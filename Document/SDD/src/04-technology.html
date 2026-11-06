@@ -1,0 +1,145 @@
+<!-- ===================== 3. TECHNOLOGY AND CODE STRUCTURE ===================== -->
+<h1>3. Technology and Code Structure</h1>
+<p>This section fixes the technology, the repository layout and the coding rules, so that developers and coding agents produce code of one shape. The code follows Laravel conventions and the PHP-FIG standards so that CODL PHP developers can maintain it ({{nfr-laravel}}).</p>
+
+<h2>3.1 Technology Stack</h2>
+<p>Versions are the lines to install. The exact patch version is fixed in <code>composer.lock</code> and <code>package-lock.json</code> at the start of the build, and only security patches are taken within a release.</p>
+<p class="tcap" data-t="tech-stack">Technology stack</p>
+<script type="text/tbl" data-h="Component|Choice|Version|Purpose|Ref" data-w="17%|23%|10%|40%|10%" data-cls="small">
+Language | PHP | 8.3 | Application language; <code>sodium</code>, <code>intl</code>, <code>pdo_pgsql</code>, <code>redis</code> extensions | AD-02
+Framework | Laravel | 11 | Routing, Eloquent, queues, scheduler, policies, validation | AD-02
+UI server side | Blade with Livewire | Livewire 3 | Server-rendered pages and interactive tables, forms and dialogs | AD-04
+UI browser side | Alpine.js | 3 | Small behaviours: dialogs, menus, focus handling, toasts | AD-04
+Asset build | Vite with plain CSS custom properties | Vite 5, Node 20 LTS (build only) | Builds the DESIGN.md tokens and components into CSS and JS | AD-04
+Database | PostgreSQL | 16 | System of record, full-text search, audit table | AD-03, AD-16
+Cache, queue, session | Redis | 7 | Queues, cache, sessions, locks, rate limits | AD-05
+Queue supervisor | Laravel Horizon | 5 | Runs and monitors queue workers | AD-05
+Sign-in | Laravel Socialite with the Microsoft provider | Socialite 5 | OIDC sign-in with Microsoft Entra ID | AD-06
+PDF | Spatie Browsershot with headless Chromium | Browsershot 4 | Prints bilingual A4 Blade templates to PDF in a worker | AD-10
+Credential signing | PHP sodium (Ed25519) with an RDFC-1.0 canonicalisation library | PHP 8.3 | Open Badges 3.0 Data Integrity proof (<code>eddsa-rdfc-2022</code>) | AD-09
+Object storage | MinIO (S3 API) through Laravel filesystem | current stable | Files, PDFs, exports | AD-14
+Malware scan | ClamAV daemon | current stable | Scans each upload | AD-14, {{sr-uploads}}
+Web server | Nginx with PHP-FPM | current stable | HTTPS termination and PHP | AD-18
+Health checks | spatie/laravel-health | current for Laravel 11 | Health endpoint for monitoring | {{nfr-monitor}}
+Unit and feature tests | Pest | 3 | Feature tests named after SRS requirements | AD-17
+End-to-end tests | Playwright | current stable | Browser tests of the prototype's flows | AD-17
+Code style | Laravel Pint | current | PSR-12 formatting | {{nfr-laravel}}
+Static analysis | Larastan (PHPStan) | level 8 | Type checking | {{nfr-laravel}}
+Architecture check | Deptrac | current | Fails the build on a forbidden module dependency | AD-01, {{nfr-modular}}
+Mail capture (non-production) | Mailpit | current | Catches test email | AD-15
+Containers | Docker Compose for dev and test | current | Repeatable environments, PostgreSQL, Redis, MinIO, ClamAV, Mailpit | {{nfr-deploy}}
+</script>
+<div class="note"><b>Note:</b> No front-end framework other than Livewire and Alpine is used, and no CSS framework. All dependencies must have licences compatible with UTeM ownership and on-premises use ({{nfr-ip}}); licences are listed in the release notes.</div>
+
+<h2>3.2 Repository Layout</h2>
+<p>One Git repository holds the application. Business code lives only under <code>app/Modules</code> (AD-01). Folders outside <code>app/Modules</code> follow the Laravel default.</p>
+<pre class="code">mcms/
+  app/
+    Modules/
+      Platform/ Identity/ Curriculum/ Approval/ Offering/ Enrolment/
+      LearningPlatform/ Assessment/ AchievementRecord/ Credentials/
+      QualityVerification/ CreditBank/ Transfer/ Pathways/
+      Monitoring/ Records/ Integration/
+        (each module: Http, Livewire, Actions, Models, Enums, Policies,
+         Events, Listeners, Jobs, Contracts, Database, Resources, routes.php)
+    Providers/            registers module providers
+  bootstrap/  config/
+    mcms.php              release number, feature flags, limits
+    integrations.php      adapter mode per interface
+    settings-defaults.php first values of versioned settings
+  database/
+    migrations/           only platform-wide migrations; modules keep their own
+    seeders/              ReferenceSeeder, SampleWorldSeeder
+  resources/
+    css/tokens.css        DESIGN.md tokens as custom properties
+    js/                   Alpine setup
+  routes/                 web.php, api.php, public.php
+  lang/                   ms/ and en/ shared strings (module strings sit in the module)
+  tests/
+    Feature/&lt;Module&gt;/    Pest tests named by SRS key
+    Architecture/         layer and dependency tests
+    Contract/             adapter contract tests
+    E2E/                  Playwright specs
+  docs/                   SDD, SRS, UI/UX specification (read-only copies)
+  deploy/                 Dockerfiles, Nginx and Horizon config, scripts
+  .github or .gitlab-ci   pipeline definition
+  deptrac.yaml  phpstan.neon  pint.json  composer.json  package.json</pre>
+<p>Each module registers itself through its own service provider, loaded from <code>config/app.php</code>, which loads its routes, migrations, views, language files and policies. A module can be read, tested and reasoned about on its own.</p>
+
+<h2>3.3 Naming and Coding Conventions</h2>
+<p class="tcap" data-t="tech-conv">Conventions</p>
+<script type="text/tbl" data-h="Topic|Rule" data-w="22%|78%" data-cls="small">
+Style | PSR-12 enforced by Pint. Every PHP file starts with <code>declare(strict_types=1);</code>. Static analysis at level 8 must pass.
+Classes | PascalCase. Models are singular (<code>Offering</code>). Tables are plural snake_case (<code>offerings</code>) and carry no module prefix, except that a table name that would clash gets the module name first.
+Actions | One class per business operation, a verb phrase, with a single public <code>handle()</code> method: <code>VerifyResults</code>, <code>ConfirmCompletion</code>, <code>RecordSenateDecision</code>. An action runs one transaction, calls the policy, writes the audit row and raises events.
+DTOs | Readonly classes ending in <code>Data</code> carry input to actions and output of contracts (<code>VerifyResultsData</code>). Controllers and Livewire components pass DTOs, not request objects. Contracts return DTOs, not models.
+Enums | Every status and every closed list is a backed PHP enum in the owning module, with the exact words of the UI/UX specification (Section 4.8) in the label method, in both languages. Statuses are never stored as free text. Enum names are the stored values, in snake_case.
+Events | Past tense, PascalCase, one fact: <code>ResultsVerified (EV-29)</code>, <code>CompletionConfirmed (EV-31)</code>, <code>CredentialIssued (EV-32)</code>. Jobs are verb phrases ending in <code>Job</code> only where a class of the same name would clash.
+Policies | One per model, named <code>&lt;Model&gt;Policy</code>, with a method per action (<code>verify</code>, <code>revoke</code>). Methods check role, scope and separation of duties and return a reason string on refusal.
+Identifiers | Internal primary keys are ULIDs; public codes and human numbers are separate columns (Section 5).
+Migrations | One migration per change, in the owning module, named <code>YYYY_MM_DD_HHMMSS_create_&lt;table&gt;_table</code> or <code>..._add_&lt;column&gt;_to_&lt;table&gt;_table</code>. Never edit a migration that has run in staging; add a new one ({{nfr-migrations}}). Vendor-specific SQL only inside migrations, with a note on the MySQL fallback ({{nfr-dbportable}}).
+Routes | Staff routes under <code>/staff</code>, participant routes under <code>/me</code>, public routes at the root, API under <code>/api/v1</code>. Route names are <code>module.resource.action</code>.
+Strings | No user-visible text in PHP or Blade; use <code>__('module::key')</code> (Section 3.5).
+Business rules | Thresholds, lists and periods are versioned settings read through <code>Settings::get()</code>, never constants (C4, AD-12).
+Tests | A Pest test is named after the requirement it proves: <code>it('FR-123 refuses to verify results of a held case')</code> and grouped with <code>->group('FR-123')</code>. Business rules carry the BR key the same way ({{nfr-rulestests}}). Test files mirror the module folder.
+Commits and branches | One topic per branch; the commit message starts with the module ID, for example <code>MD-07: verify results action</code>.
+</script>
+
+<h2>3.4 UI Component Library</h2>
+<p>The shared components live in MD-00 under <code>Platform/Resources/views/components</code> and <code>Platform/Livewire</code>, with anonymous Blade components used wherever no server logic is needed. They mirror the component catalogue of UI/UX specification Section 3.5 and the interaction rules of Section 4, and take their colours, type and spacing from <code>tokens.css</code> (DESIGN.md). Business modules use these components and write no component CSS of their own. The prototype's <code>core.js</code> shows the behaviour that each component must reproduce.</p>
+<p class="tcap" data-t="tech-components">UI components and their Blade or Livewire names</p>
+<script type="text/tbl" data-h="Component (UI spec)|Component name|Key props and behaviour" data-w="22%|24%|54%" data-cls="small">
+Shell (top bar, side navigation, content) | <code>&lt;x-ui.shell&gt;</code> | <code>nav</code> (menu from the user's roles), <code>title</code>, <code>breadcrumb</code>, <code>status</code>; slot <code>actions</code>. Top bar holds search (staff), language switch, help, bell and profile menu. Reflows below 760 px.
+Navy side navigation | <code>&lt;x-ui.side-nav&gt;</code> | <code>groups[]</code> of items with <code>label</code>, <code>route</code>, <code>icon</code>, <code>count</code> (from live task data); highlights the current route. Colour #1e2a6e as in DESIGN.md.
+Public site shell | <code>&lt;x-ui.public-shell&gt;</code> | Top navigation, sign-in link, footer; used by the catalogue and verification pages.
+Maintenance banner | <code>&lt;x-ui.maintenance-banner&gt;</code> | Reads the announced maintenance setting; shown 48 hours before ({{nfr-maint}}).
+Buttons | <code>&lt;x-ui.button&gt;</code> | <code>variant</code> (primary, secondary, tertiary, ghost, danger), <code>disabled</code> with <code>reason</code> text shown on the button; one primary per screen.
+Form fields | <code>&lt;x-ui.field&gt;</code> | <code>label</code>, <code>name</code>, <code>required</code>, <code>hint</code>, <code>error</code> (plain-language message under the field); wraps input, select, textarea, date.
+Bilingual field | <code>&lt;x-ui.bilingual-field&gt;</code> | <code>name</code>; two inputs (ms, en) stored in two columns; marks a missing language ({{nfr-bilingualcontent}}).
+Choice cards | <code>&lt;x-ui.choice-card&gt;</code> | <code>type</code> (radio, checkbox), <code>title</code>, <code>consequence</code> (one line).
+Status tag | <code>&lt;x-ui.status-tag&gt;</code> | <code>:status</code> (a status enum); renders pale tint, the status word in the user's language and a short explanation on request ({{nfr-plain}}); never colour alone ({{nfr-wcag}}).
+Category mark | <code>&lt;x-ui.category-mark&gt;</code> | <code>category</code> (UMC, SAMC, MCE).
+Data table | <code>&lt;livewire:ui.data-table&gt;</code> | <code>query</code> (scoped builder class), <code>columns[]</code> (label, key, sortable, align), <code>filters[]</code>, <code>searchable</code>, <code>rowRoute</code>, <code>perPage</code> (5, 10, 25, 50; default 10), <code>bulk</code> action. Search uses full-text search inside scope (AD-16); counts follow the filter; numbers right-aligned.
+Tabs | <code>&lt;x-ui.tabs&gt;</code> | <code>tabs[]</code> with <code>label</code>, <code>count</code>; keyboard arrow navigation; selected tab kept in the query string.
+Dialog | <code>&lt;x-ui.dialog&gt;</code> | <code>kicker</code>, <code>title</code> (question with count), slot body, <code>fields</code>, <code>confirmLabel</code> (a verb), <code>destructive</code> (danger style, red top edge, reason required, focus on Cancel). Traps focus, closes on Escape, returns focus to the opener ({{ir-confirm}}).
+Drawer | <code>&lt;x-ui.drawer&gt;</code> | <code>side</code>, <code>title</code>; same focus rules as the dialog.
+Toast | <code>&lt;x-ui.toast&gt;</code> | Raised by the <code>toast</code> browser event with <code>title</code>, <code>message</code>, <code>tone</code>; stays 5 seconds at the top right; a polite live region.
+Menu | <code>&lt;x-ui.menu&gt;</code> | <code>items[]</code>; arrow keys, Escape; used for profile and row actions.
+KPI strip | <code>&lt;x-ui.kpi-strip&gt;</code> | <code>items[]</code> of label and value; one bordered container with hairlines.
+Stage track | <code>&lt;x-ui.stage-track&gt;</code> | <code>stages[]</code> and <code>current</code>; done stages in ink, current in navy, later grey; each stage has a text state for screen readers.
+Notices | <code>&lt;x-ui.notice&gt;</code> | <code>tone</code> (info, warning, error, success); inline bar with a coloured left edge.
+Checks list | <code>&lt;x-ui.checks&gt;</code> | <code>items[]</code> of state, statement and evidence; used for readiness, pre-issuance and eligibility checks.
+Long-job progress | <code>&lt;x-ui.job-progress&gt;</code> | <code>job</code> identifier; polls the job record and shows queued, running with a count, done.
+Empty and error blocks | <code>&lt;x-ui.empty&gt;</code>, <code>&lt;x-ui.error-block&gt;</code> | Empty: one sentence and first action. Error: message, reference code, Retry ({{nfr-errors}}).
+Printable document layout | <code>&lt;x-doc.layout&gt;</code> | <code>title</code>, <code>reference</code>, <code>lang</code>; A4 page, header, footer with page numbers and QR slot; used by the certificate, ACR, proposal and report templates and printed by Chromium (AD-10).
+</script>
+<p>Every component is covered by a Blade component test and by an accessibility check in the end-to-end suite. A component that cannot be used with the keyboard alone is not accepted ({{nfr-wcag}}).</p>
+
+<h2>3.5 Internationalisation</h2>
+<p>Interface text is bilingual (AD-13, {{fr-lang}}, {{ir-lang}}).</p>
+<ul>
+  <li><b>Lang files.</b> Each module keeps <code>Resources/lang/ms/&lt;module&gt;.php</code> and <code>en/&lt;module&gt;.php</code>, loaded under the namespace of the module, for example <code>__('assessment::results.verify_title')</code>. Shared strings are in <code>lang/</code>. A test fails if a key exists in one language and not the other. Bahasa Melayu terms follow the Guide ({{nfr-bmterms}}).</li>
+  <li><b>Locale per user.</b> The locale is stored in the user's profile and held in the session. The language switch posts to the same page and keeps entered data ({{nfr-langswitch}}). The public site takes the locale from a query value or cookie, with Bahasa Melayu as the default.</li>
+  <li><b>Content columns.</b> Text that users see and that belongs to a record is stored in two columns, <code>title_ms</code> and <code>title_en</code>, read through a <code>Bilingual</code> cast that returns the user's language and falls back to the other ({{dr-bilingual}}, {{nfr-bilingualcontent}}). Credentials, notices and documents are produced in the language chosen for them ({{fr-crlang}}, {{fr-ntlang}}).</li>
+  <li><b>Formats.</b> Helpers in MD-00: <code>Fmt::date()</code> returns DD/MM/YYYY, <code>Fmt::time()</code> returns 24-hour Malaysia time, <code>Fmt::money()</code> returns "RM 450.00" ({{ir-dates}}, {{ir-time}}, {{nfr-currency}}). Dates are stored in UTC and displayed in <code>Asia/Kuala_Lumpur</code> ({{dr-time}}). Names are never shortened or reformatted ({{nfr-names}}).</li>
+  <li><b>Statuses.</b> Status labels come from the enum label method in both languages, so the same word is used on every screen.</li>
+</ul>
+
+<h2>3.6 Configuration and Feature Flags</h2>
+<p>Environment values (addresses, keys, adapter modes) are configuration, not code ({{nfr-config}}). Secrets come from the environment and are never committed. Business thresholds and lists are versioned settings in the database, not configuration (AD-12).</p>
+<p class="tcap" data-t="tech-config">Configuration files and what they hold</p>
+<script type="text/tbl" data-h="File or key|Holds|Changed by" data-w="26%|50%|24%" data-cls="small">
+<code>.env</code> | Database, Redis, MinIO, SMTP, Entra ID tenant and client, vault address; per environment | Operations
+<code>config/integrations.php</code> | Mode (<code>stub</code>, <code>manual</code>, <code>live</code>) for each adapter, from <code>INTEGRATION_*</code> values | Operations
+<code>config/mcms.php</code> <code>release</code> | Active release number: 1 now | Release process
+<code>config/mcms.php</code> <code>features</code> | Switches: <code>live_ucreds</code>, <code>live_abc</code>, <code>live_qv</code>, <code>live_payment</code>, <code>sis_link</code>; all off in Release 1 | Operations at release
+<code>config/mcms.php</code> <code>demo_clock</code> | Allowed only when <code>APP_ENV</code> is not <code>production</code> | Operations
+Settings (database) | Thresholds, lists, approving bodies, retention periods, idle timeout, notification texts, with effective dates ({{fr-settings}}, {{fr-settinghist}}) | Administrator in the interface
+</script>
+<p>Rules for flags and non-production switches:</p>
+<ul>
+  <li>A flag guards a whole capability (a route group, a menu item, an adapter binding). Code inside a flagged capability is written and tested in Release 1 where practicable, so that turning it on is a configuration change.</li>
+  <li>A <b>Release 2 or 3 switch</b> is off by default. A route behind an off switch returns 404 and its menu item is not drawn.</li>
+  <li><b>Demo clock.</b> A <code>Clock</code> service in MD-00 returns the current time. In non-production a setting can move it so that expiry alerts and overdue reminders can be shown, as the prototype does. The service provider refuses to boot when <code>APP_ENV=production</code> and the demo clock or the stub identity provider is on (AD-06, AD-18).</li>
+  <li>Code never calls <code>now()</code> directly for a business date; it uses <code>Clock::now()</code>, so tests and the demo clock work.</li>
+</ul>

@@ -1,0 +1,62 @@
+<?php
+
+// Choice lists of the proposal form (Guide Appendix A).
+return [
+    'categories' => ['umc' => 'UMC (Unbundled Micro-Credential)', 'samc' => 'SAMC (Stand-alone Micro-Credential)', 'mce' => 'MCE (non-credit short learning)'],
+    'delivery_modes' => ['face_to_face' => 'Face to face', 'online' => 'Online', 'blended' => 'Blended', 'other' => 'Other'],
+    'evidence_types' => ['industry' => 'Industry or employer analysis', 'feedback' => 'Participant feedback', 'programme' => 'Programme need', 'standard' => 'Professional standard', 'technology' => 'Technology change', 'other' => 'Other'],
+    'credit_models' => [
+        'credit_based' => 'Credit-based: each module has its own learning, activities and assessment',
+        'topic_based' => 'Topic-based: modules by topic, SLT may differ',
+        'separate_assessment' => 'Separate learning and assessment: learning modules plus one integrated assessment module',
+    ],
+    'unbundling_models' => [
+        'credit_based' => [
+            'id' => 'credit_based',
+            'letter' => 'a',
+            'name_ms' => 'Model Penyahhimpunan Berasaskan Kredit',
+            'name_en' => 'Credit-Based Unbundling Model',
+            'desc_ms' => 'Setiap modul mempunyai sekurang-kurangnya 40 jam SLT dan merangkumi pembelajaran, aktiviti dan pentaksiran.',
+            'desc_en' => 'Each module has at least 40 hours SLT and encompasses its own learning, activities, and assessment.',
+            'rule_ms' => 'SLT setiap modul ≥ 40 jam (bersamaan ≥ 1 kredit). Pentaksiran kendiri pada setiap modul.',
+            'rule_en' => 'Each module SLT ≥ 40 hours (equivalent to ≥ 1 credit). Independent assessment within each module.',
+            'badge' => '≥ 40h SLT / Modul',
+            'badge_color' => '#0f62fe',
+        ],
+        'topic_based' => [
+            'id' => 'topic_based',
+            'letter' => 'b',
+            'name_ms' => 'Model Penyahhimpunan Berasaskan Topik',
+            'name_en' => 'Topic-Based Unbundling Model',
+            'desc_ms' => 'Modul dibentuk berdasarkan topik atau kelompok pembelajaran dan SLT setiap modul boleh berbeza, dengan jumlah keseluruhan SLT bersamaan SLT kursus induk.',
+            'desc_en' => 'Modules are formed by topic or learning clusters; SLT of each module may vary, with total SLT strictly equal to parent course SLT.',
+            'rule_ms' => 'SLT modul boleh berbeza (< 40 jam dibenarkan, cth. 20j, 25j, 30j). Jumlah modul mesti tepat sama dengan SLT kursus induk.',
+            'rule_en' => 'Module SLT can vary (< 40 hours permitted, e.g. 20h, 25h, 30h). Total module hours must strictly equal parent course SLT.',
+            'badge' => 'SLT Berbeza mengikut Topik',
+            'badge_color' => '#005d5d',
+        ],
+        'separate_assessment' => [
+            'id' => 'separate_assessment',
+            'letter' => 'c',
+            'name_ms' => 'Model Penyahhimpunan Pembelajaran dan Pentaksiran Berasingan',
+            'name_en' => 'Separate Learning and Assessment Unbundling Model',
+            'desc_ms' => 'Komponen pembelajaran distrukturkan dalam beberapa modul manakala pentaksiran bersepadu ditempatkan dalam modul pentaksiran yang berasingan.',
+            'desc_en' => 'Learning components are structured across learning modules, while integrated assessment is placed in a dedicated assessment module.',
+            'rule_ms' => 'Modul pembelajaran (kandungan & aktiviti) + tepat satu Modul Pentaksiran Bersepadu.',
+            'rule_en' => 'Learning modules (content & activities) + exactly one Integrated Assessment Module.',
+            'badge' => 'Modul Pentaksiran Bersepadu',
+            'badge_color' => '#8a3ffc',
+        ],
+    ],
+    'credential_types' => ['badge' => 'Digital Badge', 'certificate' => 'Certificate', 'digital_credential' => 'Digital Credential', 'other' => 'Other'],
+    'qv_status' => ['not_applied' => 'Not applied', 'will_apply' => 'Will apply', 'verified' => 'Quality-Verified', 'na' => 'Not applicable'],
+    'readiness' => ['materials' => 'Learning materials', 'platform' => 'Learning platform', 'assessment' => 'Assessment and rubrics', 'facilitators' => 'Facilitators', 'participant_info' => 'Participant information', 'records' => 'Records and credential mechanism', 'accessibility' => 'Accessibility'],
+    'review_items' => ['outcomes' => 'Suitability of learning outcomes', 'alignment' => 'Alignment of learning and assessment', 'slt' => 'Adequacy of SLT', 'level_scope' => 'Level and scope of content', 'delivery' => 'Delivery mode', 'structure' => 'Module structure', 'credential_info' => 'Credential information', 'compliance' => 'Compliance with academic and QA requirements', 'parent_mapping' => 'Evidence of mapping to the parent course (UMC)'],
+    'change_triggers' => [
+        'outcomes' => 'Learning outcomes', 'slt_credit' => 'SLT or credit', 'mqf' => 'MQF level', 'content' => 'Core content', 'assessment' => 'Major assessment or pass standard',
+        'structure' => 'Module structure', 'parent' => 'Parent course link', 'qv' => 'Quality Verification status', 'delivery' => 'A substantive change of delivery mode',
+        'partner' => 'The provider or a partner', 'integrity' => 'The identity and integrity mechanism',
+    ],
+    'transition_rules' => ['finish_old' => 'Current participants finish on the old version', 'move_new' => 'Current participants move to the new version', 'equivalence' => 'Current participants continue by a recorded equivalence'],
+    'tabs' => ['basics' => 'Basic information', 'justification' => 'Justification', 'modules' => 'Modules', 'outcomes' => 'Learning outcomes', 'assessment' => 'Assessment', 'credential' => 'Credential', 'readiness' => 'Readiness', 'comments' => 'Comments', 'submit' => 'Submit'],
+];

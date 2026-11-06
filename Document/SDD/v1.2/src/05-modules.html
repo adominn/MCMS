@@ -1,0 +1,793 @@
+﻿<!-- ===================== 4. MODULE DESIGN ===================== -->
+<h1>4. Module Design</h1>
+<p>This section designs the seventeen modules of MCMS (AD-01). Each module has the same sub-structure: a fact sheet, a table of actions, and, where the module owns a record with a life cycle, a state machine. Section 4.19 collects the domain events (EV-xx) and the jobs (JB-xx) in two catalogues. Section 6 lists the events again and Section 7 shows the main flows as sequences.</p>
+
+<h2>4.1 Conventions for Module Descriptions</h2>
+<p>The following conventions apply to every module in this section.</p>
+<ul>
+<li><b>Fact sheet.</b> Purpose, the SRS requirements delivered, the tables owned (snake_case plural, columns defined in Section 5), the screens served by their UI/UX specification ID, the events published and consumed, and the jobs run.</li>
+<li><b>Tables owned.</b> Only the owning module reads or writes its tables. Other modules call its public service interface or react to its domain events (AD-01).</li>
+<li><b>Actions.</b> An action is one public service operation, called by a Livewire component or a controller. Every action runs under a Laravel Policy that checks role, scope and separation of duties on the record (AD-07). The policy column names the rule that is not obvious from the role alone.</li>
+<li><b>Confirmation.</b> "Yes" means the interface shows a confirmation dialog before the action runs ({{ir-confirm}}). An action with "Yes" is irreversible, submits, approves, issues, revokes or changes a setting. The server does not rely on the dialog: it checks the same rules again.</li>
+<li><b>Roles.</b> Student (P8), Lecturer (P1), Deputy dean of the PTj (P2), colleague reviewer (X1), industry expert (X2), public verifier (X3), CODL system administrator (S1) and CODL technical operator (P5). CODL roles never pass an academic policy (D-12). The Senate has no login: the deputy dean records each Senate decision with its meeting reference (D-11).</li>
+<li><b>Audit.</b> Every action that changes a record writes an <code>audit_events</code> row in the same database transaction (AD-11). The tables in this section do not repeat this.</li>
+<li><b>No deletion.</b> A correction creates a new revision linked to the old record. No module offers a delete action on a business record (D-20, {{dr-nodelete}}).</li>
+<li><b>Events.</b> A service publishes an event after its transaction commits (<code>afterCommit</code>). Listeners are queued on the <code>default</code> queue and are idempotent: each listener stores the event ID it has handled. Events carry record IDs and version numbers, not personal data. Event names are <code>PastTense</code> class names.</li>
+<li><b>Jobs.</b> Every job has a queue, an idempotency key and a retry rule (Section 4.19). A job that exhausts its retries writes an <code>integration_jobs</code> row in the failed state and raises <code>AdapterCallFailed</code> or a module-specific failure event.</li>
+<li><b>State machines.</b> Status words are those of UI/UX Specification v1.1 section 4.8. Each transition names the action that causes it. A state change is made only by the owning module's service.</li>
+<li><b>Derived wording.</b> Credit, MQF level and QV wording is read from verified records at the time of use and is never typed or stored as free text (D-17, {{dr-derived}}).</li>
+</ul>
+
+<p class="tcap" data-t="mod-summary">Summary of modules</p>
+<script type="text/tbl" data-h="ID|Module|Namespace|SRS section|Key records|Key status vocabulary" data-w="7%|16%|15%|10%|26%|26%" data-cls="small">
+MD-00 | Platform | <code>Platform</code> | cross-cutting | settings, setting_versions, templates, stored_files | Setting version effective or superseded
+MD-01 | Identity | <code>Identity</code> | 3.1 | users, role_assignments | Account active or deactivated
+MD-02 | Curriculum | <code>Curriculum</code> | 3.2 | micro_credentials, mc_versions | Proposal or version (see MD-03)
+MD-03 | Approval | <code>Approval</code> | 3.3 | reviews, approval_decisions | Draft to Terminated
+MD-04 | Offering | <code>Offering</code> | 3.4 | offerings, readiness_items | Not ready to Cancelled
+MD-05 | Enrolment | <code>Enrolment</code> | 3.5 | enrolments, payments | Registered to Completed
+MD-06 | Learning platform | <code>LearningPlatform</code> | 3.6 | import_files, export_files | Import file accepted or rejected
+MD-07 | Assessment | <code>Assessment</code> | 3.7 | assessment_results | Provisional, Held, Verified
+MD-08 | Achievement record | <code>AchievementRecord</code> | 3.8 | achievement_records | Not started, In progress, Complete
+MD-09 | credentials | <code>Credentials</code> | 3.9 | credentials, credential_events | Issued to Revoked
+MD-10 | Quality verification | <code>QualityVerification</code> | 3.10 | qv_records, qv_evidence | Not applied to Withdrawn
+MD-11 | Credit bank | <code>CreditBank</code> | 3.11, 3.13 | acrs, consents, abc_deposits, credit_ledger_entries | ACR prepared to Deposited, Available to Expired
+MD-12 | Transfer | <code>Transfer</code> | 3.12 | transfer_applications, transfer_decisions | Submitted to Not approved
+MD-13 | Pathways | <code>Pathways</code> | 3.14 | pathways, stackable_plans | Suitable, Needs review, Not yet suitable
+MD-14 | Quality and change | <code>Monitoring</code> | 3.15 | cqi_records, cqi_actions, suspensions | Open to Closed
+MD-15 | Records | <code>Records</code> | 3.16 | audit_events, corrections | Discrepancy open or resolved
+MD-16 | Integration hub | <code>Integration</code> | 3.17 | notifications, integration_jobs | Delivery sent or failed
+</script>
+
+<!-- ============ MD-00 ============ -->
+<h2>4.2 MD-00 Platform</h2>
+<p class="tcap" data-t="mod-md00-info">MD-00 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | The shared kernel. It holds versioned settings, bilingual templates, file storage, PDF rendering, global search, the UI component library and the demo clock. It contains no business rules of other modules.
+SRS requirements | {{fr-settings}}, {{fr-settinghist}}, {{fr-templates}}, {{fr-lang}}, {{ir-print}}, {{ir-files}}, {{sr-uploads}}, {{nfr-search}}, {{nfr-config}}, {{nfr-i18n}}, {{nfr-bilingualcontent}}, {{dr-bilingual}}
+Tables owned | settings, setting_versions, templates, stored_files
+Screens served | CMN-01 Personas, CMN-08 Help, CMN-09 Search, CMN-10 Something went wrong, CODL-04 Settings, CODL-05 Templates, CODL-06 Template, DOC-17 Documents and PDFs. The task queue DD-01 is assembled by the shell from the task providers that each module registers.
+Events published | EV-05 SettingChanged
+Events consumed | None
+Jobs | JB-04 RenderPdfJob, JB-17 ScanUploadJob
+</script>
+
+<p class="tcap" data-t="mod-md00-act">MD-00 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Change a setting | S1 | Reason and effective date required. Writes a new <code>setting_versions</code> row and never updates the old one ({{fr-settinghist}}). Decisions store the version they used (AD-12). | Yes
+Publish a template version | S1 | BM and EN bodies both required. A new <code>templates</code> row with the next version number is created, and old versions stay ({{fr-templates}}). | Yes
+Store a file | Any signed-in user in scope | Type and size checked, then JB-17 scans it. The file is unavailable until the scan passes ({{sr-uploads}}). | No
+Get a signed file URL | Any user allowed to see the owning record | URL lives a few minutes and is bound to the user (AD-14). | No
+Render a document | System | Only records in a final state are rendered. The template version and record revision are stored with the PDF (AD-10). | No
+Search | Any signed-in user | Full-text query always joined to the caller's scope (AD-16, {{nfr-search}}). | No
+Set demo clock | Tester | Available only when <code>APP_ENV</code> is not <code>production</code>. The application refuses to start in production with the clock on (AD-18). | No
+</script>
+
+<p><b>State machine.</b> The key record is a setting. It has no status field: the version in force at a date is the row with the latest effective date not after that date. A decision reads the version in force on the decision date.</p>
+
+<!-- ============ MD-01 ============ -->
+<h2>4.3 MD-01 Identity</h2>
+<p class="tcap" data-t="mod-md01-info">MD-01 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Signs users in through Microsoft Entra ID, holds accounts, role assignments with scope, delegation and the reference data (PTj, programmes, parent courses). It is the source for every authorisation decision.
+SRS requirements | {{fr-sso}}, {{fr-nosignup}}, {{fr-firstlogin}}, {{fr-applicant}}, {{fr-devidp}}, {{fr-session}}, {{fr-profile}}, {{fr-idmerge}}, {{fr-rbac}}, {{fr-multirole}}, {{fr-scope}}, {{fr-roleassign}}, {{fr-sod}}, {{fr-adminlimits}}, {{fr-approverbody}}, {{fr-coi}}, {{fr-sme}}, {{fr-delegate}}, {{fr-userlist}}, {{fr-refdata}}, {{sr-sso}}, {{sr-mfa}}, {{sr-authz}}, {{sr-leastpriv}}
+Tables owned | users, role_assignments, delegations, conflict_declarations, ptjs, programmes, parent_courses
+Screens served | CMN-02 Sign in, CMN-03 Verify it is you, CMN-04 Account not recognised, CMN-05 Test sign-in, CMN-06 My profile, CODL-01 Users and roles, CODL-02 User, CODL-03 Reference data
+Events published | EV-01 RoleAssigned, EV-02 RoleRevoked, EV-03 ConflictDeclared, EV-04 ReferenceDataChanged
+Events consumed | None
+Jobs | None (reference data CSV import runs inside the request for files within the limit)
+</script>
+
+<p class="tcap" data-t="mod-md01-act">MD-01 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Sign in (OIDC callback) | All users | The account is created on first sign-in with the Participant role only. There is no public sign-up. Staff roles need the MFA claim <code>amr</code> (AD-06). | No
+Sign in through stub identity provider | Tester | Route exists only when <code>APP_ENV</code> is not <code>production</code> ({{fr-devidp}}). | No
+Edit own profile | Any user | Language, notification preferences and phone only. Name and identifiers are read-only. | No
+Assign or revoke a role | S1 | Role, scope, reason and effective date required. S1 cannot assign itself an academic role, and S1 holds no approve, verify, issue, ACR or transfer action ({{fr-adminlimits}}). | Yes
+Map decision type to approver role | S1 | Stores <code>approval.route.*</code> through MD-00 settings. The mapped role must be an academic role, never an S1 or P5 role (D-12). | Yes
+Deactivate or reactivate account | S1 | Linked records stay. No delete action exists. | Yes
+Merge two accounts (Release 2) | S1 | Moves linked records to one account and writes an audit entry. | Yes
+Declare conflict of interest | X1 | Must be done before the review opens. The reviewer is removed from the task. | Yes
+Delegate approver role for a period | Approver | Only users already eligible for the role, with start and end dates ({{fr-delegate}}). | Yes
+Maintain reference data | S1 | Form or CSV. An import validates all rows first, then applies. | Yes
+</script>
+
+<p><b>State machine.</b> A user account is Active or Deactivated, set only by the deactivate and reactivate actions. A role assignment is Assigned or Revoked. Neither record is deleted, so no diagram is drawn.</p>
+
+<!-- ============ MD-02 ============ -->
+<h2>4.4 MD-02 Curriculum</h2>
+<p class="tcap" data-t="mod-md02-info">MD-02 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Determines the category (UMC, MCE, SAMC), holds the proposal workspace and the versions of a micro-credential, and checks the category rules before submission. It owns the version record and its status; MD-03 changes the status through the Curriculum service interface.
+SRS requirements | {{fr-catwizard}}, {{fr-catsuggest}}, {{fr-catumc}}, {{fr-catmce}}, {{fr-catsamc}}, {{fr-umcnotsamc}}, {{fr-mcereclass}}, {{fr-propnew}}, {{fr-propbasic}}, {{fr-propjust}}, {{fr-proplo}}, {{fr-propslt}}, {{fr-propassess}}, {{fr-propalign}}, {{fr-propcred}}, {{fr-propcredit}}, {{fr-propready}}, {{fr-propattach}}, {{fr-propcollab}}, {{fr-propautosave}}, {{fr-propip}}, {{fr-propvalidate}}, {{fr-propprint}}, {{fr-umcparent}}, {{fr-umcaccred}}, {{fr-umcmodel}}, {{fr-umcsltsum}}, {{fr-umcwhole}}, {{fr-umccreditmodel}}, {{fr-umcassessmodule}}, {{fr-umcclo}}, {{fr-umcmodcredit}}, {{fr-verhistory}}, {{fr-chgclassify}}, {{fr-chgmaterial}}, {{fr-chgminor}}, {{fr-verkeep}}, {{br-slt}}, {{br-mce}}, {{br-umcslt}}, {{br-material}}
+Tables owned | micro_credentials, mc_versions, mc_modules, learning_outcomes, assessment_components, proposal_collaborators, change_requests
+Screens served | LEC-01 My micro-credentials, LEC-02 Micro-credential, LEC-03 Proposals and versions, LEC-04 New proposal, LEC-05 Proposal workspace, LEC-06 Request a change, DOC-07 Proposal print
+Events published | EV-06 ProposalSubmitted, EV-07 MaterialChangeRecorded, EV-08 MinorChangeLogged, EV-15 VersionSuperseded
+Events consumed | EV-04 ReferenceDataChanged (flags linked UMC versions when a parent course changes), EV-11 ProposalReturned, EV-13 ProposalNotSupported, EV-14 SenateDecisionRecorded, EV-59 SuspensionDecided (version status updates through the service interface)
+Jobs | None
+</script>
+
+<p class="tcap" data-t="mod-md02-act">MD-02 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Determine category | P1 | Rules read from settings <code>slt.min_hours_samc</code>. UMC origin allows UMC only. Own offering below the threshold allows MCE only. The result is stored as proposed until P2 verifies it in MD-03. | No
+Create proposal (New, Revision, Re-offer) | P1 | Owning PTj must be inside the actor's role scope. A Revision or Re-offer starts from an Approved version. | No
+Edit proposal sections | P1, co-developer of the same PTj | Allowed only while the version is Draft or Returned for amendment. Edits are attributed to the user. Autosave runs every edit. | No
+Declare IP and copyright | P1 | Required before submission. | Yes
+Enter credit and MQF | P1 | Stored as proposed credit. It is not shown in the catalogue or on credentials until a verified record confirms it ({{fr-propcredit}}, D-17). | No
+Submit proposal | P1 | The validation service runs the category rules. Blocking errors stop submission. Warnings need a written response. UMC checks: accredited parent programme, module SLT sum equals parent SLT, minimum SLT, one model only. The content is locked on submit. | Yes
+Reclassify MCE to SAMC | P1 | Allowed only from MCE. Creates a new version in Draft ({{fr-mcereclass}}). | Yes
+Set separately recognisable credit unit | P2 or academic authority role | Default No. Only a recorded case decision sets Yes. S1 cannot ({{fr-umcmodcredit}}, D-18). | Yes
+Classify a change | P1 | Listed triggers force material. Material creates a new version in Draft. Minor needs a description and impact note. | Yes
+Print proposal | P1, P2 | Queues JB-04. | No
+</script>
+
+<p><b>State machine.</b> The version status machine is shown in Section 4.5 ({{fig:mod-md03-state}}), because the transitions are caused by approval actions. MD-02 itself changes status only for Draft to Submitted and for the fixed set of events it consumes.</p>
+
+<!-- ============ MD-03 ============ -->
+<h2>4.5 MD-03 Approval</h2>
+<p class="tcap" data-t="mod-md03-info">MD-03 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Runs review, endorsement, category verification, the recording of Senate decisions, change decisions and version transition rules. Approval always binds to one exact version and is a separate record from Quality Verification, ACR or transfer (D-15).
+SRS requirements | {{fr-revassign}}, {{fr-revform}}, {{fr-revrec}}, {{fr-revcomments}}, {{fr-revcategory}}, {{fr-revsummary}}, {{fr-wfstages}}, {{fr-wfrecord}}, {{fr-wfversion}}, {{fr-wflock}}, {{fr-wfnotcredit}}, {{fr-wfqueue}}, {{fr-wfbatch}}, {{fr-wfpack}}, {{fr-catconfirm}}, {{fr-chgqv}}, {{fr-verbind}}, {{fr-vernotify}}, {{fr-vercompare}}, {{fr-coi}}, {{fr-sme}}, {{fr-sod}}, {{br-separate}}, {{br-version}}, {{br-authority}}
+Tables owned | reviews, review_assignments, review_comments, approval_decisions, version_transition_rules
+Screens served | LEC-07 Reviews for colleagues, LEC-08 Review a proposal, EXT-01 My review invitations, EXT-02 Comment on a proposal, DD-02 Proposals and approval, DD-03 Proposal review, DD-04 Record Senate decision, DD-05 Decision pack, DOC-08 Senate decision pack
+Events published | EV-09 ReviewerAssigned, EV-10 ReviewRecorded, EV-11 ProposalReturned, EV-12 ProposalEndorsed, EV-13 ProposalNotSupported, EV-14 SenateDecisionRecorded, EV-16 TransitionRuleRecorded
+Events consumed | EV-03 ConflictDeclared (removes the reviewer and reopens the task), EV-06 ProposalSubmitted (creates the endorsement task for P2), EV-07 MaterialChangeRecorded (creates a new approval cycle), EV-08 MinorChangeLogged (creates an acknowledgement task for P2), EV-59 SuspensionDecided (records the decision)
+Jobs | JB-10 DecisionOverdueRemindersJob
+</script>
+
+<p class="tcap" data-t="mod-md03-act">MD-03 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Assign reviewers | P2 | Reviewer must not be a co-developer (no self-review) and must have no declared conflict. Due date and scope required. | No
+Submit review | X1, X2 (comment only) | X2 sees no decision controls. Rating per item is Satisfactory or Needs amendment, and the recommendation is Support, Amend or Not support. | Yes
+Respond to a comment | P1 | Comment status is open, answered or resolved. A blocking comment that is not resolved stops the decision. | No
+Request amendment | P2 | Moves the version to Returned for amendment and unlocks it. | Yes
+Endorse and verify category | P2 | Stores the verified category in <code>approval_decisions</code>, separate from the proposed category. Not possible while a blocking comment is open. | Yes
+Record not supported | P2 | Ends the cycle. Reason required. | Yes
+Send to Senate | P2 | Allowed only from Endorsed. Builds the decision pack. | No
+Record Senate decision | P2 | Decision, date, Senate meeting reference and comments required. The record names the P2 who entered it, not the Senate (D-11). The approver role comes from <code>approval.route.*</code>. S1 and P5 are refused (D-12). | Yes
+Batch decision (Release 2) | P2 | One meeting reference for many items. Each item is checked on its own. | Yes
+Record transition rule | P2 | Finish old version, move to new version, or equivalence. Required when a new version takes effect ({{fr-verbind}}). | Yes
+Acknowledge minor change | P2 | The change is logged to CQI through EV-08. | Yes
+Record suspension or termination decision | P2 of the configured authority | Requires a transition plan before Terminated ({{fr-prsuspend}}). Performed in MD-14 and recorded here. | Yes
+</script>
+
+<figure data-f="mod-md03-state">
+<pre class="mermaid">
+stateDiagram-v2
+ state "In review" as InReview
+ state "Returned for amendment" as Returned
+ state "Pending approval" as Pending
+ state "Not approved" as NotApproved
+ [*] --> Draft
+ Draft --> Submitted : Submit proposal
+ Submitted --> InReview : Assign reviewers
+ InReview --> Returned : Request amendment
+ Returned --> Submitted : Resubmit
+ InReview --> Endorsed : Endorse and verify category
+ InReview --> NotApproved : Record not supported
+ Endorsed --> Pending : Send to Senate
+ Pending --> Approved : Record Senate decision approved
+ Pending --> Returned : Record decision returned
+ Pending --> NotApproved : Record decision not approved
+ Approved --> Superseded : Later version approved
+ Approved --> Suspended : Decide suspension
+ Suspended --> Approved : Lift suspension
+ Approved --> Terminated : Decide termination
+ Suspended --> Terminated : Decide termination
+</pre>
+<figcaption>Proposal or version status. Each arrow is caused by the action named on it.</figcaption>
+</figure>
+<div class="note"><b>Note:</b> The SRS also names the end state "Not supported" for a PTj refusal. UI/UX Specification v1.1 section 4.8 has only "Not approved", so both refusals use that word and the stage (endorsement or Senate) is stored in <code>approval_decisions</code>.</div>
+
+<!-- ============ MD-04 ============ -->
+<h2>4.6 MD-04 Offering</h2>
+<p class="tcap" data-t="mod-md04-info">MD-04 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Creates cohorts (offerings) of Approved versions, runs the readiness checklist and its confirmation, opens registration, and serves the public catalogue.
+SRS requirements | {{fr-offcreate}}, {{fr-offapproved}}, {{fr-offreadiness}}, {{fr-offconfirm}}, {{fr-offopen}}, {{fr-offrecheck}}, {{fr-offqv}}, {{fr-catpublic}}, {{fr-catinfo}}, {{fr-catsearch}}, {{fr-catwording}}, {{fr-catstages}}, {{fr-catmodular}}, {{fr-catlang}}, {{fr-wdtemplate}}, {{fr-wdblock}}, {{br-offer}}, {{br-noclaim}}
+Tables owned | offerings, readiness_items, readiness_confirmations
+Screens served | LEC-11 Create an offering, LEC-12 Readiness checklist, DD-06 Offerings and readiness, DD-07 Confirm readiness, PUB-02 Catalogue, PUB-03 Offering, ST-02 Find a micro-credential
+Events published | EV-17 ReadinessConfirmed, EV-18 OfferingOpened, EV-19 OfferingHeld
+Events consumed | EV-14 SenateDecisionRecorded (makes the version selectable), EV-07 MaterialChangeRecorded (holds open offerings when the change needs approval), EV-39 QvVerified and EV-42 QvLapsed (recompute which QV, credit and MQF wording the catalogue may show), EV-59 SuspensionDecided (holds or cancels offerings)
+Jobs | JB-21 OpenCloseRegistrationJob
+</script>
+
+<p class="tcap" data-t="mod-md04-act">MD-04 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Create offering | P1, P2 | Only an Approved version can be chosen. The caller's scope must include the owning PTj. | No
+Answer readiness item | P1 | Yes, Not yet or Not applicable with an evidence note for each of B2 to B7. | No
+Confirm readiness | P2 | Ready, Ready with conditions or Not ready. Conditions must be recorded. The first confirmation by the same user who answered the items is allowed, but the confirmation is stored as its own record (D-15). | Yes
+Open registration | System | Runs when readiness is Ready, or Ready with conditions recorded, and the registration date is reached. | No
+Recheck for a new cohort | P1, P2 | Items are pre-filled. A material change puts the offering on hold until approved. | Yes
+Cancel offering | P2 | Enrolled participants are notified through EV-19. | Yes
+Publish catalogue entry | System | Recognition statements come from templates. Free text is scanned for forbidden claims, and a hit blocks publication ({{fr-wdblock}}). QV, credit and MQF show only while the QV record is valid to the cohort end date (D-17). | No
+</script>
+
+<figure data-f="mod-md04-state">
+<pre class="mermaid">
+stateDiagram-v2
+ state "Not ready" as NotReady
+ [*] --> NotReady : Create offering
+ NotReady --> Ready : Confirm readiness
+ Ready --> NotReady : Recheck finds not ready
+ Ready --> Open : Registration date reached
+ Open --> Full : Capacity reached
+ Full --> Open : Place released
+ Open --> Running : Start date reached
+ Full --> Running : Start date reached
+ Running --> Ended : End date reached
+ NotReady --> Cancelled : Cancel offering
+ Ready --> Cancelled : Cancel offering
+ Open --> Cancelled : Cancel offering
+</pre>
+<figcaption>Offering status. "Ready with conditions" is a value of the readiness confirmation, not a status.</figcaption>
+</figure>
+
+<!-- ============ MD-05 ============ -->
+<h2>4.7 MD-05 Enrolment</h2>
+<p class="tcap" data-t="mod-md05-info">MD-05 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Registers participants, checks eligibility, takes payment through the payment adapter, tracks module enrolment, withdrawal and the cohort list.
+SRS requirements | {{fr-regopen}}, {{fr-regelig}}, {{fr-regack}}, {{fr-regpdpa}}, {{fr-regpay}}, {{fr-regwaiver}}, {{fr-regstatus}}, {{fr-regmodule}}, {{fr-regwithdraw}}, {{fr-regwaitlist}}, {{fr-regbulk}}, {{fr-cohortlist}}, {{fr-regconfirm}}, {{fr-verbind}}, {{ir-idempotent}}, {{nfr-transactions}}
+Tables owned | enrolments, module_enrolments, payments, pdpa_acknowledgements
+Screens served | ST-01 My learning, ST-03 Register, ST-04 Registrations and payments, ST-05 Registration, LEC-09 Cohorts and results, DOC-01 Payment receipt, DOC-02 Enrolment confirmation
+Events published | EV-20 StudentRegistered, EV-21 PaymentConfirmed, EV-22 EnrolmentConfirmed, EV-23 EnrolmentWithdrawn
+Events consumed | EV-16 TransitionRuleRecorded (rebinds enrolments to the new version and notifies), EV-31 CompletionConfirmed (sets Completed), EV-59 SuspensionDecided
+Jobs | JB-20 CancelUnpaidEnrolmentsJob, JB-03 ExportUcredsEnrolmentJob (requested here, run by MD-06)
+</script>
+
+<p class="tcap" data-t="mod-md05-act">MD-05 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Check eligibility | System | Group and prerequisite rules run before registration. Each failed rule gives its own reason. | No
+Register | P8 | Window open and cohort not full. The participant must acknowledge the recognition statements, and the text version is stored with the enrolment. PDPA notice is acknowledged on first registration. | Yes
+Pay | P8, payment adapter | Payment reference is the idempotency key. Failure keeps the enrolment in Pending payment with a message and reference. | Yes
+Waive fee or record sponsorship (Release 2) | P2 | Reason required. Registered moves to Enrolled. | Yes
+Withdraw | P8 | Allowed only before the offering deadline and only from Enrolled. Refunds happen outside MCMS. | Yes
+Cancel unpaid enrolment | System | Pending payment moves to Cancelled when the payment window ends. | No
+Set Not completed | System | Runs when the cohort closes for an Enrolled participant without confirmed completion. | No
+Register a group by CSV (Release 2) | P5 | Per-row checks equal to single registration. | Yes
+Export cohort list | P1, P2 | Within scope. File type CSV or Excel. | No
+</script>
+
+<figure data-f="mod-md05-state">
+<pre class="mermaid">
+stateDiagram-v2
+ state "Pending payment" as PendingPayment
+ state "Not completed" as NotCompleted
+ [*] --> Registered : Register
+ Registered --> PendingPayment : Fee applies
+ Registered --> Enrolled : No fee or fee waived
+ PendingPayment --> Enrolled : Payment confirmed
+ PendingPayment --> Cancelled : Payment window ends
+ Enrolled --> Withdrawn : Withdraw
+ Enrolled --> Completed : CompletionConfirmed
+ Enrolled --> NotCompleted : Cohort closes
+</pre>
+<figcaption>Enrolment status. A transfer to a new version changes the version binding, not the status.</figcaption>
+</figure>
+
+<!-- ============ MD-06 ============ -->
+<h2>4.8 MD-06 Learning Platform</h2>
+<p class="tcap" data-t="mod-md06-info">MD-06 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Exchanges enrolments and results with UCreds through the adapter interface (AD-08). In Release 1 the adapter is manual: MCMS exports an enrolment CSV and imports result and badge CSV files.
+SRS requirements | {{fr-lpadapter}}, {{fr-lpexport}}, {{fr-lpimport}}, {{fr-lpvalidate}}, {{fr-lpstaged}}, {{fr-lpbadge}}, {{fr-lplog}}, {{fr-lplive}}, {{ir-csvtemplates}}, {{ir-adapter}}, {{nfr-import}}
+Tables owned | import_files, import_row_errors, export_files
+Screens served | CODL-07 UCreds exchange, DOC-14 Import validation report, DOC-15 UCreds enrolment export
+Events published | EV-24 ImportExportLogged, EV-25 ResultsStaged, EV-26 ImportRejected, EV-27 BadgeImported
+Events consumed | None
+Jobs | JB-02 ImportResultsJob, JB-03 ExportUcredsEnrolmentJob
+</script>
+
+<p class="tcap" data-t="mod-md06-act">MD-06 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Export enrolment CSV | P5 | Uses the UCreds template version in settings. The file name, hash and count are logged. | No
+Upload results, progress or badge file | P5 | Template version is checked. The file is stored and hashed, then JB-02 validates it. A file already imported with the same hash is refused. | Yes
+Validate and stage | System | Format, row match, score range and duplicates are checked. A file-level error rejects the whole file. Valid rows are handed to MD-07 as Provisional results. No achievement and no badge exists until P2 verifies. | No
+Match imported badges | System | A badge is linked to a verified achievement. Unmatched badges are flagged for P5 and P2. | No
+Download row error report | P5 | PDF or CSV of rejected rows. | No
+</script>
+
+<p><b>State machine.</b> An import file is Received, then Accepted, Partly accepted or Rejected. These words are local to the integration log and do not appear in the participant interface, so no diagram is drawn. Results taken from the file follow the result states in Section 4.9.</p>
+
+<!-- ============ MD-07 ============ -->
+<h2>4.9 MD-07 Assessment</h2>
+<p class="tcap" data-t="mod-md07-info">MD-07 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Holds the results of each participant and component, integrity cases, and the verification of results by the deputy dean. Verifying results is one action. Confirming completion is a different action in MD-08 (D-15).
+SRS requirements | {{fr-asplan}}, {{fr-asentry}}, {{fr-asnoattend}}, {{fr-asintegrity}}, {{fr-asverify}}, {{fr-asbulkverify}}, {{fr-aschange}}, {{fr-asmodule}}, {{fr-asappeal}}, {{fr-asfeedback}}, {{fr-lpstaged}}, {{br-achieve}}, {{br-verifyfirst}}, {{br-audit}}
+Tables owned | assessment_results, assessment_result_revisions, integrity_cases, result_change_requests, result_appeals
+Screens served | LEC-10 Cohort results, DD-08 Results and completion, DD-09 Verify results
+Events published | EV-28 IntegrityCaseOpened, EV-29 ResultsVerified, EV-30 ResultChangeApproved
+Events consumed | EV-25 ResultsStaged (creates Provisional results and the verification task for P2), EV-22 EnrolmentConfirmed (creates empty result rows)
+Jobs | None
+</script>
+
+<p class="tcap" data-t="mod-md07-act">MD-07 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Enter results | P1 | Per participant and component of the Approved version. Totals and pass or fail are computed against the pass standard of that version. Attendance alone cannot give a pass ({{fr-asnoattend}}). | No
+Record integrity mechanism and flag a case | P1 | A flagged result is Held and cannot be verified. | Yes
+Resolve integrity case | P2 | Reason required. Held returns to Provisional. | Yes
+Verify results (single or bulk) | P2 | The verifier is not the person who entered the result (separation of duties, {{fr-sod}}). An open case on any selected result blocks it. Verifier, date and identity evidence link are stored. Verifying does not complete the micro-credential. | Yes
+Request result change | P1 | Reason required. Old value is kept in <code>assessment_result_revisions</code>. | Yes
+Approve result change | P2 | The approver is not the requester. If a credential was issued, EV-30 tells MD-09 to open a correction task. | Yes
+Raise a query or appeal (Release 2) | P8 | Opens a case linked to the result. | Yes
+View own verified results | P8 | Verified results only and released feedback only. | No
+</script>
+
+<figure data-f="mod-md07-state">
+<pre class="mermaid">
+stateDiagram-v2
+ [*] --> Provisional : Enter or import result
+ Provisional --> Held : Flag integrity case
+ Held --> Provisional : Resolve integrity case
+ Provisional --> Verified : Verify results
+ Verified --> Verified : Approve result change as new revision
+</pre>
+<figcaption>Result status. "Achieved" is a module status in MD-08, derived from verified results.</figcaption>
+</figure>
+
+<!-- ============ MD-08 ============ -->
+<h2>4.10 MD-08 Achievement Record</h2>
+<p class="tcap" data-t="mod-md08-info">MD-08 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Keeps one internal Achievement Record per participant per micro-credential. It derives module status from verified results and records completion only when the deputy dean confirms it. The record is labelled "Internal record, not ACR" on every screen and export.
+SRS requirements | {{fr-arkeep}}, {{fr-arlabel}}, {{fr-arumc}}, {{fr-arnomix}}, {{fr-arwindow}}, {{fr-arsamc}}, {{fr-arview}}, {{fr-arstaff}}, {{fr-asmodule}}, {{br-certwhole}}, {{br-arnotacr}}, {{br-verifyfirst}}
+Tables owned | achievement_records, module_achievements
+Screens served | ST-06 Achievement record, DD-10 Confirm completion, DOC-05 Achievement record
+Events published | EV-31 CompletionConfirmed
+Events consumed | EV-22 EnrolmentConfirmed (creates the record), EV-23 EnrolmentWithdrawn, EV-29 ResultsVerified (updates module status), EV-30 ResultChangeApproved (recomputes), EV-32 CredentialIssued (adds the credential to the record)
+Jobs | JB-11 CompletionWindowRemindersJob
+</script>
+
+<p class="tcap" data-t="mod-md08-act">MD-08 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Derive module achievement | System | A module is Achieved when all its outcomes and assessments are met and verified. Badges or modules of different UMCs are never combined ({{fr-arnomix}}). | No
+Show completion summary | System | Automatic check of every requirement, with the missing items listed. Complete is blocked until none is missing. | No
+Confirm completion | P2 | A separate action from verifying results (D-15). Only P2 of the owning PTj. Blocked if any requirement is missing. Stores the confirmer and date. It publishes EV-31, which is the only trigger for issuing a certificate or Digital Credential (D-29). | Yes
+View own record | P8 | Own record only, including progress across periods. | No
+View records in offerings | P1, P2 | Within scope. | No
+</script>
+
+<figure data-f="mod-md08-state">
+<pre class="mermaid">
+stateDiagram-v2
+ state "Not started" as NotStarted
+ state "In progress" as InProgress
+ [*] --> NotStarted : EnrolmentConfirmed
+ NotStarted --> InProgress : First module result verified
+ InProgress --> Complete : Confirm completion
+</pre>
+<figcaption>Achievement record status. Module status Achieved is derived from verified results and does not complete the record.</figcaption>
+</figure>
+
+<!-- ============ MD-09 ============ -->
+<h2>4.11 MD-09 Credentials</h2>
+<p class="tcap" data-t="mod-md09-info">MD-09 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Issues Digital Badges, certificates and Digital Credentials automatically after the pre-issuance checks pass, signs them, serves the wallet and the public verification page, and handles correction, replacement and revocation. The system issues; no person presses an issue button (D-29).
+SRS requirements | {{fr-crcheck}}, {{fr-crbadge}}, {{fr-crbadgetext}}, {{fr-crcert}}, {{fr-crdc}}, {{fr-crformat}}, {{fr-crgenerated}}, {{fr-crbatch}}, {{fr-crlang}}, {{fr-crid}}, {{fr-crwallet}}, {{fr-crshare}}, {{fr-wdtemplate}}, {{fr-wdblock}}, {{fr-wdqvlapse}}, {{fr-vfpage}}, {{fr-vffields}}, {{fr-vfsignature}}, {{fr-vflog}}, {{fr-vfnotfound}}, {{fr-crcorrect}}, {{fr-crreplace}}, {{fr-crrevoke}}, {{fr-crnoerase}}, {{fr-crnotify}}, {{ir-obv3}}, {{ir-api}}, {{ir-hsm}}, {{sr-keys}}, {{sr-minimal}}, {{sr-ratelimit}}, {{nfr-verify}}, {{nfr-issue}}
+Tables owned | credentials, credential_events, digital_badges, verification_logs
+Screens served | ST-07 Credentials, ST-08 Credential, DD-11 Credentials, DD-12 Credential, PUB-07 Verify a credential, PUB-08 Verification result, DOC-03 Certificate, DOC-04 Digital credential
+Events published | EV-32 CredentialIssued, EV-33 BadgeIssued, EV-34 IssuanceFailed, EV-35 CredentialCorrected, EV-36 CredentialReplaced, EV-37 CredentialRevoked
+Events consumed | EV-29 ResultsVerified (badge for a verified module, if the design includes badges), EV-31 CompletionConfirmed (certificate and Digital Credential), EV-27 BadgeImported (matches a UCreds badge), EV-30 ResultChangeApproved (opens a correction task), EV-42 QvLapsed (new credentials carry no QV claim)
+Jobs | JB-01 IssueCredentialsBatchJob, JB-22 IssueCredentialJob, JB-04 RenderPdfJob
+</script>
+
+<p class="tcap" data-t="mod-md09-act">MD-09 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Run pre-issuance checks | System | Checks (App E8) include: completion confirmed (for certificate and Digital Credential), results verified, template exists, no blocked claim, QV valid when QV is stated. Any failing check blocks and lists the check. | No
+Issue credentials | System (JB-01) | Triggered only by EV-29 for badges or EV-31 for certificate and Digital Credential. Credit, MQF and QV wording is read from verified records and cannot be edited (D-17). Signs with Ed25519 through the key vault (AD-09). Template change after issue does not alter an issued payload. | No
+Retry failed issue | P2 | Re-queues the failed items listed to P2. The same idempotency key prevents a duplicate. | No
+Correct a credential | P2 of the owning PTj | Confirmed error only, reason required. Creates a new revision. The original is kept ({{fr-crcorrect}}). S1 and P5 are refused (D-12). | Yes
+Replace a credential | P2 of the owning PTj | New credential ID linked to the old one. The old one shows the new ID. | Yes
+Revoke a credential | P2 of the owning PTj, or the authorised body in settings | Recorded decision and stated reason required. Revoked is final. | Yes
+View and share own credential | P8 | Own credentials only. JSON and PDF download, and a share link. | No
+Verify publicly | X3 | Code, link or QR. Only fields in <code>verification.public_fields</code> are shown. An unknown code gives a neutral message that does not reveal similar codes. Requests are rate-limited and logged by time, code, outcome and IP only. | No
+</script>
+
+<figure data-f="mod-md09-state">
+<pre class="mermaid">
+stateDiagram-v2
+ [*] --> Issued : Issue credentials job passes checks
+ Issued --> Corrected : Correct a credential
+ Corrected --> Corrected : Correct again
+ Issued --> Replaced : Replace a credential
+ Corrected --> Replaced : Replace a credential
+ Issued --> Revoked : Revoke a credential
+ Corrected --> Revoked : Revoke a credential
+</pre>
+<figcaption>Credential status. Replaced and Revoked are final. Nothing is deleted.</figcaption>
+</figure>
+
+<!-- ============ MD-10 ============ -->
+<h2>4.12 MD-10 Quality Verification</h2>
+<p class="tcap" data-t="mod-md10-info">MD-10 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Manages the Quality Verification (QV) of a SAMC by QVC/MQA: eligibility, evidence checklist, internal readiness, submission package, recorded result, expiry and lapse. The QV record is the single source for credit, MQF and QV wording.
+SRS requirements | {{fr-qvsamc}}, {{fr-qveligible}}, {{fr-qvevidence}}, {{fr-qvautolink}}, {{fr-qvchange}}, {{fr-qvreadiness}}, {{fr-qvpackage}}, {{fr-qvsubmit}}, {{fr-qvresult}}, {{fr-qvsource}}, {{fr-qvalerts}}, {{fr-qvlapse}}, {{fr-qvnotransfer}}, {{fr-qvportal}}, {{br-qvvalid}}, {{br-qvcohort}}, {{br-qvlapse}}, {{br-creditvalid}}
+Tables owned | qv_records, qv_evidence (the submission is held on qv_records)
+Screens served | LEC-15 QV evidence, LEC-16 QV evidence, DD-13 Quality, QV and review, DD-14 QV record, DOC-11 QV submission package
+Events published | EV-38 QvSubmitted, EV-39 QvVerified, EV-40 QvNotVerified, EV-41 QvReverificationRequired, EV-42 QvLapsed
+Events consumed | EV-07 MaterialChangeRecorded (starts re-verification for a Quality-Verified SAMC), EV-22 EnrolmentConfirmed and EV-31 CompletionConfirmed (count completed cohorts as evidence)
+Jobs | JB-06 QvExpiryAlertsJob, JB-08 LapseExpiredQvJob, JB-14 BuildQvPackageJob
+</script>
+
+<p class="tcap" data-t="mod-md10-act">MD-10 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Start preparing | P1 | Only for a confirmed SAMC. Other categories do not see QV. | Yes
+Set Ready to submit | P1 | Blocked if not stand-alone, SLT below <code>slt.min_hours_samc</code>, provider not registered, fewer than <code>qv.min_completed_cohorts</code> completed cohorts with evidence, or unjustified proposed credit or MQF (D2 conditions). | Yes
+Fill evidence checklist | P1 | Available, Not yet or Not applicable with file reference. MCMS evidence is linked automatically. | No
+Record readiness decision | P1 records, P2 confirms | Ready, Ready with minor corrections or Not ready. Critical missing evidence listed. The confirmer is not the recorder. | Yes
+Generate submission package | Staff in scope | Evidence index, summary and compressed evidence. | No
+Record submission | P2 | Date, QVC/MQA reference and submitter. Requires Ready. | Yes
+Record QV result | P2 | Verified or not verified, reference, credit, MQF, start, expiry, conditions and document. Expiry after <code>qv.max_validity_years</code> from the start is blocked. The record becomes the source for catalogue, credentials and ACR. | Yes
+Flag material change | P1 | Component review. Sets the re-verification flag. | Yes
+Lapse QV | System (JB-08) or P2 | On expiry, suspension or withdrawal. Stops QV claims and new ACR eligibility, and creates a task for the PTj. | No
+</script>
+
+<figure data-f="mod-md10-state">
+<pre class="mermaid">
+stateDiagram-v2
+ state "Not applied" as NotApplied
+ state "Quality-Verified" as QV
+ [*] --> NotApplied
+ NotApplied --> Preparing : Start preparing
+ Preparing --> Ready : Set Ready to submit
+ Ready --> Submitted : Record submission
+ Submitted --> QV : Record QV result verified
+ Submitted --> Preparing : Record QV result not verified
+ QV --> Submitted : Submit for re-verification
+ QV --> Expired : Validity end date reached
+ QV --> Suspended : Record suspension
+ QV --> Withdrawn : Record withdrawal
+ Suspended --> QV : Record reinstatement
+ Expired --> Preparing : Start renewal
+</pre>
+<figcaption>QV status. Re-verification is a flag on a Quality-Verified record, and Not verified returns the record to Preparing.</figcaption>
+</figure>
+<div class="note"><b>Note:</b> The SRS state diagram names "Not verified" and "Re-verification required" as states. UI/UX Specification v1.1 section 4.8 does not, so MCMS stores them as the recorded outcome and as a flag. This keeps the status words identical to the interface.</div>
+
+<!-- ============ MD-11 ============ -->
+<h2>4.13 MD-11 Credit Bank</h2>
+<p class="tcap" data-t="mod-md11-info">MD-11 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Prepares the Academic Credit Record (ACR), asks for consent, records the ABC deposit, keeps the credit ledger and applies single redemption. An ACR exists only for an accredited UMC or a QV-valid SAMC, never for an MCE, badge, module or certificate.
+SRS requirements | {{fr-acrelig}}, {{fr-acrchecks}}, {{fr-acrprep}}, {{fr-acrverify}}, {{fr-acrseparate}}, {{fr-acrmulti}}, {{fr-acrnocombine}}, {{fr-acrexternal}}, {{fr-dpconsent}}, {{fr-dpdecline}}, {{fr-dpqueue}}, {{fr-dpexport}}, {{fr-dprecord}}, {{fr-dpnottransfer}}, {{fr-dponlyacr}}, {{fr-cvexpiry}}, {{fr-cvalert}}, {{fr-cvexpired}}, {{fr-cvledger}}, {{fr-cvretain}}, {{fr-rdprov}}, {{fr-rdfinal}}, {{fr-rdrelease}}, {{fr-rdnoreuse}}, {{fr-rdconflict}}, {{fr-rdkeep}}, {{fr-rdsource}}, {{fr-rdabcsync}}, {{br-acrelig}}, {{br-deposit}}, {{br-consent}}, {{br-acrkeep}}, {{br-redeem}}
+Tables owned | acrs, acr_checks, consents, abc_deposits, credit_ledger_entries, redemption_events
+Screens served | ST-09 Credit ledger and ABC, ST-10 Academic Credit Record, DD-18 ACR and ABC deposits, DD-19 Confirm ACR, DD-20 Record ABC deposit, DOC-06 Academic Credit Record, DOC-10 ABC deposit export
+Events published | EV-43 AcrPrepared, EV-44 AcrConfirmed, EV-45 ConsentGiven, EV-46 ConsentDeclined, EV-47 DepositRecorded, EV-48 CreditExpired, EV-49 CreditRedeemed, EV-50 CreditReleased
+Events consumed | EV-32 CredentialIssued (prepares an ACR for an eligible UMC or a QV-valid SAMC, and never for an MCE), EV-39 QvVerified and EV-42 QvLapsed (change SAMC eligibility), EV-52 TransferDecided (an approved decision sets the credit Provisionally redeemed), EV-60 CorrectionRecorded
+Jobs | JB-07 CreditExpiryAlertsJob, JB-09 ExpireCreditsJob, JB-13 ExportAbcDepositJob
+</script>
+
+<p class="tcap" data-t="mod-md11-act">MD-11 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Prepare ACR | System | Runs the F2 checks and records each result. A failing check blocks. Fields come from verified records and cannot be typed (D-17). | No
+Confirm ACR | P2 | Review of the generated record only. Not editable. S1 and P5 are refused (D-12). | Yes
+Give consent | P8 | Explicit consent stores date, wording version and channel. Without consent the ACR is not in the deposit queue. | Yes
+Decline or postpone | P8 | The ACR is kept and consent can be given later. | Yes
+Export deposit data | P2 | Only consented, confirmed ACR. Queues JB-13. Format open (OI-11). | No
+Record deposit | P2 | Date, ABC reference, credits, deposit status and recorder required. Sets the credit Available and the expiry to deposit date plus <code>credit.abc_validity_years</code> (10 years at the time of writing). The setting version used is stored (AD-12). Notices say that a deposit is storage and not a credit transfer. | Yes
+Record programme completion | Authorised user in the receiving PTj | Evidence reference required. Provisionally redeemed moves to Redeemed. Manual in Release 1. | Yes
+Record withdrawal or non-completion | Authorised user in the receiving PTj | Evidence reference required. Moves to Available if still valid, otherwise Expired. | Yes
+Record whether ABC was updated | Authorised user | Date and reference. | Yes
+Record external credit (Release 2) | Staff | Marked external, with provider, evidence and QV or accreditation. | Yes
+Select credit for transfer | System | Only credit in Available. Redeemed credit is never selectable, and a second active application on the same credit is blocked (single redemption). | No
+</script>
+
+<figure data-f="mod-md11-acr">
+<pre class="mermaid">
+stateDiagram-v2
+ state "ACR prepared" as Prepared
+ state "Consent given" as Given
+ state "Consent declined" as Declined
+ state "Correction needed" as Correction
+ [*] --> Prepared : Prepare ACR
+ Prepared --> Verified : Confirm ACR
+ Verified --> Given : Give consent
+ Verified --> Declined : Decline or postpone
+ Declined --> Given : Give consent
+ Given --> Deposited : Record deposit successful
+ Given --> Correction : Record deposit correction needed
+ Correction --> Deposited : Record deposit successful
+</pre>
+<figcaption>ACR and deposit status. A deposit does not transfer credit.</figcaption>
+</figure>
+
+<figure data-f="mod-md11-credit">
+<pre class="mermaid">
+stateDiagram-v2
+ state "Provisionally redeemed" as Provisional
+ [*] --> Available : Record deposit
+ Available --> Provisional : TransferDecided approved
+ Provisional --> Redeemed : Record programme completion
+ Provisional --> Available : Record non-completion, still valid
+ Provisional --> Expired : Record non-completion, validity ended
+ Available --> Expired : Expire credits job
+</pre>
+<figcaption>Credit ledger status for a deposited credit. Redeemed is final.</figcaption>
+</figure>
+
+<!-- ============ MD-12 ============ -->
+<h2>4.14 MD-12 Transfer</h2>
+<p class="tcap" data-t="mod-md12-info">MD-12 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Handles an application to transfer credit into a degree programme: validity check, equivalence evaluation on learning outcomes, limit warnings and the academic decision of the deputy dean of the receiving PTj. It also records programme admission as a separate fact.
+SRS requirements | {{fr-ctapply}}, {{fr-ctsource}}, {{fr-ctavailable}}, {{fr-ctvalidity}}, {{fr-ctequiv}}, {{fr-ctloequiv}}, {{fr-ctlimits}}, {{fr-ctpartial}}, {{fr-ctdecision}}, {{fr-ctauthority}}, {{fr-ctreject}}, {{fr-cttrace}}, {{fr-ctversion}}, {{fr-ctadmission}}, {{fr-ctprecedent}}, {{fr-qvnotransfer}}, {{br-equiv}}, {{br-receiver}}, {{br-mcetransfer}}, {{br-rejectkeep}}, {{br-admission}}
+Tables owned | transfer_applications, transfer_lines, equivalence_assessments, transfer_decisions, admissions
+Screens served | ST-11 Credit transfer, ST-12 New transfer application, ST-13 Transfer application, DD-21 Credit transfer, DD-22 Transfer decision, DOC-12 Credit transfer decision letter
+Events published | EV-51 TransferApplied, EV-52 TransferDecided, EV-53 AdmissionRecorded
+Events consumed | EV-48 CreditExpired (flags an affected application for re-evaluation), EV-14 SenateDecisionRecorded (flags an earlier equivalence when a material change is approved)
+Jobs | None
+</script>
+
+<p class="tcap" data-t="mod-md12-act">MD-12 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Submit application | P8 or staff | Source must be a UTeM or other eligible UMC, or a QV-valid SAMC with verifiable status. An MCE is refused with the reason. Only Available credit is selectable. The conflict check against active applications on the same credit runs first. | Yes
+Record validity check | P2 as evaluator | Authenticity, ABC status and QV or accreditation. A failure ends in Not approved. | Yes
+Complete equivalence criteria | P2 of the receiving PTj | Each F7 criterion needs a finding and a result. The criterion on learning outcomes is judged on outcomes, not on credit or SLT alone. | Yes
+Decide | P2 of the receiving PTj, or the authority in <code>approval.route.*</code> | Approved is blocked if any learning-outcome criterion is Not equivalent ({{fr-ctloequiv}}). A partly completed UMC or a badge set is not full credit unless the separately recognisable flag is Yes. Programme limit and non-transferable components show as warnings. Credits, component, date, authority and conditions required. | Yes
+Request more evidence | P2 | Returns the application to Submitted. | Yes
+Record admission | Authorised user of the programme | A separate fact. A transfer approval never implies admission. | Yes
+Consult precedent (Release 2) | P2 | A precedent does not replace the decision. | No
+</script>
+
+<figure data-f="mod-md12-state">
+<pre class="mermaid">
+stateDiagram-v2
+ state "Under evaluation" as UnderEval
+ state "Partly approved" as Partly
+ state "Not approved" as NotApproved
+ state "More evidence needed" as MoreEvidence
+ [*] --> Submitted : Submit application
+ Submitted --> UnderEval : Record validity check
+ UnderEval --> Approved : Decide approved
+ UnderEval --> Partly : Decide partly approved
+ UnderEval --> NotApproved : Decide not approved
+ UnderEval --> MoreEvidence : Request more evidence
+ MoreEvidence --> Submitted : Applicant adds evidence
+</pre>
+<figcaption>Transfer application status. Only Approved and Partly approved publish an effect on credit (EV-52).</figcaption>
+</figure>
+
+<!-- ============ MD-13 ============ -->
+<h2>4.15 MD-13 Pathways</h2>
+<p class="tcap" data-t="mod-md13-info">MD-13 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Defines stackable degree pathway mappings between credit-bearing micro-credentials and a degree programme, and keeps an individual stackable plan with the 30 percent UTeM credit and residency checks. A mapping transfers no credit; each credit still goes through MD-12.
+SRS requirements | {{fr-spdefine}}, {{fr-spmap}}, {{fr-spcreditbearing}}, {{fr-spapprove}}, {{fr-spnotransfer}}, {{fr-spplo}}, {{fr-spcurrchange}}, {{fr-spplan}}, {{fr-sp30}}, {{fr-spresidency}}, {{fr-spremain}}, {{fr-spdecision}}, {{fr-spadmit}}, {{fr-spaward}}, {{fr-spinfo}}, {{br-home30}}, {{br-residency}}, {{br-creditbearing}}, {{br-plo}}, {{br-award}}
+Tables owned | pathways, pathway_items, stackable_plans, plan_requirements
+Screens served | ST-14 Stackable plan, DD-23 Stackable pathways, DD-24 Pathway mapping, DD-25 Individual stackable plan, PUB-04 Pathways to a degree
+Events published | EV-54 PathwayPublished, EV-55 PathwayFlaggedForReview, EV-56 StackablePlanDecided
+Events consumed | EV-04 ReferenceDataChanged (a material change to a target course flags the mapping), EV-53 AdmissionRecorded (allows Suitable to proceed), EV-14 SenateDecisionRecorded (records the Senate approval of a mapping)
+Jobs | None
+</script>
+
+<p class="tcap" data-t="mod-md13-act">MD-13 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Define and map pathway | P1, P2 | Only credit-bearing credentials can be mapped. An MCE is blocked. Equivalence is High, Partial or None, and the preliminary result is Suitable, Needs review or Not suitable. | No
+Approve and publish mapping | P2 records the Senate decision | Approval is required before publication (D-11). The page states that an approved mapping transfers no credit. | Yes
+Create individual plan | P1, P2 | Computes the share of credit earned at UTeM. A share below <code>stackable.min_home_credit_percent</code> marks the plan as not meeting the rule. The interface states that 30 percent does not mean 70 percent is transferable. | No
+Record residency | P1, P2 | At least <code>stackable.residency_semesters</code> for conventional delivery. An ODL scope flag goes to review. | No
+Record plan decision | P1, P2 | Suitable to proceed needs a recorded admission ({{fr-spadmit}}). Conditions and follow-up recorded. | Yes
+Record award | Authorised user from programme records | Needs admission and all requirements. MCMS records the award and never gives it. | Yes
+</script>
+
+<figure data-f="mod-md13-state">
+<pre class="mermaid">
+stateDiagram-v2
+ state "Needs review" as NeedsReview
+ state "Not yet suitable" as NotYet
+ [*] --> NeedsReview : Create individual plan
+ NeedsReview --> Suitable : Record plan decision suitable
+ NeedsReview --> NotYet : Record plan decision not yet suitable
+ NotYet --> NeedsReview : Update plan
+ Suitable --> NeedsReview : Mapping flagged for review
+</pre>
+<figcaption>Stackable plan status. A pathway mapping itself moves Draft, Approved, Published.</figcaption>
+</figure>
+<div class="note"><b>Note:</b> The SRS plan decisions are Suitable to proceed, Suitable with conditions, Not yet suitable and Not suitable. UI/UX Specification v1.1 section 4.8 shows only Suitable, Needs review and Not yet suitable. The design stores the SRS decision in <code>stackable_plans.decision</code> and shows the section 4.8 words as status. The mapping is a design choice that needs confirmation (reported).</div>
+
+<!-- ============ MD-14 ============ -->
+<h2>4.16 MD-14 Quality and Change</h2>
+<p class="tcap" data-t="mod-md14-info">MD-14 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Calculates cohort indicators, runs continuous quality improvement (CQI) records and actions, schedules periodic reviews, and records suspension or termination with a transition plan. It does not delete any earlier achievement, credential or ACR.
+SRS requirements | {{fr-mnindicators}}, {{fr-mnlo}}, {{fr-mnfeedback}}, {{fr-mnmodular}}, {{fr-mndomains}}, {{fr-mndash}}, {{fr-cqiissue}}, {{fr-cqiaction}}, {{fr-cqieffect}}, {{fr-cqitrace}}, {{fr-cqichange}}, {{fr-cqisign}}, {{fr-prschedule}}, {{fr-proutcome}}, {{fr-prsuspend}}, {{fr-prnotify}}, {{fr-prkeep}}, {{br-cqi}}, {{br-terminate}}
+Tables owned | cqi_records, cqi_actions, periodic_reviews, suspensions, feedback_responses, quality_domain_checks
+Screens served | LEC-13 Quality review (CQI), LEC-14 Quality review record, DD-13 Quality, QV and review, DD-15 Quality review, DD-16 Periodic review, DD-17 Suspension or termination, DOC-13 Suspension notice
+Events published | EV-57 CqiRecordConfirmed, EV-58 PeriodicReviewDue, EV-59 SuspensionDecided
+Events consumed | EV-08 MinorChangeLogged (adds the minor change to CQI), EV-31 CompletionConfirmed (updates cohort indicators), EV-42 QvLapsed (adds a QV item to the review list)
+Jobs | JB-10 DecisionOverdueRemindersJob, JB-12 PeriodicReviewRemindersJob
+</script>
+
+<p class="tcap" data-t="mod-md14-act">MD-14 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Submit feedback questionnaire | P8 | One response per enrolment, after completion or cohort close. | Yes
+Record quality domains | P1 | Satisfactory or Needs action with evidence. | No
+Record CQI issue and action | P1 | Evidence, root cause, impact and priority (High, Medium, Low). Action has owner, due date and success indicator. | No
+Evaluate effectiveness | P1 | Effective, Partly effective or Not effective. | Yes
+Close CQI record | P2 | Needs a prior evaluation. The confirmer is not the evaluator. A CQI action that affects a listed component needs a change request in MD-02: the Release 1 prototype opens a task for the lecturer to make it. | Yes
+Record periodic review outcome | P1, P2 | One of five outcomes. Routes to a change request or to a suspension decision. | Yes
+Decide suspension or termination | P2 of the configured authority | Lists active participants. A transition plan is required before Terminated. Publishes EV-59, and affected participants are notified (mandatory notice). | Yes
+</script>
+
+<figure data-f="mod-md14-state">
+<pre class="mermaid">
+stateDiagram-v2
+ state "In progress" as InProgress
+ state "Done (effectiveness pending)" as Done
+ [*] --> Open : Record CQI action
+ Open --> InProgress : Start action
+ InProgress --> Done : Mark action done
+ Done --> Closed : Close CQI record after evaluation
+ Done --> Open : Carry to next cycle
+</pre>
+<figcaption>CQI action status. Suspension and termination use the version statuses in {{fig:mod-md03-state}}.</figcaption>
+</figure>
+
+<!-- ============ MD-15 ============ -->
+<h2>4.17 MD-15 Records</h2>
+<p class="tcap" data-t="mod-md15-info">MD-15 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Provides the append-only audit trail, scoped viewing, corrections of records, discrepancy handling, the traceability chain, reports and exports, and retention with holds. Corrections create revisions and nothing is deleted.
+SRS requirements | {{fr-auditlog}}, {{fr-auditview}}, {{fr-correct}}, {{fr-mismatch}}, {{fr-trace}}, {{fr-cohortrec}}, {{fr-reports}}, {{fr-export}}, {{fr-retention}}, {{fr-hold}}, {{br-audit}}, {{sr-tamper}}, {{nfr-report}}, {{nfr-records}}, {{dr-nodelete}}, {{dr-immutable}}
+Tables owned | audit_events, corrections, discrepancies, retention_holds, disposal_records, report_runs
+Screens served | DD-26 Reports, DD-27 Report, DD-28 Traceability, DD-29 Trace a participant, LEC-17 Reports, LEC-18 Report, CODL-10 Audit trail, CODL-11 Reports, CODL-12 Report, CODL-13 Retention, DOC-09 Report, DOC-16 Audit trail export
+Events published | EV-60 CorrectionRecorded, EV-61 DisposalApproved
+Events consumed | All events EV-01 to EV-63 as audit entries when the owning service did not already write one in its own transaction. EV-62 NotificationFailed. The audit write for a change is always made by the owning service in the same transaction (AD-11).
+Jobs | JB-15 GenerateReportJob, JB-18 VerifyAuditChainJob, JB-19 ListDisposalCandidatesJob
+</script>
+
+<p class="tcap" data-t="mod-md15-act">MD-15 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Append audit event | System | Hash chain: each row stores the previous hash. The application database role has no UPDATE or DELETE on the table (AD-11). | No
+View audit trail | S1, P2, authorised users | Search within scope. CODL sees technical events but never academic content beyond its scope. | No
+Record correction | Party with authority over the record (P2 for academic records) | Stores original, reason, action, approver and date. The target module applies the revision through its own service. Participants are notified if a credential, ACR, deposit or credit is affected. | Yes
+Log and resolve discrepancy | P2 | Open or resolved. Resolution is through a correction. | Yes
+Trace a participant | P2, authorised users | Chain from source to award, within scope. | No
+Run and export report | Authorised users in scope | CSV, Excel or PDF. Queues JB-15. | No
+Set retention | S1 | Setting change through MD-00. | Yes
+Approve disposal | Approver in settings | Only after the period and when no hold exists. A disposal record is the only way a row leaves the system. | Yes
+Place hold (Release 2) | Authorised user | Stops disposal. | Yes
+</script>
+
+<p><b>State machine.</b> A discrepancy is Open or Resolved, and a hold is On or Off. The audit event has no status because it is never changed.</p>
+
+<!-- ============ MD-16 ============ -->
+<h2>4.18 MD-16 Integration Hub</h2>
+<p class="tcap" data-t="mod-md16-info">MD-16 fact sheet</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Purpose | Stores and sends notifications, registers each adapter with its mode (Stub, Manual, Live), logs every external call, and retries failures without blocking the business process.
+SRS requirements | {{fr-ntevents}}, {{fr-ntlang}}, {{fr-ntprefs}}, {{fr-ntlog}}, {{fr-ntdigest}}, {{fr-ihregistry}}, {{fr-ihretry}}, {{fr-adapterstatus}}, {{fr-vernotify}}, {{fr-prnotify}}, {{ir-adapter}}, {{ir-stubs}}, {{ir-mode}}, {{ir-idempotent}}, {{ir-smtp}}, {{nfr-adapterfail}}, {{nfr-queue}}
+Tables owned | notifications, notification_preferences, integration_jobs, adapter_configs, job_runs, alert_log
+Screens served | CMN-07 Notifications, CODL-08 Adapter status, CODL-09 Test mailbox
+Events published | EV-62 NotificationFailed, EV-63 AdapterCallFailed
+Events consumed | EV-03, EV-06, EV-09, EV-10, EV-11, EV-12, EV-13, EV-14, EV-16, EV-17, EV-18, EV-19, EV-20, EV-21, EV-22, EV-23, EV-26, EV-29, EV-30, EV-32, EV-34, EV-35, EV-36, EV-37, EV-38, EV-39, EV-40, EV-42, EV-43, EV-44, EV-45, EV-47, EV-48, EV-52, EV-55, EV-56, EV-58, EV-59, EV-60 (each creates a notification from a template, see 4.19). EV-63 (notifies P5).
+Jobs | JB-05 SendNotificationJob, JB-16 RetryAdapterCallJob
+</script>
+
+<p class="tcap" data-t="mod-md16-act">MD-16 actions</p>
+<script type="text/tbl" data-h="Action|Actor|Policy rule|Confirm" data-w="26%|14%|48%|12%" data-cls="small">
+Create notification | System | Stored first in <code>notifications</code>, in the recipient's language, then sent by JB-05 (AD-15). Mandatory notices (version change, suspension, correction, replacement, revocation) cannot be switched off. | No
+Set notification preference | Any user | Optional notices only. Mandatory notices are shown locked. | No
+Register adapter and set mode | S1, P5 | Stub, Manual or Live per environment. Stub and the demo clock are rejected in production (AD-18). | Yes
+Call adapter | System | Every call writes an <code>integration_jobs</code> row with a stable idempotency key. | No
+Resolve failed call | P5 | Retry, mark handled or fix the data. P5 cannot change academic records. | No
+Email digest (Release 2) | Approvers, lecturers | Daily digest of open tasks. | No
+</script>
+
+<p><b>State machine.</b> A notification is Pending, Sent or Failed. An <code>integration_jobs</code> row is Queued, Succeeded, Retrying or Failed. These are technical states shown only on CODL-08 and CODL-09.</p>
+
+<!-- ============ 4.19 ============ -->
+<h2>4.19 Event and Job Catalogues</h2>
+<h3>4.19.1 Domain events</h3>
+<p>The event IDs below are final for this document. Section 6 and Section 7 reuse them. Cross-module reactions that matter most are:</p>
+<ul>
+<li>EV-29 ResultsVerified lets MD-09 issue a Digital Badge for a verified module. It does not complete the micro-credential.</li>
+<li>EV-31 CompletionConfirmed starts JB-01 in MD-09, which runs the pre-issuance checks and issues the certificate and Digital Credential. No other event issues these (D-29).</li>
+<li>EV-32 CredentialIssued lets MD-11 prepare an ACR for an eligible UMC or a QV-valid SAMC. It never prepares one for an MCE.</li>
+<li>EV-45 ConsentGiven puts a confirmed ACR in the deposit queue. Without it no deposit can be recorded.</li>
+<li>EV-47 DepositRecorded sets the ledger credit to Available and the expiry to the deposit date plus the credit validity setting (10 years).</li>
+<li>EV-52 TransferDecided with an approved outcome sets the credit to Provisionally redeemed, so a second application cannot use it.</li>
+<li>EV-42 QvLapsed stops QV wording on new credentials and stops new ACR eligibility for the SAMC. Earlier credentials keep their status valid at the issue date.</li>
+</ul>
+<p class="tcap" data-t="mod-events">Domain event catalogue</p>
+<script type="text/tbl" data-h="ID|Event|Published by|Consumed by|Effect" data-w="7%|18%|9%|18%|48%" data-cls="small">
+EV-01 | RoleAssigned | MD-01 | MD-15, MD-16 | Audit entry. User is notified of the role and scope.
+EV-02 | RoleRevoked | MD-01 | MD-15, MD-16 | Audit entry. Open tasks of the user are listed for reassignment.
+EV-03 | ConflictDeclared | MD-01 | MD-03, MD-16 | The reviewer is removed from the review task. The person who assigned the reviewer is notified.
+EV-04 | ReferenceDataChanged | MD-01 | MD-02, MD-13 | Linked UMC versions and pathway mappings are flagged for review when a parent or target course changes.
+EV-05 | SettingChanged | MD-00 | MD-15 | New setting version stored and audited. Later decisions use the version in force on their date.
+EV-06 | ProposalSubmitted | MD-02 | MD-03, MD-16 | Version locked. Endorsement task created for P2, who is notified.
+EV-07 | MaterialChangeRecorded | MD-02 | MD-03, MD-04, MD-10 | New version in Draft goes through approval. Open offerings of the old version are held. A Quality-Verified SAMC gets a re-verification task.
+EV-08 | MinorChangeLogged | MD-02 | MD-03, MD-14 | P2 gets an acknowledgement task. The change is added to CQI.
+EV-09 | ReviewerAssigned | MD-03 | MD-16 | Each reviewer is notified with the due date.
+EV-10 | ReviewRecorded | MD-03 | MD-16 | P2 is notified. The review summary is rebuilt.
+EV-11 | ProposalReturned | MD-03 | MD-02, MD-16 | Version returns to Returned for amendment and unlocks. P1 is notified.
+EV-12 | ProposalEndorsed | MD-03 | MD-16 | Category verified. The version moves to Pending approval when sent to Senate.
+EV-13 | ProposalNotSupported | MD-03 | MD-02, MD-16 | Version ends as Not approved. P1 is notified.
+EV-14 | SenateDecisionRecorded | MD-03 | MD-02, MD-04, MD-12, MD-13, MD-16 | Version becomes Approved, Not approved or Returned for amendment. An approved version becomes selectable for offerings. An approved material change flags earlier equivalences.
+EV-15 | VersionSuperseded | MD-02 | MD-16 | Earlier Approved version becomes Superseded. Enrolled participants are notified with the transition rule.
+EV-16 | TransitionRuleRecorded | MD-03 | MD-05, MD-16 | Enrolments are bound to the version by the rule. Participants are notified (mandatory).
+EV-17 | ReadinessConfirmed | MD-04 | MD-16 | Offering becomes Ready. Conditions are shown to P1.
+EV-18 | OfferingOpened | MD-04 | MD-16 | Offering is listed in the public catalogue and registration opens.
+EV-19 | OfferingHeld | MD-04 | MD-16 | Offering is held or cancelled. Registered participants are notified.
+EV-20 | StudentRegistered | MD-05 | MD-16 | Participant is notified. Payment is requested when a fee applies.
+EV-21 | PaymentConfirmed | MD-05 | MD-05, MD-16 | Pending payment becomes Enrolled. Receipt is rendered.
+EV-22 | EnrolmentConfirmed | MD-05 | MD-07, MD-08, MD-10, MD-16 | Achievement record and result rows are created. Confirmation with access instructions is sent.
+EV-23 | EnrolmentWithdrawn | MD-05 | MD-08, MD-16 | Record is closed as withdrawn. No credential is issued.
+EV-24 | ImportExportLogged | MD-06 | MD-15 | Export file, hash and count are logged.
+EV-25 | ResultsStaged | MD-06 | MD-07, MD-16 | Valid rows become Provisional results. A verification task is created for P2.
+EV-26 | ImportRejected | MD-06 | MD-16 | P5 is notified with the row error report. Nothing is staged for a file-level error.
+EV-27 | BadgeImported | MD-06 | MD-09 | Badge is matched to a verified achievement or flagged.
+EV-28 | IntegrityCaseOpened | MD-07 | MD-16 | Affected results become Held. P2 is notified.
+EV-29 | ResultsVerified | MD-07 | MD-08, MD-09, MD-16 | Achievements and module status are created. A badge is issued for a verified module if the design includes badges. Participants are notified.
+EV-30 | ResultChangeApproved | MD-07 | MD-08, MD-09, MD-16 | A new result revision applies. If a credential exists, a correction task is created for P2.
+EV-31 | CompletionConfirmed | MD-08 | MD-05, MD-09, MD-10, MD-14, MD-16 | Enrolment becomes Completed. JB-01 issues the certificate and Digital Credential after the pre-issuance checks.
+EV-32 | CredentialIssued | MD-09 | MD-08, MD-11, MD-16 | Credential is added to the Achievement Record. MD-11 prepares an ACR for an eligible UMC or QV-valid SAMC, never for an MCE. Participant is notified.
+EV-33 | BadgeIssued | MD-09 | MD-08 | Badge is added to the Achievement Record. It carries no credit wording.
+EV-34 | IssuanceFailed | MD-09 | MD-16 | P2 is told which participants failed and which check failed.
+EV-35 | CredentialCorrected | MD-09 | MD-16 | New revision is current. Participant is notified (mandatory).
+EV-36 | CredentialReplaced | MD-09 | MD-16 | Old credential shows the new ID. Participant is notified (mandatory).
+EV-37 | CredentialRevoked | MD-09 | MD-16 | Credential shows Revoked on verification. Participant is notified (mandatory).
+EV-38 | QvSubmitted | MD-10 | MD-16 | Status becomes Submitted. P1 and P2 are notified.
+EV-39 | QvVerified | MD-10 | MD-04, MD-11, MD-16 | QV record becomes the source for QV, credit and MQF wording. SAMC becomes ACR-eligible.
+EV-40 | QvNotVerified | MD-10 | MD-16 | Record returns to Preparing. Findings are listed to P1.
+EV-41 | QvReverificationRequired | MD-10 | MD-16 | Re-verification flag set after a material change.
+EV-42 | QvLapsed | MD-10 | MD-04, MD-09, MD-11, MD-14, MD-16 | Catalogue and new credentials drop QV wording. No new ACR for the SAMC. A task is created for the PTj.
+EV-43 | AcrPrepared | MD-11 | MD-16 | P2 is notified to confirm.
+EV-44 | AcrConfirmed | MD-11 | MD-16 | Participant gets the consent request.
+EV-45 | ConsentGiven | MD-11 | MD-11, MD-16 | ACR enters the deposit queue.
+EV-46 | ConsentDeclined | MD-11 | MD-16 | ACR stays unqueued. Participant can consent later.
+EV-47 | DepositRecorded | MD-11 | MD-15, MD-16 | Ledger credit becomes Available with expiry at deposit date plus 10 years. Participant is notified that a deposit is not a transfer.
+EV-48 | CreditExpired | MD-11 | MD-12, MD-16 | Credit becomes Expired. An affected application is flagged for re-evaluation.
+EV-49 | CreditRedeemed | MD-11 | MD-15, MD-16 | Credit becomes Redeemed and is final.
+EV-50 | CreditReleased | MD-11 | MD-16 | Credit returns to Available, or becomes Expired if validity ended.
+EV-51 | TransferApplied | MD-12 | MD-16 | Application is under evaluation. Evaluator is notified.
+EV-52 | TransferDecided | MD-12 | MD-11, MD-16 | An approved outcome sets the credit Provisionally redeemed. Not approved changes nothing in ACR, credentials or credit.
+EV-53 | AdmissionRecorded | MD-12 | MD-13 | Admission fact is available to the stackable plan.
+EV-54 | PathwayPublished | MD-13 | MD-16 | Mapping is shown on the public pathway page.
+EV-55 | PathwayFlaggedForReview | MD-13 | MD-16 | P1 and P2 are notified of a changed target curriculum.
+EV-56 | StackablePlanDecided | MD-13 | MD-16 | Plan status is updated. Participant is notified.
+EV-57 | CqiRecordConfirmed | MD-14 | MD-15 | CQI record is confirmed and audited.
+EV-58 | PeriodicReviewDue | MD-14 | MD-16 | Lecturer and PTj are reminded.
+EV-59 | SuspensionDecided | MD-14 | MD-02, MD-03, MD-04, MD-05, MD-16 | Version becomes Suspended or Terminated. Offerings are held. Affected participants are notified (mandatory). Credentials and ACR are untouched.
+EV-60 | CorrectionRecorded | MD-15 | MD-09, MD-11, MD-16 | The target module applies the revision. The participant is notified when a credential, ACR, deposit or credit is affected.
+EV-61 | DisposalApproved | MD-15 | MD-15 | Disposal record is written and rows are removed only after the approved disposal process.
+EV-62 | NotificationFailed | MD-16 | MD-15 | Failure is logged after the last retry.
+EV-63 | AdapterCallFailed | MD-16 | MD-16 | P5 is notified. The failed call appears in the failed-call queue.
+</script>
+
+<h3>4.19.2 Jobs</h3>
+<p>Queues are named in AD-05: <code>default</code>, <code>notifications</code>, <code>imports</code>, <code>credentials</code>, <code>reports</code>, <code>integration</code> and <code>default</code>. Scheduled jobs are started by the Laravel scheduler and dispatch to a queue. Long jobs report progress in <code>job_runs</code>. Alert jobs record each sent alert in <code>alert_log</code> so a re-run sends nothing twice. The idempotency key is stored on the job record, and a second run with the same key does nothing. Retry delays grow at each attempt (backoff).</p>
+<p class="tcap" data-t="mod-jobs">Job catalogue</p>
+<script type="text/tbl" data-h="ID|Job|Triggered by|Queue|Idempotency key|Retry" data-w="6%|17%|19%|10%|24%|24%" data-cls="small">
+JB-01 | IssueCredentialsBatchJob (MD-09) | EV-31 CompletionConfirmed for certificate and Digital Credential, EV-29 ResultsVerified for badges | credentials | enrolment ID, version ID, credential type | 3 attempts with backoff 1, 5 and 15 minutes. A failed item raises EV-34 and stays listed to P2. Other items continue.
+JB-02 | ImportResultsJob (MD-06) | P5 upload | imports | SHA-256 of the file plus template version | No retry on validation errors. 2 retries on storage errors. Whole-file rejection leaves no staged row.
+JB-03 | ExportUcredsEnrolmentJob (MD-06) | P5 request | imports | cohort ID plus export timestamp rounded to the minute | 3 attempts with backoff.
+JB-04 | RenderPdfJob (MD-00) | Any document request | reports | document type, record ID, revision, locale | 3 attempts with backoff. Failure shows a retry action to the user.
+JB-05 | SendNotificationJob (MD-16) | Notification row created | notifications | notification ID | Back-off 1, 5, 15 and 60 minutes, then Failed and EV-62.
+JB-06 | QvExpiryAlertsJob (MD-10) | Scheduler, daily 07:00 | default | QV record ID and threshold (<code>alerts.qv_expiry_days</code>: 180, 90, 30) | Re-run safe. A missed day is picked up next run.
+JB-07 | CreditExpiryAlertsJob (MD-11) | Scheduler, daily 07:00 | default | deposit ID and threshold (<code>alerts.credit_expiry_days</code>: 365, 90) | Re-run safe.
+JB-08 | LapseExpiredQvJob (MD-10) | Scheduler, daily 00:10 | default | QV record ID and expiry date | Re-run safe. Raises EV-42 once.
+JB-09 | ExpireCreditsJob (MD-11) | Scheduler, daily 00:20 | default | ledger entry ID and expiry date | Re-run safe. Raises EV-48 once.
+JB-10 | DecisionOverdueRemindersJob (MD-14) | Scheduler, daily 07:30 | default | task ID and reminder date | Re-run safe. Covers decisions older than <code>alerts.decision_overdue_days</code>, reviews due and CQI actions due.
+JB-11 | CompletionWindowRemindersJob (MD-08) | Scheduler, daily 07:40 | default | record ID and reminder date | Re-run safe. Reads the offering's completion period, else the setting <code>umc.completion_window_months</code>; sends nothing while neither has a value (OI-13).
+JB-12 | PeriodicReviewRemindersJob (MD-14) | Scheduler, daily 07:50 | default | review ID and due date | Re-run safe. Raises EV-58.
+JB-13 | ExportAbcDepositJob (MD-11) | P2 request | reports | batch ID | 3 attempts with backoff.
+JB-14 | BuildQvPackageJob (MD-10) | Staff request | reports | QV record ID and evidence version | 3 attempts with backoff.
+JB-15 | GenerateReportJob (MD-15) | User request | default | report type, scope, filters hash | 2 attempts. The user can start it again.
+JB-16 | RetryAdapterCallJob (MD-16) | A failed adapter call | integration | integration job ID | Back-off 1, 5, 15 and 60 minutes, then Failed and EV-63. It never blocks the business process.
+JB-17 | ScanUploadJob (MD-00) | File stored | default | file ID | 3 attempts. If the scanner is down the file stays unavailable.
+JB-18 | VerifyAuditChainJob (MD-15) | Scheduler, daily 02:00 | default | check date | Re-run safe. A broken chain raises a security alert to CODL.
+JB-19 | ListDisposalCandidatesJob (MD-15) | Scheduler, monthly | default | month | Re-run safe. It only lists candidates. Disposal needs EV-61 approval.
+JB-20 | CancelUnpaidEnrolmentsJob (MD-05) | Scheduler, hourly | default | enrolment ID and window end | Re-run safe. Pending payment becomes Cancelled.
+JB-21 | OpenCloseRegistrationJob (MD-04) | Scheduler, every 15 minutes | default | offering ID and window date | Re-run safe. Opens a Ready offering on its date and closes it on its deadline.
+JB-22 | IssueCredentialJob (MD-09) | Child of JB-01, one per credential | credentials | enrolment ID, version ID, credential type | 3 attempts with backoff. Failure raises EV-34.
+</script>
+
+
+

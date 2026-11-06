@@ -1,0 +1,43 @@
+<!-- ===================== 1. INTRODUCTION ===================== -->
+<h1>1. Introduction</h1>
+
+<h2>1.1 Purpose</h2>
+<p>This UI/UX Design Specification describes how MCMS looks and behaves for each of its users: the visual system, the interaction rules, every screen, every flow between screens and roles, and every printable document. It turns the requirements of the SRS and the product decisions of the PRD into a design that developers can build without guessing.</p>
+<p>The specification was written from the approved clickable prototype v2. The prototype is part of the specification: where a screen is described here, the prototype shows it with sample data, and where this text and the prototype differ, this text prevails and the prototype is corrected. Where this document and the SRS differ on a requirement, the SRS prevails.</p>
+
+<h2>1.2 Document Conventions</h2>
+<script type="text/tbl" data-h="Convention|Meaning" data-w="22%|78%">
+Screen ID | Role prefix and number, for example DD-12 or ST-04. The full list with routes is in Section 6.4.
+Route | Prototype address of a screen, written as <code>#/dd/verify/:id</code>. A word after a colon is a record identifier.
+FL-XX | A flow of Section 7.
+Release 1 / 2 | Follows the SRS: SHALL is Release 1, SHOULD is Release 2. Release 2 controls appear disabled and labelled "Release 2".
+Design prototype | The clickable HTML prototype v2 that this specification describes (D-31).
+Release 1 prototype | The working application of the SDD on seed data with stub and Manual adapters (D-31). It follows this specification; its acceptance script is PRD Section 7.
+FR-XX, BR-XX, NFR-XX | Requirement IDs of the SRS v1.1, as published there.
+D-XX, A-XX, OI-XX | Decisions, assumptions and open items of the Glossary and Decision Log v0.6.
+Dates and money | Written in this document as "26 Oct 2026"; shown to users as DD/MM/YYYY and RM 0.00 (Section 4.9).
+</script>
+<div class="note"><b>Note:</b> Names, records and figures in the screenshots are sample data of the prototype. They are consistent with each other but are not real people or decisions.</div>
+
+<h2>1.3 Intended Audience</h2>
+<script type="text/tbl" data-h="Reader|Use of this document|Read first" data-w="28%|47%|25%">
+Supervisor and CODL | Check that every user can do their work and that the design keeps the Guide's stages separate. | Sections 2, 6, 7
+Developers and AI development agents | Build screens, components and behaviour exactly as specified. | Sections 3, 4, 5, 6
+Testers | Derive UI tests from the interaction rules, flows and screen states. | Sections 4, 7, 9
+Content and translation | Write and translate interface text consistently in BM and EN. | Sections 4.9, 8
+</script>
+
+<h2>1.4 Scope</h2>
+<p>The specification covers the Release 1 web application for all roles: participants (students), lecturers and colleague reviewers, deputy deans, the CODL system administrator and the industry expert. It also covers the public website for visitors and employers, and the documents the system prints or exports. The application is web first and responsive down to a phone width of 360 px (NFR responsiveness); there is no native mobile app (SRS 1.4).</p>
+<p>Out of scope: the visual design of UCreds, the national ABC platform and other external systems; the SDD's technical design of components; and Release 2 features beyond showing them as disabled.</p>
+
+<h2>1.5 References</h2>
+<ol>
+  <li>Glossary and Decision Log for the UTeM MCMS, version 0.6, 27 October 2026 (MCMS_FND_V0.6_Oct_2026).</li>
+  <li>Software Requirements Specification, UTeM MCMS, version 1.0, 26 October 2026 (MCMS_SRS_V1.1_Oct_2026).</li>
+  <li>Product Requirements Document, UTeM MCMS, version 1.0, 26 October 2026 (MCMS_PRD_V1.1_Oct_2026).</li>
+  <li>DESIGN.md, design system "ulearn-carbon" (IBM Carbon with uLearn Navy), held in the project folder.</li>
+  <li>MCMS UI design basis v2 (<code>UIUX/v2/DESIGN-BASIS.md</code>) and SRS screen inventory (<code>UIUX/v2/basis/srs-fr-inventory.md</code>).</li>
+  <li>MCMS clickable prototype v2 (<code>UIUX/v2/prototype</code>) and its sample PDFs (<code>UIUX/v2/samples</code>).</li>
+  <li>WCAG 2.1; Garis Panduan Micro-Credential UTeM, Versi 1.0 (the Guide).</li>
+</ol>

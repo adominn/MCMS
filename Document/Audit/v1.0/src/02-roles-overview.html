@@ -1,0 +1,90 @@
+<!-- ===================== SECTION 1: ROLES OVERVIEW ===================== -->
+<h1>1. Role Identification & Page Architecture</h1>
+
+<p>The UTeM Micro-Credential Management System implements a strict role-based access control (RBAC) model defined by <b>Decision D-28</b> (Glossary and Decision Log v0.8) and enforced through the <code>EnsureRole</code> middleware (SR-03). The architecture establishes a clear separation between academic evaluation, quality assurance, system governance, and public verification.</p>
+
+<h2>1.1 System User Roles & Persona Definitions</h2>
+<p>MCMS categorizes system access into six authenticated personas plus an unauthenticated public tier:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Role Code</th>
+      <th>Display Label</th>
+      <th>Primary Responsibility & Authority Scope</th>
+      <th>MFA Req. (SR-02)</th>
+      <th>Active Scoping</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>public</code></td>
+      <td>Public / Guest</td>
+      <td>Unauthenticated prospective learners, employers, and verifiers. Browse course offerings, review degree pathways, verify digital credentials via cryptographic tokens or code lookup.</td>
+      <td>No</td>
+      <td>Global</td>
+    </tr>
+    <tr>
+      <td><code>student</code></td>
+      <td>Student / Learner (P8)</td>
+      <td>Enrolled participants. Enrol in course cohorts, complete payments, view verified results, manage credentials in wallet, consent to ABC credit deposits, apply for credit transfer, and build degree plans.</td>
+      <td>No</td>
+      <td>User ID Scoped</td>
+    </tr>
+    <tr>
+      <td><code>lecturer</code></td>
+      <td>Lecturer / Educator (P1)</td>
+      <td>Academic course owners. Author micro-credential proposals, manage versions, prepare cohort readiness checklists, enter assessment marks, conduct CQI reviews, assemble SAMC QV packages.</td>
+      <td>No</td>
+      <td>PTj / Department Scoped</td>
+    </tr>
+    <tr>
+      <td><code>reviewer</code> / <code>industry_expert</code></td>
+      <td>Reviewer / Industry Expert (X1, X2)</td>
+      <td>Internal academic peers and external industry specialists. Review assigned micro-credential curriculum proposals, submit formal evaluations, and verify industry relevance.</td>
+      <td>No</td>
+      <td>Assignment Scoped</td>
+    </tr>
+    <tr>
+      <td><code>deputy_dean</code></td>
+      <td>Deputy Dean Academic (P2)</td>
+      <td>Faculty academic authority. Endorse proposals, record Senate decisions, confirm cohort readiness, verify marks, confirm completions, manage credit deposits and transfer evaluations, oversee CQI.</td>
+      <td><b>Yes (6-digit)</b></td>
+      <td>Faculty PTj Scoped</td>
+    </tr>
+    <tr>
+      <td><code>codl_admin</code></td>
+      <td>CODL Administrator (S1, P5)</td>
+      <td>Centre for Open and Distance Learning technical administrator. Manage user accounts and role assignments, configure versioned system settings and templates, execute UCreds CSV data exchange, monitor audit hash integrity.</td>
+      <td><b>Yes (6-digit)</b></td>
+      <td>System Global</td>
+    </tr>
+    <tr>
+      <td><code>auth</code> (Common)</td>
+      <td>Authenticated Shell</td>
+      <td>Shared cross-role infrastructure available to any authenticated session: global header search, user profile & notification preferences, session management, universal task queue, standard report viewer, and document repository.</td>
+      <td>Inherited</td>
+      <td>Role Context</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>1.2 Role Hierarchy & Separation of Duties (BR-01, BR-02)</h2>
+<p>To preserve academic integrity and prevent conflicts of interest, the system strictly enforces the following separation of duties:</p>
+<ul>
+  <li><b>Self-Review & Self-Approval Prohibition (FR-14, FR-71):</b> A lecturer who authors a proposal cannot be assigned as its reviewer, cannot endorse the proposal, and cannot confirm its Senate approval.</li>
+  <li><b>Separation of Mark Entry and Verification (FR-120):</b> A lecturer enters and submits raw marks; only the faculty Deputy Dean can verify marks and finalize achievements.</li>
+  <li><b>Two-Party Cohort Readiness (FR-86):</b> A cohort readiness checklist must be completed by the lecturer and independently confirmed by the Deputy Dean before enrolment can open.</li>
+  <li><b>Administrative vs Academic Boundary (D-28):</b> CODL Administrators hold zero authority over academic decisions (proposal approvals, grade adjustments, credit transfers, or completion confirmations). Their authority is strictly confined to technical settings, user accounts, and data interchange.</li>
+</ul>
+
+<h2>1.3 Page Types & Layout Architecture</h2>
+<p>In accordance with <b>Decision D-38</b> and the approved clickable prototype (<code>UIUX/v2/prototype</code>), all pages adhere to a <i>Summary-First</i> information hierarchy utilizing the UTeM Carbon Design System with a Navy (<code>#1e2a6e</code>) sidebar navigation. Pages are categorized into six functional archetypes:</p>
+<ol>
+  <li><b>Dashboard & Task Workspaces:</b> Action-oriented hubs (e.g., Student Home, Task Queue, Approvals Hub) that display overdue action items, status counters, and active workflow links.</li>
+  <li><b>Listing & Management Directories:</b> Tabulated records featuring client-side search, type-aware column sorting, and pagination (suppressed for datasets of 10 or fewer rows).</li>
+  <li><b>Multi-Step Guided Wizards:</b> Stepped forms (e.g., 4-step Course Registration, Guided Category Wizard) with client/server validation, state retention, and explicit step indicators.</li>
+  <li><b>Comprehensive Workspaces:</b> High-density tabbed environments (e.g., 8-tab Curriculum Proposal Workspace, CQI Workspace) featuring live validation warnings, draft autosave, and status badges.</li>
+  <li><b>Verification & Audit Portals:</b> Cryptographic and data verification tools (e.g., Public Verification, Hash Chain Verification, Discrepancy Log) enforcing data integrity.</li>
+  <li><b>Print & Export Layouts:</b> Official institutional sheets (e.g., Certificate, Receipt, Academic Credit Record, Senate Decision Pack) formatted for standardized A4 presentation.</li>
+</ol>

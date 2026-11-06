@@ -1,0 +1,2039 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Software Requirements Specification - UTeM MCMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --blue:#3f6fa6; --tint:#dcebf1; --line:#444; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family:'Noto Serif', Cambria, Georgia, serif; font-size:10pt; line-height:1.45; color:#1a1a1a;
+         font-variant-ligatures:none; margin:0; background:#fff; }
+  /* cover */
+  .cover { break-after:page; padding-top:28mm; }
+  .cover .doc-title { text-align:center; font-size:23pt; font-weight:700; margin:0 0 6px; }
+  .cover .doc-sub { text-align:center; font-size:14pt; font-weight:700; font-style:italic; margin:0 0 30px; }
+  .cover h3 { font-size:13pt; margin:0 0 4px; }
+  .cover table td:first-child { width:34%; font-weight:700; }
+  .cover .disclaimer { margin-top:38mm; font-style:italic; font-size:9.5pt; text-align:justify; }
+  .cover .disclaimer b { display:block; font-size:10.5pt; margin-bottom:2px; }
+  .tint, .cover th { background:var(--tint) !important; }
+  /* toc */
+  .toc { break-after:page; }
+  .toc-title, h1.notoc { background:var(--tint); text-align:center; font-size:14pt; font-weight:700; padding:6px; margin:0 0 12px; color:#111; }
+  .toc-row { display:flex; align-items:baseline; font-size:9.5pt; margin:3px 0; }
+  .toc-row .t { white-space:nowrap; }
+  .toc-row .dots { flex:1; border-bottom:1px dotted #777; margin:0 4px; transform:translateY(-3px); }
+  .toc-row .pg { min-width:16px; text-align:right; }
+  .toc-1 { font-weight:700; margin-top:7px; }
+  .toc-2 { padding-left:16px; }
+  .toc-3 { padding-left:32px; font-size:9pt; }
+  .tocend { color:#fff; font-size:2pt; }
+  /* headings */
+  main h1 { break-before:page; background:var(--tint); color:var(--blue); font-size:15pt; padding:5px 8px; margin:0 0 10px; break-after:avoid; }
+  main h2 { color:var(--blue); font-size:12.5pt; margin:16px 0 6px 10px; break-after:avoid; }
+  main h3 { color:var(--blue); font-size:11pt; margin:12px 0 5px 20px; font-style:italic; break-after:avoid; }
+  main h4 { font-size:10pt; margin:10px 0 4px; break-after:avoid; }
+  p { margin:0 0 7px; text-align:justify; }
+  ul, ol { margin:2px 0 8px 4px; padding-left:20px; }
+  li { margin:1px 0; }
+  td ul, td ol { margin:2px 0 2px 0; padding-left:16px; }
+  table { width:100%; border-collapse:collapse; margin:6px 0 12px; font-size:9pt; }
+  th, td { border:0.6pt solid var(--line); padding:3px 6px; vertical-align:top; text-align:left; }
+  th { background:#ececec; font-weight:700; }
+  thead { display:table-header-group; }
+  tr { break-inside:avoid; }
+  td.c-id, th.c-id { white-space:nowrap; width:50px; font-weight:600; }
+  td.c-src, th.c-src { width:74px; font-size:8pt; color:#333; }
+  td.c-src { font-family:'Noto Sans', Arial, sans-serif; }
+  td.c-x, th.c-x { width:92px; font-size:8pt; }
+  .tcap, figcaption { font-style:italic; font-size:8.5pt; color:#333; margin:2px 0 12px; text-align:left; }
+  .tcap { margin:10px 0 0; }
+  figure { margin:10px 0 12px; break-inside:avoid; }
+  figure .mermaid { text-align:center; }
+  figure .mermaid svg { max-height:205mm; }
+  .note { border-left:3pt solid var(--blue); background:#f3f7fb; padding:5px 9px; margin:8px 0 10px; font-size:9.5pt; break-inside:avoid; }
+  .note b:first-child { color:var(--blue); }
+  code { font-family:Consolas, 'Courier New', monospace; font-size:8.3pt; background:#f1f1f1; padding:0 2px; }
+  .small { font-size:8.5pt; }
+  .center { text-align:center; }
+  .keep { break-inside:avoid; }
+  .pb { break-before:page; }
+  pre.mermaid { font-family:'Noto Sans', Arial, sans-serif; white-space:pre; }
+</style>
+</head>
+<body>
+<!-- ===================== COVER ===================== -->
+<section class="cover">
+  <p class="doc-title">System Role-Based Page & Functionality Audit</p>
+  <p class="doc-sub">UTeM Micro-Credential Management System (MCMS / ACESS)</p>
+  <h3>Document Control</h3>
+  <table>
+    <thead><tr><th colspan="2">Document Information</th></tr></thead>
+    <tbody>
+      <tr><td>System Name</td><td>UTeM Micro-Credential Management System (MCMS / ACESS)</td></tr>
+      <tr><td>Document Reference</td><td>MCMS_AUDIT_V1.0_Nov_2026</td></tr>
+      <tr><td>Version & Date</td><td>Version 1.0 &bull; November 2026</td></tr>
+      <tr><td>Target Architecture</td><td>Laravel 13.38 / PHP 8.3 / PostgreSQL 16 Modular Monolith (Carbon Navy UI)</td></tr>
+      <tr><td>Baseline Specifications</td><td>SRS v1.2, SDD v1.2, PRD v1.1, Glossary & Decision Log v0.8 (D-38), UI/UX Spec v1.3</td></tr>
+      <tr><td>Design Baseline</td><td>Approved Clickable Prototype v2 (<code>UIUX/v2/prototype</code>)</td></tr>
+      <tr><td>Prepared For</td><td>Centre for Open and Distance Learning (CODL), Universiti Teknikal Malaysia Melaka</td></tr>
+      <tr><td>Prepared By</td><td>Antigravity Agentic Audit Suite (Advanced Software Engineering & Verification)</td></tr>
+      <tr><td>Audit Scope</td><td>100% Comprehensive Audit of All User Roles, Routes (221 Endpoints), Blade Templates (126 Views), Controllers (36 Modules), Database Tables (91 Tables), and Cross-Role Workflows</td></tr>
+    </tbody>
+  </table>
+  <div class="disclaimer">
+    <b>Document Classification & Integrity:</b>
+    This audit report represents a rigorous, evidence-based technical inspection of the ACESS / MCMS codebase. Every finding is substantiated by static code inspection, controller method analysis, route table verification, and database migration mapping. No assumptions regarding database operations, access controls, or UI interactivity have been made without direct verification against the underlying implementation.
+  </div>
+</section>
+
+<!-- ===================== TABLE OF CONTENTS ===================== -->
+<section class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <div id="toc"></div>
+  <span class="tocend">TOCENDMARKER</span>
+</section>
+
+<main>
+<h1 class="notoc">Executive Summary</h1>
+<p>This audit delivers an exhaustive functional and technical evaluation of the <b>UTeM Micro-Credential Management System (MCMS / ACESS)</b>. Built to support UTeM's lifelong learning and Malaysian Qualifications Framework (MQF) credit-bearing initiatives, MCMS implements the approved clickable prototype (D-38) across a modular Laravel 13 architecture connected to a PostgreSQL database schema.</p>
+
+<h2>Audit Objectives & Scope</h2>
+<p>The audit was executed under rigorous directives to identify all registered pages, evaluate actual versus intended behavior, trace database operations, verify role-based permissions, map end-to-end user flows, and identify disconnected or unfinished workflows. The scope encompasses:</p>
+<ul>
+  <li><b>All Seven (7) User Roles / Actors:</b> Public / Guest, Student, Lecturer, Reviewer & Industry Expert, Deputy Dean, CODL Administrator, and Shared Authenticated Shell.</li>
+  <li><b>Complete Route Inventory:</b> 221 registered routes (116 GET/HEAD endpoints and 105 POST/PUT state-transition actions).</li>
+  <li><b>Presentation Layer:</b> 126 Blade templates across 24 module view directories.</li>
+  <li><b>Data Layer:</b> 91 relational database tables across 20 schema migrations.</li>
+  <li><b>Execution & Integration:</b> 36 module controllers, background event listeners, and external adapters.</li>
+</ul>
+
+<h2>Key Audit Findings</h2>
+<p>The system exhibits strong architectural discipline, with an append-only cryptographic audit chain (MD-15), strict separation of academic and administrative duties (D-28), and a fully functioning four-act demonstration scenario (FL-19) verifying core curriculum, learning, credit banking, and quality verification lifecycles. However, several critical gaps must be addressed before production pilot readiness:</p>
+<ol>
+  <li><b>File Storage & Scanning Stand-Ins:</b> Multiple production workflows (Quality Verification evidence, offering readiness evidence, UCreds CSV uploads) store textual file references rather than binary files in an object store with automated virus scanning.</li>
+  <li><b>Server-Side PDF Generation:</b> Official legal credentials (A4 certificate, student receipt, Academic Credit Record, Senate decision pack, transfer letter) rely on client-side browser print rendering rather than deterministic server-side PDF compilation.</li>
+  <li><b>Bilingual UI Localization:</b> While header toggles and Malay headings exist (<code>lang/ms.json</code>), subheadings, table headers, buttons, and validation messages remain predominantly in English.</li>
+  <li><b>Asynchronous Processing Dependencies:</b> File imports and 500-credential issuing batches run synchronously within HTTP requests, awaiting Redis/Horizon queue worker infrastructure.</li>
+</ol>
+
+<!-- ===================== SECTION 1: ROLES OVERVIEW ===================== -->
+<h1>1. Role Identification & Page Architecture</h1>
+
+<p>The UTeM Micro-Credential Management System implements a strict role-based access control (RBAC) model defined by <b>Decision D-28</b> (Glossary and Decision Log v0.8) and enforced through the <code>EnsureRole</code> middleware (SR-03). The architecture establishes a clear separation between academic evaluation, quality assurance, system governance, and public verification.</p>
+
+<h2>1.1 System User Roles & Persona Definitions</h2>
+<p>MCMS categorizes system access into six authenticated personas plus an unauthenticated public tier:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Role Code</th>
+      <th>Display Label</th>
+      <th>Primary Responsibility & Authority Scope</th>
+      <th>MFA Req. (SR-02)</th>
+      <th>Active Scoping</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>public</code></td>
+      <td>Public / Guest</td>
+      <td>Unauthenticated prospective learners, employers, and verifiers. Browse course offerings, review degree pathways, verify digital credentials via cryptographic tokens or code lookup.</td>
+      <td>No</td>
+      <td>Global</td>
+    </tr>
+    <tr>
+      <td><code>student</code></td>
+      <td>Student / Learner (P8)</td>
+      <td>Enrolled participants. Enrol in course cohorts, complete payments, view verified results, manage credentials in wallet, consent to ABC credit deposits, apply for credit transfer, and build degree plans.</td>
+      <td>No</td>
+      <td>User ID Scoped</td>
+    </tr>
+    <tr>
+      <td><code>lecturer</code></td>
+      <td>Lecturer / Educator (P1)</td>
+      <td>Academic course owners. Author micro-credential proposals, manage versions, prepare cohort readiness checklists, enter assessment marks, conduct CQI reviews, assemble SAMC QV packages.</td>
+      <td>No</td>
+      <td>PTj / Department Scoped</td>
+    </tr>
+    <tr>
+      <td><code>reviewer</code> / <code>industry_expert</code></td>
+      <td>Reviewer / Industry Expert (X1, X2)</td>
+      <td>Internal academic peers and external industry specialists. Review assigned micro-credential curriculum proposals, submit formal evaluations, and verify industry relevance.</td>
+      <td>No</td>
+      <td>Assignment Scoped</td>
+    </tr>
+    <tr>
+      <td><code>deputy_dean</code></td>
+      <td>Deputy Dean Academic (P2)</td>
+      <td>Faculty academic authority. Endorse proposals, record Senate decisions, confirm cohort readiness, verify marks, confirm completions, manage credit deposits and transfer evaluations, oversee CQI.</td>
+      <td><b>Yes (6-digit)</b></td>
+      <td>Faculty PTj Scoped</td>
+    </tr>
+    <tr>
+      <td><code>codl_admin</code></td>
+      <td>CODL Administrator (S1, P5)</td>
+      <td>Centre for Open and Distance Learning technical administrator. Manage user accounts and role assignments, configure versioned system settings and templates, execute UCreds CSV data exchange, monitor audit hash integrity.</td>
+      <td><b>Yes (6-digit)</b></td>
+      <td>System Global</td>
+    </tr>
+    <tr>
+      <td><code>auth</code> (Common)</td>
+      <td>Authenticated Shell</td>
+      <td>Shared cross-role infrastructure available to any authenticated session: global header search, user profile & notification preferences, session management, universal task queue, standard report viewer, and document repository.</td>
+      <td>Inherited</td>
+      <td>Role Context</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>1.2 Role Hierarchy & Separation of Duties (BR-01, BR-02)</h2>
+<p>To preserve academic integrity and prevent conflicts of interest, the system strictly enforces the following separation of duties:</p>
+<ul>
+  <li><b>Self-Review & Self-Approval Prohibition (FR-14, FR-71):</b> A lecturer who authors a proposal cannot be assigned as its reviewer, cannot endorse the proposal, and cannot confirm its Senate approval.</li>
+  <li><b>Separation of Mark Entry and Verification (FR-120):</b> A lecturer enters and submits raw marks; only the faculty Deputy Dean can verify marks and finalize achievements.</li>
+  <li><b>Two-Party Cohort Readiness (FR-86):</b> A cohort readiness checklist must be completed by the lecturer and independently confirmed by the Deputy Dean before enrolment can open.</li>
+  <li><b>Administrative vs Academic Boundary (D-28):</b> CODL Administrators hold zero authority over academic decisions (proposal approvals, grade adjustments, credit transfers, or completion confirmations). Their authority is strictly confined to technical settings, user accounts, and data interchange.</li>
+</ul>
+
+<h2>1.3 Page Types & Layout Architecture</h2>
+<p>In accordance with <b>Decision D-38</b> and the approved clickable prototype (<code>UIUX/v2/prototype</code>), all pages adhere to a <i>Summary-First</i> information hierarchy utilizing the UTeM Carbon Design System with a Navy (<code>#1e2a6e</code>) sidebar navigation. Pages are categorized into six functional archetypes:</p>
+<ol>
+  <li><b>Dashboard & Task Workspaces:</b> Action-oriented hubs (e.g., Student Home, Task Queue, Approvals Hub) that display overdue action items, status counters, and active workflow links.</li>
+  <li><b>Listing & Management Directories:</b> Tabulated records featuring client-side search, type-aware column sorting, and pagination (suppressed for datasets of 10 or fewer rows).</li>
+  <li><b>Multi-Step Guided Wizards:</b> Stepped forms (e.g., 4-step Course Registration, Guided Category Wizard) with client/server validation, state retention, and explicit step indicators.</li>
+  <li><b>Comprehensive Workspaces:</b> High-density tabbed environments (e.g., 8-tab Curriculum Proposal Workspace, CQI Workspace) featuring live validation warnings, draft autosave, and status badges.</li>
+  <li><b>Verification & Audit Portals:</b> Cryptographic and data verification tools (e.g., Public Verification, Hash Chain Verification, Discrepancy Log) enforcing data integrity.</li>
+  <li><b>Print & Export Layouts:</b> Official institutional sheets (e.g., Certificate, Receipt, Academic Credit Record, Senate Decision Pack) formatted for standardized A4 presentation.</li>
+</ol>
+
+<!-- ===================== SECTION 2: PUBLIC ROLE ===================== -->
+<h1>2. Public / Guest Pages & Functionality Analysis</h1>
+
+<p>The Public / Guest role encompasses all unauthenticated user interactions. This tier is critical for public course discovery, prospective student engagement, employer credential verification, institutional transparency, and authentication entry.</p>
+
+<!-- ---------------- 2.1 Public Home ---------------- -->
+<h2>2.1 Public Landing Portal</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> Public Landing Portal / Home</li>
+  <li><b>Role:</b> Public / Unauthenticated Guest</li>
+  <li><b>Exact Route:</b> <code>GET /public</code> (Route Name: <code>public.home</code>)</li>
+  <li><b>Page Type:</b> Landing Page / Marketing & Discovery</li>
+  <li><b>Related Database Tables:</b> <code>offerings</code>, <code>mc_versions</code>, <code>micro_credentials</code>, <code>ptjs</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Offering\CatalogueController@home</code>, View: <code>public.home</code>, Layout: <code>layouts.public</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Serves as the primary institutional showcase for UTeM Micro-Credentials. It displays hero messaging, core statistics (active offerings, total learners, participating faculties), featured micro-credentials categorized by discipline (Computing, Engineering, Technology Management), an explainer on micro-credential stacking, and direct navigation links to the catalogue, verification portal, and degree pathways.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and aligned with prototype screen <code>#/public/home</code>. Displays active course cohorts dynamically retrieved from the database where <code>offerings.status = 'open'</code>. Includes bilingual navigation header, search redirect to catalogue, and responsive feature grids. Empty states are handled gracefully when no cohorts are open.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Dynamic database queries correctly filter active, verified offerings. Fast load times, responsive CSS, and full alignment with D-38 styling directives.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<p><b>Entry:</b> User visits root URL <code>/</code> or direct URL <code>/public</code> &rarr; <b>Action:</b> Explores featured courses, clicks category pill or "Explore Catalogue" &rarr; <b>System:</b> Renders homepage with dynamic counts &rarr; <b>Destination:</b> Navigates to <code>/public/catalogue</code> or <code>/public/offering/{id}</code>.</p>
+
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Public Visitor<br/>Landing Page<br/>/public"] --> B["Browse Featured Courses"]
+    B --> C{"User Decision"}
+    C -->|"Click Offering"| D["Public Offering Detail<br/>/public/offering/{id}"]
+    C -->|"Click Browse All"| E["Public Catalogue<br/>/public/catalogue"]
+    C -->|"Click Verify"| F["Verification Portal<br/>/public/verify"]
+    C -->|"Click Sign In"| G["Sign In Screen<br/>/signin"]
+</pre>
+<figcaption>Figure 2.1: Public Landing Portal Navigation Flow (Current & Expected Flow)</figcaption>
+</figure>
+
+<!-- ---------------- 2.2 Public Catalogue ---------------- -->
+<h2>2.2 Public Micro-Credential Catalogue</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> Micro-Credential Course Catalogue</li>
+  <li><b>Role:</b> Public / Guest & Authenticated Learners</li>
+  <li><b>Exact Route:</b> <code>GET /public/catalogue</code> (Route Name: <code>public.catalogue</code>)</li>
+  <li><b>Page Type:</b> Listing / Search & Filter Directory</li>
+  <li><b>Related Database Tables:</b> <code>offerings</code>, <code>mc_versions</code>, <code>micro_credentials</code>, <code>ptjs</code>, <code>qv_records</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Offering\CatalogueController@catalogue</code>, View: <code>public.catalogue</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Allows prospective learners to search, filter, and compare all approved micro-credential offerings. Provides filtering by faculty (PTj), category (SAMC, UMC, MCE), delivery mode (Online, Blended), credit eligibility, and keywords. Displays offering badges indicating MQF level, academic credits, fee (RM), cohort duration, and enrollment deadlines.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional with real-time keyword search and sidebar filters. Filters dynamically query PostgreSQL using Eloquent. Respects D-38 pagination rules (pager rendered only when records exceed 10). Credit and MQF values are displayed strictly from verified records (FR-150).</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Filtering, keyword search, reset actions, and responsive layout are operational and tested by Playwright flow FL-22.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Visitor / Student<br/>Public Catalogue<br/>/public/catalogue"] --> B["Enter Search Keyword or Select Filter"]
+    B --> C["System Queries Database<br/>Filter: status='open', PTj, Category"]
+    C --> D["Render Matching Offering Cards"]
+    D --> E["Select Course Offering"]
+    E --> F["Offering Detail Page<br/>/public/offering/{id}"]
+</pre>
+<figcaption>Figure 2.2: Course Catalogue Search & Filter Flow</figcaption>
+</figure>
+
+<!-- ---------------- 2.3 Public Offering Detail ---------------- -->
+<h2>2.3 Public Course Offering Detail</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> Course Offering Overview & Registration Gate</li>
+  <li><b>Role:</b> Public / Guest</li>
+  <li><b>Exact Route:</b> <code>GET /public/offering/{id}</code> (Route Name: <code>public.offering</code>)</li>
+  <li><b>Page Type:</b> Details Page / Registration Entry</li>
+  <li><b>Related Database Tables:</b> <code>offerings</code>, <code>mc_versions</code>, <code>micro_credentials</code>, <code>mc_modules</code>, <code>learning_outcomes</code>, <code>ptjs</code>, <code>qv_records</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Offering\CatalogueController@offering</code>, View: <code>public.offering</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Provides complete syllabus and administrative disclosure for a specific cohort: course description, target learners, module breakdown, total student learning time (SLT), MQF level, credit eligibility, fee breakdown, instructor credentials, and prerequisite requirements. Includes an official "Register Now" action button that initiates learner enrollment.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Implemented in full alignment with the approved prototype (two-column layout with summary strip). Correctly queries linked modules and learning outcomes. When unauthenticated, clicking "Register" redirects to <code>/signin</code> with an intended return URL; when authenticated as a student, it launches the 4-step wizard at <code>/register/{id}</code>.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Dynamic data binding, prerequisite checks, and role redirection are operational.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["User on Offering Page<br/>/public/offering/{id}"] --> B["Review Syllabus, Modules, Fee & Dates"]
+    B --> C["Click 'Register Now'"]
+    C --> D{"Authenticated as Student?"}
+    D -->|"Yes"| E["Launch 4-Step Registration<br/>/register/{offering}"]
+    D -->|"No Guest"| F["Redirect to Sign In<br/>/signin?intended=/register/{offering}"]
+    F --> G["Sign In / Account Creation"]
+    G --> E
+</pre>
+<figcaption>Figure 2.3: Course Offering Discovery & Registration Handoff Flow</figcaption>
+</figure>
+
+<!-- ---------------- 2.4 How Recognition Works & Pathways ---------------- -->
+<h2>2.4 How Recognition Works & Pathways to a Degree</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> How Recognition Works (<code>/public/how</code>), Pathways to a Degree (<code>/public/pathways</code>)</li>
+  <li><b>Role:</b> Public / Guest</li>
+  <li><b>Exact Routes:</b> <code>GET /public/how</code>, <code>GET /public/pathways</code></li>
+  <li><b>Page Type:</b> Educational / Policy Explainer & Pathway Directory</li>
+  <li><b>Related Database Tables:</b> <code>pathways</code>, <code>pathway_items</code>, <code>programmes</code>, <code>micro_credentials</code></li>
+  <li><b>Related Components & Controllers:</b> <code>CatalogueController@how</code>, <code>CatalogueController@pathways</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p><code>/public/how</code> explains the regulatory and academic framework governing UTeM micro-credentials (MQF compliance, SAMC Quality Verification, Academic Credit Record, ABC banking, and credit transfer). <code>/public/pathways</code> lists all Senate-approved degree pathways, illustrating how specific micro-credential clusters map to target Bachelor and Master degree programmes.</p>
+
+<h3>C. Current Implementation</h3>
+<p><code>/public/how</code> delivers structured bilingual guidelines matching Guide requirements. <code>/public/pathways</code> dynamically renders approved pathway mappings from the <code>pathways</code> table. Prominently displays the mandatory legal disclaimer: <i>"Earning a micro-credential does not guarantee automatic admission to a degree programme."</i></p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Content integrity verified against Senate policy guidelines.</p>
+
+<!-- ---------------- 2.5 Verification Portal ---------------- -->
+<h2>2.5 Public Credential Verification Portal & JWKS</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Public Verification Portal (<code>/public/verify</code>), Verification Result (<code>/public/verify/{code}</code>), File Check (<code>POST /public/verify/file</code>), JWKS (<code>GET /.well-known/jwks.json</code>)</li>
+  <li><b>Role:</b> Public / Employers / Verifiers</li>
+  <li><b>Exact Routes:</b> <code>GET /public/verify</code>, <code>GET /public/verify/{code}</code>, <code>POST /public/verify/file</code>, <code>GET /.well-known/jwks.json</code></li>
+  <li><b>Page Type:</b> Verification Portal / Cryptographic Security Endpoint</li>
+  <li><b>Related Database Tables:</b> <code>credentials</code>, <code>signing_keys</code>, <code>verification_log</code>, <code>enrolments</code>, <code>users</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Credentials\VerifyController</code>, Views: <code>public.verify</code>, <code>public.verify-result</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Enables any third-party employer or academic institution to verify the authenticity of a UTeM micro-credential without requiring an account (X3, FR-155 to FR-162). Verification is supported via two mechanisms: (1) Entering an 8-character public verification code (e.g., <code>7Q2M-K4PA</code>), and (2) Uploading a signed Digital Credential file (VC-JWT). Rate limiting (SR-08) and neutral not-found responses prevent enumeration attacks.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented. Lookup by code retrieves the credential, logs the verification attempt in <code>verification_log</code>, and renders the verification badge showing status (Valid, Corrected, Replaced, or Revoked). File upload validates the Ed25519 cryptographic signature against the public key published at <code>/.well-known/jwks.json</code>. Rate limiting (60 requests/minute) is strictly enforced.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Tested by Playwright flow FL-23 and unit tests in <code>CredentialTest.php</code>.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Employer / Verifier<br/>Verification Portal<br/>/public/verify"] --> B{"Verification Method"}
+    B -->|"Enter Public Code"| C["Submit 8-Digit Code<br/>e.g. 7Q2M-K4PA"]
+    B -->|"Upload File"| D["Upload Credential JSON/JWT"]
+    
+    C --> E["System Validates Rate Limit<br/>Queries credentials table"]
+    D --> F["System Verifies Ed25519 Signature<br/>Checks key in signing_keys"]
+    
+    E --> G{"Credential Found?"}
+    F --> H{"Signature Valid?"}
+    
+    G -->|"Yes"| I["Log Verification in verification_log<br/>Display Result Page<br/>/public/verify/{code}"]
+    G -->|"No"| J["Display Neutral 'Not Found' Notice"]
+    
+    H -->|"Yes"| I
+    H -->|"No"| K["Display Cryptographic Invalid Warning"]
+</pre>
+<figcaption>Figure 2.5: Public Credential Verification Flow (Code Lookup & Cryptographic Verification)</figcaption>
+</figure>
+
+<!-- ---------------- 2.6 Authentication & MFA ---------------- -->
+<h2>2.6 Authentication Portal & MFA Challenge</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Sign In Portal (<code>/signin</code>), MFA Challenge (<code>/signin/mfa</code>), Root Redirect (<code>/</code>), Sign Out (<code>POST /signout</code>)</li>
+  <li><b>Role:</b> Public Guest & Authenticated Users</li>
+  <li><b>Exact Routes:</b> <code>GET /signin</code>, <code>POST /signin/stub</code>, <code>GET /signin/mfa</code>, <code>POST /signin/mfa</code>, <code>POST /signout</code></li>
+  <li><b>Page Type:</b> Authentication & Access Control</li>
+  <li><b>Related Database Tables:</b> <code>users</code>, <code>role_assignments</code>, <code>sessions</code>, <code>audit_events</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Identity\StubSignInController</code>, Views: <code>signin</code>, <code>mfa</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Authenticates system users. Under production requirements (OI-03, SR-01), authentication must integrate with Microsoft Entra ID (UTeM Single Sign-On). In development and demonstration environments, a stub identity provider (FR-05) allows selecting personas. Staff holding privileged decision-making roles (Deputy Dean, CODL Administrator) must complete a second-factor authentication (MFA) step (SR-02).</p>
+
+<h3>C. Current Implementation</h3>
+<p>The stub IdP is fully functional and guarded by <code>config('mcms.stub_idp')</code>. Signing in as a student or lecturer logs in directly; selecting Deputy Dean or CODL Admin redirects to <code>/signin/mfa</code> requiring a 6-digit passcode. Successful authentication regenerates the session, updates <code>last_login_at</code>, and creates an audit record in <code>audit_events</code>.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Partially Working (By Design).</b> The stub IdP and MFA simulator work completely for demonstration and testing, but Microsoft Entra ID integration remains pending external UTeM ICT confirmation (OI-03).</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["User at Sign In<br/>/signin"] --> B["Select Persona / Enter Credentials"]
+    B --> C["Submit Credentials to /signin/stub"]
+    C --> D{"Account Active?"}
+    D -->|"No"| E["Audit auth.refused_inactive<br/>Display Deactivation Error"]
+    D -->|"Yes"| F{"Role Requires MFA?<br/>(Deputy Dean / Admin)"}
+    F -->|"Yes"| G["Set session mfa_pending<br/>Redirect to /signin/mfa"]
+    G --> H["Enter 6-Digit MFA Code"]
+    H --> I["Validate Code regex ^\d{6}$"]
+    I --> J["Complete Authentication"]
+    F -->|"No"| J
+    J --> K["Regenerate Session ID<br/>Audit auth.signed_in<br/>Set active_role"]
+    K --> L["Redirect to Intended Destination<br/>or Universal Task Queue /tasks"]
+</pre>
+<figcaption>Figure 2.6: User Authentication & Privileged Role MFA Flow</figcaption>
+</figure>
+
+<!-- ===================== SECTION 3: STUDENT ROLE ===================== -->
+<h1>3. Student / Learner Pages & Functionality Analysis</h1>
+
+<p>The Student role (Persona P8) represents enrolled and prospective learners. The student interface prioritizes active coursework, verifiable achievements, Malaysian Qualifications Agency (MQA) credit recognition, and stackable pathways toward formal academic qualifications.</p>
+
+<!-- ---------------- 3.1 Student Home ---------------- -->
+<h2>3.1 Student Home: "My Learning" Dashboard</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> Student Home ("My Learning")</li>
+  <li><b>Role:</b> Student (<code>student</code>)</li>
+  <li><b>Exact Route:</b> <code>GET /tasks</code> (redirected internally by <code>TaskController@index</code>)</li>
+  <li><b>Page Type:</b> User Dashboard / Learning Command Center</li>
+  <li><b>Related Database Tables:</b> <code>enrolments</code>, <code>offerings</code>, <code>mc_versions</code>, <code>mc_modules</code>, <code>module_achievements</code>, <code>credentials</code>, <code>acrs</code>, <code>transfer_applications</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Identity\TaskController@student</code>, View: <code>student.home</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Provides an immediate, summary-first overview of the student's academic journey. Features: (1) Urgent action items (pending consent, feedback requests, payment deadlines), (2) In-progress courses with module completion progress bars, (3) Courses waiting for Deputy Dean completion confirmation, (4) Recently achieved credentials, and (5) KPI summary metrics (Achieved Modules, Issued Credentials, Pending ACR Consents, Active Transfer Applications).</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and tested by Playwright flow FL-00. Dynamically calculates module completion percentages by correlating <code>mc_modules</code> with <code>module_achievements</code>. Empty states provide quick links to the public catalogue.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Data aggregation across 8 tables executes efficiently without N+1 query regressions.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Student Lands on Dashboard<br/>/tasks -> student.home"] --> B{"Review Active Section"}
+    B -->|"Click In-Progress Course"| C["Enrolment Details<br/>/enrolments/{id}"]
+    B -->|"Click Pending Consent"| D["ACR & Consent Review<br/>/my-credit/{id}"]
+    B -->|"Click Recent Credential"| E["Credential Details<br/>/my-credentials/{id}"]
+    B -->|"Click Transfer Application"| F["Transfer Status Page<br/>/transfer/{id}"]
+</pre>
+<figcaption>Figure 3.1: Student Dashboard Hub & Quick Navigation Flow</figcaption>
+</figure>
+
+<!-- ---------------- 3.2 Registration Wizard & Payments ---------------- -->
+<h2>3.2 Course Registration Wizard & Payments (MD-05)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Registration Wizard (<code>/register/{offering}</code>), Confirmation (<code>/enrolments/{id}/confirmation</code>), Receipt (<code>/enrolments/{id}/receipt</code>), Withdrawal (<code>POST /enrolments/{id}/withdraw</code>)</li>
+  <li><b>Role:</b> Student (<code>student</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /register/{offering}</code>, <code>POST /register/{offering}/eligibility</code>, <code>POST /register/{offering}/acknowledge</code>, <code>POST /register/{offering}/pay</code>, <code>GET /enrolments/{id}/confirmation</code>, <code>GET /enrolments/{id}/receipt</code></li>
+  <li><b>Page Type:</b> Multi-Step Form & Payment Gateway</li>
+  <li><b>Related Database Tables:</b> <code>enrolments</code>, <code>payments</code>, <code>pdpa_acknowledgements</code>, <code>offerings</code>, <code>enrolment_status_log</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Enrolment\EnrolmentController</code>, Views: <code>student.register</code>, <code>student.confirmation</code>, <code>student.receipt</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Implements a 4-step compliant enrollment workflow (FR-97 to FR-109): (1) <b>Eligibility & Contact:</b> Validates prerequisites and emergency phone number; (2) <b>Recognition & PDPA Acknowledgment:</b> Mandatory acceptance of Personal Data Protection Act notice and official recognition statements; (3) <b>Payment Processing:</b> Idempotent fee handling with payment simulation; (4) <b>Confirmation:</b> Enrolment reference (e.g., <code>E-2026-0590</code>), downloadable receipt, and access instructions.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flows FL-06 and FL-06b. Card details are never stored; payment attempts utilize unique UUID references. The enrollment receipt adheres to the standard A4 print layout (<code>layouts.print</code>).</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Validations, status transitions (<code>pending_payment</code> &rarr; <code>enrolled</code>), capacity counting, and withdrawal deadlines (20 days before cohort completion) are enforced.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Student clicks 'Register'<br/>/public/offering/{id}"] --> B["Step 1: Eligibility Check<br/>/register/{offering}"]
+    B -->|"Submit Phone & Prereq"| C["Save Draft Enrolment<br/>Status: pending_payment"]
+    C --> D["Step 2: PDPA & Recognition<br/>Official Disclosure"]
+    D -->|"Acknowledge"| E["Record pdpa_acknowledgements"]
+    E --> F["Step 3: Payment Gateway<br/>Simulated / Payment Adapter"]
+    F -->|"Submit Card Details"| G["Idempotent Payment Check<br/>Record in payments table"]
+    G -->|"Payment Success"| H["Update Enrolment Status: 'enrolled'<br/>Log in enrolment_status_log"]
+    H --> I["Step 4: Confirmation Page<br/>/enrolments/{id}/confirmation"]
+    I --> J["View/Print Fee Receipt<br/>/enrolments/{id}/receipt"]
+    
+    G -->|"Withdraw Before Deadline"| K["Post /enrolments/{id}/withdraw<br/>Update Status: 'withdrawn'"]
+</pre>
+<figcaption>Figure 3.2: 4-Step Registration, Payment & Withdrawal Lifecycle</figcaption>
+</figure>
+
+<!-- ---------------- 3.3 Results & Achievement Record ---------------- -->
+<h2>3.3 Results & Internal Achievement Record (MD-07, MD-08)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> My Results (<code>/my-results</code>), Internal Achievement Record (<code>/my-record</code>)</li>
+  <li><b>Role:</b> Student (<code>student</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /my-results</code>, <code>GET /my-record</code></li>
+  <li><b>Page Type:</b> Academic Results & Internal Transcript</li>
+  <li><b>Related Database Tables:</b> <code>enrolments</code>, <code>assessment_results</code>, <code>assessment_components</code>, <code>module_achievements</code>, <code>digital_badges</code>, <code>achievement_records</code></li>
+  <li><b>Related Components & Controllers:</b> <code>ResultsController@mine</code>, <code>RecordController@mine</code>, Views: <code>student.results</code>, <code>records.mine</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Displays verified assessment results per cohort and module. <code>/my-results</code> breaks down component marks (quizzes, assignments, exams) and shows earned module badges. <code>/my-record</code> renders the official internal Achievement Record (DOC-05). In accordance with BR-12, the Achievement Record is prominently watermarked and labeled: <i>"Internal Academic Record – Not an Academic Credit Record (ACR)."</i></p>
+
+<h3>C. Current Implementation</h3>
+<p>Strictly enforces that students only see marks that have been formally verified by the Deputy Dean (FR-128); unverified marks entered by lecturers remain hidden. Results under integrity holds display a neutral pending notice.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Tested in Playwright flow FL-08.</p>
+
+<!-- ---------------- 3.4 Credentials Wallet ---------------- -->
+<h2>3.4 Digital Credentials Wallet & Certificate Print (MD-09)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Credentials Wallet (<code>/my-credentials</code>), Credential Detail (<code>/my-credentials/{id}</code>), Certificate (<code>/my-credentials/{id}/certificate</code>), Transcript Sheet (<code>/my-credentials/{id}/sheet</code>), Download (<code>/my-credentials/{id}/download/{as}</code>)</li>
+  <li><b>Role:</b> Student (<code>student</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /my-credentials</code>, <code>GET /my-credentials/{id}</code>, <code>GET /my-credentials/{id}/certificate</code>, <code>GET /my-credentials/{id}/sheet</code>, <code>GET /my-credentials/{id}/download/{as}</code></li>
+  <li><b>Page Type:</b> Credential Wallet / Printable Certificate / File Export</li>
+  <li><b>Related Database Tables:</b> <code>credentials</code>, <code>enrolments</code>, <code>signing_keys</code>, <code>mc_versions</code></li>
+  <li><b>Related Components & Controllers:</b> <code>CredentialController</code>, Views: <code>credentials.wallet</code>, <code>credentials.show</code>, <code>credentials.certificate</code>, <code>credentials.sheet</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>The student's portable credential repository (FR-137 to FR-147). Upon cohort completion confirmed by the Deputy Dean, the system automatically mints a tamper-evident credential. From the wallet, learners can: (1) View verification status, (2) Copy public verification links, (3) Download the VC-JWT / Open Badges 3.0 cryptographic package, (4) Print the official bilingual A4 Certificate with QR code and signatories, and (5) Inspect the academic transcript sheet.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and aligned with the prototype. The certificate page (<code>layouts.print</code>) renders institutional letterheads, signatory blocks, and dynamic SVG QR codes encoding the public verification URL. Cryptographic downloads provide compliant VC-JWT files signed with Ed25519.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Issuance, certificate formatting, and token downloads validated by FL-09 and FL-10.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Student opens Wallet<br/>/my-credentials"] --> B["Select Issued Credential"]
+    B --> C["Credential View<br/>/my-credentials/{id}"]
+    C --> D{"Selected Action"}
+    D -->|"Print Certificate"| E["Certificate A4 View<br/>/my-credentials/{id}/certificate"]
+    D -->|"Download JSON/JWT"| F["Download Action<br/>/my-credentials/{id}/download/jwt"]
+    D -->|"View Transcript Sheet"| G["Transcript Sheet View<br/>/my-credentials/{id}/sheet"]
+    D -->|"Share Verification Link"| H["Copy Link: /public/verify/{code}"]
+</pre>
+<figcaption>Figure 3.4: Student Credentials Management & Export Flow</figcaption>
+</figure>
+
+<!-- ---------------- 3.5 Credit Ledger & ACR ---------------- -->
+<h2>3.5 Credit Ledger, ACR & National Credit Banking (MD-11)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Credit Ledger (<code>/my-credit</code>), ACR & Consent Review (<code>/my-credit/{id}</code>), Submit Consent (<code>POST /my-credit/{id}/consent</code>)</li>
+  <li><b>Role:</b> Student (<code>student</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /my-credit</code>, <code>GET /my-credit/{id}</code>, <code>POST /my-credit/{id}/consent</code></li>
+  <li><b>Page Type:</b> Financial/Academic Ledger & Legal Consent</li>
+  <li><b>Related Database Tables:</b> <code>acrs</code>, <code>consents</code>, <code>credit_ledger_entries</code>, <code>abc_deposits</code>, <code>redemption_events</code></li>
+  <li><b>Related Components & Controllers:</b> <code>CreditBankController</code>, Views: <code>creditbank.ledger</code>, <code>creditbank.acr</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Empowers students to manage credits banked with the Malaysian Academic Credit Bank (ABC). An Academic Credit Record (ACR) is automatically generated only for accredited UMCs or verified SAMCs (never MCEs). Before credit can be queued or exported to ABC, the student must review the generated ACR and submit legal consent (FR-dp*). Once deposited by the Deputy Dean, credits appear in the ledger with a 10-year validity counter.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented. Consent submission stores channel, timestamp, and version of wording. The ledger clearly distinguishes between <i>Available</i>, <i>Provisionally Redeemed</i> (in transfer evaluation), <i>Redeemed</i>, and <i>Expired</i> credits. Every screen clearly emphasizes that an ABC deposit is secure storage, not an automatic credit transfer.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Tested in Playwright flow FL-11.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Credential Issued<br/>System prepares ACR"] --> B["Student notified<br/>Consent Required"]
+    B --> C["Open ACR Details<br/>/my-credit/{id}"]
+    C --> D{"Student Decision"}
+    D -->|"Give Consent"| E["POST /my-credit/{id}/consent<br/>decision: 'consent_given'"]
+    D -->|"Decline Consent"| F["POST /my-credit/{id}/consent<br/>decision: 'consent_declined'"]
+    
+    E --> G["Record consent in consents table<br/>Status: 'consented'"]
+    G --> H["ACR enters Deputy Dean ABC Queue"]
+    F --> I["Status: 'consent_declined'<br/>Blocked from ABC Queue"]
+    
+    H --> J["Deputy Dean Deposits to ABC"]
+    J --> K["Credit appears in Student Ledger<br/>/my-credit (Status: 'Available')"]
+</pre>
+<figcaption>Figure 3.5: Academic Credit Record (ACR) Consent & ABC Deposit Lifecycle</figcaption>
+</figure>
+
+<!-- ---------------- 3.6 Credit Transfer & Degree Plan ---------------- -->
+<h2>3.6 Credit Transfer Applications & Degree Plan (MD-12, MD-13)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Credit Transfer Listing (<code>/transfer</code>), New Application (<code>/transfer/new</code>), Application Detail (<code>/transfer/{id}</code>), Degree Plan (<code>/my-plan</code>)</li>
+  <li><b>Role:</b> Student (<code>student</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /transfer</code>, <code>GET /transfer/new</code>, <code>POST /transfer</code>, <code>GET /transfer/{id}</code>, <code>GET /my-plan</code></li>
+  <li><b>Page Type:</b> Application Workflow & Interactive Degree Tracking</li>
+  <li><b>Related Database Tables:</b> <code>transfer_applications</code>, <code>transfer_lines</code>, <code>programmes</code>, <code>stackable_plans</code>, <code>plan_requirements</code>, <code>credit_ledger_entries</code></li>
+  <li><b>Related Components & Controllers:</b> <code>TransferController</code>, <code>PathwayController@mine</code>, Views: <code>transfer.index</code>, <code>transfer.create</code>, <code>transfer.show</code>, <code>pathways.mine</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Allows learners holding <i>Available</i> credits to formally apply for credit transfer toward a target UTeM academic degree programme. The application enforces single redemption (BR-26): applied credits are immediately placed on hold as <i>Provisionally Redeemed</i>. <code>/my-plan</code> tracks the student's progress along stackable pathway mappings, calculating the percentage of institutional credit earned against the 30% residency rule.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional. Application creation verifies that selected credits are unencumbered. Once submitted, the application enters the faculty Deputy Dean evaluation queue. The student can track evaluation milestones (Validity Check &rarr; Equivalence Review &rarr; Senate Decision). <code>/my-plan</code> visually flags missing programme requirements and residency ratios.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Single redemption locking and status tracking verified in FL-12 and FL-13.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Student on Credit Ledger<br/>Has 'Available' Credit"] --> B["Click 'Apply for Transfer'<br/>/transfer/new"]
+    B --> C["Select Target Degree Programme<br/>Select Credit Lines"]
+    C --> D["Submit Application"]
+    D --> E["Ledger Service locks credits<br/>Status: 'provisionally_redeemed'"]
+    E --> F["Create transfer_applications record<br/>Status: 'submitted'"]
+    F --> G["Enters Deputy Dean Queue<br/>/transfers/{id}"]
+    G --> H["Student tracks progress<br/>/transfer/{id}"]
+</pre>
+<figcaption>Figure 3.6: Student Credit Transfer Application Submission Flow</figcaption>
+</figure>
+
+<!-- ---------------- 3.7 Course Feedback Form ---------------- -->
+<h2>3.7 Course & Cohort Feedback Form (MD-14)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Feedback Hub (<code>/feedback</code>), Cohort Feedback Form (<code>/feedback/{enrolment}</code>)</li>
+  <li><b>Role:</b> Student (<code>student</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /feedback</code>, <code>GET /feedback/{enrolment}</code>, <code>POST /feedback/{enrolment}</code></li>
+  <li><b>Page Type:</b> Survey Form & Learner Evaluation</li>
+  <li><b>Related Database Tables:</b> <code>feedback_responses</code>, <code>enrolments</code>, <code>offerings</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Monitoring\QualityReviewController</code>, Views: <code>monitoring.feedback</code>, <code>monitoring.feedback-form</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Collects mandatory quality feedback from participants upon cohort completion or closure (FR-mn*). The evaluation comprises 18 items grouped into 6 quality domains: (1) Learning Outcomes & Content, (2) Delivery & Activities, (3) Assessment & Feedback, (4) Platform & Accessibility, (5) Facilitator Support, and (6) Overall Satisfaction. Responses are completely anonymized to protect participant privacy.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented. Enforces one submission per enrollment. The 6 core group ratings are strictly validated as required, while the 12 detailed diagnostic items are optional. Completed surveys feed directly into lecturer CQI aggregate indicators.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Verified in unit tests and manual execution.</p>
+
+<!-- ===================== SECTION 4: LECTURER ROLE ===================== -->
+<h1>4. Lecturer / Educator Pages & Functionality Analysis</h1>
+
+<p>The Lecturer role (Persona P1) represents academic curriculum developers, course coordinators, and instructors. Lecturers author micro-credential proposals, manage version transitions, supervise cohort deliveries, enter student assessment marks, assemble Quality Verification portfolios, and execute Continuous Quality Improvement (CQI) cycles.</p>
+
+<!-- ---------------- 4.1 Lecturer Tasks & Home ---------------- -->
+<h2>4.1 Lecturer Dashboard & Work Queue</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> Lecturer Dashboard & Work Tasks</li>
+  <li><b>Role:</b> Lecturer (<code>lecturer</code>)</li>
+  <li><b>Exact Route:</b> <code>GET /tasks</code> (with active lecturer role)</li>
+  <li><b>Page Type:</b> Work Queue / KPI Hub</li>
+  <li><b>Related Database Tables:</b> <code>tasks</code>, <code>micro_credentials</code>, <code>mc_versions</code>, <code>offerings</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Identity\TaskController@index</code>, View: <code>tasks</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Provides an immediate action-oriented overview of pending academic responsibilities. Displays KPI cards: (1) Approved micro-credentials, (2) Proposals in review or pending endorsement, (3) Active draft proposals, and (4) Open/upcoming offerings. Lists overdue tasks (e.g., mark entry deadlines, CQI action reviews, readiness checklists) with area filtering.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and aligned with prototype screen <code>#/lec/home</code>. Displays lecturer-specific KPIs via <code>lecturerKpis()</code> method. Tasks link directly to corresponding action pages.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Dynamic KPI calculations and task filtering operate correctly.</p>
+
+<!-- ---------------- 4.2 Proposals & Guided Category Wizard ---------------- -->
+<h2>4.2 Curriculum Proposals & Guided Category Wizard (MD-02)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Guided Category Wizard (<code>/proposals/new</code>), My Proposals (<code>/proposals</code>), Proposal Workspace (<code>/proposals/{id}</code>), Printable Proposal (<code>/proposals/{id}/print</code>)</li>
+  <li><b>Role:</b> Lecturer (<code>lecturer</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /proposals</code>, <code>GET /proposals/new</code>, <code>POST /proposals</code>, <code>GET /proposals/{id}</code>, <code>PUT /proposals/{id}</code>, <code>POST /proposals/{id}/submit</code>, <code>GET /proposals/{id}/print</code></li>
+  <li><b>Page Type:</b> Multi-Step Wizard & 8-Tab High-Density Authoring Workspace</li>
+  <li><b>Related Database Tables:</b> <code>micro_credentials</code>, <code>mc_versions</code>, <code>mc_modules</code>, <code>learning_outcomes</code>, <code>assessment_components</code>, <code>assessment_component_outcomes</code>, <code>parent_courses</code>, <code>proposal_readiness</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Curriculum\ProposalController</code>, Views: <code>curriculum.new</code>, <code>curriculum.index</code>, <code>curriculum.workspace</code>, <code>curriculum.print</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Guides lecturers through compliant micro-credential development:
+(1) <b>Category Wizard:</b> A 3-question diagnostic tool that automatically recommends the appropriate category (SAMC, UMC, or MCE) based on credit intent, stand-alone nature, and SLT hours.
+(2) <b>8-Tab Workspace:</b>
+  - <i>Basics:</i> Title, description, delivery mode, language.
+  - <i>Justification:</i> Industry demand, target market, stakeholder consultation.
+  - <i>Modules:</i> Breakdown of modular units; for UMCs, parent course selection and unbundling model (credit-based or topic-based).
+  - <i>Outcomes:</i> Malaysian Qualifications Agency (MQA) aligned Course Learning Outcomes (CLOs).
+  - <i>Assessment:</i> Formative/summative assessments with component weights, pass marks, and an alignment matrix mapping each component to assessed modules and CLOs.
+  - <i>Credential:</i> Proposed MQF level, credit value, badge metadata, and expiry terms.
+  - <i>Readiness:</i> Preliminary faculty and platform resource confirmation.
+  - <i>Submit:</i> Live validation engine checking for blocking errors (e.g., total SLT mismatch, missing outcome mappings) and final formal submission to the Deputy Dean.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-02 and demonstration scenario Act 1. Live validation checks enforce that SLT totals match contact hours, that every module has at least one assessed component, and that unbundling models adhere to parent course rules. Submitting locks the proposal, transitions version status to <code>submitted</code>, logs an audit event, and dispatches a task to the Deputy Dean.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Workspace tabs, autosave, live validation, and submission locking operate reliably.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Lecturer clicks 'New Proposal'<br/>/proposals/new"] --> B["Answer Category Wizard Diagnostic<br/>Credits? Stand-alone? SLT?"]
+    B --> C["System recommends Category<br/>e.g. UMC or SAMC"]
+    C --> D["Initialize Draft Proposal<br/>Redirect to /proposals/{id}"]
+    D --> E["Author 8-Tab Curriculum Specification<br/>Basics, Modules, Outcomes, Matrix"]
+    E --> F["Live Validation Engine<br/>Check SLT sum, module alignments"]
+    F -->|"Blocking Errors Found"| G["Display Error Banner<br/>Disable Submit Button"]
+    F -->|"Validation Passed"| H["Click 'Submit for Review'"]
+    H --> I["Content Locked (status: 'submitted')<br/>Audit event recorded<br/>Task dispatched to Deputy Dean"]
+    I --> J["Redirect to /proposals<br/>Shows 'In Review' tag"]
+</pre>
+<figcaption>Figure 4.2: Guided Category Wizard & Proposal Submission Lifecycle</figcaption>
+</figure>
+
+<!-- ---------------- 4.3 Version History & Material Changes ---------------- -->
+<h2>4.3 Version Management & Material Changes (MD-02)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> My Micro-Credentials (<code>/my-mcs</code>), Version History (<code>/my-mcs/{id}</code>), Request Change Form (<code>/my-mcs/{id}/change</code>)</li>
+  <li><b>Role:</b> Lecturer (<code>lecturer</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /my-mcs</code>, <code>GET /my-mcs/{id}</code>, <code>GET /my-mcs/{id}/change</code>, <code>POST /my-mcs/{id}/change</code>, <code>POST /my-mcs/{id}/reoffer</code></li>
+  <li><b>Page Type:</b> Version Governance & Change Classification Form</li>
+  <li><b>Related Database Tables:</b> <code>micro_credentials</code>, <code>mc_versions</code>, <code>change_requests</code>, <code>version_transition_rules</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Curriculum\VersionController</code>, Views: <code>curriculum.mcs.index</code>, <code>curriculum.mcs.show</code>, <code>curriculum.mcs.change</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Manages the lifecycle of approved micro-credentials across multiple version iterations (FR-74 to FR-82). Lecturers can request curriculum modifications. The system automatically classifies requested changes from an 11-item checklist into: (1) <b>Minor Change:</b> Typo fixes, reading list updates; requires only Deputy Dean acknowledgment. (2) <b>Material Change:</b> Alterations to outcomes, assessment structure, SLT, credits, or MQF level; creates a new draft version copied from the approved version, requiring full colleague re-review and Senate endorsement.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented. Material changes correctly branch into new version drafts (e.g., v1.0 &rarr; v2.0-draft). When Senate approves the new version, transition rules (teach-out current students or migrate to new version) are recorded. Re-offer functionality allows launching new cohorts from an approved version without modifying curriculum content.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Change classification, version branching, and transition rule logging operate correctly.</p>
+
+<!-- ---------------- 4.4 Offerings & Readiness Checklist ---------------- -->
+<h2>4.4 Course Offerings (Cohorts) & Readiness Checklist (MD-04)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Offerings Listing (<code>/offerings</code>), Create Cohort (<code>/offerings/new</code>), Offering Delivery Dashboard (<code>/offerings/{id}</code>), Participants Roster (<code>/offerings/{id}/participants</code>), Readiness Checklist (<code>/offerings/{id}/readiness</code>)</li>
+  <li><b>Role:</b> Lecturer (<code>lecturer</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /offerings</code>, <code>GET /offerings/new</code>, <code>POST /offerings</code>, <code>GET /offerings/{id}</code>, <code>GET /offerings/{id}/participants</code>, <code>GET /offerings/{id}/readiness</code>, <code>POST /offerings/{id}/readiness</code></li>
+  <li><b>Page Type:</b> Cohort Management, Stepped Checklist & Learner Roster</li>
+  <li><b>Related Database Tables:</b> <code>offerings</code>, <code>readiness_items</code>, <code>readiness_confirmations</code>, <code>enrolments</code>, <code>mc_versions</code>, <code>ucreds_courses</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Offering\OfferingController</code>, Views: <code>offerings.index</code>, <code>offerings.new</code>, <code>offerings.show</code>, <code>offerings.participants</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Enables lecturers to instantiate and manage delivery cohorts for Senate-approved micro-credentials. Lecturers define cohort names (e.g., <code>DS-2027-1</code>), start/end dates, max quota, and link the course to UCreds reference courses. Before enrollment can open, the lecturer must complete the comprehensive Readiness Checklist (Appendix B2-B7) verifying LMS course setup, instructor availability, assessment readiness, and student support materials.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional. Cohort creation validates that the parent version is approved. The readiness checklist captures lecturer responses and evidentiary notes. Completing the checklist transitions cohort readiness to <code>submitted</code> and dispatches a confirmation task to the Deputy Dean.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Partially Working (By Design).</b> The checklist logic, status transitions, and participant rosters work completely. However, evidence attachments currently accept text notes and URLs rather than uploaded binary files (pending object storage service).</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Lecturer on Offerings<br/>/offerings/new"] --> B["Enter Cohort Details<br/>Dates, Quota, UCreds Reference"]
+    B --> C["Save Cohort (Status: 'draft')"]
+    C --> D["Open Readiness Checklist<br/>/offerings/{id}/readiness"]
+    D --> E["Answer 6 Readiness Dimensions<br/>Provide evidentiary notes"]
+    E --> F["Submit Readiness Checklist"]
+    F --> G["Readiness status: 'submitted'<br/>Task dispatched to Deputy Dean"]
+    G --> H["Deputy Dean Confirms Readiness<br/>Cohort status becomes 'open'"]
+    H --> I["Cohort published in Public Catalogue<br/>/public/catalogue"]
+</pre>
+<figcaption>Figure 4.4: Cohort Creation, Readiness Verification & Catalogue Publishing</figcaption>
+</figure>
+
+<!-- ---------------- 4.5 Assessment Marks Entry & Result Revision ---------------- -->
+<h2>4.5 Marks Entry, Integrity Holds & Result Revisions (MD-07)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Marks Entry Grid (<code>/results/{offering}</code>), Component Marks Sheet (<code>/results/{offering}/components/{component}</code>), Integrity Case Manager (<code>POST /results/{offering}/integrity</code>), Result Change Request (<code>POST /results/{offering}/change-request</code>)</li>
+  <li><b>Role:</b> Lecturer (<code>lecturer</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /results/{offering}</code>, <code>POST /results/{offering}/marks</code>, <code>POST /results/{offering}/submit</code>, <code>POST /results/{offering}/integrity</code>, <code>POST /results/{offering}/change-request</code></li>
+  <li><b>Page Type:</b> High-Density Grade Sheet & Academic Integrity Operations</li>
+  <li><b>Related Database Tables:</b> <code>assessment_results</code>, <code>assessment_result_revisions</code>, <code>result_change_requests</code>, <code>integrity_cases</code>, <code>enrolments</code>, <code>assessment_components</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Assessment\ResultsController</code>, Views: <code>results.cohort</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Allows the course instructor to enter assessment marks for all enrolled participants against approved components (quizzes, lab practicals, final assessments). Features: (1) Component-by-component mark validation (cannot exceed maximum mark), (2) Flagging active academic integrity cases (cheating/plagiarism) which freezes result verification for that learner, and (3) Post-verification grade change requests requiring documented justification and Deputy Dean approval.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-08. Raw marks are saved in draft state until the lecturer clicks "Submit Marks for Verification", which locks the grade sheet and forwards the cohort results to the Deputy Dean. Integrity holds successfully isolate affected participants while allowing unaffected participants to proceed.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Grade validation, integrity locks, and change request audit logging operate reliably.</p>
+
+<!-- ---------------- 4.6 Continuous Quality Improvement (CQI) ---------------- -->
+<h2>4.6 Continuous Quality Improvement (CQI) Workspace (MD-14)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> CQI Workspace (<code>/cqi</code>), Cohort CQI Record (<code>/cqi/{offering}</code>), Create Action (<code>POST /cqi/{offering}/actions</code>), Evaluate Action (<code>POST /cqi/{offering}/actions/{action}/evaluate</code>)</li>
+  <li><b>Role:</b> Lecturer (<code>lecturer</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /cqi</code>, <code>GET /cqi/{offering}</code>, <code>POST /cqi/{offering}/actions</code>, <code>POST /cqi/{offering}/actions/{action}/evaluate</code></li>
+  <li><b>Page Type:</b> Quality Audit Workspace & Action Tracking Engine</li>
+  <li><b>Related Database Tables:</b> <code>cqi_records</code>, <code>quality_domain_checks</code>, <code>cqi_issues</code>, <code>cqi_actions</code>, <code>feedback_responses</code>, <code>offerings</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Monitoring\CqiController</code>, Views: <code>monitoring.cqi</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Implements institutional closed-loop quality assurance (FR-cqi*). Following cohort completion, the lecturer must assemble a CQI Record analyzing: (1) Participant feedback aggregates across 6 quality domains, (2) Grade distribution metrics (pass rate, failure rate), (3) Root-cause issue identification, and (4) Action plan with assigned owners, due dates, and success criteria. In subsequent cycles, the lecturer must evaluate the effectiveness of previously implemented actions before closing them.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-15. Indicators automatically compute median scores from <code>feedback_responses</code>. Action plans strictly follow the two-party lifecycle: the lecturer prepares actions and evaluates effectiveness, but only the Deputy Dean can formally close an action.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Quality domain metrics, action progression, and evaluation checks are operational.</p>
+
+<!-- ---------------- 4.7 SAMC Quality Verification Workspace ---------------- -->
+<h2>4.7 Stand-alone SAMC Quality Verification (QV) Portfolio (MD-10)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Quality Verification Hub (<code>/quality</code>), SAMC QV Portfolio (<code>/quality/{mc}</code>), Assemble Evidence (<code>POST /quality/{mc}/evidence</code>), Submit QV (<code>POST /quality/{mc}/submit</code>)</li>
+  <li><b>Role:</b> Lecturer (<code>lecturer</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /quality</code>, <code>GET /quality/{mc}</code>, <code>POST /quality/{mc}/evidence</code>, <code>POST /quality/{mc}/submit</code></li>
+  <li><b>Page Type:</b> Compliance Portfolio & Evidence Assembly</li>
+  <li><b>Related Database Tables:</b> <code>qv_records</code>, <code>qv_evidence</code>, <code>micro_credentials</code>, <code>mc_versions</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Quality\QvController</code>, Views: <code>quality.index</code>, <code>quality.show</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Supports Malaysian Qualifications Agency (MQA) Quality Verification for Stand-alone Micro-Credentials (SAMC). A stand-alone SAMC cannot carry academic credit unless Quality Verification has been successfully conducted (G 6.3.2). The lecturer assembles the 6 mandatory evidence dimensions (curriculum design, learning resources, assessment mechanism, facilitator credentials, participant evaluation, institutional readiness) and submits the portfolio for faculty endorsement.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-14. Validates that the micro-credential is an approved SAMC with completed cohorts. Evidence items link to system records. Once submitted, the record enters the Deputy Dean queue for institutional endorsement.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Partially Working (By Design).</b> Evidence items are captured as system references and notes; the compressed ZIP package download feature (FR-169) produces an index page pending stored-file service implementation.</p>
+
+<!-- ===================== SECTION 5: REVIEWER ROLE ===================== -->
+<h1>5. Reviewer & Industry Expert Pages & Functionality Analysis</h1>
+
+<p>The Reviewer (Persona X1) and Industry Expert (Persona X2) roles represent internal academic peers and external industry specialists assigned to evaluate curriculum proposals. The interface focuses strictly on objective evaluation, conflict of interest mitigation, and structured rubric recommendations.</p>
+
+<!-- ---------------- 5.1 Review Invitations ---------------- -->
+<h2>5.1 Review Invitations & Evaluation Queue</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> My Review Invitations / Reviews Hub</li>
+  <li><b>Role:</b> Reviewer (<code>reviewer</code>) & Industry Expert (<code>industry_expert</code>)</li>
+  <li><b>Exact Route:</b> <code>GET /reviews</code> (Route Name: <code>reviews</code>)</li>
+  <li><b>Page Type:</b> Evaluation Queue / Assignment Directory</li>
+  <li><b>Related Database Tables:</b> <code>review_assignments</code>, <code>mc_versions</code>, <code>micro_credentials</code>, <code>users</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Approval\ReviewController@index</code>, View: <code>reviews.index</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Serves as the primary landing page for assigned reviewers. Lists all pending and completed evaluation assignments with proposal title, developer name, assigned date, due date, review scope (Full Academic Review vs Industry Relevance Evaluation), and current status (Pending Declaration, In Review, Submitted).</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and tested by Playwright flow FL-03. Strictly filters assignments by the logged-in user ID. Reviewers holding only the <code>industry_expert</code> role are automatically redirected directly to this page upon sign-in by <code>TaskController@index</code>.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Role scoping and assignment filtering operate reliably.</p>
+
+<!-- ---------------- 5.2 COI Declaration & Review Form ---------------- -->
+<h2>5.2 Conflict of Interest (COI) Declaration & Proposal Review Form</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Proposal Review Form (<code>/reviews/{id}</code>), Declare COI (<code>POST /reviews/{id}/declare</code>), Post Comment (<code>POST /reviews/{id}/comments</code>), Submit Review (<code>POST /reviews/{id}/submit</code>)</li>
+  <li><b>Role:</b> Reviewer (<code>reviewer</code>) & Industry Expert (<code>industry_expert</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /reviews/{id}</code>, <code>POST /reviews/{id}/declare</code>, <code>POST /reviews/{id}/comments</code>, <code>POST /reviews/{id}/submit</code></li>
+  <li><b>Page Type:</b> Formal Evaluation Form & Multi-Item Rubric</li>
+  <li><b>Related Database Tables:</b> <code>reviews</code>, <code>review_assignments</code>, <code>review_comments</code>, <code>mc_versions</code>, <code>mc_modules</code>, <code>learning_outcomes</code>, <code>assessment_components</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Approval\ReviewController</code>, View: <code>reviews.show</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Enforces a mandatory two-stage review process (FR-14 to FR-18, FR-60 to FR-68):
+(1) <b>Conflict of Interest Declaration:</b> Before viewing proposal contents, the reviewer must legally declare that no conflict of interest exists (e.g., co-authorship, personal relationship, or direct financial interest). A positive declaration immediately recuses the reviewer and reassigns the task.
+(2) <b>Evaluation Form:</b> Academic reviewers evaluate 8 core dimensions (alignment with MQF, SLT realism, outcome clarity, assessment validity, syllabus currency, prerequisites, resource adequacy, unbundling integrity). Industry experts complete a streamlined industry alignment rubric.
+(3) <b>Tracked Comments:</b> Reviewers post granular comments tied to specific tabs/modules, flagged as <i>Blocking</i> (must be resolved) or <i>Advisory</i>.
+(4) <b>Final Recommendation:</b> Recommends <i>Support</i>, <i>Support with Amendments</i>, or <i>Do Not Support</i>.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-03. Proposal content is completely shielded until the COI declaration is submitted. Self-review is strictly blocked by <code>EnsureNotSelfReview</code> checks. Comments correctly bind to the version record and must be addressed before the Deputy Dean can endorse.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> COI gating, rubric validation, comment tracking, and audit logging operate as specified.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Reviewer on Invitations<br/>/reviews"] --> B["Select Assignment<br/>/reviews/{id}"]
+    B --> C{"COI Declared?"}
+    C -->|"No"| D["Display Mandatory COI Gate<br/>Declaration Checkbox"]
+    D -->|"Declares Conflict"| E["POST /reviews/{id}/declare (conflict)<br/>Recuse Reviewer & Audit"]
+    D -->|"No Conflict"| F["POST /reviews/{id}/declare (clear)<br/>Unlock Proposal Content"]
+    
+    C -->|"Yes"| F
+    F --> G["Inspect Proposal Details<br/>Curriculum, Modules, Matrix"]
+    G --> H["Post Section Comments<br/>Flag as 'Blocking' or 'Advisory'"]
+    H --> I["Complete 8-Item Rubric & Recommendation"]
+    I --> J["Submit Review<br/>Status: 'submitted'"]
+    J --> K["Notify Deputy Dean<br/>Comments visible to Developer"]
+</pre>
+<figcaption>Figure 5.2: Reviewer Conflict of Interest Declaration & Evaluation Flow</figcaption>
+</figure>
+
+<!-- ===================== SECTION 6: DEPUTY DEAN ROLE ===================== -->
+<h1>6. Deputy Dean Pages & Functionality Analysis</h1>
+
+<p>The Deputy Dean Academic (Persona P2) is the primary faculty academic authority in MCMS. The role oversees the entire lifecycle of micro-credentials within the faculty: curriculum endorsement, Senate decision recording, cohort readiness confirmation, assessment verification, completion confirmation, credential lifecycle governance, quality verification, ABC credit deposits, and credit transfer evaluations.</p>
+
+<!-- ---------------- 6.1 Approvals & Senate Decision ---------------- -->
+<h2>6.1 Proposal Endorsement & Senate Approval Recording (MD-03)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Approvals Hub (<code>/approvals</code>), Proposal Endorsement Review (<code>/approvals/{id}</code>), Assign Reviewers (<code>POST /approvals/{id}/reviewers</code>), Senate Recording (<code>/approvals/{id}/senate</code>), Decision Pack (<code>/approvals/{id}/pack</code>)</li>
+  <li><b>Role:</b> Deputy Dean (<code>deputy_dean</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /approvals</code>, <code>GET /approvals/{id}</code>, <code>POST /approvals/{id}/reviewers</code>, <code>POST /approvals/{id}/endorse</code>, <code>POST /approvals/{id}/{how}</code>, <code>GET /approvals/{id}/senate</code>, <code>POST /approvals/{id}/senate</code>, <code>GET /approvals/{id}/pack</code></li>
+  <li><b>Page Type:</b> Multi-Stage Approval Portal & Institutional Decision Recording</li>
+  <li><b>Related Database Tables:</b> <code>mc_versions</code>, <code>micro_credentials</code>, <code>review_assignments</code>, <code>reviews</code>, <code>review_comments</code>, <code>approval_decisions</code>, <code>tasks</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Approval\ApprovalController</code>, Views: <code>approval.index</code>, <code>approval.show</code>, <code>approval.senate</code>, <code>approval.pack</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Governs the faculty approval pipeline (FR-60 to FR-71):
+(1) <b>Assign Reviewers:</b> Selects one or more peer reviewers or industry experts with a target due date.
+(2) <b>Endorsement Review:</b> Inspects curriculum tabs, reviewer rubrics, and tracked comments. Verifies category classification (SAMC vs UMC). Resolves or enforces blocking comments. Actions: <i>Endorse</i>, <i>Return for Amendment</i>, or <i>Do Not Support</i>.
+(3) <b>Senate Approval Recording:</b> Senate is the supreme academic authority but does not log in (D-28). The Deputy Dean officially records the formal Senate decision (Meeting Reference, Senate Approval Date, Effective Date, Conditions).
+(4) <b>Senate Decision Pack:</b> Compiles an executive summary pack of the curriculum, outcomes, assessment matrix, and reviewer recommendations for submission to Senate.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-04 and scenario Act 1. Endorsement blocks if any reviewer comments marked <i>Blocking</i> remain unresolved. Self-endorsement is strictly prevented. Recording Senate approval transitions the version status to <code>approved</code>, making it eligible for cohort offerings.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Endorsement checks, comment resolution, Senate recording, and audit logging operate as specified.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Deputy Dean opens Queue<br/>/approvals"] --> B["Select Submitted Proposal<br/>/approvals/{id}"]
+    B --> C["Assign Peer / Industry Reviewers<br/>Set due date & scope"]
+    C --> D["Reviewers submit evaluations<br/>Comments visible on proposal"]
+    D --> E["Deputy Dean reviews comments<br/>Check blocking issues"]
+    E -->|"Amendments Required"| F["Click 'Return for Amendment'<br/>Returns to Developer"]
+    E -->|"Satisfactory"| G["Click 'Endorse Proposal'<br/>Status: 'endorsed'"]
+    
+    G --> H["Senate Reviews Pack<br/>/approvals/{id}/pack (External Meeting)"]
+    H --> I["Deputy Dean opens Senate Record Form<br/>/approvals/{id}/senate"]
+    I --> J["Record Senate Meeting Ref & Date<br/>POST /approvals/{id}/senate"]
+    J --> K["Version status becomes 'approved'<br/>Eligible for Cohort Offerings"]
+</pre>
+<figcaption>Figure 6.1: Proposal Review, Endorsement & Senate Decision Flow</figcaption>
+</figure>
+
+<!-- ---------------- 6.2 Cohort Readiness Confirmation ---------------- -->
+<h2>6.2 Cohort Readiness Confirmation & Cancellation (MD-04)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Offerings Review (<code>/offerings</code>), Confirm Readiness (<code>POST /offerings/{id}/readiness</code>), Cohort Cancellation (<code>POST /offerings/{id}/cancel</code>)</li>
+  <li><b>Role:</b> Deputy Dean (<code>deputy_dean</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /offerings</code>, <code>GET /offerings/{id}</code>, <code>POST /offerings/{id}/readiness</code>, <code>POST /offerings/{id}/cancel</code></li>
+  <li><b>Page Type:</b> Administrative Verification & Lifecycle Control</li>
+  <li><b>Related Database Tables:</b> <code>offerings</code>, <code>readiness_items</code>, <code>readiness_confirmations</code>, <code>enrolments</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Offering\OfferingController</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Enforces the two-party institutional readiness check (FR-86). The Deputy Dean inspects the lecturer's readiness submission across 6 operational dimensions. If satisfied, the Deputy Dean records formal acceptance. Only when confirmed does the offering status transition to <code>ready</code> / <code>open</code>, automatically publishing it in the public catalogue. In emergencies, the Deputy Dean can cancel a cohort with a documented reason, automatically notifying participants and triggering refunds.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-05. Independent confirmation is enforced: the confirm button is disabled if the logged-in user authored the readiness submission.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Tested in scenario Act 1.</p>
+
+<!-- ---------------- 6.3 Results Verification & Completion ---------------- -->
+<h2>6.3 Assessment Results Verification & Completion Confirmation (MD-07, MD-08)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Results Hub (<code>/results</code>), Cohort Results Verification (<code>/results/{id}</code>), Verify Marks (<code>POST /results/{id}/verify</code>), Completion Check (<code>/completions/{id}</code>), Confirm Completion (<code>POST /completions/{id}/confirm</code>)</li>
+  <li><b>Role:</b> Deputy Dean (<code>deputy_dean</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /results</code>, <code>GET /results/{id}</code>, <code>POST /results/{id}/verify</code>, <code>POST /results/{id}/verify-module</code>, <code>POST /results/{id}/verify-revision</code>, <code>GET /completions/{id}</code>, <code>POST /completions/{id}/confirm</code></li>
+  <li><b>Page Type:</b> Grade Verification & Official Completion Authority</li>
+  <li><b>Related Database Tables:</b> <code>assessment_results</code>, <code>module_achievements</code>, <code>digital_badges</code>, <code>enrolments</code>, <code>achievement_records</code>, <code>credentials</code>, <code>integrity_cases</code></li>
+  <li><b>Related Components & Controllers:</b> <code>ResultsController</code>, <code>CompletionController</code>, Views: <code>results.index</code>, <code>results.verify</code>, <code>completion.show</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Core academic certification engine:
+(1) <b>Results Verification:</b> Inspects grade distributions, raw marks, and pass rates submitted by lecturers. Verifying marks generates official <code>module_achievements</code> and <code>digital_badges</code>. Learners under integrity holds are automatically bypassed.
+(2) <b>Completion Confirmation:</b> Verifies that the participant has achieved every required module, satisfied all whole-micro-credential assessments, and holds no open disciplinary cases. Formal confirmation sets enrolment status to <code>completed</code>, stores final weighted marks, and fires the <code>CompletionConfirmed</code> event (EV-31) &mdash; the sole automated trigger for digital credential issuance.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-08 and scenario Act 2. Results verification is atomic. The completion confirmation check dynamically validates all prerequisites before enabling the confirm button.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Verified end-to-end.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Lecturer Submits Marks<br/>Cohort status: pending_verification"] --> B["Deputy Dean opens /results/{id}"]
+    B --> C["Review Mark Distribution & Pass Rates"]
+    C --> D["Click 'Verify Marks'<br/>POST /results/{id}/verify"]
+    D --> E["System generates module_achievements & badges<br/>Marks become visible to Students"]
+    E --> F["System runs Completion Check<br/>Opens Task when criteria met"]
+    
+    F --> G["Deputy Dean opens /completions/{id}"]
+    G --> H["Inspect Diagnostic Checklist<br/>All modules passed? Integrity clear?"]
+    H --> I["Click 'Confirm Completion'<br/>POST /completions/{id}/confirm"]
+    I --> J["Set Enrolment Status: 'completed'<br/>Store Confirmer & Final Mark"]
+    J --> K["Fire Event: CompletionConfirmed (EV-31)"]
+    K --> L["Listener Mints Digital Credential<br/>Prepares Academic Credit Record (ACR)"]
+</pre>
+<figcaption>Figure 6.3: Assessment Results Verification & Completion Issuance Lifecycle</figcaption>
+</figure>
+
+<!-- ---------------- 6.4 Credential Administration ---------------- -->
+<h2>6.4 Credential Administration & Lifecycle Corrections (MD-09)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Credential Admin Directory (<code>/admin/credentials</code>), Credential Admin Detail (<code>/admin/credentials/{id}</code>), Correct (<code>POST /admin/credentials/{id}/correct</code>), Replace (<code>POST /admin/credentials/{id}/replace</code>), Revoke (<code>POST /admin/credentials/{id}/revoke</code>)</li>
+  <li><b>Role:</b> Deputy Dean (<code>deputy_dean</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /admin/credentials</code>, <code>GET /admin/credentials/{id}</code>, <code>POST /admin/credentials/{id}/correct</code>, <code>POST /admin/credentials/{id}/replace</code>, <code>POST /admin/credentials/{id}/revoke</code></li>
+  <li><b>Page Type:</b> Credential Governance & Cryptographic Status Operations</li>
+  <li><b>Related Database Tables:</b> <code>credentials</code>, <code>credential_revisions</code>, <code>enrolments</code>, <code>users</code></li>
+  <li><b>Related Components & Controllers:</b> <code>CredentialController@adminIndex</code>, <code>@adminShow</code>, Views: <code>credentials.admin</code>, <code>credentials.admin-show</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Administers all issued micro-credentials within the faculty scope (FR-143 to FR-147). In the event of administrative errors, data updates, or academic misconduct, the Deputy Dean executes immutable lifecycle corrections:
+- <b>Correction:</b> Fixes typographical errors (e.g., student name spelling). Maintains identical verification URL; shows status <i>Corrected</i> with public revision audit history.
+- <b>Replacement:</b> Issues a new credential code for substantial structural changes. The old credential permanently indicates status <i>Replaced</i> pointing to the new reference.
+- <b>Revocation:</b> Immediately invalidates the credential. Public verification permanently shows status <i>Revoked</i> with documented legal justification. Nothing is ever hard-deleted.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-10 and scenario Act 2. Revisions are immutably logged in <code>credential_revisions</code> with user, reason, before/after JSON diffs, and timestamp.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Audit-trailed lifecycle operations operate reliably.</p>
+
+<!-- ---------------- 6.5 ACR & National ABC Deposits ---------------- -->
+<h2>6.5 Academic Credit Record (ACR) & ABC Banking (MD-11)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Credit Bank Queue (<code>/admin/creditbank</code>), Confirm ACR (<code>POST /admin/creditbank/acrs/{id}/confirm</code>), Batch Export Detail (<code>/admin/creditbank/batches/{id}</code>), Record Deposit (<code>POST /admin/creditbank/batches/{id}/deposit</code>)</li>
+  <li><b>Role:</b> Deputy Dean (<code>deputy_dean</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /admin/creditbank</code>, <code>POST /admin/creditbank/acrs/{id}/confirm</code>, <code>GET /admin/creditbank/batches/{id}</code>, <code>POST /admin/creditbank/batches/{id}/deposit</code></li>
+  <li><b>Page Type:</b> National Credit Banking & Batch File Management</li>
+  <li><b>Related Database Tables:</b> <code>acrs</code>, <code>acr_checks</code>, <code>consents</code>, <code>abc_batches</code>, <code>abc_deposits</code>, <code>credit_ledger_entries</code></li>
+  <li><b>Related Components & Controllers:</b> <code>CreditBankController</code>, Views: <code>creditbank.queue</code>, <code>creditbank.batch</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Oversees credit banking operations with the Malaysian Academic Credit Bank (ABC). The ACR is generated automatically following 7 automated checks (valid accreditation, credit-bearing category, no unresolved disciplinary cases). Once the student submits consent, the record enters the ABC Queue. The Deputy Dean confirms the record, exports compliant CSV batch files for ABC upload, and officially records the returned ABC deposit reference (e.g., <code>ABC-FTMK-2026-03</code>), activating the 10-year validity counter in the student's ledger.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-11 and scenario Act 3. Blocks any ACR where student consent is missing or declined. Deposit recording atomically creates credit ledger entries.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Export, confirmation, and ledger activation operate correctly.</p>
+
+<!-- ---------------- 6.6 Credit Transfer Evaluation ---------------- -->
+<h2>6.6 Credit Transfer Evaluation & Programme Admission (MD-12)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Transfer Queue (<code>/transfers</code>), Evaluation Workspace (<code>/transfers/{id}</code>), Record Decision (<code>POST /transfers/{id}/decide</code>), Record Admission (<code>POST /admissions</code>)</li>
+  <li><b>Role:</b> Deputy Dean (<code>deputy_dean</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /transfers</code>, <code>GET /transfers/{id}</code>, <code>POST /transfers/{id}/decide</code>, <code>POST /admissions</code></li>
+  <li><b>Page Type:</b> Academic Credit Evaluation & Degree Admission Authority</li>
+  <li><b>Related Database Tables:</b> <code>transfer_applications</code>, <code>transfer_lines</code>, <code>equivalence_criteria</code>, <code>equivalence_assessments</code>, <code>transfer_decisions</code>, <code>admissions</code>, <code>credit_ledger_entries</code></li>
+  <li><b>Related Components & Controllers:</b> <code>EvaluationController</code>, Views: <code>transfer.queue</code>, <code>transfer.decide</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Evaluates student applications to transfer micro-credential credit toward academic degree courses (FR-ct*). The Deputy Dean executes a rigorous evaluation:
+(1) <b>Validity Check:</b> Verifies ACR authenticity and validity period.
+(2) <b>Equivalence Matrix:</b> Evaluates 9 mandatory Appendix F7 criteria and compares micro-credential learning outcomes directly against target course syllabus outcomes. <i>Approval is strictly blocked if any course learning outcome lacks a matching micro-credential outcome</i>, regardless of credit hours.
+(3) <b>Residency & Transfer Limits:</b> Verifies that transferred credit does not breach the faculty 30% credit limit.
+(4) <b>Decision:</b> <i>Approved</i>, <i>Partly Approved</i>, <i>More Evidence Needed</i>, or <i>Not Approved</i>. Approval atomically updates the credit ledger to <code>redeemed</code>.
+(5) <b>Admission Recording:</b> Admission is a distinct fact that credit transfer never automatically creates (D-28). The Deputy Dean independently records the matriculation reference.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-12 and scenario Act 3. Outcome-based matching is strictly enforced by backend validation rules.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Rigorous evaluation logic and single redemption protection verified.</p>
+
+<!-- ---------------- 6.7 Quality Verification & Traceability ---------------- -->
+<h2>6.7 Quality Oversight, Traceability & Discrepancy Log (MD-10, MD-14, MD-15)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> SAMC QV Endorsement (<code>/quality/{mc}</code>), QV Package (<code>/quality/{mc}/package</code>), Record QV Result (<code>POST /quality/{mc}/decision</code>), Periodic Reviews (<code>/reviews/periodic</code>), Suspensions Hub (<code>/suspensions</code>), Student Traceability Chain (<code>/records/trace/{user}</code>), Cohort Inspection (<code>/records/cohort/{offering}</code>), Discrepancy Log (<code>/records/discrepancies</code>)</li>
+  <li><b>Role:</b> Deputy Dean (<code>deputy_dean</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /quality/{mc}</code>, <code>GET /quality/{mc}/package</code>, <code>POST /quality/{mc}/decision</code>, <code>GET /reviews/periodic</code>, <code>POST /reviews/periodic/{mc}</code>, <code>GET /suspensions</code>, <code>POST /suspensions</code>, <code>POST /suspensions/{id}/lift</code>, <code>GET /records/trace</code>, <code>GET /records/trace/{user}</code>, <code>GET /records/cohort/{offering}</code>, <code>GET /records/discrepancies</code>, <code>POST /records/discrepancies/{id}/correct</code></li>
+  <li><b>Page Type:</b> Institutional Governance, Traceability Engine & Integrity Audit</li>
+  <li><b>Related Database Tables:</b> <code>qv_records</code>, <code>periodic_reviews</code>, <code>suspensions</code>, <code>discrepancies</code>, <code>corrections</code>, <code>audit_events</code>, <code>enrolments</code></li>
+  <li><b>Related Components & Controllers:</b> <code>QvController</code>, <code>QualityReviewController</code>, <code>RecordsController</code>, Views: <code>quality.package</code>, <code>monitoring.index</code>, <code>monitoring.suspensions</code>, <code>records.trace</code>, <code>records.cohort</code>, <code>records.discrepancies</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Comprehensive institutional oversight:
+- <b>SAMC QV Result:</b> Records MQA Quality Verification references, valid dates, and credit values. The verified record is the exclusive system writer of credit and MQF claims.
+- <b>Suspension Governance:</b> Suspends/terminates offerings with mandatory learner notification; earned credentials remain untouched.
+- <b>Traceability Chain:</b> Reconstructs a student's full historical audit trail from initial proposal development through enrollment, assessment, credentials, and credit transfer.
+- <b>Discrepancy Log:</b> Detects mismatches between Achievement Records, Credentials, ACRs, and ABC deposits, enforcing audit-logged resolutions.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flows FL-14, FL-16, FL-18, and scenario Act 4. Traceability queries join across 12 relational tables to deliver complete audit verification.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Tested and operational.</p>
+
+<!-- ===================== SECTION 7: CODL ADMIN ROLE ===================== -->
+<h1>7. CODL Administrator Pages & Functionality Analysis</h1>
+
+<p>The Centre for Open and Distance Learning (CODL) Administrator role (Persona S1, P5) represents the technical system operator. In accordance with <b>Decision D-28</b>, CODL has no academic decision authority; the role is strictly focused on user identity governance, reference data management, system configuration, external integration hubs, audit integrity verification, and data retention.</p>
+
+<!-- ---------------- 7.1 User & Role Management ---------------- -->
+<h2>7.1 User Administration & Role Provisioning (MD-01)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> User Directory (<code>/admin/users</code>), User Profile & Roles (<code>/admin/users/{user}</code>), Assign Role (<code>POST /admin/users/{user}/roles</code>), Revoke Role (<code>POST /admin/users/{user}/roles/{assignment}/revoke</code>), Toggle Status (<code>POST /admin/users/{user}/status/{to}</code>)</li>
+  <li><b>Role:</b> CODL Administrator (<code>codl_admin</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /admin/users</code>, <code>GET /admin/users/{user}</code>, <code>POST /admin/users/{user}/roles</code>, <code>POST /admin/users/{user}/roles/{assignment}/revoke</code>, <code>POST /admin/users/{user}/status/{to}</code></li>
+  <li><b>Page Type:</b> User Directory & RBAC Security Administration</li>
+  <li><b>Related Database Tables:</b> <code>users</code>, <code>role_assignments</code>, <code>ptjs</code>, <code>audit_events</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Identity\UserAdminController</code>, Views: <code>admin.users.index</code>, <code>admin.users.show</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Governs user identities across all departments (FR-05, FR-06, FR-13, FR-23). Features: (1) Keyword search by staff/student ID, name, email, or role, (2) User deactivation/reactivation (deactivated users are blocked from sign-in and audited), (3) Scoped role assignments with effective start and end dates (e.g., assigning Deputy Dean scoped strictly to FTMK), and (4) Role revocation with mandatory audit justification.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-17. Role assignments validate that privileged staff roles (Deputy Dean, CODL Admin) require MFA. Scoping correctly binds to PTj faculty records.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Role lifecycle and permission checks operate reliably.</p>
+
+<!-- ---------------- 7.2 Settings & Bilingual Templates ---------------- -->
+<h2>7.2 Versioned Settings, Templates & Reference Data (MD-00)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> System Settings (<code>/admin/settings</code>), Setting History (<code>/admin/settings/{key}</code>), Bilingual Templates (<code>/admin/templates</code>), Template Editor (<code>/admin/templates/{key}</code>), Reference Data (<code>/admin/reference/{entity}</code>)</li>
+  <li><b>Role:</b> CODL Administrator (<code>codl_admin</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /admin/settings</code>, <code>GET /admin/settings/{key}</code>, <code>POST /admin/settings/{key}</code>, <code>GET /admin/templates</code>, <code>GET /admin/templates/{key}</code>, <code>POST /admin/templates/{key}</code>, <code>GET /admin/reference/{entity}</code>, <code>POST /admin/reference/{entity}</code>, <code>POST /admin/reference/{entity}/import</code></li>
+  <li><b>Page Type:</b> Configuration Registry, Template Versioning & Reference Importer</li>
+  <li><b>Related Database Tables:</b> <code>settings</code>, <code>setting_versions</code>, <code>templates</code>, <code>template_versions</code>, <code>ptjs</code>, <code>programmes</code>, <code>parent_courses</code></li>
+  <li><b>Related Components & Controllers:</b> <code>SettingsController</code>, <code>TemplateController</code>, <code>ReferenceDataController</code>, Views: <code>settings.index</code>, <code>settings.history</code>, <code>admin.templates.index</code>, <code>admin.templates.edit</code>, <code>admin.reference</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>System parameter governance:
+- <b>Settings:</b> Manages 34 institutional parameters (credit validity years, decision overdue thresholds, fee waiver defaults). Every modification requires a written reason and is versioned in <code>setting_versions</code>.
+- <b>Templates:</b> Governs official communication and certificate wording in English and Bahasa Melayu (PDPA disclosures, certificate recognition wording). Modifications create immutable numbered versions.
+- <b>Reference Data:</b> Maintains institutional entities (Faculties, Degree Programmes, Parent Courses) via manual web forms or bulk CSV imports.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and verified in Playwright flow FL-17. Setting modifications validate type constraints and log full before/after snapshots into the audit chain.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Complete versioning and rollback capability verified.</p>
+
+<!-- ---------------- 7.3 UCreds Integration Hub ---------------- -->
+<h2>7.3 UCreds Integration Hub & File Exchange (MD-06)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> UCreds Hub (<code>/admin/ucreds</code>), Enrolment Export (<code>/admin/ucreds/export/{offering}</code>), Enrolment Manifest (<code>/admin/ucreds/export/{offering}/manifest</code>), Check Results CSV (<code>POST /admin/ucreds/check</code>), Import Audit Report (<code>/admin/ucreds/imports/{id}</code>), Download Errors (<code>/admin/ucreds/imports/{id}/errors.csv</code>), Stage Valid Results (<code>POST /admin/ucreds/imports/{id}/stage</code>), UCreds Courses (<code>/admin/ucreds/courses</code>)</li>
+  <li><b>Role:</b> CODL Administrator (<code>codl_admin</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /admin/ucreds</code>, <code>GET /admin/ucreds/export/{offering}</code>, <code>GET /admin/ucreds/export/{offering}/manifest</code>, <code>POST /admin/ucreds/check</code>, <code>GET /admin/ucreds/imports/{id}</code>, <code>GET /admin/ucreds/imports/{id}/errors.csv</code>, <code>POST /admin/ucreds/imports/{id}/stage</code>, <code>GET /admin/ucreds/courses</code></li>
+  <li><b>Page Type:</b> Integration Hub, File Parser & Staging Pipeline</li>
+  <li><b>Related Database Tables:</b> <code>export_files</code>, <code>import_files</code>, <code>import_row_errors</code>, <code>enrolments</code>, <code>assessment_results</code>, <code>ucreds_courses</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Learning\UcredsController</code>, Views: <code>ucreds.index</code>, <code>ucreds.manifest</code>, <code>ucreds.report</code>, <code>ucreds.courses</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Executes deterministic CSV data interchange with UCreds (Moodle LMS):
+(1) <b>Enrolment Export:</b> Compiles registered learner rosters in standardized template <code>enrol v3</code>, generating identical byte output and SHA-256 hashes for identical data.
+(2) <b>Check File:</b> Validates imported grades against schema rules without altering live database records. Detects duplicate files via SHA-256 hash checking (SDD 6.2.3).
+(3) <b>Rejected Rows Report:</b> Generates downloadable CSV containing specific row numbers and validation error reasons (e.g., unregistered student ID, mark exceeds 100).
+(4) <b>Staging:</b> Commits valid rows to <code>assessment_results</code> in pending verification state.
+(5) <b>UCreds Courses:</b> Reference catalog of 59 verified pilot courses (D-34).</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-07 and scenario Act 2. Staging handles partial validation: valid rows stage successfully while rejected rows are isolated in <code>import_row_errors</code>.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Partially Working (By Design).</b> Core file checking, error reporting, and staging operate reliably. File scanning and storage run within local disk storage (<code>storage/app/private/ucreds</code>) pending an enterprise object store and virus scanner.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["CODL Admin on UCreds Hub<br/>/admin/ucreds"] --> B["Upload UCreds Results CSV"]
+    B --> C["Click 'Check File'<br/>POST /admin/ucreds/check"]
+    C --> D["System verifies Header & SHA-256 Hash<br/>Parses every row"]
+    D -->|"Hash Already Imported"| E["Reject File<br/>Refuse Duplicate Import"]
+    D -->|"Syntax / Data Errors Found"| F["Record Row Errors in import_row_errors<br/>Generate /admin/ucreds/imports/{id}"]
+    F --> G["Download Rejected Rows CSV<br/>/admin/ucreds/imports/{id}/errors.csv"]
+    
+    D -->|"Valid Rows Present"| H["Enable 'Stage Valid Rows' Button"]
+    H --> I["Click 'Stage Valid Rows'<br/>POST /admin/ucreds/imports/{id}/stage"]
+    I --> J["Insert into assessment_results<br/>Status: pending_verification"]
+    J --> K["Notify Deputy Dean & Lecturer"]
+</pre>
+<figcaption>Figure 7.3: UCreds Grade Import, Validation & Staging Pipeline</figcaption>
+</figure>
+
+<!-- ---------------- 7.4 Adapters, Audit & Retention ---------------- -->
+<h2>7.4 Adapters, Cryptographic Audit Trail & Retention Governance (MD-15, MD-16)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Integration Adapters (<code>/admin/adapters</code>), Retry Call (<code>POST /admin/adapters/calls/{id}/retry</code>), Notification Log (<code>/admin/notification-log</code>), Demo Clock (<code>/admin/demo-clock</code>), Audit Trail (<code>/admin/audit</code>), Verify Hash Chain (<code>POST /admin/audit/verify</code>), Retention Governance (<code>/records/retention</code>), Apply Hold (<code>POST /records/retention/holds</code>), Lift Hold (<code>POST /records/retention/holds/{id}/lift</code>), Dispose (<code>POST /records/retention/{category}/dispose</code>)</li>
+  <li><b>Role:</b> CODL Administrator (<code>codl_admin</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /admin/adapters</code>, <code>POST /admin/adapters/calls/{id}/retry</code>, <code>GET /admin/notification-log</code>, <code>GET /admin/demo-clock</code>, <code>POST /admin/demo-clock</code>, <code>POST /admin/demo-clock/jobs</code>, <code>GET /admin/audit</code>, <code>POST /admin/audit/verify</code>, <code>GET /records/retention</code>, <code>POST /records/retention/holds</code>, <code>POST /records/retention/holds/{id}/lift</code>, <code>POST /records/retention/{category}/dispose</code></li>
+  <li><b>Page Type:</b> Integration Hub, Security Audit & Legal Compliance Dashboard</li>
+  <li><b>Related Database Tables:</b> <code>integration_calls</code>, <code>notifications</code>, <code>audit_events</code>, <code>audit_chain_heads</code>, <code>retention_holds</code>, <code>disposal_records</code></li>
+  <li><b>Related Components & Controllers:</b> <code>AdapterController</code>, <code>NotificationController</code>, <code>DemoClockController</code>, <code>AuditController</code>, <code>RetentionController</code>, Views: <code>admin.adapters</code>, <code>admin.notification-log</code>, <code>admin.demo-clock</code>, <code>audit.index</code>, <code>records.retention</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Technical and legal governance:
+- <b>Adapters & Notifications:</b> Monitors external API calls (payment gateway, SMS, email), displays latency and error payloads, and enables manual retries.
+- <b>Demo Clock (FL-19):</b> Test-only simulation clock that advances system time to test time-based events (credit expiry, QV lapse) without tampering with database records. Strictly blocked in production environments.
+- <b>Cryptographic Audit Trail (FR-254):</b> Implements an append-only log where every state change is linked to the prior record via a SHA-256 hash chain. "Verify Chain" traverses the chain to detect unauthorized database tampering.
+- <b>Retention & Disposal (FR-retention):</b> Applies legal retention periods to non-academic logs. Supports legal holds that freeze disposal. Disposal permanently purges eligible records and issues a signed certificate of disposal.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flows FL-17, FL-18, and FL-24. Hash chain verification successfully detects modified payloads. Legal holds immediately block disposal actions.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Audit integrity, retry mechanisms, and retention rules operate as specified.</p>
+
+<!-- ===================== SECTION 8: COMMON AUTHENTICATED PAGES ===================== -->
+<h1>8. Shared Authenticated & Shell Pages Analysis</h1>
+
+<p>The Shared Authenticated & Shell pages provide consistent system-wide infrastructure across all logged-in personas. These services unify global search, personal data privacy, multi-channel notifications, cross-module task coordination, institutional reporting, and document archival.</p>
+
+<!-- ---------------- 8.1 Universal Task Queue ---------------- -->
+<h2>8.1 Universal Task Queue (IR-07)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Universal Tasks Queue (<code>/tasks</code>), Task Detail & Direct Action (<code>/tasks/{id}</code>)</li>
+  <li><b>Role:</b> All Authenticated Staff (Lecturer, Deputy Dean, CODL Admin, Reviewer)</li>
+  <li><b>Exact Routes:</b> <code>GET /tasks</code>, <code>GET /tasks/{id}</code></li>
+  <li><b>Page Type:</b> Work Queue / Action Routing Hub</li>
+  <li><b>Related Database Tables:</b> <code>tasks</code>, <code>users</code>, <code>role_assignments</code>, <code>ptjs</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Identity\TaskController</code>, Views: <code>tasks</code>, <code>tasks-show</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Serves as the post-sign-in landing page for all staff personas (IR-07). Aggregates all open, actionable items assigned to the user individually or to their active role within their faculty PTj scope. Features area tabs (Proposals, Offerings, Results, Credentials, Deposits, Transfers), keyword search, overdue flagging based on <code>alerts.decision_overdue_days</code>, and direct action routing.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-01. Accessing <code>/tasks/{id}</code> automatically redirects the user directly to the target record where the work is performed (e.g., clicking a proposal task opens <code>/approvals/{id}</code>).</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Dynamic role scoping and automated task completion operate reliably.</p>
+
+<!-- ---------------- 8.2 Global Search ---------------- -->
+<h2>8.2 Role-Aware Global Header Search</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> Role-Aware Global Search</li>
+  <li><b>Role:</b> All Authenticated Users</li>
+  <li><b>Exact Route:</b> <code>GET /search</code> (Route Name: <code>search</code>)</li>
+  <li><b>Page Type:</b> System-Wide Search & Results Directory</li>
+  <li><b>Related Database Tables:</b> <code>micro_credentials</code>, <code>mc_versions</code>, <code>offerings</code>, <code>users</code>, <code>credentials</code>, <code>transfer_applications</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Identity\SearchController@search</code>, View: <code>search</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Provides unified search capabilities tailored dynamically to the user's active role:
+- <i>Student:</i> Searches enrolled courses, achievements, and credentials.
+- <i>Lecturer:</i> Searches assigned micro-credentials, delivery cohorts, and enrolled learners.
+- <i>Deputy Dean:</i> Searches faculty proposals, grade sheets, issued credentials, and transfer applications.
+- <i>CODL Admin:</i> Searches user directory, system configuration settings, templates, and integration logs.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional. Executes role-scoped queries against database indexes. Results are grouped into categorized cards with deep links to matching records.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Role scoping and keyword matching operate as specified.</p>
+
+<!-- ---------------- 8.3 User Profile & Sessions ---------------- -->
+<h2>8.3 Profile, Personal Data Governance & Session Control</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> User Profile (<code>/profile</code>), Update Preferences (<code>POST /profile/preferences</code>), Data Correction Request (<code>POST /profile/data-correction</code>), Terminate Session (<code>POST /profile/sessions/terminate</code>)</li>
+  <li><b>Role:</b> All Authenticated Users</li>
+  <li><b>Exact Routes:</b> <code>GET /profile</code>, <code>POST /profile/preferences</code>, <code>POST /profile/data-correction</code>, <code>POST /profile/sessions/terminate</code></li>
+  <li><b>Page Type:</b> User Profile, PDPA Compliance & Security Dashboard</li>
+  <li><b>Related Database Tables:</b> <code>users</code>, <code>sessions</code>, <code>notification_preferences</code>, <code>corrections</code>, <code>audit_events</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Identity\SearchController</code>, View: <code>profile</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Compliance and account management:
+(1) <b>Personal Information:</b> Displays official name, staff/student ID, verified email, and assigned roles.
+(2) <b>Notification Preferences:</b> Toggles granular email and in-system notification delivery per event category.
+(3) <b>Session Governance:</b> Displays all active web sessions with IP addresses, browser agents, and last activity timestamps. Allows terminating foreign sessions.
+(4) <b>PDPA Data Rights:</b> Allows users to submit formal personal data correction requests (e.g., legal name spelling change) which are logged into the audit chain for administrative verification.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and verified in Playwright flow FL-01. Session termination invalidates target sessions in the <code>sessions</code> table. Correction requests log to <code>corrections</code>.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Privacy controls and session security are operational.</p>
+
+<!-- ---------------- 8.4 Notifications Center ---------------- -->
+<h2>8.4 Notifications Center (MD-16)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Notifications Center (<code>/notifications</code>), Notification Preferences (<code>POST /notifications/preferences</code>), Mark Read (<code>POST /notifications/{id}/read</code>), Mark All Read (<code>POST /notifications/read-all</code>), Open Notification Link (<code>GET /notifications/{id}/open</code>)</li>
+  <li><b>Role:</b> All Authenticated Users</li>
+  <li><b>Exact Routes:</b> <code>GET /notifications</code>, <code>POST /notifications/preferences</code>, <code>POST /notifications/read-all</code>, <code>GET /notifications/{id}/open</code>, <code>POST /notifications/{id}/read</code></li>
+  <li><b>Page Type:</b> Notification Hub & In-App Activity Center</li>
+  <li><b>Related Database Tables:</b> <code>notifications</code>, <code>notification_preferences</code>, <code>templates</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Notifications\NotificationController</code>, View: <code>notifications.index</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Delivers real-time and historical communications across system channels (FR-265 to FR-271). Features: (1) Unread notification counter in top header, (2) Notification popover menu displaying recent messages, (3) Tabbed interface (All, Unread, Read), (4) "Mark all as read" button, and (5) Direct navigation: clicking a notification marks it as read and redirects the user directly to the associated action URL via <code>Notifier::linkFor()</code>.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and tested in Playwright flow FL-01. Messages are rendered from bilingual system templates in the user's preferred language.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Dynamic unread badges, popover interaction, and deep-linking operate correctly.</p>
+
+<!-- ---------------- 8.5 Document Repository ---------------- -->
+<h2>8.5 Official Document Repository & Archive</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> Document Center ("My Documents")</li>
+  <li><b>Role:</b> All Authenticated Users (Content Scoped)</li>
+  <li><b>Exact Route:</b> <code>GET /documents</code> (Route Name: <code>documents</code>)</li>
+  <li><b>Page Type:</b> Centralized Document Repository & Archive</li>
+  <li><b>Related Database Tables:</b> <code>credentials</code>, <code>enrolments</code>, <code>acrs</code>, <code>abc_batches</code>, <code>report_runs</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Records\RecordsController@documents</code>, View: <code>records.documents</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Aggregates all official institutional documents generated by or issued to the logged-in user in one centralized archive. Groups documents by category: (1) Enrolment Fee Receipts, (2) Digital Certificates & Badges, (3) Academic Credit Records (ACR), (4) Export Batches, and (5) Generated System Reports. Each entry provides date, reference number, status, and direct links to view or print the document in the standard A4 layout.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and aligned with the prototype. Queries user-associated records dynamically, presenting an organized tabbed archive.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Document aggregation and A4 print linking operate reliably.</p>
+
+<!-- ---------------- 8.6 Standard System Reports ---------------- -->
+<h2>8.6 Ten Standard System Reports (MD-15)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Reports Hub (<code>/records/reports</code>), Report View (<code>/records/reports/{kind}</code>), CSV Export (<code>/records/reports/{kind}/csv</code>), Print View (<code>/records/reports/{kind}/print</code>)</li>
+  <li><b>Role:</b> Lecturer, Deputy Dean, CODL Administrator</li>
+  <li><b>Exact Routes:</b> <code>GET /records/reports</code>, <code>GET /records/reports/{kind}</code>, <code>GET /records/reports/{kind}/csv</code>, <code>GET /records/reports/{kind}/print</code></li>
+  <li><b>Page Type:</b> Institutional Business Intelligence & Regulatory Reporting</li>
+  <li><b>Related Database Tables:</b> <code>report_runs</code>, <code>offerings</code>, <code>enrolments</code>, <code>credentials</code>, <code>qv_records</code>, <code>acrs</code>, <code>transfer_applications</code>, <code>credit_ledger_entries</code>, <code>cqi_actions</code>, <code>stackable_plans</code>, <code>suspensions</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Records\RecordsController</code>, Views: <code>records.reports</code>, <code>records.report</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Generates the 10 official regulatory reports required by MQA and Senate (FR-reports):
+<ol>
+  <li><code>offerings</code>: Cohort delivery performance and enrolment rates.</li>
+  <li><code>enrolments</code>: Learner retention, withdrawal, and completion statistics.</li>
+  <li><code>credentials</code>: Issued certificates, badges, corrections, and revocations.</li>
+  <li><code>quality</code>: Stand-alone SAMC Quality Verification status and expiry tracking.</li>
+  <li><code>deposits</code>: Academic Credit Records and national ABC bank deposit totals.</li>
+  <li><code>transfers</code>: Credit transfer applications, approval rates, and granted credits.</li>
+  <li><code>redemption</code>: Credit ledger redemption lifecycle and validity states.</li>
+  <li><code>actions</code>: Open CQI improvement actions and effectiveness evaluations.</li>
+  <li><code>plans</code>: Individual stackable pathway plans and institutional credit shares.</li>
+  <li><code>suspensions</code>: Active suspensions, terminations, and periodic review outcomes.</li>
+</ol>
+All reports are strictly scoped to the user's faculty (deputy dean) or system-wide (admin). Every report execution is logged in <code>report_runs</code> with user ID, execution parameters, and record counts. Results can be viewed on screen, exported as CSV, or printed via A4 layout.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-24. Queries respect faculty PTj boundaries. CSV exports and printable layouts execute deterministically.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Scoped reporting, CSV export, print layout, and run logging operate as specified.</p>
+
+<!-- ===================== SECTION 9: CROSS-ROLE RELATIONSHIPS ===================== -->
+<h1>9. Cross-Role Relationships & End-to-End Workflows</h1>
+
+<p>The strength of the MCMS architecture lies in its rigorous cross-role handoffs. No single persona operates in isolation; academic integrity, quality verification, and credit mobility depend on multi-stage workflows spanning multiple actors, distinct pages, and transactional state changes.</p>
+
+<!-- ---------------- 9.1 Multi-Stage Workflows ---------------- -->
+<h2>9.1 End-to-End Multi-Stage Workflow Maps</h2>
+
+<h3>Workflow 1: Curriculum Development, Review & Senate Approval</h3>
+<p><b>Participating Roles:</b> Lecturer (Author), Peer Reviewer / Industry Expert (Evaluator), Deputy Dean (Endorser & Senate Recorder), Senate (Supreme Authority).</p>
+
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Lecturer<br/>Proposal Workspace<br/>/proposals/{id}"] -->|"Submit Proposal"| B["Content Locked<br/>Status: submitted<br/>Task created for DD"]
+    B --> C["Deputy Dean<br/>Approvals Hub<br/>/approvals/{id}"]
+    C -->|"Assign Reviewers"| D["Reviewer<br/>Evaluation Form<br/>/reviews/{id}"]
+    D -->|"Declare COI & Submit Comments"| E["Reviews Completed<br/>Status: in_review"]
+    E --> C
+    C -->|"Endorse Proposal"| F["Senate Decision Pack<br/>/approvals/{id}/pack"]
+    F -->|"External Senate Meeting"| G["Senate Approves Proposal<br/>(D-11 Meeting Ref)"]
+    G --> H["Deputy Dean<br/>Senate Record Form<br/>/approvals/{id}/senate"]
+    H -->|"Submit Senate Ref & Date"| I["Version Status: approved<br/>Eligible for Cohorts"]
+</pre>
+<figcaption>Figure 9.1: Cross-Role Curriculum Approval & Senate Recording Lifecycle</figcaption>
+</figure>
+
+<h3>Workflow 2: Cohort Readiness, Enrolment & Delivery Handoff</h3>
+<p><b>Participating Roles:</b> Lecturer (Coordinator), Deputy Dean (Verifier), Prospective Student (Learner).</p>
+
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Lecturer<br/>Create Offering<br/>/offerings/new"] -->|"Save Cohort"| B["Status: draft<br/>Readiness: not_started"]
+    B --> C["Lecturer<br/>Readiness Checklist<br/>/offerings/{id}/readiness"]
+    C -->|"Submit Checklist Notes"| D["Readiness: submitted<br/>Task dispatched to DD"]
+    D --> E["Deputy Dean<br/>Readiness Confirmation<br/>/offerings/{id}/readiness"]
+    E -->|"Confirm Institutional Readiness"| F["Readiness: confirmed<br/>Offering Status: open"]
+    F --> G["Public Visitor<br/>Public Catalogue<br/>/public/catalogue"]
+    G -->|"Select Offering"| H["Student<br/>4-Step Wizard<br/>/register/{offering}"]
+    H -->|"Pay Fee"| I["Enrolment Status: enrolled<br/>Appears on Lecturer Roster<br/>/offerings/{id}/participants"]
+</pre>
+<figcaption>Figure 9.2: Cohort Readiness, Verification & Enrolment Workflow</figcaption>
+</figure>
+
+<h3>Workflow 3: Assessment, Completion Confirmation & Credential Issuance</h3>
+<p><b>Participating Roles:</b> Lecturer (Instructor), Deputy Dean (Academic Authority), Student (Graduate), Employer (Verifier).</p>
+
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Lecturer<br/>Marks Entry Grid<br/>/results/{offering}"] -->|"Submit Cohort Marks"| B["Grade Sheet Locked<br/>Status: pending_verification"]
+    B --> C["Deputy Dean<br/>Results Verification<br/>/results/{id}"]
+    C -->|"Verify Results"| D["Generate module_achievements & badges<br/>Visible in /my-results"]
+    D --> E["Completion Diagnostics Check<br/>Open Task if all criteria met"]
+    E --> F["Deputy Dean<br/>Completion Screen<br/>/completions/{id}"]
+    F -->|"Confirm Completion"| G["Enrolment Status: completed<br/>Fire CompletionConfirmed (EV-31)"]
+    G --> H["Automated Credential Listener<br/>Mints Digital Credential & Prepares ACR"]
+    H --> I["Student<br/>Credentials Wallet<br/>/my-credentials"]
+    I -->|"Share Verification URL"| J["Employer<br/>Public Verification<br/>/public/verify/{code}"]
+</pre>
+<figcaption>Figure 9.3: Results Verification, Completion & Credential Issuance Lifecycle</figcaption>
+</figure>
+
+<h3>Workflow 4: Academic Credit Banking (ACR), Consent & National ABC Deposit</h3>
+<p><b>Participating Roles:</b> System (ACR Generator), Student (Owner & Consenter), Deputy Dean (Depositor), National ABC Bank.</p>
+
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Credential Issued<br/>System prepares ACR"] --> B["Student notified<br/>Action Required"]
+    B --> C["Student<br/>ACR & Consent Review<br/>/my-credit/{id}"]
+    C -->|"Submit Legal Consent"| D["Record Consent (consents table)<br/>ACR Status: consented"]
+    D --> E["Deputy Dean<br/>ABC Deposits Queue<br/>/admin/creditbank"]
+    E -->|"Confirm ACR & Export CSV"| F["Generate Batch File (abc_batches)<br/>Upload to External ABC Portal"]
+    F -->|"Receive ABC Reference"| G["Deputy Dean<br/>Batch Detail Page<br/>/admin/creditbank/batches/{id}"]
+    G -->|"Record Deposit Reference"| H["Ledger Service updates Status: Available<br/>10-Year Expiry Clock Activated"]
+    H --> I["Student Ledger<br/>/my-credit<br/>Shows Available Credits"]
+</pre>
+<figcaption>Figure 9.4: Academic Credit Record (ACR) Consent & National ABC Deposit Lifecycle</figcaption>
+</figure>
+
+<h3>Workflow 5: Credit Transfer Application, Equivalence & Degree Admission</h3>
+<p><b>Participating Roles:</b> Student (Applicant), Deputy Dean of Receiving Faculty (Evaluator).</p>
+
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Student<br/>New Transfer Application<br/>/transfer/new"] -->|"Select Programme & Credits"| B["Ledger locks Credits: provisionally_redeemed<br/>Status: submitted"]
+    B --> C["Deputy Dean<br/>Transfer Evaluation Queue<br/>/transfers/{id}"]
+    C --> D["Step 1: Check ACR Validity"]
+    D --> E["Step 2: Map Outcome Equivalence Matrix<br/>Every CLO must match!"]
+    E --> F{"Approval Decision"}
+    F -->|"Approved"| G["POST /transfers/{id}/decide<br/>Credits Status: redeemed<br/>Applies toward Degree"]
+    F -->|"Rejected / More Evidence"| H["POST /transfers/{id}/decide<br/>Credits Status: Available<br/>Lock Released"]
+    G --> I["Deputy Dean<br/>Record Matriculation Admission<br/>POST /admissions"]
+    I --> J["Student tracks completion<br/>/my-plan"]
+</pre>
+<figcaption>Figure 9.5: Credit Transfer Application, Equivalence Assessment & Admission Flow</figcaption>
+</figure>
+
+<h2>9.2 Disconnected Workflows & Continuity Gaps</h2>
+<p>The audit identified specific points where user workflows experience friction, incomplete automation, or disconnected handoffs:</p>
+
+<ol>
+  <li><b>Quality Verification Re-Verification Task Handoff (FR-175):</b> When an approved SAMC undergoes a material change, the system successfully flags the version as requiring re-verification and logs an event. However, it does not automatically instantiate a new draft QV record in <code>qv_records</code>; the lecturer must manually create a new portfolio from scratch.</li>
+  <li><b>CQI Action to Change Request Bridge (EV-08):</b> In the CQI module (MD-14), if an approved improvement action requires a curriculum alteration, the system creates a generic task reminder for the lecturer rather than directly pre-populating a draft Change Request in <code>/my-mcs/{id}/change</code>.</li>
+  <li><b>Student Notice on Cohort Cancellation:</b> When a Deputy Dean cancels an offering (<code>POST /offerings/{id}/cancel</code>), database records and payments are updated correctly, but the participant cancellation email notification relies on an inline job rather than an asynchronous event queue.</li>
+  <li><b>Transfer Decision Letter PDF Generation (DOC-12):</b> While the credit transfer decision is recorded and viewable in the web interface (<code>/transfer/{id}</code>), the formal Senate Transfer Decision Letter template remains unimplemented as a downloadable document.</li>
+</ol>
+
+<!-- ===================== SECTION 10: ISSUES & GAPS ===================== -->
+<h1>10. System Deficiencies, Gaps & Redundancies Analysis</h1>
+
+<p>This section consolidates all architectural defects, UI/backend discrepancies, redundant screens, missing templates, and security considerations identified during the comprehensive audit.</p>
+
+<!-- ---------------- 10.1 UI vs Backend Discrepancies ---------------- -->
+<h2>10.1 Frontend vs Backend Discrepancies</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Module / Feature</th>
+      <th>Frontend UI Presentation</th>
+      <th>Actual Backend Implementation</th>
+      <th>Impact & Risk</th>
+      <th>Remediation Requirement</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Quality Verification Evidence</b> (MD-10)</td>
+      <td>UI presents file attachment inputs with descriptions for 6 MQA evidence categories.</td>
+      <td>Stores textual file references / URLs in <code>qv_evidence.file_reference</code>; no binary upload or virus scan.</td>
+      <td>Medium. File integrity cannot be cryptographically proven without binary hashing.</td>
+      <td>Implement S3/MinIO enterprise object storage service with ClamAV virus scanning.</td>
+    </tr>
+    <tr>
+      <td><b>Cohort Readiness Evidence</b> (MD-04)</td>
+      <td>Lecturer checklist presents "Attach Evidence" file fields.</td>
+      <td>Backend accepts text notes; does not store binary files in object store.</td>
+      <td>Low. Operational workaround in place for pilot.</td>
+      <td>Connect file upload handler to stored files service upon activation.</td>
+    </tr>
+    <tr>
+      <td><b>UCreds CSV File Import</b> (MD-06)</td>
+      <td>UI allows uploading grades and badge CSV files.</td>
+      <td>Files are stored on local web server filesystem (<code>storage/app/private/ucreds</code>); parsing runs synchronously inside HTTP request.</td>
+      <td>High. Large CSV imports (500+ rows) risk HTTP timeout (504) or server memory exhaustion.</td>
+      <td>Move CSV parsing and row validation to asynchronous queue workers (Redis/Horizon).</td>
+    </tr>
+    <tr>
+      <td><b>Drawer Side Panels</b> (UIUX Spec 4.2)</td>
+      <td>Prototype specifies sliding right-hand drawers for quick record inspection.</td>
+      <td>Drawers are absent in Blade views; interactions navigate to full pages or use inline accordion folds (<code>details.fold</code>).</td>
+      <td>Low (UX Consistency). D-38 permits inline summary-first presentations.</td>
+      <td>Retain current inline fold/tab pattern; drawers are unnecessary overhead for server-rendered Blade.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ---------------- 10.2 Redundancies & Overlapping Screens ---------------- -->
+<h2>10.2 Redundant & Overlapping Pages Analysis</h2>
+<p>Several pages exhibit functional overlap and require architectural decisions regarding whether to retain, merge, or redesign them:</p>
+
+<h3>1. Internal Achievement Record (<code>/my-record</code>) vs Admin Record (<code>/records/{enrolment}</code>)</h3>
+<ul>
+  <li><b>Current Situation:</b> <code>/my-record</code> renders the student's personal internal achievement record, while <code>/records/{enrolment}</code> renders an identical view for administrative review. Both use the <code>records.show</code> / <code>records.mine</code> Blade template.</li>
+  <li><b>Assessment:</b> <b>RETAIN BOTH, MAINTAIN DISTINCT ROUTES.</b> Although the presentation template is identical, the authorization scopes are fundamentally different: <code>/my-record</code> is strictly user-scoped to the signed-in student, whereas <code>/records/{enrolment}</code> enforces faculty PTj authorization for Deputy Deans and CODL staff. Merging them would introduce complex conditional authorization logic into a single endpoint.</li>
+</ul>
+
+<h3>2. Credit Ledger (<code>/my-credit</code>) vs ACR Detail View (<code>/my-credit/{id}</code>)</h3>
+<ul>
+  <li><b>Current Situation:</b> <code>/my-credit</code> displays the balance of banked credits in ABC, while <code>/my-credit/{id}</code> displays the detailed Academic Credit Record and legal consent submission form.</li>
+  <li><b>Assessment:</b> <b>RETAIN AND ENHANCE.</b> In accordance with D-38's <i>Summary-First</i> rule, the ledger provides the high-level credit balance overview, while the detailed legal text, MQA accreditation metadata, and consent buttons are properly isolated on the detail screen.</li>
+</ul>
+
+<h3>3. Printable Proposal View (<code>/proposals/{id}/print</code>) vs Senate Pack (<code>/approvals/{id}/pack</code>)</h3>
+<ul>
+  <li><b>Current Situation:</b> Both pages display an aggregated, non-tabbed representation of a micro-credential proposal.</li>
+  <li><b>Assessment:</b> <b>MERGE INTO STANDARDIZED TEMPLATE.</b> The Printable Proposal view was developed for the authoring lecturer, while the Senate Pack was designed for the Deputy Dean. Both should share a single unified printable Blade component (<code>layouts.print</code>) with a conditional banner for Senate meeting metadata.</li>
+</ul>
+
+<!-- ---------------- 10.3 Missing Pages & Incomplete Templates ---------------- -->
+<h2>10.3 Missing Pages & Technical Gaps</h2>
+<p>The audit identified the following missing templates and incomplete backend services:</p>
+
+<ol>
+  <li><b>Official Senate Credit Transfer Decision Letter (DOC-12):</b>
+    <br/><i>Issue:</i> When a Deputy Dean approves or rejects a credit transfer application, the decision is stored in <code>transfer_decisions</code> and viewable in the web table. However, the formal official Decision Letter (DOC-12) required for the student's academic file and Pejabat Pendaftar admission submission has no printable A4 template.
+    <br/><i>Remediation:</i> Implement <code>transfer.letter</code> Blade view in <code>layouts.print</code>.</li>
+
+  <li><b>Suspension Notice Document Template (DOC-13):</b>
+    <br/><i>Issue:</i> When an offering is suspended, the system dispatches an in-system notification. A formal printable suspension notice template exists in <code>monitoring/suspension-notice.blade.php</code>, but it is not linked from the student's Document Center (<code>/documents</code>).
+    <br/><i>Remediation:</i> Add suspension notices to the document center repository query.</li>
+
+  <li><b>Server-Side PDF Binary Compilation:</b>
+    <br/><i>Issue:</i> Certificates, receipts, ACRs, and reports currently rely on the browser's native print-to-PDF functionality. In automated batch workflows (e.g., emailing a certificate upon graduation or exporting 500 credentials), client-side printing cannot execute.
+    <br/><i>Remediation:</i> Integrate a headless PDF renderer (Playwright Core / Chromium) into the Laravel backend to generate true PDF binaries for downloadable storage.</li>
+
+  <li><b>Full Bahasa Melayu Translation Coverage:</b>
+    <br/><i>Issue:</i> While the top navigation and static page <code>&lt;h1&gt;</code> headers are translated via <code>lang/ms.json</code>, table column headers, form input labels, validation alert messages, and button text remain in English.
+    <br/><i>Remediation:</i> Wrap all UI strings in Blade views with the translation helper <code>__()</code> and expand <code>lang/ms.json</code> to achieve 100% bilingual compliance.</li>
+</ol>
+
+<!-- ===================== SECTION 11: SUMMARY & INVENTORY ===================== -->
+<h1>11. Final Audit Summary & Prioritized Action Plan</h1>
+
+<p>This final chapter consolidates the entire audit inventory into unified matrices, providing quantitative benchmarks, critical vulnerability assessments, and prioritized architectural recommendations for institutional stakeholders.</p>
+
+<!-- ---------------- 11.1 Page Functionality Summary Matrix ---------------- -->
+<h2>11.1 Page Functionality Summary Matrix</h2>
+<p>The table below summarizes the functionality status of all pages across each user role:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>User Role</th>
+      <th class="center">Total Pages</th>
+      <th class="center">Fully Working</th>
+      <th class="center">Partially Working</th>
+      <th class="center">UI Only</th>
+      <th class="center">Broken</th>
+      <th class="center">Not Implemented</th>
+      <th class="center">Needs Verification</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Public / Guest</b></td>
+      <td class="center"><b>15</b></td>
+      <td class="center">13</td>
+      <td class="center">2</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+    </tr>
+    <tr>
+      <td><b>Student / Learner</b></td>
+      <td class="center"><b>18</b></td>
+      <td class="center">17</td>
+      <td class="center">1</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+    </tr>
+    <tr>
+      <td><b>Lecturer / Educator</b></td>
+      <td class="center"><b>20</b></td>
+      <td class="center">17</td>
+      <td class="center">3</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+    </tr>
+    <tr>
+      <td><b>Reviewer & Industry Expert</b></td>
+      <td class="center"><b>2</b></td>
+      <td class="center">2</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+    </tr>
+    <tr>
+      <td><b>Deputy Dean (Academic)</b></td>
+      <td class="center"><b>25</b></td>
+      <td class="center">23</td>
+      <td class="center">2</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+    </tr>
+    <tr>
+      <td><b>CODL Administrator</b></td>
+      <td class="center"><b>15</b></td>
+      <td class="center">13</td>
+      <td class="center">2</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+    </tr>
+    <tr>
+      <td><b>Shared Authenticated / Shell</b></td>
+      <td class="center"><b>7</b></td>
+      <td class="center">7</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+      <td class="center">0</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <th>Total System Inventory</th>
+      <th class="center">102</th>
+      <th class="center">92 (90.2%)</th>
+      <th class="center">10 (9.8%)</th>
+      <th class="center">0</th>
+      <th class="center">0</th>
+      <th class="center">0</th>
+      <th class="center">0</th>
+    </tr>
+  </tfoot>
+</table>
+
+<!-- ---------------- 11.2 Role-Based Page Inventory ---------------- -->
+<h2>11.2 Role-Based Page Inventory</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Role</th>
+      <th>Page Name</th>
+      <th>Exact Route</th>
+      <th>Main Function</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Public Pages -->
+    <tr><td>Public</td><td>Public Landing Portal</td><td><code>/public</code></td><td>Institutional showcase, featured offerings, marketing</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Public</td><td>Course Catalogue</td><td><code>/public/catalogue</code></td><td>Public course search, discipline & credit filters</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Public</td><td>Course Offering Detail</td><td><code>/public/offering/{id}</code></td><td>Syllabus, module breakdown, fees, register gateway</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Public</td><td>How Recognition Works</td><td><code>/public/how</code></td><td>Regulatory framework, MQF, SAMC, credit banking explainer</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Public</td><td>Pathways to a Degree</td><td><code>/public/pathways</code></td><td>Stackable pathways to Bachelor/Master degrees</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Public</td><td>Verification Portal</td><td><code>/public/verify</code></td><td>Public credential verification entry & code lookup</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Public</td><td>Verification Result</td><td><code>/public/verify/{code}</code></td><td>Public credential verification status badge</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Public</td><td>File Signature Check</td><td><code>POST /public/verify/file</code></td><td>Cryptographic Ed25519 VC-JWT verification</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Public</td><td>Public Keys (JWKS)</td><td><code>/.well-known/jwks.json</code></td><td>Ed25519 public key endpoint for verification</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Public</td><td>Public FAQ</td><td><code>/public/faq</code></td><td>Frequently asked questions for learners & employers</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Public</td><td>Terms of Service</td><td><code>/public/terms</code></td><td>Legal platform conditions and user obligations</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Public</td><td>Privacy Policy</td><td><code>/public/privacy</code></td><td>PDPA compliance disclosure and privacy practices</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Public</td><td>Accessibility Policy</td><td><code>/public/accessibility</code></td><td>WCAG compliance and accessibility provisions</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Public</td><td>Sign In Portal</td><td><code>/signin</code></td><td>Stub identity provider authentication portal</td><td><b>Partially Working</b></td></tr>
+    <tr><td>Public</td><td>MFA Challenge</td><td><code>/signin/mfa</code></td><td>Second-factor 6-digit passcode authentication</td><td><b>Fully Working</b></td></tr>
+
+    <!-- Student Pages -->
+    <tr><td>Student</td><td>My Learning Dashboard</td><td><code>/tasks -> student.home</code></td><td>Active coursework, progress bars, urgent tasks, KPIs</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Enrolments Listing</td><td><code>/enrolments</code></td><td>Directory of registered courses and payment states</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Enrolment Details</td><td><code>/enrolments/{id}</code></td><td>Cohort schedule, instructor, access instructions</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Registration Stepper</td><td><code>/register/{offering}</code></td><td>4-step enrolment: eligibility, PDPA, payment, confirm</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Payment Confirmation</td><td><code>/enrolments/{id}/confirmation</code></td><td>Enrolment reference, receipt link, LMS access details</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Official Fee Receipt</td><td><code>/enrolments/{id}/receipt</code></td><td>Printable A4 institutional tuition receipt</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Enrolment Withdrawal</td><td><code>POST /enrolments/{id}/withdraw</code></td><td>Withdrawal request before deadline with audit</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>My Results</td><td><code>/my-results</code></td><td>Verified assessment marks, component grades, badges</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Achievement Record</td><td><code>/my-record</code></td><td>Internal academic transcript (watermarked not ACR)</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Credentials Wallet</td><td><code>/my-credentials</code></td><td>Repository of earned digital micro-credentials</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Credential Detail</td><td><code>/my-credentials/{id}</code></td><td>Credential metadata, verification code, share links</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Certificate Print View</td><td><code>/my-credentials/{id}/certificate</code></td><td>Official A4 printable certificate with QR code</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Credential Sheet</td><td><code>/my-credentials/{id}/sheet</code></td><td>Academic transcript sheet with syllabus outcomes</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Download Token</td><td><code>/my-credentials/{id}/download/{as}</code></td><td>Cryptographic VC-JWT / Open Badges 3.0 export</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Credit Ledger</td><td><code>/my-credit</code></td><td>Banked credits balance, validity status, ABC links</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>ACR & Consent Review</td><td><code>/my-credit/{id}</code></td><td>Academic Credit Record review & legal consent form</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Course Feedback Form</td><td><code>/feedback/{enrolment}</code></td><td>18-item anonymous quality rating across 6 domains</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Credit Transfer Hub</td><td><code>/transfer</code></td><td>Directory of credit transfer applications</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>New Transfer Form</td><td><code>/transfer/new</code></td><td>Apply banked credit toward academic degree courses</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Student</td><td>Transfer Application</td><td><code>/transfer/{id}</code></td><td>Track evaluation milestones and decision status</td><td><b>Partially Working</b></td></tr>
+    <tr><td>Student</td><td>My Degree Plan</td><td><code>/my-plan</code></td><td>Interactive degree tracking & 30% residency check</td><td><b>Fully Working</b></td></tr>
+
+    <!-- Lecturer Pages -->
+    <tr><td>Lecturer</td><td>Lecturer Work Tasks</td><td><code>/tasks</code></td><td>KPI metrics, pending mark submissions, CQI tasks</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>My Micro-Credentials</td><td><code>/my-mcs</code></td><td>Directory of authored micro-credentials & versions</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Micro-Credential Detail</td><td><code>/my-mcs/{id}</code></td><td>Version history, change requests, re-offer actions</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Request Change Form</td><td><code>/my-mcs/{id}/change</code></td><td>Minor / Material change classification & proposal</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Guided Category Wizard</td><td><code>/proposals/new</code></td><td>3-question diagnostic tool (SAMC vs UMC vs MCE)</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Proposal Workspace</td><td><code>/proposals/{id}</code></td><td>8-tab authoring workspace with live validation</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Printable Proposal</td><td><code>/proposals/{id}/print</code></td><td>Aggregated non-tabbed proposal print sheet</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Offerings Listing</td><td><code>/offerings</code></td><td>Directory of active and upcoming delivery cohorts</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Create Cohort Form</td><td><code>/offerings/new</code></td><td>Instantiate new cohort from approved version</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Offering Dashboard</td><td><code>/offerings/{id}</code></td><td>Cohort delivery management, readiness links, status</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Participants Roster</td><td><code>/offerings/{id}/participants</code></td><td>Enrolled learner roster, attendance, and progress</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Readiness Checklist</td><td><code>/offerings/{id}/readiness</code></td><td>6-dimension operational readiness questionnaire</td><td><b>Partially Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Marks Entry Grid</td><td><code>/results/{offering}</code></td><td>Component mark entry sheet with validation</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Component Sheet</td><td><code>/results/{offering}/components/{c}</code></td><td>Specific assessment component marks table</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Integrity Case Manager</td><td><code>POST /results/{offering}/integrity</code></td><td>Flag cheating/plagiarism to freeze mark verification</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Result Change Request</td><td><code>POST /results/{offering}/change-request</code></td><td>Submit post-verification mark correction request</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>CQI Workspace</td><td><code>/cqi</code></td><td>Continuous Quality Improvement review hub</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Cohort CQI Record</td><td><code>/cqi/{offering}</code></td><td>Feedback analysis, root cause, action plan creation</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Lecturer</td><td>SAMC QV Portfolio</td><td><code>/quality/{mc}</code></td><td>Assemble 6-dimension MQA Quality Verification pack</td><td><b>Partially Working</b></td></tr>
+    <tr><td>Lecturer</td><td>Peer Review Hub</td><td><code>/reviews</code></td><td>List of assigned proposal review invitations</td><td><b>Fully Working</b></td></tr>
+
+    <!-- Reviewer Pages -->
+    <tr><td>Reviewer</td><td>Review Invitations</td><td><code>/reviews</code></td><td>Evaluation queue filtered to assigned invitations</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Reviewer</td><td>Proposal Review Form</td><td><code>/reviews/{id}</code></td><td>COI declaration gate, 8-item rubric, tracked comments</td><td><b>Fully Working</b></td></tr>
+
+    <!-- Deputy Dean Pages -->
+    <tr><td>Deputy Dean</td><td>Task Queue Hub</td><td><code>/tasks</code></td><td>Universal approvals, verification, and decision tasks</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Approvals Hub</td><td><code>/approvals</code></td><td>Directory of proposals awaiting endorsement</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Endorsement Review</td><td><code>/approvals/{id}</code></td><td>Curriculum verification, resolve comments, endorse</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Assign Reviewers</td><td><code>POST /approvals/{id}/reviewers</code></td><td>Select peer reviewers and industry experts</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Senate Recording</td><td><code>/approvals/{id}/senate</code></td><td>Formally record Senate approval meeting ref & date</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Senate Decision Pack</td><td><code>/approvals/{id}/pack</code></td><td>Executive summary pack for Senate submission</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Material Change Review</td><td><code>/changes/{id}</code></td><td>Evaluate curriculum change request & transition rules</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Confirm Readiness</td><td><code>POST /offerings/{id}/readiness</code></td><td>Independent institutional confirmation to open cohort</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Cohort Cancellation</td><td><code>POST /offerings/{id}/cancel</code></td><td>Emergency cancellation with learner notifications</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Results Verification</td><td><code>/results</code></td><td>Hub for cohort grade sheets awaiting verification</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Verify Cohort Marks</td><td><code>/results/{id}</code></td><td>Inspect grade distribution and verify marks</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Completion Check</td><td><code>/completions/{id}</code></td><td>Verify completion criteria & confirm issuance</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Credential Admin Hub</td><td><code>/admin/credentials</code></td><td>Directory of issued credentials within faculty</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Credential Admin Detail</td><td><code>/admin/credentials/{id}</code></td><td>Inspect revision log, audit history, public status</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Credential Lifecycle</td><td><code>POST /admin/credentials/{id}/*</code></td><td>Execute Correction, Replacement, or Revocation</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>SAMC QV Confirmation</td><td><code>/quality/{mc}</code></td><td>Faculty endorsement of SAMC QV portfolio</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>QV Submission Pack</td><td><code>/quality/{mc}/package</code></td><td>Compile official submission package for MQA/QVC</td><td><b>Partially Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Record QV Decision</td><td><code>POST /quality/{mc}/decision</code></td><td>Record formal MQA verification reference & dates</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>CQI Action Closure</td><td><code>POST /cqi/{offering}/actions/*/close</code></td><td>Verify effectiveness and formally close action</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Periodic Reviews Hub</td><td><code>/reviews/periodic</code></td><td>Schedule and record 5-year periodic reviews</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Suspensions Manager</td><td><code>/suspensions</code></td><td>Suspend or terminate non-compliant offerings</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>ABC Deposits Queue</td><td><code>/admin/creditbank</code></td><td>Confirm consented ACRs and export ABC batch CSV</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Record ABC Deposit</td><td><code>POST /admin/creditbank/batches/*/deposit</code></td><td>Record external ABC reference to activate ledger</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Transfer Queue</td><td><code>/transfers</code></td><td>Directory of credit transfer applications</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Transfer Evaluation</td><td><code>/transfers/{id}</code></td><td>Map CLO equivalence matrix & record decision</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Record Admission</td><td><code>POST /admissions</code></td><td>Record matriculation reference apart from transfer</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Traceability Chain</td><td><code>/records/trace/{user}</code></td><td>Inspect end-to-end audit trail for specific student</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Cohort Records Check</td><td><code>/records/cohort/{offering}</code></td><td>Verify Appendix H5 minimum cohort academic archive</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Deputy Dean</td><td>Discrepancy Log</td><td><code>/records/discrepancies</code></td><td>Audit and resolve data discrepancies across tables</td><td><b>Fully Working</b></td></tr>
+
+    <!-- CODL Admin Pages -->
+    <tr><td>CODL Admin</td><td>User Directory</td><td><code>/admin/users</code></td><td>Search, view, and manage system user accounts</td><td><b>Fully Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>User Detail & Roles</td><td><code>/admin/users/{user}</code></td><td>Assign/revoke scoped roles & toggle user status</td><td><b>Fully Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>System Settings</td><td><code>/admin/settings</code></td><td>Registry of 34 versioned institutional settings</td><td><b>Fully Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>Setting Version History</td><td><code>/admin/settings/{key}</code></td><td>Audit log of setting modifications & rollback</td><td><b>Fully Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>Bilingual Templates</td><td><code>/admin/templates</code></td><td>Registry of bilingual communication/legal templates</td><td><b>Fully Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>Template Editor</td><td><code>/admin/templates/{key}</code></td><td>Edit English/Malay templates with version tracking</td><td><b>Fully Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>Reference Data</td><td><code>/admin/reference/{entity}</code></td><td>Manage PTj faculties, Programmes, Parent Courses</td><td><b>Fully Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>UCreds Exchange Hub</td><td><code>/admin/ucreds</code></td><td>LMS integration hub for CSV exports and imports</td><td><b>Partially Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>Enrolment Export</td><td><code>/admin/ucreds/export/{offering}</code></td><td>Generate enrol v3 CSV with deterministic hashing</td><td><b>Fully Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>Import Audit Report</td><td><code>/admin/ucreds/imports/{id}</code></td><td>Inspect rejected rows and stage valid grade rows</td><td><b>Fully Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>UCreds Courses Catalog</td><td><code>/admin/ucreds/courses</code></td><td>Directory of 59 verified pilot reference courses</td><td><b>Fully Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>Integration Adapters</td><td><code>/admin/adapters</code></td><td>Monitor external API calls & trigger retries</td><td><b>Fully Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>Notification Log</td><td><code>/admin/notification-log</code></td><td>Delivery audit log across in-system and email</td><td><b>Fully Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>Demo Clock Control</td><td><code>/admin/demo-clock</code></td><td>Advance virtual simulation clock (Test only)</td><td><b>Fully Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>Audit Trail Hub</td><td><code>/admin/audit</code></td><td>Traverse append-only hash-chained event log</td><td><b>Fully Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>Verify Hash Chain</td><td><code>POST /admin/audit/verify</code></td><td>Cryptographic verification of audit chain heads</td><td><b>Fully Working</b></td></tr>
+    <tr><td>CODL Admin</td><td>Retention Governance</td><td><code>/records/retention</code></td><td>Apply retention holds and execute record disposal</td><td><b>Fully Working</b></td></tr>
+
+    <!-- Common Authenticated Pages -->
+    <tr><td>Common</td><td>Universal Task Queue</td><td><code>/tasks</code></td><td>Role-scoped post-login task routing hub</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Common</td><td>Global Search</td><td><code>/search</code></td><td>Role-aware global keyword search</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Common</td><td>User Profile</td><td><code>/profile</code></td><td>Profile info, sessions, PDPA correction requests</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Common</td><td>Notifications Center</td><td><code>/notifications</code></td><td>View, filter, and mark notifications as read</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Common</td><td>Document Center</td><td><code>/documents</code></td><td>Centralized repository of generated receipts & certs</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Common</td><td>Standard Reports Hub</td><td><code>/records/reports</code></td><td>10 MQA/Senate regulatory reports (Screen/CSV/Print)</td><td><b>Fully Working</b></td></tr>
+    <tr><td>Common</td><td>Help & System Guides</td><td><code>/help</code></td><td>Role-specific user guides and documentation</td><td><b>Fully Working</b></td></tr>
+  </tbody>
+</table>
+
+<!-- ---------------- 11.3 Critical Issues ---------------- -->
+<h2>11.3 Critical Vulnerabilities & Architectural Issues</h2>
+
+<div class="note">
+  <b>Critical Finding 1: Unprotected Asynchronous Processing in Grade Staging</b><br/>
+  <i>Severity: High &bull; Affected Route: <code>POST /admin/ucreds/imports/{id}/stage</code> &bull; Module: MD-06</i><br/>
+  Staging imported grades from UCreds runs synchronously within the PHP-FPM web request. For cohorts exceeding 300 learners, database transaction duration risks exceeding the default 60-second execution timeout, potentially resulting in partial grade staging.
+  <br/><b>Remediation:</b> Implement Redis queue worker dispatch (<code>StageGradesJob</code>) with atomic transaction rollback.
+</div>
+
+<div class="note">
+  <b>Critical Finding 2: Lack of Cryptographic Hashing on Stored Evidence Files</b><br/>
+  <i>Severity: High &bull; Affected Route: <code>POST /quality/{mc}/evidence</code> &bull; Module: MD-10</i><br/>
+  SAMC Quality Verification evidence items currently accept textual URLs or file reference strings without computing or recording a SHA-256 binary hash. An altered external document would not invalidate the evidence chain.
+  <br/><b>Remediation:</b> Connect file inputs to an S3-compatible object store that calculates and immutably logs the binary SHA-256 hash in <code>qv_evidence.file_hash</code>.
+</div>
+
+<div class="note">
+  <b>Critical Finding 3: Missing Official Senate Transfer Decision Letter (DOC-12)</b><br/>
+  <i>Severity: Medium &bull; Affected Route: <code>GET /transfers/{id}</code> &bull; Module: MD-12</i><br/>
+  When a credit transfer is approved, the decision updates the credit ledger, but no official printable Decision Letter (DOC-12) is generated for the student or Pejabat Pendaftar.
+  <br/><b>Remediation:</b> Implement <code>transfer.letter</code> Blade view adhering to <code>layouts.print</code>.
+</div>
+
+<!-- ---------------- 11.4 Prioritized Recommendations ---------------- -->
+<h2>11.4 Prioritized Architectural Recommendations</h2>
+
+<p>Recommendations are structured into four priority tiers to guide future engineering sprints:</p>
+
+<h3>Priority 1: Critical (Must Resolve Before Pilot Launch)</h3>
+<ol>
+  <li><b>Enterprise Object Storage & Binary Virus Scanning:</b> Implement S3/MinIO file storage with automated ClamAV scanning for UCreds imports, cohort readiness evidence, and SAMC QV evidence packages.</li>
+  <li><b>Asynchronous Job Queue Infrastructure:</b> Deploy Redis and Laravel Horizon to handle background imports (MD-06), 500-credential issuing batches (MD-09), and heavy regulatory reports (MD-15).</li>
+  <li><b>Microsoft Entra ID Production SSO (OI-03):</b> Transition from the development stub IdP to UTeM's official Microsoft Entra ID Single Sign-On gateway with hardware-backed MFA enforcement.</li>
+</ol>
+
+<h3>Priority 2: High (Important Functional & Compliance Gaps)</h3>
+<ol>
+  <li><b>Server-Side PDF Binary Compilation:</b> Integrate Playwright Core / Chromium backend rendering to generate deterministic PDF binaries for official certificates, receipts, ACRs, and decision letters.</li>
+  <li><b>Senate Transfer Decision Letter (DOC-12):</b> Author the standardized A4 institutional letter template for approved credit transfers.</li>
+  <li><b>Comprehensive Bahasa Melayu UI Localization:</b> Complete full Malay translation across all table headers, input labels, error banners, and action buttons in <code>lang/ms.json</code>.</li>
+</ol>
+
+<h3>Priority 3: Medium (Workflow Continuity & Usability Improvements)</h3>
+<ol>
+  <li><b>Automated Re-Verification Task Initialization (FR-175):</b> When an approved SAMC undergoes a material change, automatically seed a new draft QV record in <code>qv_records</code>.</li>
+  <li><b>CQI Action to Change Request Bridge:</b> Pre-fill change request fields when a lecturer clicks "Request Change" directly from an open CQI improvement action.</li>
+  <li><b>Centralized Document Repository Integration:</b> Ensure all formal notices (suspension notices, withdrawal confirmations) are linked within <code>/documents</code>.</li>
+</ol>
+
+<h3>Priority 4: Low (Minor Optimizations & Polish)</h3>
+<ol>
+  <li><b>Merge Printable Proposal & Senate Pack:</b> Unify <code>/proposals/{id}/print</code> and <code>/approvals/{id}/pack</code> into a single reusable printable Blade view.</li>
+  <li><b>Sidebar Count Enhancements:</b> Add dynamic live badges to cohort and CQI sidebar items matching the approved prototype.</li>
+</ol>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+(async () => {
+  const problems = window.__problems = [];
+  const docTitle = document.querySelector('.doc-title');
+  if (docTitle) document.title = docTitle.textContent.trim() + ' - UTeM MCMS';
+  const ids = {};
+  const counters = {};
+  const pad = n => String(n).padStart(2, '0');
+  const kw = s => s.replace(/\b(SHALL NOT|SHALL|SHOULD NOT|SHOULD|MAY)\b/g, '<b>$1</b>');
+
+  // 1. requirement tables: lines "key | text | source"
+  document.querySelectorAll('script[type="text/req"]').forEach(s => {
+    const pre = s.dataset.p;
+    const t = document.createElement('table');
+    t.className = 'req';
+    const extra = s.dataset.x; // optional fourth column, e.g. "Enforced by"
+    t.innerHTML = `<thead><tr><th class="c-id">ID</th><th>${s.dataset.h || 'Requirement'}</th><th class="c-src">Source</th>${extra ? `<th class="c-x">${extra}</th>` : ''}</tr></thead>`;
+    const tb = document.createElement('tbody');
+    s.textContent.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).forEach(l => {
+      const parts = l.split('|').map(x => x.trim());
+      if (parts.length < 2) { problems.push('bad req line: ' + l); return; }
+      const [k, txt, src = '', x = ''] = parts;
+      counters[pre] = (counters[pre] || 0) + 1;
+      const id = `${pre}-${pad(counters[pre])}`;
+      if (ids[k]) problems.push('duplicate key ' + k);
+      ids[k] = id;
+      const tr = document.createElement('tr');
+      tr.id = k;
+      tr.innerHTML = `<td class="c-id">${id}</td><td>${kw(txt)}</td><td class="c-src">${src}</td>${extra ? `<td class="c-x">${x}</td>` : ''}`;
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    s.replaceWith(t);
+  });
+
+  // 2. plain tables: data-h="A|B|C", rows "a | b | c"
+  document.querySelectorAll('script[type="text/tbl"]').forEach(s => {
+    const t = document.createElement('table');
+    if (s.dataset.cls) t.className = s.dataset.cls;
+    const heads = s.dataset.h.split('|');
+    const widths = (s.dataset.w || '').split('|');
+    t.innerHTML = '<thead><tr>' + heads.map((h, i) => `<th${widths[i] ? ` style="width:${widths[i]}"` : ''}>${h}</th>`).join('') + '</tr></thead>';
+    const tb = document.createElement('tbody');
+    s.textContent.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).forEach(l => {
+      const cells = l.split('|').map(x => x.trim());
+      tb.insertAdjacentHTML('beforeend', '<tr>' + cells.map(c => `<td>${kw(c)}</td>`).join('') + '</tr>');
+    });
+    t.appendChild(tb);
+    s.replaceWith(t);
+  });
+
+  // 3. figure and table captions
+  let fig = 0, tab = 0;
+  document.querySelectorAll('figure[data-f], .tcap[data-t]').forEach(el => {
+    if (el.tagName === 'FIGURE') {
+      fig++; ids['fig:' + el.dataset.f] = 'Figure ' + fig;
+      const c = el.querySelector('figcaption');
+      c.innerHTML = `<b>Figure ${fig}:</b> ` + c.innerHTML;
+    } else {
+      tab++; ids['tab:' + el.dataset.t] = 'Table ' + tab;
+      el.innerHTML = `<b>Table ${tab}:</b> ` + el.innerHTML;
+    }
+  });
+
+  // 4. resolve {{key}} placeholders in text nodes
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) {
+    const n = walker.currentNode;
+    if (n.parentNode.nodeName !== 'SCRIPT' && n.nodeValue.includes('{{')) nodes.push(n);
+  }
+  nodes.forEach(n => {
+    n.nodeValue = n.nodeValue.replace(/\{\{([a-z0-9:-]+)\}\}/g, (m, k) => {
+      if (ids[k]) return ids[k];
+      const ext = (window.__EXT_IDS || {})[k]; // IDs published by another document (e.g. SRS keys cited in the PRD)
+      if (ext) return ext;
+      problems.push('unresolved ' + k);
+      return '??' + k;
+    });
+  });
+
+  // 5. table of contents
+  const toc = document.getElementById('toc');
+  const map = window.__TOC || {};
+  document.querySelectorAll('main h1:not(.notoc), main h2, main h3').forEach(h => {
+    if (h.tagName === 'H3' && !/^\d/.test(h.textContent.trim())) return; // unnumbered sub-headings stay out of the TOC
+    h.setAttribute('data-toc', '');
+    const lvl = h.tagName[1];
+    const text = h.textContent.trim();
+    toc.insertAdjacentHTML('beforeend',
+      `<div class="toc-row toc-${lvl}"><span class="t">${text}</span><span class="dots"></span><span class="pg">${map[text] || ''}</span></div>`);
+  });
+
+  // 6. diagrams
+  try {
+    mermaid.initialize({
+      startOnLoad: false, securityLevel: 'loose', theme: 'base',
+      themeVariables: {
+        fontFamily: 'Noto Sans, Arial, sans-serif', fontSize: '13px',
+        primaryColor: '#e7f0f8', primaryBorderColor: '#3f6fa6', primaryTextColor: '#13263a',
+        secondaryColor: '#fdf1dc', tertiaryColor: '#f4f6f8', lineColor: '#4b5563',
+        noteBkgColor: '#fff8e1', noteBorderColor: '#c9a227', actorBkg: '#e7f0f8', actorBorder: '#3f6fa6'
+      },
+      flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true, padding: 10 },
+      sequence: { useMaxWidth: true, mirrorActors: false, wrap: true },
+      state: { useMaxWidth: true },
+      er: { useMaxWidth: true }
+    });
+    await document.fonts.ready;
+    await mermaid.run({ querySelector: 'pre.mermaid' });
+  } catch (e) { problems.push('mermaid: ' + e.message); }
+  document.querySelectorAll('pre.mermaid').forEach(p => { if (!p.querySelector('svg')) problems.push('diagram not rendered: ' + p.textContent.slice(0, 60)); });
+  document.body.dataset.done = '1';
+})();
+</script>
+</body>
+</html>

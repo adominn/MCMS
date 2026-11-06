@@ -1,0 +1,141 @@
+<main>
+<h1>9. Prioritised Action Plan &amp; Readiness Roadmap</h1>
+
+<h2>9.1 Final Readiness Recommendation</h2>
+<p>
+Is MCMS ready to be considered complete?
+</p>
+<div style="background:#edf7ed; border-left:4px solid #0e6027; padding:12px 16px; margin:12px 0;">
+  <b style="font-size:12pt; color:#0e6027;">FINAL VERDICT: READY FOR USER ACCEPTANCE TESTING (UAT) &amp; PILOT DEPLOYMENT</b>
+  <p style="margin:4px 0 0; font-size:9.5pt;">
+    <b>Yes.</b> The system is functionally complete and mathematically robust for all internal UTeM micro-credential operations. All 14 core functional domains specified by <i>Garis Panduan Micro-Credential UTeM Versi 1.0</i> are operational in code, database schemas, and user interfaces, with <b>82.5% strictly verified PASS</b> and an aggregate <b>94.9% substantial coverage</b>. The remaining gaps are either external institutional dependencies (national MQA ABC API, institutional SSO, live bank acquiring) or advanced convenience features scheduled for Release 2. The core academic integrity, governance separation, and single-redemption credit banking engines are fully verified.
+  </p>
+</div>
+
+<h2>9.2 Prioritised Implementation Roadmap</h2>
+<p>
+To achieve 100% compliance with all guide nuances and prepare for university-wide rollout, outstanding work is prioritized into three phased releases:
+</p>
+
+<h3>Priority 1: Immediate Pre-Production Alignment (Pre-UAT / Pilot Launch)</h3>
+<p><i>Focus: Institutional infrastructure connections and operational security.</i></p>
+<table>
+  <thead>
+    <tr>
+      <th style="width:20%;">Task</th>
+      <th style="width:15%;">Guide Ref</th>
+      <th style="width:45%;">Scope of Work</th>
+      <th style="width:20%;">Target Owner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>1. Entra ID SSO Activation</b></td>
+      <td>Bab 16.1<br>(G-121)</td>
+      <td>Configure production Microsoft Entra ID OpenID Connect / SAML provider using university tenant credentials, replacing the test sign-in persona switcher.</td>
+      <td>PPMK / IT Infrastructure &amp; Engineering</td>
+    </tr>
+    <tr>
+      <td><b>2. Live Payment Gateway</b></td>
+      <td>Bab 10.3<br>(G-67)</td>
+      <td>Connect live bank acquiring gateway (e.g. Bank Islam / FPX / JomPAY) to replace <code>StubPaymentAdapter</code> for live learner fees.</td>
+      <td>Bursary &amp; Engineering</td>
+    </tr>
+    <tr>
+      <td><b>3. Production SMTP Relay</b></td>
+      <td>Bab 16.10<br>(G-120)</td>
+      <td>Configure authenticated university SMTP mail relay for live dispatch of notifications, OTPs, and alerts.</td>
+      <td>CODL Admin &amp; IT Ops</td>
+    </tr>
+    <tr>
+      <td><b>4. Physical Storage &amp; Anti-Virus</b></td>
+      <td>Lampiran A, D<br>(G-26, G-79)</td>
+      <td>Connect S3/MinIO persistent object storage for syllabus and evidence attachments with ClamAV daemon background scanning.</td>
+      <td>Engineering &amp; IT Security</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Priority 2: Release 2 Functional Enhancements (Post-Pilot Rollout)</h3>
+<p><i>Focus: Workflow efficiency, external credit intake, and secondary user surveys.</i></p>
+<table>
+  <thead>
+    <tr>
+      <th style="width:20%;">Task</th>
+      <th style="width:15%;">Guide Ref</th>
+      <th style="width:45%;">Scope of Work</th>
+      <th style="width:20%;">Target Owner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>5. External HEI Credit Intake</b></td>
+      <td>Bab 12.7, 13.2<br>(G-91)</td>
+      <td>Build intake portal for students to submit external accredited micro-credential transcripts and certificates for UTeM credit transfer review.</td>
+      <td>Faculty Academic Offices &amp; Engineering</td>
+    </tr>
+    <tr>
+      <td><b>6. Articulation Precedent Library</b></td>
+      <td>Bab 13.3<br>(G-102)</td>
+      <td>Build institutional repository of approved course equivalences to enable 1-click evaluation reuse for recurring transfer requests.</td>
+      <td>Academic Development Centre (CAD)</td>
+    </tr>
+    <tr>
+      <td><b>7. Self-Service Grade Appeals</b></td>
+      <td>Bab 10.4<br>(G-35)</td>
+      <td>Provide student self-service "Rayuan Keputusan" form allowing participants to formally appeal grades within 14 days of publication.</td>
+      <td>CODL &amp; Faculty Academic Offices</td>
+    </tr>
+    <tr>
+      <td><b>8. Bulk CSV Enrolment</b></td>
+      <td>Bab 10.3<br>(G-68)</td>
+      <td>Implement CSV batch registration to support bulk corporate enrolments for industry cohorts.</td>
+      <td>CODL Operations</td>
+    </tr>
+    <tr>
+      <td><b>9. Multi-Author Proposals</b></td>
+      <td>Bab 9.1<br>(G-58)</td>
+      <td>Extend proposal workspace to permit collaborative co-authoring across multiple lecturers within a faculty.</td>
+      <td>Engineering</td>
+    </tr>
+    <tr>
+      <td><b>10. Visual Version Diff Tool</b></td>
+      <td>Bab 17.8<br>(G-133)</td>
+      <td>Implement interactive redline side-by-side visual diff tool highlighting changes between curriculum versions.</td>
+      <td>Engineering</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Priority 3: Ecosystem Expansions (Long-Term Strategic Alignment)</h3>
+<p><i>Focus: National education data networks and mobile wallet integration.</i></p>
+<table>
+  <thead>
+    <tr>
+      <th style="width:20%;">Task</th>
+      <th style="width:15%;">Guide Ref</th>
+      <th style="width:45%;">Scope of Work</th>
+      <th style="width:20%;">Target Owner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>11. National ABC API Sync</b></td>
+      <td>Bab 12.5, 18.6<br>(G-86)</td>
+      <td>Implement real-time REST integration with the national Academic Bank of Credit once MQA finalizes national API endpoints.</td>
+      <td>MQA, MoHE &amp; CODL</td>
+    </tr>
+    <tr>
+      <td><b>12. Digital Mobile Wallet Push</b></td>
+      <td>Bab 8.7.1<br>(G-47)</td>
+      <td>Add 1-click pass generation for Apple Wallet (<code>.pkpass</code>) and Google Wallet API for mobile credential presentation.</td>
+      <td>Engineering</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>9.3 Concluding Summary</h2>
+<p>
+The UTeM Micro-Credential Management System represents an exceptionally rigorous, faithful, and comprehensive implementation of the university's <i>Garis Panduan Micro-Credential</i>. By enforcing academic credit boundaries, constructive alignment, single redemption integrity, and strict separation of duties directly within the software architecture, MCMS establishes UTeM at the forefront of digital credentialing and lifelong learning in Malaysian higher education.
+</p>
+</main>

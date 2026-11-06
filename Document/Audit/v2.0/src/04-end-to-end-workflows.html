@@ -1,0 +1,124 @@
+<main>
+<h1>3. Cross-Role End-to-End Workflow Verification</h1>
+
+<h2>3.1 Workflow Architecture Overview</h2>
+<p>
+A core requirement of this audit is verifying complete, end-to-end workflows across all identified user personas: <b>Student</b>, <b>Lecturer / Proposer</b>, <b>Academic Reviewer</b>, <b>Deputy Dean (Academic)</b>, <b>Senate / Central University</b>, <b>CODL Administrator</b>, and <b>Industry Expert</b>. The system must not merely present isolated screens, but enforce strict procedural handoffs, automated state transitions, audit logging, and role-based data isolation.
+</p>
+
+<h2>3.2 Verification of 11 Core Functional Workflows</h2>
+
+<h3>Workflow 1: Proposal Development, Multi-Tier Review &amp; Senate Approval</h3>
+<ul>
+  <li><b>Initiator:</b> Lecturer / Proposer initiates proposal via <code>/curriculum/wizard</code> (answering the 3 category questions from Rajah 3).</li>
+  <li><b>Authoring:</b> Proposer completes 9 tabs in <code>/curriculum/proposals/{id}</code> (Basics, Modules, Justification, Outcomes, Assessment, Credential, Readiness, Comments, Submit) matching Lampiran A. Live validation in <code>ProposalChecker.php</code> highlights blocking errors and warnings.</li>
+  <li><b>Reviewer Assignment:</b> Deputy Dean assigns 1 or more academic reviewers and optional industry experts (<code>/approval/proposals/{id}/reviewers</code>), setting due dates and scope.</li>
+  <li><b>Conflict of Interest:</b> Assigned reviewers must complete a mandatory COI declaration before the proposal dossier unlocks (<code>reviews/coi.blade.php</code>). If conflict declared, reviewer is unassigned and Deputy Dean notified.</li>
+  <li><b>Evaluation Form:</b> Reviewers rate 8 standard criteria (plus parent-course mapping for UMC), log tracked comments, and submit recommendation (Endorse, Amend, Not Supported). Industry experts provide advisory comments only without voting power (Bab 16.7).</li>
+  <li><b>Resolution Gate:</b> Proposer answers comments. Deputy Dean verifies resolution. Endorsement is blocked while any blocking comment remains open.</li>
+  <li><b>Endorsement &amp; Senate Decision:</b> Deputy Dean endorses proposal, verifying the category. Central authority records Senate decision with official meeting reference and minute date (<code>/approval/proposals/{id}/senate</code>), generating the official Senate Decision Pack (<code>/approval/proposals/{id}/pack</code>).</li>
+  <li><b>Downstream Impact:</b> Approved proposal generates Version 1.0 (<code>mc_versions</code>), locks content, and enables cohort creation in Offering module.</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>CurriculumTest.php</code> and <code>ApprovalTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 2: Cohort Setup, Offering Readiness Checklist &amp; Publishing</h3>
+<ul>
+  <li><b>Initiator:</b> Lecturer creates a cohort offering for an approved version (<code>/offerings/create</code>), defining dates, fees, intake capacity, and delivery mode.</li>
+  <li><b>Readiness Checklist (Lampiran B1–B7):</b> Lecturer completes items covering trainer readiness, materials upload, platform availability (uLearn/UCreds), and assessment rubrics.</li>
+  <li><b>Deputy Dean Confirmation:</b> Deputy Dean inspects evidence and independently confirms readiness (<code>/offerings/{id}/readiness</code>). Status transitions from <i>Not Ready</i> to <i>Ready</i>, and automatically opens for enrolment when start date arrives.</li>
+  <li><b>Public Publication:</b> Offering appears on the public catalogue (<code>/catalogue</code>) with transparent information, MQF/credit claims derived strictly from verified records, and automated scanning for forbidden promotional claims (<code>ForbiddenClaims.php</code>).</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>OfferingTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 3: Participant Registration, PDPA Consent &amp; Payment</h3>
+<ul>
+  <li><b>Initiator:</b> Prospective participant visits <code>/offerings/{id}</code> and initiates registration without requiring prior university sign-in.</li>
+  <li><b>Step 1 (Eligibility &amp; Profile):</b> User verifies prerequisite criteria, enters IC/passport and contact details.</li>
+  <li><b>Step 2 (Recognition &amp; PDPA Notice):</b> Mandatory acknowledgement of recognition wording (confirming UMC does not guarantee degree admission) and consent to personal data processing under PDPA.</li>
+  <li><b>Step 3 (Payment):</b> Payment processed via idempotent adapter (<code>StubPaymentAdapter.php</code>). Card numbers are never stored; transaction reference logged in <code>payments</code> table.</li>
+  <li><b>Step 4 (Confirmation &amp; Instructions):</b> System generates enrolment record, assigns Enrolment ID, and renders official confirmation letter with uLearn/UCreds access instructions (<code>/student/enrolment/{id}/letter</code>).</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>EnrolmentTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 4: Learning Exchange, Assessment Marks &amp; Result Verification</h3>
+<ul>
+  <li><b>Learning Exchange:</b> CODL Administrator exports participant roster manifest (CSV) and imports assessment marks/badge completion records from UCreds/Moodle via <code>ImportValidator.php</code> with pre-validation report.</li>
+  <li><b>Mark Entry:</b> Lecturer accesses cohort gradebook (<code>/results/{cohortId}</code>), inputs assessment marks against approved assessment plan, and submits marks.</li>
+  <li><b>Integrity Holds:</b> If an academic integrity case is flagged, the participant's results are placed in <i>Held</i> status, blocking achievement finalization.</li>
+  <li><b>Verification:</b> Deputy Dean reviews grade distribution and verifies results by cohort or module (<code>/results/{cohortId}/verify</code>). Proposer cannot verify own marks (separation of duties). Results become visible to students only after verification.</li>
+  <li><b>Result Revision:</b> Any post-verification result change requires formal change request, justification, and Deputy Dean sign-off, preserving full audit history.</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>ResultsTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 5: Completion Confirmation, Open Badges 3.0 &amp; Credential Issuance</h3>
+<ul>
+  <li><b>Completion Evaluation:</b> System evaluates whether participant has achieved all modules, met whole-MC assessments, and resolved integrity holds (<code>Completion.php</code>).</li>
+  <li><b>Deputy Dean Confirmation:</b> Deputy Dean reviews pre-issue checklist and confirms completion (<code>/completion/{cohortId}</code>). Dispatches <code>CompletionConfirmed</code> event.</li>
+  <li><b>Automated Credentialing:</b> Event listener (<code>IssueCredential.php</code>) automatically mints Digital Badges for each module and issues the official bilingual A4 Certificate (DOC-03) and signed W3C VC-JWT Digital Credential (DOC-04) using Ed25519 signing keys.</li>
+  <li><b>Public Verification:</b> Anyone can verify credential validity via <code>GET /verify/{code}</code> without login, inspecting cryptographic proofs and JWKS public keys.</li>
+  <li><b>Correction / Revocation:</b> Deputy Dean can correct clerical errors (original kept), replace credentials, or revoke fraudulent credentials with public status display.</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>CompletionTest.php</code> and <code>CredentialTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 6: Stand-Alone Micro-Credential Quality Verification (QV) Dossier</h3>
+<ul>
+  <li><b>Eligibility Check:</b> Lecturer initiates QV application (<code>/quality/{mcId}</code>). System validates: SAMC category, &ge;40 hours SLT, and at least 1 completed cohort with verified results.</li>
+  <li><b>Evidence Compilation:</b> System auto-links internal data for 6 evidence groups matching Lampiran D (academic design, assessment rubrics, cohort performance, CQI records, digital credential metadata).</li>
+  <li><b>Dual Endorsement:</b> Lecturer marks dossier as ready; Deputy Dean verifies and confirms internal readiness.</li>
+  <li><b>Submission &amp; External Decision:</b> Deputy Dean records external QVC/MQA submission reference and eventual verification decision (credit value, MQF level, validity dates up to 3 years). Verified record acts as single source of truth for catalogue claims.</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>QualityTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 7: Credit Accumulation, Consent, ACR Generation &amp; ABC Deposit</h3>
+<ul>
+  <li><b>ACR Preparation:</b> Upon completion of an eligible UMC or Quality-Verified SAMC, system prepares an Academic Credit Record (ACR) following 7 automated checks (<code>acr_checks</code>). MCE is blocked immediately.</li>
+  <li><b>Participant Consent:</b> Participant receives notification and submits consent choice (Consented, Declined, Postponed) via <code>/student/acr/{id}/consent</code>.</li>
+  <li><b>Deputy Dean Review:</b> Deputy Dean confirms ACR record accuracy.</li>
+  <li><b>ABC Export &amp; Deposit:</b> Consented ACRs enter ABC deposit queue (<code>/creditbank/queue</code>), exported as CSV batch, and deposit logged with ABC central reference. Credits become <i>Available</i> in student's credit ledger (<code>/creditbank/mine</code>) with a 10-year expiration timer.</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> (with CSV batch export; live national API gap noted) &bull; Verified in <code>CreditBankTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 8: Credit Transfer Evaluation, 80% LO Match &amp; Single Redemption</h3>
+<ul>
+  <li><b>Application:</b> Student applies for credit transfer to an enrolled degree programme using Available ABC credits (<code>/transfer/apply</code>). MCE and unverified SAMC blocked.</li>
+  <li><b>Validity &amp; Eligibility:</b> Receiving Faculty Deputy Dean evaluates application against 9 criteria in Lampiran F7.</li>
+  <li><b>LO Equivalence Matrix:</b> Evaluator maps applicant's MC learning outcomes against target course learning outcomes side-by-side. System computes percentage match; <b>&ge;80% threshold strictly enforced</b> before approval can proceed.</li>
+  <li><b>Single Redemption Lock:</b> On approval, credit ledger immediately places credits in <i>Provisionally Redeemed</i> status, blocking reuse in other programs. Upon degree graduation, credit transitions to <i>Redeemed</i>. If student withdraws, credit reverts to <i>Available</i>.</li>
+  <li><b>Decision Letter:</b> Official printable transfer decision letter (DOC-12) generated with detailed course exemptions and conditions.</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>TransferTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 9: Stackable Degree Pathway Mapping &amp; Individual Study Planning</h3>
+<ul>
+  <li><b>Pathway Definition:</b> Faculty defines official stackable pathway (<code>/pathways/create</code>) mapping multiple credit-bearing MCs to degree program courses. Senate approval reference recorded before publishing.</li>
+  <li><b>Curriculum Coverage:</b> Maps target courses to Programme Learning Outcomes (PLO) and Body of Knowledge (BoK) domains (Lampiran G4 &amp; G5).</li>
+  <li><b>Individual Study Plan (Lampiran G8):</b> Student or advisor builds individual study plan (<code>/pathways/{id}/plan</code>). System verifies:
+    <ol>
+      <li><b>Home Credit Rule (Clause 14.5.1):</b> Computes % of credits earned directly from UTeM (&ge;30% mandatory threshold).</li>
+      <li><b>Conventional Residency Rule (Clause 14.5.3):</b> Enforces minimum 1 semester physical residency at UTeM for conventional programmes.</li>
+      <li><b>Remaining Requirements:</b> Compiles remaining core, elective, FYP, and industrial training courses needed for graduation.</li>
+    </ol>
+  </li>
+  <li><b>Suitability Verdict:</b> Produces structured decision: <i>Suitable to Proceed</i>, <i>Suitable with Conditions</i>, <i>Not Yet Suitable</i>, or <i>Not Suitable</i>.</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>PathwayTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 10: Continuous Quality Improvement (CQI) &amp; Version Management</h3>
+<ul>
+  <li><b>Cohort Metrics:</b> Monitoring dashboard tracks active rate, completion rate, pass rate, mark distribution, and CLO attainment against institutional targets.</li>
+  <li><b>Student Feedback:</b> Anonymous survey submitted by participants after completion (<code>/student/feedback/{id}</code>).</li>
+  <li><b>CQI Record (Lampiran C):</b> Lecturer evaluates 6 quality domains, records identified issues with root cause, impact, and priority, and proposes action plans with owners and success KPIs.</li>
+  <li><b>Effectiveness Loop:</b> Actions move step-by-step; lecturer evaluates effectiveness, and only Deputy Dean can formally close the action. Ineffective actions carry forward to next cycle.</li>
+  <li><b>Version Management:</b> Changes classified automatically as Minor (recorded for CQI) or Material (triggers new draft version, full Senate re-approval, and transition rule execution).</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>MonitoringTest.php</code> and <code>VersionTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 11: Governance, Audit Integrity, Discrepancies &amp; Retention</h3>
+<ul>
+  <li><b>Separation of Duties:</b> Verified across all routes. Academic decisions locked to Faculty/Senate. CODL restricted to operations, templates, reference data, and reporting.</li>
+  <li><b>Audit Trail:</b> Cryptographic SHA-256 hash chaining on all <code>audit_events</code>. Database trigger blocks updates or deletions. Verification job detects chain breaks.</li>
+  <li><b>Mismatch Log:</b> Background scanner cross-checks results, credentials, ACRs, and ABC deposits. Found discrepancies can only be resolved via audited correction records.</li>
+  <li><b>Retention &amp; Disposal:</b> Non-academic logs undergo retention countdowns and require formal approval for disposal. Academic student records protected by permanent retention rules (<i>in perpetuity</i>).</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>RecordsTest.php</code> and <code>RbacSecurityTest.php</code>.</li>
+</ul>
+</main>

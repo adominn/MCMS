@@ -1,0 +1,58 @@
+<!-- ===================== SECTION 2 ===================== -->
+<h1>2. System Architecture & Technical Infrastructure</h1>
+
+<h2>2.1 Platform Overview & Technology Stack</h2>
+<p>UCreds is deployed as a dual-tier web architecture hosted on UTeM's institutional enterprise server infrastructure. The platform pairs a customized learning management engine with an integrated content management knowledge base to deliver both pedagogical content and administrative student guidance.</p>
+
+<script type="text/tbl" data-h="Component Layer|Technology / Implementation|Operational Role" data-w="28%|32%|40%">
+Core LMS Engine | Moodle 3.17 (Build 20201109) | Manages course activities, quiz assessments, gradebooks, modular SCORM packages, and user enrolments.
+Presentation Theme | Custom Fordson (Enhanced UI) | Provides a responsive, card-based interface tailored for adult learners, featuring high-contrast typography and category tabs.
+Catalog Frontend | Custom jQuery / AJAX Subsystem | Serves dynamic course filtering, live keyword search, and pagination via <code>/catalog/action.php</code>.
+Knowledge Base | WordPress 6.4.3 + Astra + BetterDocs | Hosts student support documentation, eOrientation articles, and eCounseling procedures under <code>/support/student/</code>.
+Web Server & OS | Apache 2.4.52 on Ubuntu Linux (PHP 7.4.33) | Handles HTTP/HTTPS ingress, reverse proxying, and SSL/TLS termination with modern cryptographic ciphers.
+Identity & Access | Microsoft Entra ID (OIDC) & OAuth2 | Facilitates single sign-on (SSO) for UTeM staff and students using institutional <code>@student.utem.edu.my</code> accounts.
+Security Perimeter | Campus Web Application Firewall (WAF) | Enforces perimeter rate-limiting, geo-blocking, and bot mitigation (e.g. blocking automated scraper user-agents).
+</script>
+<p class="tcap" data-t="tech-stack">Core Technology Stack of the UCreds Platform</p>
+
+<h2>2.2 Identity Federation and Single Sign-On (SSO)</h2>
+<p>Authentication on UCreds is bifurcated to accommodate both internal university stakeholders and external lifelong learners:</p>
+<ul>
+  <li><b>Institutional Users (Staff & Students):</b> Authenticate via the OpenID Connect (OIDC) protocol through Microsoft Entra ID (formerly Azure Active Directory) at endpoint <code>/auth/oidc/</code>. Upon successful federated authentication, accounts are automatically provisioned with university role mappings and linked to UTeM email domains.</li>
+  <li><b>Lifelong / Industry Learners:</b> Authenticate via Google OAuth2 federation (<code>/auth/oauth2/</code>) or standard internal Moodle credentials (<code>/login/index.php</code>), allowing public candidates to register and purchase modular courses without requiring university matriculation.</li>
+</ul>
+
+<h2>2.3 Data Flow & Catalog Retrieval Model</h2>
+<p>Unlike standard Moodle installations where courses are viewed strictly through a static category hierarchy (<code>/course/index.php</code>), UCreds decouples the public exploration layer from the underlying LMS course structure. When a prospective learner visits <code>https://ucreds.utem.edu.my/catalog/</code>, the client executes an asynchronous <code>POST</code> request to <code>action.php</code>.</p>
+
+<figure data-f="catalog-seq">
+<pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Learner as Prospective Learner
+    participant Browser as Client Browser (Edge/Chrome)
+    participant WAF as Campus Security WAF
+    participant Catalog as Catalog Controller (/catalog/action.php)
+    participant DB as Moodle Core DB (mdl_course)
+    
+    Learner->>Browser: Selects "Micro Courses" or Enters Search
+    Browser->>WAF: POST /catalog/action.php (action=fetch_data, pageid=1)
+    WAF->>Catalog: Validates Headers & Proxies Request
+    Catalog->>DB: Query published courses (visible=1, category in scope)
+    DB-->>Catalog: Return course titles, thumbnails, authors, prices
+    Catalog-->>Browser: JSON payload with HTML card markup
+    Browser->>Learner: Renders responsive 3x7 course grid
+    Learner->>Browser: Clicks course card
+    Browser->>Catalog: GET /courses/overview.php?id={id}
+    Catalog-->>Learner: Displays syllabus, MLOs, duration & enrolment CTA
+</pre>
+<figcaption>End-to-End Dynamic Catalog Retrieval Sequence on UCreds</figcaption>
+</figure>
+
+<h2>2.4 Security Perimeter & Network Isolation</h2>
+<p>The UCreds platform is guarded by an institutional Web Application Firewall (WAF). During the initial phases of this audit, standard headless automation tools (such as unmodified Puppeteer or Playwright instances) were intercepted with HTTP 500 error responses bearing signature <code>Attack ID: 20000051</code>. The perimeter enforces stringent checks on:</p>
+<ol>
+  <li><b>User-Agent Integrity:</b> Requires verified modern browser signatures (e.g., Google Chrome or Microsoft Edge desktop strings).</li>
+  <li><b>TLS Fingerprinting:</b> Inspects JA3/TLS handshake ciphers to filter out unauthorized automated scrapers.</li>
+  <li><b>Rate-Limiting:</b> Restricts burst requests across catalog search endpoints to protect backend PHP-FPM workers.</li>
+</ol>

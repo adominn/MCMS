@@ -1,0 +1,120 @@
+<!-- ===================== 7. NON-FUNCTIONAL REQUIREMENTS ===================== -->
+<h1>7. Non-Functional Requirements</h1>
+<p>This section states the quality the system must achieve. Figures for load are based on the indicative sizing of A-09 (up to 200 offerings and 20,000 participants a year, peaks of 2,000 registrations within a few hours); they are not binding commitments (D-21) and will be revised when real figures are known.</p>
+
+<h2>7.1 Performance Requirements</h2>
+<h3>7.1.1 Response Time</h3>
+<script type="text/req" data-p="NFR">
+nfr-page | 95% of page requests SHALL complete within 2 seconds under normal load, measured at the server. |
+nfr-search | Catalogue and record searches SHALL return the first page of results within 2 seconds for 95% of requests. |
+nfr-verify | The public verification page SHALL respond within 1 second for 95% of requests. | App E6
+nfr-report | Standard reports for one PTj and one year SHALL be produced within 10 seconds; larger reports SHALL run in the background and notify the user when ready. |
+</script>
+<h3>7.1.2 Throughput</h3>
+<script type="text/req" data-p="NFR">
+nfr-peak | The system SHALL handle 2,000 registrations within 2 hours, with at least 100 concurrent users submitting, without errors or loss of data. | A-09
+nfr-capacity | Registration SHALL never accept more participants than the capacity of an offering, even under concurrent submissions. |
+nfr-import | A CSV import of 5,000 result rows SHALL be validated and staged within 2 minutes. |
+nfr-issue | Issuing 500 signed Digital Credentials for a cohort SHALL complete within 10 minutes as a background job. |
+</script>
+<h3>7.1.3 Resource Utilisation and Scalability</h3>
+<script type="text/req" data-p="NFR">
+nfr-cpu | At the peak load of {{nfr-peak}}, average CPU use of application servers SHALL stay below 70%, leaving headroom for unexpected load. | D-21
+nfr-stateless | Application servers SHALL keep no session state on local disk, so that more servers can be added behind a load balancer. | D-21
+nfr-queue | Long-running work (imports, credential issuance, reports, notifications, alerts) SHALL run in background queues, so that interactive response times are not affected. |
+nfr-growth | The design SHALL allow ten times the indicative annual volume without a change of architecture. | D-21
+</script>
+
+<h2>7.2 Security Requirements</h2>
+<h3>7.2.1 Authentication and Authorisation</h3>
+<script type="text/req" data-p="SR">
+sr-sso | In production, all users except public verifiers SHALL authenticate through UTeM SSO. MCMS SHALL NOT store user passwords. | D-10
+sr-mfa | Staff roles that approve, verify, issue, deposit or administer SHALL require multi-factor authentication, enforced through the SSO provider where possible. |
+sr-authz | Every request SHALL be checked on the server against the user's roles and scope. Access to a record outside scope SHALL be refused and logged. | G 18.11
+sr-leastpriv | Roles SHALL follow least privilege: each role SHALL have only the permissions needed for its functions in {{tab:raci}}. | App H6
+sr-review | S1 SHALL be able to produce a list of all role assignments for periodic access review. | App H6
+</script>
+<h3>7.2.2 Data Protection</h3>
+<script type="text/req" data-p="SR">
+sr-tls | Data in transit SHALL be encrypted (Section 5.4). |
+sr-rest | The database, file storage and backups SHALL be encrypted at rest. Identity card and passport numbers SHALL additionally be encrypted at field level. | PDPA
+sr-keys | Credential signing keys SHALL be generated and stored in a protected key store, SHALL never leave it in readable form, and SHALL be rotatable without invalidating credentials already issued. Key ownership is TBD (OI-08). | D-19
+sr-uploads | Uploaded files SHALL be checked for allowed type and size, scanned for malware where a scanner is available, and stored outside the public web root. |
+sr-tamper | The audit trail SHALL be tamper-evident (for example, each entry carries a hash of the previous one), and the system SHALL be able to check its integrity. | D-20
+sr-backupprotect | Backups SHALL be stored separately from the production system with access restricted to authorised administrators. | App H6
+</script>
+<h3>7.2.3 Privacy and Compliance</h3>
+<script type="text/req" data-p="SR">
+sr-pdpa | Processing of personal data SHALL comply with PDPA 2010: notice at collection, use only for stated purposes, disclosure only as permitted, and retention only as long as needed. | PDPA, G 18.11
+sr-minimal | The public verification page and any shared data SHALL show only the minimum permitted information (Section 3.9.3). | App E6, H6
+sr-access | A participant SHALL be able to see the personal data MCMS holds about them and request correction through the correction procedure. | PDPA, G 18.10
+sr-sharing | Data SHALL be shared with external parties (ABC, QVC/MQA, partners) only through approved mechanisms and only to the extent needed. | App H6
+</script>
+<h3>7.2.4 Application Security, Monitoring and Incident Response</h3>
+<script type="text/req" data-p="SR">
+sr-asvs | The application SHALL meet OWASP ASVS 4.0 level 2, including input validation, output encoding, protection against cross-site request forgery and injection, and secure session cookies. |
+sr-ratelimit | Public endpoints (catalogue, verification) SHALL be rate-limited to resist automated abuse and enumeration of credential IDs. |
+sr-seclog | Security events (sign-in, failed authorisation, role changes, key use, export of personal data) SHALL be logged and SHALL be available to UTeM ICT security monitoring. |
+sr-alerts | The system SHOULD alert administrators to suspicious patterns, such as many failed authorisations or mass data export. |
+sr-incident | An incident procedure SHALL be documented, covering detection, containment, notification of affected participants where required, and recovery. | PDPA
+sr-pentest | A security test SHALL be carried out before the first production release and after major changes. |
+</script>
+
+<h2>7.3 Reliability and Availability</h2>
+<script type="text/req" data-p="NFR">
+nfr-avail | The system SHALL be available 99.5% of the time during UTeM working hours (08:00–18:00, Monday to Friday), excluding announced maintenance. |
+nfr-verifyavail | The public verification page SHOULD be available 99.5% of the time at all hours, because employers may check credentials at any time. | App E6
+nfr-maint | Planned maintenance SHALL be announced to users at least 48 hours in advance and SHALL be scheduled outside working hours unless an urgent fix requires otherwise. |
+nfr-backup | The database and stored files SHALL be backed up daily, with backups kept for at least 30 days. The recovery point objective (RPO) SHALL be 24 hours. | App H6
+nfr-recover | The system SHALL be restorable from backup within a recovery time objective (RTO) of 8 working hours. A restore SHALL be tested at least twice a year. |
+nfr-adapterfail | Failure or unavailability of an external system SHALL NOT stop the business functions that do not depend on it; affected jobs SHALL wait and retry. | D-06
+nfr-errors | Errors SHALL be shown to users as clear messages in their language with a reference code, without technical details. Full details SHALL be logged for support staff. |
+nfr-transactions | Each business action that changes several records (for example approving a transfer and changing credit status) SHALL succeed or fail as a whole. |
+</script>
+
+<h2>7.4 Usability and Accessibility</h2>
+<script type="text/req" data-p="NFR">
+nfr-wcag | The interface SHALL conform to WCAG 2.1 level AA, including keyboard operation, sufficient colour contrast, text alternatives and labels readable by screen readers. Status SHALL never be shown by colour alone. |
+nfr-plain | Labels, messages and help SHALL use plain language. Each recognition status SHALL have a short explanation available on the screen where it appears. | G 10.3.1
+nfr-tasks | A trained staff user SHALL be able to complete a common task (verify a cohort's results, issue credentials, record a deposit) in no more than five steps from their task page. |
+nfr-mobile | Participant functions (catalogue, registration, progress, credentials, consent, ledger) SHALL be fully usable on a phone. |
+nfr-langswitch | Switching language SHALL keep the user on the same page with entered data intact. | D-02
+nfr-lowbandwidth | Pages for participants SHOULD remain usable on slow mobile connections (for example, page weight under 1.5 MB without media). |
+</script>
+
+<h2>7.5 Maintainability and Portability</h2>
+<script type="text/req" data-p="NFR">
+nfr-modular | The code SHALL be organised into the modules of {{tab:modules}}, each with its own internal interface. A module SHALL NOT read or write another module's tables directly. | D-07
+nfr-laravel | The system SHALL follow the conventions of the Laravel framework and the PHP-FIG coding standards, so that CODL PHP developers can maintain it. | D-08
+nfr-rulestests | Every business rule of Section 4 SHALL have at least one automated test. The automated test suite SHALL run on every change. | D-01, D-05
+nfr-dbportable | Database access SHALL use the Laravel database layer, keeping vendor-specific features to a documented minimum, so that the system can run on PostgreSQL or MySQL/MariaDB. | D-09
+nfr-config | Environment-specific values (addresses, keys, adapter modes) SHALL be configuration, not code. | D-14
+nfr-migrations | Database changes SHALL be applied through versioned migration scripts. |
+nfr-deploy | The system SHALL be deployable to the development, test and production environments by a documented, repeatable procedure, preferably as containers. |
+nfr-docs | The SDD, adapter interfaces, CSV templates and operating procedures SHALL be kept up to date with each release. |
+</script>
+
+<h2>7.6 Legal and Compliance Requirements</h2>
+<script type="text/req" data-p="NFR">
+nfr-guide | The system SHALL comply with the Guide and the MQA guidelines it refers to, as they apply to the controlling copy of the Guide (Versi 1.0, 18 September 2026). | D-03
+nfr-pdpa | The system SHALL comply with the Personal Data Protection Act 2010 and UTeM data protection policy (Section 7.2.3). |
+nfr-records | The system SHALL support UTeM's records and document management policy, including retention and controlled disposal. | G 18.12
+nfr-ip | Software components used SHALL have licences compatible with UTeM ownership and on-premises use. The use of third-party learning materials is governed by Section 3.2.2. | G 9.3
+nfr-standards | Digital Credentials SHALL follow the open standards of reference 9 so that they can be verified by third parties without UTeM software. | D-19
+</script>
+
+<h2>7.7 Operational Requirements</h2>
+<script type="text/req" data-p="NFR">
+nfr-monitor | The system SHALL expose health checks and SHALL be monitored for availability, response time, queue length, failed jobs and disk use, with alerts to the operations team. |
+nfr-applog | Application logs SHALL be structured, time-stamped and kept for at least 90 days. Logs SHALL NOT contain identity card numbers, tokens or secrets. | PDPA
+nfr-admin | Routine administration (users, roles, settings, templates, reference data, adapter modes) SHALL be possible through the interface without database access. | D-16
+nfr-scheduler | Timed jobs (expiry alerts, overdue reminders, retention checks) SHALL run on a scheduler, and each run SHALL be logged with its result. |
+nfr-envs | Development and test environments SHALL NOT contain real personal data unless it is masked. | PDPA
+</script>
+
+<h2>7.8 Cultural and Language Considerations</h2>
+<script type="text/req" data-p="NFR">
+nfr-names | Name fields SHALL accept long names and Malaysian naming forms (for example bin, binti, a/l, a/p) and SHALL print them in full on certificates. | App E3
+nfr-bmterms | The Bahasa Melayu interface SHALL use the terms of the Guide (for example Rekod Pencapaian Pembelajaran, Pemindahan Kredit, Penebusan Tunggal) consistently. | D-02
+nfr-holidays | Reminders and due dates SHOULD take account of Malaysian public holidays and the UTeM academic calendar. |
+</script>

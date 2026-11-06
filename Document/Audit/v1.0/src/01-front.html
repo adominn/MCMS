@@ -1,0 +1,54 @@
+<!-- ===================== COVER ===================== -->
+<section class="cover">
+  <p class="doc-title">System Role-Based Page & Functionality Audit</p>
+  <p class="doc-sub">UTeM Micro-Credential Management System (MCMS / ACESS)</p>
+  <h3>Document Control</h3>
+  <table>
+    <thead><tr><th colspan="2">Document Information</th></tr></thead>
+    <tbody>
+      <tr><td>System Name</td><td>UTeM Micro-Credential Management System (MCMS / ACESS)</td></tr>
+      <tr><td>Document Reference</td><td>MCMS_AUDIT_V1.0_Nov_2026</td></tr>
+      <tr><td>Version & Date</td><td>Version 1.0 &bull; November 2026</td></tr>
+      <tr><td>Target Architecture</td><td>Laravel 13.38 / PHP 8.3 / PostgreSQL 16 Modular Monolith (Carbon Navy UI)</td></tr>
+      <tr><td>Baseline Specifications</td><td>SRS v1.2, SDD v1.2, PRD v1.1, Glossary & Decision Log v0.8 (D-38), UI/UX Spec v1.3</td></tr>
+      <tr><td>Design Baseline</td><td>Approved Clickable Prototype v2 (<code>UIUX/v2/prototype</code>)</td></tr>
+      <tr><td>Prepared For</td><td>Centre for Open and Distance Learning (CODL), Universiti Teknikal Malaysia Melaka</td></tr>
+      <tr><td>Prepared By</td><td>Antigravity Agentic Audit Suite (Advanced Software Engineering & Verification)</td></tr>
+      <tr><td>Audit Scope</td><td>100% Comprehensive Audit of All User Roles, Routes (221 Endpoints), Blade Templates (126 Views), Controllers (36 Modules), Database Tables (91 Tables), and Cross-Role Workflows</td></tr>
+    </tbody>
+  </table>
+  <div class="disclaimer">
+    <b>Document Classification & Integrity:</b>
+    This audit report represents a rigorous, evidence-based technical inspection of the ACESS / MCMS codebase. Every finding is substantiated by static code inspection, controller method analysis, route table verification, and database migration mapping. No assumptions regarding database operations, access controls, or UI interactivity have been made without direct verification against the underlying implementation.
+  </div>
+</section>
+
+<!-- ===================== TABLE OF CONTENTS ===================== -->
+<section class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <div id="toc"></div>
+  <span class="tocend">TOCENDMARKER</span>
+</section>
+
+<main>
+<h1 class="notoc">Executive Summary</h1>
+<p>This audit delivers an exhaustive functional and technical evaluation of the <b>UTeM Micro-Credential Management System (MCMS / ACESS)</b>. Built to support UTeM's lifelong learning and Malaysian Qualifications Framework (MQF) credit-bearing initiatives, MCMS implements the approved clickable prototype (D-38) across a modular Laravel 13 architecture connected to a PostgreSQL database schema.</p>
+
+<h2>Audit Objectives & Scope</h2>
+<p>The audit was executed under rigorous directives to identify all registered pages, evaluate actual versus intended behavior, trace database operations, verify role-based permissions, map end-to-end user flows, and identify disconnected or unfinished workflows. The scope encompasses:</p>
+<ul>
+  <li><b>All Seven (7) User Roles / Actors:</b> Public / Guest, Student, Lecturer, Reviewer & Industry Expert, Deputy Dean, CODL Administrator, and Shared Authenticated Shell.</li>
+  <li><b>Complete Route Inventory:</b> 221 registered routes (116 GET/HEAD endpoints and 105 POST/PUT state-transition actions).</li>
+  <li><b>Presentation Layer:</b> 126 Blade templates across 24 module view directories.</li>
+  <li><b>Data Layer:</b> 91 relational database tables across 20 schema migrations.</li>
+  <li><b>Execution & Integration:</b> 36 module controllers, background event listeners, and external adapters.</li>
+</ul>
+
+<h2>Key Audit Findings</h2>
+<p>The system exhibits strong architectural discipline, with an append-only cryptographic audit chain (MD-15), strict separation of academic and administrative duties (D-28), and a fully functioning four-act demonstration scenario (FL-19) verifying core curriculum, learning, credit banking, and quality verification lifecycles. However, several critical gaps must be addressed before production pilot readiness:</p>
+<ol>
+  <li><b>File Storage & Scanning Stand-Ins:</b> Multiple production workflows (Quality Verification evidence, offering readiness evidence, UCreds CSV uploads) store textual file references rather than binary files in an object store with automated virus scanning.</li>
+  <li><b>Server-Side PDF Generation:</b> Official legal credentials (A4 certificate, student receipt, Academic Credit Record, Senate decision pack, transfer letter) rely on client-side browser print rendering rather than deterministic server-side PDF compilation.</li>
+  <li><b>Bilingual UI Localization:</b> While header toggles and Malay headings exist (<code>lang/ms.json</code>), subheadings, table headers, buttons, and validation messages remain predominantly in English.</li>
+  <li><b>Asynchronous Processing Dependencies:</b> File imports and 500-credential issuing batches run synchronously within HTTP requests, awaiting Redis/Horizon queue worker infrastructure.</li>
+</ol>

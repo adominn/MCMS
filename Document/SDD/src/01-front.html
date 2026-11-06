@@ -1,0 +1,52 @@
+<!-- ===================== COVER ===================== -->
+<section class="cover">
+  <p class="doc-title">Software Design Description (SDD)</p>
+  <p class="doc-sub">UTeM Micro-Credential Management System (MCMS)</p>
+  <h3>Document Control</h3>
+  <table>
+    <thead><tr><th colspan="2">Document Information</th></tr></thead>
+    <tbody>
+      <tr><td>Title</td><td>Software Design Description for the UTeM Micro-Credential Management System (MCMS)</td></tr>
+      <tr><td>Date</td><td>27 October 2026</td></tr>
+      <tr><td>Status</td><td>Draft; supervisor review planned once the Release 1 prototype can be shown (D-23)</td></tr>
+      <tr><td>Version</td><td>1.0</td></tr>
+      <tr><td>Prepared for</td><td>Supervisor review; Centre for Open and Distance Learning (CODL), Universiti Teknikal Malaysia Melaka (assumed system owner)</td></tr>
+      <tr><td>Prepared by</td><td>Aliff, Intern</td></tr>
+      <tr><td>Reference</td><td>MCMS_SDD_V1.0_Oct_2026</td></tr>
+      <tr><td>Written against</td><td>Glossary and Decision Log v0.5 (MCMS_FND_V0.5_Oct_2026); Software Requirements Specification v1.0 (MCMS_SRS_V1.0_Oct_2026); Product Requirements Document v1.0 (MCMS_PRD_V1.0_Oct_2026); UI/UX Design Specification v1.1 (MCMS_UIUX_V1.1_Oct_2026)</td></tr>
+      <tr><td>Document set</td><td>SRS, PRD, UI/UX Design Specification, Software Design Description (this document)</td></tr>
+    </tbody>
+  </table>
+  <div class="disclaimer">
+    <b>Disclaimer:</b>
+    This document is a working draft prepared by an intern as part of a concept and mock-up for a proposed system. It is not an official document of UTeM or CODL. Technology choices marked Assumed or Proposed have not been confirmed by the system owner. Unauthorised modification, distribution or misrepresentation is prohibited.
+  </div>
+</section>
+
+<section class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <div id="toc"></div>
+  <span class="tocend">TOCENDMARKER</span>
+</section>
+
+<main>
+<h1 class="notoc">Revision History</h1>
+<script type="text/tbl" data-h="Version|Date|Change" data-w="12%|18%|70%">
+1.0 | 27 Oct 2026 | First issue: architecture, technology, module, data, interface, process, security, quality and deployment design for Release 1, traced to the SRS v1.0 and the approved UI/UX Design Specification v1.1.
+</script>
+
+<h1 class="notoc">Glossary</h1>
+<p>All terms of the Glossary and Decision Log v0.5 apply with exactly the same meaning. The table below adds only the technical terms used in this SDD.</p>
+<script type="text/tbl" data-h="Term|Definition" data-w="24%|76%">
+Action | A single-purpose class that performs one business operation of a module (for example VerifyResults), inside one database transaction.
+Adapter | An implementation of an integration interface for one external system. Each interface has a Stub, Manual and, later, Live adapter (AD-08).
+AD-XX / DA-XX | Architecture decision / design assumption of this SDD (Sections 1.6 and 11.3).
+Domain event (EV-XX) | A record that something happened in a module (for example CredentialIssued), published so other modules can react without reading its tables.
+Eloquent | Laravel's object-relational mapper.
+Horizon | Laravel's dashboard and supervisor for Redis queues.
+Job (JB-XX) | A unit of background work run by a queue worker, for example issuing a batch of credentials.
+Livewire | A Laravel library for interactive server-rendered components.
+MD-XX | A module of the modular monolith (Section 2.3).
+Policy | A Laravel class that decides whether a user may perform an action on a record (role, scope, separation of duties).
+ULID | Universally Unique Lexicographically Sortable Identifier, used as the internal primary key.
+</script>

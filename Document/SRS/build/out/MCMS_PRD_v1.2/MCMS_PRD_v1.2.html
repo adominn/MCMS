@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Software Requirements Specification - UTeM MCMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --blue:#3f6fa6; --tint:#dcebf1; --line:#444; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family:'Noto Serif', Cambria, Georgia, serif; font-size:10pt; line-height:1.45; color:#1a1a1a;
+         font-variant-ligatures:none; margin:0; background:#fff; }
+  /* cover */
+  .cover { break-after:page; padding-top:28mm; }
+  .cover .doc-title { text-align:center; font-size:23pt; font-weight:700; margin:0 0 6px; }
+  .cover .doc-sub { text-align:center; font-size:14pt; font-weight:700; font-style:italic; margin:0 0 30px; }
+  .cover h3 { font-size:13pt; margin:0 0 4px; }
+  .cover table td:first-child { width:34%; font-weight:700; }
+  .cover .disclaimer { margin-top:38mm; font-style:italic; font-size:9.5pt; text-align:justify; }
+  .cover .disclaimer b { display:block; font-size:10.5pt; margin-bottom:2px; }
+  .tint, .cover th { background:var(--tint) !important; }
+  /* toc */
+  .toc { break-after:page; }
+  .toc-title, h1.notoc { background:var(--tint); text-align:center; font-size:14pt; font-weight:700; padding:6px; margin:0 0 12px; color:#111; }
+  .toc-row { display:flex; align-items:baseline; font-size:9.5pt; margin:3px 0; }
+  .toc-row .t { white-space:nowrap; }
+  .toc-row .dots { flex:1; border-bottom:1px dotted #777; margin:0 4px; transform:translateY(-3px); }
+  .toc-row .pg { min-width:16px; text-align:right; }
+  .toc-1 { font-weight:700; margin-top:7px; }
+  .toc-2 { padding-left:16px; }
+  .toc-3 { padding-left:32px; font-size:9pt; }
+  .tocend { color:#fff; font-size:2pt; }
+  /* headings */
+  main h1 { break-before:page; background:var(--tint); color:var(--blue); font-size:15pt; padding:5px 8px; margin:0 0 10px; break-after:avoid; }
+  main h2 { color:var(--blue); font-size:12.5pt; margin:16px 0 6px 10px; break-after:avoid; }
+  main h3 { color:var(--blue); font-size:11pt; margin:12px 0 5px 20px; font-style:italic; break-after:avoid; }
+  main h4 { font-size:10pt; margin:10px 0 4px; break-after:avoid; }
+  p { margin:0 0 7px; text-align:justify; }
+  ul, ol { margin:2px 0 8px 4px; padding-left:20px; }
+  li { margin:1px 0; }
+  td ul, td ol { margin:2px 0 2px 0; padding-left:16px; }
+  table { width:100%; border-collapse:collapse; margin:6px 0 12px; font-size:9pt; }
+  th, td { border:0.6pt solid var(--line); padding:3px 6px; vertical-align:top; text-align:left; }
+  th { background:#ececec; font-weight:700; }
+  thead { display:table-header-group; }
+  tr { break-inside:avoid; }
+  td.c-id, th.c-id { white-space:nowrap; width:50px; font-weight:600; }
+  td.c-src, th.c-src { width:74px; font-size:8pt; color:#333; }
+  td.c-src { font-family:'Noto Sans', Arial, sans-serif; }
+  td.c-x, th.c-x { width:92px; font-size:8pt; }
+  .tcap, figcaption { font-style:italic; font-size:8.5pt; color:#333; margin:2px 0 12px; text-align:left; }
+  .tcap { margin:10px 0 0; }
+  figure { margin:10px 0 12px; break-inside:avoid; }
+  figure .mermaid { text-align:center; }
+  figure .mermaid svg { max-height:205mm; }
+  .note { border-left:3pt solid var(--blue); background:#f3f7fb; padding:5px 9px; margin:8px 0 10px; font-size:9.5pt; break-inside:avoid; }
+  .note b:first-child { color:var(--blue); }
+  code { font-family:Consolas, 'Courier New', monospace; font-size:8.3pt; background:#f1f1f1; padding:0 2px; }
+  .small { font-size:8.5pt; }
+  .center { text-align:center; }
+  .keep { break-inside:avoid; }
+  .pb { break-before:page; }
+  pre.mermaid { font-family:'Noto Sans', Arial, sans-serif; white-space:pre; }
+</style>
+</head>
+<body>
+<script>window.__EXT_IDS = {"fr-sso": "FR-01", "fr-nosignup": "FR-02", "fr-firstlogin": "FR-03", "fr-applicant": "FR-04", "fr-devidp": "FR-05", "fr-session": "FR-06", "fr-profile": "FR-07", "fr-signinguide": "FR-08", "fr-lang": "FR-09", "fr-idmerge": "FR-10", "fr-rbac": "FR-11", "fr-multirole": "FR-12", "fr-scope": "FR-13", "fr-roleassign": "FR-14", "fr-sod": "FR-15", "fr-adminlimits": "FR-16", "fr-approverbody": "FR-17", "fr-coi": "FR-18", "fr-sme": "FR-19", "fr-delegate": "FR-20", "fr-settings": "FR-21", "fr-settinghist": "FR-22", "fr-templates": "FR-23", "fr-userlist": "FR-24", "fr-refdata": "FR-25", "fr-adapterstatus": "FR-26", "fr-catwizard": "FR-27", "fr-catsuggest": "FR-28", "fr-catumc": "FR-29", "fr-catmce": "FR-30", "fr-catsamc": "FR-31", "fr-catconfirm": "FR-32", "fr-umcnotsamc": "FR-33", "fr-mcereclass": "FR-34", "fr-propnew": "FR-35", "fr-propbasic": "FR-36", "fr-propjust": "FR-37", "fr-proplo": "FR-38", "fr-propslt": "FR-39", "fr-propassess": "FR-40", "fr-propalign": "FR-41", "fr-propcred": "FR-42", "fr-propcredit": "FR-43", "fr-propready": "FR-44", "fr-propattach": "FR-45", "fr-propcollab": "FR-46", "fr-propautosave": "FR-47", "fr-propip": "FR-48", "fr-propvalidate": "FR-49", "fr-propprint": "FR-50", "fr-umcparent": "FR-51", "fr-umcaccred": "FR-52", "fr-umcmodel": "FR-53", "fr-umcsltsum": "FR-54", "fr-umcwhole": "FR-55", "fr-umccreditmodel": "FR-56", "fr-umcassessmodule": "FR-57", "fr-umcclo": "FR-58", "fr-umcmodcredit": "FR-59", "fr-umcparentchange": "FR-60", "fr-revassign": "FR-61", "fr-revform": "FR-62", "fr-revrec": "FR-63", "fr-revcomments": "FR-64", "fr-revcategory": "FR-65", "fr-revsummary": "FR-66", "fr-wfstages": "FR-67", "fr-wfrecord": "FR-68", "fr-wfversion": "FR-69", "fr-wflock": "FR-70", "fr-wfnotcredit": "FR-71", "fr-wfqueue": "FR-72", "fr-wfbatch": "FR-73", "fr-wfpack": "FR-74", "fr-verhistory": "FR-75", "fr-chgclassify": "FR-76", "fr-chgmaterial": "FR-77", "fr-chgminor": "FR-78", "fr-chgqv": "FR-79", "fr-verkeep": "FR-80", "fr-verbind": "FR-81", "fr-vernotify": "FR-82", "fr-vercompare": "FR-83", "fr-offcreate": "FR-84", "fr-offapproved": "FR-85", "fr-offreadiness": "FR-86", "fr-offconfirm": "FR-87", "fr-offopen": "FR-88", "fr-offrecheck": "FR-89", "fr-offqv": "FR-90", "fr-catpublic": "FR-91", "fr-catinfo": "FR-92", "fr-catsearch": "FR-93", "fr-catwording": "FR-94", "fr-catstages": "FR-95", "fr-catmodular": "FR-96", "fr-catlang": "FR-97", "fr-regopen": "FR-98", "fr-regelig": "FR-99", "fr-regack": "FR-100", "fr-regpdpa": "FR-101", "fr-regpay": "FR-102", "fr-regwaiver": "FR-103", "fr-regstatus": "FR-104", "fr-regmodule": "FR-105", "fr-regwithdraw": "FR-106", "fr-regwaitlist": "FR-107", "fr-regbulk": "FR-108", "fr-cohortlist": "FR-109", "fr-regconfirm": "FR-110", "fr-lpadapter": "FR-111", "fr-lpexport": "FR-112", "fr-lpimport": "FR-113", "fr-lpvalidate": "FR-114", "fr-lpstaged": "FR-115", "fr-lpbadge": "FR-116", "fr-lplog": "FR-117", "fr-lplive": "FR-118", "fr-lpsync": "FR-119", "fr-asplan": "FR-120", "fr-asentry": "FR-121", "fr-asnoattend": "FR-122", "fr-asintegrity": "FR-123", "fr-asverify": "FR-124", "fr-asbulkverify": "FR-125", "fr-aschange": "FR-126", "fr-asmodule": "FR-127", "fr-asappeal": "FR-128", "fr-asfeedback": "FR-129", "fr-arkeep": "FR-130", "fr-arlabel": "FR-131", "fr-arumc": "FR-132", "fr-arnomix": "FR-133", "fr-arwindow": "FR-134", "fr-arsamc": "FR-135", "fr-arview": "FR-136", "fr-arstaff": "FR-137", "fr-crcheck": "FR-138", "fr-crbadge": "FR-139", "fr-crbadgetext": "FR-140", "fr-crcert": "FR-141", "fr-crdc": "FR-142", "fr-crformat": "FR-143", "fr-crgenerated": "FR-144", "fr-crbatch": "FR-145", "fr-crlang": "FR-146", "fr-crid": "FR-147", "fr-crwallet": "FR-148", "fr-crshare": "FR-149", "fr-crwalletint": "FR-150", "fr-wdtemplate": "FR-151", "fr-wdblock": "FR-152", "fr-wdqvlapse": "FR-153", "fr-vfpage": "FR-154", "fr-vffields": "FR-155", "fr-vfsignature": "FR-156", "fr-vftrust": "FR-157", "fr-vflog": "FR-158", "fr-vfnotfound": "FR-159", "fr-crcorrect": "FR-160", "fr-crreplace": "FR-161", "fr-crrevoke": "FR-162", "fr-crnoerase": "FR-163", "fr-crnotify": "FR-164", "fr-qvsamc": "FR-165", "fr-qveligible": "FR-166", "fr-qvevidence": "FR-167", "fr-qvautolink": "FR-168", "fr-qvchange": "FR-169", "fr-qvreadiness": "FR-170", "fr-qvpackage": "FR-171", "fr-qvsubmit": "FR-172", "fr-qvresult": "FR-173", "fr-qvsource": "FR-174", "fr-qvalerts": "FR-175", "fr-qvlapse": "FR-176", "fr-qvnotransfer": "FR-177", "fr-qvportal": "FR-178", "fr-acrelig": "FR-179", "fr-acrchecks": "FR-180", "fr-acrprep": "FR-181", "fr-acrverify": "FR-182", "fr-acrseparate": "FR-183", "fr-acrmulti": "FR-184", "fr-acrnocombine": "FR-185", "fr-acrexternal": "FR-186", "fr-dpconsent": "FR-187", "fr-dpdecline": "FR-188", "fr-dpqueue": "FR-189", "fr-dpexport": "FR-190", "fr-dprecord": "FR-191", "fr-dpnottransfer": "FR-192", "fr-dponlyacr": "FR-193", "fr-dplive": "FR-194", "fr-cvexpiry": "FR-195", "fr-cvalert": "FR-196", "fr-cvexpired": "FR-197", "fr-cvledger": "FR-198", "fr-cvretain": "FR-199", "fr-ctapply": "FR-200", "fr-ctsource": "FR-201", "fr-ctavailable": "FR-202", "fr-ctvalidity": "FR-203", "fr-ctequiv": "FR-204", "fr-ctloequiv": "FR-205", "fr-ctlimits": "FR-206", "fr-ctpartial": "FR-207", "fr-ctdecision": "FR-208", "fr-ctauthority": "FR-209", "fr-ctreject": "FR-210", "fr-cttrace": "FR-211", "fr-ctversion": "FR-212", "fr-ctadmission": "FR-213", "fr-ctprecedent": "FR-214", "fr-rdprov": "FR-215", "fr-rdfinal": "FR-216", "fr-rdrelease": "FR-217", "fr-rdnoreuse": "FR-218", "fr-rdconflict": "FR-219", "fr-rdkeep": "FR-220", "fr-rdsource": "FR-221", "fr-rdabcsync": "FR-222", "fr-spdefine": "FR-223", "fr-spmap": "FR-224", "fr-spcreditbearing": "FR-225", "fr-spapprove": "FR-226", "fr-spnotransfer": "FR-227", "fr-spplo": "FR-228", "fr-spcurrchange": "FR-229", "fr-spplan": "FR-230", "fr-sp30": "FR-231", "fr-spresidency": "FR-232", "fr-spremain": "FR-233", "fr-spdecision": "FR-234", "fr-spadmit": "FR-235", "fr-spaward": "FR-236", "fr-spinfo": "FR-237", "fr-spsis": "FR-238", "fr-mnindicators": "FR-239", "fr-mnlo": "FR-240", "fr-mnfeedback": "FR-241", "fr-mnmodular": "FR-242", "fr-mndomains": "FR-243", "fr-mndash": "FR-244", "fr-cqiissue": "FR-245", "fr-cqiaction": "FR-246", "fr-cqieffect": "FR-247", "fr-cqitrace": "FR-248", "fr-cqichange": "FR-249", "fr-cqisign": "FR-250", "fr-prschedule": "FR-251", "fr-proutcome": "FR-252", "fr-prsuspend": "FR-253", "fr-prnotify": "FR-254", "fr-prkeep": "FR-255", "fr-auditlog": "FR-256", "fr-auditview": "FR-257", "fr-correct": "FR-258", "fr-mismatch": "FR-259", "fr-trace": "FR-260", "fr-cohortrec": "FR-261", "fr-reports": "FR-262", "fr-export": "FR-263", "fr-retention": "FR-264", "fr-hold": "FR-265", "fr-analytics": "FR-266", "fr-ntevents": "FR-267", "fr-ntlang": "FR-268", "fr-ntprefs": "FR-269", "fr-ntlog": "FR-270", "fr-ntdigest": "FR-271", "fr-ihregistry": "FR-272", "fr-ihretry": "FR-273", "br-slt": "BR-01", "br-qvvalid": "BR-02", "br-qvcohort": "BR-03", "br-creditvalid": "BR-04", "br-home30": "BR-05", "br-residency": "BR-06", "br-mce": "BR-07", "br-umcslt": "BR-08", "br-umclink": "BR-09", "br-creditmodel": "BR-10", "br-badge": "BR-11", "br-nomix": "BR-12", "br-modcredit": "BR-13", "br-samccredit": "BR-14", "br-sltnotcredit": "BR-15", "br-separate": "BR-16", "br-offer": "BR-17", "br-material": "BR-18", "br-achieve": "BR-19", "br-verifyfirst": "BR-20", "br-certwhole": "BR-21", "br-noclaim": "BR-22", "br-qvlapse": "BR-23", "br-acrelig": "BR-24", "br-arnotacr": "BR-25", "br-deposit": "BR-26", "br-consent": "BR-27", "br-acrkeep": "BR-28", "br-redeem": "BR-29", "br-equiv": "BR-30", "br-receiver": "BR-31", "br-mcetransfer": "BR-32", "br-rejectkeep": "BR-33", "br-admission": "BR-34", "br-creditbearing": "BR-35", "br-plo": "BR-36", "br-award": "BR-37", "br-audit": "BR-38", "br-version": "BR-39", "br-terminate": "BR-40", "br-cqi": "BR-41", "br-authority": "BR-42", "ir-responsive": "IR-01", "ir-lang": "IR-02", "ir-home": "IR-03", "ir-stagecolours": "IR-04", "ir-forms": "IR-05", "ir-confirm": "IR-06", "ir-print": "IR-07", "ir-identity": "IR-08", "ir-badges": "IR-09", "ir-help": "IR-10", "ir-accessible": "IR-11", "ir-qrscan": "IR-12", "ir-print-hw": "IR-13", "ir-hsm": "IR-14", "ir-adapter": "IR-15", "ir-stubs": "IR-16", "ir-mode": "IR-17", "ir-idempotent": "IR-18", "ir-oidc": "IR-19", "ir-csvtemplates": "IR-20", "ir-obv3": "IR-21", "ir-api": "IR-22", "ir-https": "IR-23", "ir-smtp": "IR-24", "ir-time": "IR-25", "ir-dates": "IR-26", "ir-files": "IR-27", "dr-separate": "DR-01", "dr-versionref": "DR-02", "dr-immutable": "DR-03", "dr-nodelete": "DR-04", "dr-derived": "DR-05", "dr-asof": "DR-06", "dr-publicid": "DR-07", "dr-time": "DR-08", "dr-refint": "DR-09", "dr-bilingual": "DR-10", "dr-refimport": "DR-11", "dr-legacy": "DR-12", "dr-nolegacycred": "DR-13", "nfr-page": "NFR-01", "nfr-search": "NFR-02", "nfr-verify": "NFR-03", "nfr-report": "NFR-04", "nfr-peak": "NFR-05", "nfr-capacity": "NFR-06", "nfr-import": "NFR-07", "nfr-issue": "NFR-08", "nfr-cpu": "NFR-09", "nfr-stateless": "NFR-10", "nfr-queue": "NFR-11", "nfr-growth": "NFR-12", "sr-sso": "SR-01", "sr-mfa": "SR-02", "sr-authz": "SR-03", "sr-leastpriv": "SR-04", "sr-review": "SR-05", "sr-tls": "SR-06", "sr-rest": "SR-07", "sr-keys": "SR-08", "sr-uploads": "SR-09", "sr-tamper": "SR-10", "sr-backupprotect": "SR-11", "sr-pdpa": "SR-12", "sr-minimal": "SR-13", "sr-access": "SR-14", "sr-sharing": "SR-15", "sr-asvs": "SR-16", "sr-ratelimit": "SR-17", "sr-seclog": "SR-18", "sr-alerts": "SR-19", "sr-incident": "SR-20", "sr-pentest": "SR-21", "nfr-avail": "NFR-13", "nfr-verifyavail": "NFR-14", "nfr-maint": "NFR-15", "nfr-backup": "NFR-16", "nfr-recover": "NFR-17", "nfr-adapterfail": "NFR-18", "nfr-errors": "NFR-19", "nfr-transactions": "NFR-20", "nfr-wcag": "NFR-21", "nfr-plain": "NFR-22", "nfr-tasks": "NFR-23", "nfr-mobile": "NFR-24", "nfr-langswitch": "NFR-25", "nfr-lowbandwidth": "NFR-26", "nfr-modular": "NFR-27", "nfr-laravel": "NFR-28", "nfr-rulestests": "NFR-29", "nfr-dbportable": "NFR-30", "nfr-config": "NFR-31", "nfr-migrations": "NFR-32", "nfr-deploy": "NFR-33", "nfr-docs": "NFR-34", "nfr-guide": "NFR-35", "nfr-pdpa": "NFR-36", "nfr-records": "NFR-37", "nfr-ip": "NFR-38", "nfr-standards": "NFR-39", "nfr-monitor": "NFR-40", "nfr-applog": "NFR-41", "nfr-admin": "NFR-42", "nfr-scheduler": "NFR-43", "nfr-envs": "NFR-44", "nfr-names": "NFR-45", "nfr-bmterms": "NFR-46", "nfr-holidays": "NFR-47", "nfr-i18n": "NFR-48", "nfr-bilingualcontent": "NFR-49", "nfr-currency": "NFR-50", "nfr-train-roles": "NFR-51", "nfr-train-cards": "NFR-52", "nfr-train-sandbox": "NFR-53", "nfr-train-tot": "NFR-54"};</script>
+
+<!-- ===================== COVER ===================== -->
+<section class="cover">
+  <p class="doc-title">Product Requirements Document (PRD)</p>
+  <p class="doc-sub">UTeM Micro-Credential Management System (MCMS)</p>
+  <h3>Document Control</h3>
+  <table>
+    <thead><tr><th colspan="2">Document Information</th></tr></thead>
+    <tbody>
+      <tr><td>Title</td><td>Product Requirements Document for the UTeM Micro-Credential Management System (MCMS)</td></tr>
+      <tr><td>Date</td><td>6 November 2026</td></tr>
+      <tr><td>Status</td><td>Draft; supervisor review planned once the Release 1 prototype can be shown (D-23)</td></tr>
+      <tr><td>Version</td><td>1.2</td></tr>
+      <tr><td>Prepared for</td><td>Supervisor review; Centre for Open and Distance Learning (CODL), Universiti Teknikal Malaysia Melaka (assumed system owner)</td></tr>
+      <tr><td>Prepared by</td><td>Aliff, Intern</td></tr>
+      <tr><td>Reference</td><td>MCMS_PRD_V1.2_Nov_2026</td></tr>
+      <tr><td>Written against</td><td>Glossary and Decision Log v0.9 (MCMS_FND_V0.9_Nov_2026); Software Requirements Specification v1.3 (MCMS_SRS_V1.3_Nov_2026)</td></tr>
+      <tr><td>Document set</td><td>Software Requirements Specification (SRS), Product Requirements Document (PRD) (this document), UI/UX Design Specification, Software Design Description (SDD), System Flow Map (D-30)</td></tr>
+    </tbody>
+  </table>
+  <div class="disclaimer">
+    <b>Disclaimer:</b>
+    This document is a working draft prepared by an intern as part of a concept and mock-up for a proposed system. It is not an official document of UTeM or CODL. Personas, sample data and targets in this document are illustrative. Items marked Assumed, Proposed or TBD have not been confirmed by the system owner. Unauthorised modification, distribution or misrepresentation is prohibited.
+  </div>
+</section>
+
+<section class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <div id="toc"></div>
+  <span class="tocend">TOCENDMARKER</span>
+</section>
+
+<main>
+<h1 class="notoc">Glossary</h1>
+<p>All terms of the Glossary and Decision Log v0.6 apply with exactly the same meaning. The table below adds only the product-management terms used in this PRD.</p>
+<script type="text/tbl" data-h="Term|Definition" data-w="24%|76%">
+Acceptance criteria | Conditions that a user story must meet to be accepted, written as Given / When / Then.
+Epic | A large body of work that groups related features and user stories (E1–E10 in this document).
+Feature (F-XX) | A product capability that delivers value to one or more user classes. Each feature traces to SRS requirements.
+Increment | A shippable slice of Release 1 that can be demonstrated on its own (Increment 1.1 to 1.4).
+KPI-XX | Key Performance Indicator: a measure with a target that shows whether the product achieves its goals.
+MoSCoW | Prioritisation scale: Must have, Should have, Could have, Won't have (this time).
+MVP | Minimum Viable Product. For MCMS, the Release 1 prototype that can run the demonstration scenario of Section 7 end to end.
+Persona | A fictional, representative user built from a user class, used to keep design decisions centred on real needs. Personas in this document are illustrative.
+PA-XX | Product assumption made in this PRD, in addition to A-01 to A-09 of the Glossary and Decision Log.
+Release 1 / 2 / 3 | Delivery stages. SHALL requirements of the SRS belong to Release 1, SHOULD to Release 2, MAY to Release 3 or later (D-24).
+RK-XX | An entry in the product risk register (Section 10).
+User story (US-XX) | A short description of a need from a user's point of view: "As a ⟨role⟩, I want ⟨goal⟩ so that ⟨benefit⟩."
+</script>
+
+<!-- ===================== 1. INTRODUCTION ===================== -->
+<h1>1. Introduction</h1>
+
+<h2>1.1 Purpose</h2>
+<p>This Product Requirements Document (PRD) describes MCMS as a product: who it serves, what problems it solves, which features it offers, in which release each feature is delivered, and how success is measured. It complements the Software Requirements Specification (SRS). The SRS states precisely <i>what the system shall do</i>; this PRD explains <i>what to build first, for whom and why</i>, and turns the SRS into a release plan, user stories and a demonstrable Release 1 prototype (D-22).</p>
+<p>Where this PRD and the SRS differ on a requirement, the SRS prevails; where this PRD and the Glossary and Decision Log differ on a term or decision, the Glossary and Decision Log prevails. Every feature and user story in this document cites the SRS requirements it delivers, so the two documents can be checked against each other.</p>
+
+<h2>1.2 Document Conventions</h2>
+<script type="text/tbl" data-h="Convention|Meaning" data-w="22%|78%">
+Release 1 / 2 / 3 | Follows the SRS: SHALL = Release 1 (prototype scope), SHOULD = Release 2, MAY = Release 3 or later (D-24).
+Design prototype | The clickable HTML prototype that the UI/UX Design Specification describes (D-31).
+Release 1 prototype | The working application of the SDD on seed data with stub and Manual adapters. The demonstration scenario of Section 7 runs on it (D-31).
+Must / Should / Could / Won't | MoSCoW priority inside a release. All Release 1 features are Must; the priority orders work within later releases.
+F-XX | Feature. US-XX: user story. KPI-XX: success measure. PA-XX: product assumption. RK-XX: product risk.
+FR-XX, BR-XX, NFR-XX | Requirement IDs of the SRS v1.1, cited exactly as published there.
+D-XX, A-XX, OI-XX | Decisions, assumptions and open items of the Glossary and Decision Log v0.6.
+Given / When / Then | Format of acceptance criteria: the starting situation, the action, and the expected result.
+</script>
+<div class="note"><b>Note:</b> Personas, sample names and sample data in this document are fictional and illustrative. Targets of Section 9 are proposed values based on assumptions; they will be confirmed with CODL after the prototype is shown (D-23).</div>
+
+<h2>1.3 Intended Audience</h2>
+<script type="text/tbl" data-h="Reader|Use of this document|Read first" data-w="28%|47%|25%">
+Supervisor and CODL | Check that the product solves the right problems and that the release plan is sensible. | Sections 2, 5, 7, 9
+Developers and AI development agents | Know what to build in which order, and the acceptance criteria for each story. | Sections 5, 6, 7
+Designers | Understand users, journeys and design principles. | Sections 3, 4, 8
+Testers | Derive acceptance tests from stories and the demonstration scenario. | Sections 6, 7
+</script>
+
+<h2>1.4 Product Scope</h2>
+<p>MCMS manages the whole life of a UTeM micro-credential under the Garis Panduan Micro-Credential UTeM. Its scope is defined in SRS Section 1.4 and is not repeated here. This PRD adds three things:</p>
+<ol>
+  <li><b>A release plan</b>: Release 1 is split into four demonstrable increments (Section 5.3).</li>
+  <li><b>User stories</b> for every Release 1 feature, with acceptance criteria (Section 6).</li>
+  <li><b>A demonstration scenario</b> for the Release 1 prototype, with sample data, that shows every recognition stage working as a separate step (Section 7).</li>
+</ol>
+
+<h2>1.5 References</h2>
+<ol>
+  <li>Glossary and Decision Log for the UTeM MCMS, version 0.6, 27 October 2026 (MCMS_FND_V0.6_Oct_2026).</li>
+  <li>UI/UX Design Specification, UTeM MCMS, version 1.2, 27 October 2026 (MCMS_UIUX_V1.2_Oct_2026), and Software Design Description, version 1.1 (MCMS_SDD_V1.1_Oct_2026): the design documents that follow this PRD (D-30).</li>
+  <li>Software Requirements Specification for the UTeM MCMS, version 1.0, 26 October 2026 (MCMS_SRS_V1.1_Oct_2026).</li>
+  <li>Garis Panduan Micro-Credential UTeM (the Guide), Versi 1.0, 18 September 2026, Bab 1–18 with Lampiran A–H (D-03).</li>
+  <li>DESIGN.md "ulearn-carbon": the project's user interface design system (Carbon-based, uLearn Navy accent).</li>
+  <li>Software Requirements Specification for an AI-Driven Job Matching Platform, v1.0, May 2025. Format reference only (D-26).</li>
+</ol>
+
+<!-- ===================== 2. PRODUCT OVERVIEW ===================== -->
+<h1>2. Product Overview</h1>
+
+<h2>2.1 Background and Problem Statement</h2>
+<p>UTeM offers three kinds of micro-credential (UMC, SAMC, MCE), each with different rules for SLT, quality assurance, credentials and credit. The Guide requires seven recognition stages — approval to offer, module achievement, MC completion, Quality Verification, ACR and ABC deposit, credit transfer and the award of a qualification — to be decided and recorded separately [G 12–14, 18.14]. Today these steps are handled with forms, spreadsheets and email, and the learning platform (UCreds) records learning but not academic recognition.</p>
+<p class="tcap" data-t="problems">Problems MCMS addresses</p>
+<script type="text/tbl" data-h="Problem today|Consequence|How MCMS responds" data-w="30%|34%|36%">
+Proposals follow the Appendix A template on paper or in documents, with no check of the category rules. | Proposals are returned late for errors such as SLT that does not match the parent course. | Guided proposal with automatic category, SLT and alignment checks before submission.
+Approval, QV, ACR, deposit and transfer status are tracked in separate spreadsheets. | A step can be skipped or mistaken for another; for example, a deposit may be read as an approved transfer. | Each stage is its own record with its own decision and label (D-15).
+Certificates are prepared by hand. | Credit, MQF level or QV status may be stated wrongly, or after QV has expired. | Credentials generated only from verified records; wording controlled by category and status (D-17).
+Employers cannot check a certificate easily. | Credentials have low trust and value. | Signed Digital Credentials with public verification by link or QR code (D-19).
+Credit use across programmes is not traceable. | The same credit could be used twice. | Single redemption ledger with Available / Provisionally Redeemed / Redeemed status.
+Monitoring and CQI evidence is scattered. | QV renewal and audits are slow. | Cohort indicators, CQI records and an append-only audit trail in one place.
+</script>
+
+<h2>2.2 Product Vision</h2>
+<div class="note"><b>Vision:</b> Every UTeM micro-credential, from proposal to credit used in a degree, is managed in one trusted system where each recognition step is clear, honest and traceable — so that participants can trust what they earn, staff can follow the Guide without extra effort, and employers and programmes can verify what a credential really means.</div>
+
+<h2>2.3 Goals and Non-Goals</h2>
+<p class="tcap" data-t="goals">Product goals</p>
+<script type="text/tbl" data-h="ID|Goal|Measured by" data-w="9%|61%|30%">
+G1 | Make the Guide's rules the default path: staff cannot accidentally skip or merge recognition stages. | KPI-05, KPI-06
+G2 | Shorten the time from proposal to approved, ready offering. | KPI-01, KPI-02
+G3 | Give participants honest, verifiable credentials and a clear view of their credit. | KPI-03, KPI-07
+G4 | Give CODL and PTj complete, auditable records for QA, QV and audits. | KPI-06, KPI-08
+G5 | Deliver a working Release 1 prototype that demonstrates the full chain on sample data. | KPI-09
+</script>
+<p><b>Non-goals</b> (things MCMS deliberately does not try to do):</p>
+<ul>
+  <li>Teach or host learning content — that stays on UCreds.</li>
+  <li>Decide academic matters — MCMS records decisions made by the authorised people; it never approves on their behalf.</li>
+  <li>Replace the national ABC platform, the QVC/MQA process, the student information system or the payment hub.</li>
+  <li>Promise credit, admission or a degree to participants (G 14.9).</li>
+</ul>
+
+<h2>2.4 Value for Each Stakeholder</h2>
+<script type="text/tbl" data-h="Stakeholder|Main value from MCMS" data-w="26%|74%">
+Students (P8) | Clear information before enrolling; progress across modules; shareable, verifiable credentials; control over ACR deposit; one ledger of credit and its status.
+Lecturers (P1) | A guided proposal that catches rule errors early; cohort and result management; quality review and QV evidence collected as they go.
+Deputy deans (P2) | One queue for reviews, endorsements, Senate decisions, readiness and result verification; oversight of all PTj offerings.
+Deputy deans as decision makers (P2) | Credentials issued automatically after verification; correct-by-construction ACR; a deposit queue with consent already checked; equivalence evaluation with all evidence linked and protection against double use of credit; monitoring and QV evidence without chasing spreadsheets.
+Senate (P3) | Concise decision packs prepared by the deputy dean; a recorded history of its decisions with meeting references.
+Employers and the public (X3) | Instant verification of a credential without contacting UTeM.
+CODL as system operator (S1, P5) | One system to administer, with roles and rules changed by settings, and no academic decisions to take; ready for later integration with UCreds, ABC and the student system.
+</script>
+
+<!-- ===================== 3. USERS AND PERSONAS ===================== -->
+<h1>3. Users and Personas</h1>
+
+<h2>3.1 Users and Stakeholder Map</h2>
+<p>MCMS has six kinds of user (SRS Section 2.5, decision D-28): <b>students</b>, <b>lecturers</b>, <b>deputy deans</b> of the PTj, the <b>Senate</b> (which approves but does not log in), <b>CODL</b> as system administrator and technical operator only, and <b>employers or the public</b> who verify credentials. The <b>system</b> itself issues credentials and generates ACR automatically after the deputy dean verifies (D-29). {{fig:stakeholders}} places the users by how often they use MCMS and how much their work depends on it.</p>
+<figure data-f="stakeholders">
+<pre class="mermaid">
+quadrantChart
+  title Use frequency vs dependence on MCMS
+  x-axis Occasional use --> Daily use
+  y-axis Low dependence --> High dependence
+  quadrant-1 Core daily users
+  quadrant-2 Key decision makers
+  quadrant-3 Light touch
+  quadrant-4 Operators
+  Student P8: [0.72, 0.85]
+  Lecturer P1: [0.82, 0.78]
+  Deputy dean P2: [0.62, 0.90]
+  Senate P3 via P2: [0.12, 0.72]
+  CODL S1 and P5: [0.58, 0.32]
+  Employer X3: [0.12, 0.28]
+  Industry expert X2: [0.20, 0.15]
+</pre>
+<figcaption>Stakeholder map (illustrative positions). The deputy dean is the busiest decision maker; the Senate decides rarely and only through decisions recorded by the deputy dean.</figcaption>
+</figure>
+
+<h2>3.2 Personas</h2>
+<p>The personas below are fictional. Each represents one kind of user and its most important needs. Feature and story priorities in Sections 5 and 6 are checked against them.</p>
+
+<h4>Persona 1 — Dr. Aina, lecturer (P1)</h4>
+<script type="text/tbl" data-h="Aspect|Description" data-w="22%|78%">
+Context | Senior lecturer at a faculty. Wants to offer a UMC unbundled from a 3-credit, 120-hour course, and later a SAMC for industry. Teaches and assesses the students, and reviews colleagues' proposals when asked.
+Goals | Get a proposal approved without being sent back for avoidable errors; run cohorts with little admin; record improvements and QV evidence as part of normal work.
+Frustrations | Long Appendix A documents; finding out at review that SLT does not match the parent course; rebuilding the same evidence for QV.
+What MCMS must do | Guided proposal with live checks (category, SLT, alignment); visible review comments; one place for cohorts, results, quality review and QV evidence.
+Key stories | Epics E2, E3, E4, E6 and E10.
+</script>
+
+<h4>Persona 2 — Hakim, PTj deputy dean (P2)</h4>
+<script type="text/tbl" data-h="Aspect|Description" data-w="22%|78%">
+Context | Owns all micro-credentials of the faculty in MCMS. Endorses proposals and takes them to the Senate, then records the Senate's decision. Confirms readiness, verifies results and completion (which makes the system issue the credentials), confirms quality reviews and QV evidence, corrects or revokes credentials, confirms ACR and records ABC deposits.
+Goals | See what needs a decision today; trust that what reaches them is complete; never sign something that breaks the Guide; spend no time typing certificates.
+Frustrations | Decisions scattered across email; unclear category claims; certificates prepared by hand; no overview of QV status.
+What MCMS must do | A single task queue; category verification; decision pack for the Senate; bulk result verification that triggers automatic credentials; simple correction with history; a deposit queue with consent already checked.
+Key stories | Epics E2, E3, E4, E5, E6, E7 and E10.
+</script>
+
+<h4>Persona 3 — Prof. Lim, deputy dean of the faculty that owns a degree (P2)</h4>
+<script type="text/tbl" data-h="Aspect|Description" data-w="22%|78%">
+Context | Same role as Persona 2, but acting for the faculty that runs the Bachelor of Computer Science. Decides credit transfer applications into that degree and prepares stackable pathway mappings for the Senate.
+Goals | Decide equivalence on learning outcomes with all evidence in one view; respect transfer limits; never accept the same credit twice.
+Frustrations | Applications arrive as loose attachments; no reliable way to know whether credit was already used elsewhere.
+What MCMS must do | Equivalence form with linked ACR, outcomes and QV evidence; limit checks; single redemption status.
+Key stories | Epics E8 and E9.
+</script>
+
+<h4>Persona 4 — Amir, working professional and student (P8)</h4>
+<script type="text/tbl" data-h="Aspect|Description" data-w="22%|78%">
+Context | Engineer in industry, studying modules part-time on a phone. Hopes the credits will count toward a degree later.
+Goals | Know exactly what they will get before enrolling; see progress across modules taken months apart; share a credential with an employer; understand what their credit can and cannot do.
+Frustrations | Marketing that implies credits "will transfer"; losing track of modules; not knowing where credit is stored.
+What MCMS must do | Honest catalogue wording; module progress; shareable credentials; consent control for ABC; a ledger that separates deposit from transfer.
+Key stories | Epics E3, E5, E7, E8 and E9.
+</script>
+
+<h4>Persona 5 — Farid, CODL system administrator (S1, P5)</h4>
+<script type="text/tbl" data-h="Aspect|Description" data-w="22%|78%">
+Context | Runs MCMS for the University: user accounts and roles, settings, templates, reference data, and the data exchange with UCreds. Takes no academic decision.
+Goals | Change roles, rules and templates without a developer; move data to and from UCreds safely; see quickly when an adapter fails.
+What MCMS must do | Role and scope management; settings with history; CSV templates with validation; adapter status page. No screens that let CODL approve, verify or issue anything.
+Key stories | Epics E1 and E4.
+</script>
+
+<h4>Persona 6 — Tan, HR manager verifying a credential (X3)</h4>
+<script type="text/tbl" data-h="Aspect|Description" data-w="22%|78%">
+Context | Receives a candidate's credential link during hiring.
+Goals | Confirm in seconds that the credential is genuine, current and issued by UTeM.
+What MCMS must do | A public verification page with no login, minimum information and a clear status.
+Key stories | Epic E5.
+</script>
+
+<h2>3.3 Needs by User</h2>
+<p class="tcap" data-t="needs">Top needs by user</p>
+<script type="text/tbl" data-h="User|Top need|Feature that answers it" data-w="24%|46%|30%">
+Student (P8) | Honesty and control over their record | {{f-catalogue}} Catalogue, {{f-achrec}} Achievement Record, {{f-issue}} Credentials, {{f-ledger}} Credit ledger
+Lecturer (P1) | Get proposals right the first time; little admin when running cohorts | {{f-proposal}} Guided proposal, {{f-umc}} UMC checks, {{f-verify}} Result entry, {{f-cqi}} Quality review
+Deputy dean (P2) | Know what to decide and trust the input; no manual certificates | {{f-approval}} Review and approval, {{f-readiness}} Readiness, {{f-verify}} Verification, {{f-issue}} Automatic credentials, {{f-deposit}} Deposit queue
+Deputy dean of a degree's faculty (P2) | Evidence-based equivalence, no double use | {{f-transfer}} Credit transfer, {{f-redeem}} Single redemption, {{f-stackmap}} Pathway mapping
+Senate (P3, via P2) | Short decision packs; decisions recorded with meeting references | {{f-approval}} Decision packs and recording
+CODL (S1, P5) | Change rules and roles without developers; safe UCreds exchange | {{f-roles}} Roles, {{f-settings}} Settings, {{f-csv}} UCreds exchange
+Employer (X3) | Instant, trustworthy verification | {{f-public}} Public verification
+</script>
+
+<!-- ===================== 4. USER JOURNEYS ===================== -->
+<h1>4. User Journeys</h1>
+<p>Journeys show the experience of a persona across several features. The <i>target experience</i> rates each step with MCMS on a scale of 1 (frustrating) to 5 (effortless). Steps that stay at 3 are limited by processes outside MCMS, such as committee meetings, which MCMS records but does not control. Each journey crosses several recognition stages; the stage column shows that the participant or officer always knows which stage they are in.</p>
+
+<h2>4.1 Lecturer: From Idea to Open Offering</h2>
+<p class="tcap" data-t="jcoord">Dr. Aina takes a UMC from idea to an open offering</p>
+<script type="text/tbl" data-h="Phase|Step|Who|Target experience|What MCMS does" data-w="12%|30%|13%|12%|33%" data-cls="small">
+Propose | Answer the category questions | Aina | 5 / 5 | Proposes UMC and explains why ({{f-proposal}})
+Propose | Fill the guided proposal | Aina | 4 / 5 | Calculates SLT live, checks weightings and alignment
+Propose | Fix the SLT warning (110 h vs 120 h) before submitting | Aina | 4 / 5 | Blocks submission with a clear message ({{f-umc}})
+Review | Read reviewer comments and respond | Aina, reviewer | 4 / 5 | Tracks each comment to resolution ({{f-approval}})
+Review | PTj verifies the category and endorses | Hakim | 4 / 5 | Produces the decision pack
+Approve | Deputy dean presents the decision pack at the Senate meeting | Hakim, Senate | 3 / 5 | Outside MCMS; MCMS provides the decision pack
+Approve | Decision recorded with the meeting reference | Hakim | 5 / 5 | Version 1 becomes Approved; nothing else changes
+Offer | Complete the readiness checklist | Aina, Hakim | 4 / 5 | Opens registration only when Ready ({{f-readiness}})
+Offer | Offering appears in the catalogue | Aina | 5 / 5 | Generates honest recognition text ({{f-catalogue}})
+</script>
+
+<h2>4.2 Participant: From Enrolment to Credit Used in a Degree</h2>
+<p class="tcap" data-t="jpart">Amir earns a UMC and later uses its credit</p>
+<script type="text/tbl" data-h="Stage|Step|Who|Target experience|What MCMS does" data-w="15%|29%|12%|12%|32%" data-cls="small">
+Choose | Read the offering details | Amir | 5 / 5 | Shows outcomes, fees, credential and the separate-stages notice
+Choose | Register and pay | Amir | 4 / 5 | Dummy payment; access instructions ({{f-register}})
+2 Module achievement | Study modules on UCreds over several months | Amir | 4 / 5 | Keeps each module record and date
+2 Module achievement | See each module badge | Amir | 5 / 5 | Badge issued after PTj verification ({{f-verify}})
+3 MC completion | Receive certificate and Digital Credential | Amir | 5 / 5 | Signed, bilingual, with QR code ({{f-issue}})
+3 MC completion | Share the link with an employer | Amir, employer | 5 / 5 | Public verification page ({{f-public}})
+5 ACR and ABC | Consent to deposit the ACR to ABC | Amir | 4 / 5 | Records consent; queues for the deputy dean ({{f-deposit}})
+5 ACR and ABC | See 3 credits as Available in the ledger | Amir | 5 / 5 | Shows deposit and expiry dates ({{f-ledger}})
+6 Credit transfer | Get admitted to a degree programme | Programme | 3 / 5 | Outside MCMS; admission recorded separately
+6 Credit transfer | Apply for credit transfer | Amir | 4 / 5 | Attaches ACR and evidence automatically ({{f-transfer}})
+6 Credit transfer | Credit approved and shown as Provisionally Redeemed | Amir, Prof. Lim (deputy dean of the degree faculty) | 4 / 5 | Blocks any reuse of the same credit ({{f-redeem}})
+</script>
+
+<h2>4.3 Deputy Dean: Closing a Cohort</h2>
+<p class="tcap" data-t="jrecords">Hakim closes a cohort: results, credentials, ACR and deposit</p>
+<script type="text/tbl" data-h="Phase|Step|Who|Target experience|What MCMS does" data-w="12%|30%|13%|12%|33%" data-cls="small">
+Verify | Verify the cohort's results and confirm completion | Hakim | 5 / 5 | Lists flags and integrity holds first ({{f-verify}})
+Issue | Credentials are issued without a separate step | System | 5 / 5 | Runs Appendix E8 checks per participant, then issues ({{f-issue}})
+Issue | Review the participants who failed a check | Hakim | 4 / 5 | Gives the reason for each; issues the rest
+Credit | Confirm the generated ACR for eligible participants | Hakim | 4 / 5 | Generates ACR only for eligible UMC or QV-SAMC ({{f-acr}})
+Credit | Record ABC deposits after students consent | Hakim | 3 / 5 | Manual; national ABC platform is a concept (D-14); export provided
+Fix | Correct a misspelt name | Hakim | 4 / 5 | New revision, history kept, student notified ({{f-correct}})
+</script>
+
+<h2>4.4 Employer: Verifying a Credential</h2>
+<p>Tan opens the link or scans the QR code on a certificate. The verification page loads immediately without login and presents an authoritative, centered certificate-style result slip. It features a single prominent status seal (e.g. <code>Status: Valid</code> in emerald), a copyable Crockford Base32 verification code, and a clean two-column summary of the micro-credential, holder, issuer, issue date, and graduating credits. The interface removes distracting implementation pills (such as Ed25519 or RFC specifications) and provides direct action buttons to download the verifiable cryptographic files (<code>.json</code> and <code>.jwt</code>) for HR archival, print the official slip, or review the statutory Personal Data Protection Act 2010 (PDPA) notice ({{fr-vffields}}). If the credential was revoked or replaced, the status seal clearly states so with the effective date. The whole verification journey takes under a minute, needs no contact with UTeM, and resolves cleanly across desktop and mobile devices.</p>
+
+<!-- ===================== 5. FEATURES AND RELEASE PLAN ===================== -->
+<h1>5. Features and Release Plan</h1>
+
+<h2>5.1 Feature Map</h2>
+<p>Features are grouped into ten epics that follow the life of a micro-credential. {{fig:featuremap}} gives the overview; {{tab:features}} lists every feature with its release, priority and the SRS requirements it delivers.</p>
+<figure data-f="featuremap">
+<pre class="mermaid">
+mindmap
+  root((MCMS))
+    E1 Platform foundation
+      Sign-in and roles
+      Settings and templates
+      Reference data
+      Notifications
+    E2 Curriculum
+      Category determination
+      Guided proposal
+      UMC structure
+      Review and approval
+      Versions and material change
+    E3 Offering and enrolment
+      Readiness
+      Catalogue
+      Registration and payment
+    E4 Learning results
+      UCreds exchange
+      Result verification
+      Achievement record
+    E5 Credentials
+      Badges certificates DCs
+      Wording control
+      Public verification
+      Corrections
+    E6 Quality Verification
+      Evidence and readiness
+      QV status and expiry
+    E7 ACR and ABC
+      ACR preparation
+      Consent and deposit
+      Credit ledger
+    E8 Transfer and redemption
+      Equivalence evaluation
+      Single redemption
+    E9 Stackable degree
+      Pathway mapping
+      Individual plan
+    E10 Quality and records
+      Monitoring and CQI
+      Periodic review
+      Audit trail and reports
+</pre>
+<figcaption>Feature map of MCMS by epic.</figcaption>
+</figure>
+
+<h2>5.2 Feature List</h2>
+<p>The Release column follows the SRS wording of the delivering requirements: a feature is in Release 1 when its core requirements are SHALL. Some Release 1 features have SHOULD or MAY extensions, listed separately as later-release features.</p>
+<p class="tcap" data-t="features">Features by epic, with release, priority and SRS requirements</p>
+<script type="text/req" data-p="F" data-h="Feature" data-x="Release / priority">
+# E1 Platform foundation
+f-sso | <b>Sign-in and accounts</b> (E1). Microsoft education account single sign-on with explicit format guidance (UserId@utem.edu.my for staff, MatricNo@student.utem.edu.my for students), vertically centered sign-in, stub persona sign-in for testing, no public sign-up, language choice. | {{fr-sso}}–{{fr-signinguide}}, {{fr-lang}} | R1 · Must
+f-roles | <b>Roles, scopes and separation of duties</b> (E1). Multiple roles per user with PTj or MC scope; submitter cannot decide; approving bodies are settings. | {{fr-rbac}}–{{fr-sme}} | R1 · Must
+f-settings | <b>Settings, templates and reference data</b> (E1). All Guide thresholds as settings with history; bilingual templates; PTj, programme and parent course data. | {{fr-settings}}–{{fr-adapterstatus}} | R1 · Must
+f-notify | <b>Notifications and integration hub</b> (E1). In-system and email notices in the user's language; adapter registry with stub, manual and live modes. | {{fr-ntevents}}–{{fr-ntlog}}, {{fr-ihregistry}}, {{fr-ihretry}} | R1 · Must
+# E2 Curriculum
+f-proposal | <b>Category determination and guided proposal</b> (E2). Category wizard; Appendix A workspace with live SLT, alignment and completeness checks. | {{fr-catwizard}}–{{fr-propprint}} | R1 · Must
+f-umc | <b>UMC structure checks</b> (E2). Parent course link, unbundling model, SLT sum, CLO coverage, module credit flag by academic approval only. | {{fr-umcparent}}–{{fr-umcmodcredit}} | R1 · Must
+f-approval | <b>Review and approval workflow</b> (E2). Reviewer assignment with conflict declaration, comment tracking, PTj endorsement with category verification, decision packs, approval per exact version. | {{fr-revassign}}–{{fr-wfqueue}}, {{fr-wfpack}} | R1 · Must
+f-versions | <b>Versions and material change</b> (E2). Version history; automatic material-change detection; re-approval; enrolments bound to versions; participant notices. | {{fr-verhistory}}–{{fr-vernotify}} | R1 · Must
+# E3 Offering and enrolment
+f-readiness | <b>Offering readiness</b> (E3). Cohorts for approved versions only; Appendix B checklist; three-party readiness confirmation; QV validity check for SAMC. | {{fr-offcreate}}–{{fr-offqv}} | R1 · Must
+f-catalogue | <b>Public catalogue</b> (E3). Honest, bilingual offering information with generated recognition statements and the separate-stages notice. | {{fr-catpublic}}–{{fr-catlang}} | R1 · Must
+f-register | <b>Registration, payment and cohorts</b> (E3). Eligibility, acknowledgement of offering information, PDPA notice, dummy payment, per-module enrolment for modular UMC. | {{fr-regopen}}–{{fr-regstatus}}, {{fr-regmodule}}, {{fr-regwithdraw}}, {{fr-cohortlist}}, {{fr-regconfirm}} | R1 · Must
+# E4 Learning results
+f-csv | <b>CSV exchange with UCreds</b> (E4). Enrolment export; result and badge import with validation; imported data stays provisional. | {{fr-lpadapter}}–{{fr-lplog}} | R1 · Must
+f-verify | <b>Result entry and verification</b> (E4). Assessment plan from the approved version; integrity flags; PTj verification; controlled result changes. | {{fr-asplan}}–{{fr-asmodule}}, {{fr-asfeedback}} | R1 · Must
+f-achrec | <b>Achievement Record</b> (E4). Internal record of modules, badges and completion, clearly not an ACR; automatic UMC completion check confirmed by PTj. | {{fr-arkeep}}–{{fr-arstaff}} | R1 · Must
+# E5 Credentials
+f-issue | <b>Credential issuance</b> (E5). Pre-issuance checks; badges, certificates and signed Digital Credentials issued automatically when the deputy dean verifies; bilingual. | {{fr-crcheck}}–{{fr-crwallet}} | R1 · Must
+f-wording | <b>Recognition wording control</b> (E5). Statements from templates per category and status; blocking of unsupported credit, MQF or QV claims. | {{fr-wdtemplate}}–{{fr-wdqvlapse}} | R1 · Must
+f-public | <b>Public verification</b> (E5). Verification by Crockford Base32 ID, link or QR with authoritative certificate result slip layout, single status seal, direct cryptographic downloads (.json, .jwt), print slip styling, statutory PDPA notice, dynamic host resolution, and decoupled machine JWKS discovery. | {{fr-vfpage}}, {{fr-vffields}}, {{fr-vftrust}}, {{fr-vflog}}, {{fr-vfnotfound}} | R1 · Must
+f-correct | <b>Correction, replacement and revocation</b> (E5). Authorised changes with full history and participant notice. | {{fr-crcorrect}}–{{fr-crnotify}} | R1 · Must
+# E6 Quality Verification
+f-qv | <b>QV management for SAMC</b> (E6). Eligibility gate, evidence checklist with automatic links, readiness decision, submission package, QV result with validity, expiry alerts and lapse handling. | {{fr-qvsamc}}–{{fr-qvnotransfer}} | R1 · Must
+# E7 ACR and ABC
+f-acr | <b>ACR preparation</b> (E7). Eligibility checks; ACR generated automatically from verified records; deputy dean confirms; separate record type. | {{fr-acrelig}}–{{fr-acrnocombine}} | R1 · Must
+f-deposit | <b>Consent and deposit tracking</b> (E7). Student consent; deputy dean deposit queue; export; recorded deposit reference and status; deposit never shown as transfer. | {{fr-dpconsent}}–{{fr-dponlyacr}} | R1 · Must
+f-ledger | <b>Credit ledger and validity</b> (E7). Expiry date, alerts, ledger by status, ACR retention. | {{fr-cvexpiry}}–{{fr-cvretain}} | R1 · Must
+# E8 Transfer and redemption
+f-transfer | <b>Credit transfer evaluation</b> (E8). Application, source checks, Appendix F7 equivalence, limit checks, recorded decision by the right authority, version-aware equivalence. | {{fr-ctapply}}–{{fr-ctadmission}} | R1 · Must
+f-redeem | <b>Single redemption</b> (E8). Provisional and final redemption, release on non-completion, no reuse, conflict blocking. | {{fr-rdprov}}–{{fr-rdabcsync}} | R1 · Must
+# E9 Stackable degree
+f-stackmap | <b>Pathway mapping</b> (E9). Programme pathway with course mapping via accessible modal dialog ("+ Define mapping"), credit-bearing check and approval. | {{fr-spdefine}}–{{fr-spnotransfer}}, {{fr-spcurrchange}} | R1 · Must
+f-stackplan | <b>Individual stackable plan</b> (E9). 30% UTeM credit check, residency check, remaining requirements, plan decision, admission gate, award recorded from programme records. | {{fr-spplan}}–{{fr-spinfo}} | R1 · Must
+# E10 Quality and records
+f-cqi | <b>Monitoring and CQI</b> (E10). Cohort indicators, outcome attainment, participant feedback, CQI issues, actions and effectiveness. | {{fr-mnindicators}}–{{fr-mndomains}}, {{fr-cqiissue}}–{{fr-cqisign}} | R1 · Must
+f-review | <b>Periodic review, suspension and termination</b> (E10). Review schedule and outcome; transition plan; participant protection. | {{fr-prschedule}}–{{fr-prkeep}} | R1 · Must
+f-audit | <b>Audit trail, corrections and traceability</b> (E10). Append-only log, discrepancy log, end-to-end traceability, minimum cohort records. | {{fr-auditlog}}–{{fr-cohortrec}} | R1 · Must
+f-reports | <b>Reports and retention</b> (E10). Standard reports by scope, exports, retention settings and controlled disposal. | {{fr-reports}}–{{fr-retention}} | R1 · Must
+# Release 2 and later
+f-r2-admin | <b>Account merge and approval delegation</b> (E1). | {{fr-idmerge}}, {{fr-delegate}} | R2 · Should
+f-r2-curr | <b>Curriculum productivity</b> (E2): parent-course change alerts, batch meeting decisions, version comparison. | {{fr-umcparentchange}}, {{fr-wfbatch}}, {{fr-vercompare}} | R2 · Should
+f-r2-enrol | <b>Enrolment extras</b> (E3): fee waivers, waiting list, bulk enrolment. | {{fr-regwaiver}}, {{fr-regwaitlist}}, {{fr-regbulk}} | R2 · Could
+f-r2-ucreds | <b>Live UCreds connector</b> (E4) and result appeals. | {{fr-lplive}}, {{fr-asappeal}} | R2 · Should
+f-r2-cred | <b>Credential extras</b> (E5): signature check of uploaded files, sharing to professional networks. | {{fr-vfsignature}}, {{fr-crshare}} | R2 · Could
+f-r2-credit | <b>Credit extras</b> (E7, E8, E9): external credit records, equivalence precedents, PLO and Body of Knowledge matrices. | {{fr-acrexternal}}, {{fr-ctprecedent}}, {{fr-spplo}} | R2 · Should
+f-r2-quality | <b>Quality extras</b> (E10): dashboards, record holds, daily digests. | {{fr-mndash}}, {{fr-hold}}, {{fr-ntdigest}} | R2 · Should
+f-r3 | <b>Release 3 integrations</b>: live ABC and QVC/MQA connectors, near-real-time UCreds sync, credential wallets, student information system link, analytics. | {{fr-dplive}}, {{fr-qvportal}}, {{fr-lpsync}}, {{fr-crwalletint}}, {{fr-spsis}}, {{fr-analytics}} | R3 · Could
+</script>
+
+<h2>5.3 Release 1 Increments</h2>
+<p>Release 1 contains every SHALL requirement of the SRS. To make it buildable and demonstrable by a small team, it is delivered in four increments (fixed by D-32; build slices are planned inside them and do not reorder them). Each increment ends with a demonstration on sample data; later increments build on earlier ones, as {{fig:increments}} shows.</p>
+<p class="tcap" data-t="increments">Release 1 increments</p>
+<script type="text/tbl" data-h="Increment|Features|Demonstration at the end" data-w="18%|44%|38%">
+1.1 Foundation | {{f-sso}} to {{f-notify}}, {{f-audit}} (audit trail) | Sign in as each role with the stub identity provider; change a setting and see its history; see an audit entry for every action.
+1.2 Curriculum | {{f-proposal}} to {{f-catalogue}} | Create a UMC proposal, fail and then pass the SLT check, review, endorse, approve; open a cohort after the readiness check; see it in the catalogue.
+1.3 Delivery and credentials | {{f-register}} to {{f-correct}} | Register a participant, simulate payment, import UCreds results, verify, see badges, complete the UMC, issue and publicly verify a Digital Credential; correct a credential.
+1.4 Credit and quality | {{f-qv}} to {{f-review}}, {{f-reports}} | QV a SAMC; prepare ACR, consent, record deposit; apply for transfer and approve it; see redemption status; build a stackable plan; record CQI; run reports and the traceability view.
+</script>
+
+<figure data-f="increments">
+<pre class="mermaid">
+flowchart LR
+  I1["<b>1.1 Foundation</b><br/>identity, roles, settings,<br/>notifications, audit"] --> I2["<b>1.2 Curriculum</b><br/>category, proposal,<br/>approval, versions,<br/>readiness, catalogue"]
+  I2 --> I3["<b>1.3 Delivery and<br/>credentials</b><br/>enrolment, UCreds CSV,<br/>verification, credentials"]
+  I3 --> I4["<b>1.4 Credit and quality</b><br/>QV, ACR, ABC, transfer,<br/>redemption, stackable,<br/>CQI, reports"]
+  I4 --> R1(["Release 1 prototype<br/>demonstration (Section 7)"])
+  R1 --> SV["Supervisor review<br/>of all documents and<br/>prototype (D-23)"]
+</pre>
+<figcaption>Release 1 increments and their dependencies.</figcaption>
+</figure>
+
+<h2>5.4 Indicative Roadmap</h2>
+<p>The roadmap below is indicative. It assumes work starts on 2 November 2026, two-week sprints, and one developer with AI assistance (PA-01, PA-02). Dates will move with actual progress; the order of increments will not.</p>
+<figure data-f="roadmap">
+<pre class="mermaid">
+gantt
+  title Indicative roadmap (assumes start 2 Nov 2026)
+  dateFormat YYYY-MM-DD
+  axisFormat %d %b
+  section Documents
+  SDD                         :sdd, 2026-10-27, 2w
+  section Release 1
+  Increment 1.1 Foundation        :i1, 2026-11-02, 3w
+  Increment 1.2 Curriculum        :i2, after i1, 4w
+  Increment 1.3 Delivery and credentials :i3, after i2, 4w
+  Increment 1.4 Credit and quality :i4, after i3, 4w
+  Hardening and demo preparation  :h, after i4, 2w
+  section Review
+  Supervisor review (D-23)        :milestone, rv, after h, 0d
+  section Later
+  Release 2 planning              :r2, after h, 2w
+</pre>
+<figcaption>Indicative roadmap. Release 1 is about 17 weeks of work on these assumptions.</figcaption>
+</figure>
+
+<h2>5.5 Definition of Done for Release 1</h2>
+<p>Release 1 is done when all of the following hold. They extend the acceptance approach of SRS Section 8.3.</p>
+<ol>
+  <li>Every user story of Section 6 marked R1 meets its acceptance criteria in the test environment.</li>
+  <li>Every business rule BR-01 to {{br-authority}} has an automated test that proves the forbidden case is refused ({{nfr-rulestests}}).</li>
+  <li>The demonstration scenario of Section 7 runs end to end on seed data with stub adapters.</li>
+  <li>The interface works in Bahasa Melayu and English and passes an automated WCAG 2.1 AA check on the main participant screens.</li>
+  <li>The SDD describes the system as built.</li>
+</ol>
+
+<h2>5.6 Out of Scope for This Product Version</h2>
+<ul>
+  <li>Delivering learning content, live classes or proctoring (UCreds and other tools).</li>
+  <li>Taking academic decisions automatically; MCMS proposes, checks and records, people decide.</li>
+  <li>Native mobile applications; the web interface is responsive instead.</li>
+  <li>Partner-delivered micro-credentials of other institutions as offerings in MCMS.</li>
+  <li>Refund processing and financial accounting.</li>
+</ul>
+
+<!-- ===================== 6. USER STORIES ===================== -->
+<h1>6. User Stories</h1>
+<p>Each story states a need in the user's words and gives acceptance criteria in Given / When / Then form. The SRS column lists the requirements the story delivers; a story is accepted only when those requirements are also met. All stories are Release 1 unless marked <i>(R2)</i>. Story IDs are stable once issued.</p>
+
+<h2>6.1 E1 Platform Foundation</h2>
+<script type="text/req" data-p="US" data-h="User story and acceptance criteria">
+us-signin | As a <b>participant or staff member</b>, I want to sign in with my UTeM Microsoft account so that I don't need another password.<br><i>Given</i> a valid UTeM account, <i>when</i> I sign in for the first time, <i>then</i> a profile is created from my account details with the Participant role, and no MCMS password is ever asked for. | {{fr-sso}}, {{fr-firstlogin}}
+us-stub | As a <b>tester</b>, I want to sign in as any test role without the real tenant so that every workflow can be tested end to end.<br><i>Given</i> the test environment, <i>when</i> I choose a test user, <i>then</i> I act with exactly that user's roles; <i>and</i> the stub cannot be switched on in production. | {{fr-devidp}}
+us-lang | As a <b>user</b>, I want to switch between Bahasa Melayu and English on any page so that I can work in my preferred language.<br><i>Given</i> any page, <i>when</i> I switch language, <i>then</i> the same page reloads in the other language with my entered data kept, and the choice is remembered. | {{fr-lang}}, {{nfr-langswitch}}
+us-roles | As the <b>system administrator</b>, I want to give a person several roles, each limited to a PTj or a micro-credential, so that access matches real responsibilities.<br><i>Given</i> a user, <i>when</i> I assign "PTj reviewer for FTMK", <i>then</i> that user sees only FTMK items for that role, and the assignment appears in the audit trail with my reason. | {{fr-multirole}}, {{fr-scope}}, {{fr-roleassign}}
+us-sod | As <b>CODL</b>, I want the system to stop people deciding their own submissions so that every decision is independent.<br><i>Given</i> a lecturer who submitted a proposal, <i>when</i> they also hold a reviewer role, <i>then</i> they cannot review or approve that proposal. | {{fr-sod}}, {{br-authority}}
+us-settings | As the <b>system administrator</b>, I want to change a Guide threshold in settings so that a policy change needs no developer.<br><i>Given</i> the setting <code>credit.abc_validity_years</code>, <i>when</i> I change it with a reason and effective date, <i>then</i> new deposits use the new value, earlier deposits keep their recorded value, and the history shows old and new values. | {{fr-settings}}, {{fr-settinghist}}, {{dr-asof}}
+us-notify | As a <b>staff user</b>, I want a notice when something needs my action so that nothing waits unseen.<br><i>Given</i> a proposal assigned to me for review, <i>when</i> it is assigned, <i>then</i> I receive an in-system notice and an email in my language with a direct link. | {{fr-ntevents}}, {{fr-ntlang}}
+</script>
+
+<h2>6.2 E2 Curriculum</h2>
+<script type="text/req" data-p="US" data-h="User story and acceptance criteria">
+us-category | As a <b>lecturer</b>, I want MCMS to tell me which category my offering belongs to so that I follow the right rules from the start.<br><i>Given</i> an own offering of 30 hours SLT, <i>when</i> I answer the category questions, <i>then</i> MCMS proposes MCE, explains why, and does not allow SAMC or UMC. | {{fr-catwizard}}, {{fr-catsuggest}}, {{fr-catmce}}
+us-proposal | As a <b>lecturer</b>, I want a guided proposal form that follows Appendix A so that I submit a complete proposal the first time.<br><i>Given</i> a draft, <i>when</i> I add outcomes, activities and assessments, <i>then</i> total SLT is calculated live, weightings must total 100%, and outcomes without assessment are flagged before I can submit. | {{fr-proplo}}, {{fr-propslt}}, {{fr-propassess}}, {{fr-propalign}}, {{fr-propvalidate}}
+us-umcslt | As a <b>lecturer</b> of a UMC, I want MCMS to check my modules against the parent course so that the structure is valid before review.<br><i>Given</i> a parent course of 3 credits and 120 hours SLT, <i>when</i> my three modules total 110 hours, <i>then</i> submission is blocked with the message "Total module SLT (110 h) must equal parent course SLT (120 h)". | {{fr-umcparent}}, {{fr-umcsltsum}}, {{br-umcslt}}
+us-modcredit | As the <b>academic authority</b>, I want to approve a single UMC module as a separate credit unit case by case so that the Guide's exception is possible but controlled.<br><i>Given</i> a module with the flag at No, <i>when</i> the academic authority records an approval decision, <i>then</i> the flag becomes Yes with the decision linked; <i>and</i> a user with only the System Administrator role cannot change it. | {{fr-umcmodcredit}}, {{br-modcredit}}
+us-proposedcredit | As <b>CODL</b>, I want proposed credit values kept out of public view so that nothing unconfirmed is advertised.<br><i>Given</i> a SAMC proposal with a proposed 2 credits, <i>when</i> the offering is published before QV, <i>then</i> neither the catalogue nor any credential shows 2 credits. | {{fr-propcredit}}, {{br-samccredit}}
+us-review | As a <b>reviewer</b>, I want a structured review form so that my review covers every point of Guide clause 9.4.<br><i>Given</i> an assigned proposal, <i>when</i> I open it, <i>then</i> I must first declare whether I have a conflict of interest; <i>and</i> I rate each review item and give a recommendation (Support, Amend, Do not support). | {{fr-coi}}, {{fr-revform}}, {{fr-revrec}}
+us-endorse | As the <b>PTj</b>, I want to verify the category and endorse a reviewed proposal so that only sound proposals reach the authority.<br><i>Given</i> all blocking comments are resolved, <i>when</i> I endorse, <i>then</i> my verified category is recorded separately from the proposed one and a decision pack is produced for the authority. | {{fr-revcomments}}, {{fr-revcategory}}, {{fr-wfpack}}
+us-approve | As a <b>deputy dean</b>, I want to record the Senate's decision with the meeting reference so that the decision is traceable.<br><i>Given</i> a decision pack taken to the Senate, <i>when</i> I record "approved, Senate 5/2026" for version 1, <i>then</i> version 1 becomes Approved, no credit, QV or transfer status is set, and version 2 would need its own approval. | {{fr-wfrecord}}, {{fr-wfversion}}, {{fr-wfnotcredit}}
+us-material | As a <b>lecturer</b>, I want MCMS to tell me when a change is material so that I don't change an approved offering by mistake.<br><i>Given</i> an approved version, <i>when</i> I edit the pass standard, <i>then</i> the change is classified as material, a new version is started, and it cannot take effect until approved. | {{fr-chgclassify}}, {{fr-chgmaterial}}, {{br-material}}
+us-versionbind | As a <b>participant</b>, I want my enrolment to stay tied to the version I joined so that the rules don't change under me.<br><i>Given</i> I enrolled on version 1, <i>when</i> version 2 is approved, <i>then</i> my record still points to version 1 and I am told the effective date and my transition option. | {{fr-verbind}}, {{fr-vernotify}}
+</script>
+
+<h2>6.3 E3 Offering and Enrolment</h2>
+<script type="text/req" data-p="US" data-h="User story and acceptance criteria">
+us-readiness | As the <b>PTj</b>, I want registration to open only after readiness is confirmed so that participants never join an unprepared offering.<br><i>Given</i> a cohort with readiness "Not ready", <i>when</i> anyone tries to open registration, <i>then</i> it is refused; <i>when</i> lecturer and PTj confirm "Ready", <i>then</i> registration can open. | {{fr-offreadiness}}, {{fr-offconfirm}}, {{fr-offopen}}, {{br-offer}}
+us-catalogue | As a <b>prospective participant</b>, I want complete and honest information before I enrol so that I know what I will and won't get.<br><i>Given</i> a UMC offering, <i>when</i> I open it, <i>then</i> I see outcomes, modules, SLT, assessment, fees, credential type, and a notice that completion, ACR, ABC deposit and credit transfer are separate steps with no automatic guarantee. | {{fr-catinfo}}, {{fr-catstages}}, {{fr-catwording}}
+us-register | As a <b>participant</b>, I want to register and pay online so that I can start quickly.<br><i>Given</i> an open offering, <i>when</i> I acknowledge the information and the personal data notice and pay through the (dummy) payment service, <i>then</i> my enrolment becomes Enrolled and I receive access instructions. | {{fr-regack}}, {{fr-regpdpa}}, {{fr-regpay}}, {{fr-regconfirm}}
+us-modules | As a <b>participant</b> in a modular UMC, I want to take modules at different times so that I can fit learning around work.<br><i>Given</i> I completed module 1 in March, <i>when</i> I enrol in module 2 in August, <i>then</i> both module records and dates show on my record. | {{fr-regmodule}}, {{fr-arview}}
+us-waitlist | <i>(R2)</i> As a <b>participant</b>, I want to join a waiting list for a full offering so that I get a place if one frees up. | {{fr-regwaitlist}}
+</script>
+
+<h2>6.4 E4 Learning Results</h2>
+<script type="text/req" data-p="US" data-h="User story and acceptance criteria">
+us-csvexport | As the <b>CODL administrator</b>, I want to export the enrolment list in the UCreds template so that loading learners is quick and error-free.<br><i>Given</i> an offering with enrolled participants, <i>when</i> I export, <i>then</i> I get a CSV in the published template version. | {{fr-lpexport}}
+us-csvimport | As the <b>CODL administrator</b>, I want MCMS to check every row of a results file so that bad data never becomes an achievement.<br><i>Given</i> a file with one unknown matric number, <i>when</i> I upload it, <i>then</i> valid rows are staged as provisional, the bad row is listed in a downloadable report, and nothing becomes an achievement yet. | {{fr-lpimport}}, {{fr-lpvalidate}}, {{fr-lpstaged}}
+us-verifyresults | As the <b>PTj</b>, I want to verify a cohort's results in one action after reviewing a summary so that credentials can be issued on time.<br><i>Given</i> staged results with no open integrity case, <i>when</i> I verify the cohort, <i>then</i> the results become verified with my name and date, and module achievements are created. | {{fr-asverify}}, {{fr-asbulkverify}}, {{fr-asmodule}}
+us-integrity | As a <b>facilitator</b>, I want to flag a suspected integrity case so that the result is held until resolved.<br><i>Given</i> a flagged result, <i>when</i> the PTj verifies the cohort, <i>then</i> that participant's result is excluded and stays held. | {{fr-asintegrity}}
+us-attendance | As <b>CODL</b>, I want attendance alone never to count as a pass so that recognition follows achievement.<br><i>Given</i> a participant with full attendance but no assessment result, <i>when</i> completion is calculated, <i>then</i> the participant is not complete. | {{fr-asnoattend}}, {{br-achieve}}
+us-umccomplete | As a <b>participant</b>, I want MCMS to recognise when I have finished all modules so that my certificate is not delayed.<br><i>Given</i> all modules and requirements met, <i>when</i> the last result is verified, <i>then</i> MCMS marks the UMC ready for completion and the PTj confirms it; badges from a different UMC never count. | {{fr-arumc}}, {{fr-arnomix}}, {{br-nomix}}
+</script>
+
+<h2>6.5 E5 Credentials</h2>
+<script type="text/req" data-p="US" data-h="User story and acceptance criteria">
+us-batchissue | As a <b>deputy dean</b>, I want credentials issued automatically when I confirm completion so that no one prepares certificates by hand.<br><i>Given</i> 30 participants, <i>when</i> I confirm completion for the cohort, <i>then</i> the system runs the Appendix E8 checks and issues each credential; any participant who fails a check is listed with the reason and is not issued. | {{fr-crcheck}}, {{fr-crbatch}}
+us-dc | As a <b>participant</b>, I want a signed Digital Credential and a PDF certificate so that I can prove my achievement anywhere.<br><i>Given</i> my completed UMC, <i>when</i> it is issued, <i>then</i> I can download a signed JSON credential and a bilingual PDF with a QR code, both showing the approved credit of the whole UMC. | {{fr-crdc}}, {{fr-crformat}}, {{fr-crcert}}, {{fr-crlang}}
+us-noclaim | As <b>CODL</b>, I want MCMS to block wording that claims credit, MQF level or QV status we don't have so that UTeM never misleads anyone.<br><i>Given</i> a SAMC whose QV expired yesterday, <i>when</i> a credential is issued today, <i>then</i> it carries no Quality-Verified claim, credit value or MQF level. | {{fr-wdtemplate}}, {{fr-wdblock}}, {{fr-wdqvlapse}}, {{br-noclaim}}
+us-verify | As an <b>employer</b>, I want to verify a credential from a link or QR code without signing in so that I can trust it instantly.<br><i>Given</i> a credential link, <i>when</i> I open it, <i>then</i> I see the credential name, holder, issuer, date and status, and no identity card number, email or results. | {{fr-vfpage}}, {{fr-vffields}}, {{nfr-verify}}
+us-correctcred | As a <b>deputy dean</b>, I want to correct a misspelt name without losing history so that records stay trustworthy.<br><i>Given</i> an issued credential with a confirmed error, <i>when</i> I correct it, <i>then</i> a new revision is issued, the original stays in history, and the participant is notified. | {{fr-crcorrect}}, {{fr-crnoerase}}, {{fr-crnotify}}
+us-revoke | As a <b>deputy dean</b>, I want to revoke a credential with a recorded reason so that misuse is stopped.<br><i>Given</i> a revocation decision, <i>when</i> it is recorded, <i>then</i> the verification page shows "Revoked" with the date. | {{fr-crrevoke}}
+</script>
+
+<h2>6.6 E6 Quality Verification</h2>
+<script type="text/req" data-p="US" data-h="User story and acceptance criteria">
+us-qvgate | As a <b>lecturer</b>, I want MCMS to stop a SAMC being marked ready for QV too early so that we only submit eligible offerings.<br><i>Given</i> a SAMC with no completed cohort, <i>when</i> I try to set "Ready to submit", <i>then</i> it is refused with the reason "at least 1 completed cohort is required". | {{fr-qveligible}}, {{br-qvcohort}}
+us-qvevidence | As a <b>lecturer</b>, I want existing evidence to be linked automatically to the QV checklist so that I don't collect it again.<br><i>Given</i> a SAMC with one completed cohort, <i>when</i> I open the QV checklist, <i>then</i> outcomes, SLT calculation, assessment plan, cohort results and CQI records are already linked. | {{fr-qvevidence}}, {{fr-qvautolink}}
+us-qvresult | As a <b>deputy dean</b>, I want to record the QV decision so that verified credit and MQF level become official in MCMS.<br><i>Given</i> a QV decision valid for 3 years, <i>when</i> I record it, <i>then</i> the verified credit and MQF level become the only source for catalogue, credentials and ACR; a validity longer than 3 years is rejected. | {{fr-qvresult}}, {{fr-qvsource}}, {{br-qvvalid}}
+us-qvexpiry | As a <b>deputy dean</b>, I want early alerts before QV expires so that we can renew in time.<br><i>Given</i> QV expiring in 90 days, <i>when</i> the scheduler runs, <i>then</i> the lecturer and deputy dean receive an alert; on expiry, Quality-Verified claims stop automatically. | {{fr-qvalerts}}, {{fr-qvlapse}}
+</script>
+
+<h2>6.7 E7 ACR and ABC</h2>
+<script type="text/req" data-p="US" data-h="User story and acceptance criteria">
+us-acreligible | As a <b>deputy dean</b>, I want MCMS to generate ACR only for eligible learning so that no ineligible credit reaches ABC.<br><i>Given</i> a completed MCE, <i>when</i> completion is confirmed, <i>then</i> no ACR is generated; <i>given</i> a completed UMC from an accredited programme, <i>then</i> an ACR is generated from verified records for me to confirm. | {{fr-acrelig}}, {{fr-acrprep}}, {{fr-acrverify}}, {{br-acrelig}}
+us-consent | As a <b>participant</b>, I want to decide whether my ACR is deposited to ABC so that I stay in control of my record.<br><i>Given</i> a verified ACR, <i>when</i> I decline consent, <i>then</i> the ACR is kept and not queued; <i>when</i> I give consent, <i>then</i> it enters the deputy dean's deposit queue with my consent recorded. | {{fr-dpconsent}}, {{fr-dpdecline}}, {{br-consent}}
+us-deposit | As a <b>deputy dean</b>, I want to record each deposit made in ABC so that MCMS shows the true status.<br><i>Given</i> a queued ACR, <i>when</i> I record the ABC reference and date, <i>then</i> the credit becomes Available with an expiry 10 years later, and the participant is told this is storage, not a credit transfer. | {{fr-dprecord}}, {{fr-cvexpiry}}, {{fr-dpnottransfer}}, {{br-deposit}}
+us-ledger | As a <b>participant</b>, I want one ledger of my credit so that I know what is available, used and expiring.<br><i>Given</i> two ACRs, one transferred, <i>when</i> I open my ledger, <i>then</i> I see one Available and one Provisionally Redeemed, with deposit and expiry dates and a note that credit is not automatically accepted. | {{fr-cvledger}}
+</script>
+
+<h2>6.8 E8 Credit Transfer and Redemption</h2>
+<script type="text/req" data-p="US" data-h="User story and acceptance criteria">
+us-apply | As a <b>participant</b> admitted to a programme, I want to apply for credit transfer using my ACR so that my earlier learning counts.<br><i>Given</i> Available credit, <i>when</i> I apply for a target course, <i>then</i> MCMS attaches the ACR, credential, outcomes and QV evidence automatically; MCE or already-redeemed credit cannot be selected. | {{fr-ctapply}}, {{fr-ctsource}}, {{fr-ctavailable}}, {{fr-rdnoreuse}}
+us-equiv | As the <b>deputy dean of the degree's faculty</b>, I want to evaluate equivalence on learning outcomes so that my decision follows Guide clause 13.3.<br><i>Given</i> an application where credit and SLT match but outcomes are not equivalent, <i>when</i> I try to approve, <i>then</i> MCMS refuses the Approved decision for that course. | {{fr-ctequiv}}, {{fr-ctloequiv}}, {{br-equiv}}
+us-decide | As the <b>deputy dean of the degree's faculty</b>, I want to record my decision with conditions so that the outcome is official and traceable.<br><i>Given</i> a completed evaluation, <i>when</i> I approve 3 credits for course BITS 1123, <i>then</i> the credit becomes Provisionally Redeemed and linked to the programme; a refusal would leave ACR and credentials unchanged. | {{fr-ctdecision}}, {{fr-ctauthority}}, {{fr-rdprov}}, {{fr-ctreject}}
+us-redeemfinal | As the <b>deputy dean of the degree's faculty</b>, I want to record programme completion so that used credit becomes Redeemed and can never be reused.<br><i>Given</i> Provisionally Redeemed credit, <i>when</i> programme completion is recorded with evidence, <i>then</i> it becomes Redeemed; if non-completion is recorded instead, it returns to Available while still valid. | {{fr-rdfinal}}, {{fr-rdrelease}}, {{fr-rdsource}}, {{br-redeem}}
+</script>
+
+<h2>6.9 E9 Stackable Degree</h2>
+<script type="text/req" data-p="US" data-h="User story and acceptance criteria">
+us-pathway | As the <b>deputy dean of the degree's faculty</b>, I want to publish a Senate-approved pathway mapping so that students can plan their learning.<br><i>Given</i> a mapping of UMCs to courses, <i>when</i> I record the Senate's approval, <i>then</i> it is published to participants; an MCE cannot be added to it. | {{fr-spdefine}}, {{fr-spmap}}, {{fr-spcreditbearing}}, {{fr-spapprove}}
+us-plan | As an <b>advisor</b>, I want MCMS to check an individual stackable plan against the 30% and residency rules so that no plan promises the impossible.<br><i>Given</i> a 120-credit conventional programme with 90 credits proposed from earlier credentials, <i>when</i> I check the plan, <i>then</i> it shows 25% UTeM credit, "Not yet suitable", and states that 30% UTeM credit does not mean 70% can be transferred. | {{fr-sp30}}, {{fr-spresidency}}, {{fr-spdecision}}, {{br-home30}}
+us-noguarantee | As a <b>participant</b>, I want honest pathway information so that I am not misled into thinking a set of micro-credentials equals a degree.<br><i>Given</i> any pathway page, <i>when</i> I read it, <i>then</i> admission, transfer, credit limits, validity, remaining courses and graduation conditions are listed, with no automatic-degree claim. | {{fr-spinfo}}, {{fr-spadmit}}
+</script>
+
+<h2>6.10 E10 Quality and Records</h2>
+<script type="text/req" data-p="US" data-h="User story and acceptance criteria">
+us-indicators | As a <b>lecturer</b>, I want cohort indicators calculated for me so that CQI starts from evidence.<br><i>Given</i> a finished cohort, <i>when</i> I open monitoring, <i>then</i> completion, pass and credential-issuance rates and outcome attainment are shown against my targets. | {{fr-mnindicators}}, {{fr-mnlo}}
+us-cqi | As a <b>lecturer</b>, I want to record an issue, its action and its effect so that CQI is complete and traceable.<br><i>Given</i> an action marked Done, <i>when</i> I try to close the CQI item, <i>then</i> MCMS asks for the effectiveness check first; an action that changes outcomes creates a change request. | {{fr-cqiaction}}, {{fr-cqieffect}}, {{fr-cqichange}}, {{br-cqi}}
+us-terminate | As the <b>PTj</b>, I want to suspend an offering with a transition plan so that current participants are protected.<br><i>Given</i> active participants, <i>when</i> the authority decides to suspend, <i>then</i> MCMS lists them, requires a transition plan, notifies them, and keeps every earned credential valid. | {{fr-prsuspend}}, {{fr-prnotify}}, {{fr-prkeep}}, {{br-terminate}}
+us-trace | As an <b>auditor</b>, I want to trace one participant from proposal to credit use so that an audit takes minutes, not days.<br><i>Given</i> a participant and a micro-credential, <i>when</i> I open the traceability view, <i>then</i> I see every linked record from approval to credit use, each with who decided and when. | {{fr-trace}}, {{fr-auditlog}}, {{fr-auditview}}
+us-reports | As <b>CODL</b>, I want standard reports by PTj and year so that management sees the state of micro-credentials.<br><i>Given</i> my scope, <i>when</i> I run "Credentials issued 2026", <i>then</i> I get the report on screen and as CSV, Excel or PDF. | {{fr-reports}}, {{fr-export}}
+us-dashboard | <i>(R2)</i> As the <b>PTj</b>, I want a dashboard of all my offerings so that I see risks at a glance. | {{fr-mndash}}
+</script>
+
+<!-- ===================== 7. RELEASE 1 PROTOTYPE ===================== -->
+<h1>7. Release 1 Prototype and Demonstration</h1>
+<p>The Release 1 prototype must show, on realistic sample data, that MCMS handles the whole life of a micro-credential and keeps each recognition stage separate. This section fixes the demonstration scenario, the seed data and the behaviour of the stub adapters, so that the Release 1 prototype and its demonstration can be built and tested against a known script. This scenario is the acceptance script of Release 1 (D-31): the UI/UX Design Specification flow FL-19 and the Playwright end-to-end test follow it, act by act.</p>
+
+<h2>7.1 Demonstration Scenario</h2>
+<p>The scenario follows three offerings — one of each category — and one participant, Amir, through every stage. It is the script for the supervisor demonstration (D-23) and the end-to-end acceptance test of Release 1.</p>
+<figure data-f="demo">
+<table class="small storyboard">
+  <thead><tr>
+    <th style="width:25%">Act 1 · Curriculum<br><span style="font-weight:400">Increment 1.2</span></th>
+    <th style="width:25%">Act 2 · Learning and credentials<br><span style="font-weight:400">Increment 1.3</span></th>
+    <th style="width:25%">Act 3 · Credit<br><span style="font-weight:400">Increment 1.4</span></th>
+    <th style="width:25%">Act 4 · Quality<br><span style="font-weight:400">Increment 1.4</span></th>
+  </tr></thead>
+  <tbody><tr>
+    <td><ol>
+      <li>Dr. Aina proposes UMC "Data Structures" from BITS 1123 (3 credits, 120 h, 3 modules).</li>
+      <li>SLT check fails at 110 h; fixed to 120 h.</li>
+      <li>Colleague review, deputy dean endorsement with category check; Senate approval recorded by the deputy dean.</li>
+      <li>Readiness confirmed; cohort Jan 2027 opens and appears in the catalogue.</li>
+    </ol></td>
+    <td><ol>
+      <li>Amir registers; dummy payment succeeds.</li>
+      <li>UCreds results imported by CSV; one bad row rejected.</li>
+      <li>Deputy dean verifies; the system issues badges for modules 1–3.</li>
+      <li>Deputy dean confirms completion; the system issues the certificate and signed Digital Credential.</li>
+      <li>Employer verifies by QR; a name typo is corrected with history kept.</li>
+    </ol></td>
+    <td><ol>
+      <li>System generates the ACR; deputy dean confirms it.</li>
+      <li>Amir consents; deputy dean records the ABC reference.</li>
+      <li>Ledger: 3 credits Available, expiry in 10 years.</li>
+      <li>Amir admitted to a programme; applies for transfer.</li>
+      <li>Equivalence judged on outcomes; approved, credit Provisionally Redeemed.</li>
+      <li>A second application using the same credit is blocked.</li>
+      <li>Stackable plan shows 25% UTeM credit: Not yet suitable.</li>
+    </ol></td>
+    <td><ol>
+      <li>SAMC "Cloud Native" QV evidence linked; QV recorded: 2 credits, MQF level 4.</li>
+      <li>Demo clock passes the QV expiry: Quality-Verified claims disappear.</li>
+      <li>MCE "Leadership Essentials" completes: no ACR is offered.</li>
+      <li>CQI item closes only after its effectiveness check; traceability view for Amir.</li>
+    </ol></td>
+  </tr></tbody>
+</table>
+<figcaption>Release 1 demonstration scenario in four acts, read left to right. Every step is a separate, recorded decision.</figcaption>
+</figure>
+
+<p class="tcap" data-t="democheck">What each act proves</p>
+<script type="text/tbl" data-h="Act|What the audience sees|Rules proven" data-w="14%|52%|34%">
+1 Curriculum | Guided proposal stops an invalid UMC; approval applies to one version only. | {{br-umcslt}}, {{br-separate}}, {{br-offer}}
+2 Learning and credentials | Imported data stays provisional until verified; credentials are generated, signed and verifiable; corrections keep history. | {{br-verifyfirst}}, {{br-certwhole}}, {{br-noclaim}}, {{br-audit}}
+3 Credit | ACR needs eligibility and consent; deposit is not transfer; transfer is decided on outcomes; credit cannot be used twice; stackable rules are checked. | {{br-acrelig}}, {{br-consent}}, {{br-deposit}}, {{br-equiv}}, {{br-redeem}}, {{br-home30}}
+4 Quality | QV gives credit and MQF level only while valid; MCE never earns ACR; CQI closes only after its effect is checked. | {{br-samccredit}}, {{br-qvlapse}}, {{br-mce}}, {{br-cqi}}
+</script>
+
+<h2>7.2 Seed Data</h2>
+<p>The prototype ships with fictional seed data so that the scenario can be run at any time and reset. No real personal data is used ({{nfr-envs}}).</p>
+<script type="text/tbl" data-h="Data|Seed content" data-w="24%|76%">
+PTj | Faculty of Information and Communication Technology (FTMK); Faculty of Electrical Engineering; CODL.
+Programmes and parent courses | Bachelor of Computer Science (120 graduating credits, conventional, accredited) with parent course BITS 1123 Data Structures (3 credits, 120 h SLT, 4 CLOs).
+Micro-credentials | UMC "Data Structures" (3 modules of 40 h, credit-based model); SAMC "Cloud Native Development" (80 h, QV sought); MCE "Leadership Essentials" (16 h).
+Users and roles | Test users for every user: students, lecturers, deputy deans of two faculties (one owning the degree), a CODL administrator, an industry expert; plus one lecturer who is also a reviewer, to show separation of duties.
+Settings | All defaults of SRS Table "Configurable settings", including 1 credit = 40 h (D-27).
+Clock | A "demo clock" setting, available only in test environments, that moves the date forward so that QV and credit expiry can be shown.
+</script>
+
+<h2>7.3 Stub and Manual Adapters in the Prototype</h2>
+<script type="text/tbl" data-h="Adapter|Prototype behaviour" data-w="22%|78%">
+Identity (SSO) | Stub sign-in page listing test users; real Microsoft sign-in only in production (D-10).
+Learning platform (UCreds) | CSV export of enrolments and CSV import of results and badges, with sample files that include one invalid row.
+Payment | Dummy service: "Pay" succeeds with a reference number; a test card number forces failure (A-03).
+ABC | Export of deposit data as CSV and PDF; the deputy dean types the ABC reference back into MCMS; the national ABC platform is a concept (D-14).
+QVC / MQA | Submission package download; the QV decision is entered by the deputy dean.
+Email | Sent to a test mailbox viewer instead of real inboxes.
+Credential signing | A test key pair; the public key is published on the verification page of the test environment.
+</script>
+
+<h2>7.4 Prototype Constraints</h2>
+<ul>
+  <li>The prototype runs in a test environment with seed data only; it is not a production service.</li>
+  <li>The demo clock and stub sign-in must be impossible to enable in production ({{fr-devidp}}).</li>
+  <li>Performance targets of SRS Section 7.1 are measured once on the test environment and reported, but not tuned beyond Release 1 needs.</li>
+</ul>
+
+<!-- ===================== 8. UX AND DESIGN ===================== -->
+<h1>8. Experience and Design Principles</h1>
+
+<h2>8.1 Design System</h2>
+<p>All screens follow the project design system <b>DESIGN.md "ulearn-carbon"</b>: IBM Carbon's flat, square geometry; IBM Plex Sans; white and light-gray surfaces; charcoal text; and uLearn Navy (#1e2a6e) as the single accent for links, primary actions and focus. MCMS adds the product rules below on top of it.</p>
+
+<h2>8.2 Product Design Principles</h2>
+<ol>
+  <li><b>One stage, one look.</b> Each recognition stage has its own label and status style, used everywhere, so that a badge never looks like credit and a deposit never looks like a transfer ({{ir-stagecolours}}).</li>
+  <li><b>Honest by default.</b> Recognition text is generated, not typed; when the system cannot support a claim, it says what is true instead.</li>
+  <li><b>Guide, then check.</b> Forms explain the rule next to the field and check it as the user types, rather than failing at submission.</li>
+  <li><b>Tasks first.</b> Staff land on "what needs me today"; participants land on "my learning and my credit".</li>
+  <li><b>Bilingual and mobile.</b> Every participant task works on a phone in Bahasa Melayu or English.</li>
+  <li><b>History is visible.</b> Any record shows who decided what and when, one click away.</li>
+</ol>
+
+<h2>8.3 Status Vocabulary and Tag Policy</h2>
+<p>The statuses below appear across screens, credentials and notices. Colours use DESIGN.md semantic tokens, always with a text label (colour is never the only signal, {{nfr-wcag}}). In accordance with decision D-42, coloured background pills and badges are strictly reserved for operational states, eligibility conditions, and progress indicators (e.g. <code>Passed (Final)</code>, <code>0 / 2 eligible</code>, <code>Provisional (1/3)</code>). Decorative, technical-standard, or implementation tags (such as <code>Ed25519</code>, <code>W3C VC 2.0</code>, <code>RFC 7519</code>, or duplicate <code>Course Completed</code> badges beside completed headings) are prohibited from end-user screens.</p>
+<p class="tcap" data-t="statuses">Status vocabulary and visual treatment</p>
+<script type="text/tbl" data-h="Stage|Statuses shown|Visual treatment (DESIGN.md tokens)" data-w="24%|42%|34%">
+Approval (MC version) | Draft, Submitted, In review, Returned for amendment, Endorsed, Pending approval, Approved, Superseded, Suspended, Terminated | Neutral tag; Approved uses primary (navy) outline
+Module achievement | In progress, Achieved (badge) | Neutral tag with badge icon
+MC completion and credential | Complete, Issued, Corrected, Replaced, Revoked | Success green for Issued; error red for Revoked
+Quality Verification | Not applied, Preparing, Ready, Submitted, Quality-Verified, Expired, Suspended, Withdrawn | Info (navy) for Quality-Verified; warning yellow for expiring within 90 days
+ACR and ABC deposit | ACR prepared, Verified, Consent given, Deposited, Correction needed | Neutral tag labelled "Storage only — not a credit transfer"
+Credit status | Available, Provisionally Redeemed, Redeemed, Expired | Success green, info, neutral and subtle gray respectively
+Credit transfer | Submitted, Under evaluation, Approved, Partly approved, Not approved, More evidence needed | Success / warning / error by outcome
+</script>
+
+<h2>8.4 Gaps in the Design System</h2>
+<p>DESIGN.md lists known gaps: it has no data tables, breadcrumbs, validation styling or dark theme, because it was extracted from marketing pages. MCMS is a data-heavy application, so the SDD shall define these components from Carbon's product guidance in the same flat, square style:</p>
+<ul>
+  <li>data tables with sorting, filtering, row selection and bulk actions (queues, cohort results, ledgers);</li>
+  <li>breadcrumbs and page headers for deep records (proposal → version → review);</li>
+  <li>form validation and error states (blocking errors versus warnings that need a response);</li>
+  <li>status tags for {{tab:statuses}}.</li>
+</ul>
+<p>A dark theme is not needed for Release 1.</p>
+
+<!-- ===================== 9. SUCCESS METRICS ===================== -->
+<h1>9. Success Metrics</h1>
+<p>Targets are proposed values based on the assumptions of this document; they will be confirmed with CODL after the prototype is shown (D-23). KPI-09 applies to the Release 1 prototype; the others apply once MCMS runs a real pilot.</p>
+<p class="tcap" data-t="kpis">Key performance indicators</p>
+<script type="text/tbl" data-h="ID|Measure|Target (proposed)|Goal|How measured" data-w="8%|32%|20%|8%|32%" data-cls="small">
+KPI-01 | Proposals returned for errors that MCMS checks automatically (SLT sum, weightings, alignment, category) | 0 | G2 | Review comments tagged by type
+KPI-02 | Median days from proposal submission to approval decision | ≤ 30 days (excluding committee schedule) | G2 | Workflow timestamps
+KPI-03 | Credentials verified successfully by the public page | ≥ 99% of requests for existing IDs | G3 | Verification log
+KPI-04 | Days from PTj completion confirmation to credential issuance | ≤ 5 working days | G3 | Workflow timestamps
+KPI-05 | Credentials or catalogue entries with an unsupported credit, MQF or QV claim | 0 | G1 | Automated check of issued records against approval and QV records
+KPI-06 | Recognition decisions with a complete audit entry (who, what, when, reason) | 100% | G1, G4 | Audit log completeness report
+KPI-07 | Participants who can find their credit status without help (usability test) | ≥ 80% | G3 | Moderated test with 5–8 participants
+KPI-08 | Time to produce the traceability record for one participant in an audit | ≤ 5 minutes | G4 | Timed task
+KPI-09 | Release 1 demonstration scenario steps passing | 100% | G5 | Scripted run of Section 7.1
+</script>
+
+<!-- ===================== 10. ASSUMPTIONS, DEPENDENCIES, RISKS ===================== -->
+<h1>10. Assumptions, Dependencies and Risks</h1>
+
+<h2>10.1 Product Assumptions</h2>
+<p>These assumptions are made in this PRD in addition to the assumptions of the Glossary and Decision Log v0.6.</p>
+<script type="text/tbl" data-h="ID|Assumption|Effect if wrong" data-w="8%|56%|36%">
+PA-01 | Release 1 is built by one developer (the intern) with AI-assisted development, in two-week sprints. | Roadmap dates shift; increment order stays.
+PA-02 | Work on Release 1 starts on 2 November 2026, after the SDD is drafted. | Roadmap dates shift.
+PA-03 | A test server or local environment with PHP, PostgreSQL and Edge or Chrome is available for development and demonstration. | Demonstration runs on a developer laptop.
+PA-04 | Fictional seed data is acceptable for the supervisor demonstration. | Anonymised real data must be prepared under PDPA controls.
+PA-05 | The first real pilot, if approved, covers CODL-run offerings only. | KPI baselines and training plans grow.
+</script>
+
+<h2>10.2 Dependencies</h2>
+<ul>
+  <li>The SDD, which turns this PRD and the SRS into a buildable design (next document, D-23).</li>
+  <li>Reference data for at least one programme and parent course for the demonstration (seed data stands in until then).</li>
+  <li>For a real pilot only: SSO tenant access (OI-03), the UCreds exchange format (OI-04), the ABC deposit format (OI-11) and a production host (OI-02).</li>
+</ul>
+
+<h2>10.3 Risk Register</h2>
+<p class="tcap" data-t="risks">Product risks</p>
+<script type="text/tbl" data-h="ID|Risk|Likelihood|Impact|Mitigation" data-w="7%|35%|11%|10%|37%" data-cls="small">
+RK-01 | Release 1 scope (all SHALL requirements) is too large for one developer in the time available. | High | High | Four increments with a demonstration each; Release 1.4 items can slip to a later increment without blocking 1.1–1.3; AI-assisted development; business rules tested first.
+RK-02 | UCreds cannot export results in a usable form. | Medium | High | CSV adapter with published templates; manual result entry as fallback ({{fr-asentry}}).
+RK-03 | SSO access is not granted for the pilot. | Medium | Medium | Stub identity provider for the prototype; local accounts are not added (D-10).
+RK-04 | Users confuse ACR deposit with credit transfer or badges with credit. | Medium | High | One-stage-one-look design, generated wording, help pages, usability test (KPI-07).
+RK-05 | The Guide or MQA rules change during the project. | Medium | Medium | Thresholds are settings (D-16); rules are tested individually; source tags make affected requirements easy to find.
+RK-06 | Approving bodies differ from the decided model (deputy dean endorses, Senate approves). | Low | Low | Approving roles are settings (D-11).
+RK-07 | Credential signing keys are lost or leaked. | Low | High | Protected key store, rotation without invalidating old credentials ({{sr-keys}}); ownership decided under OI-08.
+RK-08 | Personal data exposure in the prototype or pilot. | Low | High | Fictional seed data; minimum public data; encryption at rest; PDPA notice ({{sr-pdpa}}).
+RK-09 | Supervisor review late in the project (D-23) finds a fundamental issue. | Medium | High | Decisions and assumptions are explicit and changeable; the demonstration after each increment can be shown early if needed.
+RK-10 | Deputy deans carry most decisions (endorse, verify, confirm, deposit, transfer) and may become a bottleneck. | Medium | Medium | Bulk actions, a single task queue, automatic credential issuance, reminders; delegation in Release 2 ({{fr-delegate}}).
+</script>
+
+<figure data-f="riskmatrix">
+<pre class="mermaid">
+quadrantChart
+  title Risk matrix
+  x-axis Low likelihood --> High likelihood
+  y-axis Low impact --> High impact
+  quadrant-1 Act now
+  quadrant-2 Prepare
+  quadrant-3 Accept
+  quadrant-4 Monitor
+  RK-01 scope: [0.85, 0.85]
+  RK-02 UCreds: [0.55, 0.80]
+  RK-03 SSO: [0.58, 0.44]
+  RK-04 confusion: [0.55, 0.75]
+  RK-05 rule change: [0.40, 0.60]
+  RK-06 approvers: [0.45, 0.20]
+  RK-07 keys: [0.15, 0.85]
+  RK-08 data: [0.20, 0.90]
+  RK-09 late review: [0.60, 0.88]
+  RK-10 deputy dean load: [0.62, 0.62]
+</pre>
+<figcaption>Risk matrix of {{tab:risks}}. Top-right risks are addressed first in the plan.</figcaption>
+</figure>
+
+<!-- ===================== 11. OPEN ITEMS ===================== -->
+<h1>11. Open Items</h1>
+<p>Open items are kept in one place, the Glossary and Decision Log v0.6. None blocks the Release 1 prototype; each has a working assumption. The items that matter most for the product are:</p>
+<script type="text/tbl" data-h="Open item|Why it matters to the product|Working assumption" data-w="22%|46%|32%">
+OI-03 SSO protocol and applicants | Needed before a real pilot; not for the prototype. | Stub sign-in for the prototype.
+OI-04 UCreds connection | Decides how much manual work lecturers do for results. | CSV exchange.
+OI-09 Transfer limits per programme | Affects transfer decisions and stackable plans. | Limits entered per programme; warning only.
+OI-10 Programme status feed | Drives final redemption of credit. | Manual recording from programme records.
+OI-11 ABC deposit format | Affects the deputy dean's workload; the national ABC platform is still a concept. | CSV and PDF export.
+OI-13 Modular UMC completion window | Affects reminders and participant expectations. | Set per offering.
+OI-15 Online assessment identity checks | Affects integrity evidence for QV. | Recorded per assessment by the PTj.
+</script>
+
+<!-- ===================== APPENDICES ===================== -->
+<h1>Appendix A: Traceability from Features to Stories</h1>
+<p class="tcap" data-t="trace">Features, their stories and SRS sections</p>
+<script type="text/tbl" data-h="Epic|Features|User stories|SRS sections" data-w="20%|22%|36%|22%" data-cls="small">
+E1 Platform foundation | {{f-sso}}–{{f-notify}} | {{us-signin}}–{{us-notify}} | 3.1, 3.17
+E2 Curriculum | {{f-proposal}}–{{f-versions}} | {{us-category}}–{{us-versionbind}} | 3.2, 3.3
+E3 Offering and enrolment | {{f-readiness}}–{{f-register}} | {{us-readiness}}–{{us-waitlist}} | 3.4, 3.5
+E4 Learning results | {{f-csv}}–{{f-achrec}} | {{us-csvexport}}–{{us-umccomplete}} | 3.6, 3.7, 3.8
+E5 Credentials | {{f-issue}}–{{f-correct}} | {{us-batchissue}}–{{us-revoke}} | 3.9
+E6 Quality Verification | {{f-qv}} | {{us-qvgate}}–{{us-qvexpiry}} | 3.10
+E7 ACR and ABC | {{f-acr}}–{{f-ledger}} | {{us-acreligible}}–{{us-ledger}} | 3.11
+E8 Transfer and redemption | {{f-transfer}}–{{f-redeem}} | {{us-apply}}–{{us-redeemfinal}} | 3.12, 3.13
+E9 Stackable degree | {{f-stackmap}}–{{f-stackplan}} | {{us-pathway}}–{{us-noguarantee}} | 3.14
+E10 Quality and records | {{f-cqi}}–{{f-reports}} | {{us-indicators}}–{{us-dashboard}} | 3.15, 3.16
+</script>
+
+<h1>Appendix B: Document History</h1>
+<script type="text/tbl" data-h="Version|Date|Author|Change" data-w="12%|18%|18%|52%">
+1.0 | 26 October 2026 | Aliff, Intern | First PRD, written against Glossary and Decision Log v0.5 and SRS v1.0 (users per D-28 and D-29): vision, goals, personas, journeys, feature list and release plan, user stories, Release 1 demonstration scenario, design principles, success metrics and risks.
+1.1 | 27 October 2026 | Aliff, Intern | Aligned with Glossary and Decision Log v0.6 and SRS v1.1: document set (D-30), design prototype and Release 1 prototype defined (D-31), increments fixed (D-32). The demonstration scenario of Section 7 is the acceptance script of Release 1 and the UI/UX flow FL-19 follows it. No feature, story or release assignment changed.
+1.2 | 6 November 2026 | Aliff, Intern | Aligned with Glossary and Decision Log v0.9 and SRS v1.3: updated user journeys and feature descriptions for public verification certificate slip layout, direct cryptographic file downloads, statutory PDPA compliance notice, tag and badge simplification policy (D-42), centralized Office 365 sign-in guidance (D-44), and degree articulation modal workflow.
+</script>
+<p class="small"><i>Review of this document: under D-23 the SDD and Release 1 prototype proceed on the recorded assumptions; the supervisor's comments will be applied to all documents together once the prototype can be shown.</i></p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+(async () => {
+  const problems = window.__problems = [];
+  const docTitle = document.querySelector('.doc-title');
+  if (docTitle) document.title = docTitle.textContent.trim() + ' - UTeM MCMS';
+  const ids = {};
+  const counters = {};
+  const pad = n => String(n).padStart(2, '0');
+  const kw = s => s.replace(/\b(SHALL NOT|SHALL|SHOULD NOT|SHOULD|MAY)\b/g, '<b>$1</b>');
+
+  // 1. requirement tables: lines "key | text | source"
+  document.querySelectorAll('script[type="text/req"]').forEach(s => {
+    const pre = s.dataset.p;
+    const t = document.createElement('table');
+    t.className = 'req';
+    const extra = s.dataset.x; // optional fourth column, e.g. "Enforced by"
+    t.innerHTML = `<thead><tr><th class="c-id">ID</th><th>${s.dataset.h || 'Requirement'}</th><th class="c-src">Source</th>${extra ? `<th class="c-x">${extra}</th>` : ''}</tr></thead>`;
+    const tb = document.createElement('tbody');
+    s.textContent.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).forEach(l => {
+      const parts = l.split('|').map(x => x.trim());
+      if (parts.length < 2) { problems.push('bad req line: ' + l); return; }
+      const [k, txt, src = '', x = ''] = parts;
+      counters[pre] = (counters[pre] || 0) + 1;
+      const id = `${pre}-${pad(counters[pre])}`;
+      if (ids[k]) problems.push('duplicate key ' + k);
+      ids[k] = id;
+      const tr = document.createElement('tr');
+      tr.id = k;
+      tr.innerHTML = `<td class="c-id">${id}</td><td>${kw(txt)}</td><td class="c-src">${src}</td>${extra ? `<td class="c-x">${x}</td>` : ''}`;
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    s.replaceWith(t);
+  });
+
+  // 2. plain tables: data-h="A|B|C", rows "a | b | c"
+  document.querySelectorAll('script[type="text/tbl"]').forEach(s => {
+    const t = document.createElement('table');
+    if (s.dataset.cls) t.className = s.dataset.cls;
+    const heads = s.dataset.h.split('|');
+    const widths = (s.dataset.w || '').split('|');
+    t.innerHTML = '<thead><tr>' + heads.map((h, i) => `<th${widths[i] ? ` style="width:${widths[i]}"` : ''}>${h}</th>`).join('') + '</tr></thead>';
+    const tb = document.createElement('tbody');
+    s.textContent.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).forEach(l => {
+      const cells = l.split('|').map(x => x.trim());
+      tb.insertAdjacentHTML('beforeend', '<tr>' + cells.map(c => `<td>${kw(c)}</td>`).join('') + '</tr>');
+    });
+    t.appendChild(tb);
+    s.replaceWith(t);
+  });
+
+  // 3. figure and table captions
+  let fig = 0, tab = 0;
+  document.querySelectorAll('figure[data-f], .tcap[data-t]').forEach(el => {
+    if (el.tagName === 'FIGURE') {
+      fig++; ids['fig:' + el.dataset.f] = 'Figure ' + fig;
+      const c = el.querySelector('figcaption');
+      c.innerHTML = `<b>Figure ${fig}:</b> ` + c.innerHTML;
+    } else {
+      tab++; ids['tab:' + el.dataset.t] = 'Table ' + tab;
+      el.innerHTML = `<b>Table ${tab}:</b> ` + el.innerHTML;
+    }
+  });
+
+  // 4. resolve {{key}} placeholders in text nodes
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) {
+    const n = walker.currentNode;
+    if (n.parentNode.nodeName !== 'SCRIPT' && n.nodeValue.includes('{{')) nodes.push(n);
+  }
+  nodes.forEach(n => {
+    n.nodeValue = n.nodeValue.replace(/\{\{([a-z0-9:-]+)\}\}/g, (m, k) => {
+      if (ids[k]) return ids[k];
+      const ext = (window.__EXT_IDS || {})[k]; // IDs published by another document (e.g. SRS keys cited in the PRD)
+      if (ext) return ext;
+      problems.push('unresolved ' + k);
+      return '??' + k;
+    });
+  });
+
+  // 5. table of contents
+  const toc = document.getElementById('toc');
+  const map = window.__TOC || {};
+  document.querySelectorAll('main h1:not(.notoc), main h2, main h3').forEach(h => {
+    if (h.tagName === 'H3' && !/^\d/.test(h.textContent.trim())) return; // unnumbered sub-headings stay out of the TOC
+    h.setAttribute('data-toc', '');
+    const lvl = h.tagName[1];
+    const text = h.textContent.trim();
+    toc.insertAdjacentHTML('beforeend',
+      `<div class="toc-row toc-${lvl}"><span class="t">${text}</span><span class="dots"></span><span class="pg">${map[text] || ''}</span></div>`);
+  });
+
+  // 6. diagrams
+  try {
+    mermaid.initialize({
+      startOnLoad: false, securityLevel: 'loose', theme: 'base',
+      themeVariables: {
+        fontFamily: 'Noto Sans, Arial, sans-serif', fontSize: '13px',
+        primaryColor: '#e7f0f8', primaryBorderColor: '#3f6fa6', primaryTextColor: '#13263a',
+        secondaryColor: '#fdf1dc', tertiaryColor: '#f4f6f8', lineColor: '#4b5563',
+        noteBkgColor: '#fff8e1', noteBorderColor: '#c9a227', actorBkg: '#e7f0f8', actorBorder: '#3f6fa6'
+      },
+      flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true, padding: 10 },
+      sequence: { useMaxWidth: true, mirrorActors: false, wrap: true },
+      state: { useMaxWidth: true },
+      er: { useMaxWidth: true }
+    });
+    await document.fonts.ready;
+    await mermaid.run({ querySelector: 'pre.mermaid' });
+  } catch (e) { problems.push('mermaid: ' + e.message); }
+  document.querySelectorAll('pre.mermaid').forEach(p => { if (!p.querySelector('svg')) problems.push('diagram not rendered: ' + p.textContent.slice(0, 60)); });
+  document.body.dataset.done = '1';
+})();
+</script>
+</body>
+</html>

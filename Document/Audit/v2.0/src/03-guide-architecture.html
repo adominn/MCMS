@@ -1,0 +1,201 @@
+<main>
+<h1>2. Guide Structure, Architectural Models &amp; Diagram Analysis</h1>
+
+<h2>2.1 Structure of Garis Panduan Micro-Credential UTeM</h2>
+<p>
+The reference document, <b>Garis Panduan Micro-Credential UTeM (Versi 1.0, 18 September 2026)</b>, published by the Centre for Open and Distance Learning (CODL), establishes the definitive institutional framework for micro-credentials at Universiti Teknikal Malaysia Melaka. Spanning 119 pages, it is organized into five major parts (Bahagian A–E) and eight normative appendices (Lampiran A–H):
+</p>
+<ul>
+  <li><b>Bahagian A – Permulaan (Bab 1–5, pp. 8–16):</b> Background, objectives, Malaysian Qualifications Framework (MQF) alignment, scope, definitions, glossary, and acronyms.</li>
+  <li><b>Bahagian B – Konsep, Prinsip dan Kerangka (Bab 6–8, pp. 17–30):</b> Three micro-credential categories (UMC, SAMC, MCE), constructive alignment, Student Learning Time (SLT), assessment, and the 3-tier recognition hierarchy (Rajah 1–7, Jadual 1).</li>
+  <li><b>Bahagian C – Pembangunan, Pelaksanaan dan Jaminan Kualiti (Bab 9–11, pp. 31–43):</b> Development lifecycle, academic review, Senate approval, cohort delivery, readiness checklists, and Quality Verification (QV) for SAMC (Rajah 8–13).</li>
+  <li><b>Bahagian D – Pengumpulan, Pemindahan Kredit dan Stackable Degree (Bab 12–14, pp. 44–58):</b> Academic Credit Record (ACR), Academic Bank of Credit (ABC) deposits, single redemption principle, 80% LO-matching credit transfer, and stackable pathways with institutional residency (Rajah 14–18).</li>
+  <li><b>Bahagian E – Tadbir Urus, Pemantauan dan Pengurusan Rekod (Bab 15–18, pp. 59–71):</b> University, Faculty, and Operational governance tiers, RACI responsibilities, CQI cycles, version management, mismatch reconciliation, retention, and audit trails (Rajah 19, Jadual 2).</li>
+  <li><b>Lampiran A–H (pp. 75–119):</b> Standardized templates, readiness checklists, CQI forms, QV evidence dossiers, digital badge/credential specifications, credit transfer evaluation matrices, stackable pathway mappings, and governance matrices.</li>
+</ul>
+
+<h2>2.2 Inspection of the 19 Process Diagrams (Rajah 1 to 19)</h2>
+<p>
+A critical requirement of this audit is inspecting all embedded visual diagrams to ensure graphical business logic is accurately reflected in MCMS:
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">Diagram</th>
+      <th>Title &amp; Page</th>
+      <th>Key Process Flow &amp; Rules Illustrated</th>
+      <th>Relevant MCMS Module &amp; Route</th>
+      <th>Verification Evidence</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">Rajah 1</td>
+      <td>Kategori Micro-Credential UTeM (p. 18)</td>
+      <td>Taxonomy of UMC (accredited parent course), SAMC (stand-alone, potential credit), and MCE (executive, non-credit).</td>
+      <td><code>Curriculum</code><br><code>/curriculum/wizard</code></td>
+      <td><code>CategoryRules.php</code> strictly partitions inputs into <code>umc</code>, <code>samc</code>, and <code>mce</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 2</td>
+      <td>Model Penyahhimpunan UMC (p. 20)</td>
+      <td>3 unbundling models: Credit-based (40 SLT/mod), Topic-based (topical split), and Split Learning (80%) + Assessment (20%). Multi-HEI stacking allowed for whole UMC, but cross-course module mix prohibited.</td>
+      <td><code>Curriculum</code><br><code>/curriculum/proposals/{id}</code></td>
+      <td><code>mc_versions.unbundling_model</code> enum supports all 3 models; total module SLT must equal parent course SLT.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 3</td>
+      <td>Carta Alir Penentuan Kategori MC (p. 22)</td>
+      <td>Decision tree: Accredited course? Yes &rarr; UMC. No &rarr; SLT &ge;40 hrs? No &rarr; MCE. Yes &rarr; Quality-Verified? Yes &rarr; QV-SAMC; No &rarr; Non-QV SAMC.</td>
+      <td><code>Curriculum</code><br><code>/curriculum/wizard</code></td>
+      <td>3-question wizard in <code>CategoryRules::determine()</code> replicates decision tree logic exactly.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 4</td>
+      <td>Kitar Hayat Micro-Credential UTeM (p. 25)</td>
+      <td>9-stage lifecycle: Proposal &rarr; Category &rarr; Development &rarr; Delivery &rarr; Assessment &rarr; Credentials &rarr; ACR/ABC &rarr; Transfer/Stacking &rarr; CQI loop.</td>
+      <td>All 14 Modules<br><code>/tasks</code></td>
+      <td>Task queue, stage gates, and status lifecycle enforce exact linear progression across all 9 stages.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 5</td>
+      <td>Kerangka Reka Bentuk MC UTeM (p. 26)</td>
+      <td>Constructive Alignment framework: CLO (What?) &rarr; SLT (How long?) &rarr; Content (What?) &rarr; Activity (How?) &rarr; Assessment (Proof) &rarr; Credential.</td>
+      <td><code>Curriculum</code><br><code>tabs/_assessment.blade</code></td>
+      <td>Matrix links components to CLOs in <code>assessment_component_outcomes</code>; warns on unaligned CLOs.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 6</td>
+      <td>Contoh Penyahhimpunan Kursus Induk (p. 27)</td>
+      <td>Database course (3 credits / 120 SLT) split into 5 modules: 30+25+25+20+20 = 120 SLT. Total module SLT must strictly equal parent course SLT.</td>
+      <td><code>Curriculum</code><br><code>tabs/_modules.blade</code></td>
+      <td><code>ProposalChecker.php</code> raises blocking error if sum of module SLT does not equal parent course SLT.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 7</td>
+      <td>Hierarki Pengiktirafan MC UTeM (p. 29)</td>
+      <td>3-tier recognition: Level 1 (Module Complete &rarr; Digital Badge) &rarr; Level 2 (Full MC Complete &rarr; Sijil/DC) &rarr; Level 3 (Academic Recognition &rarr; ACR/ABC Credit).</td>
+      <td><code>Credentials</code>, <code>CreditBank</code><br><code>/credentials/{id}</code></td>
+      <td>Badge issued per module; Sijil + VC-JWT sheet issued on completion; ACR prepared separately only for eligible MCs.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 8</td>
+      <td>Proses Pembangunan MC UTeM (p. 32)</td>
+      <td>6-step process: Needs Analysis &rarr; Learning Design &rarr; Content Build &rarr; Academic Review &rarr; Approval &rarr; Offering.</td>
+      <td><code>Curriculum</code>, <code>Approval</code><br><code>/curriculum/proposals</code></td>
+      <td>Structured wizard, reviewer assignment, endorsement, and Senate decision pack enforce exact sequence.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 9</td>
+      <td>Kitaran Pelaksanaan MC UTeM (p. 35)</td>
+      <td>Cohort operations: Registration &rarr; Learning Access (uLearn) &rarr; Activities &rarr; Assessment &rarr; Verification &rarr; Certification &amp; Registry.</td>
+      <td><code>Offering</code>, <code>Enrolment</code><br><code>/offerings/{id}</code></td>
+      <td>Readiness checklist, 4-step registration, roster export, gradebook, and verification lifecycle execute this loop.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 10</td>
+      <td>Kitaran Jaminan Kualiti MC UTeM (p. 39)</td>
+      <td>Quality circle: Design &amp; Approval &rarr; Delivery &rarr; Monitoring &rarr; Evaluation &rarr; Improvement &rarr; Periodic Review.</td>
+      <td><code>Monitoring</code><br><code>/monitoring</code></td>
+      <td>Cohort KPIs, student feedback, CQI Action Plan, and periodic reviews execute this continuous assurance cycle.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 11</td>
+      <td>Carta Alir Laluan QV bagi SAMC (p. 40)</td>
+      <td>SAMC build &rarr; Complete &ge;1 cohort &rarr; Compile evidence (Lampiran D) &rarr; Internal review &rarr; QVC/MQA submission &rarr; Decision &rarr; Verified SAMC.</td>
+      <td><code>Quality</code><br><code>/quality/{id}</code></td>
+      <td>Eligibility check requires completed cohort; 6-group evidence package generated; Deputy Dean confirms submission.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 12</td>
+      <td>Hubungan Kelulusan, QV &amp; Pengiktirafan (p. 41)</td>
+      <td>Three distinct columns: UTeM Approval &ne; Quality Verification &ne; Academic Credit Recognition. Neither implies the other automatically.</td>
+      <td><code>Quality</code>, <code>CreditBank</code><br><code>/quality</code>, <code>/creditbank</code></td>
+      <td>Separate approval entities; QV only updates SAMC credit claim after positive external decision; ACR requires explicit eligibility checks.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 13</td>
+      <td>Kitaran CQI Micro-Credential UTeM (p. 42)</td>
+      <td>6-stage CQI cycle: Data &amp; Feedback &rarr; Analysis &rarr; Action Plan &rarr; Implementation &rarr; Re-evaluation &rarr; Feedback update.</td>
+      <td><code>Monitoring</code><br><code>/monitoring/cqi/{id}</code></td>
+      <td>CQI builder captures issues with root cause/priority, actions with owner/KPI, and requires effectiveness evaluation before closure.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 14</td>
+      <td>Carta Alir ACR, ABC &amp; Pemindahan Kredit (p. 51)</td>
+      <td>Completion &rarr; ACR record &rarr; ABC deposit (consent required) &rarr; Transfer application &rarr; Equivalence review &rarr; Transfer approval / rejection.</td>
+      <td><code>CreditBank</code>, <code>Transfer</code><br><code>/creditbank</code>, <code>/transfer</code></td>
+      <td>Full pipeline: ACR prepared &rarr; consent recorded &rarr; exported &rarr; deposit logged &rarr; transfer evaluated &rarr; single redemption locked.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 15</td>
+      <td>Mekanisme Pemindahan Kredit ke Program (p. 52)</td>
+      <td>Dual learning pathways (UMC modular vs SAMC coherent) converging into Academic Verification &rarr; ACR &rarr; ABC &rarr; Credit Transfer.</td>
+      <td><code>CreditBank</code>, <code>Transfer</code><br><code>/records/mine</code>, <code>/transfer</code></td>
+      <td>Differentiates internal achievement records from credit records; enforces single redemption on approval.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 16</td>
+      <td>Carta Alir Laluan Stackable Degree UTeM (p. 55)</td>
+      <td>Initial eligibility check &rarr; Academic mapping (CLO&rarr;PLO) &rarr; Transfer evaluation &rarr; Program conditions (&ge;30% UTeM credit, residency) &rarr; Degree study &rarr; Award.</td>
+      <td><code>Pathways</code><br><code>/pathways/{id}</code></td>
+      <td>Pathway mapping builder maps MCs to degree courses; individual study plan checks 30% home credit and residency.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 17</td>
+      <td>Contoh Laluan MC ke Stackable Degree (p. 57)</td>
+      <td>3 Zones: Zone 1 (Accumulation: UMC A + UMC B + QV SAMC &rarr; ACR &rarr; ABC) &rarr; Zone 2 (Recognition: Admission &rarr; Transfer) &rarr; Zone 3 (Remaining program &rarr; Degree). Callouts: ABC &ne; Admission; Credits &ne; Degree.</td>
+      <td><code>Pathways</code>, <code>Transfer</code><br><code>/pathways/plan</code></td>
+      <td>Plan calculates remaining course requirements; disclaimers explicitly displayed on portal and plan printouts.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 18</td>
+      <td>Struktur &amp; Pemetaan Laluan Stackable Degree (p. 58)</td>
+      <td>3 sources: UMC UTeM, QV SAMC, and Other HEI MCs. All undergo equivalence mapping before contributing to graduation requirements.</td>
+      <td><code>Pathways</code><br><code>/pathways</code></td>
+      <td>Pre-mapped UMC routes supported; individual plan maps CLO/PLO; external HEI intake identified as Release 2 gap.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 19</td>
+      <td>Struktur Tadbir Urus MC UTeM (p. 60)</td>
+      <td>3 Governance Tiers: Tier 1 University (Senate, Policy, QA), Tier 2 Faculty (Needs, Development, Delivery, Assessment, CQI), Tier 3 Operational (uLearn, Registry, Badges, ACR/ABC).</td>
+      <td><code>Identity</code>, <code>Approval</code><br>All controllers</td>
+      <td>RBAC architecture scopes users to PTj; Senate decisions recorded with formal reference; CODL restricted from academic approvals.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>2.3 Analysis of Governance Tables (Jadual 1 &amp; Jadual 2)</h2>
+<h3>Jadual 1: Perbandingan Kategori Micro-Credential UTeM (p. 21)</h3>
+<p>
+The guide defines immutable operational criteria differentiating UMC, SAMC, and MCE:
+</p>
+<table>
+  <thead>
+    <tr>
+      <th>Dimension</th>
+      <th>Unbundled MC (UMC)</th>
+      <th>Stand-alone MC (SAMC)</th>
+      <th>Executive MC (MCE)</th>
+      <th>MCMS Implementation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><b>Origin</b></td><td>Accredited course/program</td><td>Stand-alone course</td><td>Independent short course</td><td><code>mc_versions.origin</code> ('unbundled' vs 'own')</td></tr>
+    <tr><td><b>Program Link</b></td><td>Official parent course component</td><td>Non-parent component</td><td>No link required</td><td><code>parent_course_id</code> foreign key required for UMC</td></tr>
+    <tr><td><b>SLT Threshold</b></td><td>&ge;40 hours (or sum of modules)</td><td>&ge;40 hours</td><td>&lt;40 hours</td><td>Validated in <code>CategoryRules</code> and <code>ProposalChecker</code></td></tr>
+    <tr><td><b>Academic Status</b></td><td>Credit-bearing as parent course</td><td>Credit depends on QV outcome</td><td>Strictly non-credit</td><td><code>is_credit_bearing</code> flag governed by category/QV</td></tr>
+    <tr><td><b>Quality Assurance</b></td><td>Parent program QA</td><td>QA + Quality Verification (QV)</td><td>Internal UTeM QA only</td><td>Separate QA workflows in <code>Approval</code> and <code>Quality</code></td></tr>
+    <tr><td><b>QV Applicability</b></td><td>Not applicable</td><td>Applicable for credit recognition</td><td>Not applicable</td><td>QV module only accepts SAMC with &ge;40 SLT</td></tr>
+    <tr><td><b>Credit Potential</b></td><td>Yes, subject to full completion</td><td>Only after successful QV</td><td>None (Zero)</td><td>ACR engine blocks MCE; gates SAMC on QV</td></tr>
+    <tr><td><b>Stackable Degree</b></td><td>Yes, subject to pathway mapping</td><td>Yes, if Quality-Verified</td><td>No (Prohibited)</td><td>Pathways module strictly refuses MCE</td></tr>
+    <tr><td><b>Primary Focus</b></td><td>Academic qualifications</td><td>Academic / Competency</td><td>Professional / Upskilling</td><td>Classified in catalog and metadata</td></tr>
+  </tbody>
+</table>
+
+<h3>Jadual 2: Matriks Fungsi Umum Tadbir Urus (p. 64)</h3>
+<p>
+The guide allocates authority across four institutional actors: Universiti (Senate/CODL), PTj (Faculty Dean/Deputy Dean), Penyelaras (Coordinator), and Pembangun/Pengajar (Developer/Lecturer). MCMS mirrors this matrix with strict RBAC middleware, preventing role overlap and enforcing separation of duties across all 232 system endpoints.
+</p>
+</main>

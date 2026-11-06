@@ -1,0 +1,151 @@
+<!-- ===================== SECTION 8: COMMON AUTHENTICATED PAGES ===================== -->
+<h1>8. Shared Authenticated & Shell Pages Analysis</h1>
+
+<p>The Shared Authenticated & Shell pages provide consistent system-wide infrastructure across all logged-in personas. These services unify global search, personal data privacy, multi-channel notifications, cross-module task coordination, institutional reporting, and document archival.</p>
+
+<!-- ---------------- 8.1 Universal Task Queue ---------------- -->
+<h2>8.1 Universal Task Queue (IR-07)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Universal Tasks Queue (<code>/tasks</code>), Task Detail & Direct Action (<code>/tasks/{id}</code>)</li>
+  <li><b>Role:</b> All Authenticated Staff (Lecturer, Deputy Dean, CODL Admin, Reviewer)</li>
+  <li><b>Exact Routes:</b> <code>GET /tasks</code>, <code>GET /tasks/{id}</code></li>
+  <li><b>Page Type:</b> Work Queue / Action Routing Hub</li>
+  <li><b>Related Database Tables:</b> <code>tasks</code>, <code>users</code>, <code>role_assignments</code>, <code>ptjs</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Identity\TaskController</code>, Views: <code>tasks</code>, <code>tasks-show</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Serves as the post-sign-in landing page for all staff personas (IR-07). Aggregates all open, actionable items assigned to the user individually or to their active role within their faculty PTj scope. Features area tabs (Proposals, Offerings, Results, Credentials, Deposits, Transfers), keyword search, overdue flagging based on <code>alerts.decision_overdue_days</code>, and direct action routing.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-01. Accessing <code>/tasks/{id}</code> automatically redirects the user directly to the target record where the work is performed (e.g., clicking a proposal task opens <code>/approvals/{id}</code>).</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Dynamic role scoping and automated task completion operate reliably.</p>
+
+<!-- ---------------- 8.2 Global Search ---------------- -->
+<h2>8.2 Role-Aware Global Header Search</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> Role-Aware Global Search</li>
+  <li><b>Role:</b> All Authenticated Users</li>
+  <li><b>Exact Route:</b> <code>GET /search</code> (Route Name: <code>search</code>)</li>
+  <li><b>Page Type:</b> System-Wide Search & Results Directory</li>
+  <li><b>Related Database Tables:</b> <code>micro_credentials</code>, <code>mc_versions</code>, <code>offerings</code>, <code>users</code>, <code>credentials</code>, <code>transfer_applications</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Identity\SearchController@search</code>, View: <code>search</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Provides unified search capabilities tailored dynamically to the user's active role:
+- <i>Student:</i> Searches enrolled courses, achievements, and credentials.
+- <i>Lecturer:</i> Searches assigned micro-credentials, delivery cohorts, and enrolled learners.
+- <i>Deputy Dean:</i> Searches faculty proposals, grade sheets, issued credentials, and transfer applications.
+- <i>CODL Admin:</i> Searches user directory, system configuration settings, templates, and integration logs.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional. Executes role-scoped queries against database indexes. Results are grouped into categorized cards with deep links to matching records.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Role scoping and keyword matching operate as specified.</p>
+
+<!-- ---------------- 8.3 User Profile & Sessions ---------------- -->
+<h2>8.3 Profile, Personal Data Governance & Session Control</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> User Profile (<code>/profile</code>), Update Preferences (<code>POST /profile/preferences</code>), Data Correction Request (<code>POST /profile/data-correction</code>), Terminate Session (<code>POST /profile/sessions/terminate</code>)</li>
+  <li><b>Role:</b> All Authenticated Users</li>
+  <li><b>Exact Routes:</b> <code>GET /profile</code>, <code>POST /profile/preferences</code>, <code>POST /profile/data-correction</code>, <code>POST /profile/sessions/terminate</code></li>
+  <li><b>Page Type:</b> User Profile, PDPA Compliance & Security Dashboard</li>
+  <li><b>Related Database Tables:</b> <code>users</code>, <code>sessions</code>, <code>notification_preferences</code>, <code>corrections</code>, <code>audit_events</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Identity\SearchController</code>, View: <code>profile</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Compliance and account management:
+(1) <b>Personal Information:</b> Displays official name, staff/student ID, verified email, and assigned roles.
+(2) <b>Notification Preferences:</b> Toggles granular email and in-system notification delivery per event category.
+(3) <b>Session Governance:</b> Displays all active web sessions with IP addresses, browser agents, and last activity timestamps. Allows terminating foreign sessions.
+(4) <b>PDPA Data Rights:</b> Allows users to submit formal personal data correction requests (e.g., legal name spelling change) which are logged into the audit chain for administrative verification.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and verified in Playwright flow FL-01. Session termination invalidates target sessions in the <code>sessions</code> table. Correction requests log to <code>corrections</code>.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Privacy controls and session security are operational.</p>
+
+<!-- ---------------- 8.4 Notifications Center ---------------- -->
+<h2>8.4 Notifications Center (MD-16)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Notifications Center (<code>/notifications</code>), Notification Preferences (<code>POST /notifications/preferences</code>), Mark Read (<code>POST /notifications/{id}/read</code>), Mark All Read (<code>POST /notifications/read-all</code>), Open Notification Link (<code>GET /notifications/{id}/open</code>)</li>
+  <li><b>Role:</b> All Authenticated Users</li>
+  <li><b>Exact Routes:</b> <code>GET /notifications</code>, <code>POST /notifications/preferences</code>, <code>POST /notifications/read-all</code>, <code>GET /notifications/{id}/open</code>, <code>POST /notifications/{id}/read</code></li>
+  <li><b>Page Type:</b> Notification Hub & In-App Activity Center</li>
+  <li><b>Related Database Tables:</b> <code>notifications</code>, <code>notification_preferences</code>, <code>templates</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Notifications\NotificationController</code>, View: <code>notifications.index</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Delivers real-time and historical communications across system channels (FR-265 to FR-271). Features: (1) Unread notification counter in top header, (2) Notification popover menu displaying recent messages, (3) Tabbed interface (All, Unread, Read), (4) "Mark all as read" button, and (5) Direct navigation: clicking a notification marks it as read and redirects the user directly to the associated action URL via <code>Notifier::linkFor()</code>.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and tested in Playwright flow FL-01. Messages are rendered from bilingual system templates in the user's preferred language.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Dynamic unread badges, popover interaction, and deep-linking operate correctly.</p>
+
+<!-- ---------------- 8.5 Document Repository ---------------- -->
+<h2>8.5 Official Document Repository & Archive</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> Document Center ("My Documents")</li>
+  <li><b>Role:</b> All Authenticated Users (Content Scoped)</li>
+  <li><b>Exact Route:</b> <code>GET /documents</code> (Route Name: <code>documents</code>)</li>
+  <li><b>Page Type:</b> Centralized Document Repository & Archive</li>
+  <li><b>Related Database Tables:</b> <code>credentials</code>, <code>enrolments</code>, <code>acrs</code>, <code>abc_batches</code>, <code>report_runs</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Records\RecordsController@documents</code>, View: <code>records.documents</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Aggregates all official institutional documents generated by or issued to the logged-in user in one centralized archive. Groups documents by category: (1) Enrolment Fee Receipts, (2) Digital Certificates & Badges, (3) Academic Credit Records (ACR), (4) Export Batches, and (5) Generated System Reports. Each entry provides date, reference number, status, and direct links to view or print the document in the standard A4 layout.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and aligned with the prototype. Queries user-associated records dynamically, presenting an organized tabbed archive.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Document aggregation and A4 print linking operate reliably.</p>
+
+<!-- ---------------- 8.6 Standard System Reports ---------------- -->
+<h2>8.6 Ten Standard System Reports (MD-15)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Reports Hub (<code>/records/reports</code>), Report View (<code>/records/reports/{kind}</code>), CSV Export (<code>/records/reports/{kind}/csv</code>), Print View (<code>/records/reports/{kind}/print</code>)</li>
+  <li><b>Role:</b> Lecturer, Deputy Dean, CODL Administrator</li>
+  <li><b>Exact Routes:</b> <code>GET /records/reports</code>, <code>GET /records/reports/{kind}</code>, <code>GET /records/reports/{kind}/csv</code>, <code>GET /records/reports/{kind}/print</code></li>
+  <li><b>Page Type:</b> Institutional Business Intelligence & Regulatory Reporting</li>
+  <li><b>Related Database Tables:</b> <code>report_runs</code>, <code>offerings</code>, <code>enrolments</code>, <code>credentials</code>, <code>qv_records</code>, <code>acrs</code>, <code>transfer_applications</code>, <code>credit_ledger_entries</code>, <code>cqi_actions</code>, <code>stackable_plans</code>, <code>suspensions</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Records\RecordsController</code>, Views: <code>records.reports</code>, <code>records.report</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Generates the 10 official regulatory reports required by MQA and Senate (FR-reports):
+<ol>
+  <li><code>offerings</code>: Cohort delivery performance and enrolment rates.</li>
+  <li><code>enrolments</code>: Learner retention, withdrawal, and completion statistics.</li>
+  <li><code>credentials</code>: Issued certificates, badges, corrections, and revocations.</li>
+  <li><code>quality</code>: Stand-alone SAMC Quality Verification status and expiry tracking.</li>
+  <li><code>deposits</code>: Academic Credit Records and national ABC bank deposit totals.</li>
+  <li><code>transfers</code>: Credit transfer applications, approval rates, and granted credits.</li>
+  <li><code>redemption</code>: Credit ledger redemption lifecycle and validity states.</li>
+  <li><code>actions</code>: Open CQI improvement actions and effectiveness evaluations.</li>
+  <li><code>plans</code>: Individual stackable pathway plans and institutional credit shares.</li>
+  <li><code>suspensions</code>: Active suspensions, terminations, and periodic review outcomes.</li>
+</ol>
+All reports are strictly scoped to the user's faculty (deputy dean) or system-wide (admin). Every report execution is logged in <code>report_runs</code> with user ID, execution parameters, and record counts. Results can be viewed on screen, exported as CSV, or printed via A4 layout.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-24. Queries respect faculty PTj boundaries. CSV exports and printable layouts execute deterministically.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Scoped reporting, CSV export, print layout, and run logging operate as specified.</p>

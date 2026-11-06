@@ -1,0 +1,255 @@
+<!-- Glossary and Decision Log v0.4. Each version's changes are listed in Section 4 (Change Control). -->
+<section class="cover">
+  <p class="doc-title">Glossary and Decision Log</p>
+  <p class="doc-sub">UTeM Micro-Credential Management System (MCMS)</p>
+  <h3>Document Control</h3>
+  <table>
+    <thead><tr><th colspan="2">Document Information</th></tr></thead>
+    <tbody>
+      <tr><td>Title</td><td>Glossary and Decision Log for the UTeM Micro-Credential Management System (MCMS)</td></tr>
+      <tr><td>Date</td><td>27 October 2026</td></tr>
+      <tr><td>Status</td><td>Draft</td></tr>
+      <tr><td>Version</td><td>0.6 (document set and prototype terms fixed: D-30 to D-33 and A-10 added; D-01 and D-23 updated; OI-02, OI-03, OI-08 and OI-13 updated)</td></tr>
+      <tr><td>Prepared for</td><td>Supervisor review; Centre for Open and Distance Learning (CODL), Universiti Teknikal Malaysia Melaka (assumed system owner)</td></tr>
+      <tr><td>Prepared by</td><td>Aliff, Intern</td></tr>
+      <tr><td>Reference</td><td>MCMS_FND_V0.6_Oct_2026</td></tr>
+      <tr><td>Document set</td><td>Software Requirements Specification (SRS), Product Requirements Document (PRD), UI/UX Design Specification, Software Design Description (SDD), System Flow Map (D-30)</td></tr>
+    </tbody>
+  </table>
+  <div class="disclaimer">
+    <b>Disclaimer:</b>
+    This document is a working draft prepared by an intern as part of a concept and mock-up for a proposed system. It is not an official document of UTeM or CODL. Rules taken from the Garis Panduan Micro-Credential UTeM remain the property of UTeM. Items marked Assumed or Proposed have not been confirmed by the system owner. Unauthorised modification, distribution or misrepresentation is prohibited.
+  </div>
+</section>
+
+<section class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <div id="toc"></div>
+  <span class="tocend">TOCENDMARKER</span>
+</section>
+
+<main>
+<h1 class="notoc">Glossary</h1>
+<script type="text/tbl" data-h="Term|Definition" data-w="24%|76%">
+ABC | Academic Bank of Credit. Central digital depository of ACR. A deposit is storage and does not approve transfer. [G 12.5]
+ACR | Academic Credit Record. Academic record used in the ABC mechanism; prepared only for an eligible completed UMC or Quality-Verified SAMC. [G 12.4]
+Achievement Record | UTeM internal record of modules passed, Digital Badges and MC completion (Rekod Pencapaian Pembelajaran). It is not an ACR. [G 8.7.5, 18.3]
+Adapter | A defined interface to an external system (UCreds, ABC, QVC/MQA, payment, SSO, email) with a stub or manual version in the first release.
+API | Application Programming Interface
+Audit trail | Append-only record of approvals, credential actions, result changes and corrections. History is never erased. [G 10.5.1, 18.10]
+CODL | Centre for Open and Distance Learning. System administrator and technical operator of MCMS and operator of UCreds. CODL takes no academic decision in MCMS (D-12).
+Configurable value | A threshold or list kept in settings and never hard-coded (40 h SLT, 3-year QV limit, 10-year credit validity, 30% home credit, residency, alert days, retention).
+CQI | Continuous Quality Improvement: finding, evidence, analysis, action, implementation and effectiveness check. [G 17]
+Credit accumulation | Building a record of eligible credit over time. Separate from credit transfer. [G 12]
+Credit transfer | Evaluation and acceptance of credit by the programme that receives it; in MCMS decided by the deputy dean of the faculty that owns the degree (D-28). Equivalence is judged on learning outcomes, not on credit or SLT alone. [G 13]
+Credit validity | Credit in ABC is valid 10 years from deposit date. This differs from ACR retention (indefinite unless the owner or authority directs otherwise). [G 12.8]
+Digital Badge | Proof of achievement of one module or unit. Not academic credit and not an ACR. [G 8.7.1, App E1]
+Digital Credential / Certificate | Proof of completing the whole MC (Sijil / Digital Credential). Does not by itself give credit or transfer. [G 8.7.3, App E1]
+Deputy dean (PTj) | The faculty deputy dean who owns micro-credential offerings in MCMS: endorses, verifies, confirms quality and records decisions (D-28).
+HEPA | Student Affairs and Alumni Department. Assumed to register outside applicants together with Pejabat Pendaftar.
+Material change | Change to outcomes, SLT, assessment, module structure, credit, MQF level, parent course link or QV status. Needs review and re-approval and is versioned. [G 9.5, 17.7, 17.8]
+MCE | Micro-Credential Eksekutif. Non-credit short learning under 40 hours SLT. Never carries credit unless reclassified and re-approved as a SAMC. [G 6.3.3]
+MQA / MQF | Malaysian Qualifications Agency / Malaysian Qualifications Framework.
+Micro-Credential (MC) | Certification of a small, focused unit of learning with defined outcomes and assessment. Recognition follows achievement, not attendance. [G 6.1]
+Module | A smaller unit of a UMC. Completion earns a Digital Badge, not credit and not whole-UMC completion. [G 8.7.1]
+PTj | Pusat Tanggungjawab: the faculty, school, institute or centre that owns an offering. [G 15.2.2]
+QA / QV / QVC | Quality Assurance applies to every MC. Quality Verification is the SAMC-specific check run by the QVC under MQA rules. Approval to offer is a separate decision from QV. [G 7.6, 11.2]
+Quality-Verified SAMC | A SAMC that has passed QV. QV is valid for at most 3 continuous years and needs one completed cohort before submission. [G 11.2.1, 11.2.2]
+RBAC | Role-Based Access Control
+SAMC | Stand-alone Micro-Credential. Own offering, at least 40 hours SLT. Credit and MQF level exist only after QV. [G 6.3.2]
+SDD | Software Design Description
+Single Redemption | Credit used for one qualification cannot be used for another. Transfer makes credit provisionally redeemed; completing the programme makes it redeemed. [G 12.9]
+SLT | Student Learning Time: all learning and assessment time, not only contact time. [G 8.3]
+Stackable Degree | Planned pathway where eligible credit counts toward part of a degree. Needs admission, transfer approval, at least 30% credit earned at UTeM, residency (1 semester for conventional programmes), PLO mapping and graduation requirements. [G 14]
+SRS / PRD | Software Requirements Specification / Product Requirements Document
+SSO | Single Sign-On
+UCreds | UTeM online learning platform for micro-credentials; the pilot learning platform. Reached only through an adapter.
+UMC | Unbundled Micro-Credential. Made by unbundling an accredited credit course; keeps its parent link; total SLT equals the parent course; whole UMC is at least 40 hours SLT or one credit. [G 6.3.1]
+</script>
+
+<h1>1. Introduction</h1>
+<h2>1.1 Purpose</h2>
+<p>This document fixes the vocabulary and the key decisions that the three controlling documents of the UTeM Micro-Credential Management System (MCMS), namely the Software Requirements Specification (SRS), the Product Requirements Document (PRD) and the Software Design Description (SDD), shall follow. Every later document shall use the terms in the Glossary with exactly these meanings and shall not contradict a decision in Section 3 unless the decision is first changed here and the version of this document is raised.</p>
+<p>The document set is written for two readers at once: a supervisor who reviews it, and AI development agents and developers who use it as the guide, reference and rule set for building the system. For that reason requirements are written as single, identified statements with traceability to the Guide.</p>
+
+<h2>1.2 Document Conventions</h2>
+<p>This document and the document set follow these conventions:</p>
+<script type="text/tbl" data-h="Term|Description" data-w="16%|84%">
+SHALL | Mandatory requirement that must be fulfilled in Release 1, the first buildable release (prototype scope, decision D-22). The developer is required to cover this feature in Release 1.
+SHOULD | Requirement planned for Release 2. The developer should take it into account in the design so that it can be added without rework.
+MAY | Requirement anticipated for Release 3 or later. The developer is encouraged to keep it in mind for future scalability.
+TBD | To Be Determined. Information not yet available that will be provided in a later version. Every TBD is linked to an open item (OI-xx).
+Note | Provides additional information or clarification.
+</script>
+<div class="note"><b>Note:</b> A requirement tagged with a Guide source, for example [G 12.9], states a rule that is mandatory for the complete system under UTeM policy. Its SHALL / SHOULD / MAY wording states only the release in which MCMS implements it. Guide rules are never relaxed by the release plan.</div>
+<p>Requirements and records are categorised as follows:</p>
+<script type="text/tbl" data-h="Requirement Number|Description" data-w="26%|74%">
+FR-XX | Functional Requirements
+NFR-XX | Non-Functional Requirements
+IR-XX | Interface Requirements
+DR-XX | Data Requirements
+SR-XX | Security Requirements
+BR-XX | Business Rules taken from the Guide (added to the reference categories, decision D-25)
+D-XX / A-XX / OI-XX | Decision / Assumption / Open item (this document)
+</script>
+<p>Source tags follow the Guide: [G 12.9] means Guide clause 12.9 and [App E5] means Guide appendix E, table E5.</p>
+
+<h2>1.3 Intended Audience</h2>
+<p>This document is intended for the following stakeholders:</p>
+<script type="text/tbl" data-h="Stakeholder|Role" data-w="38%|62%">
+Supervisor | Reviews the document set and the decisions taken.
+CODL / UTeM reviewers | Confirm assumptions and open items; system owner (assumed).
+Development team and AI development agents | Design and implement the system using these terms and decisions as fixed rules.
+Testers and quality assurance | Derive acceptance tests from requirement IDs and rules.
+System administrators | Maintain and configure the system after delivery.
+</script>
+
+<h2>1.4 Scope of this Document</h2>
+<p><b><i>In Scope</i></b></p>
+<ul>
+  <li>Glossary of terms used across the SRS, PRD and SDD</li>
+  <li>Key concepts of the Guide that drive the design (categories, recognition stages, numeric rules)</li>
+  <li>Decision log, assumptions register and open items with the working assumption for each</li>
+  <li>Change control for this document</li>
+</ul>
+<p><b><i>Out of Scope</i></b></p>
+<ul>
+  <li>Requirements, user needs and design detail, which belong to the SRS, PRD and SDD</li>
+  <li>A Test Plan (acceptance tests are traced from SRS requirement IDs; decision D-01)</li>
+  <li>Any change to the Guide itself</li>
+</ul>
+
+<h2>1.5 References</h2>
+<ol>
+  <li>Garis Panduan Micro-Credential UTeM (the Guide), CODL UTeM, with Lampiran A to H: the copy held in the project (MC UTeM Guide.pdf), cover Versi 1.0, 18 September 2026 (D-03).</li>
+  <li>Software Requirements Specification, UTeM Micro-Credential Management System, informal draft v0.1, 23 October 2026 (input material only).</li>
+  <li>Software Requirements Specification for an AI-Driven Job Matching Platform, v1.0, May 2025. Used as a format reference only; no content is reused.</li>
+  <li>MQA: Guidelines to Good Practices on Micro-Credentials; Quality Verification of Stand-alone Micro-Credentials; Guidelines on the Academic Bank of Credit; Malaysian Qualifications Framework (second edition).</li>
+  <li>Guidelines on Developing Academic Programme through Stackable Degree Pathway.</li>
+  <li>ISO/IEC/IEEE 29148, Requirements engineering.</li>
+  <li>Open Badges 3.0 and W3C Verifiable Credentials data model (guidance for credential format).</li>
+  <li>WCAG 2.1; OWASP Application Security Verification Standard; Personal Data Protection Act 2010 (Act 709) with current amendments.</li>
+  <li>Software Requirements Specification, UTeM Micro-Credential Management System, v1.0 draft, 23 October 2026 (MCMS_SRS_V1.0_Oct_2026), written against v0.2 of this document; source of open items OI-09 to OI-15.</li>
+</ol>
+
+<h1>2. Key Concepts from the Guide</h1>
+<p>This section summarises the parts of the Guide that shape every design decision. It does not replace the Guide.</p>
+<h2>2.1 Micro-Credential Categories</h2>
+<script type="text/tbl" data-h="Criterion|UMC|SAMC|MCE" data-w="16%|32%|28%|24%">
+Origin | Unbundled from an accredited credit course; keeps parent link | Own offering, not part of an accredited programme | Own non-credit short learning
+SLT | Total equals parent course; whole UMC at least 40 h or 1 credit | At least 40 h | Under 40 h
+Credit | Possible, subject to academic rules; only the whole UMC carries credit | Only after QV | None
+Quality route | Quality assurance of parent programme | QA, plus QV if credit is sought | Internal UTeM QA
+ABC deposit | Yes, if eligible | Only if Quality-Verified | No
+Stackable degree | Yes, subject to conditions | Only if Quality-Verified | No
+</script>
+<p class="small"><i>Source: Guide Table 1 and clauses 6.3 to 6.5.</i></p>
+
+<h2>2.2 The Separate Recognition Stages</h2>
+<p>The Guide treats each stage below as a different thing with its own decision and its own record [G 12 to 14, 18.14]. MCMS shall store them as separate records so that none can be skipped or mistaken for another.</p>
+<script type="text/tbl" data-h="Stage|Decided by|Does NOT imply" data-w="40%|35%|25%">
+1. Approval to offer | Senate, after deputy dean endorsement; recorded by the deputy dean | Credit, QV, transfer
+2. Module achievement (Digital Badge) | Lecturer assesses; deputy dean verifies; system issues the badge | Whole-MC completion, credit
+3. MC completion (Certificate / Digital Credential) | Deputy dean confirms; system issues the credential | Credit, ACR, transfer
+4. Quality Verification (SAMC only) | QVC / MQA | Transfer or admission
+5. ACR and ABC deposit | System generates the ACR; participant consents; deputy dean records the deposit | Transfer approval
+6. Credit transfer | Deputy dean of the faculty that owns the degree | Admission, degree award
+7. Stackable degree award | UTeM academic programme | Nothing further
+</script>
+
+<h2>2.3 Key Numeric Rules (Configurable)</h2>
+<script type="text/tbl" data-h="ID|Rule|Default|Source" data-w="9%|51%|24%|16%">
+BR-01 | Minimum SLT for SAMC and for a whole UMC | 40 hours (or 1 credit for UMC) | G 6.3.1, 6.3.2
+BR-02 | Maximum validity of Quality Verification | 3 continuous years | G 11.2.2
+BR-03 | QV submission needs at least one completed cohort | 1 cohort | G 11.2.1
+BR-04 | Validity of credit in ABC from deposit date | 10 years | G 12.8
+BR-05 | Minimum credit earned at UTeM for a stackable degree | 30% of graduating credit | G 14.5.1
+BR-06 | Residency for conventional programmes via stackable pathway | 1 semester | G 14.5.3
+</script>
+
+<h1>3. Decision Log</h1>
+<h2>3.1 Status Key</h2>
+<p><b>Decided</b>: stated by the project owner or fixed by the Guide. <b>Assumed</b>: no answer yet; a working assumption is used and its effect if wrong is recorded in 3.3. <b>Proposed</b>: a recommendation awaiting confirmation. Every Assumed or Proposed item shall be built so that it can change through configuration or by replacing one adapter, not by rewriting modules.</p>
+
+<h2>3.2 Decisions</h2>
+<script type="text/tbl" data-h="ID|Decision|Rationale / effect if changed|Status" data-w="7%|43%|36%|14%" data-cls="small">
+D-01 | The controlling document set is the SRS, the PRD and the SDD. A Test Plan is not in this set; acceptance tests are traced from SRS requirement IDs. | Matches the project owner's choice. A Test Plan can be added later without changing the three documents. Extended in v0.6 by D-30 (UI/UX Design Specification and System Flow Map). | Decided
+D-02 | All documents are written in English. The system (screens, notifications, credentials) shall support Bahasa Melayu and English. | Documents are read by a supervisor and by AI agents. Bilingual wording of the Guide is preserved through the Glossary. | Decided
+D-03 | The controlling Guide is the copy held in the project (MC UTeM Guide.pdf), whose cover says Versi 1.0, 18 September 2026. A "Version 2.0 Final, 15 September 2026" was named only in the informal draft SRS v0.1; no such copy is held in the project. | It is the only copy available. If a later version is issued, only the source tags need re-checking. | Decided (v0.4, closes OI-01)
+D-04 | A new, formal SRS shall be written. Its layout follows the reference SRS (document control, contents, glossary, numbered sections, identified requirement tables) with Guide terminology. The informal draft SRS v0.1 is input material only. | The draft ends at section 2.8 and its later sections do not exist. A new SRS avoids inheriting the gaps. | Decided
+D-05 | All documents are formal and professional in style and written so an AI agent can follow them without guessing: stable IDs, one requirement per statement, traceability to Guide clauses, explicit assumptions. | Dual audience: supervisor review and AI-assisted development. | Decided
+D-06 | MCMS is a new standalone system with its own database, login handling and workflow. It talks to other systems only through adapters. | Carried from draft SRS (C1, C3). Keeps UCreds and the student system untouched. | Decided
+D-07 | Architecture is a modular monolith: one deployable application with clearly separated modules (starting from the draft's M1 to M16, regrouped in the SDD if needed). | Simplest to build, test and host for a small team. Modules use internal interfaces, so later splitting stays possible. | Proposed
+D-08 | Primary technology is Laravel (PHP). | CODL mostly uses PHP, so maintenance stays with a familiar stack. Chosen by the project owner. | Decided
+D-09 | Database recommendation: PostgreSQL as the primary choice; MySQL or MariaDB is an acceptable fallback if CODL already hosts and supports it. | PostgreSQL gives strong constraints, transactional integrity, JSON fields for credential metadata and good support for append-only audit design. The SDD keeps queries portable through Laravel's database layer. | Proposed (OI-02)
+D-10 | Identity: staff and participants sign in with their Microsoft education account through single sign-on (OpenID Connect assumed). Outside applicants register first at Pejabat Pendaftar or HEPA and then receive that account. MCMS offers no open public sign-up. | Stated by the project owner with details uncertain. If the method differs, only the SSO adapter and applicant recognition change. | Assumed (A-06, OI-03)
+D-11 | Approvals: the deputy dean (PTj) endorses proposals and the Senate gives final approval to offer, approves material changes and approves stackable degree mappings. The Senate does not use MCMS; the deputy dean records each Senate decision with its meeting reference. Individual credit transfer cases are decided by the deputy dean of the faculty that owns the degree. Approving roles stay settings, not code. | Confirmed by the project owner in v0.5. The Guide names no committees (App H), so routing remains configurable. | Decided (v0.5, closes OI-06)
+D-12 | CODL is the system administrator (S1) and technical operator (P5) of MCMS and the product owner. CODL takes no academic decision and holds no academic records role: it does not issue, correct or revoke credentials, prepare ACR or deposit credit. | Confirmed by the project owner in v0.5. Separates operation of the system from academic authority [G 15.2.3]. | Decided (v0.5)
+D-13 | UCreds is the pilot learning platform. Its connection method is a placeholder for the next iteration; CSV import is the fallback. UCreds is assumed to issue module badges and keep its own database; MCMS imports and checks badge data and issues certificates and Digital Credentials. | If UCreds does not issue badges, MCMS issues them instead (one adapter and one module change). | Assumed (A-04, A-05, OI-04)
+D-14 | QVC/MQA submission and payment are manual or stubbed in Release 1: MCMS prepares and tracks; UTeM staff submit. A dummy payment service stands in. The ABC deposit step stays in the flow after the ACR: the deputy dean records each deposit in MCMS. A national ABC platform is still a concept, so no live connection is built; it is added later by swapping one adapter if it becomes available. | External services are not ready or not integrable now. Each is replaced later by swapping one adapter. | Assumed (A-02, A-03)
+D-15 | Recognition stages (Section 2.2) shall be stored as separate records with separate decisions. No single status or button may combine them. | The single most important rule in the Guide [G 12 to 14, 18.14]. Overrides any convenience shortcut in later documents. | Decided
+D-16 | Thresholds in Section 2.3 and other limits shall be configurable settings, including alert days and retention periods. | Rules in the Guide may be revised by UTeM or MQA. Carried from draft SRS (C4). | Decided
+D-17 | Credit value, MQF level and QV wording shall be generated only from verified records, never typed by hand. A credential shall show credit, MQF or QV information only when verified and still valid. | Prevents false claims [G 10.5, App E5]. | Decided
+D-18 | The draft's rule C9 ("a UMC module is never a credit unit") is corrected: a UMC module is not a credit unit unless specifically approved as a separately recognisable credit unit. The whole UMC always carries the credit of its parent course. The approval is an academic decision taken case by case by the deputy dean (the approving role is a setting, D-11). | Guide 13.5 and 14.2.1 allow this exception. Guide 15.2.3 keeps academic decisions away from operational staff, so the System Administrator role does not approve it. The system shall support an approval flag whose default is no. | Decided (v0.5 names the deputy dean; closes OI-05)
+D-19 | Credentials use an open, signed format (Open Badges 3.0 and W3C Verifiable Credentials as guidance); blockchain is not required. Public verification needs no login and shows only the minimum permitted information. | Carried from draft SRS (C8). Privacy limits follow Guide App E6. | Proposed
+D-20 | All approvals, credential actions, result changes and corrections are written to an append-only audit log. Corrections never delete earlier records. | Required by G 10.5.1, 15.7 and 18.10. Also supports supervisor review. | Decided
+D-21 | Sizing figures (up to 200 offerings and 20,000 participants a year, peaks of 2,000 registering within hours) are indicative only and non-binding. | The project owner considers them a possibility, not fact. Design for modest scale without blocking growth. | Assumed (A-09)
+D-22 | The system is produced by an intern as a mock-up and concept. The documents describe the target system. Release 1 is the first buildable release (prototype scope); the PRD shall mark which features belong to Release 1, 2 and 3 or later. | Keeps the specification complete while being honest about prototype scope. Release numbers drive SHALL / SHOULD / MAY (D-24). | Decided
+D-23 | Deliverables are produced as PDF, one at a time, in this order: this document, SRS, PRD, SDD, and then the Release 1 prototype (D-31). The UI/UX Design Specification and System Flow Map were added in v0.6 (D-30). Work continues on the recorded assumptions without waiting for review between documents; supervisor review takes place once something tangible (the prototype) can be shown, and its comments are applied to all documents together. | Changed in v0.4 at the project owner's request: keeps the work moving while assumptions are explicit and changeable. Earlier wording required review before each next document. | Decided
+D-24 | SHALL, SHOULD and MAY indicate Release 1, Release 2 and Release 3 or later respectively, as in the reference SRS. Guide-mandated rules keep their [G] tag and stay binding on the full system regardless of release. | Follows the reference format while preventing the release plan from weakening any Guide rule. Replaces the plain shall / should / may meaning used in v0.1. | Proposed
+D-25 | A sixth requirement category, BR-XX (Business Rules from the Guide), is added to the reference categories FR, NFR, IR, DR and SR. | The Guide's rules are central to this system and need their own traceable IDs. | Proposed
+D-26 | Format of all documents follows the reference SRS: cover with Document Control table and disclaimer, table of contents, glossary, numbered sections with tinted headings, serif body text, and tables with ID and Requirement columns. The PRD and SDD adopt these elements where applicable and use their own section content. | Requested by the project owner. Only structure and layout are adopted; no content from the reference is reused. | Decided
+D-27 | One credit equals 40 notional learning hours (SLT). The value is the default of a configurable setting and is used for UMC and SAMC credit calculations. | Confirmed by the project owner (closes OI-14); follows the MQF convention and the Guide's "40 hours or 1 credit" threshold [G 6.3.1]. | Decided (v0.4)
+D-28 | MCMS has six kinds of user: Student (P8); Lecturer (P1), who creates and runs micro-credentials, assesses students, performs the quality review and collects QV evidence, and reviews colleagues' proposals when assigned (X1); Deputy dean of the PTj (P2), who endorses, records Senate decisions, confirms readiness, verifies results and completion, confirms quality review and QV evidence, corrects or revokes credentials, records ABC deposits, approves module credit, and (for the faculty owning a degree) decides credit transfers; Senate (P3), which approves but does not log in; CODL as system administrator and technical operator (S1, P5); and employers or the public, who verify credentials without login (X3). An industry expert (X2) may comment on proposals. The former separate roles quality unit (P4), records and credential unit (P6), ABC depositor (P7) and receiving programme evaluator (X4) are not used; their tasks move to the deputy dean or the system. | Confirmed by the project owner in v0.5. Fewer roles match how UTeM faculties actually work and keep CODL out of academic decisions. | Decided (v0.5)
+D-29 | Badges, certificates and Digital Credentials are issued automatically by the system when the deputy dean verifies results or confirms completion and the pre-issuance checks pass. ACR is generated automatically for eligible learning and confirmed by the deputy dean. Corrections, replacements and revocations are made by the deputy dean, with history kept. | Confirmed by the project owner in v0.5. Removes manual certificate preparation and keeps every academic decision with an academic role. | Decided (v0.5)
+D-30 | The document set is the SRS, the PRD, the UI/UX Design Specification (approved design basis, v1.1), the SDD and the System Flow Map (a navigable overview of roles, modules, events, jobs and data, derived from the SDD). The Glossary and Decision Log governs all of them. Where the UI/UX Design Specification and the SDD differ on a screen, flow or document ID, the UI/UX Design Specification controls; where they differ on structure or behaviour behind the screen, the SDD controls. | The SDD and the UI/UX Design Specification already treat each other as part of the set, while v0.5 listed only three documents. | Proposed (v0.6)
+D-31 | Two things are called a prototype. The design prototype is the clickable HTML prototype that the UI/UX Design Specification describes. The Release 1 prototype is the working Laravel application of the SDD on seed data with stub and Manual adapters (PRD Sections 5 and 7). D-22 and D-23 refer to the Release 1 prototype. Its acceptance script is the demonstration scenario of PRD Section 7; the walk-through flow FL-19 is rewritten to follow that scenario. | The same word was used for both, and FL-19 mixes three offerings (a Stand-alone Micro-Credential, an Unbundled one and a non-credit one) so it cannot test one record chain. | Proposed (v0.6)
+D-32 | Release 1 is built in the four increments of PRD Section 5.3 (1.1 Foundation, 1.2 Curriculum, 1.3 Delivery and credentials, 1.4 Credit and quality). Build slices are planned inside these increments and do not reorder them. | Keeps one build order across the PRD and the SDD. | Proposed (v0.6)
+D-33 | DESIGN.md (Carbon with uLearn Navy) is accepted as the UTeM corporate identity for MCMS (SRS IR-08) until UTeM supplies its own guidelines. | The UI/UX Design Specification relies on this; v0.5 recorded no assumption for it. | Assumed (A-10)
+</script>
+
+<h2>3.3 Assumptions Register</h2>
+<script type="text/tbl" data-h="ID|Assumption|Effect if wrong" data-w="8%|56%|36%">
+A-01 | Superseded in v0.5 by D-11 (deputy dean endorses, Senate approves, deputy dean records Senate decisions, degree-owning deputy dean decides transfers). | Approver bodies remain settings.
+A-02 | ABC and QVC/MQA accept submissions manually in Release 1. | A real adapter is added later.
+A-03 | UTeM's payment hub is not ready; a dummy payment service is used. | Replace one adapter.
+A-04 | UCreds is the pilot learning platform; its connection method is unknown. | CSV import is the fallback; connector design shifts.
+A-05 | UCreds already issues module badges and has its own database. | MCMS issues badges itself if UCreds should not.
+A-06 | Outside applicants register at Pejabat Pendaftar or HEPA, then sign in with a Microsoft education account. | Add an applicant pre-registration screen.
+A-07 | Superseded in v0.5 by D-12 and D-29: CODL is administrator and technical operator only; credentials and ACR are produced by the system after deputy dean verification. | Role holders change in settings.
+A-08 | Retention periods are placeholders. | Edit settings.
+A-09 | Sizing is indicative: 200 offerings and 20,000 participants a year, peaks of 2,000 registering within hours. | Capacity plan changes.
+A-10 | DESIGN.md is the UTeM corporate identity for MCMS (D-33). | Colours, type and logo usage change in the style tokens only.
+</script>
+
+<h2>3.4 Open Items for CODL / Supervisor Confirmation</h2>
+<p>OI-01 to OI-08 were raised in v0.1. OI-09 to OI-15 were found while writing the SRS v1.0 draft and are added in v0.3; the SRS requirements they affect are listed in its Appendix C. Closed items keep their row and ID, with the decision that closed them.</p>
+<script type="text/tbl" data-h="ID|Question|Needed by|Working assumption until answered" data-w="8%|48%|16%|28%" data-cls="small">
+OI-01 | Which Guide version is controlling: V2.0 (15 Sep 2026) or V1.0 (18 Sep 2026)? | Closed (v0.4) | The copy held in the project, Versi 1.0, 18 Sep 2026 (D-03)
+OI-02 | Is a PostgreSQL server available, or must the system use MySQL/MariaDB? | Before staging set-up (SDD issued on the working assumption) | PostgreSQL, portable queries (D-09)
+OI-03 | Which SSO protocol and tenant settings does UTeM allow for the Microsoft education account? How are outside applicants recognised? | Before staging set-up (SDD issued on the working assumption) | OpenID Connect; account attribute or imported list (D-10)
+OI-04 | How does UCreds connect (web service, data export, Moodle link) and does it issue badges? | Next iteration | CSV import; UCreds issues badges (D-13)
+OI-05 | Is a separately credit-bearing UMC module an approved case at UTeM, and who approves it? | Closed (v0.4) | Allowed by case-by-case academic approval; approving role is a setting (D-18)
+OI-06 | Which committee or role approves each decision (offering, transfer rules, stackable mapping, material change)? | Closed (v0.5) | Deputy dean endorses, Senate approves, deputy dean records; degree-owning deputy dean decides transfers (D-11)
+OI-07 | Retention periods for each record category. | Before go-live | Placeholder settings; ACR retained indefinitely [G 12.8]
+OI-08 | Who owns the credential signing keys and the public verification page? | Before go-live | CODL (D-12)
+OI-09 | What are the credit transfer limits and non-transferable components of each target programme, and who maintains them? [G 13.5] | Before Release 1 testing | Programme settings entered by the faculty; the system warns only
+OI-10 | How will MCMS learn of programme admission, completion and withdrawal, which drive the redemption status of credit? [G 12.9, 14.4] | Before SDD | Recorded manually by an authorised user from programme records
+OI-11 | What data and file format does ABC require for an ACR deposit, and how are redemption updates sent to ABC? [G 12.5, 18.6] | Before Release 1 testing | Export of the ACR fields of Appendix F3 in CSV and PDF
+OI-12 | What fee rules, refund rules and sponsorship arrangements apply to offerings? | Before Release 2 | Fee set per offering; refunds handled outside MCMS
+OI-13 | What is the completion window for a modular UMC ("tempoh kesahan pembelajaran", G 7.4, 12.2)? | Before Release 1 testing | Default setting umc.completion_window_months (no value until answered), which an offering may override; no reminder is sent while no value is set
+OI-14 | Confirm that 40 notional learning hours equal 1 credit for UMC and SAMC calculations. [G 6.3.1] | Closed (v0.4) | Confirmed: 40 hours = 1 credit (D-27)
+OI-15 | Which identity verification methods are required for online assessment at each risk level? [G 10.4] | Before Release 1 testing | Recorded per assessment; method chosen by the PTj
+</script>
+
+<h1>4. Change Control</h1>
+<p>This document is the single place where terms and decisions change. A change shall state the decision ID, the new wording, the reason and the date, and shall raise the document version. The SRS, PRD and SDD shall cite the version of this document they were written against.</p>
+<script type="text/tbl" data-h="Version|Date|Change" data-w="12%|20%|68%">
+0.1 | 23 October 2026 | First issue: glossary, decisions D-01 to D-23, open items.
+0.2 | 23 October 2026 | Restyled to follow the reference document format; added Key Concepts, assumptions register, change history, decisions D-24 to D-26; D-04, D-05 and D-22 reworded.
+0.3 | 23 October 2026 | Added open items OI-09 to OI-15 raised while writing the SRS v1.0 draft. "Needed by" of OI-01 and OI-05 changed from "Before SRS" to "Before SRS approval", since the SRS draft now exists and uses their working assumptions. Added the SRS v1.0 draft to the references. The current assumptions (release scope, indicative performance figures) are accepted by the project owner for now. No decision changed.
+0.4 | 26 October 2026 | Closed OI-01 (D-03 now Decided: the project's copy of the Guide, Versi 1.0, 18 Sep 2026, controls), OI-05 (D-18 now Decided: module credit by case-by-case academic approval, approving role is a setting) and OI-14 (new D-27: 1 credit = 40 notional learning hours). D-23 changed: documents and the prototype proceed on recorded assumptions, with supervisor review once the prototype can be shown.
+0.5 | 26 October 2026 | User model simplified to Student, Lecturer, Deputy dean, Senate (no login), CODL (administrator and technical operator only) and public verifiers (new D-28). Credentials and ACR produced by the system after deputy dean verification (new D-29). D-11 now Decided: deputy dean endorses, Senate approves, deputy dean records Senate decisions, degree-owning deputy dean decides transfers (closes OI-06). D-12: CODL holds no academic role. D-14: ABC deposit stays in the flow and is recorded by the deputy dean; the national ABC platform is a concept only. D-18 names the deputy dean as approver. A-01 and A-07 superseded.
+0.6 | 27 October 2026 | Added D-30 (document set now includes the UI/UX Design Specification and the System Flow Map), D-31 (design prototype and Release 1 prototype defined; FL-19 to follow PRD Section 7), D-32 (Release 1 built in the PRD increments) and D-33 with A-10 (DESIGN.md as corporate identity). D-01 and D-23 updated. "Needed by" of OI-02, OI-03 and OI-08 changed because the SDD was issued on their working assumptions. OI-13 working assumption reconciled between SRS and SDD. Source: consistency review of 27 October 2026.
+</script>
+</main>

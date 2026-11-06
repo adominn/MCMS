@@ -1,0 +1,148 @@
+<!-- ===================== 4. BUSINESS RULES ===================== -->
+<h1>4. Business Rules</h1>
+<p>This section lists the rules of the Guide that MCMS enforces, as a separate requirement category (D-25). A business rule is binding on the complete system under UTeM policy, whatever the release (D-24). The column <b>Enforced by</b> names the functional requirements that put the rule into effect; acceptance tests SHALL cover every rule. Rules BR-01 to BR-06 keep the numbers given in the Glossary and Decision Log; their values are settings ({{tab:settings}}).</p>
+
+<h2>4.1 Numeric Rules (Configurable)</h2>
+<script type="text/req" data-p="BR" data-h="Rule" data-x="Enforced by">
+br-slt | A SAMC and a whole UMC SHALL have at least 40 hours SLT (a UMC: or at least 1 credit). | G 6.3.1, 6.3.2 | {{fr-catsamc}}, {{fr-umcwhole}}
+br-qvvalid | Quality Verification SHALL be valid for at most 3 continuous years. | G 11.2.2 | {{fr-qvresult}}
+br-qvcohort | A SAMC SHALL have at least one completed cohort before it is submitted for QV. | G 11.2.1 | {{fr-qveligible}}
+br-creditvalid | Credit in ABC SHALL be valid for 10 years from the deposit date. | G 12.8 | {{fr-cvexpiry}}
+br-home30 | At least 30% of graduating credit for a stackable degree SHALL be earned directly at UTeM. | G 14.5.1 | {{fr-sp30}}
+br-residency | A participant graduating through a stackable pathway in a conventional programme SHALL complete at least 1 semester of residency at UTeM. | G 14.5.3 | {{fr-spresidency}}
+</script>
+
+<h2>4.2 Category and Design Rules</h2>
+<script type="text/req" data-p="BR" data-h="Rule" data-x="Enforced by">
+br-mce | An MCE has less than 40 hours SLT, carries no credit, is not subject to QV, and cannot be used for credit transfer or stackable pathways. It becomes credit-eligible only by reclassification and re-approval as a SAMC. | G 6.3.3 | {{fr-catmce}}, {{fr-mcereclass}}
+br-umcslt | The total SLT of all modules of a UMC SHALL equal the SLT of the parent course. | G 6.3.1, 8.3 | {{fr-umcsltsum}}
+br-umclink | A UMC SHALL come from a credit course of an accredited UTeM programme and SHALL keep its link to the parent course, with its outcomes mapped to the parent CLOs. | G 6.3.1, 8.2 | {{fr-umcaccred}}, {{fr-umcclo}}
+br-creditmodel | Under the credit-based unbundling model, every module SHALL have at least 40 hours SLT. | G 6.3.1.1 | {{fr-umccreditmodel}}
+br-badge | Module completion or a Digital Badge SHALL NOT count as completion of the whole UMC or as academic credit. | G 8.7.1, 12.3.1 | {{fr-crbadgetext}}, {{fr-arumc}}
+br-nomix | Badges or modules from different UMCs or parent courses SHALL NOT form a UMC without an equivalence decision. | G 8.7.2, 12.2 | {{fr-arnomix}}
+br-modcredit | A UMC module SHALL NOT be a credit unit unless specifically approved as a separately recognisable credit unit. | G 13.5, 14.2.1, D-18 | {{fr-umcmodcredit}}, {{fr-ctpartial}}
+br-samccredit | A SAMC SHALL have a credit value and MQF level only after Quality Verification, using the values in the QV decision. | G 6.3.2, 12.3.2 | {{fr-propcredit}}, {{fr-qvsource}}
+br-sltnotcredit | Reaching 40 hours SLT SHALL NOT by itself give credit value or MQF level. | G 6.5, 11.2.1 | {{fr-catsamc}}, {{fr-qveligible}}
+</script>
+
+<h2>4.3 Approval, Delivery and Credential Rules</h2>
+<script type="text/req" data-p="BR" data-h="Rule" data-x="Enforced by">
+br-separate | Approval to offer, Quality Verification and credit transfer SHALL be separate decisions; none implies another. | G 11.2, 15.4 | {{fr-wfnotcredit}}, {{fr-qvnotransfer}}
+br-offer | No micro-credential SHALL be offered before it is approved and its readiness is confirmed. | G 9.6 | {{fr-offapproved}}, {{fr-offopen}}
+br-material | A material change SHALL be reviewed and re-approved before it is implemented. | G 9.5, 17.7 | {{fr-chgmaterial}}
+br-achieve | Recognition SHALL be based on evidence of achievement, not on attendance or participation alone. | G 6.1, 8.6 | {{fr-asnoattend}}
+br-verifyfirst | Achievement SHALL be verified before a Digital Badge, Certificate or Digital Credential is issued. | G 10.4 | {{fr-asverify}}, {{fr-lpstaged}}
+br-certwhole | A Certificate or Digital Credential for the whole micro-credential SHALL be issued only after all completion requirements are met. | G 8.7.3, 10.5 | {{fr-crcheck}}, {{fr-crcert}}
+br-noclaim | No credential or offering information SHALL suggest a credit value, MQF level or QV status that has not been formally obtained. | G 10.5, App E5 | {{fr-wdtemplate}}, {{fr-wdblock}}
+br-qvlapse | When QV expires, is suspended or is withdrawn, UTeM SHALL stop claiming Quality-Verified status for the offering. | G 11.2.2 | {{fr-qvlapse}}, {{fr-offqv}}
+</script>
+
+<h2>4.4 Credit, Transfer and Stackable Rules</h2>
+<script type="text/req" data-p="BR" data-h="Rule" data-x="Enforced by">
+br-acrelig | An ACR SHALL be prepared only for an eligible completed UMC or a completed Quality-Verified SAMC. | G 12.1.1, 12.4.1 | {{fr-acrelig}}
+br-arnotacr | The internal Achievement Record SHALL be kept distinct from the ACR. | G 8.7.5, 18.3 | {{fr-arlabel}}, {{fr-acrseparate}}
+br-deposit | An ABC deposit is storage of a credit record and SHALL NOT be treated as approval of credit transfer. | G 12.5, 18.6 | {{fr-dpnottransfer}}
+br-consent | An ACR SHALL be submitted to ABC only with the participant's consent. | G 12.4.2, 16.8 | {{fr-dpconsent}}
+br-acrkeep | Expiry of credit validity SHALL NOT delete the ACR; the ACR is kept in perpetuity unless the owner or a recognised authority directs otherwise. | G 12.8 | {{fr-cvexpired}}, {{fr-cvretain}}
+br-redeem | Credit used toward one qualification SHALL NOT be used toward another: it is provisionally redeemed on transfer, redeemed on programme completion, and may become available again if the programme is not completed while the credit is valid. | G 12.9 | {{fr-rdprov}}, {{fr-rdnoreuse}}
+br-equiv | Academic equivalence SHALL be judged on learning outcomes and related criteria, not on equal credit or SLT alone. | G 13.3 | {{fr-ctloequiv}}
+br-receiver | Acceptance of credit SHALL be decided by the receiving programme or institution; neither ABC nor MCMS decides it. | G 12.5, 13.1 | {{fr-ctauthority}}
+br-mcetransfer | An MCE SHALL NOT be used directly for credit transfer. | G 13.2 | {{fr-ctsource}}
+br-rejectkeep | A refused transfer SHALL NOT cancel a valid ACR, badge, certificate or Digital Credential. | G 13.6 | {{fr-ctreject}}
+br-admission | Programme admission SHALL be decided separately from credit transfer; holding micro-credentials, ACR or ABC credit SHALL NOT give automatic admission. | G 14.4 | {{fr-ctadmission}}, {{fr-spadmit}}
+br-creditbearing | Only credit-bearing credentials SHALL count toward a stackable degree. | G 14.1.1 | {{fr-spcreditbearing}}
+br-plo | Credit used for a stackable degree SHALL be mapped to the programme learning outcomes and Body of Knowledge. | G 14.5.2 | {{fr-spplo}}
+br-award | A qualification SHALL be awarded only after lawful admission and completion of all programme and graduation requirements. | G 14.10 | {{fr-spaward}}
+</script>
+
+<h2>4.5 Governance and Record Rules</h2>
+<script type="text/req" data-p="BR" data-h="Rule" data-x="Enforced by">
+br-audit | Corrections SHALL be made only by the party with authority and SHALL keep an audit trail; earlier actions are never erased. | G 10.5.1, 15.7, 18.10 | {{fr-crnoerase}}, {{fr-correct}}, {{fr-auditlog}}
+br-version | A version of a micro-credential linked to participant records SHALL NOT be deleted while its records must be kept. | G 18.8 | {{fr-verkeep}}
+br-terminate | Suspension or termination of an offering SHALL protect current participants and SHALL NOT cancel valid achievements. | G 17.10, 18.13 | {{fr-prsuspend}}, {{fr-prkeep}}
+br-cqi | A CQI action SHALL be considered complete only after its effectiveness is evaluated. | G 17.12 | {{fr-cqieffect}}
+br-authority | Lecturers and operational units SHALL NOT take academic decisions outside the authority given to them. | G 15.2.3, 16.3 | {{fr-sod}}, {{fr-adminlimits}}
+</script>
+
+<!-- ===================== 5. EXTERNAL INTERFACE REQUIREMENTS ===================== -->
+<h1>5. External Interface Requirements</h1>
+
+<h2>5.1 User Interfaces</h2>
+<p>MCMS has three web front ends sharing one design: the <b>staff portal</b> (lecturers, deputy deans, CODL administrators and invited experts), the <b>participant portal</b> (P8) and the <b>public pages</b> (catalogue and credential verification). {{fig:screenmap}} shows the main screens by audience. Detailed layouts belong to the SDD and the design work.</p>
+
+<figure data-f="screenmap">
+<pre class="mermaid">
+flowchart TB
+  subgraph PUB["Public pages (no login)"]
+    direction LR
+    C1["Catalogue"] --> C2["Offering details"]
+    V1["Verify credential<br/>(ID, URL, QR)"]
+  end
+  subgraph PAR["Participant portal"]
+    direction LR
+    H1["My learning"] --> H2["Enrolment and<br/>module progress"]
+    H1 --> H3["My credentials"]
+    H1 --> H4["My credit ledger<br/>(ACR, ABC, status)"]
+    H4 --> H5["Consent requests"]
+    H4 --> H6["Transfer applications"]
+  end
+  STF["<b>Staff portal</b> (menus shown by role)<br/>My tasks and decision queue · Micro-credentials: proposals, versions · Offerings: readiness, cohorts, results<br/>Credentials and ACR · ABC deposit queue · QV management · Transfer and stackable plans<br/>CQI and monitoring · Reports and audit · Administration: users, roles, settings"]
+  C2 -- "sign in to register" --> H1
+  PAR ~~~ STF
+</pre>
+<figcaption>Main screens by audience. Each staff user sees only the menus their roles allow.</figcaption>
+</figure>
+
+<script type="text/req" data-p="IR">
+ir-responsive | The user interface SHALL be a responsive web interface usable on screens from 360 px wide (phones) to desktop monitors. |
+ir-lang | Every screen SHALL be available in Bahasa Melayu and English, with a language switch on every page. | D-02
+ir-home | After sign-in each staff user SHALL land on a task page that lists the items waiting for their action, across all their roles. |
+ir-stagecolours | Each recognition stage (approval, badge, certificate or Digital Credential, QV, ACR, ABC deposit, credit transfer, redemption) SHALL have a distinct label and visual style, used consistently, so that users cannot confuse one stage with another. | D-15
+ir-forms | Forms SHALL validate input on entry, show errors next to the field in plain language, and keep entered data when an error occurs. |
+ir-confirm | Actions that issue, approve, revoke, deposit or redeem SHALL ask for confirmation and show a summary of their effect before they run. | G 15.7
+ir-print | Proposal documents, decision packs, certificates, ACR views and reports SHALL have print-friendly layouts. | App A, E3
+ir-identity | The interface and credentials SHALL follow UTeM corporate identity guidelines. Until UTeM supplies its own guidelines, DESIGN.md (Carbon with uLearn Navy) is used (D-33, A-10). | App E3
+ir-help | Each screen SHALL have context help, and the help centre SHALL explain the separate recognition stages in plain words. | G 10.3.1
+ir-accessible | The interface SHALL meet WCAG 2.1 level AA (see Section 7.4). |
+</script>
+
+<h2>5.2 Hardware Interfaces</h2>
+<p>MCMS has no special hardware interface. It runs on standard UTeM server infrastructure.</p>
+<script type="text/req" data-p="IR">
+ir-qrscan | Verification QR codes SHALL be readable by the standard camera application of current smartphones and SHALL open the verification page directly. | App E6
+ir-print-hw | Certificates SHALL print correctly on standard A4 office printers. |
+ir-hsm | Credential signing keys MAY be held in a hardware security module or an equivalent managed key store. | OI-08
+</script>
+
+<h2>5.3 Software Interfaces</h2>
+<p>All external systems are reached through adapters. Each adapter has a fixed interface towards the MCMS modules and one or more implementations: <b>stub</b> (simulated, for development and testing), <b>manual</b> (staff exchange files or enter data), and <b>live</b> (automated connection).</p>
+<p class="tcap" data-t="adapters">Adapters and their modes by release</p>
+<script type="text/tbl" data-h="Adapter|External system|Data exchanged|Release 1|Later" data-w="15%|20%|33%|16%|16%" data-cls="small">
+Identity | UTeM SSO (Microsoft education account) | Sign-in, name, email, staff or matric number, account attributes | Live in production; stub in development and test | –
+Learning platform | UCreds | Enrolments out; progress, results, module completion, badge data in | Manual (CSV) | Live connector (R2)
+ABC | National Academic Bank of Credit | ACR deposit data out; deposit reference and status in; redemption updates | Manual (export and record) | Live (R3, MAY)
+Quality Verification | QVC / MQA | QV submission package out; QV decision in | Manual (package and record) | Electronic (R3, MAY)
+Payment | UTeM payment hub | Payment request out; payment result in | Stub (dummy service) | Live (R3, MAY)
+Email | UTeM SMTP service | Notification messages | Live | –
+Student information | UTeM student information system | Admission, enrolment and graduation status | None (manual recording) | Live (R3, MAY)
+Credential signing | Key store within UTeM infrastructure | Signing of Digital Credentials; public key for verification | Live | –
+</script>
+<script type="text/req" data-p="IR">
+ir-adapter | Each adapter SHALL expose a documented, versioned interface to the MCMS modules. Business modules SHALL NOT call external systems directly. | D-06, C3
+ir-stubs | Every adapter SHALL have a stub implementation usable in development and test environments. | D-14
+ir-mode | The active implementation of each adapter SHALL be chosen by configuration, without code change. | D-14
+ir-idempotent | Operations that send data out (deposit export, payment request, notification) SHALL be safe to repeat: a repeated call SHALL NOT create a duplicate record. |
+ir-oidc | The identity adapter SHALL use OpenID Connect with the UTeM Microsoft tenant, unless CODL specifies another protocol (TBD, OI-03). | D-10
+ir-csvtemplates | CSV templates for the learning platform SHALL be versioned and published in the technical documentation, with UTF-8 encoding, a header row and ISO 8601 dates. | A-04
+ir-obv3 | Digital Credentials SHALL be produced as JSON documents following the Open Badges 3.0 / W3C Verifiable Credentials data model, signed by UTeM, with the public verification key published at a stable address. | D-19
+ir-api | The system SHOULD provide an authenticated REST API for read access to catalogue data and credential verification, to allow later integration by other UTeM systems. |
+</script>
+
+<h2>5.4 Communications Interfaces</h2>
+<script type="text/req" data-p="IR">
+ir-https | All web traffic SHALL use HTTPS with TLS 1.2 or later. Plain HTTP requests SHALL be redirected to HTTPS. | OWASP ASVS
+ir-smtp | Email SHALL be sent through the UTeM SMTP service using TLS, from a monitored UTeM address. |
+ir-time | Servers SHALL synchronise time with a trusted time source. Times SHALL be stored in UTC and shown in Malaysia time (Asia/Kuala_Lumpur). | G 15.7
+ir-dates | Dates SHALL be shown as DD/MM/YYYY in the interface and exchanged as ISO 8601 in files and APIs. |
+ir-files | Files exchanged with external parties SHALL be transferred only through approved UTeM channels and SHALL NOT be sent by personal email. | App H6
+</script>

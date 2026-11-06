@@ -1,0 +1,173 @@
+<!-- ===================== 5. FEATURES AND RELEASE PLAN ===================== -->
+<h1>5. Features and Release Plan</h1>
+
+<h2>5.1 Feature Map</h2>
+<p>Features are grouped into ten epics that follow the life of a micro-credential. {{fig:featuremap}} gives the overview; {{tab:features}} lists every feature with its release, priority and the SRS requirements it delivers.</p>
+<figure data-f="featuremap">
+<pre class="mermaid">
+mindmap
+  root((MCMS))
+    E1 Platform foundation
+      Sign-in and roles
+      Settings and templates
+      Reference data
+      Notifications
+    E2 Curriculum
+      Category determination
+      Guided proposal
+      UMC structure
+      Review and approval
+      Versions and material change
+    E3 Offering and enrolment
+      Readiness
+      Catalogue
+      Registration and payment
+    E4 Learning results
+      UCreds exchange
+      Result verification
+      Achievement record
+    E5 Credentials
+      Badges certificates DCs
+      Wording control
+      Public verification
+      Corrections
+    E6 Quality Verification
+      Evidence and readiness
+      QV status and expiry
+    E7 ACR and ABC
+      ACR preparation
+      Consent and deposit
+      Credit ledger
+    E8 Transfer and redemption
+      Equivalence evaluation
+      Single redemption
+    E9 Stackable degree
+      Pathway mapping
+      Individual plan
+    E10 Quality and records
+      Monitoring and CQI
+      Periodic review
+      Audit trail and reports
+</pre>
+<figcaption>Feature map of MCMS by epic.</figcaption>
+</figure>
+
+<h2>5.2 Feature List</h2>
+<p>The Release column follows the SRS wording of the delivering requirements: a feature is in Release 1 when its core requirements are SHALL. Some Release 1 features have SHOULD or MAY extensions, listed separately as later-release features.</p>
+<p class="tcap" data-t="features">Features by epic, with release, priority and SRS requirements</p>
+<script type="text/req" data-p="F" data-h="Feature" data-x="Release / priority">
+# E1 Platform foundation
+f-sso | <b>Sign-in and accounts</b> (E1). Microsoft education account single sign-on, stub sign-in for testing, no public sign-up, language choice. | {{fr-sso}}–{{fr-lang}} | R1 · Must
+f-roles | <b>Roles, scopes and separation of duties</b> (E1). Multiple roles per user with PTj or MC scope; submitter cannot decide; approving bodies are settings. | {{fr-rbac}}–{{fr-sme}} | R1 · Must
+f-settings | <b>Settings, templates and reference data</b> (E1). All Guide thresholds as settings with history; bilingual templates; PTj, programme and parent course data. | {{fr-settings}}–{{fr-adapterstatus}} | R1 · Must
+f-notify | <b>Notifications and integration hub</b> (E1). In-system and email notices in the user's language; adapter registry with stub, manual and live modes. | {{fr-ntevents}}–{{fr-ntlog}}, {{fr-ihregistry}}, {{fr-ihretry}} | R1 · Must
+# E2 Curriculum
+f-proposal | <b>Category determination and guided proposal</b> (E2). Category wizard; Appendix A workspace with live SLT, alignment and completeness checks. | {{fr-catwizard}}–{{fr-propprint}} | R1 · Must
+f-umc | <b>UMC structure checks</b> (E2). Parent course link, unbundling model, SLT sum, CLO coverage, module credit flag by academic approval only. | {{fr-umcparent}}–{{fr-umcmodcredit}} | R1 · Must
+f-approval | <b>Review and approval workflow</b> (E2). Reviewer assignment with conflict declaration, comment tracking, PTj endorsement with category verification, decision packs, approval per exact version. | {{fr-revassign}}–{{fr-wfqueue}}, {{fr-wfpack}} | R1 · Must
+f-versions | <b>Versions and material change</b> (E2). Version history; automatic material-change detection; re-approval; enrolments bound to versions; participant notices. | {{fr-verhistory}}–{{fr-vernotify}} | R1 · Must
+# E3 Offering and enrolment
+f-readiness | <b>Offering readiness</b> (E3). Cohorts for approved versions only; Appendix B checklist; three-party readiness confirmation; QV validity check for SAMC. | {{fr-offcreate}}–{{fr-offqv}} | R1 · Must
+f-catalogue | <b>Public catalogue</b> (E3). Honest, bilingual offering information with generated recognition statements and the separate-stages notice. | {{fr-catpublic}}–{{fr-catlang}} | R1 · Must
+f-register | <b>Registration, payment and cohorts</b> (E3). Eligibility, acknowledgement of offering information, PDPA notice, dummy payment, per-module enrolment for modular UMC. | {{fr-regopen}}–{{fr-regstatus}}, {{fr-regmodule}}, {{fr-regwithdraw}}, {{fr-cohortlist}}, {{fr-regconfirm}} | R1 · Must
+# E4 Learning results
+f-csv | <b>CSV exchange with UCreds</b> (E4). Enrolment export; result and badge import with validation; imported data stays provisional. | {{fr-lpadapter}}–{{fr-lplog}} | R1 · Must
+f-verify | <b>Result entry and verification</b> (E4). Assessment plan from the approved version; integrity flags; PTj verification; controlled result changes. | {{fr-asplan}}–{{fr-asmodule}}, {{fr-asfeedback}} | R1 · Must
+f-achrec | <b>Achievement Record</b> (E4). Internal record of modules, badges and completion, clearly not an ACR; automatic UMC completion check confirmed by PTj. | {{fr-arkeep}}–{{fr-arstaff}} | R1 · Must
+# E5 Credentials
+f-issue | <b>Credential issuance</b> (E5). Pre-issuance checks; badges, certificates and signed Digital Credentials issued automatically when the deputy dean verifies; bilingual. | {{fr-crcheck}}–{{fr-crwallet}} | R1 · Must
+f-wording | <b>Recognition wording control</b> (E5). Statements from templates per category and status; blocking of unsupported credit, MQF or QV claims. | {{fr-wdtemplate}}–{{fr-wdqvlapse}} | R1 · Must
+f-public | <b>Public verification</b> (E5). Verification by ID, link or QR with minimum information and status. | {{fr-vfpage}}, {{fr-vffields}}, {{fr-vflog}}, {{fr-vfnotfound}} | R1 · Must
+f-correct | <b>Correction, replacement and revocation</b> (E5). Authorised changes with full history and participant notice. | {{fr-crcorrect}}–{{fr-crnotify}} | R1 · Must
+# E6 Quality Verification
+f-qv | <b>QV management for SAMC</b> (E6). Eligibility gate, evidence checklist with automatic links, readiness decision, submission package, QV result with validity, expiry alerts and lapse handling. | {{fr-qvsamc}}–{{fr-qvnotransfer}} | R1 · Must
+# E7 ACR and ABC
+f-acr | <b>ACR preparation</b> (E7). Eligibility checks; ACR generated automatically from verified records; deputy dean confirms; separate record type. | {{fr-acrelig}}–{{fr-acrnocombine}} | R1 · Must
+f-deposit | <b>Consent and deposit tracking</b> (E7). Student consent; deputy dean deposit queue; export; recorded deposit reference and status; deposit never shown as transfer. | {{fr-dpconsent}}–{{fr-dponlyacr}} | R1 · Must
+f-ledger | <b>Credit ledger and validity</b> (E7). Expiry date, alerts, ledger by status, ACR retention. | {{fr-cvexpiry}}–{{fr-cvretain}} | R1 · Must
+# E8 Transfer and redemption
+f-transfer | <b>Credit transfer evaluation</b> (E8). Application, source checks, Appendix F7 equivalence, limit checks, recorded decision by the right authority, version-aware equivalence. | {{fr-ctapply}}–{{fr-ctadmission}} | R1 · Must
+f-redeem | <b>Single redemption</b> (E8). Provisional and final redemption, release on non-completion, no reuse, conflict blocking. | {{fr-rdprov}}–{{fr-rdabcsync}} | R1 · Must
+# E9 Stackable degree
+f-stackmap | <b>Pathway mapping</b> (E9). Programme pathway with course mapping, credit-bearing check and approval. | {{fr-spdefine}}–{{fr-spnotransfer}}, {{fr-spcurrchange}} | R1 · Must
+f-stackplan | <b>Individual stackable plan</b> (E9). 30% UTeM credit check, residency check, remaining requirements, plan decision, admission gate, award recorded from programme records. | {{fr-spplan}}–{{fr-spinfo}} | R1 · Must
+# E10 Quality and records
+f-cqi | <b>Monitoring and CQI</b> (E10). Cohort indicators, outcome attainment, participant feedback, CQI issues, actions and effectiveness. | {{fr-mnindicators}}–{{fr-mndomains}}, {{fr-cqiissue}}–{{fr-cqisign}} | R1 · Must
+f-review | <b>Periodic review, suspension and termination</b> (E10). Review schedule and outcome; transition plan; participant protection. | {{fr-prschedule}}–{{fr-prkeep}} | R1 · Must
+f-audit | <b>Audit trail, corrections and traceability</b> (E10). Append-only log, discrepancy log, end-to-end traceability, minimum cohort records. | {{fr-auditlog}}–{{fr-cohortrec}} | R1 · Must
+f-reports | <b>Reports and retention</b> (E10). Standard reports by scope, exports, retention settings and controlled disposal. | {{fr-reports}}–{{fr-retention}} | R1 · Must
+# Release 2 and later
+f-r2-admin | <b>Account merge and approval delegation</b> (E1). | {{fr-idmerge}}, {{fr-delegate}} | R2 · Should
+f-r2-curr | <b>Curriculum productivity</b> (E2): parent-course change alerts, batch meeting decisions, version comparison. | {{fr-umcparentchange}}, {{fr-wfbatch}}, {{fr-vercompare}} | R2 · Should
+f-r2-enrol | <b>Enrolment extras</b> (E3): fee waivers, waiting list, bulk enrolment. | {{fr-regwaiver}}, {{fr-regwaitlist}}, {{fr-regbulk}} | R2 · Could
+f-r2-ucreds | <b>Live UCreds connector</b> (E4) and result appeals. | {{fr-lplive}}, {{fr-asappeal}} | R2 · Should
+f-r2-cred | <b>Credential extras</b> (E5): signature check of uploaded files, sharing to professional networks. | {{fr-vfsignature}}, {{fr-crshare}} | R2 · Could
+f-r2-credit | <b>Credit extras</b> (E7, E8, E9): external credit records, equivalence precedents, PLO and Body of Knowledge matrices. | {{fr-acrexternal}}, {{fr-ctprecedent}}, {{fr-spplo}} | R2 · Should
+f-r2-quality | <b>Quality extras</b> (E10): dashboards, record holds, daily digests. | {{fr-mndash}}, {{fr-hold}}, {{fr-ntdigest}} | R2 · Should
+f-r3 | <b>Release 3 integrations</b>: live ABC and QVC/MQA connectors, near-real-time UCreds sync, credential wallets, student information system link, analytics. | {{fr-dplive}}, {{fr-qvportal}}, {{fr-lpsync}}, {{fr-crwalletint}}, {{fr-spsis}}, {{fr-analytics}} | R3 · Could
+</script>
+
+<h2>5.3 Release 1 Increments</h2>
+<p>Release 1 contains every SHALL requirement of the SRS. To make it buildable and demonstrable by a small team, it is delivered in four increments. Each increment ends with a demonstration on sample data; later increments build on earlier ones, as {{fig:increments}} shows.</p>
+<p class="tcap" data-t="increments">Release 1 increments</p>
+<script type="text/tbl" data-h="Increment|Features|Demonstration at the end" data-w="18%|44%|38%">
+1.1 Foundation | {{f-sso}} to {{f-notify}}, {{f-audit}} (audit trail) | Sign in as each role with the stub identity provider; change a setting and see its history; see an audit entry for every action.
+1.2 Curriculum | {{f-proposal}} to {{f-catalogue}} | Create a UMC proposal, fail and then pass the SLT check, review, endorse, approve; open a cohort after the readiness check; see it in the catalogue.
+1.3 Delivery and credentials | {{f-register}} to {{f-correct}} | Register a participant, simulate payment, import UCreds results, verify, see badges, complete the UMC, issue and publicly verify a Digital Credential; correct a credential.
+1.4 Credit and quality | {{f-qv}} to {{f-review}}, {{f-reports}} | QV a SAMC; prepare ACR, consent, record deposit; apply for transfer and approve it; see redemption status; build a stackable plan; record CQI; run reports and the traceability view.
+</script>
+
+<figure data-f="increments">
+<pre class="mermaid">
+flowchart LR
+  I1["<b>1.1 Foundation</b><br/>identity, roles, settings,<br/>notifications, audit"] --> I2["<b>1.2 Curriculum</b><br/>category, proposal,<br/>approval, versions,<br/>readiness, catalogue"]
+  I2 --> I3["<b>1.3 Delivery and<br/>credentials</b><br/>enrolment, UCreds CSV,<br/>verification, credentials"]
+  I3 --> I4["<b>1.4 Credit and quality</b><br/>QV, ACR, ABC, transfer,<br/>redemption, stackable,<br/>CQI, reports"]
+  I4 --> R1(["Release 1 prototype<br/>demonstration (Section 7)"])
+  R1 --> SV["Supervisor review<br/>of all documents and<br/>prototype (D-23)"]
+</pre>
+<figcaption>Release 1 increments and their dependencies.</figcaption>
+</figure>
+
+<h2>5.4 Indicative Roadmap</h2>
+<p>The roadmap below is indicative. It assumes work starts on 2 November 2026, two-week sprints, and one developer with AI assistance (PA-01, PA-02). Dates will move with actual progress; the order of increments will not.</p>
+<figure data-f="roadmap">
+<pre class="mermaid">
+gantt
+  title Indicative roadmap (assumes start 2 Nov 2026)
+  dateFormat YYYY-MM-DD
+  axisFormat %d %b
+  section Documents
+  SDD                         :sdd, 2026-10-27, 2w
+  section Release 1
+  Increment 1.1 Foundation        :i1, 2026-11-02, 3w
+  Increment 1.2 Curriculum        :i2, after i1, 4w
+  Increment 1.3 Delivery and credentials :i3, after i2, 4w
+  Increment 1.4 Credit and quality :i4, after i3, 4w
+  Hardening and demo preparation  :h, after i4, 2w
+  section Review
+  Supervisor review (D-23)        :milestone, rv, after h, 0d
+  section Later
+  Release 2 planning              :r2, after h, 2w
+</pre>
+<figcaption>Indicative roadmap. Release 1 is about 17 weeks of work on these assumptions.</figcaption>
+</figure>
+
+<h2>5.5 Definition of Done for Release 1</h2>
+<p>Release 1 is done when all of the following hold. They extend the acceptance approach of SRS Section 8.3.</p>
+<ol>
+  <li>Every user story of Section 6 marked R1 meets its acceptance criteria in the test environment.</li>
+  <li>Every business rule BR-01 to {{br-authority}} has an automated test that proves the forbidden case is refused ({{nfr-rulestests}}).</li>
+  <li>The demonstration scenario of Section 7 runs end to end on seed data with stub adapters.</li>
+  <li>The interface works in Bahasa Melayu and English and passes an automated WCAG 2.1 AA check on the main participant screens.</li>
+  <li>The SDD describes the system as built.</li>
+</ol>
+
+<h2>5.6 Out of Scope for This Product Version</h2>
+<ul>
+  <li>Delivering learning content, live classes or proctoring (UCreds and other tools).</li>
+  <li>Taking academic decisions automatically; MCMS proposes, checks and records, people decide.</li>
+  <li>Native mobile applications; the web interface is responsive instead.</li>
+  <li>Partner-delivered micro-credentials of other institutions as offerings in MCMS.</li>
+  <li>Refund processing and financial accounting.</li>
+</ul>

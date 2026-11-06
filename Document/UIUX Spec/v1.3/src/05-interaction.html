@@ -1,0 +1,83 @@
+<!-- ===================== 4. INTERACTION DESIGN ===================== -->
+<h1>4. Interaction Design</h1>
+
+<h2>4.1 Every Control Has a Defined Result</h2>
+<p>Each button, link, tab, table row and menu item does exactly one of the things in {{tab:results}}. A control that does nothing is a defect. A control that cannot be used yet is shown disabled with the reason in its label or beside it.</p>
+<p class="tcap" data-t="results">Possible results of a control</p>
+<script type="text/tbl" data-h="Result|Used for" data-w="28%|72%">
+Go to a screen | Opening a record, the next step of a wizard, a list, a printable document
+Confirmation dialog | Every action listed in Section 4.2
+Drawer | Reading a record without leaving a list: history, evidence, an email, import problems
+In-place change and toast | Saving a draft, marking notifications read, adding a row, accepting evidence
+Menu | Notifications, profile, row actions
+Download | A real file: signed credential (.json), report and export tables (.csv)
+</script>
+
+<h2>4.2 Confirmation Dialogs</h2>
+<p>The system asks for confirmation, with a summary of the effect, before: submit, endorse, return, record a decision, verify results, confirm completion (which issues credentials), correct, replace, revoke, confirm ACR, record a deposit, decide a transfer, redeem or release credit, change a setting, assign or remove a role, deactivate an account, import a file, withdraw an enrolment, give or withdraw consent, pay, and sign out with unsaved work (ir-confirm).</p>
+<script type="text/tbl" data-h="Part|Rule" data-w="24%|76%">
+Kicker | The record the dialog is about, for example the credential number
+Title | A question naming the action and the count, for example "Verify 28 results?"
+Body | What will happen, what will not happen, and who is told. Stage separation is stated where it matters: verifying results does not issue certificates; a deposit is not a transfer; refusing a transfer leaves the ACR and credentials unchanged.
+Fields | Any input the decision needs, such as a meeting reference, a reason or an effective date. Required fields are marked and checked.
+Footer | Cancel on the left; the action as a verb on the right
+Destructive actions | Revoke, deactivate, reject, release, withdraw and terminate use the danger style with a red top edge. The record name appears in the body, a reason is required for the audit trail, and focus starts on a safe control.
+Non-blocking warnings | The same dialog states the risk and asks the user to confirm, for example an unresolved non-blocking review comment.
+</script>
+<figure data-f="dlg"><img src="../../../../UIUX%20Spec/v1.1/src/img/modal-confirm.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Confirmation dialog: verifying results states that it creates module achievements only and that completion is confirmed separately.</figcaption></figure>
+<figure data-f="danger"><img src="../../../../UIUX%20Spec/v1.1/src/img/modal-danger.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Destructive dialog: revoking a credential needs the authorised body's decision reference and a reason; the record is never deleted.</figcaption></figure>
+
+<h2>4.3 Feedback</h2>
+<script type="text/tbl" data-h="Situation|Design" data-w="24%|76%">
+Action finished | A toast at the top right for 5 seconds: what happened and the next step, for example "Results verified. 27 module badges issued. Confirm completion next."
+Field error | The message under the field in plain language; entered data is kept; a toast counts the errors (ir-forms).
+System error | Inside the block that failed: what failed, a reference code such as ERR-…, and Retry. No technical detail (nfr-errors).
+Long job | Queued, running with a count ("issuing 14 of 27"), done; the user is notified when it finishes (nfr-queue). Used for issuing credentials, imports and large reports.
+Empty state | The frame and header stay; one sentence says why it is empty and offers the first action.
+Blocked action | The button is disabled and says why; the rule is shown beside the field that causes it.
+</script>
+<figure data-f="valid"><img src="../../../../UIUX%20Spec/v1.1/src/img/validation.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Rule beside the field: a UMC whose modules total 110 hours cannot be submitted against a 120-hour parent course; the fix is offered in place.</figcaption></figure>
+
+<h2>4.4 Notifications and Profile</h2>
+<p>The bell in the top bar shows the unread count and opens a panel with the five latest notifications, "Mark all read" and "View all". The notifications page filters by read state, marks a notification read when it is opened and takes the user to the record. Decisions on the user's records, credential actions, consent requests and enrolment changes are mandatory notices that cannot be switched off (fr-ntprefs). Lecturers and deputy deans may choose a daily digest instead of single emails.</p>
+<p>The profile button opens a menu: My profile, Notification preferences, Sign-in and sessions, Help and guides, and Sign out (which asks for confirmation). The profile page has four tabs: Details (identity from SSO, read-only; language, phone and name on certificates editable), Notifications, Sign-in and sessions (MFA, active sessions, idle timeout) and My personal data (view and request a correction, sr-access).</p>
+<figure data-f="menus"><img src="../../../../UIUX%20Spec/v1.1/src/img/menu-notif.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Notification panel opened from the bell.</figcaption></figure>
+<figure data-f="profile"><img src="../../../../UIUX%20Spec/v1.1/src/img/profile.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Profile, notification preferences: required notices are marked and cannot be switched off.</figcaption></figure>
+
+<h2>4.5 Tables and Pagination</h2>
+<p>Every list that can exceed one page is paginated: rows per page (5, 10, 25 or 50; default 10), a count "1–10 of 28", "Page 1 of 3" and previous and next buttons. Long lists have a search box above the table and filters as selects in the same bar; counts follow the filter. A row that opens a record is clickable across the whole row. A bulk action is one filled button above the table that names the count. Rows that need the user's attention, such as missing marks, are listed first.</p>
+<figure data-f="pager"><img src="../../../../UIUX%20Spec/v1.1/src/img/table-pager.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Table with search, filters and pagination (CODL users and roles), with the "Needs you" panel above it.</figcaption></figure>
+
+<p>A list of ten rows or fewer shows no search box or pager; its column headers still sort. A detail screen shows its summary and the next action first and keeps long detail in tabs (with counts) or folds that open on request; a tab set opens on the first tab that has something in it. Screens the design prototype does not show but a requirement needs, such as a participant's results, follow the same style (D-38).</p>
+
+<h2>4.6 Session, Sign-in and Maintenance</h2>
+<p>Staff sign in with the UTeM Microsoft account and a second step (MFA); participants sign in without the second step. There is no MCMS password and no public sign-up; an account that is not recognised gets a page explaining how external learners register at Pejabat Pendaftar or HEPA (D-10, A-06). Two minutes before the 30-minute idle timeout a dialog offers "Stay signed in" or "Sign out now". Planned maintenance is announced in a banner 48 hours ahead.</p>
+
+<h2>4.7 Accessibility and Language</h2>
+<ul>
+  <li>Every control works by keyboard: links, tabs, table rows and menu items are focusable, and Enter or Space activates them. Escape closes dialogs, drawers and menus; focus stays inside an open dialog and returns to the control that opened it.</li>
+  <li>Every field has a visible label; placeholders never replace labels. Status is never shown by colour alone; every tag carries its word.</li>
+  <li>Text meets 4.5:1 contrast; the navy navigation uses white and light-blue text that meets it on #1e2a6e.</li>
+  <li>Every screen, notification and credential exists in BM and EN. The language switch changes the language in place and keeps what the user has typed (nfr-langswitch). Bilingual content fields mark a missing language.</li>
+  <li>The layout reflows to one column below 760 px; the side navigation becomes a scrollable strip, and tables scroll inside their frame (ir-responsive).</li>
+</ul>
+
+<h2>4.8 Status Vocabulary</h2>
+<p>Statuses use the exact words of PRD 8.3 and the SRS state diagrams. Each status has a short explanation where it first appears on a screen (nfr-plain). Negative statuses are checked before positive ones, so "Not approved" is never shown as an approval.</p>
+<p class="tcap" data-t="status">Status words by record type</p>
+<script type="text/tbl" data-h="Record|Statuses" data-w="24%|76%" data-cls="small">
+Proposal or version | Draft, Submitted, In review, Returned for amendment, Endorsed, Pending approval, Approved, Not approved, Superseded, Suspended, Terminated
+Offering | Not ready, Ready, Open, Full, Running, Ended, Cancelled
+Enrolment | Registered, Pending payment, Enrolled, Cancelled, Withdrawn, Completed, Not completed
+Module or result | Not started, In progress, Provisional, Verified, Held (integrity), Achieved
+Completion or credential | Complete, Issued, Corrected, Replaced, Revoked
+QV | Not applied, Preparing, Ready, Submitted, Quality-Verified, Expired, Suspended, Withdrawn
+ACR or deposit | ACR prepared, Verified, Consent given, Consent declined, Deposited, Correction needed
+Credit | Available, Provisionally redeemed, Redeemed, Expired
+Transfer | Submitted, Under evaluation, Approved, Partly approved, Not approved, More evidence needed
+Stackable plan | Suitable, Needs review, Not yet suitable
+CQI action | Open, In progress, Done (effectiveness pending), Closed
+</script>
+
+<h2>4.9 Formats</h2>
+<p>Dates are shown as DD/MM/YYYY and times as 24-hour Malaysia time (ir-dates, ir-time). Money is shown as "RM 450.00" (nfr-currency). Names are printed in full, including bin, binti, a/l and a/p (nfr-names). Setting keys and file names use the mono face.</p>

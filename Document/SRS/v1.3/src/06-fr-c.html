@@ -1,0 +1,261 @@
+<!-- ===================== 3. FUNCTIONAL REQUIREMENTS (C) ===================== -->
+
+<!-- ============ 3.11 ============ -->
+<h2>3.11 ACR and ABC Deposit (M12)</h2>
+<p>For eligible learning, an Academic Credit Record (ACR) can be prepared and deposited to the Academic Bank of Credit (ABC). Only two sources are eligible: a completed UMC from an accredited programme (formal learning) and a completed Quality-Verified SAMC (non-formal learning) [G 12.1.1]. The deposit is storage, not approval: credit in ABC still has to be evaluated by a receiving programme before it can be used [G 12.5]. The participant's consent is required [G 12.4.2]. {{fig:acrseq}} shows the Release 1 process, in which the system generates the ACR, the deputy dean confirms it and, after the participant consents, records the deposit; the national ABC platform is still a concept, so no live connection exists yet (D-14, D-29).</p>
+
+<figure data-f="acrseq">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  participant P8 as Participant (P8)
+  participant M as MCMS
+  participant P2 as Deputy dean (P2)
+  participant ABC as National ABC
+  Note over M: MC completion confirmed for an eligible UMC or Quality-Verified SAMC
+  M->>M: Run ACR eligibility checks (App F2)
+  M->>M: Generate ACR from verified records
+  M->>P2: Task: confirm generated ACR
+  P2->>M: Confirm ACR
+  M->>P8: Request consent to deposit ACR to ABC
+  alt Participant consents
+    P8->>M: Give consent (wording version stored)
+    M->>P2: Add ACR to deposit queue
+    P2->>M: Export deposit data
+    P2->>ABC: Deposit (manual, national platform is a concept)
+    P2->>M: Record ABC reference, date, credits, status
+    M->>M: Set credit status Available, expiry = deposit date + 10 years
+    M->>P8: Notify deposit recorded (not a credit transfer)
+  else Participant declines
+    P8->>M: Decline
+    M->>M: ACR kept, no deposit
+  end
+</pre>
+<figcaption>Preparing an ACR and recording its deposit to ABC in Release 1.</figcaption>
+</figure>
+
+<h3>3.11.1 ACR Eligibility and Preparation</h3>
+<script type="text/req" data-p="FR">
+fr-acrelig | The system SHALL allow an ACR only for (a) a completed UMC from an accredited programme that meets the deposit requirements, or (b) a completed Quality-Verified SAMC whose QV was valid on the completion date. It SHALL NOT allow an ACR for an MCE, a SAMC without valid QV, a single module, a badge or a certificate. | G 12.1.1, 12.5, BR-24
+fr-acrchecks | Before an ACR is prepared the system SHALL run and record the checks of Appendix F2: MC completed; identity and results verified; UMC from an accredited parent programme where relevant; valid Quality-Verified status for a SAMC where relevant; credit value and MQF level based on a valid approval or QV decision; source records and credential traceable. | App F2
+fr-acrprep | The system SHALL generate the ACR from verified records with the fields of Appendix F3 and clause 12.4.2: ACR reference, date created, participant identity, provider or issuer, course or credential name, learning outcomes, credit value, MQF level, completion date, assessment basis and verification metadata. These fields SHALL NOT be typed by hand. | G 12.4.2, App F3, D-17
+fr-acrverify | The deputy dean (P2) of the owning PTj SHALL confirm each generated ACR before it can be offered for deposit. The system is Responsible for generating it and P2 Accountable for confirming it. | App F3, H3, D-29
+fr-acrseparate | ACR SHALL be a separate record type from the Achievement Record and from credentials, and SHALL be clearly labelled as such on every screen and export. | G 12.4, 18.5, D-15
+fr-acrmulti | A participant SHALL be able to hold several ACRs. Each ACR SHALL keep its own identity and academic information. | G 12.6
+fr-acrnocombine | The system SHALL NOT combine credits or modules from different ACRs to form a UMC, course or programme component without a recorded equivalence decision. | G 12.6
+fr-acrexternal | The system SHOULD let staff record credit records from other institutions that a participant presents for transfer, marked as external, with their provider, QV or accreditation status, credit, MQF level and evidence. | G 12.7
+</script>
+
+<h3>3.11.2 Consent and Deposit Tracking</h3>
+<script type="text/req" data-p="FR">
+fr-dpconsent | The system SHALL NOT place an ACR in the deposit queue without the participant's explicit consent. The consent record SHALL hold the date, the wording version and the channel. | G 12.4.2, App F4, BR-27
+fr-dpdecline | The participant SHALL be able to decline or postpone consent. The ACR SHALL be kept and can be deposited later if the participant consents. | G 16.8
+fr-dpqueue | The deputy dean (P2) SHALL have a queue of consented, confirmed ACRs awaiting deposit. | App H3, D-28
+fr-dpexport | The system SHALL export the deposit data of selected ACRs in a file format agreed with ABC (TBD, OI-11). | D-14
+fr-dprecord | The deputy dean (P2) SHALL record for each deposit: deposit date, ABC reference, credits deposited, status (Successful, In process, Correction needed) and the person recording it. | App F4
+fr-dpnottransfer | The system SHALL NEVER display or record an ABC deposit as an approved credit transfer. Deposit screens and notices SHALL state that deposit is storage only. | G 12.5, 18.6, BR-26
+fr-dponlyacr | Badges, certificates, Digital Credentials and module records SHALL NOT be selectable for deposit. | G 12.5
+fr-dplive | The system MAY deposit ACR to ABC through a live interface when ABC provides one. | A-02
+</script>
+
+<h3>3.11.3 Credit Validity, Ledger and Retention</h3>
+<script type="text/req" data-p="FR">
+fr-cvexpiry | On recording a deposit the system SHALL compute the credit expiry date as the deposit date plus <code>credit.abc_validity_years</code> and SHALL show it to the participant. | G 12.8, BR-04
+fr-cvalert | The system SHALL alert the participant at each interval in <code>alerts.credit_expiry_days</code> before credit expires. | D-16
+fr-cvexpired | After the expiry date the credit SHALL show as Expired for transfer purposes. The ACR itself SHALL remain. A later transfer request using expired credit SHALL be flagged for re-evaluation, including currency of knowledge. | G 12.8, BR-28
+fr-cvledger | The participant SHALL have a credit ledger in the layout of Appendix F5 listing, per ACR: credential, provider, credits, deposit date, expiry date and status (Available, Provisionally Redeemed, Redeemed, Expired), with a total and a note that accumulated credits are not automatically accepted by any programme. | App F5
+fr-cvretain | ACR SHALL be retained indefinitely unless the participant as record owner, or a recognised authority, directs otherwise. Such a direction SHALL be recorded and carried out only by an authorised user. | G 12.8, BR-28
+</script>
+
+<!-- ============ 3.12 ============ -->
+<h2>3.12 Credit Transfer (M13)</h2>
+<p>Credit transfer is the evaluation and acceptance, by the programme that receives it (in MCMS, the deputy dean of the faculty that owns the degree, D-11), of valid credit to meet part of its requirements [G 13]. It is separate from accumulation: credit that is verified, recorded in an ACR or deposited in ABC must still be evaluated. Equivalence is judged on learning outcomes and related criteria, never on credit value or SLT alone [G 13.3].</p>
+
+<figure data-f="transfer">
+<pre class="mermaid">
+flowchart TD
+  A["Eligible credit / ACR<br/>(status Available, within validity)"] --> B["Transfer application<br/>(App F6)"]
+  B --> C{"Record valid?<br/>source, ACR, ABC status,<br/>QV or accreditation"}
+  C -- "No" --> R1["Not approved,<br/>reason recorded"]
+  C -- "Yes" --> D["Equivalence evaluation<br/>(App F7)"]
+  D --> E{"Conditions and limits<br/>met? (programme limit,<br/>non-transferable components)"}
+  E -- "No" --> R1
+  E -- "More evidence needed" --> B
+  E -- "Yes" --> F{"Academic decision<br/>(App F8)"}
+  F -- "Approved / partly approved" --> G["Credit used in programme<br/>status: Provisionally Redeemed"]
+  F -- "Not approved" --> R1
+  R1 --> K["ACR, badges and credentials<br/>remain unchanged"]
+</pre>
+<figcaption>Credit transfer process [G 13.4, Figure 14 of the Guide].</figcaption>
+</figure>
+
+<script type="text/req" data-p="FR">
+fr-ctapply | A participant, or staff on the participant's behalf, SHALL be able to submit a transfer application with the fields of Appendix F6: target programme, receiving institution, course or component requested, credits requested, application date, the ACR or credits used, and supporting documents (ACR, credential, learning outcomes, content, SLT, assessment, QV evidence, other). | App F6
+fr-ctsource | The system SHALL accept as sources only a UMC of UTeM, a UMC of another eligible institution, or a Quality-Verified SAMC with verifiable status, credit and MQF level. An application using an MCE SHALL be refused with an explanation. | G 13.2, BR-32
+fr-ctavailable | Only credit with status Available SHALL be selectable. Expired credit SHALL be selectable only with a flag requiring re-evaluation. | G 12.8, 12.9
+fr-ctvalidity | The evaluator SHALL record a check of the validity of the record: authenticity of the ACR or credential, ABC status, and QV or accreditation status. | G 13.4
+fr-ctequiv | The deputy dean (P2) of the faculty that owns the target degree SHALL complete an equivalence evaluation with the criteria of Appendix F7: learning outcomes; credit value and SLT; MQF level; content and depth; learning activities; assessment and standard; accreditation or QV status; currency of knowledge; programme or professional body requirements. Each criterion SHALL have a finding and a result. | G 13.3, App F7
+fr-ctloequiv | The system SHALL NOT allow the decision Approved for a course or component where the learning outcome criterion is recorded as Not equivalent. Matching credit value or SLT alone SHALL NOT be accepted as evidence of equivalence. | G 13.3, BR-30
+fr-ctlimits | The system SHALL check the application against the transfer limit of the target programme and its list of non-transferable components (programme settings, TBD, OI-09), and SHALL warn the decision-maker of any breach. | G 13.5
+fr-ctpartial | A partly completed UMC, or a set of badges, SHALL NOT be accepted for full credit of the parent course, unless a module carries an approved "separately recognisable credit unit" flag. | G 13.5, D-18, BR-13
+fr-ctdecision | The decision SHALL be recorded with the fields of Appendix F8: Approved, Partly approved, Not approved or More evidence needed; credits approved; course or component credited; decision date; deciding authority; conditions or justification. | G 13.6, App F8
+fr-ctauthority | Only a user holding the role configured as the transfer decision authority for the target programme SHALL record the decision. | App H3, D-11, A-01
+fr-ctreject | A decision of Not approved SHALL NOT change the ACR, Digital Badges, Certificates or Digital Credentials, and SHALL NOT change the credit status. | G 13.6, BR-33
+fr-cttrace | Each decision SHALL be traceable to the credit source, the ACR, the equivalence evaluation, the approval and the programme record. | G 13.7
+fr-ctversion | Each equivalence evaluation SHALL record the curriculum version of the target programme and the version of the micro-credential. When either has a material change, earlier equivalence results SHALL be flagged for review before reuse. | G 13.8, 14.8
+fr-ctadmission | The system SHALL treat programme admission as a separate fact from transfer approval. Approval of a transfer SHALL NOT mark a participant as admitted. | G 14.4, BR-34
+fr-ctprecedent | The system SHOULD keep a library of approved equivalence mappings (micro-credential to course) that evaluators can consult. A precedent SHALL NOT replace the individual decision. | G 14.7
+</script>
+
+<!-- ============ 3.13 ============ -->
+<h2>3.13 Single Redemption of Credit (M12)</h2>
+<p>Credit that has been used toward one qualification cannot be used toward another. Transferred credit is <i>provisionally redeemed</i> until the participant completes the programme; it then becomes <i>redeemed</i>. If the participant does not complete the programme, the credit can become available again while it is still valid [G 12.9].</p>
+
+<figure data-f="redemption">
+<pre class="mermaid">
+stateDiagram-v2
+  direction LR
+  [*] --> Available : ACR deposited
+  Available --> Provisional : transfer approved
+  Provisional --> Redeemed : programme completed, qualification awarded
+  Provisional --> Available : programme not completed, credit still valid
+  Provisional --> Expired : programme not completed, validity ended
+  Available --> Expired : 10 years after deposit
+  Redeemed --> [*]
+  state "Provisionally Redeemed" as Provisional
+</pre>
+<figcaption>Credit status under the Single Redemption Principle [G 12.9, App F9]. Redemption never deletes the ACR or the credentials.</figcaption>
+</figure>
+
+<script type="text/req" data-p="FR">
+fr-rdprov | When a transfer is approved, the credits used SHALL change to Provisionally Redeemed and SHALL be linked to the programme and the participant's programme record. | G 12.9, App F9, BR-29
+fr-rdfinal | When completion of the programme is recorded, the linked credits SHALL change to Redeemed. | G 12.9
+fr-rdrelease | When the participant's withdrawal or non-completion of the programme is recorded, the linked credits SHALL return to Available if still within validity, or change to Expired otherwise, subject to ABC rules. | G 12.9
+fr-rdnoreuse | Credit in status Provisionally Redeemed or Redeemed SHALL NOT be selectable in any other transfer application. The system SHALL explain why. | G 12.9, BR-29
+fr-rdconflict | The system SHALL block submission of a second active application that uses the same ACR credits as an application still under evaluation. | G 12.9
+fr-rdkeep | Redemption SHALL NOT delete or alter the ACR, Digital Badges, Certificates or Digital Credentials. | G 12.9
+fr-rdsource | In Release 1, programme completion and non-completion SHALL be recorded manually by an authorised user from the programme's records. Each status change SHALL record the evidence reference. | G 14.10, OI-10
+fr-rdabcsync | For each status change the system SHALL record whether the matching update was made in ABC (manual in Release 1), with date and reference. | G 12.9, 18.6
+</script>
+
+<!-- ============ 3.14 ============ -->
+<h2>3.14 Stackable Degree Pathway (M13)</h2>
+<p>A stackable degree pathway lets eligible credit from micro-credentials count toward part of a degree. It is not a sum of credits. The participant must be admitted to the programme, have credit approved through transfer, meet the minimum of 30% of graduating credit earned at UTeM, meet residency for conventional programmes, cover the programme learning outcomes and Body of Knowledge, and meet all graduation requirements [G 14]. MCMS supports two levels: a <b>pathway mapping</b> for a target programme, approved by the academic authority, and an <b>individual stackable plan</b> per participant, using Guide Appendix G.</p>
+
+<figure data-f="stackable">
+<pre class="mermaid">
+flowchart TD
+  A["Eligible micro-credentials<br/>(UMC, Quality-Verified SAMC)"] --> B["ACR / ABC"]
+  B --> C["Programme admission<br/>(separate decision)"]
+  C --> D["Credit transfer approved<br/>(Section 3.12)"]
+  D --> E["Individual stackable plan<br/>(App G2, G6–G10)"]
+  E --> F{"≥ 30% of graduating credit<br/>earned directly at UTeM?"}
+  F -- "No" --> X["Plan not yet suitable:<br/>record gaps and conditions"]
+  F -- "Yes" --> G{"Conventional programme:<br/>≥ 1 semester residency<br/>planned or met?"}
+  G -- "No" --> X
+  G -- "Yes / not applicable" --> H{"PLO and Body of<br/>Knowledge covered?"}
+  H -- "Gaps" --> X
+  H -- "Yes" --> I["Complete remaining<br/>programme requirements"]
+  I --> J["Graduation requirements met"]
+  J --> K["Qualification awarded by<br/>the academic programme"]
+</pre>
+<figcaption>Stackable degree pathway [G 14.3, Figure 16 of the Guide]. Admission, transfer and award are separate decisions.</figcaption>
+</figure>
+
+<h3>3.14.1 Pathway Mapping for a Programme</h3>
+<script type="text/req" data-p="FR">
+fr-spdefine | P1 or P2 SHALL be able to define a pathway mapping for a target programme via an accessible multi-step modal dialog ("+ Define mapping") with the information of Appendix G1: programme name and code, MQF level, total graduating credits, approved mode (conventional, ODL, other), faculty, accreditation status and intake. | App G1, D-44
+fr-spmap | The mapping SHALL list each micro-credential or credit source and the target course or component it maps to, with credits, learning outcome and content equivalence (High, Partial, None) and a preliminary decision (Suitable, Needs review, Not suitable). | App G3, G 14.7
+fr-spcreditbearing | Only credit-bearing credentials (UMC, Quality-Verified SAMC, prior qualifications with credit) SHALL be mapped. An MCE SHALL NOT be mapped. | G 14.1.1, BR-35
+fr-spapprove | A pathway mapping SHALL be approved by the authority configured for stackable mapping before it is published to participants. | App H3, D-11
+fr-spnotransfer | An approved mapping SHALL NOT itself transfer any credit. Each participant's credit SHALL still go through Section 3.12. | G 14.7
+fr-spplo | The mapping SHOULD include the PLO matrix of Appendix G4 (credential, PLO, contribution as main or supporting, evidence, gap) and the Body of Knowledge matrix of Appendix G5 (domain, requirement, contributing credential, coverage, gap). The system SHOULD warn when any PLO or domain has no coverage. | G 14.5.2, App G4, G5, BR-36
+fr-spcurrchange | When the target programme curriculum changes materially, the system SHALL flag the mapping for review. | G 14.8
+</script>
+
+<h3>3.14.2 Individual Stackable Plan</h3>
+<script type="text/req" data-p="FR">
+fr-spplan | P1 or P2 SHALL be able to create an individual stackable plan for a participant with the content of Appendix G2 and G6–G10: the credentials and credits proposed, the UTeM credit check, the residency check, the remaining programme requirements, the credit and gap summary and the decision. | App G
+fr-sp30 | The system SHALL calculate the share of graduating credit to be earned directly at UTeM and SHALL mark the plan as not meeting the requirement when it is below <code>stackable.min_home_credit_percent</code>. The system SHALL state that meeting 30% does not mean 70% can be transferred automatically. | G 14.5.1, App G6, BR-05
+fr-spresidency | For a conventional programme the system SHALL require at least <code>stackable.residency_semesters</code> of residency to be planned or met, and SHALL record the proposed semester and delivery method. For a delivery method that may enter ODL scope, the plan SHALL be flagged for review under ODL policy. | G 14.5.3, 14.5.4, App G7, BR-06
+fr-spremain | The plan SHALL list the remaining programme requirements (core, elective, project or capstone, industrial training, university requirements, professional body requirements) with status and planned completion. | G 14.5, App G8
+fr-spdecision | The plan decision SHALL be one of Suitable to proceed, Suitable with conditions, Not yet suitable or Not suitable, with conditions and follow-up actions, confirmed as in Appendix G11. | App G10, G11
+fr-spadmit | The system SHALL NOT allow the plan decision Suitable to proceed unless programme admission is recorded. | G 14.4, BR-34
+fr-spaward | The award of a qualification SHALL be recorded only by an authorised user from the programme's records after admission and all requirements are met. MCMS SHALL NOT award qualifications. | G 14.10, BR-37
+fr-spinfo | Participants SHALL see accurate information about the pathway: target programme, mapping, admission requirements, transfer process, credit limits, credit validity, remaining requirements and graduation conditions. No screen SHALL state or imply that a number of micro-credentials or badges leads to a degree automatically. | G 14.9
+fr-spsis | The system MAY read admission, enrolment and graduation status from the student information system through an adapter. | OI-10
+</script>
+
+<!-- ============ 3.15 ============ -->
+<h2>3.15 Monitoring and Continuous Quality Improvement (M14)</h2>
+<p>Each offering is monitored with evidence, especially learning outcome attainment, assessment performance, completion and participant experience; the findings drive CQI [G 11.3–11.4, 17]. CQI is complete only when the effect of an action has been evaluated [G 17.12].</p>
+
+<figure data-f="cqi">
+<pre class="mermaid">
+flowchart LR
+  A["Plan"] --> B["Implement"] --> C["Monitor<br/>(App C2–C5)"] --> D["Evaluate<br/>issues, root cause<br/>(App C6)"] --> E["Improve<br/>action plan<br/>(App C7)"] --> F["Check<br/>effectiveness<br/>(App C8)"]
+  F -- "effective" --> G["Next offering cycle"]
+  F -- "not effective" --> D
+  E -. "material change" .-> H["Change request<br/>(Section 3.3.3)"]
+  G --> A
+</pre>
+<figcaption>CQI cycle [G 17.6, 17.12]. A CQI action that changes key academic components goes through re-approval.</figcaption>
+</figure>
+
+<h3>3.15.1 Monitoring</h3>
+<script type="text/req" data-p="FR">
+fr-mnindicators | The system SHALL compute for each cohort the indicators of Appendix C2: active participation rate, completion rate, pass rate, average and median achievement, credential issuance rate, and significant access or technical issues, each compared with a target set for the offering. | App C2
+fr-mnlo | The system SHALL compute learning outcome attainment per outcome (share of participants who achieved it) from the mapping of assessment to outcomes. | G 17.5, App C3
+fr-mnfeedback | The system SHALL collect participant feedback after completion with a configurable questionnaire covering content, activities, assessment, platform, support and relevance. It SHOULD also collect facilitator and industry feedback. | G 17.4, App C4
+fr-mnmodular | For a modular UMC, monitoring SHALL show participant progress across modules and periods. | G 11.3, 17.2
+fr-mndomains | The lecturer SHALL record the quality monitoring domains of Appendix C5 with status Satisfactory or Needs action and evidence. | App C5
+fr-mndash | Lecturers (P1) and deputy deans (P2) SHOULD have a dashboard of their offerings showing indicators, open CQI actions, upcoming QV expiries and periodic reviews due. | G 17.2
+</script>
+
+<h3>3.15.2 CQI Records</h3>
+<script type="text/req" data-p="FR">
+fr-cqiissue | The lecturer SHALL record issues or gaps with evidence, root cause, impact and priority (High, Medium, Low). | App C6
+fr-cqiaction | The lecturer SHALL record an action plan per issue: improvement action, owner, due date, success indicator and status (Not started, In progress, Done). | App C7
+fr-cqieffect | Each completed action SHALL be evaluated for effectiveness (Effective, Partly effective, Not effective) with before and after evidence. An action SHALL be closed only after this evaluation; an action that is not effective SHALL be carried to the next cycle. | G 17.12, App C8, BR-41
+fr-cqitrace | The system SHALL link each CQI record along the chain issue, evidence, analysis, action, implementation and effectiveness check. | G 17.6, 18.9
+fr-cqichange | A CQI action that affects learning outcomes, SLT or credit, MQF level or QV, core content, major assessment, delivery mode, credential or partner SHALL create a change request under Section 3.3.3. | G 17.7, App C9
+fr-cqisign | Each CQI record SHALL be prepared by the lecturer and confirmed by the deputy dean, covering the confirmations of Appendix C10. | App C10
+</script>
+
+<h3>3.15.3 Periodic Review, Suspension and Termination</h3>
+<script type="text/req" data-p="FR">
+fr-prschedule | Each micro-credential SHALL have a periodic review date. The system SHALL remind the lecturer and PTj before it is due. | G 11.5, 17.9
+fr-proutcome | A periodic review SHALL record its outcome as in Appendix C9: continue without significant change; continue with minor CQI; content or assessment review needed; review and re-approval needed; or consider suspension or termination. | App C9
+fr-prsuspend | Suspension or termination of an offering SHALL be decided by the configured authority. Before the decision is final, the system SHALL list active participants and require a transition plan (completion window, mapping to a new version, or equivalence of earlier achievement). | G 17.10, App H7
+fr-prnotify | Affected participants SHALL be notified of the status of the offering, their transition options, the period to act and the implications for credentials or academic recognition. | G 17.10
+fr-prkeep | Suspension or termination SHALL NOT cancel valid achievements, credentials or ACR. All related records SHALL be kept for their retention period. | G 18.13, BR-40
+</script>
+
+<!-- ============ 3.16 ============ -->
+<h2>3.16 Records, Audit Trail and Reporting (M15)</h2>
+<p>Every decision that affects the status of an offering, a participant's achievement, a credential, a credit value or the use of credit must have a source record, a decision-maker and a date that can be traced [G 15.7]. Corrections never erase history [G 18.10]. MCMS must allow the whole chain from development to CQI to be traced for any participant [G 18.14].</p>
+<script type="text/req" data-p="FR">
+fr-auditlog | The system SHALL write an append-only audit entry for every approval and decision, credential action, result change, ACR, deposit, transfer and redemption status change, role and setting change, correction, and record disposal. Each entry SHALL hold time, actor, actor's role, action, record affected, values before and after, reason and external reference. | G 15.7, 18.10, D-20, C6
+fr-auditview | Authorised users SHALL be able to search and view the audit trail of a record within their scope. | App H6
+fr-correct | A correction to any record SHALL follow the Guide procedure: check against the valid source record; carry out by the party with authority; record the original record, reason, action, approver or executor and date. If it affects a credential, ACR, deposit or credit status, the participant SHALL be notified and the linked records SHALL be updated in a controlled way. | G 18.10, App F10, BR-38
+fr-mismatch | The system SHALL keep a discrepancy log for mismatches between achievement records, credentials, ACR and ABC information, each resolved through the correction procedure. | G 12.10, 18.10
+fr-trace | For any participant and micro-credential the system SHALL show the traceability chain: development, approval, offering, learning, assessment, achievement, credential, ACR and ABC (if any), transfer and use of credit (if any), and monitoring and CQI. | G 18.14
+fr-cohortrec | For each cohort the system SHALL show the minimum records of Appendix H5 and whether each is present. | App H5
+fr-reports | The system SHALL provide standard reports, filtered by the user's scope: offerings by category, PTj and status; enrolments and completions; credentials issued, corrected and revoked; QV status and upcoming expiries; ACR prepared and deposits recorded; transfer applications and decisions; credit redemption status; open CQI actions. | G 17.2
+fr-export | Reports SHALL be exportable to CSV, Excel and PDF. |
+fr-retention | Each record category SHALL have a retention period setting. Records SHALL be disposed of only after the period has passed and when not held for audit, quality assurance, academic recognition, legal reasons or participant protection. Each disposal SHALL be approved and logged. | G 18.12, A-08, OI-07
+fr-hold | An authorised user SHOULD be able to place a hold on records that stops disposal. | G 18.12
+fr-analytics | The system MAY provide analytical dashboards across years, such as trends in enrolment, completion and credit use. |
+</script>
+
+<!-- ============ 3.17 ============ -->
+<h2>3.17 Notifications and Integration Hub (M16)</h2>
+<script type="text/req" data-p="FR">
+fr-ntevents | The system SHALL send in-system notifications and email for at least these events: proposal submitted, reviewer assigned, review due, amendment requested, decision made; offering open; registration, payment and enrolment confirmed; results verified; credential issued, corrected, replaced or revoked; QV expiry alerts; consent requested; deposit recorded; transfer decision; credit expiry alert; CQI action due; periodic review due; change affecting enrolled participants. | G 10.3.2, 18.10
+fr-ntlang | Notifications SHALL be sent in the recipient's chosen language using the managed templates. | D-02
+fr-ntprefs | Users SHALL be able to switch off optional notifications. Mandatory notices (decisions, credential actions, consent requests, changes affecting enrolment) SHALL NOT be switched off. |
+fr-ntlog | The system SHALL log each notification with recipient, channel, time and delivery status. |
+fr-ntdigest | Approvers and lecturers SHOULD be able to receive a daily digest instead of individual emails. |
+fr-ihregistry | The integration hub SHALL register each adapter (SSO, learning platform, ABC, QVC/MQA, payment, email, student information system) with its current mode: stub, manual or live. | D-06, D-14
+fr-ihretry | Failed outbound calls SHALL be retried with increasing delay. Calls that still fail SHALL be listed for P5 to resolve, without blocking the business process that created them. |
+</script>

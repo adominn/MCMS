@@ -1,0 +1,802 @@
+<!-- ===================== 5. DATA DESIGN ===================== -->
+<h1>5. Data Design</h1>
+<p>This section turns the conceptual model of SRS Section 6 into the physical database of Release 1. It follows the data integrity rules {{dr-separate}} to {{dr-bilingual}}: each recognition stage has its own table, approved records are never updated in place, nothing is physically deleted outside the disposal process, and relationships are enforced by the database (AD-03, AD-01). Every table is owned by one module (MD-xx). Another module reads or changes that table only through the owner's service interface or domain events (AD-01), even though the database holds foreign keys across modules.</p>
+
+<h2>5.1 Conventions</h2>
+<p class="tcap" data-t="data-conv">Database conventions</p>
+<script type="text/tbl" data-h="Topic|Convention" data-w="24%|76%" data-cls="small">
+Names | Tables are plural snake_case (<code>mc_versions</code>). Columns are snake_case. Foreign keys are <code>{table_singular}_id</code>. Enumeration columns carry the enum name in Section 5.3.
+Primary key | <code>id</code>, a ULID stored as <code>char(26)</code>. Generated in the application when the model is created, so that sort order follows creation time and no sequence leaks a count.
+Timestamps | <code>timestamptz</code>, stored in UTC and shown in Asia/Kuala_Lumpur ({{dr-time}}, {{ir-time}}). Every table has <code>created_at</code>. Mutable tables also have <code>updated_at</code>. Append-only tables have no <code>updated_at</code>.
+Dates | Calendar dates without a time (<code>start_date</code>, <code>issued_on</code>) use <code>date</code>. They are exchanged as ISO 8601 ({{ir-dates}}).
+Status | A string column holding the stored value of a PHP backed enum (Section 5.3), with a database CHECK constraint listing the allowed values. A status column is always named <code>status</code> unless the table holds two stages (for example <code>deposit_status</code> and <code>credit_status</code>), as {{dr-separate}} requires.
+Money | <code>numeric(10,2)</code> in Ringgit, cast to a decimal string in PHP. No floating point type is used for money or credit.
+Foreign keys | All relationships are declared as foreign keys with <code>ON DELETE RESTRICT</code> ({{dr-refint}}). Cascading deletes are not used. The only soft references (no foreign key) are <code>subject_id</code> on <code>audit_events</code>, <code>integration_jobs</code>, <code>job_runs</code> and <code>alert_log</code>, because those rows must outlive the records they describe.
+Bilingual text | Text that participants see is stored as a pair of columns <code>x_ms</code> and <code>x_en</code> (Section 5.8).
+Soft delete | Not used. A record that is no longer valid gets a status, an end date or a successor row (Section 5.7).
+Version reference | A table that belongs to one version of a micro-credential holds <code>mc_version_id</code> itself, even when it could be reached through a parent ({{dr-versionref}}).
+Derived values | Credit value, MQF level and QV status shown on another record are copied only with the id of the source record (<code>source_*_id</code>), so they can be traced ({{dr-derived}}).
+Framework tables | Laravel's own tables (<code>migrations</code>, <code>failed_jobs</code>, <code>job_batches</code>, <code>cache</code>) are not listed in the catalogue. Sessions and queues use Redis (AD-05).
+</script>
+
+<h2>5.2 Entity-Relationship Diagrams</h2>
+<p>The model is drawn in seven areas. Each diagram shows the tables of one area, their relationships and a few key columns. The full column lists are in the catalogues of Section 5.4. A relationship that crosses areas is drawn once, where the child table is owned. Table names follow the shared list used by the module design in Section 4.</p>
+
+<h3>5.2.1 Identity and Settings</h3>
+<figure data-f="data-erid">
+<pre class="mermaid">
+erDiagram
+  ptjs ||--o{ users : "home ptj"
+  users ||--o{ role_assignments : holds
+  users ||--o{ delegations : delegates
+  users ||--o{ conflict_declarations : declares
+  users ||--o{ notification_preferences : sets
+  ptjs ||--o{ role_assignments : "scope ptj"
+  role_assignments ||--o{ role_assignment_micro_credentials : "scope list"
+  users ||--o{ setting_versions : sets
+  settings ||--|{ setting_versions : "versioned as"
+  templates ||--|{ template_versions : "versioned as"
+  users ||--o{ template_versions : publishes
+  users {
+    string id PK
+    string entra_oid UK
+    string institution_id UK
+    string locale
+    string status
+  }
+  role_assignments {
+    string id PK
+    string user_id FK
+    string role
+    string scope_type
+    date valid_from
+    date valid_to
+  }
+  settings {
+    string id PK
+    string key UK
+    string value_type
+  }
+  setting_versions {
+    string id PK
+    string setting_id FK
+    json value
+    timestamp effective_from
+  }
+  template_versions {
+    string id PK
+    string template_id FK
+    int version_no
+    string status
+  }
+  reference_sequences {
+    string kind
+    string scope_key
+    int year
+    int last_value
+  }
+</pre>
+<figcaption>Identity, role scope, settings and templates. <code>reference_sequences</code> stands alone: it is read only by the number generator.</figcaption>
+</figure>
+
+<h3>5.2.2 Curriculum and Approval</h3>
+<figure data-f="data-ercur">
+<pre class="mermaid">
+erDiagram
+  ptjs ||--o{ micro_credentials : owns
+  ptjs ||--o{ programmes : offers
+  programmes ||--o{ parent_courses : includes
+  micro_credentials ||--|{ mc_versions : "has versions"
+  parent_courses ||--o{ mc_versions : "unbundled into"
+  mc_versions ||--|{ learning_outcomes : defines
+  mc_versions ||--o{ mc_modules : "structured in"
+  mc_modules ||--|{ assessment_components : "assessed by"
+  assessment_components ||--o{ assessment_component_outcomes : aligns
+  learning_outcomes ||--o{ assessment_component_outcomes : "aligned with"
+  mc_versions ||--o{ review_assignments : "reviewed in"
+  review_assignments ||--o| reviews : "answered by"
+  reviews ||--o{ review_comments : contains
+  mc_versions ||--o{ approval_decisions : "decided by"
+  mc_versions ||--o{ change_requests : "changed through"
+  mc_versions {
+    string id PK
+    string micro_credential_id FK
+    int version_no
+    string status
+    string change_class
+    string supersedes_id FK
+    numeric approved_credit
+  }
+  approval_decisions {
+    string id PK
+    string mc_version_id FK
+    string stage
+    string decision
+    string external_ref
+    timestamp decided_at
+  }
+</pre>
+<figcaption>Micro-credentials, immutable versions, learning design, reviews and approval decisions. <code>proposal_collaborators</code> and <code>version_transition_rules</code> also point to <code>mc_versions</code> and are left out to keep the figure small.</figcaption>
+</figure>
+
+<h3>5.2.3 Offering, Enrolment and Results</h3>
+<figure data-f="data-eroff">
+<pre class="mermaid">
+erDiagram
+  mc_versions ||--o{ offerings : "offered as"
+  offerings ||--o{ readiness_items : "confirmed by"
+  offerings ||--o{ enrolments : has
+  users ||--o{ enrolments : makes
+  enrolments ||--o{ module_enrolments : tracks
+  enrolments ||--o{ payments : "paid by"
+  module_enrolments ||--o{ assessment_results : earns
+  import_files ||--o{ import_row_errors : rejects
+  import_files ||--o{ assessment_results : stages
+  offerings ||--o{ import_files : "results for"
+  offerings ||--o{ export_files : "enrolments for"
+  offerings ||--o{ readiness_confirmations : "confirmed in"
+  enrolments ||--o{ pdpa_acknowledgements : acknowledges
+  assessment_results ||--o{ assessment_result_revisions : "revised by"
+  enrolments {
+    string id PK
+    string reference UK
+    string offering_id FK
+    string user_id FK
+    string mc_version_id FK
+    int attempt_no
+    string status
+  }
+  assessment_results {
+    string id PK
+    string module_enrolment_id FK
+    string assessment_component_id FK
+    numeric score
+    string status
+    string import_file_id FK
+  }
+</pre>
+<figcaption>Offerings, registration, payment, UCreds exchange and results.</figcaption>
+</figure>
+
+<h3>5.2.4 Credentials and Achievement</h3>
+<figure data-f="data-ercred">
+<pre class="mermaid">
+erDiagram
+  enrolments ||--o| achievement_records : "summarised in"
+  achievement_records ||--o{ credentials : "certified by"
+  module_enrolments ||--o| module_achievements : "achieved as"
+  module_achievements ||--o| digital_badges : "proved by"
+  credentials ||--o{ credential_events : "history of"
+  credentials ||--o{ verification_logs : "checked in"
+  credentials ||--o| credentials : "supersedes"
+  users ||--o{ credentials : holds
+  achievement_records {
+    string id PK
+    string enrolment_id FK
+    string completion_status
+    date completed_on
+    string confirmed_by FK
+  }
+  credentials {
+    string id PK
+    string credential_no
+    int revision
+    string public_code UK
+    string status
+    json signed_payload
+    string supersedes_id FK
+  }
+  credential_events {
+    string id PK
+    string credential_id FK
+    string action
+    string reason
+    timestamp occurred_at
+  }
+</pre>
+<figcaption>The Achievement Record, module badges, certificates and credential history. A credential row is never edited after issue.</figcaption>
+</figure>
+
+<h3>5.2.5 Quality Verification and Quality Assurance</h3>
+<figure data-f="data-erqv">
+<pre class="mermaid">
+erDiagram
+  micro_credentials ||--o{ qv_records : "verified by"
+  qv_records ||--o{ qv_evidence : contains
+  cqi_records ||--o{ quality_domain_checks : "checked by"
+  offerings ||--o{ feedback_responses : "rated in"
+  offerings ||--o{ qv_evidence : "evidence from"
+  offerings ||--o{ cqi_records : "improved through"
+  cqi_records ||--o{ cqi_actions : plans
+  micro_credentials ||--o{ periodic_reviews : "reviewed in"
+  micro_credentials ||--o{ suspensions : "suspended by"
+  qv_records {
+    string id PK
+    string micro_credential_id FK
+    int cycle_no
+    string status
+    string qv_reference
+    numeric verified_credit
+    date valid_until
+    string setting_version_id FK
+  }
+  cqi_actions {
+    string id PK
+    string cqi_record_id FK
+    string status
+    date due_on
+  }
+</pre>
+<figcaption>QV cycles and evidence, CQI, periodic review and suspension.</figcaption>
+</figure>
+
+<h3>5.2.6 Credit Bank, Transfer and Pathways</h3>
+<figure data-f="data-ercb">
+<pre class="mermaid">
+erDiagram
+  achievement_records ||--o| acrs : "may produce"
+  users ||--o{ acrs : owns
+  acrs ||--o{ consents : "authorised by"
+  acrs ||--o| abc_deposits : "deposited as"
+  abc_batches ||--o{ abc_deposits : groups
+  acrs ||--o{ acr_checks : "checked by"
+  abc_deposits ||--o{ credit_ledger_entries : "status history"
+  abc_deposits ||--o{ redemption_events : "redeemed through"
+  redemption_events ||--o{ credit_ledger_entries : records
+  acrs {
+    string id PK
+    string reference UK
+    string owner_id FK
+    numeric credits
+    string status
+    string supersedes_id FK
+  }
+  abc_deposits {
+    string id PK
+    string acr_id FK
+    string abc_reference
+    string deposit_status
+    string credit_status
+    date credit_expiry
+    string setting_version_id FK
+  }
+  credit_ledger_entries {
+    string id PK
+    string abc_deposit_id FK
+    string event
+    string to_status
+    string redemption_event_id FK
+  }
+</pre>
+<figcaption>ACR, consent, ABC deposit and the credit ledger.</figcaption>
+</figure>
+
+<figure data-f="data-ertr">
+<pre class="mermaid">
+erDiagram
+  users ||--o{ transfer_applications : submits
+  transfer_applications ||--|{ transfer_lines : lists
+  acrs ||--o{ transfer_lines : "used by"
+  parent_courses ||--o{ transfer_lines : "target course"
+  transfer_applications ||--o{ transfer_decisions : "decided by"
+  transfer_lines ||--o{ equivalence_assessments : "evaluated in"
+  transfer_lines ||--o{ redemption_events : redeems
+  stackable_plans ||--o{ plan_requirements : "checked by"
+  programmes ||--o{ pathways : has
+  pathways ||--|{ pathway_items : lists
+  pathways ||--o{ stackable_plans : "based on"
+  users ||--o{ stackable_plans : follows
+  users ||--o{ admissions : "recorded for"
+  programmes ||--o{ admissions : "admitted to"
+  transfer_lines {
+    string id PK
+    string application_id FK
+    string acr_id FK
+    string parent_course_id FK
+    numeric credits_approved
+    string decision
+  }
+  stackable_plans {
+    string id PK
+    string reference UK
+    numeric utem_credit_percent
+    string status
+    string setting_version_id FK
+  }
+</pre>
+<figcaption>Credit transfer, stackable pathways and admission records.</figcaption>
+</figure>
+
+<h3>5.2.7 Audit, Notifications and Integration</h3>
+<figure data-f="data-eraud">
+<pre class="mermaid">
+erDiagram
+  users ||--o{ audit_events : "acts in"
+  audit_chain_heads ||--o{ audit_events : "chains"
+  users ||--o{ notifications : receives
+  stored_files ||--o{ import_files : "stored as"
+  retention_holds ||--o{ disposal_records : blocks
+  users ||--o{ report_runs : requests
+  corrections ||--o{ audit_events : "recorded in"
+  integration_jobs ||--o{ integration_calls : "made of"
+  job_runs {
+    string id PK
+    string job_class
+    string idempotency_key UK
+    string status
+    int total
+    int processed
+    int failed_count
+  }
+  alert_log {
+    string id PK
+    string subject_type
+    string subject_id
+    string alert_kind
+    int offset_days
+    timestamp sent_at
+  }
+  integration_calls {
+    string id PK
+    string adapter
+    string operation
+    string status
+    int attempts
+    timestamp next_attempt_at
+  }
+  audit_events {
+    bigint seq UK
+    string id PK
+    string actor_id FK
+    string action
+    string subject_type
+    string subject_id
+    string prev_hash
+    string hash
+  }
+  integration_jobs {
+    string id PK
+    string adapter
+    string operation
+    string idempotency_key UK
+    string status
+    int attempts
+    timestamp next_attempt_at
+  }
+  notifications {
+    string id PK
+    string user_id FK
+    string template_key
+    string email_status
+    timestamp read_at
+  }
+</pre>
+<figcaption>Audit trail, notifications, integration jobs, files, corrections, reports and retention holds. <code>integration_jobs</code> refers to its subject by soft reference.</figcaption>
+</figure>
+
+<h2>5.3 Status Enumerations</h2>
+<p>Statuses use exactly the words of UI/UX Specification v1.1, Section 4.8. In PHP each status is a string-backed enum under <code>app/Modules/&lt;Module&gt;/Enums</code>. The case name is the PascalCase of the label, and the stored value is the snake_case of the label, with brackets removed (for example <code>Held (integrity)</code> is case <code>HeldIntegrity</code>, stored as <code>held_integrity</code>). The label shown to the user comes from the lang file key <code>status.&lt;stored value&gt;</code> in Bahasa Melayu and English (AD-13). The label is never stored. Negative statuses are tested before positive ones in policies and views, so "Not approved" is never read as an approval.</p>
+<p class="tcap" data-t="data-enums">Status enumerations (UI/UX Specification Section 4.8)</p>
+<script type="text/tbl" data-h="Record|PHP enum|Column|Cases (labels)" data-w="16%|18%|20%|46%" data-cls="small">
+Proposal or version | <code>VersionStatus</code> | <code>mc_versions.status</code> | Draft; Submitted; In review; Returned for amendment; Endorsed; Pending approval; Approved; Not approved; Superseded; Suspended; Terminated (stored values in Section 5.3.1)
+Offering | <code>OfferingStatus</code> | <code>offerings.status</code> | Not ready; Ready; Open; Full; Running; Ended; Cancelled
+Enrolment | <code>EnrolmentStatus</code> | <code>enrolments.status</code> | Registered; Pending payment; Enrolled; Cancelled; Withdrawn; Completed; Not completed
+Module or result | <code>ResultStatus</code> | <code>module_enrolments.status</code>, <code>assessment_results.status</code> | Not started; In progress; Provisional; Verified; Held (integrity); Achieved
+Completion | <code>CompletionStatus</code> | <code>achievement_records.completion_status</code> | Complete
+Credential | <code>CredentialStatus</code> | <code>credentials.status</code> | Issued; Corrected; Replaced; Revoked
+QV | <code>QvStatus</code> | <code>qv_records.status</code> | Not applied; Preparing; Ready; Submitted; Quality-Verified; Expired; Suspended; Withdrawn (stored values in Section 5.3.1)
+ACR or deposit | <code>AcrStatus</code> | <code>acrs.status</code> | ACR prepared; Verified; Consent given; Consent declined; Deposited; Correction needed
+Credit | <code>CreditStatus</code> | <code>abc_deposits.credit_status</code>, <code>credit_ledger_entries.to_status</code> | Available; Provisionally redeemed; Redeemed; Expired
+Transfer | <code>TransferStatus</code> | <code>transfer_applications.status</code> | Submitted; Under evaluation; Approved; Partly approved; Not approved; More evidence needed
+Stackable plan | <code>PlanSuitability</code> | <code>stackable_plans.status</code> | Suitable; Needs review; Not yet suitable (stored values in Section 5.3.1)
+CQI action | <code>CqiActionStatus</code> | <code>cqi_actions.status</code> | Open; In progress; Done (effectiveness pending); Closed
+</script>
+<p>Notes on the use of these enums:</p>
+<ul>
+  <li><b>Result and module status.</b> One enum serves both columns. <code>assessment_results.status</code> allows only Provisional, Verified and Held (integrity). <code>module_enrolments.status</code> allows Not started, In progress, Provisional, Held (integrity) and Achieved. A module becomes Achieved only when its results are Verified ({{fr-asverify}}, {{fr-asmodule}}).</li>
+  <li><b>Display statuses.</b> A label such as "Completed, waiting for verification" in the prototype is a view-model string built from <code>EnrolmentStatus::Completed</code> and the result status. It is never stored.</li>
+  <li><b>Deposit outcome.</b> The deputy dean records a deposit outcome of Successful, In process or Correction needed ({{fr-dprecord}}). It is stored in <code>abc_deposits.deposit_status</code> (enum <code>DepositOutcome</code>). Successful sets <code>acrs.status</code> to Deposited, Correction needed sets it to Correction needed, and In process leaves it at Consent given.</li>
+  <li><b>Public status.</b> The public verification page uses valid, corrected, replaced and revoked ({{fr-vffields}}). The service maps Issued to valid.</li>
+</ul>
+<h3>5.3.1 Stored Values That Differ From the Displayed Word</h3>
+<p>Where the SRS state diagrams hold a state that UI/UX Specification Section 4.8 does not show, the database stores the SRS value and a mapping gives the displayed word. The enum has one case for each SRS state. The mapping is a method on the enum (<code>label()</code>), so a view never contains the rule.</p>
+<p class="tcap" data-t="data-statusmap">SRS states stored, and the word displayed</p>
+<script type="text/tbl" data-h="Enum|Stored case (SRS state)|Displayed word (Section 4.8)" data-w="22%|40%|38%" data-cls="small">
+<code>VersionStatus</code> | <code>EndorsedByPtj</code> (Endorsed by PTj) | Endorsed
+<code>VersionStatus</code> | <code>NotSupported</code> (Not supported, the PTj does not support) | Not approved
+<code>VersionStatus</code> | <code>Rejected</code> (Rejected by the approving authority) | Not approved
+<code>QvStatus</code> | <code>PreparingEvidence</code> | Preparing
+<code>QvStatus</code> | <code>ReadyToSubmit</code> | Ready
+<code>QvStatus</code> | <code>SubmittedToQvc</code> (Submitted to QVC / MQA) | Submitted
+<code>QvStatus</code> | <code>NotVerified</code> (QV not obtained) | Preparing, with the findings shown
+<code>QvStatus</code> | <code>ReverificationRequired</code> | Preparing, with a "re-verification required" note. QV claims stop, because only Quality-Verified allows them
+<code>PlanSuitability</code> | <code>SuitableToProceed</code> | Suitable
+<code>PlanSuitability</code> | <code>SuitableWithConditions</code> | Needs review
+<code>PlanSuitability</code> | <code>NotYetSuitable</code> | Not yet suitable
+<code>PlanSuitability</code> | <code>NotSuitable</code> | Not yet suitable
+</script>
+<p>The mappings for <code>NotVerified</code>, <code>ReverificationRequired</code> and <code>NotSuitable</code> are the design's proposal where the UI/UX specification has no word; they are listed in Section 11 for confirmation. All other cases keep the same word in both lists. The decision text (for example "Suitable with conditions") is also shown on the plan screen ({{fr-spdecision}}).</p>
+<p>Enumerations that the UI/UX specification does not list are internal to the design and are shown in {{tab:data-enums2}}. Their labels are not shown to users as statuses, except where a screen already uses the word.</p>
+<p class="tcap" data-t="data-enums2">Supporting enumerations (design only)</p>
+<script type="text/tbl" data-h="PHP enum|Column|Cases" data-w="22%|34%|44%" data-cls="small">
+<code>MicroCredentialCategory</code> | <code>micro_credentials.category</code> | UMC; SAMC; MCE
+<code>ChangeClass</code> | <code>mc_versions.change_class</code>, <code>change_requests.class</code> | Initial; Minor; Material
+<code>ApprovalStage</code> | <code>approval_decisions.stage</code> | Endorsement; Senate
+<code>DecisionOutcome</code> | <code>approval_decisions.decision</code> | Endorsed; Returned; Approved; Not approved
+<code>ReviewStatus</code> | <code>review_assignments.status</code> | Invited; In progress; Submitted; Declined
+<code>CommentState</code> | <code>review_comments.state</code> | Open; Resolved
+<code>UserStatus</code> | <code>users.status</code> | Active; Deactivated
+<code>ScopeType</code> | <code>role_assignments.scope_type</code> | University; PTj; Listed micro-credentials
+<code>PaymentStatus</code> | <code>payments.status</code> | Pending; Paid; Failed; Waived; Refunded
+<code>ImportStatus</code> | <code>import_files.status</code> | Queued; Running; Done; Rejected
+<code>BadgeSource</code> | <code>digital_badges.source</code> | UCreds; MCMS
+<code>CredentialAction</code> | <code>credential_events.action</code> | Issued; Corrected; Replaced; Revoked
+<code>VerifyOutcome</code> | <code>verification_logs.outcome</code> | Found; Not found; Rate limited
+<code>ConsentDecision</code> | <code>consents.decision</code> | Given; Declined; Postponed; Withdrawn
+<code>AbcBatchStatus</code> | <code>abc_batches.status</code> | Prepared; Sent, waiting for ABC reference; Recorded
+<code>MatchLevel</code> | <code>equivalence_assessments.match</code> | Full; Partial; None
+<code>RequestStatus</code> | <code>result_change_requests.status</code>, <code>result_appeals.status</code>, <code>corrections.status</code> | Requested; Approved; Rejected; Done
+<code>CqiRecordStatus</code> | <code>cqi_records.status</code> | Draft; Submitted; Confirmed
+<code>ReviewOutcome</code> | <code>periodic_reviews.outcome</code> | Continue; Amend; Suspend; Terminate
+<code>JobStatus</code> | <code>integration_jobs.status</code> | Queued; Running; Done; Retrying; Failed
+<code>CallStatus</code> | <code>integration_calls.status</code> | Pending; Sent; Failed; Succeeded
+<code>RunStatus</code> | <code>job_runs.status</code> | Queued; Running; Done; Failed
+<code>EmailStatus</code> | <code>notifications.email_status</code> | Pending; Sent; Failed; Not required
+<code>ScanStatus</code> | <code>stored_files.scan_status</code> | Pending; Clean; Infected
+<code>TemplateStatus</code> | <code>template_versions.status</code> | Draft; Published; Retired
+</script>
+
+<h2>5.4 Table Catalogue</h2>
+<p>The catalogues list every table by area. <b>Module</b> is the owner. <b>Key columns</b> lists the columns that carry meaning, the foreign keys (FK) and the status column. Every table also has <code>id</code>, <code>created_at</code> and, where mutable, <code>updated_at</code>. The extra columns of each table are decided in its migration. Tables marked with an asterisk are not owned by any fact sheet of Section 4 and are named in Section 5.4.8.</p>
+
+<h3>5.4.1 Identity and Settings</h3>
+<p class="tcap" data-t="data-cat1">Tables for identity, settings and platform services</p>
+<script type="text/tbl" data-h="Table|Module|Purpose|Key columns" data-w="17%|8%|27%|48%" data-cls="small">
+<code>users</code> | MD-01 | A person who signs in with the UTeM Microsoft account: participant, staff or invited expert ({{fr-sso}}, {{fr-profile}}) | <code>entra_oid</code> (unique), <code>institution_id</code> (staff or matric number, unique), <code>upn</code>, <code>name</code>, <code>name_on_certificate</code>, <code>email</code>, <code>phone</code>, <code>locale</code>, <code>ptj_id</code> FK, <code>status</code> (UserStatus), <code>last_login_at</code>
+<code>role_assignments</code> | MD-01 | A role with a scope, start and end date, optionally delegated ({{fr-roleassign}}, {{fr-scope}}, {{fr-delegate}}) | <code>user_id</code> FK, <code>role</code>, <code>scope_type</code>, <code>ptj_id</code> FK, <code>valid_from</code>, <code>valid_to</code>, <code>assigned_by</code> FK, <code>reason</code>
+<code>role_assignment_micro_credentials</code>* | MD-01 | The micro-credentials listed in a role assignment whose scope is a list | <code>role_assignment_id</code> FK, <code>micro_credential_id</code> FK; unique pair
+<code>delegations</code> | MD-01 | A temporary hand-over of a role from one user to another ({{fr-delegate}}) | <code>role_assignment_id</code> FK, <code>delegator_id</code> FK, <code>delegate_id</code> FK, <code>valid_from</code>, <code>valid_to</code>, <code>reason</code>, <code>ended_at</code>
+<code>conflict_declarations</code> | MD-01 | A declared conflict of interest of a reviewer or approver ({{fr-coi}}) | <code>user_id</code> FK, <code>mc_version_id</code> FK, <code>declared_at</code>, <code>reason</code>, <code>reviewed_by</code> FK
+<code>ptjs</code> | MD-01 | Faculties and centres (PTj) as reference data ({{fr-refdata}}) | <code>code</code> (unique), <code>name_ms</code>, <code>name_en</code>, <code>active</code>
+<code>settings</code> | MD-00 | One row per setting key (<code>credit.abc_validity_years</code>, <code>alerts.qv_expiry_days</code> and so on) ({{fr-settings}}) | <code>key</code> (unique), <code>value_type</code>, <code>unit</code>, <code>description_ms</code>, <code>description_en</code>, <code>source_ref</code>
+<code>setting_versions</code> | MD-00 | Every value a setting has had, with the date it takes effect (Section 5.6) ({{fr-settinghist}}) | <code>setting_id</code> FK, <code>value</code> json, <code>effective_from</code>, <code>set_by</code> FK, <code>reason</code>, <code>supersedes_id</code> FK
+<code>templates</code> | MD-00 | A notification, certificate, credential display, recognition statement or document template identified by key ({{fr-templates}}) | <code>key</code> (unique), <code>kind</code>, <code>channel</code>, <code>description</code>
+<code>template_versions</code>* | MD-00 | A versioned bilingual body of a template | <code>template_id</code> FK, <code>version_no</code>, <code>subject_ms</code>, <code>subject_en</code>, <code>body_ms</code>, <code>body_en</code>, <code>status</code> (TemplateStatus), <code>published_by</code> FK, <code>published_at</code>
+<code>stored_files</code> | MD-00 | Metadata of every stored file; the bytes are in object storage (AD-14) | <code>storage_key</code>, <code>original_name</code>, <code>mime_type</code>, <code>size_bytes</code>, <code>sha256</code>, <code>category</code>, <code>scan_status</code>, <code>retain_until</code>, <code>uploaded_by</code> FK
+<code>reference_sequences</code>* | MD-00 | Per-year counters behind the human reference numbers (Section 5.5) | <code>kind</code>, <code>scope_key</code>, <code>year</code>, <code>last_value</code>; unique (kind, scope_key, year)
+</script>
+
+<h3>5.4.2 Curriculum and Approval</h3>
+<p class="tcap" data-t="data-cat2">Tables for curriculum and approval</p>
+<script type="text/tbl" data-h="Table|Module|Purpose|Key columns" data-w="17%|8%|27%|48%" data-cls="small">
+<code>programmes</code> | MD-01 | Target degree programmes ({{fr-refdata}}) | <code>code</code> (unique), <code>name_ms</code>, <code>name_en</code>, <code>ptj_id</code> FK, <code>total_credits</code>, <code>mqf_level</code>, <code>mode</code>, <code>accredited_until</code>
+<code>parent_courses</code> | MD-01 | Courses of a programme that a UMC can be unbundled from ({{fr-umcparent}}, {{fr-umcaccred}}) | <code>code</code> (unique), <code>programme_id</code> FK, <code>name_ms</code>, <code>name_en</code>, <code>credits</code>, <code>slt_hours</code>, <code>clo_count</code>, <code>accredited_until</code>
+<code>micro_credentials</code> | MD-02 | A micro-credential across all its versions ({{fr-catwizard}}, {{fr-catconfirm}}) | <code>code</code> (null for SAMC and MCE), <code>category</code>, <code>ptj_id</code> FK, <code>owner_id</code> FK, <code>category_confirmed_by</code> FK, <code>category_confirmed_at</code>, <code>search_vector</code> (full-text)
+<code>mc_versions</code> | MD-02 | One version of a micro-credential. An approved version is frozen ({{fr-verhistory}}, {{fr-wfversion}}) | <code>micro_credential_id</code> FK, <code>version_no</code>, <code>name_ms</code>, <code>name_en</code>, <code>parent_course_id</code> FK, <code>credit_model</code>, <code>total_slt_hours</code>, <code>approved_credit</code>, <code>mqf_level</code>, <code>change_class</code>, <code>supersedes_id</code> FK, <code>effective_date</code>, <code>status</code> (VersionStatus), <code>content_hash</code>
+<code>learning_outcomes</code> | MD-02 | The learning outcomes of a version ({{fr-proplo}}) | <code>mc_version_id</code> FK, <code>code</code>, <code>text_ms</code>, <code>text_en</code>, <code>sort_order</code>
+<code>mc_modules</code> | MD-02 | The modules of a version ({{fr-umcmodel}}, {{fr-umcsltsum}}) | <code>mc_version_id</code> FK, <code>seq</code>, <code>name_ms</code>, <code>name_en</code>, <code>slt_hours</code>, <code>credit</code>
+<code>assessment_components</code> | MD-02 | An assessed item of a module with its weight and pass mark ({{fr-propassess}}) | <code>mc_module_id</code> FK, <code>mc_version_id</code> FK, <code>csv_key</code> (the mark column in the UCreds template), <code>name_ms</code>, <code>name_en</code>, <code>weight_percent</code>, <code>max_mark</code>, <code>pass_mark</code>
+<code>assessment_component_outcomes</code>* | MD-02 | Alignment of components with learning outcomes ({{fr-propalign}}) | <code>assessment_component_id</code> FK, <code>learning_outcome_id</code> FK; unique pair
+<code>proposal_collaborators</code> | MD-02 | Co-authors who may edit a draft proposal ({{fr-propcollab}}) | <code>mc_version_id</code> FK, <code>user_id</code> FK, <code>access</code> (edit or view), <code>invited_by</code> FK, <code>invited_at</code>
+<code>review_assignments</code> | MD-03 | The invitation of a reviewer to review a version, with a due date ({{fr-revassign}}) | <code>mc_version_id</code> FK, <code>reviewer_id</code> FK, <code>kind</code> (colleague or industry expert), <code>scope</code>, <code>due_on</code>, <code>invited_by</code> FK, <code>coi_declared</code>, <code>status</code> (ReviewStatus)
+<code>reviews</code> | MD-03 | The completed review: form ratings and recommendation ({{fr-revform}}, {{fr-revrec}}) | <code>review_assignment_id</code> FK (unique), <code>form</code> json, <code>recommendation</code> (Support, Amend, Do not support), <code>submitted_at</code>
+<code>review_comments</code> | MD-03 | Comments of a review and their resolution ({{fr-revcomments}}) | <code>review_id</code> FK, <code>section</code>, <code>body</code>, <code>blocking</code>, <code>state</code> (CommentState), <code>resolved_by</code> FK, <code>resolved_at</code>
+<code>approval_decisions</code> | MD-03 | One row per decision at a stage: endorsement or Senate decision. Never updated ({{fr-wfrecord}}) | <code>mc_version_id</code> FK, <code>stage</code>, <code>decision</code>, <code>decided_by</code> FK, <code>external_ref</code> (Senate meeting reference), <code>decided_at</code>, <code>notes</code>
+<code>version_transition_rules</code> | MD-03 | The rule for learners already enrolled when a new version is approved: finish on the old version, move to the new one, or by recorded equivalence ({{fr-verbind}}) | <code>mc_version_id</code> (new version), <code>from_version_id</code>, <code>rule</code>, <code>approval_decision_id</code>, <code>created_at</code>
+<code>change_requests</code> | MD-02 | A request to change an approved version, classified as minor or material ({{fr-chgclassify}}, {{fr-chgmaterial}}) | <code>micro_credential_id</code> FK, <code>from_version_id</code> FK, <code>to_version_id</code> FK, <code>class</code>, <code>reason</code>, <code>requires_qv</code>, <code>requested_by</code> FK, <code>status</code> (VersionStatus of the new version)
+</script>
+
+<h3>5.4.3 Offering, Enrolment and Results</h3>
+<p class="tcap" data-t="data-cat3">Tables for offering, enrolment and results</p>
+<script type="text/tbl" data-h="Table|Module|Purpose|Key columns" data-w="17%|8%|27%|48%" data-cls="small">
+<code>offerings</code> | MD-04 | A cohort of an approved version ({{fr-offcreate}}, {{fr-offopen}}) | <code>reference</code> (for example DS-2026-2, unique), <code>mc_version_id</code> FK, <code>owner_id</code> FK, <code>start_date</code>, <code>end_date</code>, <code>places</code>, <code>fee</code>, <code>language</code>, <code>qv_record_id</code> FK (SAMC), <code>is_migrated</code>, <code>status</code> (OfferingStatus)
+<code>readiness_items</code> | MD-04 | The readiness checklist of an offering ({{fr-offreadiness}}) | <code>offering_id</code> FK, <code>item_key</code>, <code>label_ms</code>, <code>label_en</code>, <code>done</code>, <code>done_by</code> FK, <code>done_at</code>, <code>evidence_file_id</code> FK
+<code>readiness_confirmations</code> | MD-04 | The deputy dean's confirmation, with conditions, that an offering is ready ({{fr-offconfirm}}, {{fr-offrecheck}}) | <code>offering_id</code> FK, <code>confirmed_by</code> FK, <code>confirmed_at</code>, <code>conditions</code>, <code>items_snapshot</code> json
+<code>enrolments</code> | MD-05 | A participant's registration in an offering ({{fr-regstatus}}) | <code>reference</code> (for example E-2026-0644, unique), <code>offering_id</code> FK, <code>user_id</code> FK, <code>mc_version_id</code> FK, <code>attempt_no</code>, <code>registered_at</code>, <code>withdrawn_at</code>, <code>waiver_ref</code>, <code>is_migrated</code>, <code>status</code> (EnrolmentStatus); unique (offering_id, user_id, attempt_no)
+<code>pdpa_acknowledgements</code> | MD-05 | The participant's acknowledgement of the recognition statement and the personal data notice, with the wording version ({{fr-regack}}, {{fr-regpdpa}}) | <code>enrolment_id</code>, <code>user_id</code>, <code>statement_version</code>, <code>pdpa_version</code>, <code>acknowledged_at</code>
+<code>module_enrolments</code> | MD-05 | Progress of an enrolment in each module ({{fr-regmodule}}) | <code>enrolment_id</code> FK, <code>mc_module_id</code> FK, <code>started_at</code>, <code>achieved_at</code>, <code>status</code> (ResultStatus)
+<code>payments</code> | MD-05 | Payment attempts of an enrolment ({{fr-regpay}}, {{fr-regwaiver}}) | <code>enrolment_id</code> FK, <code>amount</code>, <code>currency</code>, <code>method</code>, <code>provider_ref</code>, <code>idempotency_key</code> (unique), <code>status</code> (PaymentStatus), <code>failure_reason</code>, <code>paid_at</code>
+<code>import_files</code> | MD-06 | Every import of a UCreds results or badge file ({{fr-lplog}}) | <code>kind</code> (results or badges), <code>template_version</code>, <code>offering_id</code> FK, <code>file_id</code> FK, <code>sha256</code>, <code>row_count</code>, <code>staged_count</code>, <code>rejected_count</code>, <code>duplicate_of_id</code> FK, <code>run_by</code> FK, <code>status</code> (ImportStatus)
+<code>import_row_errors</code> | MD-06 | A rejected row of an import with the reason ({{fr-lpvalidate}}). Valid rows are not stored here: they become Provisional results ({{fr-lpstaged}}) | <code>import_file_id</code> FK, <code>row_no</code>, <code>learner_ref</code>, <code>reason</code>; marks are not copied
+<code>export_files</code> | MD-06 | Every export of an enrolment file ({{fr-lpexport}}, {{fr-lplog}}) | <code>offering_id</code> FK, <code>template_version</code>, <code>file_id</code> FK, <code>sha256</code>, <code>row_count</code>, <code>run_by</code> FK
+<code>assessment_results</code> | MD-07 | One score per module enrolment and component. A verified row is never updated ({{fr-asentry}}, {{fr-asverify}}) | <code>module_enrolment_id</code> FK, <code>assessment_component_id</code> FK, <code>score</code>, <code>source</code> (import or manual), <code>import_file_id</code> FK, <code>entered_by</code> FK, <code>verified_by</code> FK, <code>verified_at</code>, <code>hold_reason</code>, <code>status</code> (ResultStatus)
+<code>assessment_result_revisions</code> | MD-07 | Each approved change to a verified result; the effective score is the latest revision ({{fr-aschange}}) | <code>assessment_result_id</code> FK, <code>revision_no</code>, <code>old_score</code>, <code>new_score</code>, <code>result_change_request_id</code> FK, <code>approved_by</code> FK, <code>approved_at</code>
+<code>integrity_cases</code> | MD-07 | An academic-integrity case that holds results ({{fr-asintegrity}}) | <code>offering_id</code> FK, <code>opened_by</code> FK, <code>reason</code>, <code>outcome</code>, <code>closed_at</code>, <code>closed_by</code> FK
+<code>result_change_requests</code> | MD-07 | A request to change a result after entry or verification ({{fr-aschange}}) | <code>assessment_result_id</code> FK, <code>requested_by</code> FK, <code>new_score</code>, <code>reason</code>, <code>decided_by</code> FK, <code>status</code> (RequestStatus)
+<code>result_appeals</code> | MD-07 | A participant's appeal against a result ({{fr-asappeal}}) | <code>assessment_result_id</code> FK, <code>participant_id</code> FK, <code>reason</code>, <code>decided_by</code> FK, <code>outcome</code>, <code>status</code> (RequestStatus)
+</script>
+
+<h3>5.4.4 Credentials and Achievement</h3>
+<p class="tcap" data-t="data-cat4">Tables for the Achievement Record and credentials</p>
+<script type="text/tbl" data-h="Table|Module|Purpose|Key columns" data-w="17%|8%|27%|48%" data-cls="small">
+<code>achievement_records</code> | MD-08 | The internal record of modules, badges and completion of one enrolment. It is not an ACR ({{fr-arkeep}}, {{fr-arlabel}}) | <code>enrolment_id</code> FK (unique), <code>mc_version_id</code> FK, <code>completed_on</code>, <code>final_result</code> json, <code>confirmed_by</code> FK, <code>confirmed_at</code>, <code>completion_status</code> (CompletionStatus, null until confirmed)
+<code>module_achievements</code> | MD-08 | A module achieved by verified results ({{fr-asmodule}}, {{fr-arview}}) | <code>achievement_record_id</code> FK, <code>module_enrolment_id</code> FK (unique), <code>mc_module_id</code> FK, <code>achieved_on</code>, <code>verified_by</code> FK
+<code>credentials</code> | MD-09 | A certificate with its Digital Credential, one signed object with two renderings. The signed payload is never updated ({{fr-crcert}}, {{fr-crdc}}) | <code>credential_no</code> (MCMS-C-…), <code>revision</code>, <code>public_code</code> (unique), <code>holder_id</code> FK, <code>holder_name</code>, <code>achievement_record_id</code> FK, <code>mc_version_id</code> FK, <code>issued_on</code>, <code>signed_payload</code> json, <code>payload_hash</code>, <code>key_id</code>, <code>supersedes_id</code> FK, <code>replaces_id</code> FK, <code>status</code> (CredentialStatus); unique (credential_no, revision)
+<code>digital_badges</code> | MD-09 | A Digital Badge for a verified module, imported from UCreds or issued by MCMS ({{fr-crbadge}}, {{fr-lpbadge}}) | <code>module_achievement_id</code> FK (unique), <code>holder_id</code> FK, <code>source</code> (BadgeSource), <code>badge_ref</code>, <code>badge_url</code>, <code>issued_on</code>, <code>public_code</code> (unique), <code>status</code> (CredentialStatus)
+<code>credential_events</code> | MD-09 | The history of a credential: issue, correction, replacement, revocation ({{fr-crcorrect}}, {{fr-crrevoke}}) | <code>credential_id</code> FK, <code>action</code>, <code>reason</code>, <code>actor_id</code> FK, <code>external_ref</code>, <code>from_status</code>, <code>to_status</code>, <code>linked_credential_id</code> FK, <code>occurred_at</code>
+<code>verification_logs</code> | MD-09 | One row per public verification request ({{fr-vflog}}) | <code>occurred_at</code>, <code>credential_id</code> FK (null when not found), <code>outcome</code> (VerifyOutcome), <code>channel</code> (page or api), <code>network_address</code>, <code>code_fingerprint</code>
+</script>
+
+<h3>5.4.5 Quality Verification and Quality Assurance</h3>
+<p class="tcap" data-t="data-cat5">Tables for QV, CQI and monitoring</p>
+<script type="text/tbl" data-h="Table|Module|Purpose|Key columns" data-w="17%|8%|27%|48%" data-cls="small">
+<code>qv_records</code> | MD-10 | One QV cycle of a SAMC ({{fr-qvsamc}}, {{fr-qvresult}}) | <code>micro_credential_id</code> FK, <code>mc_version_id</code> FK, <code>cycle_no</code>, <code>qv_reference</code>, <code>verified_credit</code>, <code>verified_mqf_level</code>, <code>valid_from</code>, <code>valid_until</code>, <code>setting_version_id</code> FK, <code>status</code> (QvStatus)
+<code>qv_submissions</code> | MD-10 | Not a separate table in Release 1: the submission date, QVC/MQA reference and submitter are columns of <code>qv_records</code> (<code>submitted_on</code>, <code>submitted_ref</code>, <code>submitted_by</code>), because one cycle has one submission ({{fr-qvpackage}}, {{fr-qvsubmit}})
+<code>qv_evidence</code> | MD-10 | Items of the QV evidence checklist ({{fr-qvevidence}}, {{fr-qvautolink}}) | <code>qv_record_id</code> FK, <code>checklist_key</code>, <code>offering_id</code> FK, <code>file_id</code> FK, <code>accepted</code>, <code>accepted_by</code> FK, <code>accepted_at</code>
+<code>cqi_records</code> | MD-14 | A quality review of an offering ({{fr-cqiissue}}, {{fr-cqisign}}) | <code>reference</code> (for example CQI-DS-2026-1, unique), <code>offering_id</code> FK, <code>owner_id</code> FK, <code>indicators</code> json, <code>due_on</code>, <code>submitted_at</code>, <code>confirmed_by</code> FK, <code>status</code> (CqiRecordStatus)
+<code>cqi_actions</code> | MD-14 | Improvement actions of a CQI record ({{fr-cqiaction}}, {{fr-cqieffect}}) | <code>cqi_record_id</code> FK, <code>description</code>, <code>responsible_id</code> FK, <code>due_on</code>, <code>effectiveness_note</code>, <code>closed_at</code>, <code>status</code> (CqiActionStatus)
+<code>periodic_reviews</code> | MD-14 | Scheduled review of a micro-credential and its outcome ({{fr-prschedule}}, {{fr-proutcome}}) | <code>micro_credential_id</code> FK, <code>due_on</code>, <code>completed_on</code>, <code>decided_by</code> FK, <code>outcome</code> (ReviewOutcome)
+<code>suspensions</code> | MD-14 | Suspension or termination of an offering or micro-credential, with the transition plan ({{fr-prsuspend}}, {{fr-prkeep}}) | <code>micro_credential_id</code> FK, <code>offering_id</code> FK, <code>kind</code>, <code>reason</code>, <code>effective_from</code>, <code>transition_plan</code>, <code>notified_at</code>, <code>decided_by</code> FK, <code>lifted_at</code>
+<code>feedback_responses</code> | MD-14 | A participant's course feedback, stored without a name on reports ({{fr-mnfeedback}}) | <code>offering_id</code> FK, <code>enrolment_id</code> FK, <code>answers</code> json, <code>submitted_at</code>
+<code>quality_domain_checks</code> | MD-14 | The result of each quality domain check of a CQI record ({{fr-mndomains}}) | <code>cqi_record_id</code> FK, <code>domain</code>, <code>finding</code>, <code>met</code>, <code>checked_by</code> FK, <code>checked_at</code>
+</script>
+
+<h3>5.4.6 Credit Bank, Transfer and Pathways</h3>
+<p class="tcap" data-t="data-cat6">Tables for ACR, ABC, transfer and pathways</p>
+<script type="text/tbl" data-h="Table|Module|Purpose|Key columns" data-w="17%|8%|27%|48%" data-cls="small">
+<code>acrs</code> | MD-11 | The Academic Credit Record, generated from verified records ({{fr-acrprep}}, {{fr-acrverify}}) | <code>reference</code> (MCMS-A-…, unique), <code>owner_id</code> FK, <code>achievement_record_id</code> FK, <code>mc_version_id</code> FK, <code>qv_record_id</code> FK (SAMC), <code>credits</code>, <code>mqf_level</code>, <code>completion_date</code>, <code>assessment_basis</code>, <code>payload</code> json, <code>confirmed_by</code> FK, <code>confirmed_at</code>, <code>supersedes_id</code> FK, <code>status</code> (AcrStatus)
+<code>acr_checks</code> | MD-11 | The eligibility checks run before an ACR is prepared ({{fr-acrchecks}}) | <code>acr_id</code> FK, <code>check_key</code>, <code>passed</code>, <code>detail</code>, <code>checked_at</code>
+<code>consents</code> | MD-11 | The participant's consent decisions for ABC deposit ({{fr-dpconsent}}, {{fr-dpdecline}}) | <code>acr_id</code> FK, <code>decision</code> (ConsentDecision), <code>template_version_id</code> FK (wording shown), <code>decided_at</code>, <code>decided_by</code> FK
+<code>abc_batches</code>* | MD-11 | A batch of ACR sent to ABC together ({{fr-dpqueue}}, {{fr-dpexport}}) | <code>reference</code> (for example ABC-FTMK-2026-03, unique), <code>ptj_id</code> FK, <code>export_file_id</code> FK, <code>format_version</code>, <code>sent_at</code>, <code>prepared_by</code> FK, <code>status</code> (AbcBatchStatus); Release 1 adds <code>acr_ids</code> json, the records the batch exported
+<code>abc_deposits</code> | MD-11 | The deposit of one ACR in ABC ({{fr-dprecord}}) | <code>acr_id</code> FK (unique), <code>abc_batch_id</code> FK, <code>abc_reference</code>, <code>deposit_date</code>, <code>credits</code>, <code>credit_expiry</code>, <code>setting_version_id</code> FK (validity period used), <code>recorded_by</code> FK, <code>deposit_status</code> (DepositOutcome), <code>credit_status</code> (CreditStatus)
+<code>credit_ledger_entries</code> | MD-11 | Append-only history of the credit status of a deposit: deposit, provisional redemption, redemption, release, expiry ({{fr-cvledger}}) | <code>abc_deposit_id</code> FK, <code>event</code>, <code>from_status</code>, <code>to_status</code> (CreditStatus), <code>credits</code>, <code>redemption_event_id</code> FK (null for deposit and expiry), <code>recorded_by</code> FK, <code>occurred_at</code>
+<code>redemption_events</code> | MD-11 | A step of the Single Redemption Principle for one transfer line: provisional, final, released ({{fr-rdprov}}, {{fr-rdfinal}}, {{fr-rdrelease}}) | <code>abc_deposit_id</code> FK, <code>transfer_line_id</code> FK, <code>event</code>, <code>evidence_ref</code>, <code>abc_updated_on</code>, <code>abc_update_ref</code> ({{fr-rdabcsync}}), <code>recorded_by</code> FK, <code>occurred_at</code>
+<code>transfer_applications</code> | MD-12 | A credit transfer case ({{fr-ctapply}}, {{fr-ctdecision}}) | <code>reference</code> (TR-…, unique), <code>user_id</code> FK, <code>programme_id</code> FK, <code>applied_at</code>, <code>status</code> (TransferStatus)
+<code>transfer_decisions</code> | MD-12 | The academic decision on an application, by the receiving deputy dean ({{fr-ctdecision}}, {{fr-ctauthority}}) | <code>transfer_application_id</code> FK, <code>outcome</code> (TransferStatus), <code>decided_by</code> FK, <code>decided_on</code>, <code>authority</code>, <code>decision_ref</code>, <code>conditions</code>, <code>notes</code>
+<code>transfer_lines</code> | MD-12 | One ACR offered against one target course ({{fr-ctsource}}, {{fr-ctpartial}}) | <code>transfer_application_id</code> FK, <code>acr_id</code> FK, <code>mc_version_id</code> FK, <code>parent_course_id</code> FK, <code>credits_requested</code>, <code>credits_approved</code>, <code>decision</code> (TransferStatus), <code>conditions</code>
+<code>equivalence_assessments</code> | MD-12 | The outcome-by-outcome comparison of a line ({{fr-ctequiv}}, {{fr-ctloequiv}}) | <code>transfer_line_id</code> FK, <code>source_outcome_id</code> FK, <code>target_outcome_ref</code>, <code>match</code> (MatchLevel), <code>evaluator_id</code> FK, <code>note</code>
+<code>pathways</code> | MD-13 | A mapping of micro-credentials to a programme, approved by Senate ({{fr-spmap}}, {{fr-spapprove}}) | <code>reference</code> (for example PW-BITZ-1, unique), <code>programme_id</code> FK, <code>version_no</code>, <code>approval_ref</code>, <code>approved_at</code>, <code>status</code>
+<code>pathway_items</code> | MD-13 | A micro-credential mapped to a course, with its credit ({{fr-spcreditbearing}}, {{fr-spplo}}) | <code>pathway_id</code> FK, <code>micro_credential_id</code> FK, <code>parent_course_id</code> FK, <code>credits</code>, <code>plo_map</code> json
+<code>stackable_plans</code> | MD-13 | An individual plan towards a degree ({{fr-spplan}}, {{fr-spdecision}}) | <code>reference</code> (SP-…, unique), <code>user_id</code> FK, <code>pathway_id</code> FK, <code>programme_id</code> FK, <code>utem_credit_percent</code>, <code>residency_semesters</code>, <code>setting_version_id</code> FK, <code>decided_by</code> FK, <code>conditions</code>, <code>status</code> (PlanSuitability)
+<code>plan_requirements</code> | MD-13 | The checks of a plan: home credit share, residency, credit-bearing, learning-outcome mapping, remaining requirements ({{fr-sp30}}, {{fr-spresidency}}, {{fr-spremain}}) | <code>stackable_plan_id</code> FK, <code>requirement_key</code>, <code>met</code>, <code>detail</code>, <code>checked_at</code>
+<code>admissions</code> | MD-12 | Programme admission recorded by Pejabat Pendaftar, kept apart from transfer ({{fr-spadmit}}, {{fr-ctadmission}}) | <code>user_id</code> FK, <code>programme_id</code> FK, <code>intake</code>, <code>recorded_by</code> FK, <code>recorded_at</code>, <code>evidence_ref</code>
+</script>
+
+<h3>5.4.7 Audit, Notifications and Integration</h3>
+<p class="tcap" data-t="data-cat7">Tables for audit, messages and integration</p>
+<script type="text/tbl" data-h="Table|Module|Purpose|Key columns" data-w="17%|8%|27%|48%" data-cls="small">
+<code>audit_events</code> | MD-15 | The append-only audit trail with a hash chain (Section 5.6) ({{fr-auditlog}}) | <code>seq</code> (unique, monotonic), <code>occurred_at</code>, <code>actor_id</code> FK, <code>actor_role</code>, <code>action</code>, <code>subject_type</code>, <code>subject_id</code>, <code>before</code> json, <code>after</code> json, <code>reason</code>, <code>external_ref</code>, <code>context</code> json, <code>request_id</code>, <code>prev_hash</code>, <code>hash</code>
+<code>audit_chain_heads</code>* | MD-15 | One row holding the latest sequence and hash, locked while an audit row is written; also the last verified point | <code>chain</code> (unique, value <code>main</code>), <code>last_seq</code>, <code>last_hash</code>, <code>verified_seq</code>, <code>verified_hash</code>, <code>verified_at</code>
+<code>corrections</code> | MD-15 | A correction made under the Guide procedure: original, reason, action, approver, date ({{fr-correct}}, {{fr-mismatch}}) | <code>target_type</code>, <code>target_id</code>, <code>original_ref</code>, <code>reason</code>, <code>requested_by</code> FK, <code>approved_by</code> FK, <code>executed_at</code>, <code>status</code> (RequestStatus)
+<code>discrepancies</code> | MD-15 | A mismatch between records found by a check ({{fr-mismatch}}) | <code>subject_type</code>, <code>subject_id</code>, <code>description</code>, <code>found_at</code>, <code>resolved_by</code> FK, <code>correction_id</code> FK
+<code>retention_holds</code> | MD-15 | A hold that stops disposal of records ({{fr-hold}}) | <code>scope_type</code>, <code>scope_ref</code>, <code>reason</code>, <code>placed_by</code> FK, <code>placed_at</code>, <code>released_at</code>
+<code>report_runs</code> | MD-15 | A generated report with scope, filters and file ({{fr-reports}}, {{fr-export}}) | <code>report_type</code>, <code>scope</code> json, <code>filters</code> json, <code>file_id</code> FK, <code>requested_by</code> FK, <code>status</code> (RunStatus)
+<code>disposal_records</code> | MD-15 | An approved disposal of records after the retention period ({{fr-retention}}) | <code>category</code>, <code>criteria</code>, <code>record_count</code>, <code>approved_by</code> FK, <code>executed_at</code>, <code>hold_check_passed</code>
+<code>notification_preferences</code> | MD-16 | The user's choice of channel and digest per notice group ({{fr-ntprefs}}) | <code>user_id</code> FK, <code>notice_group</code>, <code>channel</code>, <code>digest</code>; mandatory groups cannot be switched off
+<code>adapter_configs</code> | MD-16 | The mode (Stub, Manual, Live) and non-secret settings of each adapter ({{fr-ihregistry}}, {{fr-adapterstatus}}) | <code>adapter</code> (unique), <code>mode</code>, <code>settings</code> json, <code>updated_by</code> FK; secrets stay in environment configuration
+<code>notifications</code> | MD-16 | A message to a user, stored before it is sent (AD-15) ({{fr-ntevents}}, {{fr-ntlog}}) | <code>user_id</code> FK, <code>template_key</code>, <code>template_version_id</code> FK, <code>locale</code>, <code>subject</code>, <code>body</code>, <code>link</code>, <code>mandatory</code>, <code>read_at</code>, <code>sent_at</code>, <code>email_status</code> (EmailStatus), <code>digest_group</code>
+<code>integration_jobs</code> | MD-16 | One logical exchange with an external system, for example one deposit export or one payment ({{fr-ihregistry}}) | <code>adapter</code>, <code>operation</code>, <code>direction</code>, <code>idempotency_key</code> (unique), <code>subject_type</code>, <code>subject_id</code>, <code>request_summary</code> json, <code>last_error</code>, <code>status</code> (JobStatus)
+<code>integration_calls</code>* | MD-16 | One row per adapter call. With <code>notifications</code> it is the outbox: the scheduler re-dispatches rows that are pending or due for retry ({{fr-ihretry}}, {{ir-idempotent}}) | <code>integration_job_id</code> FK, <code>adapter</code>, <code>operation</code>, <code>direction</code>, <code>request_ref</code>, <code>attempts</code>, <code>next_attempt_at</code>, <code>last_error_ref</code>, <code>status</code> (CallStatus)
+<code>job_runs</code> | MD-16 | Progress of a long background job such as an import, an issue run or a report ({{nfr-queue}}) | <code>job_class</code>, <code>queue</code>, <code>idempotency_key</code> (unique), <code>subject_type</code>, <code>subject_id</code>, <code>total</code>, <code>processed</code>, <code>failed_count</code>, <code>started_at</code>, <code>finished_at</code>, <code>error_ref</code>, <code>status</code> (RunStatus)
+<code>alert_log</code> | MD-16 | One row per record, alert kind and day offset, so that a timed alert is sent once and is caught up after a missed run ({{fr-qvalerts}}, {{fr-cvalert}}) | <code>subject_type</code>, <code>subject_id</code>, <code>alert_kind</code>, <code>offset_days</code>, <code>sent_at</code>, <code>notification_id</code> FK; unique (subject_type, subject_id, alert_kind, offset_days)
+</script>
+<p>Background work runs on six named queues: <code>default</code>, <code>notifications</code>, <code>imports</code>, <code>credentials</code>, <code>reports</code> and <code>integration</code> (AD-05). <code>job_runs.queue</code> holds the queue name. Screens read progress from <code>job_runs</code> ("issuing 14 of 27"), not from Redis.</p>
+
+<h3>5.4.8 Tables Added to the Shared List</h3>
+<p>Seven tables are not named in any fact sheet of Section 4 (marked with an asterisk above). Each is needed for a stated requirement. The design also names <code>template_versions</code> in Section 5.4.1, which the fact sheet of MD-00 does not list.</p>
+<p class="tcap" data-t="data-extra">Additional tables</p>
+<script type="text/tbl" data-h="Table|Owner|Reason" data-w="30%|10%|60%" data-cls="small">
+<code>reference_sequences</code> | MD-00 | Gap-free yearly counters for reference numbers (Section 5.5)
+<code>role_assignment_micro_credentials</code> | MD-01 | A scope of "listed micro-credentials" ({{fr-scope}}) needs a real relationship, not a JSON list ({{dr-refint}})
+<code>assessment_component_outcomes</code> | MD-02 | The many-to-many alignment of outcomes and assessments ({{fr-propalign}})
+<code>template_versions</code> | MD-00 | Versions of a template, which {{fr-templates}} requires
+<code>abc_batches</code> | MD-11 | The prototype and {{fr-dpqueue}} group ACR into deposit batches sent to ABC together
+<code>audit_chain_heads</code> | MD-15 | Serialises audit writes and holds the last verified point of the chain (AD-11)
+<code>integration_calls</code> | MD-16 | The outbox row of each adapter call, with attempts and next attempt ({{fr-ihretry}})
+</script>
+<p>The SRS entities DIGITAL_BADGE, REDEMPTION_EVENT, AUDIT_LOG, SETTING, READINESS_CHECK, EQUIVALENCE_ASSESSMENT and TRANSFER_DECISION map to <code>digital_badges</code>, <code>redemption_events</code>, <code>audit_events</code>, <code>settings</code> with <code>setting_versions</code>, <code>readiness_items</code> with <code>readiness_confirmations</code>, <code>equivalence_assessments</code> and <code>transfer_decisions</code>. The credit status history of a deposit is kept in <code>credit_ledger_entries</code>, and each redemption step in <code>redemption_events</code>. One <code>credentials</code> row is the certificate together with its Digital Credential: they share one number, one public code and one signed payload, and the PDF and the JSON file are two renderings of it. The separate recognition stages stay separate ({{dr-separate}}): the approval decision, the credential, the QV record, the ACR, the deposit, the transfer decision and the redemption each have their own table and status.</p>
+
+<h2>5.5 Identifiers</h2>
+<p class="tcap" data-t="data-ids">Identifier types</p>
+<script type="text/tbl" data-h="Identifier|Form|Generation|Where used" data-w="18%|26%|34%|22%" data-cls="small">
+Primary key | ULID, 26 characters | Generated by the application (<code>HasUlids</code> trait) when the model is created | Every table. Never shown to a participant and never used as a public link
+Human reference | A prefix, the year and a number, for example <code>MCMS-C-2026-000098</code>, <code>MCMS-A-2026-000102</code>, <code>TR-2026-0012</code> | The <code>ReferenceNumbers</code> service takes the next value of <code>reference_sequences</code> for (kind, scope, year) | Credentials, ACR, transfer cases, enrolments, plans, batches
+Public verification code | 10 characters of Crockford base32, for example <code>3HXP92LDKQ</code> | Random, from a cryptographically secure source (50 bits). Not derived from any ID, number or name | <code>credentials.public_code</code>, QR code, verification link ({{dr-publicid}}, {{fr-crid}})
+</script>
+<p>Rules for human references:</p>
+<ul>
+  <li>The format of each kind is held in code, not in settings. The prefix, the width of the number and whether the number restarts each year are fixed per kind. {{tab:data-refs}} lists them.</li>
+  <li>The generator opens a transaction, selects the <code>reference_sequences</code> row for (kind, scope, year) with <code>lockForUpdate</code>, adds one, and writes the record in the same transaction. A rollback undoes the increment, so numbers have no gaps. The year is the year of creation in Asia/Kuala_Lumpur.</li>
+  <li>A reference has a unique index on its table. A reference is never reused or edited. Human references carry no secret; access is always decided by a policy and never by knowing the number ({{sr-authz}}).</li>
+</ul>
+<p class="tcap" data-t="data-refs">Human reference formats</p>
+<script type="text/tbl" data-h="Kind|Example|Scope key|Restarts yearly" data-w="22%|34%|24%|20%" data-cls="small">
+Credential | <code>MCMS-C-2026-000098</code> | none | Yes
+ACR | <code>MCMS-A-2026-000102</code> | none | Yes
+Credit transfer case | <code>TR-2026-0012</code> | none | Yes
+Stackable plan | <code>SP-2026-003</code> | none | Yes
+Enrolment | <code>E-2026-0644</code> | none | Yes
+ABC batch | <code>ABC-FTMK-2026-03</code> | PTj code | Yes
+Offering | <code>DS-2026-2</code> | micro-credential code | Yes (cohort number in the year)
+CQI record | <code>CQI-DS-2026-1</code> | offering reference | No (derived from the offering)
+</script>
+<p>The prototype shows verification codes as eight characters in two groups (<code>3HXP-92LD</code>). The design uses ten characters, as AD-09 states. The page groups them for reading (<code>3HXP9-2LDKQ</code>). On input, the service removes hyphens and spaces, upper-cases the text and maps the letters I and L to 1 and O to 0, as Crockford base32 allows. The alphabet has no I, L, O or U. A new code is generated until the unique index accepts it.</p>
+
+<h2>5.6 Audit Design</h2>
+<p>The audit trail satisfies {{fr-auditlog}}, {{fr-auditview}}, {{sr-tamper}} and AD-11. It records every approval and decision, credential action, result change, ACR, deposit, transfer and redemption status change, role and setting change, correction and disposal. A single <code>AuditLog::record()</code> call writes a row. Business code never writes <code>audit_events</code> directly.</p>
+
+<h3>5.6.1 Columns</h3>
+<p class="tcap" data-t="data-auditcols">Columns of <code>audit_events</code></p>
+<script type="text/tbl" data-h="Column|Type|Content" data-w="20%|18%|62%" data-cls="small">
+<code>id</code> | char(26) | ULID of the row
+<code>seq</code> | bigint, unique | Position in the chain, starting at 1, increased by one for each row. Taken from <code>audit_chain_heads.last_seq</code>
+<code>occurred_at</code> | timestamptz | Time of the event, from the application clock (the demo clock is never used in production, AD-18)
+<code>actor_id</code> | char(26), FK | The user who acted. Null for the system, with <code>actor_role</code> set to <code>system</code>
+<code>actor_role</code> | string | The role the actor acted in ({{fr-multirole}})
+<code>action</code> | string | A dotted name such as <code>results.verified</code>, <code>credential.revoked</code>, <code>setting.changed</code>
+<code>subject_type</code>, <code>subject_id</code> | string, char(26) | The record affected. A soft reference, so that the row outlives a disposed record
+<code>before</code>, <code>after</code> | json | Values before and after. Only changed columns are stored. Identity numbers and marks are masked in these values
+<code>reason</code> | text | The reason given in the dialog, required for corrections, revocations and rejections
+<code>external_ref</code> | string | A Senate minute reference, an ABC reference or a decision reference
+<code>context</code> | json | Approver, setting version used, job id and similar facts needed to explain the action
+<code>request_id</code> | string | The request or job identifier, to join with application logs ({{nfr-applog}})
+<code>prev_hash</code> | char(64) | The <code>hash</code> of the row with <code>seq</code> minus one. The first row holds 64 zeros
+<code>hash</code> | char(64) | SHA-256 of the row (below)
+</script>
+
+<h3>5.6.2 Hash Chain and Transaction Rule</h3>
+<ul>
+  <li><b>Hash.</b> <code>hash = SHA-256(prev_hash + canonical_json(row))</code>. The canonical JSON has the columns in fixed order (<code>seq</code>, <code>occurred_at</code> in UTC ISO 8601 with microseconds, <code>actor_id</code>, <code>actor_role</code>, <code>action</code>, <code>subject_type</code>, <code>subject_id</code>, <code>before</code>, <code>after</code>, <code>reason</code>, <code>external_ref</code>, <code>context</code>), keys sorted, no spaces, UTF-8.</li>
+  <li><b>Same transaction.</b> <code>AuditLog::record()</code> must run inside the database transaction of the change it describes. If no transaction is open it throws. The row and the change commit together or not at all.</li>
+  <li><b>Serialising.</b> The call locks the single <code>audit_chain_heads</code> row (<code>lockForUpdate</code>), reads <code>last_seq</code> and <code>last_hash</code>, writes the new row, and updates the head, all in the caller's transaction. This uses only Eloquent features and so works on PostgreSQL and MySQL (AD-03). Audit writes are therefore serial. At the Release 1 volume (the peak of {{nfr-peak}} is 2,000 registrations in 2 hours) a short lock is acceptable. Section 9 holds the load figures.</li>
+  <li><b>Database role.</b> The application connects as <code>mcms_app</code>, which has <code>INSERT</code> and <code>SELECT</code> on <code>audit_events</code> and no <code>UPDATE</code>, <code>DELETE</code> or <code>TRUNCATE</code>. Migrations run as a different role, <code>mcms_migrator</code>. A trigger that raises an error on <code>UPDATE</code> and <code>DELETE</code> of <code>audit_events</code> is added in a migration as a second barrier ({{sr-tamper}}).</li>
+  <li><b>Integrity check job.</b> A scheduled job (JB-18, <code>VerifyAuditChainJob</code>) runs every night at 02:00. It reads rows after <code>audit_chain_heads.verified_seq</code> in order, recomputes each hash and checks the link to the previous row, then moves <code>verified_seq</code> and <code>verified_hash</code> forward. It also recomputes the whole chain once a month. A mismatch writes a security log entry and an alert to the system administrator ({{sr-alerts}}). The audit screen (CODL-10) and the audit export (DOC-16) show an integrity line with the last verified sequence and time.</li>
+  <li><b>Reading.</b> The audit views filter by subject, actor and date. Staff see only entries of records in their scope ({{fr-auditview}}).</li>
+</ul>
+
+<h2>5.7 Versioned Settings</h2>
+<p>A setting is a key with a typed value. Its history is kept in <code>setting_versions</code> ({{fr-settings}}, {{fr-settinghist}}, AD-12). A row of <code>setting_versions</code> is never updated or deleted. A change inserts a new row with the new value, an <code>effective_from</code> time (now or in the future), the user and the reason, and points to the row it supersedes.</p>
+<ul>
+  <li><b>Resolving a value.</b> The value in force at time <var>t</var> is the row of the setting with the largest <code>effective_from</code> not after <var>t</var>. The <code>SettingResolver</code> takes the key and the time, defaulting to now, and returns the value and the id of the version.</li>
+  <li><b>Decisions store the version.</b> A decision that depends on a setting stores <code>setting_version_id</code> and uses the value of that version for ever ({{dr-asof}}). {{tab:data-settinguse}} lists them.</li>
+  <li><b>Calculated alerts</b> (for example QV expiry at 180, 90 and 30 days) use the value in force on the day the scheduler runs. They are not decisions.</li>
+  <li><b>Audit.</b> A setting change writes an audit row with the old and new values and the reason. Confirmation is required in the dialog ({{ir-confirm}}).</li>
+</ul>
+<p class="tcap" data-t="data-settinguse">Decisions that store a setting version</p>
+<script type="text/tbl" data-h="Decision|Column|Setting keys used" data-w="32%|28%|40%" data-cls="small">
+QV validity set on a QV result | <code>qv_records.setting_version_id</code> | <code>qv.max_validity_years</code>, <code>qv.min_completed_cohorts</code>
+Credit expiry set on an ABC deposit | <code>abc_deposits.setting_version_id</code> | <code>credit.abc_validity_years</code>
+Stackable plan suitability | <code>stackable_plans.setting_version_id</code> | <code>stackable.min_home_credit_percent</code>, <code>stackable.residency_semesters</code>
+Learning-time checks when a version is submitted | <code>mc_versions.setting_version_id</code> (added to the table) | <code>credit.slt_hours_per_credit</code>, <code>slt.min_hours_samc</code>, <code>slt.min_hours_umc_whole</code>, <code>slt.min_hours_module_credit_model</code>
+Public verification fields on a credential page | not stored (current value is used) | <code>verification.public_fields</code>
+</script>
+<p>Settings are cached per request. The cache key includes the latest <code>setting_versions.id</code> of the setting, so a new version is used at once on every node ({{nfr-stateless}}).</p>
+
+<h2>5.8 Bilingual Content</h2>
+<p>Text that a participant sees is stored in Bahasa Melayu and English ({{dr-bilingual}}, {{nfr-bilingualcontent}}, AD-13). Each such field is a pair of columns with the suffixes <code>_ms</code> and <code>_en</code>.</p>
+<ul>
+  <li><b>Fields.</b> Names and descriptions of micro-credentials versions, learning outcomes, modules and assessment components, programme and PTj names, readiness item labels, the recognition statement, and the subject and body of every template version.</li>
+  <li><b>Draft state.</b> While a version is a draft, one language may be empty. The form marks the missing language ({{fr-lang}}). The submit check and the publish check for templates both require both languages. A template version cannot be published with a missing language.</li>
+  <li><b>Reading.</b> The <code>HasBilingualAttributes</code> trait gives <code>$model-&gt;title</code> in the locale of the user, and falls back to the other language only on staff screens, marked as a fallback. Participant documents and credentials show both languages, with BM beneath EN ({{fr-crlang}}).</li>
+  <li><b>Locale.</b> <code>users.locale</code> holds <code>ms</code> or <code>en</code>. A notification stores its rendered subject and body in the recipient's locale at creation, and the template version used.</li>
+  <li><b>Search.</b> The full-text vector of a bilingual field concatenates both languages, using the <code>simple</code> text search configuration, so that no stemming of one language damages the other.</li>
+</ul>
+
+<h2>5.9 No-Delete and Correction Policy</h2>
+<p>Records are not deleted and not changed in place where the SRS forbids it ({{dr-immutable}}, {{dr-nodelete}}, {{br-audit}}). The policy has three parts.</p>
+
+<h3>5.9.1 Which Tables Are Append-Only</h3>
+<p class="tcap" data-t="data-immut">Mutability of record classes</p>
+<script type="text/tbl" data-h="Class|Tables|Rule" data-w="22%|34%|44%" data-cls="small">
+Append-only | <code>audit_events</code>, <code>setting_versions</code>, <code>credential_events</code>, <code>credit_ledger_entries</code>, <code>redemption_events</code>, <code>assessment_result_revisions</code>, <code>approval_decisions</code>, <code>transfer_decisions</code>, <code>consents</code>, <code>verification_logs</code>, <code>corrections</code>, <code>disposal_records</code> | Only <code>INSERT</code> and <code>SELECT</code> are granted to the application role
+Frozen after a milestone | <code>mc_versions</code> and its child tables (after Approved), <code>assessment_results</code> (after Verified), <code>credentials</code> payload columns (after issue), <code>acrs</code> payload (after Verified), <code>qv_records</code> result columns (after a result) | The model blocks the update. A database trigger rejects an update of the frozen columns. Status columns that the workflow changes are not frozen
+Mutable with audit | Reference and working data: <code>users</code>, <code>role_assignments</code>, <code>ptjs</code>, <code>programmes</code>, <code>parent_courses</code>, drafts, <code>offerings</code> before opening, <code>readiness_items</code>, <code>cqi_*</code>, <code>stackable_plans</code> before decision | Updates are allowed and write an audit row with before and after values
+No <code>DELETE</code> | All tables except the working tables <code>notifications</code> (read ones, after the retention period) and <code>import_row_errors</code> of a rejected file | The application role has no <code>DELETE</code> grant. Disposal runs as a separate role, <code>mcms_disposal</code>, through the approved disposal process
+</script>
+
+<h3>5.9.2 Correction Patterns</h3>
+<p>A correction follows {{fr-correct}}: the original is kept, the reason, the actor and the approver are recorded, and linked records are updated in a controlled way. {{tab:data-correct}} gives the pattern for each record.</p>
+<p class="tcap" data-t="data-correct">How each record is corrected</p>
+<script type="text/tbl" data-h="Record|Correction|Result in the data" data-w="20%|36%|44%" data-cls="small">
+Approved version | A minor or material change ({{fr-chgminor}}, {{fr-chgmaterial}}) | A new <code>mc_versions</code> row with <code>version_no</code> plus one and <code>supersedes_id</code> set. The old row becomes Superseded. A version with participant records is never deleted ({{br-version}})
+Credential, wrong detail | Correct ({{fr-crcorrect}}) | A new <code>credentials</code> row with the same <code>credential_no</code>, <code>revision</code> plus one, a new <code>public_code</code> and a newly signed payload. The old row becomes Corrected. A <code>credential_events</code> row of action Corrected links both
+Credential, replaced | Replace ({{fr-crreplace}}) | A new row with a new <code>credential_no</code> and <code>replaces_id</code> set. The old row becomes Replaced
+Credential, withdrawn | Revoke ({{fr-crrevoke}}) | No new row. <code>credentials.status</code> becomes Revoked, with a <code>credential_events</code> row holding the reason and the authorised body's decision reference. The row stays and the public page shows Revoked
+Verified result | Change after verification ({{fr-aschange}}) | A <code>result_change_requests</code> row, and when approved an <code>assessment_result_revisions</code> row with the old and new score. The verified <code>assessment_results</code> row is not edited. The effective score is the latest revision
+ACR | Correction needed ({{fr-acrverify}}) | A new <code>acrs</code> row with <code>supersedes_id</code>. The old row stays with its status and a <code>superseded_at</code> time
+Enrolment | Withdrawal, cancellation | The status changes and an audit row is written. A re-registration creates a new row with <code>attempt_no</code> plus one
+Setting | Change | A new <code>setting_versions</code> row (Section 5.7)
+Any other record | Correction by an authorised party ({{fr-correct}}, {{fr-mismatch}}) | A <code>corrections</code> row holds the original reference, reason, action, approver and date. The update is allowed only for mutable tables, with an audit row. EV-60 tells the owning module to apply it
+</script>
+<p>The <code>credentials.status</code> column is a projection of the latest <code>credential_events</code> row of that credential. Only the <code>CredentialService</code> changes it, in the same transaction that inserts the event. The signed payload, public code, number, holder and revision never change after issue ({{fr-crnoerase}}). A revoked or replaced credential is never erased and still answers a verification request with its status.</p>
+
+<h3>5.9.3 Migrated Records</h3>
+<p>Records imported from earlier spreadsheets ({{dr-legacy}}) carry <code>is_migrated = true</code> on <code>offerings</code> and <code>enrolments</code>. No ACR or credit claim is created from them unless eligibility is verified ({{dr-nolegacycred}}). The ACR service checks the flag before it generates an ACR.</p>
+
+<h2>5.10 Retention and Archiving</h2>
+<p>Retention periods are open (A-08, OI-07). The design stores one setting per record category, <code>retention.&lt;category&gt;</code>, with the value TBD until OI-07 is closed ({{fr-retention}}, {{nfr-records}}). Only the ACR rule is fixed: ACR are kept indefinitely unless the owner or a recognised authority directs otherwise (G 12.8).</p>
+<p class="tcap" data-t="data-retention">Retention by record category (periods are placeholders)</p>
+<script type="text/tbl" data-h="Record category|Tables|Setting key|Period" data-w="30%|34%|22%|14%" data-cls="small">
+Development and approval records | <code>micro_credentials</code>, <code>mc_versions</code> and children, <code>reviews</code>, <code>approval_decisions</code>, <code>change_requests</code> | <code>retention.curriculum</code> | TBD (OI-07). Versions linked to participants are kept while those records are kept
+Registration records | <code>offerings</code>, <code>enrolments</code>, <code>module_enrolments</code>, <code>payments</code> | <code>retention.registration</code> | TBD (OI-07)
+Assessment results | <code>assessment_results</code>, <code>assessment_result_revisions</code>, <code>import_row_errors</code> | <code>retention.assessment</code> | TBD (OI-07)
+Achievement Record and credentials | <code>achievement_records</code>, <code>module_achievements</code>, <code>credentials</code>, <code>digital_badges</code>, <code>credential_events</code> | <code>retention.credentials</code> | TBD (OI-07). Verification stays possible for the life of the credential
+QA, monitoring and CQI | <code>cqi_*</code>, <code>periodic_reviews</code>, <code>suspensions</code> | <code>retention.quality</code> | TBD (OI-07)
+QV documents and decisions | <code>qv_records</code>, <code>qv_evidence</code> | <code>retention.qv</code> | At least the QV validity period plus the records requirement
+ACR | <code>acrs</code>, <code>consents</code> | not configurable | Indefinite (G 12.8)
+ABC deposit and credit | <code>abc_batches</code>, <code>abc_deposits</code>, <code>credit_ledger_entries</code> | <code>retention.abc</code> | Per ABC rules
+Credit transfer decisions | <code>transfer_*</code>, <code>equivalence_assessments</code> | <code>retention.transfer</code> | TBD (academic regulations)
+Pathways and plans | <code>pathways</code>, <code>pathway_items</code>, <code>stackable_plans</code>, <code>plan_requirements</code>, <code>admissions</code> | <code>retention.pathways</code> | Programme lifetime plus review period
+Audit trail | <code>audit_events</code> | not configurable | At least as long as the longest linked record. Audit rows are not disposed of in Release 1
+Verification logs | <code>verification_logs</code> | <code>retention.verification_logs</code> | TBD (OI-07)
+Uploaded files | <code>stored_files</code>, <code>export_files</code> | <code>stored_files.retain_until</code> per row | Follows the owning record
+</script>
+<ul>
+  <li><b>Archiving.</b> Archiving means the record leaves default lists and searches. A record past its active period is shown only through the traceability and report screens (Section 4, MD-15). Release 1 does not move rows to another table or database. Table partitioning of <code>audit_events</code> and <code>verification_logs</code> by year is a later change if volume requires it ({{nfr-growth}}).</li>
+  <li><b>Disposal.</b> A disposal request names a category and a cut-off date. The job lists the records past the period, excludes any under a <code>retention_holds</code> row or linked to a record that is still retained, and waits for approval. After approval, the <code>mcms_disposal</code> role deletes them and a <code>disposal_records</code> row and an audit row are written. Every deletion is thus approved and logged ({{fr-retention}}, {{dr-nodelete}}).</li>
+  <li><b>Files.</b> Object storage keeps a file while its <code>stored_files</code> row exists. Disposal removes the object after the row is marked. Backups follow the backup schedule in Section 9 ({{sr-backupprotect}}).</li>
+  <li><b>Personal data.</b> A participant's data request is answered from the tables above ({{sr-access}}). Data is not removed while a record that must be kept refers to it ({{br-version}}).</li>
+</ul>
+
+<h2>5.11 Key Indexes</h2>
+<p>Every foreign key has an index. {{tab:data-index}} lists the other indexes that matter. Full-text indexes and partial indexes are created in migrations; the queries that use them go through Eloquent scopes (AD-03). Search always filters by the user's scope first, then ranks (AD-16, {{nfr-search}}).</p>
+<p class="tcap" data-t="data-index">Key indexes</p>
+<script type="text/tbl" data-h="Table|Index|Purpose" data-w="22%|42%|36%" data-cls="small">
+<code>users</code> | unique <code>entra_oid</code>, unique <code>institution_id</code>, GIN on <code>search_vector</code> | Sign-in lookup, merge of identities ({{fr-idmerge}}), name search
+<code>role_assignments</code> | (<code>user_id</code>, <code>role</code>, <code>valid_to</code>) | Authorisation check on every request ({{sr-authz}})
+<code>setting_versions</code> | (<code>setting_id</code>, <code>effective_from</code> descending) | Resolve the value in force
+<code>micro_credentials</code>, <code>mc_versions</code> | GIN on <code>search_vector</code>; (<code>micro_credential_id</code>, <code>version_no</code>) unique; (<code>status</code>, <code>ptj_id</code>) | Catalogue and staff search, version history, queues
+<code>offerings</code> | unique <code>reference</code>; (<code>status</code>, <code>start_date</code>) | Public catalogue and open offerings ({{fr-catsearch}})
+<code>enrolments</code> | unique (<code>offering_id</code>, <code>user_id</code>, <code>attempt_no</code>); (<code>user_id</code>, <code>status</code>) | One active registration, "my learning"
+<code>assessment_results</code> | (<code>module_enrolment_id</code>, <code>assessment_component_id</code>, <code>status</code>) | Results of a cohort and bulk verification ({{fr-asbulkverify}})
+<code>credentials</code> | unique <code>public_code</code>; unique (<code>credential_no</code>, <code>revision</code>); (<code>holder_id</code>, <code>status</code>) | Verification within 1 second ({{nfr-verify}}); holder wallet
+<code>acrs</code>, <code>abc_deposits</code> | unique <code>reference</code>; unique <code>acr_id</code>; (<code>credit_status</code>, <code>credit_expiry</code>) | ACR lookup; expiry alerts ({{fr-cvalert}})
+<code>credit_ledger_entries</code> | (<code>abc_deposit_id</code>, <code>occurred_at</code>) | Status history of a deposit
+<code>audit_events</code> | unique <code>seq</code>; (<code>subject_type</code>, <code>subject_id</code>, <code>seq</code>); (<code>actor_id</code>, <code>occurred_at</code>) | Trace a record or a person ({{fr-trace}})
+<code>notifications</code> | (<code>user_id</code>, <code>read_at</code>, <code>created_at</code> descending) | Bell count and list
+<code>integration_jobs</code>, <code>integration_calls</code> | unique <code>idempotency_key</code> (jobs); (<code>status</code>, <code>next_attempt_at</code>) (calls) | Outbox re-dispatch, failed list for the system administrator
+<code>job_runs</code>, <code>alert_log</code> | unique <code>idempotency_key</code>; unique (<code>subject_type</code>, <code>subject_id</code>, <code>alert_kind</code>, <code>offset_days</code>) | Idempotent jobs and alerts
+<code>verification_logs</code> | (<code>occurred_at</code>); (<code>network_address</code>, <code>occurred_at</code>) | Rate-limit review and abuse checks
+<code>reference_sequences</code> | unique (<code>kind</code>, <code>scope_key</code>, <code>year</code>) | Number generation
+</script>
+<p>Capacity at registration ({{nfr-capacity}}) is protected by locking the <code>offerings</code> row (<code>lockForUpdate</code>) while the places taken are counted and the enrolment row is inserted. No separate counter column is kept.</p>
+
+<h2>5.12 Migrations and Seed Data</h2>
+<h3>5.12.1 Migration Order</h3>
+<p>Migrations live in the module that owns the table (layout in Section 3). Their file names start with a timestamp, and a migration that adds a foreign key runs after the migration of the table it points to. They are forward-only in staging and production and are applied by the deployment pipeline ({{nfr-migrations}}). Destructive changes follow expand, migrate, contract over separate releases.</p>
+<p class="tcap" data-t="data-migr">Migration order</p>
+<script type="text/tbl" data-h="Step|Module|Tables created" data-w="8%|24%|68%" data-cls="small">
+1 | MD-00 Platform | <code>settings</code>, <code>setting_versions</code> (the user FK is added in step 3), <code>templates</code>, <code>template_versions</code>, <code>stored_files</code>, <code>reference_sequences</code>
+2 | MD-15 Records | <code>audit_chain_heads</code>, <code>audit_events</code>, so that every later table can be audited from its first row
+3 | MD-01 Identity | <code>ptjs</code>, <code>programmes</code>, <code>parent_courses</code>, <code>users</code>, <code>role_assignments</code>, <code>delegations</code>, <code>conflict_declarations</code>, <code>notification_preferences</code> (from MD-16); then the deferred foreign keys of steps 1 and 2 to <code>users</code>
+4 | MD-02 Curriculum | <code>micro_credentials</code>, <code>mc_versions</code>, <code>learning_outcomes</code>, <code>mc_modules</code>, <code>assessment_components</code>, <code>assessment_component_outcomes</code>, <code>proposal_collaborators</code>, <code>change_requests</code>; then <code>role_assignment_micro_credentials</code>
+5 | MD-03 Approval | <code>review_assignments</code>, <code>reviews</code>, <code>review_comments</code>, <code>approval_decisions</code>, <code>version_transition_rules</code>
+6 | MD-10 Quality verification | <code>qv_records</code>, <code>qv_evidence</code> (before offerings, which point to QV)
+7 | MD-04 Offering | <code>offerings</code>, <code>readiness_items</code>, <code>readiness_confirmations</code>; then the foreign key of <code>qv_evidence</code> to offerings
+8 | MD-05 Enrolment | <code>enrolments</code>, <code>module_enrolments</code>, <code>payments</code>, <code>pdpa_acknowledgements</code>
+9 | MD-06 Learning platform | <code>import_files</code>, <code>import_row_errors</code>, <code>export_files</code>
+10 | MD-07 Assessment | <code>assessment_results</code>, <code>assessment_result_revisions</code>, <code>integrity_cases</code>, <code>result_change_requests</code>, <code>result_appeals</code>
+11 | MD-08 Achievement record | <code>achievement_records</code>, <code>module_achievements</code>
+12 | MD-09 Credentials | <code>credentials</code>, <code>digital_badges</code>, <code>credential_events</code>, <code>verification_logs</code>
+13 | MD-11 Credit bank | <code>acrs</code>, <code>acr_checks</code>, <code>consents</code>, <code>abc_batches</code>, <code>abc_deposits</code>, <code>redemption_events</code>, <code>credit_ledger_entries</code>
+14 | MD-12 Transfer | <code>transfer_applications</code>, <code>transfer_lines</code>, <code>transfer_decisions</code>, <code>equivalence_assessments</code>, <code>admissions</code>; then the foreign key of <code>redemption_events</code> to transfer lines
+15 | MD-13 Pathways | <code>pathways</code>, <code>pathway_items</code>, <code>stackable_plans</code>, <code>plan_requirements</code>
+16 | MD-14 Quality and change | <code>cqi_records</code>, <code>cqi_actions</code>, <code>periodic_reviews</code>, <code>suspensions</code>, <code>feedback_responses</code>, <code>quality_domain_checks</code>
+17 | MD-15 Records | <code>corrections</code>, <code>discrepancies</code>, <code>retention_holds</code>, <code>disposal_records</code>, <code>report_runs</code>
+18 | MD-16 Integration hub | <code>notifications</code>, <code>adapter_configs</code>, <code>integration_jobs</code>, <code>integration_calls</code>, <code>job_runs</code>, <code>alert_log</code>
+19 | MD-00 Platform | Database roles and grants (<code>mcms_app</code>, <code>mcms_migrator</code>, <code>mcms_disposal</code>), the triggers on append-only and frozen tables, and the full-text indexes. This step is the only place with PostgreSQL-specific SQL (AD-03)
+</script>
+<p>A cycle exists between <code>micro_credentials</code> and <code>mc_versions</code> only if a pointer to the current version is stored. The design stores no such pointer: the current version is the latest version in Approved status, found by query. Likewise <code>qv_records</code> and <code>offerings</code> point at each other, so the first foreign key is added in step 7.</p>
+
+<h3>5.12.2 Seed Data</h3>
+<p>There are two seeders. <code>ReferenceSeeder</code> is safe for production: it creates the settings and their first versions (the defaults of the prototype, for example 40 learning hours per credit, QV validity of 3 years, credit validity of 10 years, 30 percent home credit, 30-minute idle timeout), the templates in both languages, and the PTj list. <code>SampleWorldSeeder</code> loads the prototype's sample world for development, test and staging. It checks <code>APP_ENV</code> and refuses to run in production (AD-18). The prototype's "today" is 26 October 2026; the seeder sets the demo clock to that date.</p>
+<p>The sample world is written through the same services as the application, not by direct inserts, so that audit rows, hash chains, reference numbers and signed credentials are valid. It is the data on which the Pest and Playwright tests run (AD-17).</p>
+<p class="tcap" data-t="data-seed">Prototype sample data and the tables it seeds</p>
+<script type="text/tbl" data-h="Prototype key (data.js and screen files)|Seeded into|Content" data-w="26%|32%|42%" data-cls="small">
+<code>people</code>, <code>users</code> | <code>users</code>, <code>role_assignments</code> | Amir Hakimi (participant), Dr. Aina Zulkifli and Dr. Rosli Hamzah (lecturers), Hakim Rahman and Dr. Farah Nadia Ismail (deputy deans), Farid Hashim (system administrator), Ir. Siti Aminah Yusof (industry expert), and 18 further participants
+<code>ptj</code>, <code>programmes</code>, <code>courses</code> | <code>ptjs</code>, <code>programmes</code>, <code>parent_courses</code> | FTMK, FKE, FPTT, FTKIP, CODL; BITZ and BITD; five courses
+<code>mcs</code> | <code>micro_credentials</code>, <code>mc_versions</code>, <code>mc_modules</code>, <code>learning_outcomes</code>, <code>assessment_components</code> | Ten micro-credentials in the three categories at different statuses (Draft, In review, Pending approval, Approved)
+<code>cohorts</code> | <code>offerings</code>, <code>readiness_items</code> | Offerings from Not ready to Ended, including DS-2026-2 with 28 learners (weights 40, 30, 30, pass mark 50, one failing learner)
+<code>enrolments</code> | <code>enrolments</code>, <code>module_enrolments</code>, <code>payments</code> | Amir's four enrolments, and the learners of each cohort
+<code>credentials</code> | <code>credentials</code>, <code>credential_events</code>, <code>digital_badges</code> | MCMS-C-2026-000098, 000209, 000418 and the revoked 000377, signed with the test key
+<code>acrs</code>, <code>acrBatches</code> | <code>acrs</code>, <code>consents</code>, <code>abc_deposits</code>, <code>abc_batches</code>, <code>credit_ledger_entries</code>, <code>redemption_events</code> | The deposited ACR 000102, the verified ACR 000214 awaiting consent, and batch ABC-FTMK-2026-03
+<code>transfers</code>, <code>admissions</code>, <code>plans</code>, <code>pathways</code> | <code>transfer_applications</code>, <code>transfer_lines</code>, <code>equivalence_assessments</code>, <code>admissions</code>, <code>stackable_plans</code>, <code>pathways</code>, <code>pathway_items</code> | TR-2026-0012 and TR-2026-0009, plans SP-2026-003 and 004, pathway PW-BITZ-1
+<code>reviews</code>, <code>ddComments</code> | <code>reviews</code>, <code>review_comments</code> | Four reviews and their comments
+<code>cqi</code> | <code>cqi_records</code>, <code>cqi_actions</code> | CQI-DS-2026-1 and CQI-CND-2026-1
+<code>settings</code>, <code>settingHistory</code> | <code>settings</code>, <code>setting_versions</code> | Sixteen settings and the change of <code>alerts.qv_expiry_days</code> of 2 September 2026
+<code>imports</code> | <code>import_files</code>, <code>export_files</code>, <code>import_row_errors</code> | Four UCreds files, including results-CND-2026-2.csv with two rejected rows
+<code>notifs</code> | <code>notifications</code> | The notifications of each persona
+<code>audit</code> | <code>audit_events</code> | Written by the services above as they run; not copied
+<code>tasks</code>, <code>adapters</code> | not stored | The task queue is computed from the data. Adapter status comes from configuration and <code>integration_jobs</code>
+</script>
+<p>Tests find seeded rows by code or reference (for example <code>DS-2026-2</code>), never by ID. The seeder uses a fixed random seed so that references and public codes are the same on every run.</p>

@@ -1,0 +1,194 @@
+<!-- ===================== SECTION 4: LECTURER ROLE ===================== -->
+<h1>4. Lecturer / Educator Pages & Functionality Analysis</h1>
+
+<p>The Lecturer role (Persona P1) represents academic curriculum developers, course coordinators, and instructors. Lecturers author micro-credential proposals, manage version transitions, supervise cohort deliveries, enter student assessment marks, assemble Quality Verification portfolios, and execute Continuous Quality Improvement (CQI) cycles.</p>
+
+<!-- ---------------- 4.1 Lecturer Tasks & Home ---------------- -->
+<h2>4.1 Lecturer Dashboard & Work Queue</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> Lecturer Dashboard & Work Tasks</li>
+  <li><b>Role:</b> Lecturer (<code>lecturer</code>)</li>
+  <li><b>Exact Route:</b> <code>GET /tasks</code> (with active lecturer role)</li>
+  <li><b>Page Type:</b> Work Queue / KPI Hub</li>
+  <li><b>Related Database Tables:</b> <code>tasks</code>, <code>micro_credentials</code>, <code>mc_versions</code>, <code>offerings</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Identity\TaskController@index</code>, View: <code>tasks</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Provides an immediate action-oriented overview of pending academic responsibilities. Displays KPI cards: (1) Approved micro-credentials, (2) Proposals in review or pending endorsement, (3) Active draft proposals, and (4) Open/upcoming offerings. Lists overdue tasks (e.g., mark entry deadlines, CQI action reviews, readiness checklists) with area filtering.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and aligned with prototype screen <code>#/lec/home</code>. Displays lecturer-specific KPIs via <code>lecturerKpis()</code> method. Tasks link directly to corresponding action pages.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Dynamic KPI calculations and task filtering operate correctly.</p>
+
+<!-- ---------------- 4.2 Proposals & Guided Category Wizard ---------------- -->
+<h2>4.2 Curriculum Proposals & Guided Category Wizard (MD-02)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Guided Category Wizard (<code>/proposals/new</code>), My Proposals (<code>/proposals</code>), Proposal Workspace (<code>/proposals/{id}</code>), Printable Proposal (<code>/proposals/{id}/print</code>)</li>
+  <li><b>Role:</b> Lecturer (<code>lecturer</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /proposals</code>, <code>GET /proposals/new</code>, <code>POST /proposals</code>, <code>GET /proposals/{id}</code>, <code>PUT /proposals/{id}</code>, <code>POST /proposals/{id}/submit</code>, <code>GET /proposals/{id}/print</code></li>
+  <li><b>Page Type:</b> Multi-Step Wizard & 8-Tab High-Density Authoring Workspace</li>
+  <li><b>Related Database Tables:</b> <code>micro_credentials</code>, <code>mc_versions</code>, <code>mc_modules</code>, <code>learning_outcomes</code>, <code>assessment_components</code>, <code>assessment_component_outcomes</code>, <code>parent_courses</code>, <code>proposal_readiness</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Curriculum\ProposalController</code>, Views: <code>curriculum.new</code>, <code>curriculum.index</code>, <code>curriculum.workspace</code>, <code>curriculum.print</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Guides lecturers through compliant micro-credential development:
+(1) <b>Category Wizard:</b> A 3-question diagnostic tool that automatically recommends the appropriate category (SAMC, UMC, or MCE) based on credit intent, stand-alone nature, and SLT hours.
+(2) <b>8-Tab Workspace:</b>
+  - <i>Basics:</i> Title, description, delivery mode, language.
+  - <i>Justification:</i> Industry demand, target market, stakeholder consultation.
+  - <i>Modules:</i> Breakdown of modular units; for UMCs, parent course selection and unbundling model (credit-based or topic-based).
+  - <i>Outcomes:</i> Malaysian Qualifications Agency (MQA) aligned Course Learning Outcomes (CLOs).
+  - <i>Assessment:</i> Formative/summative assessments with component weights, pass marks, and an alignment matrix mapping each component to assessed modules and CLOs.
+  - <i>Credential:</i> Proposed MQF level, credit value, badge metadata, and expiry terms.
+  - <i>Readiness:</i> Preliminary faculty and platform resource confirmation.
+  - <i>Submit:</i> Live validation engine checking for blocking errors (e.g., total SLT mismatch, missing outcome mappings) and final formal submission to the Deputy Dean.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-02 and demonstration scenario Act 1. Live validation checks enforce that SLT totals match contact hours, that every module has at least one assessed component, and that unbundling models adhere to parent course rules. Submitting locks the proposal, transitions version status to <code>submitted</code>, logs an audit event, and dispatches a task to the Deputy Dean.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Workspace tabs, autosave, live validation, and submission locking operate reliably.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Lecturer clicks 'New Proposal'<br/>/proposals/new"] --> B["Answer Category Wizard Diagnostic<br/>Credits? Stand-alone? SLT?"]
+    B --> C["System recommends Category<br/>e.g. UMC or SAMC"]
+    C --> D["Initialize Draft Proposal<br/>Redirect to /proposals/{id}"]
+    D --> E["Author 8-Tab Curriculum Specification<br/>Basics, Modules, Outcomes, Matrix"]
+    E --> F["Live Validation Engine<br/>Check SLT sum, module alignments"]
+    F -->|"Blocking Errors Found"| G["Display Error Banner<br/>Disable Submit Button"]
+    F -->|"Validation Passed"| H["Click 'Submit for Review'"]
+    H --> I["Content Locked (status: 'submitted')<br/>Audit event recorded<br/>Task dispatched to Deputy Dean"]
+    I --> J["Redirect to /proposals<br/>Shows 'In Review' tag"]
+</pre>
+<figcaption>Figure 4.2: Guided Category Wizard & Proposal Submission Lifecycle</figcaption>
+</figure>
+
+<!-- ---------------- 4.3 Version History & Material Changes ---------------- -->
+<h2>4.3 Version Management & Material Changes (MD-02)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> My Micro-Credentials (<code>/my-mcs</code>), Version History (<code>/my-mcs/{id}</code>), Request Change Form (<code>/my-mcs/{id}/change</code>)</li>
+  <li><b>Role:</b> Lecturer (<code>lecturer</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /my-mcs</code>, <code>GET /my-mcs/{id}</code>, <code>GET /my-mcs/{id}/change</code>, <code>POST /my-mcs/{id}/change</code>, <code>POST /my-mcs/{id}/reoffer</code></li>
+  <li><b>Page Type:</b> Version Governance & Change Classification Form</li>
+  <li><b>Related Database Tables:</b> <code>micro_credentials</code>, <code>mc_versions</code>, <code>change_requests</code>, <code>version_transition_rules</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Curriculum\VersionController</code>, Views: <code>curriculum.mcs.index</code>, <code>curriculum.mcs.show</code>, <code>curriculum.mcs.change</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Manages the lifecycle of approved micro-credentials across multiple version iterations (FR-74 to FR-82). Lecturers can request curriculum modifications. The system automatically classifies requested changes from an 11-item checklist into: (1) <b>Minor Change:</b> Typo fixes, reading list updates; requires only Deputy Dean acknowledgment. (2) <b>Material Change:</b> Alterations to outcomes, assessment structure, SLT, credits, or MQF level; creates a new draft version copied from the approved version, requiring full colleague re-review and Senate endorsement.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented. Material changes correctly branch into new version drafts (e.g., v1.0 &rarr; v2.0-draft). When Senate approves the new version, transition rules (teach-out current students or migrate to new version) are recorded. Re-offer functionality allows launching new cohorts from an approved version without modifying curriculum content.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Change classification, version branching, and transition rule logging operate correctly.</p>
+
+<!-- ---------------- 4.4 Offerings & Readiness Checklist ---------------- -->
+<h2>4.4 Course Offerings (Cohorts) & Readiness Checklist (MD-04)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Offerings Listing (<code>/offerings</code>), Create Cohort (<code>/offerings/new</code>), Offering Delivery Dashboard (<code>/offerings/{id}</code>), Participants Roster (<code>/offerings/{id}/participants</code>), Readiness Checklist (<code>/offerings/{id}/readiness</code>)</li>
+  <li><b>Role:</b> Lecturer (<code>lecturer</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /offerings</code>, <code>GET /offerings/new</code>, <code>POST /offerings</code>, <code>GET /offerings/{id}</code>, <code>GET /offerings/{id}/participants</code>, <code>GET /offerings/{id}/readiness</code>, <code>POST /offerings/{id}/readiness</code></li>
+  <li><b>Page Type:</b> Cohort Management, Stepped Checklist & Learner Roster</li>
+  <li><b>Related Database Tables:</b> <code>offerings</code>, <code>readiness_items</code>, <code>readiness_confirmations</code>, <code>enrolments</code>, <code>mc_versions</code>, <code>ucreds_courses</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Offering\OfferingController</code>, Views: <code>offerings.index</code>, <code>offerings.new</code>, <code>offerings.show</code>, <code>offerings.participants</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Enables lecturers to instantiate and manage delivery cohorts for Senate-approved micro-credentials. Lecturers define cohort names (e.g., <code>DS-2027-1</code>), start/end dates, max quota, and link the course to UCreds reference courses. Before enrollment can open, the lecturer must complete the comprehensive Readiness Checklist (Appendix B2-B7) verifying LMS course setup, instructor availability, assessment readiness, and student support materials.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional. Cohort creation validates that the parent version is approved. The readiness checklist captures lecturer responses and evidentiary notes. Completing the checklist transitions cohort readiness to <code>submitted</code> and dispatches a confirmation task to the Deputy Dean.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Partially Working (By Design).</b> The checklist logic, status transitions, and participant rosters work completely. However, evidence attachments currently accept text notes and URLs rather than uploaded binary files (pending object storage service).</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Lecturer on Offerings<br/>/offerings/new"] --> B["Enter Cohort Details<br/>Dates, Quota, UCreds Reference"]
+    B --> C["Save Cohort (Status: 'draft')"]
+    C --> D["Open Readiness Checklist<br/>/offerings/{id}/readiness"]
+    D --> E["Answer 6 Readiness Dimensions<br/>Provide evidentiary notes"]
+    E --> F["Submit Readiness Checklist"]
+    F --> G["Readiness status: 'submitted'<br/>Task dispatched to Deputy Dean"]
+    G --> H["Deputy Dean Confirms Readiness<br/>Cohort status becomes 'open'"]
+    H --> I["Cohort published in Public Catalogue<br/>/public/catalogue"]
+</pre>
+<figcaption>Figure 4.4: Cohort Creation, Readiness Verification & Catalogue Publishing</figcaption>
+</figure>
+
+<!-- ---------------- 4.5 Assessment Marks Entry & Result Revision ---------------- -->
+<h2>4.5 Marks Entry, Integrity Holds & Result Revisions (MD-07)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Marks Entry Grid (<code>/results/{offering}</code>), Component Marks Sheet (<code>/results/{offering}/components/{component}</code>), Integrity Case Manager (<code>POST /results/{offering}/integrity</code>), Result Change Request (<code>POST /results/{offering}/change-request</code>)</li>
+  <li><b>Role:</b> Lecturer (<code>lecturer</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /results/{offering}</code>, <code>POST /results/{offering}/marks</code>, <code>POST /results/{offering}/submit</code>, <code>POST /results/{offering}/integrity</code>, <code>POST /results/{offering}/change-request</code></li>
+  <li><b>Page Type:</b> High-Density Grade Sheet & Academic Integrity Operations</li>
+  <li><b>Related Database Tables:</b> <code>assessment_results</code>, <code>assessment_result_revisions</code>, <code>result_change_requests</code>, <code>integrity_cases</code>, <code>enrolments</code>, <code>assessment_components</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Assessment\ResultsController</code>, Views: <code>results.cohort</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Allows the course instructor to enter assessment marks for all enrolled participants against approved components (quizzes, lab practicals, final assessments). Features: (1) Component-by-component mark validation (cannot exceed maximum mark), (2) Flagging active academic integrity cases (cheating/plagiarism) which freezes result verification for that learner, and (3) Post-verification grade change requests requiring documented justification and Deputy Dean approval.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-08. Raw marks are saved in draft state until the lecturer clicks "Submit Marks for Verification", which locks the grade sheet and forwards the cohort results to the Deputy Dean. Integrity holds successfully isolate affected participants while allowing unaffected participants to proceed.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Grade validation, integrity locks, and change request audit logging operate reliably.</p>
+
+<!-- ---------------- 4.6 Continuous Quality Improvement (CQI) ---------------- -->
+<h2>4.6 Continuous Quality Improvement (CQI) Workspace (MD-14)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> CQI Workspace (<code>/cqi</code>), Cohort CQI Record (<code>/cqi/{offering}</code>), Create Action (<code>POST /cqi/{offering}/actions</code>), Evaluate Action (<code>POST /cqi/{offering}/actions/{action}/evaluate</code>)</li>
+  <li><b>Role:</b> Lecturer (<code>lecturer</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /cqi</code>, <code>GET /cqi/{offering}</code>, <code>POST /cqi/{offering}/actions</code>, <code>POST /cqi/{offering}/actions/{action}/evaluate</code></li>
+  <li><b>Page Type:</b> Quality Audit Workspace & Action Tracking Engine</li>
+  <li><b>Related Database Tables:</b> <code>cqi_records</code>, <code>quality_domain_checks</code>, <code>cqi_issues</code>, <code>cqi_actions</code>, <code>feedback_responses</code>, <code>offerings</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Monitoring\CqiController</code>, Views: <code>monitoring.cqi</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Implements institutional closed-loop quality assurance (FR-cqi*). Following cohort completion, the lecturer must assemble a CQI Record analyzing: (1) Participant feedback aggregates across 6 quality domains, (2) Grade distribution metrics (pass rate, failure rate), (3) Root-cause issue identification, and (4) Action plan with assigned owners, due dates, and success criteria. In subsequent cycles, the lecturer must evaluate the effectiveness of previously implemented actions before closing them.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-15. Indicators automatically compute median scores from <code>feedback_responses</code>. Action plans strictly follow the two-party lifecycle: the lecturer prepares actions and evaluates effectiveness, but only the Deputy Dean can formally close an action.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Quality domain metrics, action progression, and evaluation checks are operational.</p>
+
+<!-- ---------------- 4.7 SAMC Quality Verification Workspace ---------------- -->
+<h2>4.7 Stand-alone SAMC Quality Verification (QV) Portfolio (MD-10)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Quality Verification Hub (<code>/quality</code>), SAMC QV Portfolio (<code>/quality/{mc}</code>), Assemble Evidence (<code>POST /quality/{mc}/evidence</code>), Submit QV (<code>POST /quality/{mc}/submit</code>)</li>
+  <li><b>Role:</b> Lecturer (<code>lecturer</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /quality</code>, <code>GET /quality/{mc}</code>, <code>POST /quality/{mc}/evidence</code>, <code>POST /quality/{mc}/submit</code></li>
+  <li><b>Page Type:</b> Compliance Portfolio & Evidence Assembly</li>
+  <li><b>Related Database Tables:</b> <code>qv_records</code>, <code>qv_evidence</code>, <code>micro_credentials</code>, <code>mc_versions</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Quality\QvController</code>, Views: <code>quality.index</code>, <code>quality.show</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Supports Malaysian Qualifications Agency (MQA) Quality Verification for Stand-alone Micro-Credentials (SAMC). A stand-alone SAMC cannot carry academic credit unless Quality Verification has been successfully conducted (G 6.3.2). The lecturer assembles the 6 mandatory evidence dimensions (curriculum design, learning resources, assessment mechanism, facilitator credentials, participant evaluation, institutional readiness) and submits the portfolio for faculty endorsement.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-14. Validates that the micro-credential is an approved SAMC with completed cohorts. Evidence items link to system records. Once submitted, the record enters the Deputy Dean queue for institutional endorsement.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Partially Working (By Design).</b> Evidence items are captured as system references and notes; the compressed ZIP package download feature (FR-169) produces an index page pending stored-file service implementation.</p>

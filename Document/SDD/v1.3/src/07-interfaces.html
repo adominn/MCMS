@@ -1,0 +1,391 @@
+<!-- ===================== 6. INTERFACE DESIGN ===================== -->
+<h1>6. Interface Design</h1>
+<p>This section describes how MCMS meets its users and how it exchanges data with other systems. Screen-level layouts are in the UI/UX Specification v1.1 and are not repeated. The external interfaces implement SRS Section 5 ({{ir-adapter}}, {{ir-stubs}}, {{ir-mode}}): each is a PHP interface with Stub, Manual and Live implementations chosen by configuration (AD-08), and every call is recorded in <code>integration_calls</code> (Section 5).</p>
+
+<h2>6.1 User Interface</h2>
+<h3>6.1.1 Route Conventions</h3>
+<p>MCMS has one web application with three front ends that share one design: the public pages, the participant portal and the staff portal ({{ir-responsive}}). The prototype uses hash routes such as <code>#/dd/verify/DS-2026-2</code>. In MCMS the same path is a real URL: <code>/dd/verify/{cohort}</code>.</p>
+<p class="tcap" data-t="ifc-route">Route conventions</p>
+<script type="text/tbl" data-h="Rule|Convention" data-w="26%|74%" data-cls="small">
+Role prefix | A staff or participant screen starts with the role prefix of the UI/UX Specification: <code>/st</code> (participant), <code>/lec</code> (lecturer), <code>/ext</code> (industry expert), <code>/dd</code> (deputy dean), <code>/codl</code> (CODL administrators). A user with several roles ({{fr-multirole}}) sees one menu and may open any prefix that a role allows
+Shared routes | <code>/profile</code>, <code>/notifications</code>, <code>/help</code>, <code>/search</code> serve every signed-in role. <code>/signin</code>, <code>/signin/mfa</code>, <code>/signin/noaccount</code> and, outside production, <code>/signin/stub</code> serve sign-in
+Public routes | No prefix: <code>/</code> (home), <code>/catalogue</code>, <code>/offering/{reference}</code>, <code>/pathways</code>, <code>/how</code>, <code>/faq</code>, <code>/verify</code>, <code>/verify/{code}</code>, <code>/public/verify/{code}/download-json</code>, <code>/public/verify/{code}/download-jwt</code>, <code>/.well-known/jwks.json</code>, <code>/privacy</code>, <code>/terms</code>, <code>/accessibility</code>
+Path words | The words follow the prototype: <code>/dd/queue</code>, <code>/dd/proposal/{id}</code>, <code>/dd/senate/{id}</code>, <code>/dd/readiness/{cohort}</code>, <code>/dd/verify/{cohort}</code>, <code>/dd/completion/{cohort}</code>, <code>/dd/cred/{id}</code>, <code>/dd/acr/{id}</code>, <code>/dd/deposit/{batch}</code>, <code>/dd/transfer/{id}</code>
+Route keys | A path parameter is the human reference of the record (DS-2026-2, MCMS-C-2026-000098, TR-2026-0012), not the ULID. Models define <code>getRouteKeyName()</code> as <code>reference</code>. The reference is not a secret: the policy decides access ({{sr-authz}})
+Printable documents | <code>/doc/{kind}/{id}</code> returns the HTML document. The same path with <code>.pdf</code> returns the PDF and with <code>.csv</code> or <code>.json</code> the machine-readable file where one exists (Section 6.2.9)
+Route names | Dot names that mirror the path: <code>dd.verify</code>, <code>st.transfer.show</code>. Each page root carries <code>data-screen="DD-09"</code> with its UI/UX screen ID, which the Playwright tests use (AD-17)
+Middleware | <code>web</code>, <code>auth</code>, <code>locale</code>, <code>idle-timeout</code> and <code>role:{prefix}</code>. The <code>role</code> middleware only checks that the user holds the role. The Policy of the record decides everything else ({{sr-authz}}, AD-07)
+Not found and forbidden | A record outside the user's scope returns the same "not found" page as a missing record, so existence is not revealed
+Query state | Search, filter, sort, page and rows per page of a table are query-string parameters, so a list can be bookmarked and the back button works
+Language | The locale comes from the user's profile. A signed-out visitor uses the <code>locale</code> cookie, and the switch changes the page in place ({{fr-lang}}, {{nfr-langswitch}})
+</script>
+
+<h3>6.1.2 Page Anatomy</h3>
+<p>Every signed-in page is rendered by the shell component and has the same parts ({{ir-home}}, UI/UX Specification Section 4):</p>
+<ul>
+  <li><b>Top bar</b> with the search box, the language switch, the notification bell with the unread count and the profile menu.</li>
+  <li><b>Side navigation</b> in navy, built from the role's menu. Counts on menu items come from the same query as the task queue.</li>
+  <li><b>Page head</b> with the title, a short subtitle and the primary action. Records show a stage track for the recognition stage they belong to ({{ir-stagecolours}}).</li>
+  <li><b>"Needs you" panel</b> on list pages, listing the items the user must act on first.</li>
+  <li><b>Panels and tables</b> holding the content. A table is the <code>DataTable</code> Livewire component with search, sort, filters and pagination (5, 10, 25 or 50 rows).</li>
+  <li><b>Dialogs, drawers and toasts</b> for every state change, as UI/UX Specification Sections 4.1 to 4.3 define. A state-changing button opens a confirmation dialog first ({{ir-confirm}}). The dialog calls a Livewire action. The action calls the application service of the owning module, inside a database transaction that also writes the audit row (AD-11).</li>
+  <li><b>Long jobs</b> (credential issue, imports, large reports) show a <code>JobProgress</code> component that polls the matching <code>job_runs</code> row every two seconds and shows "issuing 14 of 27" ({{nfr-queue}}).</li>
+</ul>
+<p>The shared Blade and Livewire components are listed in Section 3. Pages are full-page Livewire components, one per screen. A page that is only a view with no interaction may be a Blade view served by a controller.</p>
+
+<h3>6.1.3 Screens by Role</h3>
+<p>The 114 screens of the approved prototype are listed in UI/UX Specification Section 6.6. {{tab:ifc-screens}} summarises them by role and names the owning modules. Screen IDs are used in tests and in Section 4.</p>
+<p class="tcap" data-t="ifc-screens">Screens by role (UI/UX Specification Section 6.6)</p>
+<script type="text/tbl" data-h="Role|Prefix|Home route|Screens|Main areas (examples)|Modules" data-w="14%|9%|13%|8%|38%|18%" data-cls="small">
+Common and sign-in | none | <code>/signin</code> | 10 | Sign-in, MFA check, account not recognised, profile, notifications, help, search, error (CMN-01 to CMN-10) | MD-01, MD-16
+Public | none | <code>/</code> | 11 | Catalogue and offering (PUB-02, PUB-03), pathways (PUB-04), home, how recognition works and FAQ (PUB-01, PUB-05, PUB-06), privacy, terms and accessibility (PUB-09, PUB-10, PUB-11; static Blade pages), verify a credential (PUB-07, PUB-08) | MD-04, MD-09, MD-13
+Participant (P8) | <code>/st</code> | <code>/st/home</code> | 14 | Find and register (ST-02, ST-03), registrations and payments (ST-04, ST-05), Achievement Record (ST-06), credentials (ST-07, ST-08), credit ledger and ACR (ST-09, ST-10), transfer (ST-11 to ST-13), stackable plan (ST-14) | MD-05, MD-08, MD-09, MD-11, MD-12, MD-13
+Lecturer (P1) | <code>/lec</code> | <code>/lec/home</code> | 18 | Proposals and versions (LEC-03 to LEC-06), reviews (LEC-07, LEC-08), cohorts and results (LEC-09, LEC-10), offering and readiness (LEC-11, LEC-12), CQI (LEC-13, LEC-14), QV evidence (LEC-15, LEC-16), reports | MD-02, MD-03, MD-04, MD-07, MD-10, MD-14
+Industry expert (X2) | <code>/ext</code> | <code>/ext/home</code> | 2 | Review invitations and comments (EXT-01, EXT-02) | MD-03
+Deputy dean (P2) | <code>/dd</code> | <code>/dd/queue</code> | 29 | Task queue (DD-01), proposals and Senate decision (DD-02 to DD-05), readiness (DD-06, DD-07), verify results and confirm completion (DD-08 to DD-10), credentials (DD-11, DD-12), QV, CQI, review and suspension (DD-13 to DD-17), ACR and deposits (DD-18 to DD-20), transfer (DD-21, DD-22), stackable pathways (DD-23 to DD-25), reports and traceability (DD-26 to DD-29) | MD-03, MD-04, MD-07, MD-08, MD-09, MD-10, MD-11, MD-12, MD-13, MD-14, MD-15
+CODL administrator (S1, P5) | <code>/codl</code> | <code>/codl/users</code> | 13 | Users and roles (CODL-01, CODL-02), reference data, settings, templates (CODL-03 to CODL-06), UCreds exchange, adapter status, test mailbox (CODL-07 to CODL-09), audit trail, reports, retention (CODL-10 to CODL-13) | MD-00, MD-01, MD-06, MD-15, MD-16
+Printable documents | <code>/doc</code> | <code>/doc/index</code> | 17 | DOC-01 to DOC-17 (Section 6.2.9) | MD-00 and the owner of each record
+</script>
+<p>The CODL screens use the prototype's wording "System administrator" and "CODL operator" for the two CODL roles. CODL roles never reach an academic action screen ({{fr-adminlimits}}, AD-07). The deputy dean screens that record a decision show the CODL role only as a viewer where the SRS allows it.</p>
+
+<h2>6.2 External Interfaces</h2>
+<p>{{tab:ifc-summary}} lists the external interfaces. All of them run through the integration hub (MD-16). Outbound calls are placed on the <code>integration</code> queue and retried with increasing delay ({{fr-ihretry}}). A call that still fails is listed on the adapter status screen (CODL-08) and does not block the business process that created it. Retry follows JB-16 (<code>RetryAdapterCallJob</code>): back-off of 1, 5, 15 and 60 minutes, then Failed and EV-63. These values are configuration.</p>
+<p class="tcap" data-t="ifc-summary">External interfaces, adapters and modes in Release 1</p>
+<script type="text/tbl" data-h="Interface|PHP interface|Protocol|Direction|Release 1 mode|Requirements" data-w="17%|17%|18%|14%|16%|18%" data-cls="small">
+Microsoft Entra ID | <code>IdentityProvider</code> | OpenID Connect, authorisation code with PKCE | In (sign-in) | Live in production, Stub elsewhere | {{fr-sso}}, {{ir-oidc}}
+UCreds | <code>LearningPlatformGateway</code> | CSV files over UTF-8 | Out (enrolments), in (results, badges) | Manual (CSV) | {{fr-lpexport}}, {{fr-lpimport}}, {{ir-csvtemplates}}
+Payment | <code>PaymentGateway</code> | HTTPS and JSON | Out (request), in (callback) | Stub (dummy service) | {{fr-regpay}}, {{ir-idempotent}}
+Email | <code>MailTransport</code> | SMTP with TLS | Out | Live | {{ir-smtp}}, {{fr-ntlog}}
+ABC | <code>AbcGateway</code> | CSV and PDF files | Out (deposit), in (reference recorded by hand) | Manual | {{fr-dpexport}}, {{fr-rdabcsync}}
+QVC and MQA | <code>QvGateway</code> | Zip package | Out (package), in (decision recorded by hand) | Manual | {{fr-qvpackage}}, {{fr-qvsubmit}}
+Credential signing | <code>SigningKeyStore</code> | Key store call (sign request) | Out | Live (key vault of CODL) | {{sr-keys}}, {{ir-obv3}}
+Public verification | <code>VerifyController</code> | HTTPS, HTML slip, Crockford Base32 resolution | In, no login | Live | {{fr-vfpage}}, {{fr-vffields}}, {{ir-api}}, D-43
+Machine Trust Discovery | <code>JwksController</code> | RFC 7517 JWKS JSON | In, no login | Live | {{fr-vftrust}}, D-40
+Verifiable Credentials | <code>VerifyController</code> / <code>KeyStore</code> | Signed JSON (.json) and Signed Token (.jwt) | Out (download) | Live | {{fr-crformat}}, {{ir-obv3}}, D-36
+Printable documents | none (a service) | HTML to PDF | Out (download) | Live | {{ir-print}}
+</script>
+<p>The student information system and Release 2 and 3 live connectors (UCreds, ABC, QVC and MQA, payment) have no Release 1 implementation. Each interface above already has the Stub and Manual classes, so a Live class is added without changing a business module ({{fr-lplive}}).</p>
+
+<h3>6.2.1 Microsoft Entra ID (OpenID Connect)</h3>
+<p>Sign-in uses Laravel Socialite with the Microsoft provider, set to the UTeM tenant (AD-06, {{ir-oidc}}). The flow is the authorisation code flow with PKCE. MCMS stores no password ({{fr-nosignup}}).</p>
+<ol>
+  <li>The user opens <code>/signin</code> and chooses to sign in. MCMS redirects to the Entra authorisation endpoint with scopes <code>openid profile email</code>, a random <code>state</code>, a <code>nonce</code> and the PKCE challenge.</li>
+  <li>Entra authenticates the user, applies Conditional Access (MFA for staff) and redirects to <code>/auth/callback</code> with a code.</li>
+  <li>MCMS exchanges the code for tokens, checks the ID token (signature against the tenant keys, <code>iss</code>, <code>aud</code>, <code>exp</code>, <code>nonce</code>), and reads the claims in {{tab:ifc-oidc}}.</li>
+  <li>MCMS finds the user by <code>oid</code> ({{fr-idmerge}}). If none exists it applies the first-sign-in rules ({{fr-firstlogin}}); an account that is not known and not pre-registered gets the "Account not recognised" page (CMN-04).</li>
+  <li>A session is started. Idle timeout is 30 minutes, from the setting <code>auth.idle_timeout_minutes</code>, with a warning two minutes before ({{fr-session}}).</li>
+</ol>
+<p class="tcap" data-t="ifc-oidc">ID token claims used</p>
+<script type="text/tbl" data-h="Claim|Use|Handling" data-w="14%|44%|42%" data-cls="small">
+<code>oid</code> | The stable identity of the person in the tenant | Stored in <code>users.entra_oid</code>. The key of the account. Never shown
+<code>upn</code> or <code>email</code> | Sign-in name and contact email | Stored in <code>users.upn</code> and <code>users.email</code>. Refreshed at each sign-in. Not used as the key, because a name can change
+<code>name</code> | Display name | Shown read-only on the profile. The name printed on certificates is a separate editable field ({{fr-profile}})
+<code>amr</code> | How the user authenticated | A staff role (any role other than participant) requires the value <code>mfa</code>. If it is missing the session is not opened (below)
+<code>groups</code> | Directory group identifiers | Used only to decide the account type (staff or student) on first sign-in. Groups never grant a role. Roles come only from <code>role_assignments</code> (AD-07)
+</script>
+<p>The staff or matric number (<code>users.institution_id</code>) is read from a directory attribute delivered in the token. The attribute name is a configuration value that CODL confirms (DA to be added, see the report to the lead).</p>
+<p class="tcap" data-t="ifc-oidcerr">Sign-in error handling</p>
+<script type="text/tbl" data-h="Situation|Behaviour" data-w="34%|66%" data-cls="small">
+<code>state</code>, <code>nonce</code> or signature invalid | The callback is refused with HTTP 400 and the sign-in page. A security log entry is written ({{sr-seclog}})
+Entra returns an error or is unreachable | The sign-in page shows a plain message with an ERR reference and a retry button. Users with a live session are not affected
+Account not recognised | CMN-04 explains how external learners register at Pejabat Pendaftar or HEPA. No account is created ({{fr-nosignup}})
+Account deactivated | The same page as above, with a message that the account is inactive. A security log entry is written
+Staff role and no <code>mfa</code> in <code>amr</code> | CMN-03 "Verify it is you". MCMS sends the user back to Entra with <code>prompt=login</code>. If <code>amr</code> still lacks <code>mfa</code>, the session is refused and the event is logged ({{sr-mfa}})
+Participant | The second step is not required ({{fr-sso}})
+Stub provider | Available only when <code>APP_ENV</code> is not <code>production</code>. The application refuses to start in production when the stub is enabled (AD-06, {{fr-devidp}})
+</script>
+
+<h3>6.2.2 UCreds: CSV Export of Enrolments</h3>
+<p>CODL exports the enrolments of an offering to a CSV file and loads it into UCreds by hand (CODL-07, {{fr-lpexport}}). A lecturer may also download the file from the cohort screen (LEC-10). Only participants whose enrolment status is Enrolled are included. The job (JB-03, <code>ExportUcredsEnrolmentJob</code>) runs on the <code>imports</code> queue, writes an <code>export_files</code> row, and stores the file in object storage ({{fr-lplog}}).</p>
+<p class="tcap" data-t="ifc-exp">Enrolment export, template <code>enrol v3</code> (file name <code>enrol-{offering}.csv</code>)</p>
+<script type="text/tbl" data-h="Column|Type|Content and rule" data-w="20%|18%|62%" data-cls="small">
+<code>learner_id</code> | string | Matric number or participant identifier (<code>users.institution_id</code>). Required
+<code>full_name</code> | string | Name as in the official record. Required. Written in full including bin, binti, a/l and a/p ({{nfr-names}})
+<code>enrolment_id</code> | string | The enrolment reference, for example E-2026-0644. Required. Unique in the file
+<code>offering</code> | string | Offering reference, for example DS-2026-2
+<code>cohort</code> | string | The cohort label of the offering, for example Cohort 2026/2
+<code>start_date</code> | date | ISO 8601, <code>YYYY-MM-DD</code>
+<code>end_date</code> | date | ISO 8601, <code>YYYY-MM-DD</code>
+</script>
+<p>The file is UTF-8 (with no byte-order mark), comma-separated, with a header row, quoted fields where needed and line ends of <code>CRLF</code> ({{ir-csvtemplates}}). It carries no identity card number, email address or marks. The same export of the same offering and template version produces the same bytes in the same order (sorted by <code>learner_id</code>), so a repeated export does not create a conflicting file ({{ir-idempotent}}). The template version is stored on the <code>import_files</code> row and printed on the export document (DOC-15).</p>
+
+<h3>6.2.3 UCreds: CSV Import of Results</h3>
+<p>UCreds results are loaded from a CSV file (CODL-07, {{fr-lpimport}}). Imported results are stored as Provisional and create no achievement, badge or credential until the deputy dean verifies them ({{fr-lpstaged}}, {{br-verifyfirst}}). CODL cannot verify.</p>
+<p class="tcap" data-t="ifc-imp">Results import, template <code>results v3</code> (file name <code>results-{offering}.csv</code>)</p>
+<script type="text/tbl" data-h="Column|Type|Content and rule" data-w="22%|16%|62%" data-cls="small">
+<code>learner_id</code> | string | Must match a participant enrolled in the offering. Required
+<code>enrolment_id</code> | string | Must match the enrolment of that learner. Required
+<code>offering</code> | string | Must equal the offering chosen on the screen
+<code>progress_percent</code> | integer | 0 to 100
+<code>modules_completed</code> | integer | 0 up to the number of modules of the version
+<code>{csv_key}</code> (one column for each assessment component, for example <code>module1_mark</code>, <code>module2_mark</code>, <code>project_mark</code>) | decimal | A score from 0 to the component's <code>max_mark</code>, with a decimal point and at most two decimals. Required and not empty. The set of columns is fixed by the version's <code>assessment_components.csv_key</code> and published with the template version
+</script>
+<p class="tcap" data-t="ifc-impbadge">Badge import, template <code>badges v3</code> (file name <code>badges-{offering}.csv</code>)</p>
+<script type="text/tbl" data-h="Column|Type|Content and rule" data-w="22%|16%|62%" data-cls="small">
+<code>learner_id</code> | string | Must match an enrolled participant. Required
+<code>enrolment_id</code> | string | Must match. Required
+<code>module_no</code> | integer | The module sequence number within the version
+<code>badge_id</code> | string | The UCreds badge identifier. Required
+<code>badge_url</code> | URL | HTTPS link to the badge
+<code>badge_date</code> | date | ISO 8601
+</script>
+<p>A badge row is matched to the verified module achievement of that learner and stored in <code>digital_badges</code> (EV-27 BadgeImported). A badge without a verified achievement is flagged on the import report and not accepted ({{fr-lpbadge}}).</p>
+<p class="tcap" data-t="ifc-rules">Validation rules and staging</p>
+<script type="text/tbl" data-h="Level|Rule|Result" data-w="12%|58%|30%" data-cls="small">
+File | Extension <code>.csv</code>, size within the upload limit (SR-09), scanned for malware (AD-14), valid UTF-8, one header row, comma delimiter
+File | The header set equals exactly one accepted template version, and the version is the one chosen on the screen. A missing column is named, for example "column module3_mark is missing, this file uses template v2, v3 is required"
+File | The offering exists and is Running or Ended
+File | Any file-level error above | The whole file is rejected. No row is staged. The report says why ({{fr-lpvalidate}})
+Row | <code>learner_id</code> and <code>enrolment_id</code> match an enrolment of the offering. Otherwise "unknown matric number"
+Row | Every mark column is present and numeric, within range, with at most two decimals. Otherwise "project_mark is empty" or "score out of range"
+Row | Dates are ISO 8601 ({{ir-dates}})
+Row | The learner appears once in the file. A second row is rejected as a duplicate
+Row | A row for a result that is already Verified is rejected with the reason "already verified". Correction goes through {{fr-aschange}}
+Row error | A row with an error is listed in a downloadable report (DOC-14) with the row number, the learner and the reason. The report does not show marks
+Staging | Valid rows are written to <code>assessment_results</code> with status Provisional, with the <code>import_file_id</code>. Rejected rows are stored in <code>import_row_errors</code> with the reason only ({{fr-lpstaged}})
+Same file twice | The SHA-256 of the file is compared with earlier imports of the offering. If equal, the screen warns and staging again replaces the Provisional rows of the earlier import, with no duplicates ({{ir-idempotent}})
+Size and time | 5,000 rows validated and staged within 2 minutes ({{nfr-import}}). Validation is JB-02 (<code>ImportResultsJob</code>) on the <code>imports</code> queue. It reads the file in a stream, in chunks
+Notice | The lecturer is told which marks are missing. The deputy dean is told that results are staged. Each import writes an audit row and an <code>import_files</code> row ({{fr-lplog}}), and raises EV-25 (ResultsStaged) or EV-26 (ImportRejected)
+</script>
+
+<h3>6.2.4 Payment Service (Stub)</h3>
+<p>The <code>PaymentGateway</code> interface has two methods: <code>createPayment(PaymentRequest)</code> and <code>getStatus(string $providerRef)</code>. The Release 1 implementation is a dummy service inside the application, selected by configuration, with a Live class added later (R3, {{fr-regpay}}).</p>
+<p class="tcap" data-t="ifc-pay">Payment request, result and callback</p>
+<script type="text/tbl" data-h="Item|Content" data-w="22%|78%" data-cls="small">
+Request | JSON: <code>idempotency_key</code> (the enrolment reference plus the attempt number), <code>amount</code> (decimal string), <code>currency</code> (<code>MYR</code>), <code>enrolment_ref</code>, <code>description</code>, <code>payer_name</code>, <code>return_url</code>, <code>callback_url</code>. No identity number is sent
+Response | JSON: <code>provider_ref</code>, <code>status</code> (<code>pending</code>, <code>paid</code>, <code>failed</code>), <code>redirect_url</code> when the participant must pay on the provider's page, <code>failure_reason</code> when failed
+Callback | The provider calls <code>POST /integrations/payment/callback</code> with the JSON result and an HMAC-SHA256 signature header over the body. MCMS checks the signature with a shared secret from configuration, then updates the <code>payments</code> row and the enrolment
+Idempotency | <code>payments.idempotency_key</code> is unique. A repeated <code>createPayment</code> with the same key returns the stored result. A repeated callback for a finished payment changes nothing ({{ir-idempotent}})
+Failure | A failed result leaves the enrolment at Pending payment and shows the reason with a retry button. A retry makes a new attempt with attempt number plus one and a new key. No receipt is issued for a failed payment
+Timeout or no answer | The call is marked failed with a retry. A reconciliation job calls <code>getStatus</code> for payments that stay pending and for calls that gave no answer, so a payment made at the provider is never lost
+Receipt | When the status is <code>paid</code>, the enrolment moves to Enrolled in the same transaction and the receipt document (DOC-01) becomes available ({{fr-regack}})
+Stub behaviour | The stub returns <code>paid</code> or <code>failed</code> by a rule on the amount or the payer name, so that tests can force each path. It is disabled in production (AD-18)
+</script>
+
+<h3>6.2.5 Email (SMTP)</h3>
+<p>The <code>MailTransport</code> interface is implemented with Laravel Mail over the UTeM SMTP relay, with TLS ({{ir-smtp}}, AD-15). Mail is sent from a monitored UTeM address set in configuration.</p>
+<ul>
+  <li><b>Outbox.</b> A notification is first inserted into <code>notifications</code> (the user sees it in the bell at once). JB-05 (<code>SendNotificationJob</code>) on the <code>notifications</code> queue then sends the email. The send is idempotent per notification: a notification with <code>email_status</code> Sent is never sent again.</li>
+  <li><b>Content.</b> The subject and body come from the published template version in the recipient's language ({{fr-ntlang}}). A message names the record and links to the page. It carries no marks, identity number or credential payload.</li>
+  <li><b>Mandatory notices</b> (decisions on the user's records, credential actions, consent requests, enrolment changes) are always sent. Other notices follow preferences, and lecturers and deputy deans may choose a daily digest ({{fr-ntprefs}}, {{fr-ntdigest}}).</li>
+  <li><b>Failure.</b> A transient SMTP error (for example 4xx) sets the call to retry with increasing delay. A permanent error (5xx) or a bounce marks the notification Failed and lists it for the system administrator. The notification stays visible in the bell. Failures do not roll back the business action ({{nfr-adapterfail}}).</li>
+  <li><b>Test mailbox.</b> Outside production the transport writes mail to the test mailbox (CODL-09), not to the relay.</li>
+</ul>
+
+<h3>6.2.6 ABC Deposit Export</h3>
+<p>The deputy dean prepares a batch of ACR that have consent and have been confirmed ({{fr-dpqueue}}). The export is a CSV file and a PDF document (DOC-10), for staff to send to ABC by an approved channel ({{ir-files}}). The format is not yet agreed with ABC (OI-11); the columns below follow the ACR fields of Appendix F3 and are the proposed format ({{fr-dpexport}}). JB-13 (<code>ExportAbcDepositJob</code>) builds the file. The batch can be exported again; the file for a given batch and format version has the same content.</p>
+<p class="tcap" data-t="ifc-abc">ABC deposit export, proposed format <code>abc v1</code> (file name <code>{batch}.csv</code>)</p>
+<script type="text/tbl" data-h="Column|Source|Note" data-w="22%|34%|44%" data-cls="small">
+<code>acr_reference</code> | <code>acrs.reference</code> | For example MCMS-A-2026-000102
+<code>created_on</code> | <code>acrs.created_at</code> | ISO 8601 date
+<code>learner_id</code> | <code>users.institution_id</code> | Participant identity. Names, identity card numbers, emails and marks are not in the file
+<code>issuer</code> | UTeM and the PTj | Provider of the credential
+<code>credential_name</code> | <code>mc_versions.name_en</code> and code | Course or credential name
+<code>learning_outcomes</code> | <code>learning_outcomes.text_en</code> | Joined with a semicolon
+<code>credits</code> | <code>acrs.credits</code> | Verified credit only, decimal
+<code>mqf_level</code> | <code>acrs.mqf_level</code> | Integer 1 to 8
+<code>completion_date</code> | <code>acrs.completion_date</code> | ISO 8601
+<code>assessment_basis</code> | <code>acrs.assessment_basis</code> | Text
+<code>verified_by</code>, <code>verified_on</code> | <code>acrs.confirmed_by</code>, <code>acrs.confirmed_at</code> | Verification metadata
+<code>consent_date</code> | <code>consents.decided_at</code> | Only rows with consent Given are exported
+</script>
+<p>The prototype export has seven columns (reference, learner ID, micro-credential, credits, MQF level, completion date and consent date). The extra columns above come from {{fr-acrprep}} and are to be reduced or renamed when OI-11 is closed. The format version is stored in <code>abc_batches.format_version</code>.</p>
+<ul>
+  <li><b>Direction in.</b> ABC returns the ABC reference by a channel outside MCMS. The deputy dean records, for each ACR, the deposit date, the ABC reference, the credits and the outcome (Successful, In process, Correction needed) ({{fr-dprecord}}). A reference range for a batch (for example 4391 to 4419) is entered once and expanded by the application.</li>
+  <li><b>Idempotency.</b> One ACR has at most one deposit row (unique <code>acr_id</code>). Recording the same ACR again is refused and shows the earlier record ({{ir-idempotent}}).</li>
+  <li><b>Errors.</b> An ACR whose consent is missing, declined or withdrawn is excluded, and the screen says which. A batch that is empty cannot be exported.</li>
+  <li><b>Later status.</b> For every credit status change that must also be made in ABC, the user records whether it was done, with date and reference ({{fr-rdabcsync}}).</li>
+</ul>
+
+<h3>6.2.7 QVC and MQA Submission Package</h3>
+<p>For a SAMC, staff generate the submission package from the QV record (DD-14, LEC-16, {{fr-qvpackage}}). JB-14 (<code>BuildQvPackageJob</code>) on the <code>reports</code> queue builds a zip file, stores it in object storage and links it to the QV record (design: <code>qv_submissions.package_file_id</code>; Release 1 prototype: a package page with an evidence index, and the submission recorded on <code>qv_records</code>, Section 12). The package is for staff to submit to QVC and MQA by an approved channel. Staff then record the submission date, the QVC or MQA reference and the person who submitted in <code>qv_submissions</code> ({{fr-qvsubmit}}). The decision is recorded by hand ({{fr-qvresult}}).</p>
+<p class="tcap" data-t="ifc-qvzip">Contents of the QV submission package</p>
+<script type="text/tbl" data-h="File in the zip|Content" data-w="38%|62%" data-cls="small">
+<code>00-cover-and-declaration.pdf</code> | The QV submission package document (DOC-11): cover, declaration, signatory
+<code>01-evidence-index.pdf</code> and <code>.csv</code> | The checklist items, what evidence answers each, file names and SHA-256 hashes
+<code>02-summary.pdf</code> | Summary of the micro-credential: category, version, credit, MQF level proposed, learning outcomes, assessment
+<code>03-cohort-results.csv</code> | Aggregate results of completed cohorts: counts, pass rate, mark distribution. No names or identity numbers
+<code>04-quality-reviews.pdf</code> | CQI records of the cohorts, with actions and their effectiveness
+<code>evidence/</code> | The accepted evidence files, in folders by checklist item
+<code>manifest.json</code> | Package version, QV record reference, generation time, and the SHA-256 of every file
+</script>
+<p>The package is generated again on request and each generation is stored as a new file; the one recorded as submitted is kept. A package cannot be generated while required checklist items are not accepted ({{fr-qvreadiness}}). A file that fails the malware scan is excluded and listed on the screen. The package is generated by a job, so a long build does not hold a web request ({{nfr-queue}}).</p>
+
+<h3>6.2.8 Public Verification Page and JSON API</h3>
+<p>Anyone can check a credential without signing in ({{fr-vfpage}}). The page is reached by the code, a link or a QR code that opens the link ({{ir-qrscan}}). The same data is served as JSON for other systems ({{ir-api}}). Responses follow {{nfr-verify}}: 95 percent within one second.</p>
+<p class="tcap" data-t="ifc-verify">Verification endpoints</p>
+<script type="text/tbl" data-h="Endpoint|Method|Returns" data-w="34%|10%|56%" data-cls="small">
+<code>/verify</code> | GET | The HTML form to enter a code (PUB-07)
+<code>/verify/{code}</code> | GET | The HTML result page (PUB-08). With the header <code>Accept: application/json</code> it returns the JSON below
+<code>/api/v1/verify/{code}</code> | GET | The JSON result. Read-only, no authentication, rate limited
+<code>/issuer</code> | GET | The issuer profile (name, URL) as JSON-LD, linked from every credential
+<code>/issuer/keys/{key_id}</code> | GET | The public verification key as a Multikey document, so a credential can be checked without calling MCMS ({{ir-obv3}}, {{sr-keys}})
+</script>
+<p>Rules for the response:</p>
+<ul>
+  <li><b>Fields.</b> Only the holder's name, the credential name, the issuer, the issue date and the status (<code>valid</code>, <code>corrected</code>, <code>replaced</code>, <code>revoked</code>), plus any field listed in the setting <code>verification.public_fields</code> ({{fr-vffields}}). No identity card or passport number, matric number, email address or result is ever returned.</li>
+  <li><b>Lookup.</b> The code is normalised (Section 5.5) and looked up by the unique <code>public_code</code>. A revoked credential still answers with status <code>revoked</code>. A credential that was corrected or replaced answers with that status and no link to the new credential.</li>
+  <li><b>Not found.</b> An unknown or malformed code returns HTTP 404 with the same neutral body in every case: no hint whether a similar code exists ({{fr-vfnotfound}}). The code in the URL is never echoed in the body.</li>
+  <li><b>Rate limit.</b> Verification and catalogue routes are limited by network address with Laravel's rate limiter ({{sr-ratelimit}}). A stricter limit applies to not-found answers, which are the signature of code guessing. Above the limit the response is HTTP 429 with a <code>Retry-After</code> header. The limits are configuration values (a DA is proposed in the report).</li>
+  <li><b>Logging.</b> Each request writes a <code>verification_logs</code> row with the time, the credential (when found), the outcome and the network address. A not-found request stores a hash of the code, not the code ({{fr-vflog}}).</li>
+  <li><b>Headers.</b> <code>Cache-Control: no-store</code> so a revocation is visible at once. The page has no cookies and no scripts from other sites.</li>
+  <li><b>File check.</b> A verifier may upload a Digital Credential file. The page checks its signature against the published key and compares it with the stored payload hash ({{fr-vfsignature}}). The file is not stored.</li>
+</ul>
+<pre class="code">GET /api/v1/verify/3HXP92LDKQ        200 OK
+{
+  "status": "valid",
+  "holder_name": "Amir Hakimi",
+  "credential": "Data Structures",
+  "issuer": "Universiti Teknikal Malaysia Melaka",
+  "issued_on": "2026-03-03"
+}
+
+GET /api/v1/verify/ZZZZZZZZZZ        404 Not Found
+{
+  "status": "not_found",
+  "message": "No credential matches this code."
+}</pre>
+
+<h3>6.2.9 Open Badges 3.0 Credential</h3>
+<p>A certificate is issued with a Digital Credential: a JSON-LD document that follows the Open Badges 3.0 and W3C Verifiable Credentials data models and is signed with Ed25519 using a Data Integrity proof of cryptosuite <code>eddsa-rdfc-2022</code> (AD-09, {{fr-crformat}}). The document is built on the <code>credentials</code> queue by JB-22 (<code>IssueCredentialJob</code>, started by JB-01 after EV-31 CompletionConfirmed), signed by the <code>SigningKeyStore</code>, and stored in <code>credentials.signed_payload</code>. A module badge is a separate object in <code>digital_badges</code> and is imported from UCreds or issued by MCMS (EV-29, EV-33). The application never holds the private key: it sends the canonical hash to the key store and receives the signature ({{sr-keys}}). Blockchain is not used. The example is shortened; the host name is a placeholder.</p>
+<pre class="code">{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://purl.imsglobal.org/spec/ob/v3p0/context-3.0.3.json"
+  ],
+  "id": "https://mcms.example.my/verify/3HXP92LDKQ",
+  "type": ["VerifiableCredential", "OpenBadgeCredential"],
+  "issuer": {
+    "id": "https://mcms.example.my/issuer",
+    "type": ["Profile"],
+    "name": "Universiti Teknikal Malaysia Melaka"
+  },
+  "validFrom": "2026-03-03T02:00:00Z",
+  "name": "Data Structures",
+  "credentialSubject": {
+    "type": ["AchievementSubject"],
+    "identifier": [{
+      "type": "IdentityObject",
+      "identityType": "name",
+      "hashed": false,
+      "identityHash": "Amir Hakimi"
+    }],
+    "achievement": {
+      "id": "https://mcms.example.my/achievements/DS-v2",
+      "type": ["Achievement"],
+      "achievementType": "MicroCredential",
+      "name": "Data Structures",
+      "description": "Unbundled Micro-Credential (UMC) from BITS 1123",
+      "creditsAvailable": 3,
+      "criteria": { "narrative": "Completed all modules and passed assessment." }
+    }
+  },
+  "proof": {
+    "type": "DataIntegrityProof",
+    "cryptosuite": "eddsa-rdfc-2022",
+    "created": "2026-03-03T02:00:05Z",
+    "verificationMethod": "https://mcms.example.my/issuer/keys/2026-1",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "z3FXQ... (base58 signature)"
+  }
+}</pre>
+<ul>
+  <li><b>Content.</b> The credential carries the verified credit only when it is verified and valid. A SAMC adds the QV claim (QV status, MQF level) with the QV record reference ({{dr-derived}}). Names and descriptions are given in both languages by language maps in the stored version.</li>
+  <li><b>Identity.</b> The document contains the holder's name as in the official record. It contains no identity card number, matric number or email address.</li>
+  <li><b>Key id.</b> The <code>verificationMethod</code> names the key. A new key can be used for later credentials, and old keys stay published so earlier credentials still verify ({{sr-keys}}).</li>
+  <li><b>Download.</b> The holder downloads the signed JSON and a PDF rendering (DOC-04) ({{fr-crwallet}}).</li>
+</ul>
+
+<h3>6.2.10 Printable Documents</h3>
+<p>Every printable document is a Blade A4 template with a print bar, rendered to PDF by headless Chromium (Spatie Browsershot) by JB-04 (<code>RenderPdfJob</code>) on the <code>reports</code> queue, except the certificate and Digital Credential, which are issued by JB-01 and JB-22 on the <code>credentials</code> queue (AD-10, {{ir-print}}). Templates are bilingual and versioned in <code>templates</code> and <code>template_versions</code> ({{fr-templates}}). The template version used is stored with the generated file. Certificates and Digital Credentials are rendered again from the stored signed payload, never from live data, so a reprint always matches what was issued.</p>
+<p class="tcap" data-t="ifc-docs">Documents, template keys and outputs</p>
+<script type="text/tbl" data-h="ID|Document|Template key|Output|Source of data" data-w="8%|26%|24%|12%|30%" data-cls="small">
+DOC-01 | Payment receipt | <code>doc.receipt</code> | PDF | <code>payments</code>, <code>enrolments</code>
+DOC-02 | Enrolment confirmation | <code>doc.enrolment</code> | PDF | <code>enrolments</code>, <code>offerings</code>
+DOC-03 | Certificate | <code>doc.certificate</code> | PDF | <code>credentials</code> (signed payload)
+DOC-04 | Digital credential | <code>doc.credential</code> | JSON, PDF | <code>credentials</code> (signed payload)
+DOC-05 | Achievement record | <code>doc.record</code> | PDF | <code>achievement_records</code>, <code>module_achievements</code>, <code>digital_badges</code>
+DOC-06 | Academic Credit Record | <code>doc.acr</code> | PDF | <code>acrs</code>, <code>abc_deposits</code>
+DOC-07 | Proposal print | <code>doc.proposal</code> | PDF | <code>mc_versions</code> and children
+DOC-08 | Senate decision pack | <code>doc.pack</code> | PDF | <code>mc_versions</code>, <code>reviews</code>, <code>approval_decisions</code>
+DOC-09 | Report (ten kinds) | <code>doc.report</code> | PDF, CSV | Report queries (Section 4, MD-15)
+DOC-10 | ABC deposit export | <code>doc.abc</code> | PDF, CSV | <code>abc_batches</code>, <code>acrs</code>
+DOC-11 | QV submission package | <code>doc.qvpack</code> | PDF, zip | <code>qv_records</code>, <code>qv_evidence</code>
+DOC-12 | Credit transfer decision letter | <code>doc.transfer</code> | PDF | <code>transfer_applications</code>, <code>transfer_lines</code>
+DOC-13 | Suspension notice | <code>doc.suspend</code> | PDF | <code>suspensions</code>
+DOC-14 | Import validation report | <code>doc.import</code> | PDF, CSV | <code>import_files</code>, <code>import_row_errors</code>
+DOC-15 | UCreds enrolment export | <code>doc.export</code> | PDF, CSV | <code>export_files</code>, <code>enrolments</code>
+DOC-16 | Audit trail export | <code>doc.audit</code> | PDF, CSV | <code>audit_events</code> (with integrity line)
+DOC-17 | Documents and PDFs | none (index page) | HTML | List of the above
+</script>
+<p>Each page has a header with the UTeM name, the document title, the reference and the date, and a footer with the reference, the page number, the generation time and "Generated by MCMS". Participant documents are bilingual, with BM beneath EN. Documents that leave UTeM show no identity number, email or marks. A PDF is generated by a job and the user is notified when it is ready; small documents are returned directly.</p>
+
+<h2>6.3 Internal Event Catalogue</h2>
+<p>Modules communicate by domain events as well as by service interfaces (AD-01). An event is a PHP class named in the past tense. It is dispatched after the database transaction that caused it commits (<code>afterCommit</code>), and its listeners that do slow work run on a queue. The numbering EV-01 to EV-63 is owned by Section 4 and is reused here without change; {{tab:ifc-events}} repeats the catalogue of Section 4.19.1 so that Section 6 can be read alone. Jobs (JB-01 to JB-22) are listed in Section 4.19.2 and are named in the interface descriptions above.</p>
+<p class="tcap" data-t="ifc-events">Domain event catalogue (EV numbers from Section 4)</p>
+<script type="text/tbl" data-h="ID|Event|Published by|Consumed by|Effect" data-w="7%|18%|9%|18%|48%" data-cls="small">
+EV-01 | <code>RoleAssigned</code> | MD-01 | MD-15, MD-16 | Audit entry. User is notified of the role and scope.
+EV-02 | <code>RoleRevoked</code> | MD-01 | MD-15, MD-16 | Audit entry. Open tasks of the user are listed for reassignment.
+EV-03 | <code>ConflictDeclared</code> | MD-01 | MD-03, MD-16 | The reviewer is removed from the review task. The person who assigned the reviewer is notified.
+EV-04 | <code>ReferenceDataChanged</code> | MD-01 | MD-02, MD-13 | Linked UMC versions and pathway mappings are flagged for review when a parent or target course changes.
+EV-05 | <code>SettingChanged</code> | MD-00 | MD-15 | New setting version stored and audited. Later decisions use the version in force on their date.
+EV-06 | <code>ProposalSubmitted</code> | MD-02 | MD-03, MD-16 | Version locked. Endorsement task created for P2, who is notified.
+EV-07 | <code>MaterialChangeRecorded</code> | MD-02 | MD-03, MD-04, MD-10 | New version in Draft goes through approval. Open offerings of the old version are held. A Quality-Verified SAMC gets a re-verification task.
+EV-08 | <code>MinorChangeLogged</code> | MD-02 | MD-03, MD-14 | P2 gets an acknowledgement task. The change is added to CQI.
+EV-09 | <code>ReviewerAssigned</code> | MD-03 | MD-16 | Each reviewer is notified with the due date.
+EV-10 | <code>ReviewRecorded</code> | MD-03 | MD-16 | P2 is notified. The review summary is rebuilt.
+EV-11 | <code>ProposalReturned</code> | MD-03 | MD-02, MD-16 | Version returns to Returned for amendment and unlocks. P1 is notified.
+EV-12 | <code>ProposalEndorsed</code> | MD-03 | MD-16 | Category verified. The version moves to Pending approval when sent to Senate.
+EV-13 | <code>ProposalNotSupported</code> | MD-03 | MD-02, MD-16 | Version ends as Not approved. P1 is notified.
+EV-14 | <code>SenateDecisionRecorded</code> | MD-03 | MD-02, MD-04, MD-12, MD-13, MD-16 | Version becomes Approved, Not approved or Returned for amendment. An approved version becomes selectable for offerings. An approved material change flags earlier equivalences.
+EV-15 | <code>VersionSuperseded</code> | MD-02 | MD-16 | Earlier Approved version becomes Superseded. Enrolled participants are notified with the transition rule.
+EV-16 | <code>TransitionRuleRecorded</code> | MD-03 | MD-05, MD-16 | Enrolments are bound to the version by the rule. Participants are notified (mandatory).
+EV-17 | <code>ReadinessConfirmed</code> | MD-04 | MD-16 | Offering becomes Ready. Conditions are shown to P1.
+EV-18 | <code>OfferingOpened</code> | MD-04 | MD-16 | Offering is listed in the public catalogue and registration opens.
+EV-19 | <code>OfferingHeld</code> | MD-04 | MD-16 | Offering is held or cancelled. Registered participants are notified.
+EV-20 | <code>StudentRegistered</code> | MD-05 | MD-16 | Participant is notified. Payment is requested when a fee applies.
+EV-21 | <code>PaymentConfirmed</code> | MD-05 | MD-05, MD-16 | Pending payment becomes Enrolled. Receipt is rendered.
+EV-22 | <code>EnrolmentConfirmed</code> | MD-05 | MD-07, MD-08, MD-10, MD-16 | Achievement record and result rows are created. Confirmation with access instructions is sent.
+EV-23 | <code>EnrolmentWithdrawn</code> | MD-05 | MD-08, MD-16 | Record is closed as withdrawn. No credential is issued.
+EV-24 | <code>ImportExportLogged</code> | MD-06 | MD-15 | Export file, hash and count are logged.
+EV-25 | <code>ResultsStaged</code> | MD-06 | MD-07, MD-16 | Valid rows become Provisional results. A verification task is created for P2.
+EV-26 | <code>ImportRejected</code> | MD-06 | MD-16 | P5 is notified with the row error report. Nothing is staged for a file-level error.
+EV-27 | <code>BadgeImported</code> | MD-06 | MD-09 | Badge is matched to a verified achievement or flagged.
+EV-28 | <code>IntegrityCaseOpened</code> | MD-07 | MD-16 | Affected results become Held. P2 is notified.
+EV-29 | <code>ResultsVerified</code> | MD-07 | MD-08, MD-09, MD-16 | Achievements and module status are created. A badge is issued for a verified module if the design includes badges. Participants are notified.
+EV-30 | <code>ResultChangeApproved</code> | MD-07 | MD-08, MD-09, MD-16 | A new result revision applies. If a credential exists, a correction task is created for P2.
+EV-31 | <code>CompletionConfirmed</code> | MD-08 | MD-05, MD-09, MD-10, MD-14, MD-16 | Enrolment becomes Completed. JB-01 issues the certificate and Digital Credential after the pre-issuance checks.
+EV-32 | <code>CredentialIssued</code> | MD-09 | MD-08, MD-11, MD-16 | Credential is added to the Achievement Record. MD-11 prepares an ACR for an eligible UMC or QV-valid SAMC, never for an MCE. Participant is notified.
+EV-33 | <code>BadgeIssued</code> | MD-09 | MD-08 | Badge is added to the Achievement Record. It carries no credit wording.
+EV-34 | <code>IssuanceFailed</code> | MD-09 | MD-16 | P2 is told which participants failed and which check failed.
+EV-35 | <code>CredentialCorrected</code> | MD-09 | MD-16 | New revision is current. Participant is notified (mandatory).
+EV-36 | <code>CredentialReplaced</code> | MD-09 | MD-16 | Old credential shows the new ID. Participant is notified (mandatory).
+EV-37 | <code>CredentialRevoked</code> | MD-09 | MD-16 | Credential shows Revoked on verification. Participant is notified (mandatory).
+EV-38 | <code>QvSubmitted</code> | MD-10 | MD-16 | Status becomes Submitted. P1 and P2 are notified.
+EV-39 | <code>QvVerified</code> | MD-10 | MD-04, MD-11, MD-16 | QV record becomes the source for QV, credit and MQF wording. SAMC becomes ACR-eligible.
+EV-40 | <code>QvNotVerified</code> | MD-10 | MD-16 | Record returns to Preparing. Findings are listed to P1.
+EV-41 | <code>QvReverificationRequired</code> | MD-10 | MD-16 | Re-verification flag set after a material change.
+EV-42 | <code>QvLapsed</code> | MD-10 | MD-04, MD-09, MD-11, MD-14, MD-16 | Catalogue and new credentials drop QV wording. No new ACR for the SAMC. A task is created for the PTj.
+EV-43 | <code>AcrPrepared</code> | MD-11 | MD-16 | P2 is notified to confirm.
+EV-44 | <code>AcrConfirmed</code> | MD-11 | MD-16 | Participant gets the consent request.
+EV-45 | <code>ConsentGiven</code> | MD-11 | MD-11, MD-16 | ACR enters the deposit queue.
+EV-46 | <code>ConsentDeclined</code> | MD-11 | MD-16 | ACR stays unqueued. Participant can consent later.
+EV-47 | <code>DepositRecorded</code> | MD-11 | MD-15, MD-16 | Ledger credit becomes Available with expiry at deposit date plus 10 years. Participant is notified that a deposit is not a transfer.
+EV-48 | <code>CreditExpired</code> | MD-11 | MD-12, MD-16 | Credit becomes Expired. An affected application is flagged for re-evaluation.
+EV-49 | <code>CreditRedeemed</code> | MD-11 | MD-15, MD-16 | Credit becomes Redeemed and is final.
+EV-50 | <code>CreditReleased</code> | MD-11 | MD-16 | Credit returns to Available, or becomes Expired if validity ended.
+EV-51 | <code>TransferApplied</code> | MD-12 | MD-16 | Application is under evaluation. Evaluator is notified.
+EV-52 | <code>TransferDecided</code> | MD-12 | MD-11, MD-16 | An approved outcome sets the credit Provisionally redeemed. Not approved changes nothing in ACR, credentials or credit.
+EV-53 | <code>AdmissionRecorded</code> | MD-12 | MD-13 | Admission fact is available to the stackable plan.
+EV-54 | <code>PathwayPublished</code> | MD-13 | MD-16 | Mapping is shown on the public pathway page.
+EV-55 | <code>PathwayFlaggedForReview</code> | MD-13 | MD-16 | P1 and P2 are notified of a changed target curriculum.
+EV-56 | <code>StackablePlanDecided</code> | MD-13 | MD-16 | Plan status is updated. Participant is notified.
+EV-57 | <code>CqiRecordConfirmed</code> | MD-14 | MD-15 | CQI record is confirmed and audited.
+EV-58 | <code>PeriodicReviewDue</code> | MD-14 | MD-16 | Lecturer and PTj are reminded.
+EV-59 | <code>SuspensionDecided</code> | MD-14 | MD-02, MD-03, MD-04, MD-05, MD-16 | Version becomes Suspended or Terminated. Offerings are held. Affected participants are notified (mandatory). Credentials and ACR are untouched.
+EV-60 | <code>CorrectionRecorded</code> | MD-15 | MD-09, MD-11, MD-16 | The target module applies the revision. The participant is notified when a credential, ACR, deposit or credit is affected.
+EV-61 | <code>DisposalApproved</code> | MD-15 | MD-15 | Disposal record is written and rows are removed only after the approved disposal process.
+EV-62 | <code>NotificationFailed</code> | MD-16 | MD-15 | Failure is logged after the last retry.
+EV-63 | <code>AdapterCallFailed</code> | MD-16 | MD-16 | P5 is notified. The failed call appears in the failed-call queue.
+</script>
+<p>Rules for events: an event holds record identifiers and a few facts, not whole records. A listener must be safe to run twice (the same event delivered again does nothing new). A listener never changes a table of another module; it calls that module's service. Timed alerts (QV expiry at 180, 90 and 30 days, credit expiry at 365 and 90 days, an overdue decision after 14 days) are not events. They come from the scheduler and are made idempotent by <code>alert_log</code> (Section 5).</p>

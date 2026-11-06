@@ -1,0 +1,57 @@
+<!-- ===================== COVER ===================== -->
+<section class="cover">
+  <p class="doc-title">UCreds Public Portal Audit & Complete Course Directory</p>
+  <p class="doc-sub">Comprehensive Platform Architecture, Pedagogical Taxonomy, Student Support Services, and MCMS Integration</p>
+  <h3>Document Control</h3>
+  <table>
+    <thead><tr><th colspan="2">Document Information</th></tr></thead>
+    <tbody>
+      <tr><td>Title</td><td>Comprehensive Audit, Pedagogical Taxonomy, and Course Directory of the UCreds Public Portal</td></tr>
+      <tr><td>Date</td><td>27 October 2026</td></tr>
+      <tr><td>Status</td><td>Official Technical & Academic Audit Report</td></tr>
+      <tr><td>Version</td><td>1.0</td></tr>
+      <tr><td>Target Portal</td><td>https://ucreds.utem.edu.my/ (Centre for Open and Distance Learning - CODL, UTeM)</td></tr>
+      <tr><td>Prepared for</td><td>Centre for Open and Distance Learning (CODL) & Senate Micro-Credential Committee, Universiti Teknikal Malaysia Melaka</td></tr>
+      <tr><td>Prepared by</td><td>Aliff, Intern</td></tr>
+      <tr><td>Reference</td><td>UCREDS_AUDIT_V1.0_Oct_2026</td></tr>
+      <tr><td>Document Set</td><td>Aligned with UTeM MCMS SRS v1.0, PRD v1.0, SDD v1.0, and Garis Panduan Micro-Credential UTeM</td></tr>
+    </tbody>
+  </table>
+  <div class="disclaimer">
+    <b>Disclaimer:</b>
+    This audit document is prepared as a rigorous, systematic technical and curriculum assessment of the public-facing assets of UCreds (https://ucreds.utem.edu.my/). The audit was executed entirely against publicly accessible interfaces and institutional documentation without bypassing authentication barriers or accessing restricted learner data. Pedagogical rules, credit transfer principles, and stackable pathways cited herein are referenced from the official <i>Garis Panduan Micro-Credential Universiti Teknikal Malaysia Melaka</i> (2025/2026) and Malaysian Qualifications Agency (MQA) guidelines.
+  </div>
+</section>
+
+<!-- ===================== TABLE OF CONTENTS ===================== -->
+<section class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <div id="toc"></div>
+  <span class="tocend">TOCENDMARKER</span>
+</section>
+
+<main>
+<!-- ===================== SECTION 1 ===================== -->
+<h1>1. Executive Summary & Audit Scope</h1>
+
+<h2>1.1 Executive Summary</h2>
+<p>The Centre for Open and Distance Learning (CODL) at Universiti Teknikal Malaysia Melaka (UTeM) operates <b>UCreds</b> (<code>https://ucreds.utem.edu.my/</code>), the university's flagship digital learning and micro-credential delivery platform. Designed to advance flexible, lifelong, and industry-relevant education, UCreds bridges the gap between modular upskilling and fully accredited academic awards.</p>
+<p>This audit delivers an exhaustive, multi-dimensional assessment of the entire public reach of UCreds. Over the course of the investigation, 100% of the public catalog was explored, resulting in a verified registry of <b>60 curated public offerings</b> (spanning 3 fully accredited ODL Master degree programmes, 2 structured learning paths, and 55 specialised micro-courses) alongside an underlying Moodle repository comprising <b>214 academic modules</b>. In addition, the student support knowledge base (hosting 36 comprehensive policy and guidance articles) was thoroughly catalogued and synthesized.</p>
+
+<h2>1.2 Audit Objectives</h2>
+<p>The primary objectives of this technical and academic audit are as follows:</p>
+<ul>
+  <li><b>Exhaustive Inventory:</b> Identify, catalog, and classify every course, micro-credential, learning path, and academic degree offered on the public UCreds portal, including prices, prerequisites, durations, and learning outcomes.</li>
+  <li><b>Platform & Infrastructure Analysis:</b> Document the underlying software architecture, Learning Management System (LMS) engine, theme customisations, identity federation (Single Sign-On), and network security perimeter.</li>
+  <li><b>Pedagogical & Regulatory Alignment:</b> Evaluate how UCreds implements the Malaysian Qualifications Agency (MQA) micro-credential framework, the <i>Single Redemption Principle</i>, and the <i>Stackable Degree Pathway</i> as mandated by the <i>Garis Panduan Micro-Credential UTeM</i>.</li>
+  <li><b>Support & Governance Review:</b> Map the student onboarding ecosystem, eCounseling services, academic regulations, digital library facilities, and helpdesk operations.</li>
+  <li><b>MCMS Integration Blueprint:</b> Formulate concrete integration specifications to bind UCreds seamlessly with the upcoming Micro-Credential Management System (MCMS) across course offering synchronization, batch grade transfers, and Academic Credit Record (ACR) deposits.</li>
+</ul>
+
+<h2>1.3 Scope and Methodology</h2>
+<p>The investigation utilized an automated, high-precision inspection pipeline combining headless browser automation (Playwright Core over Microsoft Edge), REST API introspection, DOM structure parsing, and network traffic interception. All data was cross-referenced across three distinct architectural layers:</p>
+<ol>
+  <li><b>The Public Dynamic Catalog:</b> Interrogated via the asynchronous catalog endpoint (<code>/catalog/action.php</code>) across all category filters and pagination matrices.</li>
+  <li><b>The Course Overview Subsystem:</b> Crawled across all individual course profile endpoints (<code>/courses/overview.php?id={id}</code>) to extract syllabi, instructors, and learning outcomes.</li>
+  <li><b>The Integrated Knowledge Base:</b> Queried via the WordPress REST API (<code>/support/student/wp-json/wp/v2/docs</code>) to extract all orientation handbooks, mental wellness procedures, and IT governance rules.</li>
+</ol>

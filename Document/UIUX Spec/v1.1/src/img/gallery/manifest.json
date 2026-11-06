@@ -1,0 +1,3412 @@
+[
+ {
+  "kind": "screen",
+  "id": "CMN-01",
+  "title": "Personas",
+  "route": "#/",
+  "file": "cmn-01.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CMN-02",
+  "title": "Sign in",
+  "route": "#/signin",
+  "file": "cmn-02.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CMN-03",
+  "title": "Verify it is you",
+  "route": "#/signin/mfa",
+  "file": "cmn-03.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CMN-04",
+  "title": "Account not recognised",
+  "route": "#/signin/noaccount",
+  "file": "cmn-04.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CMN-05",
+  "title": "Test sign-in",
+  "route": "#/signin/stub",
+  "file": "cmn-05.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CMN-06",
+  "title": "My profile",
+  "route": "#/profile",
+  "file": "cmn-06.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "CMN-06",
+  "title": "My profile",
+  "route": "#/profile",
+  "label": "Tab: Notifications",
+  "file": "cmn-06-tab-0.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "CMN-06",
+  "title": "My profile",
+  "route": "#/profile",
+  "label": "Tab: Sign-in and sessions",
+  "file": "cmn-06-tab-1.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "CMN-06",
+  "title": "My profile",
+  "route": "#/profile",
+  "label": "Tab: My personal data",
+  "file": "cmn-06-tab-2.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CMN-06",
+  "title": "My profile",
+  "route": "#/profile",
+  "key": "m:timeout",
+  "label": "Confirmation: You will be signed out in 2 minutes",
+  "trigger": "Preview the idle warning",
+  "file": "cmn-06-pop-1.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CMN-06",
+  "title": "My profile",
+  "route": "#/profile",
+  "key": "m:confirmSign out of Chrome on Android, Ayer Keroh?",
+  "label": "Confirmation: Sign out of Chrome on Android, Ayer Keroh?",
+  "trigger": "Sign out",
+  "file": "cmn-06-pop-2.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CMN-06",
+  "title": "My profile",
+  "route": "#/profile",
+  "key": "m:datacorrect",
+  "label": "Confirmation: Request a correction to your personal data",
+  "trigger": "Request a correction",
+  "file": "cmn-06-pop-3.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CMN-07",
+  "title": "Notifications",
+  "route": "#/notifications",
+  "file": "cmn-07.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "CMN-07",
+  "title": "Notifications",
+  "route": "#/notifications?f=unread",
+  "label": "Tab: Unread",
+  "file": "cmn-07-tab-0.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "CMN-07",
+  "title": "Notifications",
+  "route": "#/notifications?f=read",
+  "label": "Tab: Read",
+  "file": "cmn-07-tab-1.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CMN-08",
+  "title": "Help",
+  "route": "#/help",
+  "file": "cmn-08.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CMN-09",
+  "title": "Search",
+  "route": "#/search",
+  "file": "cmn-09.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CMN-10",
+  "title": "Something went wrong",
+  "route": "#/error",
+  "file": "cmn-10.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "PUB-01",
+  "title": "Micro-credentials at UTeM",
+  "route": "#/public/home",
+  "file": "pub-01.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "PUB-02",
+  "title": "Catalogue",
+  "route": "#/public/catalogue",
+  "file": "pub-02.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "PUB-03",
+  "title": "Offering",
+  "route": "#/public/offering/CND-2027-1",
+  "file": "pub-03.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "PUB-03",
+  "title": "Offering",
+  "route": "#/public/offering/CND-2027-1",
+  "label": "Tab: Syllabus",
+  "file": "pub-03-tab-0.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "PUB-03",
+  "title": "Offering",
+  "route": "#/public/offering/CND-2027-1",
+  "label": "Tab: Assessment",
+  "file": "pub-03-tab-1.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "PUB-03",
+  "title": "Offering",
+  "route": "#/public/offering/CND-2027-1",
+  "label": "Tab: Prerequisites",
+  "file": "pub-03-tab-2.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "PUB-03",
+  "title": "Offering",
+  "route": "#/public/offering/CND-2027-1",
+  "label": "Tab: Recognition",
+  "file": "pub-03-tab-3.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "PUB-03",
+  "title": "Offering",
+  "route": "#/public/offering/CND-2027-1",
+  "label": "Tab: FAQ",
+  "file": "pub-03-tab-4.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "PUB-04",
+  "title": "Pathways to a degree",
+  "route": "#/public/pathways",
+  "file": "pub-04.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "PUB-05",
+  "title": "How recognition works",
+  "route": "#/public/how",
+  "file": "pub-05.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "PUB-06",
+  "title": "FAQ",
+  "route": "#/public/faq",
+  "file": "pub-06.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "PUB-07",
+  "title": "Verify a credential",
+  "route": "#/public/verify",
+  "file": "pub-07.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "PUB-08",
+  "title": "Verification result",
+  "route": "#/public/verify/3HXP-92LD",
+  "file": "pub-08.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "PUB-09",
+  "title": "Privacy notice",
+  "route": "#/public/privacy",
+  "file": "pub-09.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "PUB-10",
+  "title": "Terms of use",
+  "route": "#/public/terms",
+  "file": "pub-10.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "PUB-11",
+  "title": "Accessibility statement",
+  "route": "#/public/accessibility",
+  "file": "pub-11.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "ST-01",
+  "title": "My learning",
+  "route": "#/st/home",
+  "file": "st-01.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "ST-02",
+  "title": "Find a micro-credential",
+  "route": "#/st/catalogue",
+  "file": "st-02.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "ST-03",
+  "title": "Register",
+  "route": "#/st/register/CND-2027-1",
+  "file": "st-03.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "ST-04",
+  "title": "Registrations and payments",
+  "route": "#/st/enrolments",
+  "file": "st-04.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "ST-05",
+  "title": "Registration",
+  "route": "#/st/enrolment/E-2026-0590",
+  "file": "st-05.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "ST-05",
+  "title": "Registration",
+  "route": "#/st/enrolment/E-2026-0590",
+  "key": "m:st-withdraw",
+  "label": "Warning (destructive): Withdraw from Industrial IoT Fundamentals Cohort 2026/2?",
+  "trigger": "Withdraw",
+  "file": "st-05-pop-4.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "ST-06",
+  "title": "Achievement record",
+  "route": "#/st/record",
+  "file": "st-06.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "ST-07",
+  "title": "Credentials",
+  "route": "#/st/credentials",
+  "file": "st-07.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "ST-08",
+  "title": "Credential",
+  "route": "#/st/credential/MCMS-C-2026-000098",
+  "file": "st-08.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "ST-09",
+  "title": "Credit ledger and ABC",
+  "route": "#/st/ledger",
+  "file": "st-09.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "ST-10",
+  "title": "Academic Credit Record",
+  "route": "#/st/acr/MCMS-A-2026-000214",
+  "file": "st-10.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "ST-10",
+  "title": "Academic Credit Record",
+  "route": "#/st/acr/MCMS-A-2026-000214",
+  "key": "m:st-consent",
+  "label": "Confirmation: Give consent to deposit?",
+  "trigger": "Continue",
+  "file": "st-10-pop-5.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "ST-11",
+  "title": "Credit transfer",
+  "route": "#/st/transfer",
+  "file": "st-11.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "ST-12",
+  "title": "New transfer application",
+  "route": "#/st/transfer/new",
+  "file": "st-12.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "ST-13",
+  "title": "Transfer application",
+  "route": "#/st/transfer/TR-2026-0012",
+  "file": "st-13.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "ST-14",
+  "title": "Stackable plan",
+  "route": "#/st/plan",
+  "file": "st-14.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-01",
+  "title": "My micro-credentials",
+  "route": "#/lec/home",
+  "file": "lec-01.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-02",
+  "title": "Micro-credential",
+  "route": "#/lec/mc/DS",
+  "file": "lec-02.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-02",
+  "title": "Micro-credential",
+  "route": "#/lec/mc/DS",
+  "label": "Tab: Cohorts",
+  "file": "lec-02-tab-0.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-02",
+  "title": "Micro-credential",
+  "route": "#/lec/mc/DS",
+  "label": "Tab: CQI",
+  "file": "lec-02-tab-1.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-02",
+  "title": "Micro-credential",
+  "route": "#/lec/mc/DS",
+  "label": "Tab: History",
+  "file": "lec-02-tab-2.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-03",
+  "title": "Proposals and versions",
+  "route": "#/lec/proposals",
+  "file": "lec-03.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-03",
+  "title": "Proposals and versions",
+  "route": "#/lec/proposals?f=Draft",
+  "label": "Tab: Draft",
+  "file": "lec-03-tab-0.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-03",
+  "title": "Proposals and versions",
+  "route": "#/lec/proposals?f=Returned",
+  "label": "Tab: Returned",
+  "file": "lec-03-tab-1.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-03",
+  "title": "Proposals and versions",
+  "route": "#/lec/proposals?f=Submitted",
+  "label": "Tab: Submitted",
+  "file": "lec-03-tab-2.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-03",
+  "title": "Proposals and versions",
+  "route": "#/lec/proposals?f=In%20review",
+  "label": "Tab: In review",
+  "file": "lec-03-tab-3.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-03",
+  "title": "Proposals and versions",
+  "route": "#/lec/proposals?f=Pending%20approval",
+  "label": "Tab: Pending approval",
+  "file": "lec-03-tab-4.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-03",
+  "title": "Proposals and versions",
+  "route": "#/lec/proposals?f=Approved",
+  "label": "Tab: Approved",
+  "file": "lec-03-tab-5.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-04",
+  "title": "New proposal",
+  "route": "#/lec/new",
+  "file": "lec-04.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-05",
+  "title": "Proposal workspace",
+  "route": "#/lec/proposal/ST",
+  "file": "lec-05.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-05",
+  "title": "Proposal workspace",
+  "route": "#/lec/proposal/ST",
+  "label": "Tab: Justification",
+  "file": "lec-05-tab-0.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-05",
+  "title": "Proposal workspace",
+  "route": "#/lec/proposal/ST",
+  "label": "Tab: Outcomes",
+  "file": "lec-05-tab-1.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-05",
+  "title": "Proposal workspace",
+  "route": "#/lec/proposal/ST",
+  "label": "Tab: Modules and SLT",
+  "file": "lec-05-tab-2.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-05",
+  "title": "Proposal workspace",
+  "route": "#/lec/proposal/ST",
+  "label": "Tab: Assessment",
+  "file": "lec-05-tab-3.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-05",
+  "title": "Proposal workspace",
+  "route": "#/lec/proposal/ST",
+  "label": "Tab: Alignment",
+  "file": "lec-05-tab-4.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-05",
+  "title": "Proposal workspace",
+  "route": "#/lec/proposal/ST",
+  "label": "Tab: Credential design",
+  "file": "lec-05-tab-5.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-05",
+  "title": "Proposal workspace",
+  "route": "#/lec/proposal/ST",
+  "label": "Tab: Delivery",
+  "file": "lec-05-tab-6.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-05",
+  "title": "Proposal workspace",
+  "route": "#/lec/proposal/ST",
+  "label": "Tab: Co-developers",
+  "file": "lec-05-tab-7.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-05",
+  "title": "Proposal workspace",
+  "route": "#/lec/proposal/ST",
+  "label": "Tab: Declaration",
+  "file": "lec-05-tab-8.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "LEC-05",
+  "title": "Proposal workspace",
+  "route": "#/lec/proposal/ST",
+  "label": "Tab: Comments",
+  "file": "lec-05-tab-9.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-06",
+  "title": "Request a change",
+  "route": "#/lec/change/DS",
+  "file": "lec-06.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-07",
+  "title": "Reviews for colleagues",
+  "route": "#/lec/reviews",
+  "file": "lec-07.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-08",
+  "title": "Review a proposal",
+  "route": "#/lec/review/RV-031",
+  "file": "lec-08.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "LEC-08",
+  "title": "Review a proposal",
+  "route": "#/lec/review/RV-031",
+  "key": "m:lcfDeclare no conflict of interest?",
+  "label": "Confirmation: Declare no conflict of interest?",
+  "trigger": "I have no conflict of interest",
+  "file": "lec-08-pop-6.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "LEC-08",
+  "title": "Review a proposal",
+  "route": "#/lec/review/RV-031",
+  "key": "m:coiconflict",
+  "label": "Warning (destructive): Decline this review because of a conflict?",
+  "trigger": "I have a conflict: decline this review",
+  "file": "lec-08-pop-7.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-09",
+  "title": "Cohorts and results",
+  "route": "#/lec/cohorts",
+  "file": "lec-09.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-10",
+  "title": "Cohort results",
+  "route": "#/lec/cohort/CND-2026-2",
+  "file": "lec-10.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "LEC-10",
+  "title": "Cohort results",
+  "route": "#/lec/cohort/CND-2026-2",
+  "key": "m:intflag",
+  "label": "Warning (destructive): Hold this result for an integrity case?",
+  "trigger": "Flag integrity",
+  "file": "lec-10-pop-8.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-11",
+  "title": "Create an offering",
+  "route": "#/lec/offering/new",
+  "file": "lec-11.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-12",
+  "title": "Readiness checklist",
+  "route": "#/lec/readiness/DS-2027-1",
+  "file": "lec-12.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-13",
+  "title": "Quality review (CQI)",
+  "route": "#/lec/cqi",
+  "file": "lec-13.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-14",
+  "title": "Quality review record",
+  "route": "#/lec/cqi/CQI-DS-2026-1",
+  "file": "lec-14.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "LEC-14",
+  "title": "Quality review record",
+  "route": "#/lec/cqi/CQI-DS-2026-1",
+  "key": "m:lcfSubmit this quality review to the deputy dean?",
+  "label": "Confirmation: Submit this quality review to the deputy dean?",
+  "trigger": "Submit to deputy dean",
+  "file": "lec-14-pop-9.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "LEC-14",
+  "title": "Quality review record",
+  "route": "#/lec/cqi/CQI-DS-2026-1",
+  "key": "m:cqiadd",
+  "label": "Confirmation: Add an action",
+  "trigger": "Add action",
+  "file": "lec-14-pop-10.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "LEC-14",
+  "title": "Quality review record",
+  "route": "#/lec/cqi/CQI-DS-2026-1",
+  "key": "m:cqieff",
+  "label": "Confirmation: Record the effectiveness check",
+  "trigger": "Record effectiveness check",
+  "file": "lec-14-pop-11.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-15",
+  "title": "QV evidence",
+  "route": "#/lec/qv",
+  "file": "lec-15.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-16",
+  "title": "QV evidence",
+  "route": "#/lec/qv/CND",
+  "file": "lec-16.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-17",
+  "title": "Reports",
+  "route": "#/lec/reports",
+  "file": "lec-17.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "LEC-18",
+  "title": "Report",
+  "route": "#/lec/report/credentials-issued",
+  "file": "lec-18.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "EXT-01",
+  "title": "My review invitations",
+  "route": "#/ext/home",
+  "file": "ext-01.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "EXT-02",
+  "title": "Comment on a proposal",
+  "route": "#/ext/review/RV-033",
+  "file": "ext-02.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-01",
+  "title": "Task queue",
+  "route": "#/dd/queue",
+  "file": "dd-01.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-01",
+  "title": "Task queue",
+  "route": "#/dd/queue?area=proposals",
+  "label": "Tab: Proposals",
+  "file": "dd-01-tab-0.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-01",
+  "title": "Task queue",
+  "route": "#/dd/queue?area=offerings",
+  "label": "Tab: Offerings",
+  "file": "dd-01-tab-1.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-01",
+  "title": "Task queue",
+  "route": "#/dd/queue?area=results",
+  "label": "Tab: Results",
+  "file": "dd-01-tab-2.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-01",
+  "title": "Task queue",
+  "route": "#/dd/queue?area=creds",
+  "label": "Tab: Credentials",
+  "file": "dd-01-tab-3.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-01",
+  "title": "Task queue",
+  "route": "#/dd/queue?area=quality",
+  "label": "Tab: Quality",
+  "file": "dd-01-tab-4.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-01",
+  "title": "Task queue",
+  "route": "#/dd/queue?area=acr",
+  "label": "Tab: ACR and ABC",
+  "file": "dd-01-tab-5.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-01",
+  "title": "Task queue",
+  "route": "#/dd/queue?area=transfer",
+  "label": "Tab: Transfer",
+  "file": "dd-01-tab-6.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-02",
+  "title": "Proposals and approval",
+  "route": "#/dd/proposals",
+  "file": "dd-02.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-02",
+  "title": "Proposals and approval",
+  "route": "#/dd/proposals?s=review",
+  "label": "Tab: Waiting for a decision",
+  "file": "dd-02-tab-0.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-02",
+  "title": "Proposals and approval",
+  "route": "#/dd/proposals?s=approved",
+  "label": "Tab: Approved",
+  "file": "dd-02-tab-1.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-02",
+  "title": "Proposals and approval",
+  "route": "#/dd/proposals?s=other",
+  "label": "Tab: Draft, returned, superseded",
+  "file": "dd-02-tab-2.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-03",
+  "title": "Proposal review",
+  "route": "#/dd/proposal/DB",
+  "file": "dd-03.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-03",
+  "title": "Proposal review",
+  "route": "#/dd/proposal/DB",
+  "label": "Tab: Comments",
+  "file": "dd-03-tab-0.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-03",
+  "title": "Proposal review",
+  "route": "#/dd/proposal/DB",
+  "label": "Tab: History",
+  "file": "dd-03-tab-1.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-03",
+  "title": "Proposal review",
+  "route": "#/dd/proposal/DB",
+  "key": "m:assignrev",
+  "label": "Confirmation: Assign reviewers",
+  "trigger": "Assign reviewers",
+  "file": "dd-03-pop-12.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-03",
+  "title": "Proposal review",
+  "route": "#/dd/proposal/DB",
+  "key": "m:returnprop",
+  "label": "Confirmation: Return BITM 2313 Database Systems for amendment?",
+  "trigger": "Return for amendment",
+  "file": "dd-03-pop-13.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-03",
+  "title": "Proposal review",
+  "route": "#/dd/proposal/DB",
+  "key": "m:addcmt",
+  "label": "Confirmation: Add a comment",
+  "trigger": "Add comment",
+  "file": "dd-03-pop-14.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-03",
+  "title": "Proposal review",
+  "route": "#/dd/proposal/DB",
+  "key": "m:cmtres",
+  "label": "Confirmation: Mark this comment resolved?",
+  "trigger": "Mark resolved",
+  "file": "dd-03-pop-15.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-04",
+  "title": "Record Senate decision",
+  "route": "#/dd/senate/ADA",
+  "file": "dd-04.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-04",
+  "title": "Record Senate decision",
+  "route": "#/dd/senate/ADA",
+  "key": "m:senate",
+  "label": "Confirmation: Record \"Approved\" for Applied Data Analytics with Python?",
+  "trigger": "Review and record decision",
+  "file": "dd-04-pop-16.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-05",
+  "title": "Decision pack",
+  "route": "#/dd/pack",
+  "file": "dd-05.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-06",
+  "title": "Offerings and readiness",
+  "route": "#/dd/offerings",
+  "file": "dd-06.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-06",
+  "title": "Offerings and readiness",
+  "route": "#/dd/offerings?s=ready",
+  "label": "Tab: Not ready",
+  "file": "dd-06-tab-0.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-06",
+  "title": "Offerings and readiness",
+  "route": "#/dd/offerings?s=live",
+  "label": "Tab: Open, full or running",
+  "file": "dd-06-tab-1.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-06",
+  "title": "Offerings and readiness",
+  "route": "#/dd/offerings?s=ended",
+  "label": "Tab: Ended",
+  "file": "dd-06-tab-2.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-07",
+  "title": "Confirm readiness",
+  "route": "#/dd/readiness/DS-2027-1",
+  "file": "dd-07.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-08",
+  "title": "Results and completion",
+  "route": "#/dd/results",
+  "file": "dd-08.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-09",
+  "title": "Verify results",
+  "route": "#/dd/verify/DS-2026-2",
+  "file": "dd-09.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-09",
+  "title": "Verify results",
+  "route": "#/dd/verify/DS-2026-2",
+  "key": "m:retres",
+  "label": "Confirmation: Return Cohort 2026/2 results to the lecturer?",
+  "trigger": "Return to lecturer",
+  "file": "dd-09-pop-17.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-09",
+  "title": "Verify results",
+  "route": "#/dd/verify/DS-2026-2",
+  "key": "m:verifyres",
+  "label": "Confirmation: Verify 28 results for BITS 1123 Data Structures Cohort 2026/2?",
+  "trigger": "Verify 28 results",
+  "file": "dd-09-pop-18.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-10",
+  "title": "Confirm completion",
+  "route": "#/dd/completion/LE-2026-10",
+  "file": "dd-10.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-10",
+  "title": "Confirm completion",
+  "route": "#/dd/completion/LE-2026-10",
+  "key": "m:confirmcomp",
+  "label": "Confirmation: Confirm completion for 38 learners?",
+  "trigger": "Confirm completion for 38 learners",
+  "file": "dd-10-pop-19.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-11",
+  "title": "Credentials",
+  "route": "#/dd/creds",
+  "file": "dd-11.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-11",
+  "title": "Credentials",
+  "route": "#/dd/creds?s=Issued",
+  "label": "Tab: Issued",
+  "file": "dd-11-tab-0.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-11",
+  "title": "Credentials",
+  "route": "#/dd/creds?s=Corrected",
+  "label": "Tab: Corrected",
+  "file": "dd-11-tab-1.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-11",
+  "title": "Credentials",
+  "route": "#/dd/creds?s=Replaced",
+  "label": "Tab: Replaced",
+  "file": "dd-11-tab-2.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-11",
+  "title": "Credentials",
+  "route": "#/dd/creds?s=Revoked",
+  "label": "Tab: Revoked",
+  "file": "dd-11-tab-3.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-12",
+  "title": "Credential",
+  "route": "#/dd/cred/MCMS-C-2026-000418",
+  "file": "dd-12.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-12",
+  "title": "Credential",
+  "route": "#/dd/cred/MCMS-C-2026-000418",
+  "key": "m:credrevoke",
+  "label": "Warning (destructive): Revoke credential MCMS-C-2026-000418?",
+  "trigger": "Revoke",
+  "file": "dd-12-pop-20.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-12",
+  "title": "Credential",
+  "route": "#/dd/cred/MCMS-C-2026-000418",
+  "key": "m:credreplace",
+  "label": "Confirmation: Replace credential MCMS-C-2026-000418?",
+  "trigger": "Replace",
+  "file": "dd-12-pop-21.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-12",
+  "title": "Credential",
+  "route": "#/dd/cred/MCMS-C-2026-000418",
+  "key": "m:credcorrect",
+  "label": "Confirmation: Correct credential MCMS-C-2026-000418?",
+  "trigger": "Correct",
+  "file": "dd-12-pop-22.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-13",
+  "title": "Quality, QV and review",
+  "route": "#/dd/quality",
+  "file": "dd-13.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-13",
+  "title": "Quality, QV and review",
+  "route": "#/dd/quality",
+  "label": "Tab: Quality reviews",
+  "file": "dd-13-tab-0.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-13",
+  "title": "Quality, QV and review",
+  "route": "#/dd/quality",
+  "label": "Tab: Periodic review schedule",
+  "file": "dd-13-tab-1.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-13",
+  "title": "Quality, QV and review",
+  "route": "#/dd/quality",
+  "label": "Tab: Suspension and termination",
+  "file": "dd-13-tab-2.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-14",
+  "title": "QV record",
+  "route": "#/dd/qv/CND",
+  "file": "dd-14.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-14",
+  "title": "QV record",
+  "route": "#/dd/qv/CND",
+  "key": "m:qvSubmit",
+  "label": "Confirmation: Record the submission to QVC/MQA?",
+  "trigger": "Record submission",
+  "file": "dd-14-pop-23.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-15",
+  "title": "Quality review",
+  "route": "#/dd/cqi/CQI-CND-2026-1",
+  "file": "dd-15.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-15",
+  "title": "Quality review",
+  "route": "#/dd/cqi/CQI-CND-2026-1",
+  "key": "m:cqiAsk",
+  "label": "Confirmation: Ask the lecturer for changes?",
+  "trigger": "Ask for changes",
+  "file": "dd-15-pop-24.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-15",
+  "title": "Quality review",
+  "route": "#/dd/cqi/CQI-CND-2026-1",
+  "key": "m:cqiConfirm",
+  "label": "Confirmation: Confirm this quality review?",
+  "trigger": "Confirm quality review",
+  "file": "dd-15-pop-25.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-15",
+  "title": "Quality review",
+  "route": "#/dd/cqi/CQI-CND-2026-1",
+  "key": "m:cqiClose",
+  "label": "Confirmation: Close this action?",
+  "trigger": "Close action",
+  "file": "dd-15-pop-26.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-16",
+  "title": "Periodic review",
+  "route": "#/dd/review/DS",
+  "file": "dd-16.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-17",
+  "title": "Suspension or termination",
+  "route": "#/dd/suspend/CND",
+  "file": "dd-17.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-17",
+  "title": "Suspension or termination",
+  "route": "#/dd/suspend/CND",
+  "key": "m:suspendConfirm",
+  "label": "Warning (destructive): Suspend Cloud Native Development?",
+  "trigger": "Record decision",
+  "file": "dd-17-pop-27.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-18",
+  "title": "ACR and ABC deposits",
+  "route": "#/dd/acr",
+  "file": "dd-18.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-18",
+  "title": "ACR and ABC deposits",
+  "route": "#/dd/acr",
+  "label": "Tab: Deposit queue",
+  "file": "dd-18-tab-0.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-18",
+  "title": "ACR and ABC deposits",
+  "route": "#/dd/acr",
+  "label": "Tab: Deposited",
+  "file": "dd-18-tab-1.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-18",
+  "title": "ACR and ABC deposits",
+  "route": "#/dd/acr",
+  "label": "Tab: Discrepancies",
+  "file": "dd-18-tab-2.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-18",
+  "title": "ACR and ABC deposits",
+  "route": "#/dd/acr",
+  "key": "m:discResolve",
+  "label": "Confirmation: Mark this discrepancy resolved?",
+  "trigger": "Resolve",
+  "file": "dd-18-pop-28.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-19",
+  "title": "Confirm ACR",
+  "route": "#/dd/acr/ACR-DS-2026-1",
+  "file": "dd-19.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-19",
+  "title": "Confirm ACR",
+  "route": "#/dd/acr/ACR-DS-2026-1",
+  "key": "m:acrConfirm",
+  "label": "Confirmation: Confirm 26 ACR?",
+  "trigger": "Confirm 26 ACR",
+  "file": "dd-19-pop-29.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-20",
+  "title": "Record ABC deposit",
+  "route": "#/dd/deposit/ABC-FTMK-2026-03",
+  "file": "dd-20.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-20",
+  "title": "Record ABC deposit",
+  "route": "#/dd/deposit/ABC-FTMK-2026-03",
+  "key": "m:depositRecord",
+  "label": "Confirmation: Record this ABC deposit?",
+  "trigger": "Record deposit",
+  "file": "dd-20-pop-30.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-21",
+  "title": "Credit transfer",
+  "route": "#/dd/transfer",
+  "file": "dd-21.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-22",
+  "title": "Transfer decision",
+  "route": "#/dd/transfer/TR-2026-0012",
+  "file": "dd-22.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-22",
+  "title": "Transfer decision",
+  "route": "#/dd/transfer/TR-2026-0012",
+  "key": "m:transferDecide",
+  "label": "Confirmation: Record the decision: Approved?",
+  "trigger": "Record decision",
+  "file": "dd-22-pop-31.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-23",
+  "title": "Stackable pathways",
+  "route": "#/dd/stack",
+  "file": "dd-23.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "DD-23",
+  "title": "Stackable pathways",
+  "route": "#/dd/stack",
+  "label": "Tab: Individual plans",
+  "file": "dd-23-tab-0.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-24",
+  "title": "Pathway mapping",
+  "route": "#/dd/pathway/PW-BITZ-1",
+  "file": "dd-24.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-24",
+  "title": "Pathway mapping",
+  "route": "#/dd/pathway/PW-BITZ-1",
+  "key": "m:pwAdd",
+  "label": "Confirmation: Add a mapping",
+  "trigger": "Add a mapping",
+  "file": "dd-24-pop-32.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-24",
+  "title": "Pathway mapping",
+  "route": "#/dd/pathway/PW-BITZ-1",
+  "key": "m:pwSubmit",
+  "label": "Confirmation: Submit this pathway for Senate approval?",
+  "trigger": "Submit for Senate approval",
+  "file": "dd-24-pop-33.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-24",
+  "title": "Pathway mapping",
+  "route": "#/dd/pathway/PW-BITZ-1",
+  "key": "m:pwMatch",
+  "label": "Confirmation: Change the outcome match",
+  "trigger": "Change match",
+  "file": "dd-24-pop-34.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-25",
+  "title": "Individual stackable plan",
+  "route": "#/dd/plan/SP-2026-004",
+  "file": "dd-25.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD-25",
+  "title": "Individual stackable plan",
+  "route": "#/dd/plan/SP-2026-004",
+  "key": "m:planDecide",
+  "label": "Confirmation: Record the plan decision: Not yet suitable?",
+  "trigger": "Record decision",
+  "file": "dd-25-pop-35.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-26",
+  "title": "Reports",
+  "route": "#/dd/reports",
+  "file": "dd-26.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-27",
+  "title": "Report",
+  "route": "#/dd/report/credentials-issued",
+  "file": "dd-27.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-28",
+  "title": "Traceability",
+  "route": "#/dd/trace",
+  "file": "dd-28.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DD-29",
+  "title": "Trace a participant",
+  "route": "#/dd/trace/amir",
+  "file": "dd-29.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CODL-01",
+  "title": "Users and roles",
+  "route": "#/codl/users",
+  "file": "codl-01.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL-01",
+  "title": "Users and roles",
+  "route": "#/codl/users",
+  "key": "m:assignrole",
+  "label": "Confirmation: Assign a role",
+  "trigger": "Assign role",
+  "file": "codl-01-pop-36.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CODL-02",
+  "title": "User",
+  "route": "#/codl/user/S01842",
+  "file": "codl-02.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL-02",
+  "title": "User",
+  "route": "#/codl/user/S01842",
+  "key": "m:deactivate",
+  "label": "Warning (destructive): Deactivate Dr. Aina Zulkifli?",
+  "trigger": "Deactivate account",
+  "file": "codl-02-pop-37.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL-02",
+  "title": "User",
+  "route": "#/codl/user/S01842",
+  "key": "m:removerole",
+  "label": "Warning (destructive): Remove Lecturer from Dr. Aina Zulkifli?",
+  "trigger": "Remove",
+  "file": "codl-02-pop-38.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CODL-03",
+  "title": "Reference data",
+  "route": "#/codl/refdata",
+  "file": "codl-03.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "CODL-03",
+  "title": "Reference data",
+  "route": "#/codl/refdata",
+  "label": "Tab: Programmes",
+  "file": "codl-03-tab-0.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "CODL-03",
+  "title": "Reference data",
+  "route": "#/codl/refdata",
+  "label": "Tab: Parent courses",
+  "file": "codl-03-tab-1.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL-03",
+  "title": "Reference data",
+  "route": "#/codl/refdata",
+  "key": "m:refimport",
+  "label": "Confirmation: Import PTj list from CSV",
+  "trigger": "Import CSV",
+  "file": "codl-03-pop-39.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL-03",
+  "title": "Reference data",
+  "route": "#/codl/refdata",
+  "key": "m:refform",
+  "label": "Confirmation: Add PTj",
+  "trigger": "Add PTj",
+  "file": "codl-03-pop-40.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CODL-04",
+  "title": "Settings",
+  "route": "#/codl/settings",
+  "file": "codl-04.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL-04",
+  "title": "Settings",
+  "route": "#/codl/settings",
+  "key": "m:setchange",
+  "label": "Confirmation: Change credit.slt_hours_per_credit",
+  "trigger": "Change",
+  "file": "codl-04-pop-41.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL-04",
+  "title": "Settings",
+  "route": "#/codl/settings",
+  "key": "d:sethist",
+  "label": "Side panel: History: credit.slt_hours_per_credit",
+  "trigger": "History",
+  "file": "codl-04-pop-42.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL-04",
+  "title": "Settings",
+  "route": "#/codl/settings",
+  "key": "m:routechange",
+  "label": "Confirmation: Change who decides: Endorse a proposal",
+  "trigger": "Change",
+  "file": "codl-04-pop-43.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CODL-05",
+  "title": "Templates",
+  "route": "#/codl/templates",
+  "file": "codl-05.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CODL-06",
+  "title": "Template",
+  "route": "#/codl/template/cert-umc",
+  "file": "codl-06.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL-06",
+  "title": "Template",
+  "route": "#/codl/template/cert-umc",
+  "key": "d:tplprev",
+  "label": "Side panel: Preview with sample data",
+  "trigger": "Preview",
+  "file": "codl-06-pop-44.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL-06",
+  "title": "Template",
+  "route": "#/codl/template/cert-umc",
+  "key": "m:tplpublish",
+  "label": "Confirmation: Publish a new version of cert-umc?",
+  "trigger": "Publish new version",
+  "file": "codl-06-pop-45.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CODL-07",
+  "title": "UCreds exchange",
+  "route": "#/codl/ucreds",
+  "file": "codl-07.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL-07",
+  "title": "UCreds exchange",
+  "route": "#/codl/ucreds",
+  "key": "d:improb",
+  "label": "Side panel: Problems in results-CND-2026-2.csv",
+  "trigger": "2 problems",
+  "file": "codl-07-pop-46.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CODL-08",
+  "title": "Adapter status",
+  "route": "#/codl/adapters",
+  "file": "codl-08.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL-08",
+  "title": "Adapter status",
+  "route": "#/codl/adapters",
+  "key": "d:aderr",
+  "label": "Side panel: Errors: Email notifications",
+  "trigger": "Errors",
+  "file": "codl-08-pop-47.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL-08",
+  "title": "Adapter status",
+  "route": "#/codl/adapters",
+  "key": "m:adretry",
+  "label": "Confirmation: Retry 3 failed messages?",
+  "trigger": "Retry 3",
+  "file": "codl-08-pop-48.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CODL-09",
+  "title": "Test mailbox",
+  "route": "#/codl/mailbox",
+  "file": "codl-09.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL-09",
+  "title": "Test mailbox",
+  "route": "#/codl/mailbox",
+  "key": "d:mail",
+  "label": "Side panel: Results ready to verify: Data Structures 2026/2",
+  "trigger": "Results ready to verify: Data Structures 2026/2",
+  "file": "codl-09-pop-49.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CODL-10",
+  "title": "Audit trail",
+  "route": "#/codl/audit",
+  "file": "codl-10.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CODL-11",
+  "title": "Reports",
+  "route": "#/codl/reports",
+  "file": "codl-11.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CODL-12",
+  "title": "Report",
+  "route": "#/codl/report/credentials-issued",
+  "file": "codl-12.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "CODL-13",
+  "title": "Retention",
+  "route": "#/codl/retention",
+  "file": "codl-13.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-01",
+  "title": "Payment receipt",
+  "route": "#/doc/receipt/E-2026-0590",
+  "label": "Page 1 of 1",
+  "file": "doc-01-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-02",
+  "title": "Enrolment confirmation",
+  "route": "#/doc/enrolment/E-2026-0590",
+  "label": "Page 1 of 1",
+  "file": "doc-02-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-03",
+  "title": "Certificate",
+  "route": "#/doc/certificate/MCMS-C-2026-000098",
+  "label": "Page 1 of 1",
+  "file": "doc-03-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-04",
+  "title": "Digital credential",
+  "route": "#/doc/credential/MCMS-C-2026-000098",
+  "label": "Page 1 of 2",
+  "file": "doc-04-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-04",
+  "title": "Digital credential",
+  "route": "#/doc/credential/MCMS-C-2026-000098",
+  "label": "Page 2 of 2",
+  "file": "doc-04-p2.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-05",
+  "title": "Achievement record",
+  "route": "#/doc/record/amir",
+  "label": "Page 1 of 2",
+  "file": "doc-05-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-05",
+  "title": "Achievement record",
+  "route": "#/doc/record/amir",
+  "label": "Page 2 of 2",
+  "file": "doc-05-p2.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-06",
+  "title": "Academic Credit Record",
+  "route": "#/doc/acr/MCMS-A-2026-000102",
+  "label": "Page 1 of 1",
+  "file": "doc-06-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-07",
+  "title": "Proposal print",
+  "route": "#/doc/proposal/DB",
+  "label": "Page 1 of 3",
+  "file": "doc-07-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-07",
+  "title": "Proposal print",
+  "route": "#/doc/proposal/DB",
+  "label": "Page 2 of 3",
+  "file": "doc-07-p2.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-07",
+  "title": "Proposal print",
+  "route": "#/doc/proposal/DB",
+  "label": "Page 3 of 3",
+  "file": "doc-07-p3.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-08",
+  "title": "Senate decision pack",
+  "route": "#/doc/pack/ADA",
+  "label": "Page 1 of 3",
+  "file": "doc-08-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-08",
+  "title": "Senate decision pack",
+  "route": "#/doc/pack/ADA",
+  "label": "Page 2 of 3",
+  "file": "doc-08-p2.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-08",
+  "title": "Senate decision pack",
+  "route": "#/doc/pack/ADA",
+  "label": "Page 3 of 3",
+  "file": "doc-08-p3.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-09",
+  "title": "Report",
+  "route": "#/doc/report/credentials-issued",
+  "label": "Page 1 of 5",
+  "file": "doc-09-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-09",
+  "title": "Report",
+  "route": "#/doc/report/credentials-issued",
+  "label": "Page 2 of 5",
+  "file": "doc-09-p2.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-09",
+  "title": "Report",
+  "route": "#/doc/report/credentials-issued",
+  "label": "Page 3 of 5",
+  "file": "doc-09-p3.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-09",
+  "title": "Report",
+  "route": "#/doc/report/credentials-issued",
+  "label": "Page 4 of 5",
+  "file": "doc-09-p4.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-09",
+  "title": "Report",
+  "route": "#/doc/report/credentials-issued",
+  "label": "Page 5 of 5",
+  "file": "doc-09-p5.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-10",
+  "title": "ABC deposit export",
+  "route": "#/doc/abc/ABC-FTMK-2026-03",
+  "label": "Page 1 of 5",
+  "file": "doc-10-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-10",
+  "title": "ABC deposit export",
+  "route": "#/doc/abc/ABC-FTMK-2026-03",
+  "label": "Page 2 of 5",
+  "file": "doc-10-p2.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-10",
+  "title": "ABC deposit export",
+  "route": "#/doc/abc/ABC-FTMK-2026-03",
+  "label": "Page 3 of 5",
+  "file": "doc-10-p3.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-10",
+  "title": "ABC deposit export",
+  "route": "#/doc/abc/ABC-FTMK-2026-03",
+  "label": "Page 4 of 5",
+  "file": "doc-10-p4.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-10",
+  "title": "ABC deposit export",
+  "route": "#/doc/abc/ABC-FTMK-2026-03",
+  "label": "Page 5 of 5",
+  "file": "doc-10-p5.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-11",
+  "title": "QV submission package",
+  "route": "#/doc/qvpack/CND",
+  "label": "Page 1 of 3",
+  "file": "doc-11-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-11",
+  "title": "QV submission package",
+  "route": "#/doc/qvpack/CND",
+  "label": "Page 2 of 3",
+  "file": "doc-11-p2.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-11",
+  "title": "QV submission package",
+  "route": "#/doc/qvpack/CND",
+  "label": "Page 3 of 3",
+  "file": "doc-11-p3.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-12",
+  "title": "Credit transfer decision letter",
+  "route": "#/doc/transfer/TR-2026-0012",
+  "label": "Page 1 of 1",
+  "file": "doc-12-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-13",
+  "title": "Suspension notice",
+  "route": "#/doc/suspend/CND",
+  "label": "Page 1 of 1",
+  "file": "doc-13-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-14",
+  "title": "Import validation report",
+  "route": "#/doc/import/results-CND-2026-2.csv",
+  "label": "Page 1 of 1",
+  "file": "doc-14-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-15",
+  "title": "UCreds enrolment export",
+  "route": "#/doc/export/IIOT-2027-1",
+  "label": "Page 1 of 1",
+  "file": "doc-15-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-16",
+  "title": "Audit trail export",
+  "route": "#/doc/audit",
+  "label": "Page 1 of 2",
+  "file": "doc-16-p1.jpg"
+ },
+ {
+  "kind": "docpage",
+  "id": "DOC-16",
+  "title": "Audit trail export",
+  "route": "#/doc/audit",
+  "label": "Page 2 of 2",
+  "file": "doc-16-p2.jpg"
+ },
+ {
+  "kind": "screen",
+  "id": "DOC-17",
+  "title": "Documents and PDFs",
+  "route": "#/doc/index",
+  "file": "doc-17.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL",
+  "title": "User (deactivated account)",
+  "route": "#/codl/user/S01388",
+  "key": "m:reactivate",
+  "label": "Confirmation: Reactivate Dr. Kamal Ariffin?",
+  "file": "state-reactivate.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CODL",
+  "title": "UCreds exchange (file validated)",
+  "route": "#/codl/ucreds",
+  "key": "m:ucimport",
+  "label": "Confirmation: Stage these results?",
+  "file": "state-ucimport.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD",
+  "title": "Proposal review (all comments resolved, category verified)",
+  "route": "#/dd/proposal/DB",
+  "key": "m:endorse",
+  "label": "Confirmation: Endorse BITM 2313 Database Systems v1?",
+  "file": "state-endorse.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD",
+  "title": "Confirm readiness (checklist sent, evidence accepted)",
+  "route": "#/dd/readiness/DS-2027-1",
+  "key": "m:readyconfirm",
+  "label": "Confirmation: Confirm Cohort 2027/1 is ready and open it?",
+  "file": "state-readyconfirm.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD",
+  "title": "Verify results (held learner)",
+  "route": "#/dd/verify/LA-2026-2",
+  "key": "m:closecase",
+  "label": "Confirmation: Close the integrity case for Zafri Ahmad and verify the result?",
+  "file": "state-closecase.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD",
+  "title": "QV record (preparing)",
+  "route": "#/dd/qv/CND",
+  "key": "m:qvReady",
+  "label": "Confirmation: Confirm ready to submit to QVC/MQA?",
+  "file": "state-qvready.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD",
+  "title": "QV record (submitted, record the result)",
+  "route": "#/dd/qv/CND",
+  "key": "m:qvResult",
+  "label": "Confirmation: Record the QV result: Quality-Verified?",
+  "file": "state-qvresult.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD",
+  "title": "Periodic review (outcome chosen)",
+  "route": "#/dd/review/DS",
+  "key": "m:reviewOutcome",
+  "label": "Confirmation: Record the review outcome: Continue?",
+  "file": "state-reviewoutcome.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD",
+  "title": "Credit transfer (approved, provisionally redeemed)",
+  "route": "#/dd/transfer/TR-2026-0012",
+  "key": "m:redeemComplete",
+  "label": "Confirmation: Record programme completion?",
+  "file": "state-redeemcomplete.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD",
+  "title": "Credit transfer (approved, provisionally redeemed)",
+  "route": "#/dd/transfer/TR-2026-0012",
+  "key": "m:redeemRelease",
+  "label": "Warning (destructive): Release this credit?",
+  "file": "state-redeemrelease.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "DD",
+  "title": "Pathway mapping (submitted to the Senate)",
+  "route": "#/dd/pathway/PW-BITZ-1",
+  "key": "m:pwSenate",
+  "label": "Confirmation: Record the Senate decision",
+  "file": "state-pwsenate.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "LEC",
+  "title": "Proposal workspace, comments",
+  "route": "#/lec/proposal/DB?tab=comments",
+  "key": "m:respond",
+  "label": "Confirmation: Respond to the reviewer comment",
+  "file": "state-respond.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "LEC",
+  "title": "Change to an approved version (change chosen)",
+  "route": "#/lec/change/DS",
+  "key": "m:chgconfirm",
+  "label": "Confirmation: Create version 3 for approval?",
+  "file": "state-chgconfirm.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "ST",
+  "title": "Register, payment step",
+  "route": "#/st/register/CND-2027-1?step=3",
+  "key": "m:st-pay",
+  "label": "Confirmation: Pay RM 600.00 for Cloud Native Development?",
+  "file": "state-st-pay.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "ST",
+  "title": "Registration pending payment",
+  "route": "#/st/enrolment/E-2026-0701",
+  "key": "m:st-cancelreg",
+  "label": "Warning (destructive): Cancel your registration for Lean Six Sigma Yellow Belt Cohort Dec 2026?",
+  "file": "state-st-cancelreg.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "ST-03",
+  "title": "Register",
+  "route": "#/st/register/CND-2027-1?step=2",
+  "label": "Step 2",
+  "file": "st-03-walk2.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "ST-03",
+  "title": "Register",
+  "route": "#/st/register/CND-2027-1?step=3",
+  "label": "Step 3",
+  "file": "st-03-walk3.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "ST-03",
+  "title": "Register",
+  "route": "#/st/register/CND-2027-1?step=4",
+  "label": "Step 4: paid, registration confirmed",
+  "file": "st-03-paid.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "ST-03",
+  "title": "Register",
+  "route": "#/st/register/CND-2027-1?step=3",
+  "label": "Payment failed with the test card, ready to retry",
+  "file": "st-03-payfail.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "ST-12",
+  "title": "New transfer application",
+  "route": "#/st/transfer/new?step=2",
+  "label": "Step 2",
+  "file": "st-12-walk2.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "ST-12",
+  "title": "New transfer application",
+  "route": "#/st/transfer/new?step=3",
+  "label": "Step 3",
+  "file": "st-12-walk3.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "ST-12",
+  "title": "New transfer application",
+  "route": "#/st/transfer/new?step=4",
+  "label": "Step 4",
+  "file": "st-12-walk4.jpg"
+ },
+ {
+  "kind": "state",
+  "id": "ST-12",
+  "title": "New transfer application",
+  "route": "#/st/transfer/new?step=5",
+  "label": "Step 5",
+  "file": "st-12-walk5.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "ST-12",
+  "title": "New transfer application",
+  "route": "#/st/transfer/new",
+  "key": "m:st-tr-submit",
+  "label": "Confirmation: Submit this transfer application?",
+  "file": "state-st-tr-submit.jpg"
+ },
+ {
+  "kind": "menu",
+  "id": "st",
+  "title": "Notifications menu",
+  "route": "#/st/home",
+  "label": "st",
+  "file": "menu-st-notif.jpg"
+ },
+ {
+  "kind": "menu",
+  "id": "st",
+  "title": "Profile menu",
+  "route": "#/st/home",
+  "label": "st",
+  "file": "menu-st-user.jpg"
+ },
+ {
+  "kind": "menu",
+  "id": "lec",
+  "title": "Notifications menu",
+  "route": "#/lec/home",
+  "label": "lec",
+  "file": "menu-lec-notif.jpg"
+ },
+ {
+  "kind": "menu",
+  "id": "lec",
+  "title": "Profile menu",
+  "route": "#/lec/home",
+  "label": "lec",
+  "file": "menu-lec-user.jpg"
+ },
+ {
+  "kind": "menu",
+  "id": "dd",
+  "title": "Notifications menu",
+  "route": "#/dd/queue",
+  "label": "dd",
+  "file": "menu-dd-notif.jpg"
+ },
+ {
+  "kind": "menu",
+  "id": "dd",
+  "title": "Profile menu",
+  "route": "#/dd/queue",
+  "label": "dd",
+  "file": "menu-dd-user.jpg"
+ },
+ {
+  "kind": "menu",
+  "id": "codl",
+  "title": "Notifications menu",
+  "route": "#/codl/users",
+  "label": "codl",
+  "file": "menu-codl-notif.jpg"
+ },
+ {
+  "kind": "menu",
+  "id": "codl",
+  "title": "Profile menu",
+  "route": "#/codl/users",
+  "label": "codl",
+  "file": "menu-codl-user.jpg"
+ },
+ {
+  "kind": "menu",
+  "id": "ext",
+  "title": "Notifications menu",
+  "route": "#/ext/home",
+  "label": "ext",
+  "file": "menu-ext-notif.jpg"
+ },
+ {
+  "kind": "menu",
+  "id": "ext",
+  "title": "Profile menu",
+  "route": "#/ext/home",
+  "label": "ext",
+  "file": "menu-ext-user.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CMN",
+  "title": "Any signed-in screen",
+  "route": "#/dd/queue",
+  "label": "Warning: idle sign-out",
+  "file": "pop-timeout.jpg"
+ },
+ {
+  "kind": "popup",
+  "id": "CMN",
+  "title": "Profile menu",
+  "route": "#/dd/queue",
+  "label": "Confirmation: sign out",
+  "file": "pop-signout.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-00",
+  "title": "Tour the deputy dean task queue",
+  "actor": "Deputy dean",
+  "route": "#/dd/queue",
+  "label": "Step 1 of 2",
+  "say": "Hakim lands on the task queue: everything waiting for a decision, oldest flagged as overdue.",
+  "file": "fl-00-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-00",
+  "title": "Tour the deputy dean task queue",
+  "actor": "Deputy dean",
+  "route": "#/dd/queue?area=results",
+  "label": "Step 2 of 2",
+  "say": "Tabs filter by area and the counts follow. Click a row to open its decision screen.",
+  "file": "fl-00-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-01",
+  "title": "Sign in with SSO and MFA, land on the task page",
+  "actor": "Any staff",
+  "route": "#/signin",
+  "label": "Step 1 of 3",
+  "say": "Staff sign in with their UTeM Microsoft account. There is no separate MCMS password. Click Continue.",
+  "file": "fl-01-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-01",
+  "title": "Sign in with SSO and MFA, land on the task page",
+  "actor": "Any staff",
+  "route": "#/signin/mfa",
+  "label": "Step 2 of 3",
+  "say": "Roles that decide on records need a second step. Enter any 6-digit code and verify.",
+  "file": "fl-01-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-01",
+  "title": "Sign in with SSO and MFA, land on the task page",
+  "actor": "Any staff",
+  "route": "#/dd/queue",
+  "label": "Step 3 of 3",
+  "say": "Hakim lands on what needs him today: the task queue, not an empty home page.",
+  "file": "fl-01-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-02",
+  "title": "Propose a UMC, fix the SLT, submit",
+  "actor": "Lecturer",
+  "route": "#/lec/new",
+  "label": "Step 1 of 5",
+  "say": "Dr. Aina starts a new proposal. Pick \"Modules from a UTeM credit course\" and a parent course to see the category and the reason. A 30 h own offering would be an MCE only.",
+  "file": "fl-02-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-02",
+  "title": "Propose a UMC, fix the SLT, submit",
+  "actor": "Lecturer",
+  "route": "#/lec/proposal/ST?tab=mods",
+  "label": "Step 2 of 5",
+  "say": "Her Software Testing draft has modules of 40 + 38 + 32 = 110 h. The checks panel shows the blocking error and Submit is disabled with the reason beside it.",
+  "file": "fl-02-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-02",
+  "title": "Propose a UMC, fix the SLT, submit",
+  "actor": "Lecturer",
+  "route": "#/lec/proposal/ST?tab=mods",
+  "label": "Step 3 of 5",
+  "say": "Click \"Set module 3 to 42 h\" (or type 42). The total becomes 120 h, the error clears, and the panel shows one warning about an outcome with no assessment.",
+  "file": "fl-02-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-02",
+  "title": "Propose a UMC, fix the SLT, submit",
+  "actor": "Lecturer",
+  "route": "#/lec/proposal/ST?tab=mods",
+  "label": "Step 4 of 5",
+  "say": "Click Submit for review, write a short response to the warning, and confirm. The status becomes Submitted and the content locks.",
+  "file": "fl-02-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-02",
+  "title": "Propose a UMC, fix the SLT, submit",
+  "actor": "Lecturer",
+  "route": "#/dd/queue?area=proposals",
+  "label": "Step 5 of 5",
+  "say": "Hakim Rahman now has a task \"Assign reviewers\" for Software Testing.",
+  "file": "fl-02-s5.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-03",
+  "title": "Review a colleague's proposal",
+  "actor": "Lecturer as reviewer",
+  "route": "#/lec/reviews",
+  "label": "Step 1 of 4",
+  "say": "Dr. Aina has an invitation to review Cyber Security Operations Fundamentals, due 30 Oct.",
+  "file": "fl-03-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-03",
+  "title": "Review a colleague's proposal",
+  "actor": "Lecturer as reviewer",
+  "route": "#/lec/review/RV-031",
+  "label": "Step 2 of 4",
+  "say": "Step 1: declare a conflict of interest. The proposal stays closed until you do. Choose \"I have no conflict of interest\" and confirm. Choosing a conflict declines the review instead.",
+  "file": "fl-03-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-03",
+  "title": "Review a colleague's proposal",
+  "actor": "Lecturer as reviewer",
+  "route": "#/lec/review/RV-031",
+  "label": "Step 3 of 4",
+  "say": "Step 2: rate each item Satisfactory or Needs amendment. A Needs amendment rating needs a comment and can be marked blocking.",
+  "file": "fl-03-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-03",
+  "title": "Review a colleague's proposal",
+  "actor": "Lecturer as reviewer",
+  "route": "#/lec/review/RV-031",
+  "label": "Step 4 of 4",
+  "say": "Step 3: choose Support, Amend or Do not support, add a summary, and submit. Submit stays disabled until everything is filled.",
+  "file": "fl-03-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-04",
+  "title": "Endorse a proposal, then record the Senate decision",
+  "actor": "Deputy dean",
+  "route": "#/dd/queue?area=proposals",
+  "label": "Step 1 of 7",
+  "say": "Two proposal tasks: endorse Database Systems, and record Senate's decision on Applied Data Analytics.",
+  "file": "fl-04-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-04",
+  "title": "Endorse a proposal, then record the Senate decision",
+  "actor": "Deputy dean",
+  "route": "#/dd/proposal/DB",
+  "label": "Step 2 of 7",
+  "say": "Endorse is blocked. Open Comments: the answered blocking comment shows the lecturer's response, so read it and click Mark resolved with a reason. The other blocking comment has no response yet and cannot be resolved.",
+  "file": "fl-04-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-04",
+  "title": "Endorse a proposal, then record the Senate decision",
+  "actor": "Deputy dean",
+  "route": "#/lec/proposal/DB?tab=comments",
+  "label": "Step 3 of 7",
+  "say": "Dr. Aina responds to the open blocking comment. It becomes answered.",
+  "file": "fl-04-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-04",
+  "title": "Endorse a proposal, then record the Senate decision",
+  "actor": "Deputy dean",
+  "route": "#/dd/proposal/DB",
+  "label": "Step 4 of 7",
+  "say": "Back with the deputy dean: resolve the answered comment, verify the category on the Review summary tab, then click Endorse and confirm. A task to record the Senate decision is created.",
+  "file": "fl-04-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-04",
+  "title": "Endorse a proposal, then record the Senate decision",
+  "actor": "Deputy dean",
+  "route": "#/dd/pack?id=DB",
+  "label": "Step 5 of 7",
+  "say": "The decision pack for Senate 8/2026 now shows the endorsement. Print pack opens the A4 document.",
+  "file": "fl-04-s5.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-04",
+  "title": "Endorse a proposal, then record the Senate decision",
+  "actor": "Deputy dean",
+  "route": "#/dd/senate/ADA",
+  "label": "Step 6 of 7",
+  "say": "Senate met on 14 Oct. Enter the meeting date and the wording from the minutes, choose Approved, and confirm. The dialog says no QV or credit status is set.",
+  "file": "fl-04-s6.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-04",
+  "title": "Endorse a proposal, then record the Senate decision",
+  "actor": "Deputy dean",
+  "route": "#/dd/proposals",
+  "label": "Step 7 of 7",
+  "say": "Both proposals now show their new status. Approval is one decision; QV and credit are separate.",
+  "file": "fl-04-s7.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-05",
+  "title": "Create an offering and confirm readiness",
+  "actor": "Lecturer, deputy dean",
+  "route": "#/lec/offering/new",
+  "label": "Step 1 of 4",
+  "say": "Dr. Aina creates a new cohort for the approved Data Structures version.",
+  "file": "fl-05-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-05",
+  "title": "Create an offering and confirm readiness",
+  "actor": "Lecturer, deputy dean",
+  "route": "#/lec/readiness/DS-2027-1",
+  "label": "Step 2 of 4",
+  "say": "She uploads the one open item (facilitator qualification evidence) and sends the checklist to the deputy dean.",
+  "file": "fl-05-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-05",
+  "title": "Create an offering and confirm readiness",
+  "actor": "Lecturer, deputy dean",
+  "route": "#/dd/readiness/DS-2027-1",
+  "label": "Step 3 of 4",
+  "say": "Hakim can only confirm once the checklist is sent. Click Accept evidence on the new item, choose Ready, and record the decision. Ready with conditions and Not ready are the other choices.",
+  "file": "fl-05-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-05",
+  "title": "Create an offering and confirm readiness",
+  "actor": "Lecturer, deputy dean",
+  "route": "#/public/catalogue",
+  "label": "Step 4 of 4",
+  "say": "The cohort is now Open and appears in the public catalogue.",
+  "file": "fl-05-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-06",
+  "title": "Find, register and pay",
+  "actor": "Student",
+  "route": "#/public/offering/CND-2027-1",
+  "label": "Step 1 of 6",
+  "say": "Amir reads the public offering page. Credit is not claimed because QV ends before the cohort does. Click Register.",
+  "file": "fl-06-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-06",
+  "title": "Find, register and pay",
+  "actor": "Student",
+  "route": "#/st/register/CND-2027-1?step=1",
+  "label": "Step 2 of 6",
+  "say": "Step 1: eligibility checks pass and he confirms his phone number. Click Continue.",
+  "file": "fl-06-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-06",
+  "title": "Find, register and pay",
+  "actor": "Student",
+  "route": "#/st/register/CND-2027-1?step=2",
+  "label": "Step 3 of 6",
+  "say": "Step 2: tick both the recognition statement and the PDPA notice. The statement says credit depends on QV renewal. Click Continue to payment.",
+  "file": "fl-06-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-06",
+  "title": "Find, register and pay",
+  "actor": "Student",
+  "route": "#/st/register/CND-2027-1?step=3",
+  "label": "Step 4 of 6",
+  "say": "Step 3: pay with the dummy card, then confirm Pay now in the dialog. Any card number except 4000 0000 0000 0002 succeeds.",
+  "file": "fl-06-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-06",
+  "title": "Find, register and pay",
+  "actor": "Student",
+  "route": "#/st/register/CND-2027-1?step=4",
+  "label": "Step 5 of 6",
+  "say": "Step 4: confirmation with the enrolment ID and how to open UCreds. The registration now shows under Registrations and payments.",
+  "file": "fl-06-s5.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-06",
+  "title": "Find, register and pay",
+  "actor": "Student",
+  "route": "#/st/enrolments",
+  "label": "Step 6 of 6",
+  "say": "The new registration is listed as Enrolled with its receipt link.",
+  "file": "fl-06-s6.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-06b",
+  "title": "Payment failure and retry",
+  "actor": "Student",
+  "route": "#/st/register/LSS-2026-12?step=3",
+  "label": "Step 1 of 3",
+  "say": "Amir pays for Lean Six Sigma Yellow Belt. Replace the card number with 4000 0000 0000 0002 and click Pay, then confirm.",
+  "file": "fl-06b-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-06b",
+  "title": "Payment failure and retry",
+  "actor": "Student",
+  "route": "#/st/register/LSS-2026-12?step=3",
+  "label": "Step 2 of 3",
+  "say": "The failure shows inside the payment block with a reference. The registration stays Pending payment and nothing was charged. Put back 4242 4242 4242 4242 and click Retry payment.",
+  "file": "fl-06b-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-06b",
+  "title": "Payment failure and retry",
+  "actor": "Student",
+  "route": "#/st/enrolments",
+  "label": "Step 3 of 3",
+  "say": "After a successful retry the registration is Enrolled, with one payment only.",
+  "file": "fl-06b-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-07",
+  "title": "Import UCreds results with a bad row",
+  "actor": "CODL, lecturer, deputy dean",
+  "route": "#/codl/ucreds",
+  "label": "Step 1 of 3",
+  "say": "Farid chooses results-CND-2026-2.csv and clicks Check file. The report shows 22 rows ready, 2 rejected (empty marks) and a notice that this file was already imported. Click Stage 22 rows and watch the job run. Dr. Aina is told which marks are missing. Nothing becomes an achievement yet.",
+  "file": "fl-07-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-07",
+  "title": "Import UCreds results with a bad row",
+  "actor": "CODL, lecturer, deputy dean",
+  "route": "#/lec/cohort/CND-2026-2",
+  "label": "Step 2 of 3",
+  "say": "Now as Dr. Aina: she enters Daniel Ong's project mark and Wong Kar Seng's module 2 mark, and submits the results for verification.",
+  "file": "fl-07-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-07",
+  "title": "Import UCreds results with a bad row",
+  "actor": "CODL, lecturer, deputy dean",
+  "route": "#/dd/results",
+  "label": "Step 3 of 3",
+  "say": "Now as Hakim, the deputy dean: the cohort waits for verification. Only the deputy dean can verify; CODL has no verify button.",
+  "file": "fl-07-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-08",
+  "title": "Verify results, then confirm completion",
+  "actor": "Deputy dean",
+  "route": "#/dd/verify/DS-2026-2",
+  "label": "Step 1 of 3",
+  "say": "Review the 28 provisional results, then click Verify 28 results. This creates module badges only; nothing is issued yet.",
+  "file": "fl-08-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-08",
+  "title": "Verify results, then confirm completion",
+  "actor": "Deputy dean",
+  "route": "#/dd/completion/DS-2026-2",
+  "label": "Step 2 of 3",
+  "say": "A new task appeared for completion. Check the pre-issue checks (one learner is below the pass mark and is not issued), then Confirm completion and watch the job run.",
+  "file": "fl-08-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-08",
+  "title": "Verify results, then confirm completion",
+  "actor": "Deputy dean",
+  "route": "#/st/credentials",
+  "label": "Step 3 of 3",
+  "say": "Learners find issued credentials in their wallet. This is Amir's own list, showing what a participant sees.",
+  "file": "fl-08-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-09",
+  "title": "Share a credential and have it verified",
+  "actor": "Student, public",
+  "route": "#/st/credential/MCMS-C-2026-000098",
+  "label": "Step 1 of 4",
+  "say": "Amir copies the share link for his Data Structures credential and sees what an employer will see.",
+  "file": "fl-09-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-09",
+  "title": "Share a credential and have it verified",
+  "actor": "Student, public",
+  "route": "#/public/verify/3HXP-92LD",
+  "label": "Step 2 of 4",
+  "say": "An employer opens the link: minimum fields only, status Valid.",
+  "file": "fl-09-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-09",
+  "title": "Share a credential and have it verified",
+  "actor": "Student, public",
+  "route": "#/public/verify/R7KD-1MQA",
+  "label": "Step 3 of 4",
+  "say": "A revoked credential says Revoked and shows no result.",
+  "file": "fl-09-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-09",
+  "title": "Share a credential and have it verified",
+  "actor": "Student, public",
+  "route": "#/public/verify/ZZZZ-0000",
+  "label": "Step 4 of 4",
+  "say": "A code that does not exist says it was not found and tells the employer what to check.",
+  "file": "fl-09-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-10",
+  "title": "Correct a credential name",
+  "actor": "Deputy dean",
+  "route": "#/dd/cred/MCMS-C-2026-000418",
+  "label": "Step 1 of 2",
+  "say": "Lee Jia Hui asked for her name to be corrected. Click Start correction, check the name, give a reason and confirm.",
+  "file": "fl-10-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-10",
+  "title": "Correct a credential name",
+  "actor": "Deputy dean",
+  "route": "#/public/verify/7Q2M-K4PA",
+  "label": "Step 2 of 2",
+  "say": "The same public link now shows the credential as Corrected, with the corrected name.",
+  "file": "fl-10-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-11",
+  "title": "Consent to ABC deposit, confirm ACR, record deposit, see ledger",
+  "actor": "Student, deputy dean",
+  "route": "#/st/acr/MCMS-A-2026-000214",
+  "label": "Step 1 of 4",
+  "say": "Amir opens his Cloud Native Development ACR and gives consent to deposit it in ABC. Click Give consent, then Next step.",
+  "file": "fl-11-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-11",
+  "title": "Consent to ABC deposit, confirm ACR, record deposit, see ledger",
+  "actor": "Student, deputy dean",
+  "route": "#/dd/acr?tab=queue",
+  "label": "Step 2 of 4",
+  "say": "Hakim sees the consented, confirmed ACR in the deposit queue. Only ACR with consent appear here. Open the row.",
+  "file": "fl-11-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-11",
+  "title": "Consent to ABC deposit, confirm ACR, record deposit, see ledger",
+  "actor": "Student, deputy dean",
+  "route": "#/dd/deposit/MCMS-A-2026-000214",
+  "label": "Step 3 of 4",
+  "say": "Open the export for ABC, go back, then enter the ABC reference and date and click Record deposit. The credit becomes Available for 10 years and Amir is told it is storage, not a transfer.",
+  "file": "fl-11-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-11",
+  "title": "Consent to ABC deposit, confirm ACR, record deposit, see ledger",
+  "actor": "Student, deputy dean",
+  "route": "#/st/ledger",
+  "label": "Step 4 of 4",
+  "say": "Amir sees the credit as Available with its expiry date and the ABC reference.",
+  "file": "fl-11-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-12",
+  "title": "Apply for credit transfer; decide by outcome; provisionally redeemed; second use blocked",
+  "actor": "Student, deputy dean",
+  "route": "#/st/transfer/TR-2026-0012",
+  "label": "Step 1 of 5",
+  "say": "Amir's application TR-2026-0012 is under evaluation. It was submitted from the new application page; nothing more to do here.",
+  "file": "fl-12-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-12",
+  "title": "Apply for credit transfer; decide by outcome; provisionally redeemed; second use blocked",
+  "actor": "Student, deputy dean",
+  "route": "#/dd/transfer/TR-2026-0012",
+  "label": "Step 2 of 5",
+  "say": "Hakim compares each outcome (all Full) and checks the ACR is deposited, valid and unused. Choose Approve, then Record decision.",
+  "file": "fl-12-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-12",
+  "title": "Apply for credit transfer; decide by outcome; provisionally redeemed; second use blocked",
+  "actor": "Student, deputy dean",
+  "route": "#/st/ledger",
+  "label": "Step 3 of 5",
+  "say": "The credit now shows Provisionally redeemed. It cannot be used for another application.",
+  "file": "fl-12-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-12",
+  "title": "Apply for credit transfer; decide by outcome; provisionally redeemed; second use blocked",
+  "actor": "Student, deputy dean",
+  "route": "#/st/transfer/new",
+  "label": "Step 4 of 5",
+  "say": "Amir starts another application. The Data Structures credit is no longer selectable and the page says why.",
+  "file": "fl-12-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-12",
+  "title": "Apply for credit transfer; decide by outcome; provisionally redeemed; second use blocked",
+  "actor": "Student, deputy dean",
+  "route": "#/dd/transfer/TR-2026-0009",
+  "label": "Step 5 of 5",
+  "say": "Wong Kar Seng's case has one outcome with no match. Approve is disabled for that line; you can only refuse it or ask for more evidence. A line whose outcomes are not rated is blocked the same way.",
+  "file": "fl-12-s5.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-13",
+  "title": "Stackable plan: 25% \"Not yet suitable\" and a suitable plan",
+  "actor": "Deputy dean",
+  "route": "#/dd/stack?tab=plans",
+  "label": "Step 1 of 4",
+  "say": "Hakim opens the individual plans. Wong Kar Seng is Not yet suitable; Amir is Suitable.",
+  "file": "fl-13-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-13",
+  "title": "Stackable plan: 25% \"Not yet suitable\" and a suitable plan",
+  "actor": "Deputy dean",
+  "route": "#/dd/plan/SP-2026-004",
+  "label": "Step 2 of 4",
+  "say": "Wong proposes 90 of 120 credits from outside UTeM, so only 25% is earned at UTeM. The 30% minimum fails and the suitable options are off. Note that 30% does not mean 70% transfers.",
+  "file": "fl-13-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-13",
+  "title": "Stackable plan: 25% \"Not yet suitable\" and a suitable plan",
+  "actor": "Deputy dean",
+  "route": "#/dd/plan/SP-2026-003",
+  "label": "Step 3 of 4",
+  "say": "Amir has 95.8% at UTeM, residency met and admission recorded, so Suitable to proceed is available. Record the decision.",
+  "file": "fl-13-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-13",
+  "title": "Stackable plan: 25% \"Not yet suitable\" and a suitable plan",
+  "actor": "Deputy dean",
+  "route": "#/dd/pathway/PW-BITZ-1",
+  "label": "Step 4 of 4",
+  "say": "The pathway mapping behind the plans. Try adding Leadership Essentials: an MCE is refused. Then submit for Senate approval.",
+  "file": "fl-13-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-14",
+  "title": "QV evidence, gate, record QV result; expiry removes claims",
+  "actor": "Lecturer, deputy dean",
+  "route": "#/lec/qv/CND",
+  "label": "Step 1 of 4",
+  "say": "Dr. Aina keeps the QV evidence for Cloud Native Development. QV expires on 6 Dec 2026, 41 days away.",
+  "file": "fl-14-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-14",
+  "title": "QV evidence, gate, record QV result; expiry removes claims",
+  "actor": "Lecturer, deputy dean",
+  "route": "#/dd/qv/CND",
+  "label": "Step 2 of 4",
+  "say": "Hakim builds the package, records the submission date and reference, then records the result. Try a validity longer than 3 years: it is refused.",
+  "file": "fl-14-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-14",
+  "title": "QV evidence, gate, record QV result; expiry removes claims",
+  "actor": "Lecturer, deputy dean",
+  "route": "#/dd/qv/CSO",
+  "label": "Step 3 of 4",
+  "say": "Cyber Security Operations has no completed cohort, so it cannot be Ready to submit. The button is off and says why.",
+  "file": "fl-14-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-14",
+  "title": "QV evidence, gate, record QV result; expiry removes claims",
+  "actor": "Lecturer, deputy dean",
+  "route": "#/dd/quality",
+  "label": "Step 4 of 4",
+  "say": "The QV list shows alerts at 180, 90 and 30 days, and the lapse rule: when QV ends, the QV claim goes but earned credentials stay.",
+  "file": "fl-14-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-15",
+  "title": "Quality review: close an action only after the effectiveness check",
+  "actor": "Lecturer, deputy dean",
+  "route": "#/lec/cqi/CQI-DS-2026-1",
+  "label": "Step 1 of 4",
+  "say": "Indicators against targets: outcome attainment is 73% against 75%. Action A3 is Done, but \"Close action\" is disabled until an effectiveness check exists.",
+  "file": "fl-15-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-15",
+  "title": "Quality review: close an action only after the effectiveness check",
+  "actor": "Lecturer, deputy dean",
+  "route": "#/lec/cqi/CQI-DS-2026-1",
+  "label": "Step 2 of 4",
+  "say": "Click \"Record effectiveness check\" on A3, choose a result and add evidence. Then \"Close action\" becomes available. A2 changes an outcome, so it offers \"Create change request\".",
+  "file": "fl-15-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-15",
+  "title": "Quality review: close an action only after the effectiveness check",
+  "actor": "Lecturer, deputy dean",
+  "route": "#/lec/cqi/CQI-DS-2026-1",
+  "label": "Step 3 of 4",
+  "say": "Click Submit to deputy dean and confirm. The record becomes Submitted and a task is pushed.",
+  "file": "fl-15-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-15",
+  "title": "Quality review: close an action only after the effectiveness check",
+  "actor": "Lecturer, deputy dean",
+  "route": "#/dd/cqi/CQI-DS-2026-1",
+  "label": "Step 4 of 4",
+  "say": "The deputy dean sees the submitted record and confirms it.",
+  "file": "fl-15-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-16",
+  "title": "Suspend an offering with a transition plan",
+  "actor": "Deputy dean",
+  "route": "#/dd/quality?tab=periodic",
+  "label": "Step 1 of 4",
+  "say": "Hakim sees the periodic reviews that are due. Cloud Native Development is due on 6 Nov.",
+  "file": "fl-16-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-16",
+  "title": "Suspend an offering with a transition plan",
+  "actor": "Deputy dean",
+  "route": "#/dd/review/CND",
+  "label": "Step 2 of 4",
+  "say": "Choose the outcome \"Consider suspension or termination\" and record it. That takes you to the suspension screen.",
+  "file": "fl-16-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-16",
+  "title": "Suspend an offering with a transition plan",
+  "actor": "Deputy dean",
+  "route": "#/dd/suspend/CND",
+  "label": "Step 3 of 4",
+  "say": "The active participants are listed. A transition plan is required. Review the notice, then confirm with a reason. Earned credentials stay valid.",
+  "file": "fl-16-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-16",
+  "title": "Suspend an offering with a transition plan",
+  "actor": "Deputy dean",
+  "route": "#/dd/quality?tab=susp",
+  "label": "Step 4 of 4",
+  "say": "The micro-credential now shows Suspended.",
+  "file": "fl-16-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-17",
+  "title": "Assign a scoped role and change a setting",
+  "actor": "CODL administrator",
+  "route": "#/codl/users",
+  "label": "Step 1 of 4",
+  "say": "Farid searches the user list and opens a person.",
+  "file": "fl-17-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-17",
+  "title": "Assign a scoped role and change a setting",
+  "actor": "CODL administrator",
+  "route": "#/codl/user/S01842",
+  "label": "Step 2 of 4",
+  "say": "Click Assign role. Choose Reviewer, scope Specific micro-credentials (LE, which Dr. Aina does not own), a reason and an effective date. The new row appears in the table.",
+  "file": "fl-17-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-17",
+  "title": "Assign a scoped role and change a setting",
+  "actor": "CODL administrator",
+  "route": "#/codl/settings",
+  "label": "Step 3 of 4",
+  "say": "Find alerts.qv_expiry_days and click Change. Enter a new value, an effective date and a reason. Then click History on the same row to see old and new values.",
+  "file": "fl-17-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-17",
+  "title": "Assign a scoped role and change a setting",
+  "actor": "CODL administrator",
+  "route": "#/codl/audit",
+  "label": "Step 4 of 4",
+  "say": "Both changes are in the audit trail with who, when and why. Click Check integrity to verify the hash chain.",
+  "file": "fl-17-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-18",
+  "title": "Trace a participant from approval to credit use; audit trail",
+  "actor": "Deputy dean",
+  "route": "#/dd/trace",
+  "label": "Step 1 of 3",
+  "say": "Hakim searches for a participant or a credential number.",
+  "file": "fl-18-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-18",
+  "title": "Trace a participant from approval to credit use; audit trail",
+  "actor": "Deputy dean",
+  "route": "#/dd/trace/amir",
+  "label": "Step 2 of 3",
+  "say": "The chain runs from approval, offering, enrolment, results, completion and credential to ACR, consent, deposit, transfer and redemption. Each step shows who acted and when.",
+  "file": "fl-18-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-18",
+  "title": "Trace a participant from approval to credit use; audit trail",
+  "actor": "Deputy dean",
+  "route": "#/dd/trace/wong",
+  "label": "Step 3 of 3",
+  "say": "Wong Kar Seng's chain shows a transfer still under evaluation. Scroll to the audit table at the bottom: every action on these records is listed with who did it and when.",
+  "file": "fl-18-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/public/home",
+  "label": "Step 1 of 17",
+  "say": "Amir, a working engineer, finds UTeM micro-credentials on the public site.",
+  "file": "fl-19-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/public/offering/CND-2027-1",
+  "label": "Step 2 of 17",
+  "say": "The offering says what he will get and that completion, ACR, ABC deposit and transfer are separate decisions.",
+  "file": "fl-19-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/st/register/CND-2027-1",
+  "label": "Step 3 of 17",
+  "say": "He signs in with his UTeM learner account, accepts the recognition statement and PDPA notice, and pays (dummy service).",
+  "file": "fl-19-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/st/home",
+  "label": "Step 4 of 17",
+  "say": "He studies on UCreds. MCMS shows his module progress across months.",
+  "file": "fl-19-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/codl/ucreds",
+  "label": "Step 5 of 17",
+  "say": "CODL imports results from UCreds. Bad rows are rejected; good rows stay Provisional.",
+  "file": "fl-19-s5.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/lec/cohort/CND-2026-2",
+  "label": "Step 6 of 17",
+  "say": "Dr. Aina fills the two missing marks and sends the cohort for verification.",
+  "file": "fl-19-s6.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/dd/verify/DS-2026-2",
+  "label": "Step 7 of 17",
+  "say": "Hakim verifies results. This creates module badges only, nothing else. (Shown on Data Structures 2026/2; Amir's own cohorts were verified the same way.)",
+  "file": "fl-19-s7.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/dd/completion/LE-2026-10",
+  "label": "Step 8 of 17",
+  "say": "Hakim confirms completion as a separate step. The system checks each learner and issues Amir's Leadership Essentials certificate. It is an MCE, so no ACR follows.",
+  "file": "fl-19-s8.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/st/credentials",
+  "label": "Step 9 of 17",
+  "say": "Amir sees his credentials, including the new Leadership Essentials certificate. He opens one and copies a share link.",
+  "file": "fl-19-s9.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/public/verify/3HXP-92LD",
+  "label": "Step 10 of 17",
+  "say": "An employer opens the link without signing in and sees only name, credential, issuer, date and status.",
+  "file": "fl-19-s10.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/st/acr/MCMS-A-2026-000214",
+  "label": "Step 11 of 17",
+  "say": "Amir gives consent to deposit his ACR in the Academic Bank of Credit.",
+  "file": "fl-19-s11.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/dd/deposit/MCMS-A-2026-000214",
+  "label": "Step 12 of 17",
+  "say": "Hakim sees the consented ACR in the deposit queue and records the ABC reference.",
+  "file": "fl-19-s12.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/st/ledger",
+  "label": "Step 13 of 17",
+  "say": "Amir's ledger shows the credit Available for 10 years. It is storage, not a transfer.",
+  "file": "fl-19-s13.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/st/transfer/new",
+  "label": "Step 14 of 17",
+  "say": "Admitted to the degree (a separate decision), Amir can now apply with Cloud Native Development. Data Structures is already in his earlier application TR-2026-0012, and MCE credit is never selectable.",
+  "file": "fl-19-s14.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/dd/transfer/TR-2026-0012",
+  "label": "Step 15 of 17",
+  "say": "Hakim, deputy dean of the degree's faculty, decides Amir's earlier application on learning outcomes and approves. The credit becomes Provisionally redeemed.",
+  "file": "fl-19-s15.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/dd/plan/SP-2026-003",
+  "label": "Step 16 of 17",
+  "say": "The stackable plan checks that at least 30% of credit is still earned at UTeM, and residency.",
+  "file": "fl-19-s16.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-19",
+  "title": "End-to-end: Amir from catalogue to credit used in a degree",
+  "actor": "All roles",
+  "route": "#/dd/trace/amir",
+  "label": "Step 17 of 17",
+  "say": "Anyone authorised can trace every record from approval to credit use, with who and when.",
+  "file": "fl-19-s17.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-20",
+  "title": "Industry expert comments on a proposal",
+  "actor": "Industry expert",
+  "route": "#/ext/home",
+  "label": "Step 1 of 3",
+  "say": "Ir. Siti Aminah Yusof has an invitation to Applied Data Analytics with Python.",
+  "file": "fl-20-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-20",
+  "title": "Industry expert comments on a proposal",
+  "actor": "Industry expert",
+  "route": "#/ext/review/RV-033",
+  "label": "Step 2 of 3",
+  "say": "The proposal is already endorsed and waits for the Senate; comments are still accepted until that decision is recorded. Declare no conflict, then write comments. There is no rating and no recommendation for this role. Send comments and confirm.",
+  "file": "fl-20-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-20",
+  "title": "Industry expert comments on a proposal",
+  "actor": "Industry expert",
+  "route": "#/lec/proposal/ADA?tab=comments",
+  "label": "Step 3 of 3",
+  "say": "The comments reach the proposer on the Comments tab, where she can respond.",
+  "file": "fl-20-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-21",
+  "title": "Withdraw from an enrolment",
+  "actor": "Student",
+  "route": "#/st/enrolments",
+  "label": "Step 1 of 3",
+  "say": "Amir opens his registrations and picks Industrial IoT Fundamentals 2026/2.",
+  "file": "fl-21-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-21",
+  "title": "Withdraw from an enrolment",
+  "actor": "Student",
+  "route": "#/st/enrolment/E-2026-0590",
+  "label": "Step 2 of 3",
+  "say": "Click Withdraw. The dialog states what stays on his record, that refunds are undecided, and asks for a reason. Confirm to withdraw.",
+  "file": "fl-21-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-21",
+  "title": "Withdraw from an enrolment",
+  "actor": "Student",
+  "route": "#/st/enrolments",
+  "label": "Step 3 of 3",
+  "say": "The registration now reads Withdrawn. Module 1, achieved on 6 Oct 2026, is still in his achievement record.",
+  "file": "fl-21-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-22",
+  "title": "A visitor explores the public site",
+  "actor": "Public visitor",
+  "route": "#/public/home",
+  "label": "Step 1 of 5",
+  "say": "A visitor lands on the portal. The three categories and open offerings are explained before anything else. Click Next step.",
+  "file": "fl-22-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-22",
+  "title": "A visitor explores the public site",
+  "actor": "Public visitor",
+  "route": "#/public/catalogue?q=cloud",
+  "label": "Step 2 of 5",
+  "say": "The search from the home page opens the catalogue filtered to \"cloud\". Use the filters on the left to narrow further.",
+  "file": "fl-22-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-22",
+  "title": "A visitor explores the public site",
+  "actor": "Public visitor",
+  "route": "#/public/offering/CND-2027-1",
+  "label": "Step 3 of 5",
+  "say": "The offering shows modules, assessment and the credential received. Note \"Credit after QV renewal\" and the separate-stages notice.",
+  "file": "fl-22-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-22",
+  "title": "A visitor explores the public site",
+  "actor": "Public visitor",
+  "route": "#/public/how",
+  "label": "Step 4 of 5",
+  "say": "Each recognition stage says what it is and what it is not.",
+  "file": "fl-22-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-22",
+  "title": "A visitor explores the public site",
+  "actor": "Public visitor",
+  "route": "#/public/pathways",
+  "label": "Step 5 of 5",
+  "say": "Pathways show only approved micro-credentials, with the rules and the no-automatic-degree wording.",
+  "file": "fl-22-s5.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-23",
+  "title": "An employer verifies a credential",
+  "actor": "Tan Mei Ling, HR manager (public)",
+  "route": "#/public/verify",
+  "label": "Step 1 of 7",
+  "say": "Tan has a candidate's credential and opens the verification page. No sign-in is needed.",
+  "file": "fl-23-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-23",
+  "title": "An employer verifies a credential",
+  "actor": "Tan Mei Ling, HR manager (public)",
+  "route": "#/public/verify/3HXP-92LD",
+  "label": "Step 2 of 7",
+  "say": "The credential is valid. Only name, credential, issuer, date and status are shown.",
+  "file": "fl-23-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-23",
+  "title": "An employer verifies a credential",
+  "actor": "Tan Mei Ling, HR manager (public)",
+  "route": "#/public/verify/7Q2M-K4PA",
+  "label": "Step 3 of 7",
+  "say": "A credential that was corrected (once the deputy dean corrects it) stays valid and shows the correction date.",
+  "file": "fl-23-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-23",
+  "title": "An employer verifies a credential",
+  "actor": "Tan Mei Ling, HR manager (public)",
+  "route": "#/dd/cred/MCMS-C-2026-000418",
+  "label": "Step 4 of 7",
+  "say": "Before you continue, replace credential 7Q2M-K4PA here as the deputy dean (use the replace action and confirm). Then click Next step.",
+  "file": "fl-23-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-23",
+  "title": "An employer verifies a credential",
+  "actor": "Tan Mei Ling, HR manager (public)",
+  "route": "#/public/verify/7Q2M-K4PA",
+  "label": "Step 5 of 7",
+  "say": "Once replaced, the old code shows \"Replaced\" and links to the new credential. Employers should verify the new code instead. If you did not replace it, the page still shows the earlier result.",
+  "file": "fl-23-s5.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-23",
+  "title": "An employer verifies a credential",
+  "actor": "Tan Mei Ling, HR manager (public)",
+  "route": "#/public/verify/R7KD-1MQA",
+  "label": "Step 6 of 7",
+  "say": "A revoked credential shows the revocation date and must not be relied on.",
+  "file": "fl-23-s6.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-23",
+  "title": "An employer verifies a credential",
+  "actor": "Tan Mei Ling, HR manager (public)",
+  "route": "#/public/verify/ZZZZ-0000",
+  "label": "Step 7 of 7",
+  "say": "An unknown code gives a neutral not-found message, not an accusation.",
+  "file": "fl-23-s7.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-24",
+  "title": "Documents and PDFs",
+  "actor": "All roles",
+  "route": "#/doc/index",
+  "label": "Step 1 of 8",
+  "say": "This is the list of every printable document. Next, open the payment receipt.",
+  "file": "fl-24-s1.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-24",
+  "title": "Documents and PDFs",
+  "actor": "All roles",
+  "route": "#/doc/receipt/E-2026-0590",
+  "label": "Step 2 of 8",
+  "say": "An official receipt with the fee breakdown and a dummy-payment line. Use Print or save as PDF in the top bar, then Next step.",
+  "file": "fl-24-s2.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-24",
+  "title": "Documents and PDFs",
+  "actor": "All roles",
+  "route": "#/doc/enrolment/E-2026-0590",
+  "label": "Step 3 of 8",
+  "say": "The enrolment letter: UCreds instructions, withdrawal deadline, the recognition statement and the separate-stages notice, with Bahasa Melayu beneath.",
+  "file": "fl-24-s3.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-24",
+  "title": "Documents and PDFs",
+  "actor": "All roles",
+  "route": "#/doc/certificate/MCMS-C-2026-000098",
+  "label": "Step 4 of 8",
+  "say": "A bilingual landscape certificate with credit, a verification code and a placeholder QR square. No marks are shown.",
+  "file": "fl-24-s4.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-24",
+  "title": "Documents and PDFs",
+  "actor": "All roles",
+  "route": "#/doc/credential/MCMS-C-2026-000098",
+  "label": "Step 5 of 8",
+  "say": "The Digital Credential as Open Badges 3.0 JSON. Download .json saves a real file.",
+  "file": "fl-24-s5.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-24",
+  "title": "Documents and PDFs",
+  "actor": "All roles",
+  "route": "#/doc/acr/MCMS-A-2026-000102",
+  "label": "Step 6 of 8",
+  "say": "The Academic Credit Record: it says deposit is storage, not transfer.",
+  "file": "fl-24-s6.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-24",
+  "title": "Documents and PDFs",
+  "actor": "All roles",
+  "route": "#/doc/report/credentials-issued",
+  "label": "Step 7 of 8",
+  "say": "The full report template: cover, summary figures, tables with totals, method notes and page numbers. Download .csv saves the main table.",
+  "file": "fl-24-s7.jpg"
+ },
+ {
+  "kind": "flowstep",
+  "id": "FL-24",
+  "title": "Documents and PDFs",
+  "actor": "All roles",
+  "route": "#/doc/abc/ABC-FTMK-2026-03",
+  "label": "Step 8 of 8",
+  "say": "The ABC deposit batch, one row per ACR with totals. Download .csv saves the batch file.",
+  "file": "fl-24-s8.jpg"
+ }
+]

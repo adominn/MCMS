@@ -1,0 +1,233 @@
+<!doctype html><html><head><meta charset="utf-8"><title>04-public</title><style>/* MCMS screens — DESIGN.md (ulearn-carbon) mapped to app-screen roles */
+:root {
+  --primary: #1e2a6e; --primary-hover: #18225a; --blue-60: #2e3d94;
+  --ink: #161616; --muted: #525252; --subtle: #6f6f6f;
+  --canvas: #ffffff; --s1: #f4f4f4; --s2: #e0e0e0; --hair: #e0e0e0; --rule: #ececec; --control: #8d8d8d;
+  --ok: #24a148; --warn: #f1c21b; --err: #da1e28;
+  --ok-bg: #defbe6; --ok-ink: #0e6027; --warn-bg: #fcf4d6; --warn-ink: #684e00;
+  --err-bg: #fff1f1; --err-ink: #a2191f; --info-bg: #e8eaf6; --info-ink: #1e2a6e; --n-bg: #e8e8e8; --n-ink: #393939;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif; color: var(--ink); background: #d9d9d9;
+  font-size: 14px; line-height: 20px; letter-spacing: .16px; padding: 40px; display: flex; flex-wrap: wrap; gap: 80px; align-items: flex-start; }
+.num, td.num, th.num { font-variant-numeric: tabular-nums; text-align: right; }
+a, .link { color: var(--primary); text-decoration: none; }
+
+/* screen frames */
+.screen, .phone, .sheet { flex: none; }
+.screen { width: 1440px; min-height: 900px; background: var(--canvas); display: flex; flex-direction: column; }
+.phone { width: 390px; min-height: 844px; background: var(--canvas); display: flex; flex-direction: column; }
+.sheet { width: 1440px; background: var(--canvas); padding: 48px 56px 64px; }
+
+/* shell */
+.top { height: 48px; border-bottom: 1px solid var(--hair); display: flex; align-items: center; padding: 0 24px 0 20px; gap: 24px; flex: none; }
+.brand { display: flex; align-items: baseline; gap: 8px; font-size: 14px; }
+.brand b { font-weight: 600; }
+.brand span { color: var(--muted); }
+.top .scope { margin-left: auto; display: flex; align-items: center; gap: 20px; color: var(--muted); font-size: 13px; }
+.top .scope .who { color: var(--ink); }
+.lang { display: flex; border: 1px solid var(--hair); }
+.lang span { padding: 2px 8px; font-size: 12px; }
+.lang .on { background: var(--ink); color: #fff; }
+.body { display: flex; flex: 1; }
+.side { width: 248px; border-right: 1px solid var(--hair); padding: 16px 12px; flex: none; display: flex; flex-direction: column; gap: 2px; }
+.side .grp { font-size: 12px; color: var(--subtle); padding: 16px 12px 6px; }
+.nav { height: 36px; display: flex; align-items: center; padding: 0 12px; color: var(--muted); font-size: 14px; gap: 10px; }
+.nav svg { width: 16px; height: 16px; flex: none; }
+.nav .c { margin-left: auto; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.nav.on { background: var(--s1); color: var(--ink); font-weight: 600; }
+.main { flex: 1; padding: 24px 40px 48px; display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.crumb { font-size: 12px; color: var(--muted); display: flex; gap: 8px; }
+.crumb a { color: var(--primary); }
+.title { display: flex; align-items: flex-end; gap: 16px; }
+.title h1 { font-size: 28px; line-height: 36px; font-weight: 400; letter-spacing: 0; }
+.title .sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+.title .act { margin-left: auto; display: flex; gap: 8px; }
+h2 { font-size: 16px; line-height: 24px; font-weight: 600; }
+h3 { font-size: 14px; font-weight: 600; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; line-height: 16px; letter-spacing: .32px; }
+.row { display: flex; gap: 24px; align-items: flex-start; }
+.col { display: flex; flex-direction: column; gap: 16px; }
+.grow { flex: 1; min-width: 0; }
+
+/* buttons */
+.btn { height: 40px; padding: 0 16px; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; border: 0; background: var(--primary); color: #fff; white-space: nowrap; font-family: inherit; }
+.btn.sec { background: var(--ink); }
+.btn.ter { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+.btn.ghost { background: transparent; color: var(--primary); padding: 0 8px; }
+.btn.danger { background: var(--err); }
+.btn.dis { background: var(--s2); color: #8d8d8d; }
+.btn.sm { height: 32px; padding: 0 12px; }
+
+/* panels */
+.panel { border: 1px solid var(--hair); background: #fff; }
+.panel > .hd { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--hair); }
+.panel > .hd .r { margin-left: auto; font-size: 12px; color: var(--muted); }
+.panel > .bd { padding: 20px; }
+.band { background: var(--s1); padding: 16px 20px; }
+
+/* KPI strip: one container split by hairlines */
+.kpis { display: flex; border: 1px solid var(--hair); }
+.kpi { flex: 1; padding: 16px 20px; border-left: 1px solid var(--hair); }
+.kpi:first-child { border-left: 0; }
+.kpi .l { font-size: 12px; color: var(--muted); }
+.kpi .v { font-size: 28px; line-height: 36px; font-weight: 300; font-variant-numeric: tabular-nums; margin-top: 4px; }
+.kpi .n { font-size: 12px; color: var(--muted); }
+
+/* tables */
+table { border-collapse: collapse; width: 100%; }
+th { font-size: 12px; font-weight: 400; color: var(--muted); text-align: left; padding: 0 12px; height: 36px; border-bottom: 1px solid var(--hair); white-space: nowrap; }
+td { padding: 0 12px; height: 48px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+td .s { display: block; font-size: 12px; color: var(--muted); line-height: 16px; }
+tr.sel td { background: var(--s1); }
+th:first-child, td:first-child { padding-left: 20px; }
+th:last-child, td:last-child { padding-right: 20px; }
+
+/* tags */
+.tag { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 10px; font-size: 12px; white-space: nowrap; background: var(--n-bg); color: var(--n-ink); }
+.tag.ok { background: var(--ok-bg); color: var(--ok-ink); }
+.tag.warn { background: var(--warn-bg); color: var(--warn-ink); }
+.tag.err { background: var(--err-bg); color: var(--err-ink); }
+.tag.info { background: var(--info-bg); color: var(--info-ink); }
+.nm { display: inline-flex; gap: 8px; align-items: baseline; }
+td.num { white-space: nowrap; }
+.cat { flex: none; font-size: 12px; font-weight: 600; letter-spacing: .32px; border: 1px solid var(--ink); padding: 0 5px; height: 18px; display: inline-flex; align-items: center; }
+
+/* forms */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 12px; color: var(--muted); letter-spacing: .32px; }
+.input { height: 40px; background: var(--s1); border-bottom: 1px solid var(--control); padding: 0 16px; display: flex; align-items: center; font-size: 14px; }
+.input.ph { color: var(--subtle); }
+.input.focus { border: 2px solid var(--primary); padding: 0 14px; }
+.input.error { border: 2px solid var(--err); padding: 0 14px; }
+.input.area { height: 88px; align-items: flex-start; padding-top: 10px; }
+.input.read { background: #fff; border-bottom: 1px solid var(--hair); padding: 0; }
+.help { font-size: 12px; color: var(--muted); }
+.help.err { color: var(--err-ink); }
+.choice { display: flex; gap: 10px; align-items: flex-start; padding: 12px 16px; border: 1px solid var(--hair); }
+.choice.on { border: 2px solid var(--primary); padding: 11px 15px; }
+.radio { width: 16px; height: 16px; border: 1px solid var(--ink); border-radius: 8px; flex: none; margin-top: 2px; }
+.radio.on { border: 5px solid var(--primary); }
+.box { width: 16px; height: 16px; border: 1px solid var(--ink); flex: none; }
+.box.on { background: var(--ink); border-color: var(--ink); }
+
+/* tabs */
+.tabs { display: flex; border-bottom: 1px solid var(--hair); }
+.tab { padding: 12px 16px; color: var(--muted); font-size: 14px; }
+.tab.on { color: var(--ink); font-weight: 600; box-shadow: inset 0 -2px 0 var(--primary); }
+.tab .c { color: var(--muted); font-weight: 400; margin-left: 6px; }
+
+/* notices: a tint is never a ground; inline only */
+.note { display: flex; gap: 12px; padding: 12px 16px; border-left: 3px solid var(--primary); background: var(--info-bg); font-size: 14px; }
+.note.warn { border-color: var(--warn); background: var(--warn-bg); }
+.note.err { border-color: var(--err); background: var(--err-bg); }
+.note.ok { border-color: var(--ok); background: var(--ok-bg); }
+
+/* checks list */
+.check { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule); align-items: flex-start; }
+.check:last-child { border-bottom: 0; }
+.dot { width: 8px; height: 8px; border-radius: 4px; background: var(--ok); margin-top: 6px; flex: none; }
+.dot.warn { background: var(--warn); } .dot.err { background: var(--err); } .dot.n { background: #a8a8a8; }
+
+/* stage track: the recognition chain, kept as separate steps [G 12-14] */
+.track { display: flex; }
+.stp { flex: 1; padding: 10px 12px 10px 0; border-top: 3px solid var(--s2); font-size: 12px; color: var(--muted); }
+.stp b { display: block; font-size: 13px; font-weight: 600; color: var(--muted); }
+.stp.done { border-color: var(--ink); } .stp.done b { color: var(--ink); }
+.stp.now { border-color: var(--primary); } .stp.now b { color: var(--primary); }
+
+/* definition list */
+.dl { display: grid; grid-template-columns: 160px 1fr; row-gap: 10px; column-gap: 16px; font-size: 14px; }
+.dl dt { color: var(--muted); font-size: 13px; }
+
+/* bars */
+.bar { height: 8px; background: var(--s2); position: relative; }
+.bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--primary); }
+
+/* phone */
+.ptop { height: 52px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid var(--hair); gap: 12px; flex: none; }
+.ptop b { font-weight: 600; }
+.pmain { flex: 1; padding: 20px 16px 24px; display: flex; flex-direction: column; gap: 20px; }
+.pmain h1 { font-size: 24px; line-height: 32px; font-weight: 400; }
+.pnav { height: 64px; border-top: 1px solid var(--hair); display: flex; flex: none; }
+.pnav div { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; color: var(--muted); }
+.pnav svg { width: 20px; height: 20px; }
+.pnav .on { color: var(--ink); font-weight: 600; box-shadow: inset 0 2px 0 var(--ink); }
+.li { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.li .t { flex: 1; min-width: 0; }
+.li .t .s { display: block; font-size: 12px; color: var(--muted); line-height: 16px; }
+
+/* foundation sheet */
+.sw { width: 168px; }
+.sw i { display: block; height: 64px; border: 1px solid var(--hair); }
+.sw b { display: block; font-weight: 600; font-size: 13px; margin-top: 8px; }
+.lbl { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+</style></head><body><!-- Public: catalogue, offering detail, verification (X3, Tan). No login. -->
+
+<section class="screen" data-name="PUB-01 Catalogue"><div class="top"><div class="brand"><b>UTeM</b><span>Micro-credentials</span></div><div class="scope"><span>Catalogue</span><span>Verify a credential</span><span class="lang"><span class="on">EN</span><span>BM</span></span><span class="who">Sign in</span></div></div><div class="body"><div class="main">
+  <div class="title"><div><h1>Micro-credentials at UTeM</h1><div class="sub">5 open for registration · short courses you finish in weeks, some carrying academic credit</div></div></div>
+  <div class="row" style="gap:8px;align-items:center">
+    <div class="tabs" style="border:0"><div class="tab on">All<span class="c">5</span></div><div class="tab">UMC<span class="c">1</span></div><div class="tab">SAMC<span class="c">2</span></div><div class="tab">MCE<span class="c">2</span></div></div>
+    <div class="input ph" style="margin-left:auto;width:280px;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 5 5"/></svg> Search by name or skill</div>
+    <div class="input" style="width:200px">All faculties <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
+  </div>
+  <div class="panel"><table>
+    <tr><th>Micro-credential</th><th>Faculty</th><th class="num">Credit</th><th>Length and mode</th><th>Starts</th><th class="num">Fee</th><th></th></tr>
+    <tr><td><span class="nm"><span class="cat">SAMC</span><span>Cloud Native Development</span></span><span class="s">Build, deploy and run containerised services</span></td><td>FTMK</td><td class="num">3 credits</td><td>12 weeks · online</td><td>11 Jan 2027</td><td class="num">RM 600</td><td><a>View</a></td></tr>
+    <tr><td><span class="nm"><span class="cat">UMC</span><span>BITI 1213 Linear Algebra</span></span><span class="s">Part of the Bachelor of Computer Science</span></td><td>FTMK</td><td class="num">3 credits</td><td>12 weeks · online</td><td>4 Jan 2027</td><td class="num">RM 450</td><td><a>View</a></td></tr>
+    <tr><td><span class="nm"><span class="cat">SAMC</span><span>Industrial IoT Fundamentals</span></span><span class="s">Sensors, gateways and dashboards for the factory floor</span></td><td>FKE</td><td class="num">2 credits</td><td>10 weeks · blended</td><td>18 Jan 2027</td><td class="num">RM 520</td><td><a>View</a></td></tr>
+    <tr><td><span class="nm"><span class="cat">MCE</span><span>Leadership Essentials</span></span><span class="s">For first-time team leaders</span></td><td>FPTT</td><td class="num muted">No credit</td><td>14 hours · on campus</td><td>2 Dec 2026</td><td class="num">RM 350</td><td><a>View</a></td></tr>
+    <tr><td><span class="nm"><span class="cat">MCE</span><span>Lean Six Sigma Yellow Belt</span></span><span class="s">Process improvement for operations staff</span></td><td>FTKIP</td><td class="num muted">No credit</td><td>16 hours · on campus</td><td>9 Dec 2026</td><td class="num">RM 480</td><td><a>View</a></td></tr>
+  </table></div>
+  <div class="row small muted" style="gap:32px">
+    <span><b style="color:var(--ink)">UMC</b> part of an accredited UTeM course, with its credit</span>
+    <span><b style="color:var(--ink)">SAMC</b> new content with academic credit, quality verified</span>
+    <span><b style="color:var(--ink)">MCE</b> executive and professional training, no academic credit</span>
+  </div>
+</div></div></section>
+
+<section class="screen" data-name="PUB-02 Offering detail"><div class="top"><div class="brand"><b>UTeM</b><span>Micro-credentials</span></div><div class="scope"><span>Catalogue</span><span>Verify a credential</span><span class="lang"><span class="on">EN</span><span>BM</span></span><span class="who">Sign in</span></div></div><div class="body"><div class="main">
+  <div class="crumb"><a>Catalogue</a><span>/</span><span>Cloud Native Development</span></div>
+  <div class="row" style="gap:48px">
+    <div class="col grow" style="gap:24px">
+      <div><span class="cat">SAMC</span><h1 style="font-size:32px;line-height:40px;font-weight:300;margin-top:12px">Cloud Native Development</h1>
+      <div class="muted" style="margin-top:8px;font-size:16px;line-height:24px">Learn to package, deploy and run services on container platforms, with a project marked by lecturers and an industry assessor.</div></div>
+      <div><h2>What you will be able to do</h2>
+        <div class="check"><span class="dot n"></span><div>Containerise and deploy services to a cloud platform</div></div>
+        <div class="check"><span class="dot n"></span><div>Automate build and release pipelines</div></div>
+        <div class="check"><span class="dot n"></span><div>Observe and scale running workloads</div></div></div>
+      <div class="panel"><div class="hd"><h2>Modules</h2><span class="r">120 hours in total</span></div><table>
+        <tr><th>Module</th><th class="num">Hours</th><th>Assessed by</th></tr>
+        <tr><td>1 Containers and images</td><td class="num">36</td><td>Lab tasks (30%)</td></tr>
+        <tr><td>2 Pipelines and release</td><td class="num">36</td><td>Lab tasks (30%)</td></tr>
+        <tr><td>3 Running services in production</td><td class="num">48</td><td>Project (40%)</td></tr>
+      </table></div>
+    </div>
+    <div class="panel" style="width:360px"><div class="bd col" style="gap:16px">
+      <dl class="dl" style="grid-template-columns:110px 1fr">
+        <dt>Starts</dt><dd>11 Jan 2027</dd><dt>Length</dt><dd>12 weeks, online</dd><dt>Credit</dt><dd>3 credits</dd><dt>Fee</dt><dd>RM 600</dd><dt>Places</dt><dd>31 of 40 left</dd><dt>Quality</dt><dd>Verified, valid to 6 Dec 2026; renewal in progress</dd>
+      </dl>
+      <span class="btn" style="justify-content:center">Register</span>
+      <div class="small muted">Not a UTeM student? Register first with Pejabat Pendaftar or HEPA to get a UTeM account.</div>
+      <div class="note small" style="font-size:13px">You receive a digital credential when you pass. Its credit may be considered for transfer into a UTeM degree; that is decided case by case and is not guaranteed.</div>
+    </div></div>
+  </div>
+</div></div></section>
+
+<section class="screen" data-name="PUB-03 Verify a credential"><div class="top"><div class="brand"><b>UTeM</b><span>Micro-credentials</span></div><div class="scope"><span>Catalogue</span><span>Verify a credential</span><span class="lang"><span class="on">EN</span><span>BM</span></span><span class="who">Sign in</span></div></div><div class="body"><div class="main">
+  <div class="col" style="max-width:720px;gap:24px">
+    <div class="title"><div><h1>Verify a UTeM credential</h1><div class="sub">Enter the code from the credential or open its link</div></div></div>
+    <div class="row" style="gap:0"><div class="input focus grow">3HXP-92LD</div><span class="btn">Verify</span></div>
+    <div class="panel"><div class="hd"><span class="dot" style="margin:0"></span><h2>Valid credential issued by UTeM</h2><span class="r">Checked 26 Oct 2026, 10:14</span></div><div class="bd"><dl class="dl">
+      <dt>Holder</dt><dd>Amir Hakimi</dd>
+      <dt>Credential</dt><dd>BITS 1123 Data Structures, unbundled micro-credential, 3 credits</dd>
+      <dt>Issuer</dt><dd>Universiti Teknikal Malaysia Melaka</dd>
+      <dt>Issued</dt><dd>3 Mar 2026</dd>
+      <dt>Status</dt><dd><span class="tag ok">Valid · not revoked or replaced</span></dd>
+      <dt>Signature</dt><dd>Signed credential checked against UTeM's public key</dd>
+    </dl></div></div>
+    <div class="small muted">Only these fields are shown. Marks and personal details stay private.</div>
+  </div>
+</div></div></section>
+</body></html>

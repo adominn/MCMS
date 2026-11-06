@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCMS System Flow Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one pan-and-zoom canvas filling the window. Lifecycle stages run left to right (sticky header), roles and system layers run top to bottom (sticky lane labels), details drawer on the right. Colours follow DESIGN.md (Carbon, navy primary). */
+:root {
+  --bg: #f4f4f4; --canvas: #ffffff; --ink: #161616; --muted: #525252; --subtle: #8c8c8c; --hair: #e0e0e0;
+  --primary: #1e2a6e; --on-primary: #ffffff; --lane-b: #f7f7fa; --chrome: #ffffff;
+  --proc-fill: #1e2a6e; --proc-ink: #ffffff; --act-fill: #ffffff; --job-fill: #f6f2ff; --store-fill: #f2f2f2; --ext-fill: #fff6ec;
+  --k-act: #393939; --k-data: #8c8c8c; --k-event: #3a4cc0; --k-ext: #b45309; --k-job: #8a3ffc; --k-n: #007d79; --path: #d02670;
+  --l-pub: #0072c3; --l-stu: #198038; --l-lec: #8e6a00; --l-x2: #6f6f6f; --l-dd: #1e2a6e; --l-codl: #a2191f;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #161616; --canvas: #1c1c1e; --ink: #f4f4f4; --muted: #c6c6c6; --subtle: #8d8d8d; --hair: #393939;
+  --primary: #a6b4ff; --on-primary: #161616; --lane-b: #212125; --chrome: #262626;
+  --proc-fill: #2e3d94; --proc-ink: #ffffff; --act-fill: #262626; --job-fill: #2a2238; --store-fill: #2a2a2a; --ext-fill: #2e2418;
+  --k-act: #c6c6c6; --k-data: #7a7a7a; --k-event: #8a9cff; --k-ext: #ff9f43; --k-job: #be95ff; --k-n: #3ddbd9; --path: #ff7eb6;
+  --l-pub: #33b1ff; --l-stu: #42be65; --l-lec: #f1c21b; --l-x2: #a8a8a8; --l-dd: #a6b4ff; --l-codl: #ff8389; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #161616; --canvas: #1c1c1e; --ink: #f4f4f4; --muted: #c6c6c6; --subtle: #8d8d8d; --hair: #393939;
+  --primary: #a6b4ff; --on-primary: #161616; --lane-b: #212125; --chrome: #262626;
+  --proc-fill: #2e3d94; --proc-ink: #ffffff; --act-fill: #262626; --job-fill: #2a2238; --store-fill: #2a2a2a; --ext-fill: #2e2418;
+  --k-act: #c6c6c6; --k-data: #7a7a7a; --k-event: #8a9cff; --k-ext: #ff9f43; --k-job: #be95ff; --k-n: #3ddbd9; --path: #ff7eb6;
+  --l-pub: #33b1ff; --l-stu: #42be65; --l-lec: #f1c21b; --l-x2: #a8a8a8; --l-dd: #a6b4ff; --l-codl: #ff8389; color-scheme: dark; }
+
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); display: flex; flex-direction: column; overflow: hidden; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+/* toolbar */
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 10px 16px; background: var(--chrome); border-bottom: 1px solid var(--hair); }
+.bar h1 { font-size: 18px; line-height: 24px; font-weight: 600; margin: 0; white-space: nowrap; }
+.bar .grow { min-width: 220px !important; }
+.k-data path.ln, .k-n path.ln { opacity: .75; }
+.bar .sub { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar .grow { flex: 1 1 0; min-width: 0; }
+.search { display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--muted); background: var(--bg); padding: 0 8px; height: 32px; }
+.search input { border: 0; background: transparent; outline: none; width: 220px; max-width: 46vw; font-size: 13px; }
+.search .cnt { font-size: 11px; color: var(--subtle); font-family: var(--mono); min-width: 3ch; }
+.kinds { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--hair); background: var(--canvas); cursor: pointer; font-size: 12px; user-select: none; }
+.chip[aria-pressed="false"] { opacity: .45; }
+.chip .sw { width: 18px; height: 0; border-top: 2px solid currentColor; }
+.btn { height: 32px; min-width: 32px; padding: 0 10px; border: 1px solid var(--hair); background: var(--canvas); cursor: pointer; font-size: 13px; }
+.btn.primary { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+.btn[aria-pressed="true"] { background: var(--path); border-color: var(--path); color: #fff; }
+.zoom { display: flex; }
+.zoom .btn + .btn { border-left: 0; }
+
+/* map */
+#map { position: relative; flex: 1 1 0; min-height: 0; overflow: hidden; background: var(--canvas); touch-action: none; cursor: grab; }
+#map.dragging { cursor: grabbing; }
+#svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#cols { position: absolute; left: 0; right: 0; top: 0; height: 46px; pointer-events: none; z-index: 3; background: var(--chrome); border-bottom: 1px solid var(--hair); overflow: hidden; }
+#cols div { position: absolute; top: 0; height: 46px; padding: 6px 10px; box-sizing: border-box; border-left: 1px solid var(--hair); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+#cols small { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--subtle); }
+#cols b { font-size: 13px; font-weight: 600; }
+#lanes { position: absolute; left: 0; top: 46px; bottom: 0; width: 120px; z-index: 2; pointer-events: none; overflow: hidden; border-right: 1px solid var(--hair); }
+#lanes button { position: absolute; left: 0; width: 120px; box-sizing: border-box; padding: 6px 8px 6px 10px; text-align: left; border: 0; border-bottom: 1px solid var(--hair); background: var(--chrome); cursor: pointer; pointer-events: auto; overflow: hidden; display: flex; flex-direction: column; gap: 2px; }
+#lanes button:hover b { text-decoration: underline; }
+#lanes b { font-size: 12px; font-weight: 600; line-height: 15px; display: flex; gap: 6px; align-items: baseline; }
+#lanes b i { flex: none; width: 8px; height: 8px; background: var(--lc, var(--subtle)); }
+#lanes span { font-size: 10.5px; line-height: 13px; color: var(--muted); }
+
+/* svg content */
+.band { fill: var(--canvas); }
+.band.alt { fill: var(--lane-b); }
+.colsep { stroke: var(--hair); stroke-width: 1; }
+.node { cursor: pointer; }
+.node text { font-family: var(--sans); }
+.node .ref { font-family: var(--mono); font-size: 10px; fill: var(--muted); }
+.node .tt { font-size: 13px; font-weight: 500; fill: var(--ink); }
+.n-act rect.box { fill: var(--act-fill); stroke: var(--lc); stroke-width: 1.5; }
+.n-proc rect.box { fill: var(--proc-fill); }
+.n-proc .tt { fill: var(--proc-ink); }
+.n-proc .ref { fill: var(--proc-ink); opacity: .72; }
+.n-job rect.box { fill: var(--job-fill); stroke: var(--k-job); stroke-width: 1.2; stroke-dasharray: 5 3; }
+.n-job .tt { font-family: var(--mono); font-size: 11.5px; }
+.n-store rect.box { fill: var(--store-fill); }
+.n-store line, .n-store .idbox { stroke: var(--muted); stroke-width: 1.2; fill: none; }
+.n-store .sid { font-family: var(--mono); font-size: 12px; font-weight: 500; fill: var(--ink); }
+.n-ext rect.box { fill: var(--ext-fill); stroke: var(--k-ext); stroke-width: 2; }
+.n-ext rect.inner { fill: none; stroke: var(--k-ext); stroke-width: .8; }
+.node.sel rect.box { stroke: var(--path); stroke-width: 3; }
+.node.match rect.box { stroke: var(--path); stroke-width: 2.5; }
+.edge path.ln { fill: none; stroke-width: 1.4; }
+.edge path.hit { fill: none; stroke: transparent; stroke-width: 12; cursor: pointer; }
+.edge .lb { font-family: var(--sans); font-size: 10.5px; paint-order: stroke; stroke: var(--canvas); stroke-width: 4px; stroke-linejoin: round; text-anchor: middle; pointer-events: none; }
+.k-act path.ln { stroke: var(--k-act); } .k-act .lb { fill: var(--k-act); }
+.k-data path.ln { stroke: var(--k-data); stroke-dasharray: 6 4; } .k-data .lb { fill: var(--muted); }
+.k-event path.ln { stroke: var(--k-event); } .k-event .lb { fill: var(--k-event); }
+.k-ext path.ln { stroke: var(--k-ext); stroke-width: 1.8; } .k-ext .lb { fill: var(--k-ext); }
+.k-job path.ln { stroke: var(--k-job); stroke-dasharray: 2 3; } .k-job .lb { fill: var(--k-job); }
+.k-n path.ln { stroke: var(--k-n); stroke-dasharray: 1 3; } .k-n .lb { fill: var(--k-n); }
+.mk-act { fill: var(--k-act); } .mk-data { fill: var(--k-data); } .mk-event { fill: var(--k-event); } .mk-ext { fill: var(--k-ext); } .mk-job { fill: var(--k-job); } .mk-n { fill: var(--k-n); } .mk-path { fill: var(--path); }
+.badge { display: none; }
+.badge circle { fill: var(--path); } .badge text { fill: #fff; font: 600 11px var(--mono); text-anchor: middle; }
+svg.hide-act .k-act, svg.hide-data .k-data, svg.hide-event .k-event, svg.hide-ext .k-ext, svg.hide-job .k-job, svg.hide-n .k-n { display: none; }
+svg.far .edge:not(.on) .lb { display: none; }
+svg.focus .node:not(.on) { opacity: .14; }
+svg.focus .edge:not(.on) { opacity: .05; }
+svg.focus .edge.on path.ln { stroke-width: 2.4; }
+svg.journey .edge.step.on path.ln { stroke: var(--path); stroke-width: 3; }
+svg.journey .edge.step.on .lb { fill: var(--path); font-weight: 600; }
+svg.journey .edge.step.on .badge { display: inline; }
+@media (prefers-reduced-motion: no-preference) { .node, .edge { transition: opacity .15s; } }
+
+/* drawer */
+#panel { position: absolute; right: 0; top: 46px; bottom: 0; width: 360px; max-width: 100%; z-index: 4; background: var(--chrome); border-left: 1px solid var(--hair); overflow-y: auto; box-sizing: border-box; padding: 16px; display: flex; flex-direction: column; gap: 14px; cursor: auto; }
+#panel h2 { font-size: 16px; line-height: 22px; font-weight: 600; margin: 0; text-wrap: balance; }
+#panel h3 { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--subtle); font-weight: 500; margin: 0 0 6px; }
+#panel p { margin: 0; font-size: 13px; line-height: 19px; color: var(--muted); }
+#panel .refs { font-family: var(--mono); font-size: 11.5px; color: var(--ink); background: var(--bg); padding: 6px 8px; }
+#panel ul, #panel ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
+#panel li button { display: grid; grid-template-columns: 14px 1fr; gap: 2px 8px; width: 100%; text-align: left; border: 0; background: transparent; padding: 6px 4px; cursor: pointer; font-size: 12.5px; line-height: 17px; }
+#panel li button:hover { background: var(--bg); }
+#panel li button i { grid-row: span 2; width: 14px; height: 0; margin-top: 8px; border-top: 2px solid var(--kc); }
+#panel li button small { color: var(--muted); font-size: 11.5px; }
+#panel ol li button { grid-template-columns: 26px 1fr; }
+#panel ol li button em { grid-row: span 2; font: 600 11px var(--mono); font-style: normal; color: #fff; background: var(--path); height: 20px; display: grid; place-items: center; }
+.legend { display: grid; grid-template-columns: 54px 1fr; gap: 8px 10px; align-items: center; font-size: 12.5px; }
+.legend svg { width: 54px; height: 24px; overflow: visible; }
+.panel-close { align-self: flex-end; }
+#panel[hidden] { display: none; }
+.panel-open { position: absolute; right: 12px; top: 58px; z-index: 4; }
+
+@media (max-width: 720px) {
+  .search input { width: 140px; }
+  #panel { top: auto; height: 52%; width: 100%; border-left: 0; border-top: 1px solid var(--hair); }
+  #lanes, #lanes button { width: 96px; }
+  #lanes button { padding: 4px 6px 4px 8px; }
+  #lanes span { display: none; }
+}
+</style>
+
+<header class="bar">
+  <div class="grow">
+    <h1>MCMS System Flow Map</h1>
+    <div class="sub" id="stats"></div>
+  </div>
+  <label class="search" for="q"><span aria-hidden="true">⌕</span><input id="q" type="search" placeholder="Find a function, screen, EV-, JB-, FR…" autocomplete="off"><span class="cnt" id="qc"></span></label>
+  <div class="kinds" id="kinds" role="group" aria-label="Show exchanges"></div>
+  <button class="btn" id="journey" aria-pressed="false" title="Highlight the recognition chain from proposal to stackable plan">Main journey</button>
+  <div class="zoom"><button class="btn" id="zout" aria-label="Zoom out">−</button><button class="btn" id="zin" aria-label="Zoom in">+</button><button class="btn" id="fit">Fit</button></div>
+</header>
+
+<div id="map">
+  <svg id="svg" xmlns="http://www.w3.org/2000/svg" aria-label="MCMS system flow map"><defs id="defs"></defs><g id="vp"></g></svg>
+  <div id="cols" aria-hidden="true"></div>
+  <div id="lanes"></div>
+  <button class="btn panel-open" id="popen" hidden>Details</button>
+  <aside id="panel" aria-live="polite"></aside>
+</div>
+
+<script>
+// Sources: SRS v1.0, SDD v1.0 (modules MD-xx, events EV-xx, jobs JB-xx, Section 7 processes), UI/UX spec v1.1 screens and flows FL-xx, approved prototype.
+const LANES = [
+  { id: 'pub',  name: 'Public visitor', who: 'X3 · employers, applicants · no login', c: '--l-pub' },
+  { id: 'stu',  name: 'Student', who: 'P8 · Amir Hakimi', c: '--l-stu' },
+  { id: 'lec',  name: 'Lecturer & reviewer', who: 'P1 / X1 · Dr. Aina Zulkifli', c: '--l-lec' },
+  { id: 'x2',   name: 'Industry expert', who: 'X2 · Ir. Siti Aminah · comments only', c: '--l-x2' },
+  { id: 'dd',   name: 'Deputy dean', who: 'P2 · Hakim Rahman · every academic decision, records Senate (P3)', c: '--l-dd' },
+  { id: 'codl', name: 'CODL admin', who: 'S1 / P5 · Farid Hashim · admin only, no academic decisions', c: '--l-codl' },
+  { id: 'sys',  name: 'MCMS processes', who: 'Modules MD-00 to MD-16 (numbered by module)' },
+  { id: 'job',  name: 'Jobs & scheduler', who: 'Queued and timed work, JB-01 to JB-22' },
+  { id: 'store', name: 'Data stores', who: 'PostgreSQL tables and file storage' },
+  { id: 'ext',  name: 'External systems', who: 'Reached only through adapters' },
+];
+const STAGES = [
+  ['01', 'Access & setup'], ['02', 'Proposal & review'], ['03', 'Approval & versions'], ['04', 'Offering & catalogue'],
+  ['05', 'Registration & payment'], ['06', 'Learning & results'], ['07', 'Completion & issuing'], ['08', 'Verification & corrections'],
+  ['09', 'Quality verification'], ['10', 'ACR & ABC deposit'], ['11', 'Credit transfer'], ['12', 'Stackable pathway'],
+  ['Ongoing', 'Monitoring & CQI'], ['Cross-cutting', 'Records, audit & notifications'],
+];
+const KIND = { pub: 'act', stu: 'act', lec: 'act', x2: 'act', dd: 'act', codl: 'act', sys: 'proc', job: 'job', store: 'store', ext: 'ext' };
+
+// [id, lane, stage, title, refs]
+const N = [
+  // 01 Access & setup
+  ['s_signin', 'stu', 0, 'Sign in with UTeM account', 'CMN sign-in · FL-01'],
+  ['s_profile', 'stu', 0, 'Set profile & notification preferences', 'CMN profile'],
+  ['l_signin', 'lec', 0, 'Staff sign-in with MFA (all staff roles)', 'CMN sign-in · AD-06'],
+  ['c_roles', 'codl', 0, 'Assign roles & scopes', 'CODL users · FL-17'],
+  ['c_ref', 'codl', 0, 'Maintain reference data', 'CODL reference data'],
+  ['c_settings', 'codl', 0, 'Change versioned settings', 'CODL settings'],
+  ['c_tpl', 'codl', 0, 'Manage document & email templates', 'CODL templates'],
+  ['p1_1', 'sys', 0, '1.1 Authenticate (OIDC, MFA amr check)', 'MD-01 Identity'],
+  ['p1_2', 'sys', 0, '1.2 Authorise every request: role, scope, separation of duties', 'MD-01 · AD-07'],
+  ['p1_3', 'sys', 0, '1.3 Maintain users, roles & reference data', 'MD-01 · EV-01 EV-02 EV-04'],
+  ['p0_1', 'sys', 0, '0.1 Store setting or template version', 'MD-00 · AD-12 · EV-05'],
+  ['D0', 'store', 0, 'Settings, templates, reference data'],
+  ['D1', 'store', 0, 'Users, role assignments, COI'],
+  ['E_entra', 'ext', 0, 'Microsoft Entra ID (UTeM SSO)', 'IdentityProvider'],
+
+  // 02 Proposal & review
+  ['l_prop', 'lec', 1, 'Draft proposal: category, CLO, modules, SLT', 'LEC new proposal · FL-02'],
+  ['l_submit', 'lec', 1, 'Submit proposal version', 'LEC proposal workspace'],
+  ['l_review', 'lec', 1, 'Review as assigned reviewer, declare COI', 'LEC review · X1'],
+  ['l_amend', 'lec', 1, 'Answer comments & amend returned version', 'LEC proposal workspace'],
+  ['x_comment', 'x2', 1, 'Comment on industry relevance', 'EXT review · FL-03'],
+  ['d_assign', 'dd', 1, 'Assign reviewers & due dates', 'DD proposals'],
+  ['p2_1', 'sys', 1, '2.1 Validate proposal (SLT totals, 40 h per credit, MQF level)', 'MD-02 Curriculum'],
+  ['p2_2', 'sys', 1, '2.2 Lock version & create endorsement task', 'MD-02 · EV-06'],
+  ['p3_1', 'sys', 1, '3.1 Review tasks, COI & review summary', 'MD-03 · EV-03 EV-09 EV-10'],
+  ['D2', 'store', 1, 'Micro-credentials, versions, modules, CLO, SLT'],
+
+  // 03 Approval & versions
+  ['l_change', 'lec', 2, 'Request a material or minor change', 'LEC change request · FL-20'],
+  ['d_endorse', 'dd', 2, 'Endorse, return or not support', 'DD proposal · FL-04'],
+  ['d_senate', 'dd', 2, 'Record Senate decision from the minutes', 'DD Senate decision'],
+  ['d_rule', 'dd', 2, 'Record version transition rule', 'DD versions · EV-16'],
+  ['p3_2', 'sys', 2, '3.2 Record endorsement decision', 'MD-03 · EV-11 EV-12 EV-13'],
+  ['p3_3', 'sys', 2, '3.3 Apply Senate decision to the version', 'MD-03 · EV-14'],
+  ['p2_3', 'sys', 2, '2.3 Supersede old version & bind enrolments', 'MD-02 · EV-15 EV-16'],
+  ['p2_4', 'sys', 2, '2.4 Classify change: material or minor', 'MD-02 · EV-07 EV-08'],
+  ['j04_pack', 'job', 2, 'JB-04 RenderPdfJob: decision pack', 'reports queue'],
+  ['D3', 'store', 2, 'Reviews, approval & Senate decisions'],
+  ['E_senate', 'ext', 2, 'UTeM Senate (P3, meets offline)', 'no system access'],
+
+  // 04 Offering & catalogue
+  ['p_home', 'pub', 3, 'Browse public site & catalogue', 'PUB home, catalogue · FL-22'],
+  ['p_offer', 'pub', 3, 'Read offering: fee, dates, credit, QV status', 'PUB offering'],
+  ['l_offer', 'lec', 3, 'Create offering from an approved version', 'LEC create offering · FL-05'],
+  ['l_ready', 'lec', 3, 'Complete readiness checklist', 'LEC readiness'],
+  ['d_ready', 'dd', 3, 'Confirm readiness (with conditions)', 'DD readiness'],
+  ['p4_1', 'sys', 3, '4.1 Create offering: dates, fee, seats, mode', 'MD-04 Offering'],
+  ['p4_2', 'sys', 3, '4.2 Readiness check & conditions', 'MD-04 · EV-17'],
+  ['p4_3', 'sys', 3, '4.3 Catalogue: open, close, hold', 'MD-04 · EV-18 EV-19'],
+  ['j21', 'job', 3, 'JB-21 OpenCloseRegistrationJob', 'every 15 minutes'],
+  ['D4', 'store', 3, 'Offerings & readiness items'],
+
+  // 05 Registration & payment
+  ['s_reg', 'stu', 4, 'Register for an offering', 'ST register · FL-06'],
+  ['s_pay', 'stu', 4, 'Pay the fee', 'ST registrations · FL-06b'],
+  ['s_receipt', 'stu', 4, 'Download receipt', 'Receipt document'],
+  ['s_withdraw', 'stu', 4, 'Withdraw from enrolment', 'ST enrolment'],
+  ['l_cohort', 'lec', 4, 'View cohort list', 'LEC cohorts · FL-21'],
+  ['p5_1', 'sys', 4, '5.1 Check eligibility & seats, register', 'MD-05 · EV-20'],
+  ['p5_2', 'sys', 4, '5.2 Confirm payment → Enrolled', 'MD-05 · EV-21 EV-22'],
+  ['p5_3', 'sys', 4, '5.3 Withdraw or cancel', 'MD-05 · EV-23'],
+  ['j20', 'job', 4, 'JB-20 CancelUnpaidEnrolmentsJob', 'hourly'],
+  ['j04_r', 'job', 4, 'JB-04 RenderPdfJob: receipt', 'reports queue'],
+  ['D5', 'store', 4, 'Registrations, payments, enrolments, cohorts'],
+  ['E_pay', 'ext', 4, 'Payment gateway (stub in Release 1)', 'PaymentGateway'],
+
+  // 06 Learning & results
+  ['s_learn', 'stu', 5, 'Learn & sit assessments on UCreds', 'outside MCMS'],
+  ['l_marks', 'lec', 5, 'Check cohort results & submit to deputy dean', 'LEC cohort results · FL-07'],
+  ['d_verify', 'dd', 5, 'Verify results (bulk)', 'DD results · FL-08'],
+  ['d_integrity', 'dd', 5, 'Open integrity case or approve a result change', 'DD results · EV-28 EV-30'],
+  ['c_export', 'codl', 5, 'Export enrolments for UCreds', 'CODL UCreds exchange'],
+  ['c_import', 'codl', 5, 'Upload UCreds results & badge file', 'CODL import report'],
+  ['p6_1', 'sys', 5, '6.1 Export enrolment file', 'MD-06 · EV-24'],
+  ['p6_2', 'sys', 5, '6.2 Validate & stage results as Provisional', 'MD-06 · EV-25 EV-26 EV-27'],
+  ['p7_1', 'sys', 5, '7.1 Lecturer submission of results', 'MD-07 Assessment'],
+  ['p7_2', 'sys', 5, '7.2 Verify results → achievements & module status', 'MD-07 · EV-29'],
+  ['p9_1', 'sys', 5, '9.1 Issue module badge (no credit wording)', 'MD-09 · EV-33'],
+  ['j03', 'job', 5, 'JB-03 ExportUcredsEnrolmentJob', 'imports queue'],
+  ['j02', 'job', 5, 'JB-02 ImportResultsJob', 'imports queue'],
+  ['D6', 'store', 5, 'Import & export batches, row errors, adapter calls'],
+  ['D7', 'store', 5, 'Assessment results & revisions'],
+  ['E_ucreds', 'ext', 5, 'UCreds learning platform (CSV exchange)', 'LearningPlatformGateway'],
+
+  // 07 Completion & issuing
+  ['s_ar', 'stu', 6, 'View achievement record', 'ST achievement record'],
+  ['s_creds', 'stu', 6, 'Download certificate, share credential link or QR', 'ST credentials · FL-09'],
+  ['d_complete', 'dd', 6, 'Confirm completion', 'DD completion'],
+  ['d_fail', 'dd', 6, 'Resolve issuance failures', 'DD credentials · EV-34'],
+  ['p8_1', 'sys', 6, '8.1 Close achievement record → Completed', 'MD-08 · EV-31'],
+  ['p9_2', 'sys', 6, '9.2 Pre-issuance checks', 'MD-09 Credentials'],
+  ['p9_3', 'sys', 6, '9.3 Build & sign Open Badges 3.0 credential', 'MD-09 · AD-09 · EV-32'],
+  ['p9_4', 'sys', 6, '9.4 Render certificate', 'MD-09 · AD-10'],
+  ['j01', 'job', 6, 'JB-01 IssueCredentialsBatchJob', 'credentials queue'],
+  ['j22', 'job', 6, 'JB-22 IssueCredentialJob (one per credential)', 'credentials queue'],
+  ['j11', 'job', 6, 'JB-11 CompletionWindowRemindersJob', 'daily 07:40'],
+  ['D8', 'store', 6, 'Achievement records & module status'],
+  ['D9', 'store', 6, 'Credentials, badges, revisions, revocations'],
+  ['E_vault', 'ext', 6, 'Key vault (Ed25519 signing keys)', 'SigningKeyStore'],
+
+  // 08 Verification & corrections
+  ['p_verify', 'pub', 7, 'Verify a credential by code, link or QR', 'PUB verify · FL-10'],
+  ['d_correct', 'dd', 7, 'Correct, replace or revoke a credential', 'DD credentials · FL-23'],
+  ['p9_5', 'sys', 7, '9.5 Public verification: signature, status, revocation', 'MD-09 · rate limited'],
+  ['p9_6', 'sys', 7, '9.6 Apply correction, replacement or revocation', 'MD-09 · EV-35 EV-36 EV-37'],
+  ['p15_3', 'sys', 7, '15.3 Record correction & pass it on', 'MD-15 · EV-60'],
+
+  // 09 Quality verification
+  ['l_qv', 'lec', 8, 'Prepare QV evidence', 'LEC QV evidence · FL-14'],
+  ['d_qvsub', 'dd', 8, 'Record submission to QVC/MQA', 'DD quality · EV-38'],
+  ['d_qvres', 'dd', 8, 'Record QV result & validity (max 3 years)', 'DD QV record'],
+  ['p10_1', 'sys', 8, '10.1 Build QV package', 'MD-10 Quality Verification'],
+  ['p10_2', 'sys', 8, '10.2 Record QV result: source of all QV wording', 'MD-10 · EV-39 EV-40 EV-41'],
+  ['p10_3', 'sys', 8, '10.3 Expiry alerts & lapse', 'MD-10 · EV-42'],
+  ['j14', 'job', 8, 'JB-14 BuildQvPackageJob', 'reports queue'],
+  ['j06', 'job', 8, 'JB-06 QvExpiryAlertsJob', 'daily 07:00 · 180/90/30 days'],
+  ['j08', 'job', 8, 'JB-08 LapseExpiredQvJob', 'daily 00:10'],
+  ['D10', 'store', 8, 'QV records, evidence, packages'],
+  ['E_qv', 'ext', 8, 'QVC / MQA (manual submission)', 'QvGateway'],
+
+  // 10 ACR & ABC deposit
+  ['s_consent', 'stu', 9, 'Give or decline deposit consent', 'ST ACR · FL-11'],
+  ['s_ledger', 'stu', 9, 'View credit ledger & expiry dates', 'ST ledger'],
+  ['d_acr', 'dd', 9, 'Check & confirm the ACR', 'DD ACR · EV-44'],
+  ['d_dep', 'dd', 9, 'Export deposit batch & record ABC outcome', 'DD deposit'],
+  ['p11_1', 'sys', 9, '11.1 Prepare ACR (UMC or QV-valid SAMC, never MCE)', 'MD-11 · EV-43'],
+  ['p11_2', 'sys', 9, '11.2 Consent & deposit queue', 'MD-11 · EV-45 EV-46'],
+  ['p11_3', 'sys', 9, '11.3 Record deposit → credit Available for 10 years', 'MD-11 · EV-47'],
+  ['p11_4', 'sys', 9, '11.4 Expire credit', 'MD-11 · EV-48'],
+  ['j13', 'job', 9, 'JB-13 ExportAbcDepositJob', 'reports queue'],
+  ['j07', 'job', 9, 'JB-07 CreditExpiryAlertsJob', 'daily 07:00 · 365/90 days'],
+  ['j09', 'job', 9, 'JB-09 ExpireCreditsJob', 'daily 00:20'],
+  ['D11', 'store', 9, 'ACR, consents, deposits, credit ledger'],
+  ['E_abc', 'ext', 9, 'ABC national credit bank (manual deposit)', 'AbcGateway'],
+
+  // 11 Credit transfer
+  ['s_transfer', 'stu', 10, 'Apply for credit transfer', 'ST transfer · FL-12'],
+  ['s_letter', 'stu', 10, 'Download transfer letter', 'Transfer letter document'],
+  ['d_transfer', 'dd', 10, 'Evaluate equivalence & decide outcome', 'DD transfer'],
+  ['d_adm', 'dd', 10, 'Record admission or programme completion', 'DD transfer · DA-06'],
+  ['p12_1', 'sys', 10, '12.1 Evaluate equivalence & programme limit', 'MD-12 · EV-51'],
+  ['p12_2', 'sys', 10, '12.2 Record transfer decision', 'MD-12 · EV-52 EV-53'],
+  ['p11_5', 'sys', 10, '11.5 Redeem or release credit', 'MD-11 · EV-49 EV-50'],
+  ['j04_l', 'job', 10, 'JB-04 RenderPdfJob: transfer letter', 'reports queue'],
+  ['D12', 'store', 10, 'Transfer applications & decisions'],
+
+  // 12 Stackable pathway
+  ['p_path', 'pub', 11, 'View published pathways', 'PUB pathways'],
+  ['s_plan', 'stu', 11, 'Request & track stackable plan', 'ST plan · FL-13'],
+  ['d_path', 'dd', 11, 'Define pathway mapping', 'DD pathways'],
+  ['d_plan', 'dd', 11, 'Decide stackable plan', 'DD plans'],
+  ['p13_1', 'sys', 11, '13.1 Publish pathway mapping', 'MD-13 · EV-54'],
+  ['p13_2', 'sys', 11, '13.2 Check plan rules: 30% UTeM credit, residency', 'MD-13 · EV-56'],
+  ['p13_3', 'sys', 11, '13.3 Flag pathway when a target course changes', 'MD-13 · EV-55'],
+  ['D13', 'store', 11, 'Pathways & stackable plans'],
+
+  // Monitoring & CQI
+  ['l_cqi', 'lec', 12, 'Write quality review & CQI actions', 'LEC quality review · FL-15'],
+  ['d_cqi', 'dd', 12, 'Confirm CQI & effectiveness check', 'DD quality review'],
+  ['d_periodic', 'dd', 12, 'Run periodic review', 'DD periodic review · FL-16'],
+  ['d_susp', 'dd', 12, 'Decide suspension or termination', 'DD suspension'],
+  ['p14_1', 'sys', 12, '14.1 Record & confirm CQI', 'MD-14 · EV-57'],
+  ['p14_2', 'sys', 12, '14.2 Schedule periodic review', 'MD-14 · EV-58'],
+  ['p14_3', 'sys', 12, '14.3 Suspend or terminate a version', 'MD-14 · EV-59'],
+  ['j10', 'job', 12, 'JB-10 DecisionOverdueRemindersJob', 'daily 07:30'],
+  ['j12', 'job', 12, 'JB-12 PeriodicReviewRemindersJob', 'daily 07:50'],
+  ['D14', 'store', 12, 'CQI records, reviews, suspensions'],
+
+  // Records, audit & notifications
+  ['s_notif', 'stu', 13, 'Read notifications (in-app & email)', 'CMN notifications'],
+  ['d_reports', 'dd', 13, 'Traceability & reports', 'DD reports · FL-18'],
+  ['c_audit', 'codl', 13, 'Audit log, retention & disposal list', 'CODL audit · FL-24'],
+  ['c_adapt', 'codl', 13, 'Monitor adapters & failed calls', 'CODL adapters, test mailbox'],
+  ['c_reports', 'codl', 13, 'Run institutional reports', 'CODL reports'],
+  ['p15_1', 'sys', 13, '15.1 Append audit entry (hash chain, same transaction)', 'MD-15 · AD-11'],
+  ['p15_2', 'sys', 13, '15.2 Generate reports within the user\'s scope', 'MD-15'],
+  ['p16_1', 'sys', 13, '16.1 Store & send notifications', 'MD-16 · AD-15'],
+  ['p16_2', 'sys', 13, '16.2 Integration hub: log & retry adapter calls', 'MD-16 · AD-08 · EV-63'],
+  ['p0_2', 'sys', 13, '0.2 Store & virus-scan uploaded files', 'MD-00 · AD-14'],
+  ['j05', 'job', 13, 'JB-05 SendNotificationJob', 'notifications queue'],
+  ['j16', 'job', 13, 'JB-16 RetryAdapterCallJob', 'integration queue'],
+  ['j15', 'job', 13, 'JB-15 GenerateReportJob', 'default queue'],
+  ['j17', 'job', 13, 'JB-17 ScanUploadJob', 'default queue'],
+  ['j18', 'job', 13, 'JB-18 VerifyAuditChainJob', 'daily 02:00'],
+  ['j19', 'job', 13, 'JB-19 ListDisposalCandidatesJob', 'monthly'],
+  ['D15', 'store', 13, 'Audit log (append-only)'],
+  ['D16', 'store', 13, 'Notifications & preferences'],
+  ['D17', 'store', 13, 'File storage (MinIO, signed URLs)'],
+  ['E_smtp', 'ext', 13, 'SMTP mail relay', 'MailTransport'],
+  ['E_av', 'ext', 13, 'ClamAV virus scanner', 'on the app servers'],
+];
+
+// [from, to, kind, label, main-journey step]   kinds: act = person and system, data = read/write a store,
+// event = domain event between modules, ext = external exchange, job = queued or timed work, n = notification or audit
+const E = [
+  // 01 Access & setup
+  ['s_signin', 'p1_1', 'act', 'sign-in request'],
+  ['l_signin', 'p1_1', 'act', 'sign-in request'],
+  ['p1_1', 'E_entra', 'ext', 'OIDC authorisation request'],
+  ['E_entra', 'p1_1', 'ext', 'ID token: amr, groups, staff / matric no.'],
+  ['p1_1', 'p1_2', 'event', 'signed-in user'],
+  ['p1_2', 'D1', 'data', 'reads role assignments & scope'],
+  ['s_profile', 'p1_3', 'act', 'profile changes'],
+  ['s_profile', 'D16', 'data', 'notification preferences'],
+  ['c_roles', 'p1_3', 'act', 'role, scope, start & end dates'],
+  ['c_ref', 'p1_3', 'act', 'programmes, courses, MQF levels'],
+  ['p1_3', 'D1', 'data', 'writes users & role assignments'],
+  ['p1_3', 'D0', 'data', 'writes reference data'],
+  ['c_settings', 'p0_1', 'act', 'new value + effective date'],
+  ['c_tpl', 'p0_1', 'act', 'new template version'],
+  ['p0_1', 'D0', 'data', 'writes setting / template version'],
+  ['p1_3', 'p13_3', 'event', 'EV-04 ReferenceDataChanged'],
+  ['p1_3', 'p16_1', 'n', 'EV-01 RoleAssigned · EV-02 RoleRevoked'],
+
+  // 02 Proposal & review
+  ['l_prop', 'p2_1', 'act', 'proposal: category, CLO, modules, SLT', 1],
+  ['p2_1', 'l_prop', 'act', 'validation messages'],
+  ['p2_1', 'D2', 'data', 'writes Draft version'],
+  ['p2_1', 'D0', 'data', 'reads MQF levels & credit rule'],
+  ['l_submit', 'p2_2', 'act', 'submit version', 2],
+  ['p2_2', 'D2', 'data', 'locks version'],
+  ['p2_2', 'p3_1', 'event', 'EV-06 ProposalSubmitted', 3],
+  ['p2_2', 'p16_1', 'n', 'EV-06 notify deputy dean (DA-12)'],
+  ['d_assign', 'p3_1', 'act', 'reviewers & due date'],
+  ['p3_1', 'l_review', 'act', 'review task'],
+  ['p3_1', 'x_comment', 'act', 'comment task'],
+  ['l_review', 'p3_1', 'act', 'review + COI declaration'],
+  ['x_comment', 'p3_1', 'act', 'comments (no decision)'],
+  ['p3_1', 'D3', 'data', 'writes reviews'],
+  ['p3_1', 'D1', 'data', 'writes COI declarations (EV-03)'],
+  ['p3_1', 'd_endorse', 'act', 'review summary & endorsement task', 4],
+  ['p3_1', 'p16_1', 'n', 'EV-09 ReviewerAssigned · EV-10 ReviewRecorded'],
+  ['l_amend', 'p2_1', 'act', 'amended version'],
+
+  // 03 Approval & versions
+  ['d_endorse', 'p3_2', 'act', 'endorse / return / not support', 5],
+  ['p3_2', 'D3', 'data', 'writes approval decision'],
+  ['p3_2', 'l_amend', 'act', 'EV-11 returned with comments'],
+  ['p3_2', 'j04_pack', 'job', 'decision pack request', 6],
+  ['j04_pack', 'd_senate', 'act', 'decision pack PDF', 7],
+  ['d_senate', 'E_senate', 'ext', 'tables pack at Senate meeting', 8],
+  ['E_senate', 'd_senate', 'ext', 'Senate minutes & decision', 9],
+  ['d_senate', 'p3_3', 'act', 'decision + meeting reference', 10],
+  ['p3_3', 'D3', 'data', 'writes Senate decision'],
+  ['p3_3', 'D2', 'data', 'version → Approved / Not approved / Returned'],
+  ['p3_3', 'p4_1', 'event', 'EV-14 version selectable for offerings', 11],
+  ['p3_3', 'p2_3', 'event', 'EV-14 earlier version superseded'],
+  ['p3_3', 'p12_1', 'event', 'EV-14 material change flags equivalences'],
+  ['p3_3', 'p13_3', 'event', 'EV-14 mappings to review'],
+  ['d_rule', 'p2_3', 'act', 'transition rule'],
+  ['p2_3', 'D2', 'data', 'old version → Superseded'],
+  ['p2_3', 'D5', 'data', 'binds enrolments to a version'],
+  ['p2_3', 'p16_1', 'n', 'EV-15 · EV-16 notify participants (mandatory)'],
+  ['l_change', 'p2_4', 'act', 'change request'],
+  ['p2_4', 'D2', 'data', 'new Draft version or change log'],
+  ['p2_4', 'p3_1', 'event', 'EV-07 material change → full approval'],
+  ['p2_4', 'p10_2', 'event', 'EV-07 re-verification needed (EV-41)'],
+  ['p2_4', 'p14_1', 'event', 'EV-08 minor change → CQI & acknowledgement'],
+  ['p3_2', 'p16_1', 'n', 'EV-11 · EV-12 · EV-13 notify lecturer'],
+
+  // 04 Offering & catalogue
+  ['l_offer', 'p4_1', 'act', 'dates, fee, seats, mode', 12],
+  ['p4_1', 'D2', 'data', 'reads approved version'],
+  ['p4_1', 'D4', 'data', 'writes offering'],
+  ['l_ready', 'p4_2', 'act', 'readiness items & evidence', 13],
+  ['p4_2', 'D4', 'data', 'writes readiness items'],
+  ['p4_2', 'd_ready', 'act', 'readiness task', 14],
+  ['d_ready', 'p4_2', 'act', 'confirm readiness / conditions', 15],
+  ['p4_2', 'p4_3', 'event', 'EV-17 ReadinessConfirmed → Ready', 16],
+  ['j21', 'p4_3', 'job', 'open & close on window dates'],
+  ['p4_3', 'D4', 'data', 'status Open / Closed / Held'],
+  ['p4_3', 'p_home', 'act', 'EV-18 listed in the catalogue', 17],
+  ['p_home', 'p_offer', 'act', 'opens an offering', 18],
+  ['p_offer', 's_reg', 'act', 'register (signs in first)', 19],
+  ['p_home', 'p_path', 'act', 'pathways page'],
+  ['p4_3', 'p16_1', 'n', 'EV-19 OfferingHeld notify registered'],
+
+  // 05 Registration & payment
+  ['s_reg', 'p5_1', 'act', 'registration form, PDPA acknowledgement', 20],
+  ['p5_1', 'D4', 'data', 'reads seats & window'],
+  ['p5_1', 'D5', 'data', 'writes registration (place held, DA-10)'],
+  ['p5_1', 's_pay', 'act', 'payment request', 21],
+  ['s_pay', 'E_pay', 'ext', 'payment', 22],
+  ['E_pay', 'p5_2', 'ext', 'payment confirmation', 23],
+  ['p5_2', 'D5', 'data', 'Pending payment → Enrolled'],
+  ['p5_2', 'D7', 'data', 'EV-22 creates result rows'],
+  ['p5_2', 'D8', 'data', 'EV-22 creates achievement record'],
+  ['p5_2', 'j04_r', 'job', 'receipt request'],
+  ['j04_r', 's_receipt', 'act', 'receipt PDF'],
+  ['p5_2', 'l_cohort', 'act', 'cohort list'],
+  ['p5_2', 'p6_1', 'event', 'EV-22 EnrolmentConfirmed → cohort ready', 24],
+  ['j20', 'p5_3', 'job', 'cancel unpaid after the window'],
+  ['s_withdraw', 'p5_3', 'act', 'withdrawal request'],
+  ['p5_3', 'D5', 'data', 'Withdrawn / Cancelled'],
+  ['p5_3', 'D8', 'data', 'EV-23 record closed, no credential'],
+  ['p5_2', 'p16_1', 'n', 'EV-20 · EV-21 · EV-22 confirmations'],
+
+  // 06 Learning & results
+  ['c_export', 'p6_1', 'act', 'export request', 25],
+  ['p6_1', 'j03', 'job', 'queue export', 26],
+  ['j03', 'D6', 'data', 'export file, hash, count (EV-24)'],
+  ['j03', 'E_ucreds', 'ext', 'enrolment CSV', 27],
+  ['s_learn', 'E_ucreds', 'ext', 'learning & assessment', 28],
+  ['E_ucreds', 'c_import', 'ext', 'results & badge CSV', 29],
+  ['c_import', 'p6_2', 'act', 'upload file', 30],
+  ['p6_2', 'j02', 'job', 'queue import'],
+  ['j02', 'D6', 'data', 'import batch & row errors'],
+  ['j02', 'D7', 'data', 'valid rows → Provisional'],
+  ['p6_2', 'c_import', 'act', 'import report (EV-26 rejected rows)'],
+  ['p6_2', 'p0_2', 'event', 'stores uploaded file'],
+  ['p6_2', 'p7_1', 'event', 'EV-25 ResultsStaged', 31],
+  ['p6_2', 'p9_1', 'event', 'EV-27 BadgeImported → match or flag'],
+  ['p7_1', 'l_marks', 'act', 'cohort results to check', 32],
+  ['l_marks', 'p7_1', 'act', 'submit results', 33],
+  ['p7_1', 'd_verify', 'act', 'verification task', 34],
+  ['d_verify', 'p7_2', 'act', 'verify (bulk)', 35],
+  ['p7_2', 'D7', 'data', 'Provisional → Verified'],
+  ['p7_2', 'D8', 'data', 'achievements & module status'],
+  ['p7_2', 'p9_1', 'event', 'EV-29 badge for a verified module'],
+  ['p9_1', 'D9', 'data', 'writes badge'],
+  ['d_integrity', 'p7_2', 'act', 'hold results (EV-28) / approve change (EV-30)'],
+  ['p7_2', 'p9_6', 'event', 'EV-30 result change → correction task'],
+  ['p7_2', 'd_complete', 'act', 'completion task', 36],
+  ['p7_2', 'p16_1', 'n', 'EV-29 ResultsVerified notify participants'],
+  ['p6_2', 'p16_1', 'n', 'EV-25 task to deputy dean · EV-26 to CODL'],
+
+  // 07 Completion & issuing
+  ['d_complete', 'p8_1', 'act', 'confirm completion', 37],
+  ['p8_1', 'D8', 'data', 'record → Completed'],
+  ['p8_1', 'D5', 'data', 'enrolment → Completed'],
+  ['p8_1', 's_ar', 'act', 'achievement record'],
+  ['p8_1', 'j01', 'event', 'EV-31 CompletionConfirmed', 38],
+  ['j11', 'd_complete', 'job', 'completion window reminders'],
+  ['j01', 'j22', 'job', 'one child job per credential', 39],
+  ['j22', 'p9_2', 'job', 'run checks', 40],
+  ['p9_2', 'D8', 'data', 'reads verified record'],
+  ['p9_2', 'D10', 'data', 'reads QV validity for wording'],
+  ['p9_2', 'D0', 'data', 'reads template & setting version'],
+  ['p9_2', 'p9_3', 'event', 'checks passed', 41],
+  ['p9_2', 'd_fail', 'act', 'EV-34 IssuanceFailed list'],
+  ['d_fail', 'j01', 'act', 'retry failed items'],
+  ['p9_3', 'E_vault', 'ext', 'signing request (Ed25519)'],
+  ['E_vault', 'p9_3', 'ext', 'eddsa-rdfc-2022 proof'],
+  ['p9_3', 'D9', 'data', 'credential + public code'],
+  ['p9_3', 'p9_4', 'event', 'render certificate'],
+  ['p9_4', 'D17', 'data', 'certificate PDF'],
+  ['p9_3', 's_creds', 'act', 'EV-32 CredentialIssued', 42],
+  ['p9_3', 'p11_1', 'event', 'EV-32 → prepare ACR', 45],
+  ['p9_3', 'p16_1', 'n', 'EV-32 notify participant'],
+
+  // 08 Verification & corrections
+  ['s_creds', 'p_verify', 'act', 'shares link or QR with an employer', 43],
+  ['p_verify', 'p9_5', 'act', 'public code', 44],
+  ['p9_5', 'D9', 'data', 'reads credential, status, revocation'],
+  ['p9_5', 'E_vault', 'ext', 'public verification key'],
+  ['p9_5', 'p_verify', 'act', 'Valid / Revoked / Replaced'],
+  ['d_correct', 'p9_6', 'act', 'correction, replacement or revocation + reason'],
+  ['p9_6', 'D9', 'data', 'new revision / revoked / replacement ID'],
+  ['p9_6', 'p15_3', 'event', 'EV-60 CorrectionRecorded'],
+  ['p15_3', 'p11_1', 'event', 'ACR, deposit or credit revision'],
+  ['p15_3', 'D15', 'data', 'correction record'],
+  ['p9_6', 'p16_1', 'n', 'EV-35 · EV-36 · EV-37 notify (mandatory)'],
+
+  // 09 Quality verification
+  ['l_qv', 'p10_1', 'act', 'evidence files'],
+  ['p10_1', 'p0_2', 'event', 'stores evidence files'],
+  ['p10_1', 'j14', 'job', 'build package'],
+  ['j14', 'D10', 'data', 'QV package (evidence version)'],
+  ['p10_1', 'd_qvsub', 'act', 'package ready'],
+  ['d_qvsub', 'E_qv', 'ext', 'submits package (outside MCMS)'],
+  ['d_qvsub', 'p10_2', 'act', 'EV-38 submission recorded'],
+  ['E_qv', 'd_qvres', 'ext', 'QV outcome letter'],
+  ['d_qvres', 'p10_2', 'act', 'result & validity'],
+  ['p10_2', 'D10', 'data', 'Quality-Verified / findings'],
+  ['p10_2', 'l_qv', 'act', 'EV-40 findings, back to Preparing'],
+  ['p10_2', 'p11_1', 'event', 'EV-39 SAMC becomes ACR-eligible'],
+  ['p10_2', 'p4_3', 'event', 'EV-39 QV wording in catalogue'],
+  ['j06', 'p10_3', 'job', '180 / 90 / 30-day alerts'],
+  ['j08', 'p10_3', 'job', 'lapse on expiry'],
+  ['p10_3', 'D10', 'data', 'status Lapsed'],
+  ['p10_3', 'p4_3', 'event', 'EV-42 QV wording removed'],
+  ['p10_3', 'p14_1', 'event', 'EV-42 task for the PTj'],
+  ['p10_3', 'p16_1', 'n', 'QV expiry alerts'],
+
+  // 10 ACR & ABC deposit
+  ['p11_1', 'D11', 'data', 'writes ACR (generated text)'],
+  ['p11_1', 'D10', 'data', 'reads QV validity'],
+  ['p11_1', 'd_acr', 'act', 'EV-43 ACR to confirm', 46],
+  ['d_acr', 'p11_2', 'act', 'confirm ACR (EV-44)', 47],
+  ['p11_2', 's_consent', 'act', 'consent request', 48],
+  ['s_consent', 'p11_2', 'act', 'consent given (EV-45) / declined (EV-46)', 49],
+  ['p11_2', 'D11', 'data', 'consent, deposit queue'],
+  ['p11_2', 'd_dep', 'act', 'deposit queue', 50],
+  ['d_dep', 'j13', 'act', 'export batch', 51],
+  ['j13', 'd_dep', 'act', 'CSV + PDF batch (Guide App. F3)', 52],
+  ['d_dep', 'E_abc', 'ext', 'deposits batch (outside MCMS)', 53],
+  ['E_abc', 'd_dep', 'ext', 'deposit outcome', 54],
+  ['d_dep', 'p11_3', 'act', 'record outcome', 55],
+  ['p11_3', 'D11', 'data', 'credit Available, expiry +10 years'],
+  ['p11_3', 's_ledger', 'act', 'EV-47 credit in ledger', 56],
+  ['j07', 'p11_4', 'job', '365 / 90-day expiry alerts'],
+  ['j09', 'p11_4', 'job', 'expire on the date'],
+  ['p11_4', 'D11', 'data', 'credit Expired'],
+  ['p11_4', 'p12_1', 'event', 'EV-48 flag open application'],
+  ['p11_3', 'p16_1', 'n', 'EV-47 notify: a deposit is not a transfer'],
+  ['p11_2', 'p16_1', 'n', 'EV-44 consent request'],
+
+  // 11 Credit transfer
+  ['s_ledger', 's_transfer', 'act', 'chooses an Available credit', 57],
+  ['s_transfer', 'p12_1', 'act', 'credit, target programme & course', 58],
+  ['p12_1', 'D11', 'data', 'reads credit & ACR'],
+  ['p12_1', 'D12', 'data', 'writes application'],
+  ['p12_1', 'd_transfer', 'act', 'evaluation task (EV-51)', 59],
+  ['d_transfer', 'p12_2', 'act', 'outcome & equivalence', 60],
+  ['d_adm', 'p12_2', 'act', 'admission record (EV-53)'],
+  ['p12_2', 'D12', 'data', 'writes decision'],
+  ['p12_2', 'p11_5', 'event', 'EV-52 approved → Provisionally redeemed', 61],
+  ['d_adm', 'p11_5', 'act', 'programme completion → redeem, withdrawal → release'],
+  ['p11_5', 'D11', 'data', 'Redeemed (final) or Released'],
+  ['p12_2', 'j04_l', 'job', 'transfer letter'],
+  ['j04_l', 's_letter', 'act', 'letter PDF'],
+  ['p12_2', 'p13_2', 'event', 'EV-53 admission fact'],
+  ['p12_2', 'p16_1', 'n', 'EV-52 TransferDecided notify'],
+
+  // 12 Stackable pathway
+  ['d_path', 'p13_1', 'act', 'mapping to programme courses'],
+  ['p13_1', 'D13', 'data', 'pathway mapping'],
+  ['p13_1', 'p_path', 'act', 'EV-54 published pathway'],
+  ['s_plan', 'p13_2', 'act', 'plan request', 62],
+  ['p13_2', 'D11', 'data', 'reads credits (30% UTeM rule)'],
+  ['p13_2', 'D13', 'data', 'plan & decision'],
+  ['p13_2', 'd_plan', 'act', 'plan to decide', 63],
+  ['d_plan', 'p13_2', 'act', 'decision (EV-56)', 64],
+  ['p13_2', 's_plan', 'act', 'plan status', 65],
+  ['p13_3', 'D13', 'data', 'pathway flagged'],
+  ['p13_3', 'd_path', 'act', 'EV-55 review flagged pathway'],
+  ['p13_2', 'p16_1', 'n', 'EV-56 notify participant'],
+
+  // Monitoring & CQI
+  ['l_cqi', 'p14_1', 'act', 'quality review & CQI actions'],
+  ['p14_1', 'D14', 'data', 'CQI record'],
+  ['p14_1', 'd_cqi', 'act', 'CQI to confirm'],
+  ['d_cqi', 'p14_1', 'act', 'confirm + effectiveness check (EV-57)'],
+  ['j12', 'p14_2', 'job', 'due-date reminders (EV-58)'],
+  ['p14_2', 'd_periodic', 'act', 'periodic review due'],
+  ['d_periodic', 'p14_2', 'act', 'review outcome'],
+  ['p14_2', 'D14', 'data', 'review record'],
+  ['d_periodic', 'd_susp', 'act', 'serious finding'],
+  ['d_susp', 'p14_3', 'act', 'suspend / terminate + reason'],
+  ['p14_3', 'D14', 'data', 'suspension record'],
+  ['p14_3', 'D2', 'data', 'version Suspended / Terminated'],
+  ['p14_3', 'p4_3', 'event', 'EV-59 offerings held'],
+  ['p14_3', 'p16_1', 'n', 'EV-59 notify affected (mandatory)'],
+  ['j10', 'p16_1', 'job', 'overdue decision & CQI reminders'],
+
+  // Records, audit & notifications
+  ['p16_1', 'D16', 'data', 'notification row (stored first)'],
+  ['p16_1', 's_notif', 'act', 'in-app notification'],
+  ['p16_1', 'j05', 'job', 'queue email'],
+  ['j05', 'E_smtp', 'ext', 'email'],
+  ['j05', 'p15_1', 'n', 'EV-62 NotificationFailed after retries'],
+  ['j16', 'p16_2', 'job', 'retry at 1 / 5 / 15 / 60 minutes'],
+  ['p16_2', 'D6', 'data', 'adapter call log'],
+  ['p16_2', 'c_adapt', 'act', 'EV-63 failed-call queue'],
+  ['c_adapt', 'p16_2', 'act', 'retry or switch adapter mode'],
+  ['p1_2', 'p15_1', 'n', 'every change writes one audit entry'],
+  ['p15_1', 'D15', 'data', 'append entry (hash chain)'],
+  ['j18', 'D15', 'data', 'verifies the chain'],
+  ['j18', 'c_audit', 'act', 'security alert if broken'],
+  ['p15_1', 'c_audit', 'act', 'audit search'],
+  ['j19', 'c_audit', 'act', 'disposal candidates (approval outside CODL)'],
+  ['d_reports', 'p15_2', 'act', 'report request'],
+  ['c_reports', 'p15_2', 'act', 'report request'],
+  ['p15_2', 'j15', 'job', 'generate'],
+  ['j15', 'D15', 'data', 'reads records in scope'],
+  ['j15', 'd_reports', 'act', 'report file'],
+  ['j15', 'c_reports', 'act', 'report file'],
+  ['p0_2', 'D17', 'data', 'stores file'],
+  ['p0_2', 'j17', 'job', 'scan'],
+  ['j17', 'E_av', 'ext', 'scan file'],
+];
+
+const KINDS = [['act', 'Person ↔ system'], ['data', 'Data read / write'], ['event', 'Module event'], ['ext', 'External exchange'], ['job', 'Job / scheduler'], ['n', 'Notifications & audit']];
+const KNAME = Object.fromEntries(KINDS);
+
+// ---------- model ----------
+const NODE = {}, NODES = N.map(([id, lane, col, t, r]) => (NODE[id] = { id, lane, col, t, r: r || '', kind: KIND[lane] }));
+const EDGES = E.map(([from, to, kind, label, step], i) => ({ i, from, to, kind, label, step }));
+const bad = EDGES.filter(e => !NODE[e.from] || !NODE[e.to]);
+if (bad.length) console.error('edges with unknown nodes', bad);
+
+// ---------- layout ----------
+const W = 212, GX = 34, GY = 16, COLW = W + 2 * GX, COLGAP = 28, ML = 130, MT = 58, LPT = 22, LPB = 22, PER_ROW = 1;
+const colX = c => ML + c * (COLW + COLGAP);
+function wrap(t, max) {
+  const lines = []; let cur = '';
+  for (const w of t.split(' ')) { if (cur && (cur + ' ' + w).length > max) { lines.push(cur); cur = w; } else cur = cur ? cur + ' ' + w : w; }
+  if (cur) lines.push(cur); return lines;
+}
+NODES.forEach(n => {
+  n.lines = wrap(n.t, n.kind === 'store' ? 22 : n.kind === 'job' ? 27 : 29);
+  n.w = W; n.h = n.kind === 'store' ? Math.max(44, n.lines.length * 16 + 14) : 18 + 14 + n.lines.length * 16;
+});
+const cells = {};
+NODES.forEach(n => (cells[n.lane + '|' + n.col] ||= []).push(n));
+let y = MT;
+LANES.forEach((l, li) => {
+  let maxH = 0;
+  STAGES.forEach((_, c) => {
+    const a = cells[l.id + '|' + c] || []; let h = 0;
+    for (let i = 0; i < a.length; i += PER_ROW) h += Math.max(...a.slice(i, i + PER_ROW).map(n => n.h)) + GY;
+    maxH = Math.max(maxH, h - GY);
+  });
+  l.y = y; l.h = Math.max(96, LPT + maxH + LPB); y += l.h;
+  STAGES.forEach((_, c) => {
+    const a = cells[l.id + '|' + c] || []; let yy = l.y + LPT;
+    for (let i = 0; i < a.length; i += PER_ROW) {
+      const pair = a.slice(i, i + PER_ROW), rowH = Math.max(...pair.map(n => n.h));
+      pair.forEach((n, k) => { n.x = pair.length === 1 ? colX(c) + (COLW - W) / 2 : colX(c) + GX + k * (W + GX); n.y = yy + (rowH - n.h) / 2; });
+      yy += rowH + GY;
+    }
+  });
+});
+const TW = colX(STAGES.length) - COLGAP + 40, TH = y + 30;
+
+// ---------- render ----------
+const NS = 'http://www.w3.org/2000/svg', svg = document.getElementById('svg'), vp = document.getElementById('vp');
+function el(tag, attrs, parent, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  if (parent) parent.appendChild(e); return e;
+}
+const defs = document.getElementById('defs');
+['act', 'data', 'event', 'ext', 'job', 'n', 'path'].forEach(k => {
+  const m = el('marker', { id: 'mk-' + k, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs);
+  el('path', { d: 'M0,0 L10,5 L0,10 z', class: 'mk-' + k }, m);
+});
+const gBands = el('g', {}, vp), gEdges = el('g', {}, vp), gNodes = el('g', {}, vp), gBadges = el('g', {}, vp);
+LANES.forEach((l, i) => el('rect', { x: 0, y: l.y, width: TW, height: l.h, class: 'band' + (i % 2 ? ' alt' : '') }, gBands));
+STAGES.forEach((_, c) => el('line', { x1: colX(c) - COLGAP / 2, x2: colX(c) - COLGAP / 2, y1: MT, y2: TH, class: 'colsep' }, gBands));
+LANES.forEach(l => el('line', { x1: 0, x2: TW, y1: l.y, y2: l.y, class: 'colsep' }, gBands));
+
+NODES.forEach(n => {
+  const g = n.el = el('g', { class: 'node n-' + n.kind, transform: `translate(${n.x},${n.y})`, 'data-id': n.id }, gNodes);
+  const lane = LANES.find(l => l.id === n.lane);
+  if (lane.c) g.style.setProperty('--lc', `var(${lane.c})`);
+  el('title', {}, g, n.t + (n.r ? ' · ' + n.r : ''));
+  el('rect', { class: 'box', width: n.w, height: n.h, rx: n.kind === 'proc' ? 12 : 0 }, g);
+  if (n.kind === 'ext') el('rect', { class: 'inner', x: 3.5, y: 3.5, width: n.w - 7, height: n.h - 7 }, g);
+  if (n.kind === 'store') {
+    el('line', { x1: 0, x2: n.w, y1: 0, y2: 0 }, g); el('line', { x1: 0, x2: n.w, y1: n.h, y2: n.h }, g);
+    el('line', { class: 'idbox', x1: 44, x2: 44, y1: 0, y2: n.h }, g);
+    el('text', { class: 'sid', x: 22, y: n.h / 2 + 4, 'text-anchor': 'middle' }, g, n.id);
+    n.lines.forEach((ln, i) => el('text', { class: 'tt', x: 54, y: n.h / 2 - (n.lines.length - 1) * 8 + 4 + i * 16 }, g, ln));
+    return;
+  }
+  el('text', { class: 'ref', x: 10, y: 17 }, g, n.r);
+  n.lines.forEach((ln, i) => el('text', { class: 'tt', x: 10, y: 36 + i * 16 }, g, ln));
+});
+
+const pairs = new Set(EDGES.map(e => e.from + '>' + e.to));
+function curve(a, b, off) {
+  let s, t, k;
+  if (b.x > a.x + a.w + 2) { s = [a.x + a.w, a.y + a.h / 2 + off]; t = [b.x, b.y + b.h / 2 + off]; k = Math.max(30, (t[0] - s[0]) / 2); return [s, [s[0] + k, s[1]], [t[0] - k, t[1]], t]; }
+  if (b.x + b.w < a.x - 2) { s = [a.x, a.y + a.h / 2 + off]; t = [b.x + b.w, b.y + b.h / 2 + off]; k = Math.max(30, (s[0] - t[0]) / 2); return [s, [s[0] - k, s[1]], [t[0] + k, t[1]], t]; }
+  const down = b.y > a.y;
+  s = [a.x + a.w / 2 + off, down ? a.y + a.h : a.y]; t = [b.x + b.w / 2 + off, down ? b.y : b.y + b.h];
+  k = Math.max(24, Math.abs(t[1] - s[1]) / 2) * (down ? 1 : -1);
+  return [s, [s[0], s[1] + k], [t[0], t[1] - k], t];
+}
+EDGES.forEach(e => {
+  const a = NODE[e.from], b = NODE[e.to];
+  const off = pairs.has(e.to + '>' + e.from) ? (e.from < e.to ? -6 : 6) : 0;
+  const P = curve(a, b, off), d = `M${P[0]}C${P[1]} ${P[2]} ${P[3]}`;
+  const g = e.el = el('g', { class: 'edge k-' + e.kind + (e.step ? ' step' : ''), 'data-i': e.i }, gEdges);
+  el('path', { class: 'hit', d }, g);
+  el('path', { class: 'ln', d, 'marker-end': `url(#mk-${e.kind})` }, g);
+  const mx = (P[0][0] + 3 * P[1][0] + 3 * P[2][0] + P[3][0]) / 8, my = (P[0][1] + 3 * P[1][1] + 3 * P[2][1] + P[3][1]) / 8;
+  el('text', { class: 'lb', x: mx, y: my - 4 }, g, e.label);
+  if (e.step) { const bg = el('g', { class: 'badge', transform: `translate(${mx},${my + 10})` }, g); el('circle', { r: 11 }, bg); el('text', { y: 4 }, bg, e.step); }
+});
+
+// ---------- overlays ----------
+const cols = document.getElementById('cols'), lanesEl = document.getElementById('lanes');
+STAGES.forEach(([n, t]) => { const d = document.createElement('div'); d.innerHTML = `<small>${n}</small><b>${t}</b>`; cols.appendChild(d); });
+LANES.forEach(l => {
+  const b = document.createElement('button'); b.className = 'ui'; b.title = 'Show everything ' + l.name + ' does';
+  if (l.c) b.style.setProperty('--lc', `var(${l.c})`);
+  b.innerHTML = `<b><i></i>${l.name}</b><span>${l.who}</span>`;
+  b.onclick = () => focusLane(l); lanesEl.appendChild(b); l.btn = b;
+});
+
+// ---------- view ----------
+const map = document.getElementById('map');
+let s = 1, tx = 0, ty = 0;
+function apply() {
+  vp.setAttribute('transform', `translate(${tx},${ty}) scale(${s})`);
+  svg.classList.toggle('far', s < 0.45);
+  [...cols.children].forEach((d, c) => { d.style.left = tx + (colX(c) - COLGAP / 2) * s + 'px'; d.style.width = (COLW + COLGAP) * s + 'px'; });
+  LANES.forEach(l => { l.btn.style.top = ty + l.y * s - 46 + 'px'; l.btn.style.height = l.h * s + 'px'; });
+}
+function zoomAt(f, cx, cy) { const ns = Math.min(2.5, Math.max(0.06, s * f)); tx = cx - (cx - tx) * ns / s; ty = cy - (cy - ty) * ns / s; s = ns; apply(); }
+function fit() {
+  const r = map.getBoundingClientRect(), pw = panel.hidden || r.width < 720 ? 0 : panel.offsetWidth;
+  s = Math.min((r.width - pw - 10) / TW, (r.height - 6) / TH); tx = (r.width - pw - TW * s) / 2; ty = 0; apply();
+}
+function centerOn(n) {
+  const r = map.getBoundingClientRect(), pw = panel.hidden || r.width < 720 ? 0 : panel.offsetWidth;
+  if (s < 0.8) s = 0.9;
+  tx = (r.width - pw) / 2 - (n.x + n.w / 2) * s; ty = (r.width < 720 ? r.height * 0.25 : r.height / 2) - (n.y + n.h / 2) * s; apply();
+}
+map.addEventListener('wheel', e => {
+  if (e.target.closest('#panel')) return;
+  e.preventDefault(); const r = map.getBoundingClientRect();
+  if (e.shiftKey) { tx -= e.deltaY; apply(); return; }
+  zoomAt(Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX - r.left, e.clientY - r.top);
+}, { passive: false });
+const pts = new Map(); let moved = false, downTarget = null, lastD = 0;
+map.addEventListener('pointerdown', e => {
+  if (e.target.closest('#panel, .ui, .btn')) return;
+  map.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pts.size === 1) { moved = false; downTarget = e.target; }
+  if (pts.size === 2) { const [a, b] = [...pts.values()]; lastD = Math.hypot(a.x - b.x, a.y - b.y); moved = true; }
+  map.classList.add('dragging');
+});
+map.addEventListener('pointermove', e => {
+  const p = pts.get(e.pointerId); if (!p) return;
+  if (pts.size === 1) {
+    const dx = e.clientX - p.x, dy = e.clientY - p.y;
+    if (Math.abs(dx) + Math.abs(dy) > 2) moved = true;
+    tx += dx; ty += dy; apply();
+  }
+  p.x = e.clientX; p.y = e.clientY;
+  if (pts.size === 2) {
+    const [a, b] = [...pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y), r = map.getBoundingClientRect();
+    if (lastD) zoomAt(d / lastD, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top); lastD = d;
+  }
+});
+function up(e) {
+  if (!pts.has(e.pointerId)) return; pts.delete(e.pointerId);
+  if (pts.size) return; map.classList.remove('dragging');
+  if (moved || !downTarget) return;
+  const ng = downTarget.closest('.node'), eg = downTarget.closest('.edge');
+  if (ng) selectNode(ng.dataset.id); else if (eg) selectEdge(+eg.dataset.i); else clearFocus(true);
+}
+map.addEventListener('pointerup', up); map.addEventListener('pointercancel', up);
+document.getElementById('zin').onclick = () => { const r = map.getBoundingClientRect(); zoomAt(1.4, r.width / 2, r.height / 2); };
+document.getElementById('zout').onclick = () => { const r = map.getBoundingClientRect(); zoomAt(1 / 1.4, r.width / 2, r.height / 2); };
+document.getElementById('fit').onclick = fit;
+addEventListener('resize', apply);
+addEventListener('keydown', e => {
+  if (e.target.matches('input')) return;
+  if (e.key === '+' || e.key === '=') document.getElementById('zin').click();
+  else if (e.key === '-') document.getElementById('zout').click();
+  else if (e.key === '0') fit();
+  else if (e.key === 'Escape') clearFocus(true);
+});
+
+// ---------- filters ----------
+const hidden = new Set(['n']);
+const kindsEl = document.getElementById('kinds');
+KINDS.forEach(([k, name]) => {
+  const b = document.createElement('button'); b.className = 'chip'; b.setAttribute('aria-pressed', !hidden.has(k));
+  b.innerHTML = `<span class="sw" style="color:var(--k-${k})"></span>${name}`;
+  b.onclick = () => { hidden.has(k) ? hidden.delete(k) : hidden.add(k); b.setAttribute('aria-pressed', !hidden.has(k)); svg.classList.toggle('hide-' + k, hidden.has(k)); if (current) current(); };
+  kindsEl.appendChild(b); svg.classList.toggle('hide-' + k, hidden.has(k));
+});
+const shown = e => !hidden.has(e.kind);
+
+// ---------- focus ----------
+const panel = document.getElementById('panel'), popen = document.getElementById('popen');
+let current = null; // re-runs the active selection when filters change
+function clearFocus(showIntro) {
+  svg.classList.remove('focus', 'journey'); jBtn.setAttribute('aria-pressed', 'false');
+  vp.querySelectorAll('.on, .sel, .match').forEach(x => x.classList.remove('on', 'sel', 'match'));
+  current = null; if (showIntro) intro();
+}
+function focus(nodeIds, edges) {
+  vp.querySelectorAll('.on, .sel, .match').forEach(x => x.classList.remove('on', 'sel', 'match'));
+  svg.classList.add('focus');
+  nodeIds.forEach(id => NODE[id].el.classList.add('on'));
+  edges.forEach(e => e.el.classList.add('on'));
+}
+const swatch = k => `style="--kc:var(--k-${k})"`;
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+function edgeItem(e, otherId, dir) {
+  const o = NODE[otherId];
+  return `<li><button data-go="${o.id}" ${swatch(e.kind)}><i></i><span>${dir} ${esc(o.t)}</span><small>${esc(e.label)} · ${KNAME[e.kind]}</small></button></li>`;
+}
+function showPanel(html) {
+  panel.innerHTML = `<button class="btn panel-close" id="pclose" aria-label="Hide details">Hide ×</button>` + html;
+  panel.hidden = false; popen.hidden = true;
+  panel.querySelector('#pclose').onclick = () => { panel.hidden = true; popen.hidden = false; };
+  panel.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { selectNode(b.dataset.go); centerOn(NODE[b.dataset.go]); });
+  panel.querySelectorAll('[data-lane]').forEach(b => b.onclick = () => focusLane(LANES.find(l => l.id === b.dataset.lane)));
+  panel.scrollTop = 0;
+}
+popen.onclick = () => { panel.hidden = false; popen.hidden = true; };
+const KDESC = { act: 'Person action', proc: 'System process', job: 'Background job', store: 'Data store', ext: 'External system' };
+function selectNode(id) {
+  const n = NODE[id];
+  const ins = EDGES.filter(e => e.to === id && shown(e)), outs = EDGES.filter(e => e.from === id && shown(e));
+  focus([id, ...ins.map(e => e.from), ...outs.map(e => e.to)], [...ins, ...outs]);
+  n.el.classList.add('sel');
+  current = () => selectNode(id);
+  const lane = LANES.find(l => l.id === n.lane);
+  showPanel(`<div><h3>${KDESC[n.kind]} · ${esc(lane.name)} · ${STAGES[n.col][1]}</h3><h2>${n.kind === 'store' ? n.id + ' ' : ''}${esc(n.t)}</h2></div>
+    ${n.r ? `<div class="refs">${esc(n.r)}</div>` : ''}
+    <div><h3>Receives (${ins.length})</h3>${ins.length ? `<ul>${ins.map(e => edgeItem(e, e.from, '←')).join('')}</ul>` : '<p>Nothing flows in.</p>'}</div>
+    <div><h3>Sends (${outs.length})</h3>${outs.length ? `<ul>${outs.map(e => edgeItem(e, e.to, '→')).join('')}</ul>` : '<p>Nothing flows out.</p>'}</div>
+    ${hidden.size ? `<p>Hidden exchange types are left out: ${[...hidden].map(k => KNAME[k]).join(', ')}.</p>` : ''}`);
+}
+function selectEdge(i) { const e = EDGES[i]; selectNode(e.from); }
+function focusLane(l) {
+  const ids = NODES.filter(n => n.lane === l.id).map(n => n.id), set = new Set(ids);
+  const edges = EDGES.filter(e => shown(e) && (set.has(e.from) || set.has(e.to)));
+  focus([...new Set([...ids, ...edges.flatMap(e => [e.from, e.to])])], edges);
+  current = () => focusLane(l);
+  const byStage = STAGES.map((st, c) => [st[1], NODES.filter(n => n.lane === l.id && n.col === c)]).filter(([, a]) => a.length);
+  showPanel(`<div><h3>Lane</h3><h2>${esc(l.name)}</h2></div><p>${esc(l.who)}. ${ids.length} functions, ${edges.length} exchanges.</p>
+    ${byStage.map(([st, a]) => `<div><h3>${st}</h3><ul>${a.map(n => `<li><button data-go="${n.id}" ${swatch('act')}><i></i><span>${esc(n.t)}</span><small>${esc(n.r)}</small></button></li>`).join('')}</ul></div>`).join('')}`);
+}
+
+// ---------- main journey ----------
+const jBtn = document.getElementById('journey');
+const steps = EDGES.filter(e => e.step).sort((a, b) => a.step - b.step);
+function journey() {
+  focus([...new Set(steps.flatMap(e => [e.from, e.to]))], steps);
+  svg.classList.add('journey'); jBtn.setAttribute('aria-pressed', 'true');
+  current = journey;
+  showPanel(`<div><h3>Main journey · ${steps.length} hand-offs</h3><h2>From a lecturer's proposal to a student's stackable plan</h2></div>
+    <p>The recognition chain (D-15): each stage is its own record and its own decision. Click a step to go to it.</p>
+    <ol>${steps.map(e => `<li><button data-go="${e.to}"><em>${e.step}</em><span>${esc(NODE[e.from].t)} → ${esc(NODE[e.to].t)}</span><small>${esc(e.label)}</small></button></li>`).join('')}</ol>`);
+}
+jBtn.onclick = () => jBtn.getAttribute('aria-pressed') === 'true' ? clearFocus(true) : journey();
+
+// ---------- search ----------
+const q = document.getElementById('q'), qc = document.getElementById('qc');
+let hits = [], hitAt = -1;
+q.addEventListener('input', () => {
+  const v = q.value.trim().toLowerCase();
+  if (!v) { qc.textContent = ''; hits = []; clearFocus(true); return; }
+  hits = NODES.filter(n => (n.id + ' ' + n.t + ' ' + n.r).toLowerCase().includes(v)); hitAt = -1;
+  qc.textContent = hits.length;
+  focus(hits.map(n => n.id), []); hits.forEach(n => n.el.classList.add('match'));
+  current = null;
+});
+q.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || !hits.length) return;
+  hitAt = (hitAt + 1) % hits.length; const n = hits[hitAt];
+  selectNode(n.id); centerOn(n); qc.textContent = `${hitAt + 1}/${hits.length}`;
+});
+
+// ---------- intro ----------
+const legendShape = {
+  act: `<rect x="1" y="2" width="52" height="20" fill="var(--act-fill)" stroke="var(--l-stu)" stroke-width="1.5"/>`,
+  proc: `<rect x="1" y="2" width="52" height="20" rx="8" fill="var(--proc-fill)"/>`,
+  job: `<rect x="1" y="2" width="52" height="20" fill="var(--job-fill)" stroke="var(--k-job)" stroke-dasharray="5 3"/>`,
+  store: `<rect x="1" y="2" width="52" height="20" fill="var(--store-fill)"/><path d="M1 2H53M1 22H53M15 2V22" stroke="var(--muted)" fill="none"/>`,
+  ext: `<rect x="1" y="2" width="52" height="20" fill="var(--ext-fill)" stroke="var(--k-ext)" stroke-width="2"/><rect x="4" y="5" width="46" height="14" fill="none" stroke="var(--k-ext)" stroke-width=".8"/>`,
+};
+const legendLine = k => `<path d="M2 12H50" stroke="var(--k-${k})" stroke-width="2" fill="none" ${({ data: 'stroke-dasharray="6 4"', job: 'stroke-dasharray="2 3"', n: 'stroke-dasharray="1 3"' })[k] || ''}/><path d="M46 8L53 12L46 16z" fill="var(--k-${k})"/>`;
+function intro() {
+  showPanel(`<div><h3>How to read it</h3><h2>Every function and exchange of MCMS Release 1 on one canvas</h2></div>
+    <p>Stages run left to right, from access through the recognition chain to the ongoing work. Each row is a role or a system layer. Drag to pan, scroll or pinch to zoom. Click a box to see what it receives and sends, a role name for everything that role does, or <b>Main journey</b> for the full chain in ${steps.length} numbered hand-offs.</p>
+    <div><h3>Boxes</h3><div class="legend">
+      <svg>${legendShape.act}</svg><span>Person action (border colour = role)</span>
+      <svg>${legendShape.proc}</svg><span>System process, numbered by module (7.2 = MD-07)</span>
+      <svg>${legendShape.job}</svg><span>Background job or scheduled task</span>
+      <svg>${legendShape.store}</svg><span>Data store (tables or files)</span>
+      <svg>${legendShape.ext}</svg><span>External system or body</span>
+    </div></div>
+    <div><h3>Arrows</h3><div class="legend">${KINDS.map(([k, name]) => `<svg>${legendLine(k)}</svg><span>${name}${k === 'n' ? ' (hidden at first; every change writes the audit log)' : ''}</span>`).join('')}</div></div>
+    <div><h3>Roles</h3><ul>${LANES.filter(l => l.c).map(l => `<li><button data-lane="${l.id}" style="--kc:var(${l.c})"><i></i><span>${esc(l.name)}</span><small>${esc(l.who)}</small></button></li>`).join('')}</ul></div>
+    <p>Built from the SRS v1.0, SDD v1.0 (modules, events EV-xx, jobs JB-xx) and the UI/UX spec v1.1 screens and flows (FL-xx).</p>`);
+}
+
+document.getElementById('stats').textContent = `${NODES.length} functions · ${EDGES.length} exchanges · ${STAGES.length} stages · ${LANES.length} lanes · from SRS v1.0, SDD v1.0, UI/UX spec v1.1`;
+intro();
+requestAnimationFrame(fit);
+</script>
+
+</html>

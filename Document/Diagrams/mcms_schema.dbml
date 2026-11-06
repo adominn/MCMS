@@ -1,0 +1,1373 @@
+// UTeM MCMS Database Schema (All 92 Tables & 185 Foreign Keys)
+// Compatible with dbdiagram.io, drawSQL, and Supabase Schema Visualizer
+
+Project UTeM_MCMS {
+  database_type: 'MySQL'
+  Note: 'UTeM Micro-Credential Management System (MCMS) Database'
+}
+
+Table abc_batches {
+  id bigint_unsigned [pk, increment]
+  reference varchar(30) [unique, not null]
+  ptj_id bigint_unsigned [not null]
+  format_version varchar(20) [not null]
+  row_count smallint_unsigned [not null]
+  prepared_by bigint_unsigned [not null]
+  created_at timestamp [not null]
+  acr_ids json
+}
+
+Table abc_deposits {
+  id bigint_unsigned [pk, increment]
+  acr_id bigint_unsigned [unique, not null]
+  abc_batch_id bigint_unsigned
+  abc_reference varchar(60) [not null]
+  deposit_date date [not null]
+  credits decimal(5,1) [not null]
+  credit_expiry date
+  setting_version_id bigint_unsigned
+  deposit_status varchar(16) [not null]
+  credit_status varchar(12)
+  recorded_by bigint_unsigned [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table achievement_records {
+  id bigint_unsigned [pk, increment]
+  enrolment_id bigint_unsigned [unique, not null]
+  mc_version_id bigint_unsigned [not null]
+  completion_status varchar(10)
+  completed_on date
+  final_result json
+  confirmed_by bigint_unsigned
+  confirmed_at timestamp
+  created_at timestamp [not null]
+}
+
+Table acr_checks {
+  id bigint_unsigned [pk, increment]
+  acr_id bigint_unsigned
+  enrolment_id bigint_unsigned [not null]
+  check_key varchar(30) [not null]
+  passed tinyint(1) [not null]
+  detail text [not null]
+  checked_at timestamp [not null]
+}
+
+Table acrs {
+  id bigint_unsigned [pk, increment]
+  reference varchar(24) [unique, not null]
+  user_id bigint_unsigned [not null]
+  achievement_record_id bigint_unsigned [unique, not null]
+  mc_version_id bigint_unsigned [not null]
+  qv_record_id bigint_unsigned
+  credits decimal(5,1) [not null]
+  mqf_level tinyint_unsigned [not null]
+  completion_date date [not null]
+  assessment_basis text [not null]
+  payload json [not null]
+  status varchar(16) [not null]
+  confirmed_by bigint_unsigned
+  confirmed_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table admissions {
+  id bigint_unsigned [pk, increment]
+  user_id bigint_unsigned [not null]
+  programme_id bigint_unsigned [not null]
+  intake varchar(20) [not null]
+  evidence_ref varchar(255)
+  recorded_by bigint_unsigned [not null]
+  recorded_at timestamp [not null]
+}
+
+Table approval_decisions {
+  id bigint_unsigned [pk, increment]
+  mc_version_id bigint_unsigned [not null]
+  stage varchar(12) [not null]
+  decision varchar(20) [not null]
+  decided_by bigint_unsigned [not null]
+  decided_role varchar(30) [not null]
+  verified_category varchar(4)
+  meeting_ref varchar(60)
+  meeting_date date
+  comments text
+  conditions text
+  created_at timestamp [not null]
+}
+
+Table assessment_component_outcomes {
+  assessment_component_id bigint_unsigned [pk]
+  learning_outcome_id bigint_unsigned [pk]
+}
+
+Table assessment_components {
+  id bigint_unsigned [pk, increment]
+  mc_version_id bigint_unsigned [not null]
+  mc_module_id bigint_unsigned
+  name_en varchar(255)
+  weight_percent decimal(5,1) [not null]
+  csv_key varchar(40)
+  max_mark decimal(6,2) [not null]
+  pass_mark decimal(6,2) [not null]
+}
+
+Table assessment_result_revisions {
+  id bigint_unsigned [pk, increment]
+  assessment_result_id bigint_unsigned [not null]
+  old_score decimal(6,2)
+  new_score decimal(6,2) [not null]
+  reason text [not null]
+  requested_by bigint_unsigned [not null]
+  approved_by bigint_unsigned [not null]
+  created_at timestamp [not null]
+}
+
+Table assessment_results {
+  id bigint_unsigned [pk, increment]
+  enrolment_id bigint_unsigned [not null]
+  assessment_component_id bigint_unsigned [not null]
+  score decimal(6,2)
+  status varchar(12) [not null]
+  source varchar(8) [not null]
+  import_file_id bigint_unsigned
+  entered_by bigint_unsigned
+  verified_by bigint_unsigned
+  verified_at timestamp
+  verification_evidence text
+  hold_reason text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table audit_chain_heads {
+  id bigint_unsigned [pk, increment]
+  chain varchar(20) [unique, not null]
+  last_seq bigint_unsigned [not null]
+  last_hash char(64) [not null]
+  verified_seq bigint_unsigned [not null]
+  verified_at timestamp
+}
+
+Table audit_events {
+  id bigint_unsigned [pk, increment]
+  seq bigint_unsigned [unique, not null]
+  occurred_at timestamp(6) [not null]
+  actor_id bigint_unsigned
+  actor_role varchar(30)
+  action varchar(60) [not null]
+  subject_type varchar(40)
+  subject_id varchar(255)
+  before json [not null]
+  after json [not null]
+  reason text
+  context json [not null]
+  prev_hash char(64) [not null]
+  hash char(64) [not null]
+}
+
+Table cache {
+  key varchar(255) [pk]
+  value mediumtext [not null]
+  expiration bigint [not null]
+}
+
+Table cache_locks {
+  key varchar(255) [pk]
+  owner varchar(255) [not null]
+  expiration bigint [not null]
+}
+
+Table change_requests {
+  id bigint_unsigned [pk, increment]
+  micro_credential_id bigint_unsigned [not null]
+  from_version_id bigint_unsigned [not null]
+  to_version_id bigint_unsigned
+  class varchar(10) [not null]
+  triggers json [not null]
+  reason text [not null]
+  impact_note text
+  requires_qv tinyint(1) [not null]
+  requested_by bigint_unsigned [not null]
+  status varchar(14) [not null]
+  acknowledged_by bigint_unsigned
+  acknowledged_at timestamp
+  cqi_logged_at timestamp
+  created_at timestamp [not null]
+}
+
+Table consents {
+  id bigint_unsigned [pk, increment]
+  acr_id bigint_unsigned [not null]
+  decision varchar(10) [not null]
+  channel varchar(20) [not null]
+  wording text [not null]
+  template_versions json [not null]
+  decided_by bigint_unsigned [not null]
+  decided_at timestamp [not null]
+}
+
+Table corrections {
+  id bigint_unsigned [pk, increment]
+  discrepancy_id bigint_unsigned
+  record_type varchar(30) [not null]
+  record_ref varchar(40) [not null]
+  original json [not null]
+  reason text [not null]
+  action text [not null]
+  source_checked tinyint(1) [not null]
+  approver_id bigint_unsigned [not null]
+  corrected_on date [not null]
+  participant_notified tinyint(1) [not null]
+  created_at timestamp [not null]
+}
+
+Table cqi_actions {
+  id bigint_unsigned [pk, increment]
+  cqi_record_id bigint_unsigned [not null]
+  cqi_issue_id bigint_unsigned [not null]
+  description text [not null]
+  responsible_id bigint_unsigned [not null]
+  due_on date [not null]
+  success_indicator text [not null]
+  affects varchar(20)
+  status varchar(12) [not null]
+  effectiveness varchar(14)
+  before_evidence text
+  after_evidence text
+  evaluated_by bigint_unsigned
+  evaluated_at timestamp
+  closed_by bigint_unsigned
+  closed_at timestamp
+  carried_from_id bigint_unsigned
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table cqi_issues {
+  id bigint_unsigned [pk, increment]
+  cqi_record_id bigint_unsigned [not null]
+  evidence text [not null]
+  root_cause text [not null]
+  impact text [not null]
+  priority varchar(6) [not null]
+  created_at timestamp [not null]
+}
+
+Table cqi_records {
+  id bigint_unsigned [pk, increment]
+  reference varchar(30) [unique, not null]
+  offering_id bigint_unsigned [not null]
+  owner_id bigint_unsigned [not null]
+  indicators json [not null]
+  status varchar(10) [not null]
+  submitted_at timestamp
+  confirmed_by bigint_unsigned
+  confirmed_at timestamp
+  confirmations json
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table credential_issue_failures {
+  id bigint_unsigned [pk, increment]
+  enrolment_id bigint_unsigned [unique, not null]
+  reasons json [not null]
+  created_at timestamp [not null]
+}
+
+Table credential_revisions {
+  id bigint_unsigned [pk, increment]
+  credential_id bigint_unsigned [not null]
+  revision smallint_unsigned [not null]
+  event varchar(10) [not null]
+  content json [not null]
+  jwt text [not null]
+  reason text
+  by_user_id bigint_unsigned
+  created_at timestamp [not null]
+}
+
+Table credentials {
+  id bigint_unsigned [pk, increment]
+  number varchar(24) [unique, not null]
+  public_code varchar(11) [unique, not null]
+  enrolment_id bigint_unsigned [not null]
+  status varchar(10) [not null]
+  revision smallint_unsigned [not null]
+  content json [not null]
+  jwt text [not null]
+  kid varchar(40) [not null]
+  replaces_id bigint_unsigned
+  replaced_by_id bigint_unsigned
+  issued_at timestamp [not null]
+  status_changed_at timestamp
+  status_reason text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table credit_ledger_entries {
+  id bigint_unsigned [pk, increment]
+  abc_deposit_id bigint_unsigned [not null]
+  event varchar(12) [not null]
+  from_status varchar(12)
+  to_status varchar(12) [not null]
+  credits decimal(5,1) [not null]
+  redemption_event_id bigint_unsigned
+  recorded_by bigint_unsigned
+  occurred_at timestamp [not null]
+}
+
+Table digital_badges {
+  id bigint_unsigned [pk, increment]
+  module_achievement_id bigint_unsigned [unique, not null]
+  code varchar(30) [unique, not null]
+  external_id varchar(60)
+  external_url varchar(255)
+  external_date date
+  issued_at timestamp [not null]
+}
+
+Table discrepancies {
+  id bigint_unsigned [pk, increment]
+  kind varchar(24) [not null]
+  key varchar(80) [unique, not null]
+  user_id bigint_unsigned
+  ptj_id bigint_unsigned
+  subject_type varchar(30) [not null]
+  subject_id varchar(30) [not null]
+  description text [not null]
+  status varchar(10) [not null]
+  found_at timestamp [not null]
+  resolved_at timestamp
+  resolved_by bigint_unsigned
+}
+
+Table disposal_records {
+  id bigint_unsigned [pk, increment]
+  category varchar(24) [not null]
+  cutoff date [not null]
+  row_count int_unsigned [not null]
+  retention_years smallint_unsigned [not null]
+  approved_by bigint_unsigned [not null]
+  approved_at timestamp [not null]
+}
+
+Table enrolment_status_log {
+  id bigint_unsigned [pk, increment]
+  enrolment_id bigint_unsigned [not null]
+  from_status varchar(16)
+  to_status varchar(16) [not null]
+  changed_by bigint_unsigned
+  note text
+  changed_at timestamp [not null]
+}
+
+Table enrolments {
+  id bigint_unsigned [pk, increment]
+  reference varchar(20) [unique, not null]
+  user_id bigint_unsigned [not null]
+  offering_id bigint_unsigned [not null]
+  mc_version_id bigint_unsigned [not null]
+  status varchar(16) [not null]
+  fee_amount decimal(8,2) [not null]
+  ack_text text [not null]
+  ack_versions json [not null]
+  withdraw_reason text
+  status_changed_at timestamp [not null]
+  created_at timestamp
+  updated_at timestamp
+  progress_percent tinyint_unsigned
+  modules_completed smallint_unsigned
+}
+
+Table equivalence_assessments {
+  id bigint_unsigned [pk, increment]
+  transfer_line_id bigint_unsigned [not null]
+  target_outcome varchar(255) [not null]
+  source_outcome_id bigint_unsigned
+  match varchar(8) [not null]
+  note text
+  evaluator_id bigint_unsigned [not null]
+}
+
+Table equivalence_criteria {
+  id bigint_unsigned [pk, increment]
+  transfer_line_id bigint_unsigned [not null]
+  criterion varchar(20) [not null]
+  finding text
+  result varchar(14) [not null]
+  evaluator_id bigint_unsigned [not null]
+}
+
+Table export_files {
+  id bigint_unsigned [pk, increment]
+  offering_id bigint_unsigned [not null]
+  template_version varchar(10) [not null]
+  path varchar(255) [not null]
+  sha256 char(64) [not null]
+  row_count int_unsigned [not null]
+  run_by bigint_unsigned [not null]
+  created_at timestamp [not null]
+}
+
+Table failed_jobs {
+  id bigint_unsigned [pk, increment]
+  uuid varchar(255) [unique, not null]
+  connection text [not null]
+  queue text [not null]
+  payload longtext [not null]
+  exception longtext [not null]
+  failed_at timestamp [not null]
+}
+
+Table feedback_responses {
+  id bigint_unsigned [pk, increment]
+  offering_id bigint_unsigned [not null]
+  enrolment_id bigint_unsigned [unique, not null]
+  answers json [not null]
+  comment text
+  submitted_at timestamp [not null]
+}
+
+Table import_files {
+  id bigint_unsigned [pk, increment]
+  kind varchar(10) [not null]
+  offering_id bigint_unsigned [not null]
+  template_version varchar(10) [not null]
+  original_name varchar(255) [not null]
+  path varchar(255) [not null]
+  sha256 char(64) [not null]
+  row_count int_unsigned [not null]
+  staged_count int_unsigned [not null]
+  rejected_count int_unsigned [not null]
+  duplicate_of_id bigint_unsigned
+  run_by bigint_unsigned [not null]
+  status varchar(16) [not null]
+  file_error text
+  created_at timestamp [not null]
+  staged_at timestamp
+}
+
+Table import_row_errors {
+  id bigint_unsigned [pk, increment]
+  import_file_id bigint_unsigned [not null]
+  line int_unsigned [not null]
+  learner_id varchar(40)
+  message text [not null]
+}
+
+Table integration_calls {
+  id bigint_unsigned [pk, increment]
+  adapter varchar(30) [not null]
+  operation varchar(30) [not null]
+  external_ref varchar(120) [not null]
+  payload json [not null]
+  status varchar(12) [not null]
+  attempts smallint_unsigned [not null]
+  last_error text
+  next_attempt_at timestamp
+  last_attempt_at timestamp
+  created_at timestamp [not null]
+}
+
+Table integrity_cases {
+  id bigint_unsigned [pk, increment]
+  offering_id bigint_unsigned [not null]
+  enrolment_id bigint_unsigned [not null]
+  opened_by bigint_unsigned [not null]
+  reason text [not null]
+  status varchar(8) [not null]
+  outcome text
+  closed_by bigint_unsigned
+  closed_at timestamp
+  created_at timestamp [not null]
+}
+
+Table job_batches {
+  id varchar(255) [pk]
+  name varchar(255) [not null]
+  total_jobs int [not null]
+  pending_jobs int [not null]
+  failed_jobs int [not null]
+  failed_job_ids longtext [not null]
+  options mediumtext
+  cancelled_at int
+  created_at int [not null]
+  finished_at int
+}
+
+Table jobs {
+  id bigint_unsigned [pk, increment]
+  queue varchar(255) [not null]
+  payload longtext [not null]
+  attempts tinyint_unsigned [not null]
+  reserved_at int_unsigned
+  available_at int_unsigned [not null]
+  created_at int_unsigned [not null]
+}
+
+Table learning_outcomes {
+  id bigint_unsigned [pk, increment]
+  mc_version_id bigint_unsigned [not null]
+  code varchar(10) [not null]
+  text_en text
+  text_ms text
+  sort_order smallint_unsigned [not null]
+}
+
+Table mc_modules {
+  id bigint_unsigned [pk, increment]
+  mc_version_id bigint_unsigned [not null]
+  seq smallint_unsigned [not null]
+  name_en varchar(255)
+  name_ms varchar(255)
+  slt_hours smallint_unsigned [not null]
+  is_assessment tinyint(1) [not null]
+  separately_recognisable tinyint(1) [not null]
+}
+
+Table mc_versions {
+  id bigint_unsigned [pk, increment]
+  micro_credential_id bigint_unsigned [not null]
+  version_no smallint_unsigned [not null]
+  proposal_type varchar(10) [not null]
+  status varchar(20) [not null]
+  name_en varchar(255)
+  name_ms varchar(255)
+  discipline varchar(255)
+  target_group varchar(255)
+  delivery_mode varchar(20)
+  delivery_language varchar(30)
+  offering_period varchar(255)
+  need text
+  evidence_types json
+  added_value text
+  planned_slt smallint_unsigned
+  credit_sought tinyint(1) [not null]
+  parent_course_id bigint_unsigned
+  credit_model varchar(20)
+  assessment_standard text
+  integrity_mechanism text
+  feedback_method text
+  credential_types json
+  achievement_level varchar(10)
+  qv_status varchar(20)
+  verification_method varchar(255)
+  proposed_credit decimal(5,1)
+  proposed_mqf_level tinyint_unsigned
+  ip_confirmed tinyint(1) [not null]
+  ip_note text
+  submit_response text
+  submitted_at timestamp
+  updated_by bigint_unsigned
+  created_at timestamp
+  updated_at timestamp
+  supersedes_id bigint_unsigned
+  effective_date date
+  change_class varchar(10) [not null]
+  change_summary text
+  qv_valid_until date
+}
+
+Table micro_credentials {
+  id bigint_unsigned [pk, increment]
+  code varchar(30) [unique]
+  category varchar(4) [not null]
+  category_status varchar(10) [not null]
+  origin varchar(12) [not null]
+  qv_planned tinyint(1) [not null]
+  ptj_id bigint_unsigned [not null]
+  owner_id bigint_unsigned [not null]
+  category_confirmed_by bigint_unsigned
+  category_confirmed_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table migrations {
+  id int_unsigned [pk, increment]
+  migration varchar(255) [not null]
+  batch int [not null]
+}
+
+Table module_achievements {
+  id bigint_unsigned [pk, increment]
+  enrolment_id bigint_unsigned [not null]
+  mc_module_id bigint_unsigned [not null]
+  verified_by bigint_unsigned [not null]
+  achieved_at timestamp [not null]
+}
+
+Table module_enrolments {
+  id bigint_unsigned [pk, increment]
+  enrolment_id bigint_unsigned [not null]
+  mc_module_id bigint_unsigned [not null]
+  status varchar(12) [not null]
+  enrolled_at timestamp [not null]
+  completed_at timestamp
+}
+
+Table notification_preferences {
+  id bigint_unsigned [pk, increment]
+  user_id bigint_unsigned [not null]
+  template_key varchar(60) [not null]
+  enabled tinyint(1) [not null]
+}
+
+Table notifications {
+  id bigint_unsigned [pk, increment]
+  user_id bigint_unsigned [not null]
+  template_key varchar(60) [not null]
+  channel varchar(12) [not null]
+  locale varchar(5) [not null]
+  subject varchar(255) [not null]
+  body text [not null]
+  status varchar(12) [not null]
+  dedupe_key varchar(120)
+  read_at timestamp
+  created_at timestamp [not null]
+}
+
+Table offerings {
+  id bigint_unsigned [pk, increment]
+  mc_version_id bigint_unsigned [not null]
+  cohort_name varchar(60) [not null]
+  start_date date [not null]
+  end_date date [not null]
+  delivery_mode varchar(20) [not null]
+  capacity smallint_unsigned [not null]
+  reg_opens_on date [not null]
+  reg_closes_on date [not null]
+  fee decimal(8,2) [not null]
+  facilitators text
+  eligible_groups text
+  platform_ref varchar(255)
+  description text
+  prerequisites text
+  access_period varchar(255)
+  learning_support text
+  completion_conditions text
+  staged_completion tinyint(1) [not null]
+  status varchar(12) [not null]
+  readiness_state varchar(16) [not null]
+  held_reason text
+  cancel_reason text
+  created_by bigint_unsigned [not null]
+  created_at timestamp
+  updated_at timestamp
+  withdrawal_deadline date
+  results_submitted_at timestamp
+  completion_window_months smallint_unsigned
+}
+
+Table parent_courses {
+  id bigint_unsigned [pk, increment]
+  code varchar(30) [unique, not null]
+  name varchar(255) [not null]
+  credit smallint_unsigned [not null]
+  slt_hours smallint_unsigned [not null]
+  clos text [not null]
+  created_at timestamp
+  updated_at timestamp
+  programme_id bigint_unsigned
+}
+
+Table password_reset_tokens {
+  email varchar(255) [pk]
+  token varchar(255) [not null]
+  created_at timestamp
+}
+
+Table pathway_items {
+  id bigint_unsigned [pk, increment]
+  pathway_id bigint_unsigned [not null]
+  micro_credential_id bigint_unsigned [not null]
+  parent_course_id bigint_unsigned [not null]
+  credits decimal(5,1) [not null]
+  lo_equivalence varchar(8) [not null]
+  content_equivalence varchar(8) [not null]
+  preliminary varchar(12) [not null]
+  plo_map json
+  bok_map json
+  note text
+}
+
+Table pathways {
+  id bigint_unsigned [pk, increment]
+  reference varchar(30) [unique, not null]
+  programme_id bigint_unsigned [not null]
+  version_no smallint_unsigned [not null]
+  status varchar(10) [not null]
+  plos json
+  bok json
+  approval_ref varchar(60)
+  approved_on date
+  approved_by bigint_unsigned
+  published_at timestamp
+  review_reason text
+  created_by bigint_unsigned [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table payments {
+  id bigint_unsigned [pk, increment]
+  enrolment_id bigint_unsigned [not null]
+  amount decimal(8,2) [not null]
+  method varchar(20) [not null]
+  card_last4 varchar(4)
+  reference varchar(60) [unique, not null]
+  provider_ref varchar(60)
+  status varchar(10) [not null]
+  failure_reason varchar(255)
+  created_at timestamp [not null]
+}
+
+Table pdpa_acknowledgements {
+  id bigint_unsigned [pk, increment]
+  user_id bigint_unsigned [not null]
+  notice_version varchar(20) [not null]
+  acknowledged_at timestamp [not null]
+}
+
+Table periodic_reviews {
+  id bigint_unsigned [pk, increment]
+  micro_credential_id bigint_unsigned [not null]
+  due_on date [not null]
+  completed_on date
+  outcome varchar(16)
+  note text
+  decided_by bigint_unsigned
+  reminded_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table plan_requirements {
+  id bigint_unsigned [pk, increment]
+  stackable_plan_id bigint_unsigned [not null]
+  requirement_key varchar(20) [not null]
+  met tinyint(1) [not null]
+  detail text [not null]
+  checked_at timestamp [not null]
+}
+
+Table programmes {
+  id bigint_unsigned [pk, increment]
+  code varchar(30) [unique, not null]
+  name varchar(255) [not null]
+  mqf_level tinyint_unsigned [not null]
+  mode varchar(20) [not null]
+  accreditation_status varchar(20) [not null]
+  total_credits smallint_unsigned [not null]
+  created_at timestamp
+  updated_at timestamp
+  ptj_id bigint_unsigned
+  transfer_limit_percent tinyint_unsigned [not null]
+  non_transferable text
+  curriculum_version varchar(20) [not null]
+  intake varchar(40)
+}
+
+Table proposal_readiness {
+  id bigint_unsigned [pk, increment]
+  mc_version_id bigint_unsigned [not null]
+  item varchar(30) [not null]
+  status varchar(10) [not null]
+  note text
+}
+
+Table ptjs {
+  id bigint_unsigned [pk, increment]
+  code varchar(20) [unique, not null]
+  name varchar(255) [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table qualification_awards {
+  id bigint_unsigned [pk, increment]
+  stackable_plan_id bigint_unsigned [not null]
+  evidence_ref varchar(255) [not null]
+  awarded_on date [not null]
+  recorded_by bigint_unsigned [not null]
+  created_at timestamp [not null]
+}
+
+Table quality_domain_checks {
+  id bigint_unsigned [pk, increment]
+  cqi_record_id bigint_unsigned [not null]
+  domain varchar(20) [not null]
+  met tinyint(1) [not null]
+  finding text [not null]
+  checked_by bigint_unsigned [not null]
+  checked_at timestamp [not null]
+}
+
+Table qv_evidence {
+  id bigint_unsigned [pk, increment]
+  qv_record_id bigint_unsigned [not null]
+  item varchar(30) [not null]
+  status varchar(10) [not null]
+  file_ref text
+  notes text
+  linked tinyint(1) [not null]
+}
+
+Table qv_records {
+  id bigint_unsigned [pk, increment]
+  micro_credential_id bigint_unsigned [not null]
+  cycle_no smallint_unsigned [not null]
+  status varchar(12) [not null]
+  change_review json
+  readiness_decision varchar(12)
+  readiness_missing text
+  target_date date
+  readiness_by bigint_unsigned
+  readiness_confirmed_by bigint_unsigned
+  readiness_confirmed_at timestamp
+  submitted_on date
+  submitted_ref varchar(60)
+  submitted_by bigint_unsigned
+  qv_reference varchar(60)
+  verified_credit decimal(5,1)
+  verified_mqf_level tinyint_unsigned
+  valid_from date
+  valid_until date
+  conditions text
+  decision_document varchar(255)
+  outcome_note text
+  reverification tinyint(1) [not null]
+  decided_by bigint_unsigned
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table readiness_confirmations {
+  id bigint_unsigned [pk, increment]
+  offering_id bigint_unsigned [not null]
+  role varchar(10) [not null]
+  user_id bigint_unsigned [not null]
+  outcome varchar(16) [not null]
+  conditions text
+  created_at timestamp [not null]
+}
+
+Table readiness_items {
+  id bigint_unsigned [pk, increment]
+  offering_id bigint_unsigned [not null]
+  item varchar(30) [not null]
+  status varchar(10) [not null]
+  note text
+  accepted tinyint(1) [not null]
+}
+
+Table redemption_events {
+  id bigint_unsigned [pk, increment]
+  abc_deposit_id bigint_unsigned [not null]
+  transfer_line_id bigint_unsigned
+  event varchar(12) [not null]
+  evidence_ref varchar(255)
+  abc_updated_on date
+  abc_update_ref varchar(60)
+  recorded_by bigint_unsigned
+  occurred_at timestamp [not null]
+}
+
+Table report_runs {
+  id bigint_unsigned [pk, increment]
+  kind varchar(24) [not null]
+  user_id bigint_unsigned [not null]
+  format varchar(8) [not null]
+  row_count int_unsigned [not null]
+  scope json
+  ran_at timestamp [not null]
+}
+
+Table result_change_requests {
+  id bigint_unsigned [pk, increment]
+  assessment_result_id bigint_unsigned [not null]
+  new_score decimal(6,2) [not null]
+  reason text [not null]
+  requested_by bigint_unsigned [not null]
+  status varchar(10) [not null]
+  decided_by bigint_unsigned
+  decision_note text
+  decided_at timestamp
+  created_at timestamp [not null]
+}
+
+Table retention_holds {
+  id bigint_unsigned [pk, increment]
+  category varchar(24) [not null]
+  reason text [not null]
+  placed_by bigint_unsigned [not null]
+  placed_at timestamp [not null]
+  lifted_by bigint_unsigned
+  lifted_at timestamp
+}
+
+Table review_assignments {
+  id bigint_unsigned [pk, increment]
+  mc_version_id bigint_unsigned [not null]
+  reviewer_id bigint_unsigned [not null]
+  kind varchar(10) [not null]
+  assigned_by bigint_unsigned [not null]
+  due_on date [not null]
+  scope text [not null]
+  status varchar(12) [not null]
+  coi_declared_at timestamp
+  has_conflict tinyint(1)
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table review_comments {
+  id bigint_unsigned [pk, increment]
+  mc_version_id bigint_unsigned [not null]
+  review_assignment_id bigint_unsigned [not null]
+  author_id bigint_unsigned [not null]
+  item varchar(30)
+  text text [not null]
+  blocking tinyint(1) [not null]
+  status varchar(10) [not null]
+  response text
+  responded_by bigint_unsigned
+  responded_at timestamp
+  resolve_reason text
+  resolved_by bigint_unsigned
+  resolved_at timestamp
+  created_at timestamp [not null]
+}
+
+Table reviews {
+  id bigint_unsigned [pk, increment]
+  review_assignment_id bigint_unsigned [unique, not null]
+  ratings json [not null]
+  recommendation varchar(12) [not null]
+  summary text [not null]
+  submitted_at timestamp [not null]
+}
+
+Table role_assignments {
+  id bigint_unsigned [pk, increment]
+  user_id bigint_unsigned [not null]
+  role varchar(30) [not null]
+  scope_type varchar(20)
+  ptj_id bigint_unsigned
+  scope_ref varchar(60)
+  valid_from date
+  valid_to date
+  assigned_by bigint_unsigned
+  reason text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table sessions {
+  id varchar(255) [pk]
+  user_id bigint_unsigned
+  ip_address varchar(45)
+  user_agent text
+  payload longtext [not null]
+  last_activity int [not null]
+}
+
+Table setting_versions {
+  id bigint_unsigned [pk, increment]
+  setting_id bigint_unsigned [not null]
+  value json
+  effective_from timestamp [not null]
+  set_by bigint_unsigned
+  reason text [not null]
+  supersedes_id bigint_unsigned
+}
+
+Table settings {
+  id bigint_unsigned [pk, increment]
+  key varchar(255) [unique, not null]
+  value_type varchar(20) [not null]
+  unit varchar(30)
+  description_en varchar(255) [not null]
+  description_ms varchar(255)
+  source_ref varchar(255)
+}
+
+Table signing_keys {
+  id bigint_unsigned [pk, increment]
+  kid varchar(40) [unique, not null]
+  public_key varchar(60) [not null]
+  secret_enc text [not null]
+  status varchar(8) [not null]
+  created_at timestamp [not null]
+}
+
+Table stackable_plans {
+  id bigint_unsigned [pk, increment]
+  reference varchar(24) [unique, not null]
+  user_id bigint_unsigned [not null]
+  pathway_id bigint_unsigned [not null]
+  programme_id bigint_unsigned [not null]
+  item_ids json [not null]
+  other_credits decimal(5,1) [not null]
+  transfer_credits decimal(5,1) [not null]
+  utem_percent decimal(5,1) [not null]
+  residency_semesters smallint_unsigned [not null]
+  delivery_method varchar(20) [not null]
+  remaining json
+  setting_version_id bigint_unsigned
+  status varchar(12) [not null]
+  decision varchar(12)
+  conditions text
+  decided_by bigint_unsigned
+  decided_on date
+  created_by bigint_unsigned [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table suspensions {
+  id bigint_unsigned [pk, increment]
+  micro_credential_id bigint_unsigned [not null]
+  offering_id bigint_unsigned
+  kind varchar(12) [not null]
+  reason text [not null]
+  effective_from date [not null]
+  transition_type varchar(20)
+  transition_plan text
+  offering_ids json [not null]
+  participants_notified smallint_unsigned [not null]
+  authority varchar(30) [not null]
+  decided_by bigint_unsigned [not null]
+  lifted_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table tasks {
+  id bigint_unsigned [pk, increment]
+  assignee_role varchar(30) [not null]
+  area varchar(20) [not null]
+  title varchar(255) [not null]
+  subject_ref varchar(60)
+  created_at timestamp [not null]
+  completed_at timestamp
+  ptj_id bigint_unsigned
+  user_id bigint_unsigned
+  kind varchar(30)
+  ref_id bigint_unsigned
+  link varchar(255)
+}
+
+Table template_versions {
+  id bigint_unsigned [pk, increment]
+  template_id bigint_unsigned [not null]
+  locale varchar(5) [not null]
+  version int_unsigned [not null]
+  subject varchar(255)
+  body text [not null]
+  set_by bigint_unsigned
+  reason text [not null]
+  created_at timestamp [not null]
+}
+
+Table templates {
+  id bigint_unsigned [pk, increment]
+  key varchar(60) [unique, not null]
+  kind varchar(20) [not null]
+  mandatory tinyint(1) [not null]
+  description varchar(255) [not null]
+}
+
+Table transfer_applications {
+  id bigint_unsigned [pk, increment]
+  reference varchar(24) [unique, not null]
+  user_id bigint_unsigned [not null]
+  programme_id bigint_unsigned [not null]
+  institution varchar(255) [not null]
+  documents text
+  evidence_request text
+  status varchar(14) [not null]
+  validity json
+  validity_by bigint_unsigned
+  applied_by bigint_unsigned [not null]
+  applied_at timestamp [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table transfer_decisions {
+  id bigint_unsigned [pk, increment]
+  transfer_application_id bigint_unsigned [not null]
+  outcome varchar(14) [not null]
+  decided_by bigint_unsigned [not null]
+  decided_on date [not null]
+  authority varchar(40) [not null]
+  decision_ref varchar(60)
+  conditions text
+  warnings json
+  created_at timestamp [not null]
+}
+
+Table transfer_lines {
+  id bigint_unsigned [pk, increment]
+  transfer_application_id bigint_unsigned [not null]
+  acr_id bigint_unsigned [not null]
+  abc_deposit_id bigint_unsigned [not null]
+  mc_version_id bigint_unsigned [not null]
+  parent_course_id bigint_unsigned [not null]
+  credits_requested decimal(5,1) [not null]
+  credits_approved decimal(5,1)
+  decision varchar(14)
+  reevaluate tinyint(1) [not null]
+  target_version varchar(20) [not null]
+  source_version_no smallint_unsigned [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table ucreds_courses {
+  id bigint_unsigned [pk, increment]
+  course_id int_unsigned [unique, not null]
+  title varchar(255) [not null]
+  kind varchar(14) [not null]
+  domain varchar(80) [not null]
+  level varchar(20) [not null]
+  subject_code varchar(12)
+  duration varchar(40)
+  hours decimal(7,2)
+  fee decimal(9,2)
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table users {
+  id bigint_unsigned [pk, increment]
+  name varchar(255) [not null]
+  email varchar(255) [unique, not null]
+  email_verified_at timestamp
+  password varchar(255)
+  remember_token varchar(100)
+  created_at timestamp
+  updated_at timestamp
+  entra_oid varchar(255) [unique]
+  institution_id varchar(255) [unique]
+  upn varchar(255)
+  name_on_certificate varchar(255)
+  phone varchar(255)
+  locale varchar(5) [not null]
+  status varchar(20) [not null]
+  last_login_at timestamp
+  participant_group varchar(60)
+}
+
+Table verification_log {
+  id bigint_unsigned [pk, increment]
+  credential_id bigint_unsigned
+  outcome varchar(14) [not null]
+  via varchar(8) [not null]
+  network_address varchar(45)
+  created_at timestamp [not null]
+}
+
+Table version_transition_rules {
+  id bigint_unsigned [pk, increment]
+  mc_version_id bigint_unsigned [not null]
+  from_version_id bigint_unsigned [not null]
+  rule varchar(12) [not null]
+  approval_decision_id bigint_unsigned [not null]
+  note text
+  created_at timestamp [not null]
+}
+
+// Foreign Key Relationships (185 connections)
+Ref: abc_batches.prepared_by > users.id
+Ref: abc_batches.ptj_id > ptjs.id
+Ref: abc_deposits.abc_batch_id > abc_batches.id
+Ref: abc_deposits.acr_id > acrs.id
+Ref: abc_deposits.recorded_by > users.id
+Ref: abc_deposits.setting_version_id > setting_versions.id
+Ref: achievement_records.confirmed_by > users.id
+Ref: achievement_records.enrolment_id > enrolments.id
+Ref: achievement_records.mc_version_id > mc_versions.id
+Ref: acr_checks.acr_id > acrs.id
+Ref: acr_checks.enrolment_id > enrolments.id
+Ref: acrs.achievement_record_id > achievement_records.id
+Ref: acrs.confirmed_by > users.id
+Ref: acrs.mc_version_id > mc_versions.id
+Ref: acrs.qv_record_id > qv_records.id
+Ref: acrs.user_id > users.id
+Ref: admissions.programme_id > programmes.id
+Ref: admissions.recorded_by > users.id
+Ref: admissions.user_id > users.id
+Ref: approval_decisions.decided_by > users.id
+Ref: approval_decisions.mc_version_id > mc_versions.id
+Ref: assessment_component_outcomes.assessment_component_id > assessment_components.id
+Ref: assessment_component_outcomes.learning_outcome_id > learning_outcomes.id
+Ref: assessment_components.mc_module_id > mc_modules.id
+Ref: assessment_components.mc_version_id > mc_versions.id
+Ref: assessment_result_revisions.approved_by > users.id
+Ref: assessment_result_revisions.assessment_result_id > assessment_results.id
+Ref: assessment_result_revisions.requested_by > users.id
+Ref: assessment_results.assessment_component_id > assessment_components.id
+Ref: assessment_results.enrolment_id > enrolments.id
+Ref: assessment_results.entered_by > users.id
+Ref: assessment_results.import_file_id > import_files.id
+Ref: assessment_results.verified_by > users.id
+Ref: audit_events.actor_id > users.id
+Ref: change_requests.acknowledged_by > users.id
+Ref: change_requests.from_version_id > mc_versions.id
+Ref: change_requests.micro_credential_id > micro_credentials.id
+Ref: change_requests.requested_by > users.id
+Ref: change_requests.to_version_id > mc_versions.id
+Ref: consents.acr_id > acrs.id
+Ref: consents.decided_by > users.id
+Ref: corrections.approver_id > users.id
+Ref: corrections.discrepancy_id > discrepancies.id
+Ref: cqi_actions.carried_from_id > cqi_actions.id
+Ref: cqi_actions.closed_by > users.id
+Ref: cqi_actions.cqi_issue_id > cqi_issues.id
+Ref: cqi_actions.cqi_record_id > cqi_records.id
+Ref: cqi_actions.evaluated_by > users.id
+Ref: cqi_actions.responsible_id > users.id
+Ref: cqi_issues.cqi_record_id > cqi_records.id
+Ref: cqi_records.confirmed_by > users.id
+Ref: cqi_records.offering_id > offerings.id
+Ref: cqi_records.owner_id > users.id
+Ref: credential_issue_failures.enrolment_id > enrolments.id
+Ref: credential_revisions.by_user_id > users.id
+Ref: credential_revisions.credential_id > credentials.id
+Ref: credentials.enrolment_id > enrolments.id
+Ref: credentials.replaced_by_id > credentials.id
+Ref: credentials.replaces_id > credentials.id
+Ref: credit_ledger_entries.abc_deposit_id > abc_deposits.id
+Ref: credit_ledger_entries.recorded_by > users.id
+Ref: credit_ledger_entries.redemption_event_id > redemption_events.id
+Ref: digital_badges.module_achievement_id > module_achievements.id
+Ref: discrepancies.ptj_id > ptjs.id
+Ref: discrepancies.resolved_by > users.id
+Ref: discrepancies.user_id > users.id
+Ref: disposal_records.approved_by > users.id
+Ref: enrolment_status_log.changed_by > users.id
+Ref: enrolment_status_log.enrolment_id > enrolments.id
+Ref: enrolments.mc_version_id > mc_versions.id
+Ref: enrolments.offering_id > offerings.id
+Ref: enrolments.user_id > users.id
+Ref: equivalence_assessments.evaluator_id > users.id
+Ref: equivalence_assessments.source_outcome_id > learning_outcomes.id
+Ref: equivalence_assessments.transfer_line_id > transfer_lines.id
+Ref: equivalence_criteria.evaluator_id > users.id
+Ref: equivalence_criteria.transfer_line_id > transfer_lines.id
+Ref: export_files.offering_id > offerings.id
+Ref: export_files.run_by > users.id
+Ref: feedback_responses.enrolment_id > enrolments.id
+Ref: feedback_responses.offering_id > offerings.id
+Ref: import_files.duplicate_of_id > import_files.id
+Ref: import_files.offering_id > offerings.id
+Ref: import_files.run_by > users.id
+Ref: import_row_errors.import_file_id > import_files.id
+Ref: integrity_cases.closed_by > users.id
+Ref: integrity_cases.enrolment_id > enrolments.id
+Ref: integrity_cases.offering_id > offerings.id
+Ref: integrity_cases.opened_by > users.id
+Ref: learning_outcomes.mc_version_id > mc_versions.id
+Ref: mc_modules.mc_version_id > mc_versions.id
+Ref: mc_versions.micro_credential_id > micro_credentials.id
+Ref: mc_versions.parent_course_id > parent_courses.id
+Ref: mc_versions.supersedes_id > mc_versions.id
+Ref: mc_versions.updated_by > users.id
+Ref: micro_credentials.category_confirmed_by > users.id
+Ref: micro_credentials.owner_id > users.id
+Ref: micro_credentials.ptj_id > ptjs.id
+Ref: module_achievements.enrolment_id > enrolments.id
+Ref: module_achievements.mc_module_id > mc_modules.id
+Ref: module_achievements.verified_by > users.id
+Ref: module_enrolments.enrolment_id > enrolments.id
+Ref: module_enrolments.mc_module_id > mc_modules.id
+Ref: notification_preferences.user_id > users.id
+Ref: notifications.user_id > users.id
+Ref: offerings.created_by > users.id
+Ref: offerings.mc_version_id > mc_versions.id
+Ref: parent_courses.programme_id > programmes.id
+Ref: pathway_items.micro_credential_id > micro_credentials.id
+Ref: pathway_items.parent_course_id > parent_courses.id
+Ref: pathway_items.pathway_id > pathways.id
+Ref: pathways.approved_by > users.id
+Ref: pathways.created_by > users.id
+Ref: pathways.programme_id > programmes.id
+Ref: payments.enrolment_id > enrolments.id
+Ref: pdpa_acknowledgements.user_id > users.id
+Ref: periodic_reviews.decided_by > users.id
+Ref: periodic_reviews.micro_credential_id > micro_credentials.id
+Ref: plan_requirements.stackable_plan_id > stackable_plans.id
+Ref: programmes.ptj_id > ptjs.id
+Ref: proposal_readiness.mc_version_id > mc_versions.id
+Ref: qualification_awards.recorded_by > users.id
+Ref: qualification_awards.stackable_plan_id > stackable_plans.id
+Ref: quality_domain_checks.checked_by > users.id
+Ref: quality_domain_checks.cqi_record_id > cqi_records.id
+Ref: qv_evidence.qv_record_id > qv_records.id
+Ref: qv_records.decided_by > users.id
+Ref: qv_records.micro_credential_id > micro_credentials.id
+Ref: qv_records.readiness_by > users.id
+Ref: qv_records.readiness_confirmed_by > users.id
+Ref: qv_records.submitted_by > users.id
+Ref: readiness_confirmations.offering_id > offerings.id
+Ref: readiness_confirmations.user_id > users.id
+Ref: readiness_items.offering_id > offerings.id
+Ref: redemption_events.abc_deposit_id > abc_deposits.id
+Ref: redemption_events.recorded_by > users.id
+Ref: report_runs.user_id > users.id
+Ref: result_change_requests.assessment_result_id > assessment_results.id
+Ref: result_change_requests.decided_by > users.id
+Ref: result_change_requests.requested_by > users.id
+Ref: retention_holds.lifted_by > users.id
+Ref: retention_holds.placed_by > users.id
+Ref: review_assignments.assigned_by > users.id
+Ref: review_assignments.mc_version_id > mc_versions.id
+Ref: review_assignments.reviewer_id > users.id
+Ref: review_comments.author_id > users.id
+Ref: review_comments.mc_version_id > mc_versions.id
+Ref: review_comments.resolved_by > users.id
+Ref: review_comments.responded_by > users.id
+Ref: review_comments.review_assignment_id > review_assignments.id
+Ref: reviews.review_assignment_id > review_assignments.id
+Ref: role_assignments.assigned_by > users.id
+Ref: role_assignments.ptj_id > ptjs.id
+Ref: role_assignments.user_id > users.id
+Ref: setting_versions.setting_id > settings.id
+Ref: setting_versions.set_by > users.id
+Ref: setting_versions.supersedes_id > setting_versions.id
+Ref: stackable_plans.created_by > users.id
+Ref: stackable_plans.decided_by > users.id
+Ref: stackable_plans.pathway_id > pathways.id
+Ref: stackable_plans.programme_id > programmes.id
+Ref: stackable_plans.setting_version_id > setting_versions.id
+Ref: stackable_plans.user_id > users.id
+Ref: suspensions.decided_by > users.id
+Ref: suspensions.micro_credential_id > micro_credentials.id
+Ref: suspensions.offering_id > offerings.id
+Ref: tasks.ptj_id > ptjs.id
+Ref: tasks.user_id > users.id
+Ref: template_versions.set_by > users.id
+Ref: template_versions.template_id > templates.id
+Ref: transfer_applications.applied_by > users.id
+Ref: transfer_applications.programme_id > programmes.id
+Ref: transfer_applications.user_id > users.id
+Ref: transfer_applications.validity_by > users.id
+Ref: transfer_decisions.decided_by > users.id
+Ref: transfer_decisions.transfer_application_id > transfer_applications.id
+Ref: transfer_lines.abc_deposit_id > abc_deposits.id
+Ref: transfer_lines.acr_id > acrs.id
+Ref: transfer_lines.mc_version_id > mc_versions.id
+Ref: transfer_lines.parent_course_id > parent_courses.id
+Ref: transfer_lines.transfer_application_id > transfer_applications.id
+Ref: verification_log.credential_id > credentials.id
+Ref: version_transition_rules.approval_decision_id > approval_decisions.id
+Ref: version_transition_rules.from_version_id > mc_versions.id
+Ref: version_transition_rules.mc_version_id > mc_versions.id

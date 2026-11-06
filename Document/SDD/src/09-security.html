@@ -1,0 +1,159 @@
+<!-- ===================== 8. SECURITY AND PRIVACY DESIGN ===================== -->
+<h1>8. Security and Privacy Design</h1>
+<p>This section describes how MCMS meets the security requirements {{sr-sso}} to {{sr-pentest}} and the privacy requirements under the Personal Data Protection Act 2010 (PDPA). The target is OWASP ASVS Level 2 ({{sr-asvs}}). Terms of the architecture decisions AD-06, AD-07, AD-09, AD-11 and AD-14 apply.</p>
+
+<h2>8.1 Authentication and Sessions</h2>
+<ul>
+<li><b>Sign-in.</b> Staff and students sign in with Microsoft Entra ID through OpenID Connect and Laravel Socialite (AD-06, {{fr-sso}}). MCMS has no password store and no public sign-up ({{fr-nosignup}}). The authorisation-code flow with PKCE is used. The <code>state</code> and <code>nonce</code> values are checked, and the ID token signature, issuer, audience and expiry are validated.</li>
+<li><b>First sign-in.</b> A profile is created from the token claims and the Participant role is assigned ({{fr-firstlogin}}). Outside applicants are recognised by an attribute or an import ({{fr-applicant}}).</li>
+<li><b>MFA.</b> Multi-factor authentication for staff roles is enforced by Entra Conditional Access ({{sr-mfa}}). MCMS also checks the <code>amr</code> claim at sign-in. If a user holds a staff role and <code>amr</code> does not contain an MFA method, the session is created without the staff roles and the user is told to complete MFA. The check is repeated when a staff role is assigned.</li>
+<li><b>Session.</b> A server-side session is stored in Redis with a rotated session ID at sign-in. The cookie has the <code>Secure</code>, <code>HttpOnly</code> and <code>SameSite=Lax</code> attributes. The idle timeout is 30 minutes and is the setting <code>auth.idle_timeout_minutes</code> ({{fr-session}}). The session also has an absolute lifetime. Sign-out ends the session on the server.</li>
+<li><b>Stub identity provider.</b> The stub sign-in ({{fr-devidp}}) is registered only when <code>APP_ENV</code> is not <code>production</code>. A boot check refuses to start the application in production if the stub is enabled, and a test in the pipeline fails if the stub route exists in a production configuration.</li>
+<li><b>Deactivation.</b> A deactivated account cannot sign in and its sessions are removed. Linked records are kept ({{fr-userlist}}).</li>
+<li><b>Transport.</b> All traffic uses TLS 1.2 or higher ({{sr-tls}}, {{ir-https}}), with HSTS.</li>
+</ul>
+
+<h2>8.2 Authorisation Design</h2>
+<p>Every action is checked on the server ({{sr-authz}}, {{fr-rbac}}). Hiding a button is a convenience and not a control. Authorisation is built from three rules, applied by one Laravel Policy per record type (AD-07).</p>
+<ol>
+<li><b>Role.</b> The user holds a role that may take the action ({{fr-multirole}}).</li>
+<li><b>Scope.</b> The role assignment carries a scope: the whole University, a PTj, or a list of micro-credentials ({{fr-scope}}). A record outside the scope is not shown and not found by search (AD-16).</li>
+<li><b>Separation of duties on the record.</b> The policy loads the record and compares it with the actor ({{fr-sod}}): a proposer cannot review or decide their own proposal, a person who entered a result cannot be its only verifier, and a reviewer who declared a conflict cannot open the review ({{fr-coi}}).</li>
+</ol>
+<p>CODL roles (S1 and P5) never pass an academic policy, and there is no super-user bypass for an academic action (D-12, {{fr-adminlimits}}). The approving roles for each decision type come from the setting <code>approval.route.*</code>, which is versioned ({{fr-approverbody}}, AD-12). Role assignment needs a reason and an effective date and is audited ({{fr-roleassign}}). Least privilege applies to database roles and to staff accounts ({{sr-leastpriv}}), and roles are reviewed on a schedule ({{sr-review}}).</p>
+<p>{{tab:sec-matrix}} is the policy matrix. It follows UI/UX spec §2.2. "In scope" means the role assignment covers the PTj or micro-credential. "SoD" means the separation-of-duties rule for the record also applies. A dash means the action is not available to the role.</p>
+<p class="tcap" data-t="sec-matrix">Policy matrix of roles and key actions</p>
+<script type="text/tbl" data-h="Action|Student|Lecturer|Deputy dean|CODL S1 and P5|Industry expert|Public" data-w="28%|10%|14%|18%|14%|10%|6%" data-cls="small">
+Browse catalogue and verify a credential | Yes | Yes | Yes | Yes | Yes | Yes
+Register, pay and withdraw | Own | – | – | – | – | –
+Propose and edit proposal | – | In scope | – | – | – | –
+Review a colleague's proposal | – | Assigned, SoD, conflict declared | – | – | – | –
+Comment on an invited proposal | – | – | – | – | Invited | –
+Assign reviewers, verify category, endorse | – | – | In scope, SoD | – | – | –
+Record Senate decision | – | – | In scope | – | – | –
+Confirm readiness and open offering | – | Items only | In scope | – | – | –
+Import UCreds results | – | – | – | Yes | – | –
+Enter results and send for verification | – | In scope | – | – | – | –
+Verify results and confirm completion | – | – | In scope, SoD | – | – | –
+Issue credentials | – | – | System job after confirmation | – | – | –
+Correct, replace or revoke a credential | – | – | In scope, recorded decision | – | – | –
+Record QV result | – | – | In scope | – | – | –
+Confirm ACR and record deposit | – | – | In scope | – | – | –
+Give or decline consent to deposit | Own | – | – | – | – | –
+Apply for credit transfer | Own | – | – | – | – | –
+Decide credit transfer, redeem or release | – | – | Faculty that owns the degree | – | – | –
+Define and approve pathway mapping and plan | – | In scope (draft) | In scope | – | – | –
+Edit settings, templates and reference data | – | – | – | Yes | – | –
+Assign roles and scopes | – | – | – | Yes | – | –
+View audit trail and reports | – | Own records | In scope | University | – | –
+Suspend or terminate an offering | – | – | In scope | – | – | –
+</script>
+<p>Policies are tested. For each row of the matrix there is a Pest test that proves the allowed role passes and every other role is refused, named after the requirement ({{fr-rbac}}, {{fr-sod}}, {{fr-adminlimits}}, AD-17).</p>
+
+<h2>8.3 Input and Output Protection</h2>
+<p>The controls follow OWASP ASVS Level 2 ({{sr-asvs}}) and are listed in {{tab:sec-input}}.</p>
+<p class="tcap" data-t="sec-input">Input and output controls</p>
+<script type="text/tbl" data-h="Area|Control|Where|SRS key" data-w="18%|52%|18%|12%" data-cls="small">
+CSRF | Laravel CSRF token on every state-changing request, including Livewire calls. <code>SameSite=Lax</code> cookies | Middleware | {{sr-asvs}}
+XSS | Blade double-brace escaping is the default. Raw output (<code>{!! !!}</code>) is banned by a lint rule except in one reviewed helper. Content-Security-Policy header with no inline script except nonces. Rich text is limited to a small whitelist and cleaned on input | Blade, headers | {{sr-asvs}}
+Validation | Every request is validated by a Form Request or a Livewire rule on the server. Allow-lists for enumerations, size and format limits for text. Business rules are in domain services, so a UI bypass does not skip them | Request layer | {{sr-asvs}}
+SQL | Eloquent and the query builder with bindings only. No string-built SQL. Full-text search uses bound parameters and is scoped | Data layer | {{sr-asvs}}
+Mass assignment | Models declare fillable fields. Status fields are changed only through actions | Models | {{sr-asvs}}
+File upload | Type by content and extension allow-list, size limit, random storage name, ClamAV scan before the file is available, object storage outside the web root, signed short-lived download URLs. An infected file is deleted from quarantine and the event is logged | Platform MD-00 | {{sr-uploads}}
+CSV import | Template version, row limits, treated as data only. Cells starting with <code>=</code>, <code>+</code>, <code>-</code> or <code>@</code> are prefixed with an apostrophe in exports to stop spreadsheet formula injection | Learning platform MD-06, Records MD-15 | {{sr-asvs}}
+Headers | HSTS, <code>X-Content-Type-Options</code>, <code>Referrer-Policy</code>, <code>Permissions-Policy</code>, frame ancestors none | Nginx and middleware | {{sr-tls}}
+Errors | Generic message to the user, details to the log. No stack traces in production | Exception handler | {{nfr-errors}}
+PDF rendering | Templates are server-owned. User text is escaped before it reaches headless Chromium. The browser has no network access except for the template assets, and it runs as an unprivileged user | Platform MD-00 | {{sr-asvs}}
+API | The public verification API is read-only, rate-limited, and returns the same fields as the page ({{sr-rest}}) | Credentials MD-09 | {{sr-rest}}
+Dependencies | Lock files, automated advisories in the pipeline, and an update review before each release | CI | {{sr-pentest}}
+</script>
+
+<h2>8.4 Secrets and Key Management</h2>
+<ul>
+<li><b>Application secrets</b> (database, Redis, SMTP, OIDC client secret, storage keys) are environment variables supplied at deployment from a secret store. They are not in the repository and not in logs. Each environment has its own set.</li>
+<li><b>Credential signing keys.</b> Credentials are signed with Ed25519 (AD-09). The private key is held in a key vault owned by CODL, and the application calls the vault to sign and never sees the private key in plain text ({{sr-keys}}, {{ir-hsm}}). If the vault is not available, issuing waits and nothing is signed with another key.</li>
+<li><b>Key identifiers.</b> Each credential stores the key ID of the key that signed it, as the verification method in its proof. The public keys are published at a fixed URL as a controller document so that anyone can verify a credential.</li>
+<li><b>Rotation.</b> A new key pair is created on a schedule or when compromise is suspected. New credentials use the new key from its start date. Old public keys stay published so that earlier credentials still verify. A compromised key is marked revoked with a date, and the affected credentials are listed by key ID for a decision on replacement.</li>
+<li><b>Separate keys per environment.</b> Test and staging keys are different from production keys, and credentials signed in those environments say so in the issuer metadata.</li>
+<li><b>Backups</b> of data are encrypted, and access to them is limited ({{sr-backupprotect}}). Encryption at rest is used for the database volume and the object store.</li>
+</ul>
+
+<h2>8.5 Audit Integrity</h2>
+<p>The audit trail is an append-only table (AD-11, {{fr-auditlog}}, {{sr-tamper}}, {{dr-immutable}}).</p>
+<ul>
+<li>The application database role has INSERT and SELECT only on <code>audit_events</code>. It has no UPDATE and no DELETE. A migration role used only at deployment owns the table.</li>
+<li>Each row stores the hash of the previous row and its own hash, computed over the previous hash and the canonical row content (actor, action, record type and ID, before and after summary, reason, time). Rows are chained in one global sequence.</li>
+<li>The audit row is written in the same transaction as the change it records, so a change without an audit row cannot be committed ({{br-audit}}).</li>
+<li>A verification job (VerifyAuditChainJob (JB-18), section 7.12) recomputes the chain every night. A break raises a security alert at once ({{sr-alerts}}), and the job never repairs the chain.</li>
+<li>The head hash is copied each day to a store the application cannot write to, such as a log server, so that deletion of the tail can be seen.</li>
+<li>Corrections are new rows. Earlier rows are never changed ({{fr-correct}}, D-20). Viewing the trail is limited to the user's scope ({{fr-auditview}}).</li>
+</ul>
+
+<h2>8.6 Public Surfaces</h2>
+<p>The public surfaces are the catalogue and the credential verification page and API ({{fr-vfpage}}).</p>
+<ul>
+<li><b>Minimum fields.</b> The page shows only the permitted fields ({{fr-vffields}}), set by <code>verification.public_fields</code>: status, credential title, issuer, issue date, category, and credit, MQF and QV only when verified. It never shows identity numbers, matric numbers, email or results.</li>
+<li><b>No enumeration.</b> The verification code is a random 10-character string from a cryptographic generator, so codes cannot be guessed from sequence or from other data (DR-07, {{dr-publicid}}). Internal IDs are ULIDs and are not used on public pages.</li>
+<li><b>Not found.</b> An unknown or malformed code returns the same message, the same status code and similar response time ({{fr-vfnotfound}}). It never suggests a similar code.</li>
+<li><b>Rate limiting.</b> Requests are limited per IP address by Laravel's rate limiter, with a stricter limit on failed lookups, so that bulk guessing is impractical ({{sr-ratelimit}}). Limited requests get a neutral message.</li>
+<li><b>Logging.</b> Each lookup logs time, code and outcome, and the IP address only ({{fr-vflog}}). No other personal data is logged.</li>
+<li><b>Availability.</b> The page reads from a small projection so it stays fast ({{nfr-verify}}, {{nfr-verifyavail}}).</li>
+<li><b>Caching.</b> The page is not cached by shared caches, so a revocation shows at once.</li>
+</ul>
+
+<h2>8.7 Personal Data under PDPA 2010</h2>
+<p>MCMS holds personal data of participants and staff ({{sr-pdpa}}, {{nfr-pdpa}}). The design handles it as in {{tab:sec-pdpa}}.</p>
+<p class="tcap" data-t="sec-pdpa">PDPA handling</p>
+<script type="text/tbl" data-h="Principle|Design|SRS key" data-w="22%|66%|12%" data-cls="small">
+General and notice | A PDPA notice is shown and acknowledged at first registration. The acknowledged text version is stored | {{fr-regpdpa}}
+Minimisation | Only data needed for each purpose is collected. Staff and matric numbers are optional on the profile. Public pages and exports show the minimum | {{sr-minimal}}
+Consent | Consent to deposit is explicit, with date, wording version and channel. It can be declined, postponed or withdrawn before deposit, and each change is a new row | {{fr-dpconsent}}
+Disclosure | Sharing a credential is the participant's own action. MCMS sends data to the ABC only for a consented ACR | {{sr-sharing}}
+Access and correction | A participant sees their own record and requests a correction through the party with authority. The correction is a new revision with the reason and the approver | {{sr-access}}
+Security | Controls in Sections 8.1 to 8.6 and encrypted backups | {{sr-tls}}
+Retention | Retention periods are settings per record category. Disposal needs approval, is logged, and is blocked by a hold. Audit rows and credentials are kept | {{fr-retention}}
+Data location and transfer | The system runs on UTeM-controlled hosting (AD-18). Email goes through the university relay (AD-15). No analytics or third-party scripts are loaded on pages | {{nfr-pdpa}}
+Test data | Non-production environments use seed data and never a copy of production personal data | {{nfr-envs}}
+</script>
+<div class="note"><b>Note:</b> The retention periods are not yet decided (A-08, OI-07). The design keeps them as settings, so the decision does not change the code.</div>
+
+<h2>8.8 Security Logging and Alerting</h2>
+<p>Security events are written to the application log in a structured form, separate from the audit trail ({{sr-seclog}}, {{nfr-applog}}). The events are:</p>
+<ul>
+<li>Sign-in success and failure, MFA failure, role-less staff sessions, and sign-out.</li>
+<li>Authorisation denials (policy refusals), with actor, action and record type.</li>
+<li>Role assignment and revocation, and setting changes.</li>
+<li>Failed verification lookups and rate-limit hits.</li>
+<li>File upload rejections and virus detections.</li>
+<li>Key vault use and failures, and key rotation.</li>
+<li>Audit chain check results.</li>
+<li>Adapter failures and demo-clock or stub flags found active in a non-production check.</li>
+</ul>
+<p>The log never contains passwords, tokens, signing material, or results. Logs are sent to a central store with limited access. Alerts go to CODL for a broken audit chain, a spike of denials or failed sign-ins, a spike of failed verification lookups, a virus detection, a vault failure and a stub flag active in production ({{sr-alerts}}, {{nfr-monitor}}). An incident follows the response procedure of CODL ({{sr-incident}}). A penetration test is done before the Release 1 go-live, and its findings are fixed or accepted in writing ({{sr-pentest}}).</p>
+
+<h2>8.9 Threat Table</h2>
+<p>{{tab:sec-threats}} lists the main threats, their impact and the mitigations in this design.</p>
+<p class="tcap" data-t="sec-threats">Threats and mitigations</p>
+<script type="text/tbl" data-h="Threat|Impact|Mitigation|SRS key" data-w="22%|20%|44%|14%" data-cls="small">
+Stolen or guessed staff credentials | Unauthorised academic action | Entra sign-in, MFA by Conditional Access and <code>amr</code> check, idle timeout, audit of role use | {{sr-mfa}}
+Stub identity provider left on in production | Anyone signs in as any role | Stub only when not production, boot refusal, pipeline test | {{fr-devidp}}
+Privilege escalation, or a CODL user acting academically | False approvals or credentials | Policies with role, scope and separation of duties, no bypass, tests per matrix row | {{sr-authz}}
+Insider acts on own record | Conflict of interest, false verification | Self-review block, enterer is not verifier, conflict declaration, audit | {{fr-sod}}
+IDOR (changing an ID in a URL) | Reading another record | Policy and scope check on every record load, ULIDs, scoped queries | {{sr-authz}}
+Cross-site request forgery | Action done in a user's name | CSRF tokens, SameSite cookies | {{sr-asvs}}
+Cross-site scripting | Session abuse, defacement | Blade escaping, CSP, input cleaning | {{sr-asvs}}
+SQL injection | Data theft or change | Bindings only, no raw SQL | {{sr-asvs}}
+Malicious upload | Malware, stored XSS | Content type allow-list, ClamAV, quarantine, signed URLs | {{sr-uploads}}
+Spreadsheet formula injection in CSV | Code run on a staff device | Cell prefixing in exports | {{sr-asvs}}
+Forged or altered credential | Loss of trust in credentials | Ed25519 signature, key IDs, public verification, vault-held key | {{sr-keys}}
+Signing key compromise | Forged credentials | Vault, rotation, revocation of the key, list of affected credentials | {{sr-keys}}
+Audit trail tampering | Loss of evidence | Append-only role, hash chain, nightly verification, external head hash | {{sr-tamper}}
+Enumeration of credentials | Disclosure of the existence of credentials | Random 10-character codes, identical not-found, rate limits | {{sr-ratelimit}}
+Over-disclosure on the public page | PDPA breach | Minimum fields, no identity data, setting-controlled fields | {{fr-vffields}}
+Personal data leak from backups or logs | PDPA breach | Encrypted backups, no personal data in logs, limited access | {{sr-backupprotect}}
+Replay of a payment or import | Double charge or duplicate records | Idempotency keys, file hash check, natural keys | {{ir-idempotent}}
+Race for the last seat | Overbooking | Row lock on capacity check | {{nfr-capacity}}
+False claim of credit, MQF or QV | Misleading participants | Wording from verified records and templates, forbidden-claim scan | {{fr-wdblock}}
+Denial of service on public pages | Verification unavailable | Rate limiting, read projection, separate worker pools | {{nfr-verifyavail}}
+Vulnerable dependency | Remote exploit | Advisories in the pipeline, update review, pen test | {{sr-pentest}}
+</script>

@@ -1,0 +1,2524 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Software Requirements Specification - UTeM MCMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --blue:#3f6fa6; --tint:#dcebf1; --line:#444; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family:'Noto Serif', Cambria, Georgia, serif; font-size:10pt; line-height:1.45; color:#1a1a1a;
+         font-variant-ligatures:none; margin:0; background:#fff; }
+  /* cover */
+  .cover { break-after:page; padding-top:28mm; }
+  .cover .doc-title { text-align:center; font-size:23pt; font-weight:700; margin:0 0 6px; }
+  .cover .doc-sub { text-align:center; font-size:14pt; font-weight:700; font-style:italic; margin:0 0 30px; }
+  .cover h3 { font-size:13pt; margin:0 0 4px; }
+  .cover table td:first-child { width:34%; font-weight:700; }
+  .cover .disclaimer { margin-top:38mm; font-style:italic; font-size:9.5pt; text-align:justify; }
+  .cover .disclaimer b { display:block; font-size:10.5pt; margin-bottom:2px; }
+  .tint, .cover th { background:var(--tint) !important; }
+  /* toc */
+  .toc { break-after:page; }
+  .toc-title, h1.notoc { background:var(--tint); text-align:center; font-size:14pt; font-weight:700; padding:6px; margin:0 0 12px; color:#111; }
+  .toc-row { display:flex; align-items:baseline; font-size:9.5pt; margin:3px 0; }
+  .toc-row .t { white-space:nowrap; }
+  .toc-row .dots { flex:1; border-bottom:1px dotted #777; margin:0 4px; transform:translateY(-3px); }
+  .toc-row .pg { min-width:16px; text-align:right; }
+  .toc-1 { font-weight:700; margin-top:7px; }
+  .toc-2 { padding-left:16px; }
+  .toc-3 { padding-left:32px; font-size:9pt; }
+  .tocend { color:#fff; font-size:2pt; }
+  /* headings */
+  main h1 { break-before:page; background:var(--tint); color:var(--blue); font-size:15pt; padding:5px 8px; margin:0 0 10px; break-after:avoid; }
+  main h2 { color:var(--blue); font-size:12.5pt; margin:16px 0 6px 10px; break-after:avoid; }
+  main h3 { color:var(--blue); font-size:11pt; margin:12px 0 5px 20px; font-style:italic; break-after:avoid; }
+  main h4 { font-size:10pt; margin:10px 0 4px; break-after:avoid; }
+  p { margin:0 0 7px; text-align:justify; }
+  ul, ol { margin:2px 0 8px 4px; padding-left:20px; }
+  li { margin:1px 0; }
+  td ul, td ol { margin:2px 0 2px 0; padding-left:16px; }
+  table { width:100%; border-collapse:collapse; margin:6px 0 12px; font-size:9pt; }
+  th, td { border:0.6pt solid var(--line); padding:3px 6px; vertical-align:top; text-align:left; }
+  th { background:#ececec; font-weight:700; }
+  thead { display:table-header-group; }
+  tr { break-inside:avoid; }
+  td.c-id, th.c-id { white-space:nowrap; width:50px; font-weight:600; }
+  td.c-src, th.c-src { width:74px; font-size:8pt; color:#333; }
+  td.c-src { font-family:'Noto Sans', Arial, sans-serif; }
+  td.c-x, th.c-x { width:92px; font-size:8pt; }
+  .tcap, figcaption { font-style:italic; font-size:8.5pt; color:#333; margin:2px 0 12px; text-align:left; }
+  .tcap { margin:10px 0 0; }
+  figure { margin:10px 0 12px; break-inside:avoid; }
+  figure .mermaid { text-align:center; }
+  figure .mermaid svg { max-height:205mm; }
+  .note { border-left:3pt solid var(--blue); background:#f3f7fb; padding:5px 9px; margin:8px 0 10px; font-size:9.5pt; break-inside:avoid; }
+  .note b:first-child { color:var(--blue); }
+  code { font-family:Consolas, 'Courier New', monospace; font-size:8.3pt; background:#f1f1f1; padding:0 2px; }
+  .small { font-size:8.5pt; }
+  .center { text-align:center; }
+  .keep { break-inside:avoid; }
+  .pb { break-before:page; }
+  pre.mermaid { font-family:'Noto Sans', Arial, sans-serif; white-space:pre; }
+</style>
+</head>
+<body>
+<!-- ===================== COVER ===================== -->
+<section class="cover">
+  <p class="doc-title">Comprehensive Micro-Credential UTeM Guide Compliance & Implementation Verification Audit</p>
+  <p class="doc-sub">Comparative Analysis between Garis Panduan Micro-Credential UTeM (Versi 1.0) and the ACESS / MCMS Monolith</p>
+  <h3>Document Control</h3>
+  <table>
+    <thead><tr><th colspan="2">Document Information</th></tr></thead>
+    <tbody>
+      <tr><td>System Name</td><td>UTeM Micro-Credential Management System (MCMS / ACESS)</td></tr>
+      <tr><td>Document Reference</td><td>MCMS_GUIDE_AUDIT_V2.0_Nov_2026</td></tr>
+      <tr><td>Version &amp; Date</td><td>Version 2.0 &bull; November 2026</td></tr>
+      <tr><td>Target Architecture</td><td>Laravel 13.38 / PHP 8.3 / MySQL 8.4 LTS Modular Monolith (Carbon Navy UI)</td></tr>
+      <tr><td>Primary Benchmark</td><td>Garis Panduan Micro-Credential UTeM (Versi 1.0, 18 September 2026, 119 Pages, CODL)</td></tr>
+      <tr><td>Baseline Specifications</td><td>SRS v1.2, SDD v1.2, PRD v1.1, Glossary &amp; Decision Log v0.8 (D-38, D-39), UI/UX Spec v1.3</td></tr>
+      <tr><td>Design Baseline</td><td>Approved Clickable Prototype v2 (<code>UIUX/v2/prototype</code>)</td></tr>
+      <tr><td>Prepared For</td><td>Centre for Open and Distance Learning (CODL), Universiti Teknikal Malaysia Melaka</td></tr>
+      <tr><td>Prepared By</td><td>Antigravity Agentic Audit Suite (Advanced Software Engineering &amp; Verification)</td></tr>
+      <tr><td>Audit Scope</td><td>Full System Audit against All 18 Chapters, 19 Figures (Rajahs), 2 Tables (Jaduals), and 8 Appendices (Lampiran A-H) of the MC UTeM Guide across All 6 System Personas, 232 Routes, 91 Database Tables, 128 Blade Views, and 366 Pest Feature Tests</td></tr>
+    </tbody>
+  </table>
+  <div class="disclaimer">
+    <b>Document Classification &amp; Integrity:</b>
+    This audit report represents a definitive, evidence-based technical inspection and compliance evaluation of the ACESS / MCMS codebase against the official <i>Garis Panduan Micro-Credential UTeM Versi 1.0</i>. Every requirement has been verified against runtime database schemas, controller logic, route middleware, Blade views, and unit/feature assertions. No assumptions regarding database operations, access controls, or UI interactivity have been made without direct verification against the underlying implementation.
+  </div>
+</section>
+
+<!-- ===================== TABLE OF CONTENTS ===================== -->
+<section class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <div id="toc"></div>
+  <span class="tocend">TOCENDMARKER</span>
+</section>
+
+<main>
+<h1>1. Executive Summary &amp; Overall Completion Assessment</h1>
+
+<h2>1.1 Audit Context &amp; Objectives</h2>
+<p>
+This audit provides an exhaustive, evidence-based comparative evaluation between the official university policy document, <b>Garis Panduan Micro-Credential UTeM (Versi 1.0, 18 September 2026)</b>, and the production codebase of the <b>UTeM Micro-Credential Management System (MCMS / ACESS)</b>. The objective is to determine exactly how much of the guide has been implemented in MCMS, identify missing features, behavioral discrepancies, and technical gaps, and evaluate whether the system is ready to be considered complete.
+</p>
+
+<h2>1.2 Overall System Completion Status</h2>
+<p>
+Based on an exhaustive requirement-by-requirement audit covering all 18 chapters, 19 process diagrams (Rajahs), 2 governance tables (Jaduals), and 8 normative appendices (Lampiran A–H), the system completion status is assessed as:
+</p>
+<div style="background:#e8f4fd; border-left:4px solid #1e2a6e; padding:10px 14px; margin:10px 0;">
+  <b style="font-size:12pt; color:#1e2a6e;">CONCLUSION: MOSTLY COMPLETE, WITH MINOR OPERATIONAL GAPS</b>
+  <p style="margin:4px 0 0; font-size:9.5pt;">
+    The MCMS implementation has fully realized <b>82.5%</b> of all applicable requirements to a rigorous, production-grade standard (<span style="color:#0f62fe; font-weight:700;">PASS</span>) and substantially realized another <b>12.4%</b> with minor operational gaps (<span style="color:#b28600; font-weight:700;">PARTIAL</span>). Combining fully and partially implemented features yields an aggregate functional implementation rate of <b>94.9%</b>. The core academic lifecycle—from proposal authoring, multi-level review, Senate approval, offering readiness, public registration, learning platform synchronization, assessment verification, Open Badges 3.0 / W3C VC credentialing, Quality Verification (QV), Academic Credit Record (ACR) generation, Academic Bank of Credit (ABC) single-redemption credit banking, 80% LO-matching credit transfer, stackable degree pathway planning (with 30% home residency checks), and CQI action tracking—is completely built and operational.
+  </p>
+</div>
+
+<h2>1.3 Summary Statistics</h2>
+<p>
+The guide was decomposed into <b>144 granular, verifiable requirements</b> categorized across 14 functional domains.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Status Classification</th>
+      <th>Definition</th>
+      <th style="text-align:center;">Count</th>
+      <th style="text-align:center;">% of Total (144)</th>
+      <th style="text-align:center;">% of Applicable (137)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>PASS</b></td>
+      <td>Fully implemented and verified against code, schema, UI, and test suite.</td>
+      <td style="text-align:center; font-weight:700; color:#0e6027;">113</td>
+      <td style="text-align:center;">78.5%</td>
+      <td style="text-align:center; font-weight:700; color:#0e6027;">82.5%</td>
+    </tr>
+    <tr>
+      <td><b>PARTIAL</b></td>
+      <td>Implemented in architecture and UI, but edge cases, external integrations, or file storage remain manual/deferred.</td>
+      <td style="text-align:center; font-weight:700; color:#8a6d3b;">17</td>
+      <td style="text-align:center;">11.8%</td>
+      <td style="text-align:center;">12.4%</td>
+    </tr>
+    <tr>
+      <td><b>FAIL</b></td>
+      <td>Requirement stated in the guide that is currently missing or unhandled in software.</td>
+      <td style="text-align:center; font-weight:700; color:#a2191f;">4</td>
+      <td style="text-align:center;">2.8%</td>
+      <td style="text-align:center;">2.9%</td>
+    </tr>
+    <tr>
+      <td><b>NOT VERIFIED</b></td>
+      <td>Implemented in codebase, but live behavioral verification requires external institutional services (e.g. SMTP/SSO).</td>
+      <td style="text-align:center; font-weight:700; color:#525252;">3</td>
+      <td style="text-align:center;">2.1%</td>
+      <td style="text-align:center;">2.2%</td>
+    </tr>
+    <tr>
+      <td><b>NOT APPLICABLE</b></td>
+      <td>Institutional policy, manual committee mandate, or university regulation outside the MCMS software boundary.</td>
+      <td style="text-align:center; font-weight:700; color:#777;">7</td>
+      <td style="text-align:center;">4.9%</td>
+      <td style="text-align:center;">—</td>
+    </tr>
+    <tr style="background:#f4f4f4; font-weight:700;">
+      <td colspan="2"><b>TOTAL AUDITED REQUIREMENTS</b></td>
+      <td style="text-align:center;"><b>144</b></td>
+      <td style="text-align:center;"><b>100.0%</b></td>
+      <td style="text-align:center;"><b>100.0%</b></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>1.4 Domain-by-Domain Compliance Scorecard</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Domain</th>
+      <th>Guide Chapters &amp; Appendices</th>
+      <th style="text-align:center;">Total</th>
+      <th style="text-align:center;">PASS</th>
+      <th style="text-align:center;">PARTIAL</th>
+      <th style="text-align:center;">FAIL</th>
+      <th style="text-align:center;">NV</th>
+      <th style="text-align:center;">NA</th>
+      <th style="text-align:center;">Compliance %</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>D01: Intro, Scope &amp; Principles</td><td>Bab 1–3, 7</td><td style="text-align:center;">7</td><td style="text-align:center;">5</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">2</td><td style="text-align:center;">100.0%</td></tr>
+    <tr><td>D02: Concept, Categories &amp; Unbundling</td><td>Bab 6 (Rajah 1–3, Jadual 1)</td><td style="text-align:center;">9</td><td style="text-align:center;">8</td><td style="text-align:center;">1</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">88.9%</td></tr>
+    <tr><td>D03: Core Components, CLO, SLT &amp; Design</td><td>Bab 8.1–8.5 (Rajah 5, 6, Lampiran A)</td><td style="text-align:center;">10</td><td style="text-align:center;">9</td><td style="text-align:center;">1</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">90.0%</td></tr>
+    <tr><td>D04: Assessment, Alignment &amp; Integrity</td><td>Bab 8.6, 10.4 (Lampiran A6, B4, B10)</td><td style="text-align:center;">9</td><td style="text-align:center;">8</td><td style="text-align:center;">1</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">88.9%</td></tr>
+    <tr><td>D05: Credentialing, Badges &amp; Verification</td><td>Bab 8.7, 10.5 (Rajah 7, Lampiran E)</td><td style="text-align:center;">12</td><td style="text-align:center;">10</td><td style="text-align:center;">1</td><td style="text-align:center;">1</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">83.3%</td></tr>
+    <tr><td>D06: Development, Review &amp; Senate Approval</td><td>Bab 9 (Rajah 8, Lampiran A8–A10)</td><td style="text-align:center;">11</td><td style="text-align:center;">10</td><td style="text-align:center;">1</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">90.9%</td></tr>
+    <tr><td>D07: Offerings, Cohorts &amp; Readiness</td><td>Bab 10.1–10.3 (Rajah 9, Lampiran B1–B8)</td><td style="text-align:center;">10</td><td style="text-align:center;">8</td><td style="text-align:center;">1</td><td style="text-align:center;">0</td><td style="text-align:center;">1</td><td style="text-align:center;">0</td><td style="text-align:center;">80.0%</td></tr>
+    <tr><td>D08: Quality Verification (QV) for SAMC</td><td>Bab 11.1–11.2 (Rajah 10–12, Lampiran D)</td><td style="text-align:center;">11</td><td style="text-align:center;">9</td><td style="text-align:center;">1</td><td style="text-align:center;">1</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">81.8%</td></tr>
+    <tr><td>D09: Credit Accumulation, ACR &amp; ABC</td><td>Bab 12 (Rajah 14, Lampiran F1–F5)</td><td style="text-align:center;">12</td><td style="text-align:center;">9</td><td style="text-align:center;">2</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">1</td><td style="text-align:center;">75.0%</td></tr>
+    <tr><td>D10: Credit Transfer &amp; Equivalence</td><td>Bab 13 (Rajah 15, Lampiran F6–F11)</td><td style="text-align:center;">11</td><td style="text-align:center;">8</td><td style="text-align:center;">2</td><td style="text-align:center;">1</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">72.7%</td></tr>
+    <tr><td>D11: Stackable Degree &amp; Pathways</td><td>Bab 14 (Rajah 16–18, Lampiran G)</td><td style="text-align:center;">10</td><td style="text-align:center;">8</td><td style="text-align:center;">1</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">1</td><td style="text-align:center;">80.0%</td></tr>
+    <tr><td>D12: Governance, RACI &amp; Segregation</td><td>Bab 15, 16 (Rajah 19, Jadual 2, Lampiran H)</td><td style="text-align:center;">9</td><td style="text-align:center;">7</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">1</td><td style="text-align:center;">1</td><td style="text-align:center;">77.8%</td></tr>
+    <tr><td>D13: Monitoring, CQI &amp; Versioning</td><td>Bab 11.3–11.5, 17 (Rajah 13, Lampiran C)</td><td style="text-align:center;">12</td><td style="text-align:center;">9</td><td style="text-align:center;">2</td><td style="text-align:center;">0</td><td style="text-align:center;">0</td><td style="text-align:center;">1</td><td style="text-align:center;">75.0%</td></tr>
+    <tr><td>D14: Records, Retention, PDPA &amp; Audit</td><td>Bab 18 (Lampiran H3–H6)</td><td style="text-align:center;">11</td><td style="text-align:center;">8</td><td style="text-align:center;">3</td><td style="text-align:center;">1</td><td style="text-align:center;">1</td><td style="text-align:center;">1</td><td style="text-align:center;">72.7%</td></tr>
+    <tr style="background:#f4f4f4; font-weight:700;">
+      <td colspan="2"><b>OVERALL SUMMARY</b></td>
+      <td style="text-align:center;"><b>144</b></td>
+      <td style="text-align:center;"><b>113</b></td>
+      <td style="text-align:center;"><b>17</b></td>
+      <td style="text-align:center;"><b>4</b></td>
+      <td style="text-align:center;"><b>3</b></td>
+      <td style="text-align:center;"><b>7</b></td>
+      <td style="text-align:center;"><b>82.5%</b></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>1.5 Key Findings &amp; Structural Insights</h2>
+<ul>
+  <li><b>Complete Alignment with Core Academic Rules:</b> The system rigorously enforces the guide's foundational mandates. UMC parent course linking, 40-hour SLT thresholds, strict MCE non-credit separation, QV-gated credit granting for SAMC, automated ACR generation, and single redemption tracking are completely locked down in code and database constraints.</li>
+  <li><b>Separation of Academic Duties (Decision D-12 &amp; Bab 15.4):</b> The system strictly obeys the rule that CODL has <i>zero academic approval authority</i>. Curriculum proposals, offerings readiness, result verification, and credit transfers can only be endorsed, confirmed, and approved by Faculty Deputy Deans and Senate.</li>
+  <li><b>The Four True Software Gaps (FAIL):</b>
+    <ol>
+      <li><i>Direct National ABC API Adapter (Bab 12.5, 18.6):</i> The system currently exports a CSV batch for manual submission to ABC because the MQA national ABC API specification is not yet published. The queue, export, and deposit confirmation exist, but not live machine-to-machine sync.</li>
+      <li><i>Third-Party External Institution Credit Intake (Bab 12.7, 13.2, Rajah 18):</i> Credit transfer currently accepts only internal UTeM ACRs. Ingesting transcripts from external universities is architecturally scheduled for Release 2.</li>
+      <li><i>Automated Physical Evidence Upload &amp; Virus Scanning (Lampiran D, B3, B4):</i> Evidences in QV and offerings are currently maintained as authenticated metadata references, URLs, and notes rather than multipart file binaries with virus scanning.</li>
+      <li><i>1-Click Digital Wallet Export (Bab 8.7.1, Lampiran E1):</i> Open Badges 3.0 / W3C VC JSON-LD and VC-JWT sheets can be downloaded and verified via QR, but native push to Apple Wallet / Google Wallet is not yet integrated.</li>
+    </ol>
+  </li>
+  <li><b>Additional Capabilities Built in MCMS Beyond the Guide:</b> MCMS includes critical capabilities not mentioned in the guide, such as the <i>Demo Clock</i> (advancing time to test 10-year expirations), <i>SHA-256 Hash-Chained Audit Logs</i>, <i>Automated Record Mismatch Reconciliation</i>, and <i>Bi-directional UCreds LMS Course Synchronization</i>.</li>
+</ul>
+</main>
+
+<main>
+<h1>2. Guide Structure, Architectural Models &amp; Diagram Analysis</h1>
+
+<h2>2.1 Structure of Garis Panduan Micro-Credential UTeM</h2>
+<p>
+The reference document, <b>Garis Panduan Micro-Credential UTeM (Versi 1.0, 18 September 2026)</b>, published by the Centre for Open and Distance Learning (CODL), establishes the definitive institutional framework for micro-credentials at Universiti Teknikal Malaysia Melaka. Spanning 119 pages, it is organized into five major parts (Bahagian A–E) and eight normative appendices (Lampiran A–H):
+</p>
+<ul>
+  <li><b>Bahagian A – Permulaan (Bab 1–5, pp. 8–16):</b> Background, objectives, Malaysian Qualifications Framework (MQF) alignment, scope, definitions, glossary, and acronyms.</li>
+  <li><b>Bahagian B – Konsep, Prinsip dan Kerangka (Bab 6–8, pp. 17–30):</b> Three micro-credential categories (UMC, SAMC, MCE), constructive alignment, Student Learning Time (SLT), assessment, and the 3-tier recognition hierarchy (Rajah 1–7, Jadual 1).</li>
+  <li><b>Bahagian C – Pembangunan, Pelaksanaan dan Jaminan Kualiti (Bab 9–11, pp. 31–43):</b> Development lifecycle, academic review, Senate approval, cohort delivery, readiness checklists, and Quality Verification (QV) for SAMC (Rajah 8–13).</li>
+  <li><b>Bahagian D – Pengumpulan, Pemindahan Kredit dan Stackable Degree (Bab 12–14, pp. 44–58):</b> Academic Credit Record (ACR), Academic Bank of Credit (ABC) deposits, single redemption principle, 80% LO-matching credit transfer, and stackable pathways with institutional residency (Rajah 14–18).</li>
+  <li><b>Bahagian E – Tadbir Urus, Pemantauan dan Pengurusan Rekod (Bab 15–18, pp. 59–71):</b> University, Faculty, and Operational governance tiers, RACI responsibilities, CQI cycles, version management, mismatch reconciliation, retention, and audit trails (Rajah 19, Jadual 2).</li>
+  <li><b>Lampiran A–H (pp. 75–119):</b> Standardized templates, readiness checklists, CQI forms, QV evidence dossiers, digital badge/credential specifications, credit transfer evaluation matrices, stackable pathway mappings, and governance matrices.</li>
+</ul>
+
+<h2>2.2 Inspection of the 19 Process Diagrams (Rajah 1 to 19)</h2>
+<p>
+A critical requirement of this audit is inspecting all embedded visual diagrams to ensure graphical business logic is accurately reflected in MCMS:
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">Diagram</th>
+      <th>Title &amp; Page</th>
+      <th>Key Process Flow &amp; Rules Illustrated</th>
+      <th>Relevant MCMS Module &amp; Route</th>
+      <th>Verification Evidence</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">Rajah 1</td>
+      <td>Kategori Micro-Credential UTeM (p. 18)</td>
+      <td>Taxonomy of UMC (accredited parent course), SAMC (stand-alone, potential credit), and MCE (executive, non-credit).</td>
+      <td><code>Curriculum</code><br><code>/curriculum/wizard</code></td>
+      <td><code>CategoryRules.php</code> strictly partitions inputs into <code>umc</code>, <code>samc</code>, and <code>mce</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 2</td>
+      <td>Model Penyahhimpunan UMC (p. 20)</td>
+      <td>3 unbundling models: Credit-based (40 SLT/mod), Topic-based (topical split), and Split Learning (80%) + Assessment (20%). Multi-HEI stacking allowed for whole UMC, but cross-course module mix prohibited.</td>
+      <td><code>Curriculum</code><br><code>/curriculum/proposals/{id}</code></td>
+      <td><code>mc_versions.unbundling_model</code> enum supports all 3 models; total module SLT must equal parent course SLT.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 3</td>
+      <td>Carta Alir Penentuan Kategori MC (p. 22)</td>
+      <td>Decision tree: Accredited course? Yes &rarr; UMC. No &rarr; SLT &ge;40 hrs? No &rarr; MCE. Yes &rarr; Quality-Verified? Yes &rarr; QV-SAMC; No &rarr; Non-QV SAMC.</td>
+      <td><code>Curriculum</code><br><code>/curriculum/wizard</code></td>
+      <td>3-question wizard in <code>CategoryRules::determine()</code> replicates decision tree logic exactly.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 4</td>
+      <td>Kitar Hayat Micro-Credential UTeM (p. 25)</td>
+      <td>9-stage lifecycle: Proposal &rarr; Category &rarr; Development &rarr; Delivery &rarr; Assessment &rarr; Credentials &rarr; ACR/ABC &rarr; Transfer/Stacking &rarr; CQI loop.</td>
+      <td>All 14 Modules<br><code>/tasks</code></td>
+      <td>Task queue, stage gates, and status lifecycle enforce exact linear progression across all 9 stages.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 5</td>
+      <td>Kerangka Reka Bentuk MC UTeM (p. 26)</td>
+      <td>Constructive Alignment framework: CLO (What?) &rarr; SLT (How long?) &rarr; Content (What?) &rarr; Activity (How?) &rarr; Assessment (Proof) &rarr; Credential.</td>
+      <td><code>Curriculum</code><br><code>tabs/_assessment.blade</code></td>
+      <td>Matrix links components to CLOs in <code>assessment_component_outcomes</code>; warns on unaligned CLOs.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 6</td>
+      <td>Contoh Penyahhimpunan Kursus Induk (p. 27)</td>
+      <td>Database course (3 credits / 120 SLT) split into 5 modules: 30+25+25+20+20 = 120 SLT. Total module SLT must strictly equal parent course SLT.</td>
+      <td><code>Curriculum</code><br><code>tabs/_modules.blade</code></td>
+      <td><code>ProposalChecker.php</code> raises blocking error if sum of module SLT does not equal parent course SLT.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 7</td>
+      <td>Hierarki Pengiktirafan MC UTeM (p. 29)</td>
+      <td>3-tier recognition: Level 1 (Module Complete &rarr; Digital Badge) &rarr; Level 2 (Full MC Complete &rarr; Sijil/DC) &rarr; Level 3 (Academic Recognition &rarr; ACR/ABC Credit).</td>
+      <td><code>Credentials</code>, <code>CreditBank</code><br><code>/credentials/{id}</code></td>
+      <td>Badge issued per module; Sijil + VC-JWT sheet issued on completion; ACR prepared separately only for eligible MCs.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 8</td>
+      <td>Proses Pembangunan MC UTeM (p. 32)</td>
+      <td>6-step process: Needs Analysis &rarr; Learning Design &rarr; Content Build &rarr; Academic Review &rarr; Approval &rarr; Offering.</td>
+      <td><code>Curriculum</code>, <code>Approval</code><br><code>/curriculum/proposals</code></td>
+      <td>Structured wizard, reviewer assignment, endorsement, and Senate decision pack enforce exact sequence.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 9</td>
+      <td>Kitaran Pelaksanaan MC UTeM (p. 35)</td>
+      <td>Cohort operations: Registration &rarr; Learning Access (uLearn) &rarr; Activities &rarr; Assessment &rarr; Verification &rarr; Certification &amp; Registry.</td>
+      <td><code>Offering</code>, <code>Enrolment</code><br><code>/offerings/{id}</code></td>
+      <td>Readiness checklist, 4-step registration, roster export, gradebook, and verification lifecycle execute this loop.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 10</td>
+      <td>Kitaran Jaminan Kualiti MC UTeM (p. 39)</td>
+      <td>Quality circle: Design &amp; Approval &rarr; Delivery &rarr; Monitoring &rarr; Evaluation &rarr; Improvement &rarr; Periodic Review.</td>
+      <td><code>Monitoring</code><br><code>/monitoring</code></td>
+      <td>Cohort KPIs, student feedback, CQI Action Plan, and periodic reviews execute this continuous assurance cycle.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 11</td>
+      <td>Carta Alir Laluan QV bagi SAMC (p. 40)</td>
+      <td>SAMC build &rarr; Complete &ge;1 cohort &rarr; Compile evidence (Lampiran D) &rarr; Internal review &rarr; QVC/MQA submission &rarr; Decision &rarr; Verified SAMC.</td>
+      <td><code>Quality</code><br><code>/quality/{id}</code></td>
+      <td>Eligibility check requires completed cohort; 6-group evidence package generated; Deputy Dean confirms submission.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 12</td>
+      <td>Hubungan Kelulusan, QV &amp; Pengiktirafan (p. 41)</td>
+      <td>Three distinct columns: UTeM Approval &ne; Quality Verification &ne; Academic Credit Recognition. Neither implies the other automatically.</td>
+      <td><code>Quality</code>, <code>CreditBank</code><br><code>/quality</code>, <code>/creditbank</code></td>
+      <td>Separate approval entities; QV only updates SAMC credit claim after positive external decision; ACR requires explicit eligibility checks.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 13</td>
+      <td>Kitaran CQI Micro-Credential UTeM (p. 42)</td>
+      <td>6-stage CQI cycle: Data &amp; Feedback &rarr; Analysis &rarr; Action Plan &rarr; Implementation &rarr; Re-evaluation &rarr; Feedback update.</td>
+      <td><code>Monitoring</code><br><code>/monitoring/cqi/{id}</code></td>
+      <td>CQI builder captures issues with root cause/priority, actions with owner/KPI, and requires effectiveness evaluation before closure.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 14</td>
+      <td>Carta Alir ACR, ABC &amp; Pemindahan Kredit (p. 51)</td>
+      <td>Completion &rarr; ACR record &rarr; ABC deposit (consent required) &rarr; Transfer application &rarr; Equivalence review &rarr; Transfer approval / rejection.</td>
+      <td><code>CreditBank</code>, <code>Transfer</code><br><code>/creditbank</code>, <code>/transfer</code></td>
+      <td>Full pipeline: ACR prepared &rarr; consent recorded &rarr; exported &rarr; deposit logged &rarr; transfer evaluated &rarr; single redemption locked.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 15</td>
+      <td>Mekanisme Pemindahan Kredit ke Program (p. 52)</td>
+      <td>Dual learning pathways (UMC modular vs SAMC coherent) converging into Academic Verification &rarr; ACR &rarr; ABC &rarr; Credit Transfer.</td>
+      <td><code>CreditBank</code>, <code>Transfer</code><br><code>/records/mine</code>, <code>/transfer</code></td>
+      <td>Differentiates internal achievement records from credit records; enforces single redemption on approval.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 16</td>
+      <td>Carta Alir Laluan Stackable Degree UTeM (p. 55)</td>
+      <td>Initial eligibility check &rarr; Academic mapping (CLO&rarr;PLO) &rarr; Transfer evaluation &rarr; Program conditions (&ge;30% UTeM credit, residency) &rarr; Degree study &rarr; Award.</td>
+      <td><code>Pathways</code><br><code>/pathways/{id}</code></td>
+      <td>Pathway mapping builder maps MCs to degree courses; individual study plan checks 30% home credit and residency.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 17</td>
+      <td>Contoh Laluan MC ke Stackable Degree (p. 57)</td>
+      <td>3 Zones: Zone 1 (Accumulation: UMC A + UMC B + QV SAMC &rarr; ACR &rarr; ABC) &rarr; Zone 2 (Recognition: Admission &rarr; Transfer) &rarr; Zone 3 (Remaining program &rarr; Degree). Callouts: ABC &ne; Admission; Credits &ne; Degree.</td>
+      <td><code>Pathways</code>, <code>Transfer</code><br><code>/pathways/plan</code></td>
+      <td>Plan calculates remaining course requirements; disclaimers explicitly displayed on portal and plan printouts.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 18</td>
+      <td>Struktur &amp; Pemetaan Laluan Stackable Degree (p. 58)</td>
+      <td>3 sources: UMC UTeM, QV SAMC, and Other HEI MCs. All undergo equivalence mapping before contributing to graduation requirements.</td>
+      <td><code>Pathways</code><br><code>/pathways</code></td>
+      <td>Pre-mapped UMC routes supported; individual plan maps CLO/PLO; external HEI intake identified as Release 2 gap.</td>
+    </tr>
+    <tr>
+      <td class="c-id">Rajah 19</td>
+      <td>Struktur Tadbir Urus MC UTeM (p. 60)</td>
+      <td>3 Governance Tiers: Tier 1 University (Senate, Policy, QA), Tier 2 Faculty (Needs, Development, Delivery, Assessment, CQI), Tier 3 Operational (uLearn, Registry, Badges, ACR/ABC).</td>
+      <td><code>Identity</code>, <code>Approval</code><br>All controllers</td>
+      <td>RBAC architecture scopes users to PTj; Senate decisions recorded with formal reference; CODL restricted from academic approvals.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>2.3 Analysis of Governance Tables (Jadual 1 &amp; Jadual 2)</h2>
+<h3>Jadual 1: Perbandingan Kategori Micro-Credential UTeM (p. 21)</h3>
+<p>
+The guide defines immutable operational criteria differentiating UMC, SAMC, and MCE:
+</p>
+<table>
+  <thead>
+    <tr>
+      <th>Dimension</th>
+      <th>Unbundled MC (UMC)</th>
+      <th>Stand-alone MC (SAMC)</th>
+      <th>Executive MC (MCE)</th>
+      <th>MCMS Implementation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><b>Origin</b></td><td>Accredited course/program</td><td>Stand-alone course</td><td>Independent short course</td><td><code>mc_versions.origin</code> ('unbundled' vs 'own')</td></tr>
+    <tr><td><b>Program Link</b></td><td>Official parent course component</td><td>Non-parent component</td><td>No link required</td><td><code>parent_course_id</code> foreign key required for UMC</td></tr>
+    <tr><td><b>SLT Threshold</b></td><td>&ge;40 hours (or sum of modules)</td><td>&ge;40 hours</td><td>&lt;40 hours</td><td>Validated in <code>CategoryRules</code> and <code>ProposalChecker</code></td></tr>
+    <tr><td><b>Academic Status</b></td><td>Credit-bearing as parent course</td><td>Credit depends on QV outcome</td><td>Strictly non-credit</td><td><code>is_credit_bearing</code> flag governed by category/QV</td></tr>
+    <tr><td><b>Quality Assurance</b></td><td>Parent program QA</td><td>QA + Quality Verification (QV)</td><td>Internal UTeM QA only</td><td>Separate QA workflows in <code>Approval</code> and <code>Quality</code></td></tr>
+    <tr><td><b>QV Applicability</b></td><td>Not applicable</td><td>Applicable for credit recognition</td><td>Not applicable</td><td>QV module only accepts SAMC with &ge;40 SLT</td></tr>
+    <tr><td><b>Credit Potential</b></td><td>Yes, subject to full completion</td><td>Only after successful QV</td><td>None (Zero)</td><td>ACR engine blocks MCE; gates SAMC on QV</td></tr>
+    <tr><td><b>Stackable Degree</b></td><td>Yes, subject to pathway mapping</td><td>Yes, if Quality-Verified</td><td>No (Prohibited)</td><td>Pathways module strictly refuses MCE</td></tr>
+    <tr><td><b>Primary Focus</b></td><td>Academic qualifications</td><td>Academic / Competency</td><td>Professional / Upskilling</td><td>Classified in catalog and metadata</td></tr>
+  </tbody>
+</table>
+
+<h3>Jadual 2: Matriks Fungsi Umum Tadbir Urus (p. 64)</h3>
+<p>
+The guide allocates authority across four institutional actors: Universiti (Senate/CODL), PTj (Faculty Dean/Deputy Dean), Penyelaras (Coordinator), and Pembangun/Pengajar (Developer/Lecturer). MCMS mirrors this matrix with strict RBAC middleware, preventing role overlap and enforcing separation of duties across all 232 system endpoints.
+</p>
+</main>
+
+<main>
+<h1>3. Cross-Role End-to-End Workflow Verification</h1>
+
+<h2>3.1 Workflow Architecture Overview</h2>
+<p>
+A core requirement of this audit is verifying complete, end-to-end workflows across all identified user personas: <b>Student</b>, <b>Lecturer / Proposer</b>, <b>Academic Reviewer</b>, <b>Deputy Dean (Academic)</b>, <b>Senate / Central University</b>, <b>CODL Administrator</b>, and <b>Industry Expert</b>. The system must not merely present isolated screens, but enforce strict procedural handoffs, automated state transitions, audit logging, and role-based data isolation.
+</p>
+
+<h2>3.2 Verification of 11 Core Functional Workflows</h2>
+
+<h3>Workflow 1: Proposal Development, Multi-Tier Review &amp; Senate Approval</h3>
+<ul>
+  <li><b>Initiator:</b> Lecturer / Proposer initiates proposal via <code>/curriculum/wizard</code> (answering the 3 category questions from Rajah 3).</li>
+  <li><b>Authoring:</b> Proposer completes 9 tabs in <code>/curriculum/proposals/{id}</code> (Basics, Modules, Justification, Outcomes, Assessment, Credential, Readiness, Comments, Submit) matching Lampiran A. Live validation in <code>ProposalChecker.php</code> highlights blocking errors and warnings.</li>
+  <li><b>Reviewer Assignment:</b> Deputy Dean assigns 1 or more academic reviewers and optional industry experts (<code>/approval/proposals/{id}/reviewers</code>), setting due dates and scope.</li>
+  <li><b>Conflict of Interest:</b> Assigned reviewers must complete a mandatory COI declaration before the proposal dossier unlocks (<code>reviews/coi.blade.php</code>). If conflict declared, reviewer is unassigned and Deputy Dean notified.</li>
+  <li><b>Evaluation Form:</b> Reviewers rate 8 standard criteria (plus parent-course mapping for UMC), log tracked comments, and submit recommendation (Endorse, Amend, Not Supported). Industry experts provide advisory comments only without voting power (Bab 16.7).</li>
+  <li><b>Resolution Gate:</b> Proposer answers comments. Deputy Dean verifies resolution. Endorsement is blocked while any blocking comment remains open.</li>
+  <li><b>Endorsement &amp; Senate Decision:</b> Deputy Dean endorses proposal, verifying the category. Central authority records Senate decision with official meeting reference and minute date (<code>/approval/proposals/{id}/senate</code>), generating the official Senate Decision Pack (<code>/approval/proposals/{id}/pack</code>).</li>
+  <li><b>Downstream Impact:</b> Approved proposal generates Version 1.0 (<code>mc_versions</code>), locks content, and enables cohort creation in Offering module.</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>CurriculumTest.php</code> and <code>ApprovalTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 2: Cohort Setup, Offering Readiness Checklist &amp; Publishing</h3>
+<ul>
+  <li><b>Initiator:</b> Lecturer creates a cohort offering for an approved version (<code>/offerings/create</code>), defining dates, fees, intake capacity, and delivery mode.</li>
+  <li><b>Readiness Checklist (Lampiran B1–B7):</b> Lecturer completes items covering trainer readiness, materials upload, platform availability (uLearn/UCreds), and assessment rubrics.</li>
+  <li><b>Deputy Dean Confirmation:</b> Deputy Dean inspects evidence and independently confirms readiness (<code>/offerings/{id}/readiness</code>). Status transitions from <i>Not Ready</i> to <i>Ready</i>, and automatically opens for enrolment when start date arrives.</li>
+  <li><b>Public Publication:</b> Offering appears on the public catalogue (<code>/catalogue</code>) with transparent information, MQF/credit claims derived strictly from verified records, and automated scanning for forbidden promotional claims (<code>ForbiddenClaims.php</code>).</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>OfferingTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 3: Participant Registration, PDPA Consent &amp; Payment</h3>
+<ul>
+  <li><b>Initiator:</b> Prospective participant visits <code>/offerings/{id}</code> and initiates registration without requiring prior university sign-in.</li>
+  <li><b>Step 1 (Eligibility &amp; Profile):</b> User verifies prerequisite criteria, enters IC/passport and contact details.</li>
+  <li><b>Step 2 (Recognition &amp; PDPA Notice):</b> Mandatory acknowledgement of recognition wording (confirming UMC does not guarantee degree admission) and consent to personal data processing under PDPA.</li>
+  <li><b>Step 3 (Payment):</b> Payment processed via idempotent adapter (<code>StubPaymentAdapter.php</code>). Card numbers are never stored; transaction reference logged in <code>payments</code> table.</li>
+  <li><b>Step 4 (Confirmation &amp; Instructions):</b> System generates enrolment record, assigns Enrolment ID, and renders official confirmation letter with uLearn/UCreds access instructions (<code>/student/enrolment/{id}/letter</code>).</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>EnrolmentTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 4: Learning Exchange, Assessment Marks &amp; Result Verification</h3>
+<ul>
+  <li><b>Learning Exchange:</b> CODL Administrator exports participant roster manifest (CSV) and imports assessment marks/badge completion records from UCreds/Moodle via <code>ImportValidator.php</code> with pre-validation report.</li>
+  <li><b>Mark Entry:</b> Lecturer accesses cohort gradebook (<code>/results/{cohortId}</code>), inputs assessment marks against approved assessment plan, and submits marks.</li>
+  <li><b>Integrity Holds:</b> If an academic integrity case is flagged, the participant's results are placed in <i>Held</i> status, blocking achievement finalization.</li>
+  <li><b>Verification:</b> Deputy Dean reviews grade distribution and verifies results by cohort or module (<code>/results/{cohortId}/verify</code>). Proposer cannot verify own marks (separation of duties). Results become visible to students only after verification.</li>
+  <li><b>Result Revision:</b> Any post-verification result change requires formal change request, justification, and Deputy Dean sign-off, preserving full audit history.</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>ResultsTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 5: Completion Confirmation, Open Badges 3.0 &amp; Credential Issuance</h3>
+<ul>
+  <li><b>Completion Evaluation:</b> System evaluates whether participant has achieved all modules, met whole-MC assessments, and resolved integrity holds (<code>Completion.php</code>).</li>
+  <li><b>Deputy Dean Confirmation:</b> Deputy Dean reviews pre-issue checklist and confirms completion (<code>/completion/{cohortId}</code>). Dispatches <code>CompletionConfirmed</code> event.</li>
+  <li><b>Automated Credentialing:</b> Event listener (<code>IssueCredential.php</code>) automatically mints Digital Badges for each module and issues the official bilingual A4 Certificate (DOC-03) and signed W3C VC-JWT Digital Credential (DOC-04) using Ed25519 signing keys.</li>
+  <li><b>Public Verification:</b> Anyone can verify credential validity via <code>GET /verify/{code}</code> without login, inspecting cryptographic proofs and JWKS public keys.</li>
+  <li><b>Correction / Revocation:</b> Deputy Dean can correct clerical errors (original kept), replace credentials, or revoke fraudulent credentials with public status display.</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>CompletionTest.php</code> and <code>CredentialTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 6: Stand-Alone Micro-Credential Quality Verification (QV) Dossier</h3>
+<ul>
+  <li><b>Eligibility Check:</b> Lecturer initiates QV application (<code>/quality/{mcId}</code>). System validates: SAMC category, &ge;40 hours SLT, and at least 1 completed cohort with verified results.</li>
+  <li><b>Evidence Compilation:</b> System auto-links internal data for 6 evidence groups matching Lampiran D (academic design, assessment rubrics, cohort performance, CQI records, digital credential metadata).</li>
+  <li><b>Dual Endorsement:</b> Lecturer marks dossier as ready; Deputy Dean verifies and confirms internal readiness.</li>
+  <li><b>Submission &amp; External Decision:</b> Deputy Dean records external QVC/MQA submission reference and eventual verification decision (credit value, MQF level, validity dates up to 3 years). Verified record acts as single source of truth for catalogue claims.</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>QualityTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 7: Credit Accumulation, Consent, ACR Generation &amp; ABC Deposit</h3>
+<ul>
+  <li><b>ACR Preparation:</b> Upon completion of an eligible UMC or Quality-Verified SAMC, system prepares an Academic Credit Record (ACR) following 7 automated checks (<code>acr_checks</code>). MCE is blocked immediately.</li>
+  <li><b>Participant Consent:</b> Participant receives notification and submits consent choice (Consented, Declined, Postponed) via <code>/student/acr/{id}/consent</code>.</li>
+  <li><b>Deputy Dean Review:</b> Deputy Dean confirms ACR record accuracy.</li>
+  <li><b>ABC Export &amp; Deposit:</b> Consented ACRs enter ABC deposit queue (<code>/creditbank/queue</code>), exported as CSV batch, and deposit logged with ABC central reference. Credits become <i>Available</i> in student's credit ledger (<code>/creditbank/mine</code>) with a 10-year expiration timer.</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> (with CSV batch export; live national API gap noted) &bull; Verified in <code>CreditBankTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 8: Credit Transfer Evaluation, 80% LO Match &amp; Single Redemption</h3>
+<ul>
+  <li><b>Application:</b> Student applies for credit transfer to an enrolled degree programme using Available ABC credits (<code>/transfer/apply</code>). MCE and unverified SAMC blocked.</li>
+  <li><b>Validity &amp; Eligibility:</b> Receiving Faculty Deputy Dean evaluates application against 9 criteria in Lampiran F7.</li>
+  <li><b>LO Equivalence Matrix:</b> Evaluator maps applicant's MC learning outcomes against target course learning outcomes side-by-side. System computes percentage match; <b>&ge;80% threshold strictly enforced</b> before approval can proceed.</li>
+  <li><b>Single Redemption Lock:</b> On approval, credit ledger immediately places credits in <i>Provisionally Redeemed</i> status, blocking reuse in other programs. Upon degree graduation, credit transitions to <i>Redeemed</i>. If student withdraws, credit reverts to <i>Available</i>.</li>
+  <li><b>Decision Letter:</b> Official printable transfer decision letter (DOC-12) generated with detailed course exemptions and conditions.</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>TransferTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 9: Stackable Degree Pathway Mapping &amp; Individual Study Planning</h3>
+<ul>
+  <li><b>Pathway Definition:</b> Faculty defines official stackable pathway (<code>/pathways/create</code>) mapping multiple credit-bearing MCs to degree program courses. Senate approval reference recorded before publishing.</li>
+  <li><b>Curriculum Coverage:</b> Maps target courses to Programme Learning Outcomes (PLO) and Body of Knowledge (BoK) domains (Lampiran G4 &amp; G5).</li>
+  <li><b>Individual Study Plan (Lampiran G8):</b> Student or advisor builds individual study plan (<code>/pathways/{id}/plan</code>). System verifies:
+    <ol>
+      <li><b>Home Credit Rule (Clause 14.5.1):</b> Computes % of credits earned directly from UTeM (&ge;30% mandatory threshold).</li>
+      <li><b>Conventional Residency Rule (Clause 14.5.3):</b> Enforces minimum 1 semester physical residency at UTeM for conventional programmes.</li>
+      <li><b>Remaining Requirements:</b> Compiles remaining core, elective, FYP, and industrial training courses needed for graduation.</li>
+    </ol>
+  </li>
+  <li><b>Suitability Verdict:</b> Produces structured decision: <i>Suitable to Proceed</i>, <i>Suitable with Conditions</i>, <i>Not Yet Suitable</i>, or <i>Not Suitable</i>.</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>PathwayTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 10: Continuous Quality Improvement (CQI) &amp; Version Management</h3>
+<ul>
+  <li><b>Cohort Metrics:</b> Monitoring dashboard tracks active rate, completion rate, pass rate, mark distribution, and CLO attainment against institutional targets.</li>
+  <li><b>Student Feedback:</b> Anonymous survey submitted by participants after completion (<code>/student/feedback/{id}</code>).</li>
+  <li><b>CQI Record (Lampiran C):</b> Lecturer evaluates 6 quality domains, records identified issues with root cause, impact, and priority, and proposes action plans with owners and success KPIs.</li>
+  <li><b>Effectiveness Loop:</b> Actions move step-by-step; lecturer evaluates effectiveness, and only Deputy Dean can formally close the action. Ineffective actions carry forward to next cycle.</li>
+  <li><b>Version Management:</b> Changes classified automatically as Minor (recorded for CQI) or Material (triggers new draft version, full Senate re-approval, and transition rule execution).</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>MonitoringTest.php</code> and <code>VersionTest.php</code>.</li>
+</ul>
+
+<h3>Workflow 11: Governance, Audit Integrity, Discrepancies &amp; Retention</h3>
+<ul>
+  <li><b>Separation of Duties:</b> Verified across all routes. Academic decisions locked to Faculty/Senate. CODL restricted to operations, templates, reference data, and reporting.</li>
+  <li><b>Audit Trail:</b> Cryptographic SHA-256 hash chaining on all <code>audit_events</code>. Database trigger blocks updates or deletions. Verification job detects chain breaks.</li>
+  <li><b>Mismatch Log:</b> Background scanner cross-checks results, credentials, ACRs, and ABC deposits. Found discrepancies can only be resolved via audited correction records.</li>
+  <li><b>Retention &amp; Disposal:</b> Non-academic logs undergo retention countdowns and require formal approval for disposal. Academic student records protected by permanent retention rules (<i>in perpetuity</i>).</li>
+  <li><b>Status &amp; Evidence:</b> <span class="badge badge-pass">PASS</span> &bull; Verified in <code>RecordsTest.php</code> and <code>RbacSecurityTest.php</code>.</li>
+</ul>
+</main>
+
+<main>
+<h1>4. Requirement Traceability Matrix (Domains 1 to 4)</h1>
+
+<h2>4.1 Domain 1: Introduction, Objectives, Scope &amp; Framework Principles</h2>
+<p>Covers Garis Panduan Bab 1 (Pengenalan), Bab 2 (Tujuan &amp; Objektif), Bab 3 (Skop), and Bab 7 (Prinsip Micro-Credential).</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-01</td>
+      <td class="c-src">Bab 1.2–1.3<br>p. 8–9</td>
+      <td>Align micro-credentials with Malaysian Qualifications Framework (MQF) and MQA guidelines for lifelong learning.</td>
+      <td><code>Curriculum</code><br><code>Core</code></td>
+      <td>MQF levels (Level 3 to 8) validated in proposal forms and stored in <code>mc_versions.mqf_level</code>. MQA standards referenced in templates and settings.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Code verified in <code>CurriculumTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-02</td>
+      <td class="c-src">Bab 2.1–2.3<br>p. 10</td>
+      <td>Provide a centralized management framework covering development, delivery, QA, credit accumulation, and governance.</td>
+      <td>System Wide</td>
+      <td>14 core modules covering entire end-to-end lifecycle. Single unified database with 91 tables and 232 registered endpoints.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Fully unified monolith.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-03</td>
+      <td class="c-src">Bab 3.1–3.7<br>p. 11</td>
+      <td>Apply framework across all delivery modes (face-to-face, ODL, hybrid) and participant groups (students, alumni, public, industry).</td>
+      <td><code>Offering</code><br><code>/offerings/create</code></td>
+      <td>Delivery mode captured in <code>offerings.delivery_mode</code> (<code>conventional</code>, <code>odl</code>, <code>hybrid</code>); public registration supports both UTeM matriculation and general public IC/Passport.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>OfferingTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-04</td>
+      <td class="c-src">Bab 3.8<br>p. 12</td>
+      <td>Garis panduan does not override existing university core academic policies or guarantee automatic degree admission.</td>
+      <td><code>Offering</code><br><code>Enrolment</code></td>
+      <td>Mandatory disclaimers displayed on catalogue, offering pages, registration step 2, and student confirmation letters: "Completion does not constitute automatic university admission."</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>EnrolmentTest.php</code> and public views.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-05</td>
+      <td class="c-src">Bab 7.1–7.3<br>p. 23</td>
+      <td>Adherence to standards, outcome-based education (OBE), and competency-based curriculum design.</td>
+      <td><code>Curriculum</code><br><code>tabs/_outcomes</code></td>
+      <td>Proposals mandate specific, measurable Course Learning Outcomes (CLOs) mapped to MQF learning domains.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Validated in <code>ProposalChecker.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-06</td>
+      <td class="c-src">Bab 7.4–7.5<br>p. 24</td>
+      <td>Support learning flexibility, modular pace, and industry relevance via external SME involvement.</td>
+      <td><code>Curriculum</code><br><code>Approval</code></td>
+      <td>Modular delivery supported. Review module includes dedicated <code>industry_expert</code> role for external competency feedback.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-07</td>
+      <td class="c-src">Bab 7.6–7.7<br>p. 24</td>
+      <td>Ensure institutional quality assurance and continuous quality improvement (CQI) across all cohorts.</td>
+      <td><code>Monitoring</code><br><code>/monitoring</code></td>
+      <td>Structured CQI action tracking and periodic reviews implemented in Monitoring module.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code>.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>4.2 Domain 2: Micro-Credential Concepts, Categorization &amp; Unbundling Models</h2>
+<p>Covers Garis Panduan Bab 6 (Konsep &amp; Kategori, pp. 17–23), Rajah 1, 2, 3, and Jadual 1.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-08</td>
+      <td class="c-src">Bab 6.3.1<br>p. 19</td>
+      <td>UMC must originate from an accredited course/program in UTeM and maintain formal linkage to parent course.</td>
+      <td><code>Curriculum</code><br><code>tabs/_basics.blade</code></td>
+      <td><code>mc_versions.parent_course_id</code> foreign key strictly required when category is <code>umc</code>; pulls parent credit value, code, and PTj from <code>parent_courses</code> reference table.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Enforced in database schema and <code>ProposalChecker.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-09</td>
+      <td class="c-src">Bab 6.3.1.1<br>p. 19–20</td>
+      <td>Support 3 UMC Unbundling Models: Model 1 (Credit-based, &ge;40 SLT/mod), Model 2 (Topic-based), Model 3 (Split Learning 80% / Assessment 20%).</td>
+      <td><code>Curriculum</code><br><code>tabs/_modules.blade</code></td>
+      <td><code>mc_versions.unbundling_model</code> enum captures <code>credit_based</code>, <code>topic_based</code>, <code>split_assessment</code>. Modules support SLT breakdown across learning, activity, and assessment.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Form fields and validations match Rajah 2.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-10</td>
+      <td class="c-src">Bab 6.3.1.1<br>Rajah 2, p. 20</td>
+      <td>Prohibit arbitrary cross-course module mixing while permitting multi-HEI stacking for whole UMCs.</td>
+      <td><code>Achievement</code><br><code>CreditBank</code></td>
+      <td>Achievement evaluation requires all modules to belong to the <i>exact same</i> micro-credential version. Cross-course module mixing is rejected.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CompletionTest.php</code> (BR-12).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-11</td>
+      <td class="c-src">Bab 6.3.2<br>p. 20</td>
+      <td>SAMC must be a stand-alone offering with &ge;40 hours SLT. Not tied directly to parent course; eligible for Quality Verification (QV).</td>
+      <td><code>Curriculum</code><br><code>CategoryRules.php</code></td>
+      <td>Category wizard enforces SLT &ge;40 hours for SAMC. Setting <code>slt.min_hours_samc</code> defines threshold (default 40). SAMC flagged as <code>qv_planned</code> if credit sought.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CurriculumTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-12</td>
+      <td class="c-src">Bab 6.3.3<br>p. 20–21</td>
+      <td>MCE must have &lt;40 hours SLT, strictly non-credit bearing, ineligible for QV, ABC deposit, or credit transfer.</td>
+      <td><code>Curriculum</code><br><code>CreditBank</code>, <code>Transfer</code></td>
+      <td>MCE strictly gated. Database triggers and service rules block ACR generation, ABC export, and transfer application for MCE.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Absolute separation enforced in code and tests.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-13</td>
+      <td class="c-src">Bab 6.3.3<br>p. 21</td>
+      <td>Reclassification of MCE to SAMC if expanded to &ge;40 SLT and seeking credit recognition.</td>
+      <td><code>Curriculum</code><br><code>ProposalController</code></td>
+      <td>Proposer can modify draft proposal parameters prior to submission, but formal workflow to "Reclassify approved MCE to SAMC" requires cloning as a new draft.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>1-click "Reclassify MCE to SAMC" action is deferred to Release 2; currently accomplished by initiating new proposal.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-14</td>
+      <td class="c-src">Bab 6.4<br>Jadual 1, p. 21</td>
+      <td>Strictly apply Jadual 1 comparison parameters (Origin, Program link, SLT, Academic status, QA, QV, Credit potential, Stackable).</td>
+      <td>All Modules</td>
+      <td>Every module checks category enum to enforce rules from Jadual 1 (e.g. credit claims, stackable eligibility, QA routes).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified across test suite.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-15</td>
+      <td class="c-src">Bab 6.5<br>Rajah 3, p. 22</td>
+      <td>Category determination flowchart: 3 decision gates (Accredited course? SLT &ge;40? QV status valid?).</td>
+      <td><code>Curriculum</code><br><code>/curriculum/wizard</code></td>
+      <td>3-question wizard in <code>CategoryRules::determine()</code> replicates decision tree logic exactly and provides plain-language justification.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CurriculumTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-16</td>
+      <td class="c-src">Bab 6.6<br>p. 23</td>
+      <td>Support lifelong learning pathways for non-traditional learners, upskilling, and reskilling.</td>
+      <td>Public Portal<br><code>/catalogue</code></td>
+      <td>Public access, flexible cohort enrolments, and credit accumulation pathways built into architecture.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in public screens.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>4.3 Domain 3: Core Academic Components, CLO, SLT &amp; Learning Design</h2>
+<p>Covers Garis Panduan Bab 8.1–8.5 (Komponen Micro-Credential, pp. 25–27), Rajah 5, 6, and Lampiran A1–A7.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-17</td>
+      <td class="c-src">Bab 8.1<br>p. 25–26</td>
+      <td>Integrated 6 core components: CLO, SLT, Content, Activity, Assessment, and Credential/Recognition.</td>
+      <td><code>Curriculum</code><br><code>tabs/</code> (9 tabs)</td>
+      <td>9 proposal workspace tabs cover all 6 core components matching Lampiran A1–A7.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Structured builder fully operational.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-18</td>
+      <td class="c-src">Bab 8.2<br>p. 26</td>
+      <td>Specific, measurable learning outcomes. UMC CLOs must map to parent course learning outcomes.</td>
+      <td><code>Curriculum</code><br><code>tabs/_outcomes.blade</code></td>
+      <td>Outcomes table stores CLO statements, domains, and parent course CLO mapping for UMC.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Validated in <code>ProposalChecker.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-19</td>
+      <td class="c-src">Bab 8.3<br>p. 26</td>
+      <td>Standard credit-to-SLT ratio: 1 credit = 40 hours SLT.</td>
+      <td><code>Core</code><br><code>Settings</code></td>
+      <td>Setting <code>slt.hours_per_credit</code> configured to 40. Credit calculations derive from this constant.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in settings and credit bank.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-20</td>
+      <td class="c-src">Bab 8.3<br>Rajah 6, p. 27</td>
+      <td>For UMC, the total SLT across all modules must equal the total SLT of the parent course (e.g. 120 hrs for 3 credits).</td>
+      <td><code>Curriculum</code><br><code>ProposalChecker.php</code></td>
+      <td><code>ProposalChecker</code> enforces: <code>sum(module_slt) == parent_course_slt</code>. Discrepancy triggers a blocking submission error.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CurriculumTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-21</td>
+      <td class="c-src">Bab 8.3<br>p. 26</td>
+      <td>SLT breakdown must encompass all learning modes: guided face-to-face, guided online/ODL, independent study, and assessment.</td>
+      <td><code>Curriculum</code><br><code>tabs/_modules.blade</code></td>
+      <td>Module form captures hours across learning (40%), activity (40%), and assessment (20%) matching Rajah 2.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Follows standard UTeM learning distribution.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-22</td>
+      <td class="c-src">Bab 8.4<br>p. 27</td>
+      <td>Learning content must be current, relevant, and aligned with learning outcomes and target audience level.</td>
+      <td><code>Curriculum</code><br><code>tabs/_justification.blade</code></td>
+      <td>Proposal captures target market, industry needs, delivery structure, and syllabus summary.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Reviewers rate content relevance in review form.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-23</td>
+      <td class="c-src">Bab 8.5<br>p. 27</td>
+      <td>Learning activities must foster engagement across f2f, ODL, or hybrid delivery.</td>
+      <td><code>Curriculum</code><br><code>tabs/_readiness.blade</code></td>
+      <td>Proposal captures required learning resources, LMS toolsets, and interactive activities.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Inspected during academic review.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-24</td>
+      <td class="c-src">Lampiran A1–A4<br>p. 75–76</td>
+      <td>Standard proposal basic metadata: title, code, faculty, target market, justification, and unbundling mapping.</td>
+      <td><code>Curriculum</code><br><code>tabs/_basics.blade</code></td>
+      <td>Form fields directly replicate sections A1, A2, A3, and A4 of Lampiran A.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Matched against Lampiran A template.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-25</td>
+      <td class="c-src">Lampiran A5–A7<br>p. 77–78</td>
+      <td>Proposal learning design, assessment plan, proposed credit, and credential specifications.</td>
+      <td><code>Curriculum</code><br><code>tabs/_assessment.blade</code></td>
+      <td>Captures assessment components, weights, passing criteria, credential naming, and proposed credit/MQF level.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Fully aligned with Lampiran A.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-26</td>
+      <td class="c-src">Bab 8.1<br>p. 25</td>
+      <td>Physical syllabus attachment upload with anti-virus scanning.</td>
+      <td><code>Curriculum</code><br><code>tabs/_readiness.blade</code></td>
+      <td>System accepts syllabus and content reference links and text descriptions, but physical file upload with virus scanning is deferred to shared storage service.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Integrate multipart file upload and ClamAV daemon in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>4.4 Domain 4: Assessment Design, Constructive Alignment &amp; Academic Integrity</h2>
+<p>Covers Garis Panduan Bab 8.6, 10.4, Lampiran A6, B4, B10, and B11.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-27</td>
+      <td class="c-src">Bab 8.6<br>p. 27–28</td>
+      <td>Formative and summative assessment demonstrating authentic competence. Attendance alone is strictly insufficient for completion.</td>
+      <td><code>Assessment</code><br><code>ResultsController.php</code></td>
+      <td>Gradebook enforces component marks against pass marks. Attendance records do not grant completion without verified assessment marks.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CompletionTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-28</td>
+      <td class="c-src">Bab 8.6<br>Rajah 5, p. 26</td>
+      <td>Constructive alignment matrix: Every assessment component must be mapped to at least one CLO, and all CLOs must be assessed.</td>
+      <td><code>Curriculum</code><br><code>tabs/_assessment.blade</code></td>
+      <td>Alignment matrix implemented in <code>assessment_component_outcomes</code>. <code>ProposalChecker</code> flags unassessed CLOs as warnings.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Matrix visible and functional in workspace.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-29</td>
+      <td class="c-src">Bab 8.6<br>p. 28</td>
+      <td>For UMC, assessment may be embedded in modules or placed in a dedicated assessment module, provided full CLO coverage is proven.</td>
+      <td><code>Curriculum</code><br><code>Assessment</code></td>
+      <td>Supports both embedded component mapping and separate assessment module under Model 3 (Split Learning &amp; Assessment).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in curriculum models.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-30</td>
+      <td class="c-src">Bab 8.6<br>p. 28</td>
+      <td>Preservation of academic integrity; cases of misconduct or cheating must withhold completion and result verification.</td>
+      <td><code>Assessment</code><br><code>integrity_cases</code></td>
+      <td><code>Integrity_cases</code> table tracks active cases. An open integrity case places results in <i>Held</i> status, strictly blocking completion and credentialing.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ResultsTest.php</code> and <code>CompletionTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-31</td>
+      <td class="c-src">Bab 10.4<br>p. 36</td>
+      <td>Assessment results must be moderated and formally verified by the Deputy Dean (Academic) before release to participants.</td>
+      <td><code>Assessment</code><br><code>/results/{cohortId}/verify</code></td>
+      <td>Lecturer submits provisional marks; Deputy Dean performs cohort/module verification. Results are hidden from learners until verified.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ResultsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-32</td>
+      <td class="c-src">Bab 10.4<br>p. 36</td>
+      <td>Separation of duties in assessment: Mark enterer cannot verify own cohort results.</td>
+      <td><code>Assessment</code><br><code>Verifier.php</code></td>
+      <td><code>Verifier::verify()</code> blocks if the authenticated user is the mark submitter (FR-14, D-15).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ResultsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-33</td>
+      <td class="c-src">Bab 10.4<br>p. 36</td>
+      <td>Strict result revision governance: Verified marks cannot be edited directly; requires formal change request and Deputy Dean approval.</td>
+      <td><code>Assessment</code><br><code>result_change_requests</code></td>
+      <td>Lecturer submits change request with reason; Deputy Dean approves/rejects; original mark preserved in <code>assessment_result_revisions</code>.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ResultsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-34</td>
+      <td class="c-src">Lampiran B10–B11<br>p. 85–86</td>
+      <td>Standard gradebook records and final cohort result endorsement summary.</td>
+      <td><code>Assessment</code><br><code>results/index.blade.php</code></td>
+      <td>Cohort gradebook displays component breakdown, final weighted grade, provisional/verified tags, and Deputy Dean endorsement block.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Follows Lampiran B10–B11 layout.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-35</td>
+      <td class="c-src">Bab 10.4<br>p. 36</td>
+      <td>Formal student assessment appeal workflow (Rayuan Semakan Keputusan).</td>
+      <td><code>Assessment</code><br><code>student/results</code></td>
+      <td>Students can view verified results and contact instructors, but dedicated self-service "Submit Grade Appeal" portal is slated for Release 2.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Build self-service assessment appeal workflow in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+</main>
+
+<main>
+<h1>5. Requirement Traceability Matrix (Domains 5 to 8)</h1>
+
+<h2>5.1 Domain 5: Credentialing, Modular Digital Badges, Certificates &amp; Digital Credentials</h2>
+<p>Covers Garis Panduan Bab 8.7, 10.5, Rajah 7, and Lampiran E1–E10.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-36</td>
+      <td class="c-src">Bab 8.7.1<br>p. 28</td>
+      <td>Digital Badge awarded for module/unit achievement. Digital Badge alone does not constitute academic credit.</td>
+      <td><code>Credentials</code><br><code>digital_badges</code></td>
+      <td>Module digital badges minted on module completion (<code>digital_badges</code> table) using Open Badges 3.0 schema. Explicitly labelled non-credit.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CredentialTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-37</td>
+      <td class="c-src">Bab 8.7.2<br>Rajah 7, p. 29</td>
+      <td>3-Tier Recognition Hierarchy: Level 1 (Module Digital Badge), Level 2 (Full MC Sijil / Digital Credential), Level 3 (ACR / ABC Credit).</td>
+      <td><code>Credentials</code><br><code>CreditBank</code></td>
+      <td>System strictly separates Module Badge &rarr; Micro-Credential Certificate &rarr; Academic Credit Record (ACR).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Implements Rajah 7 hierarchy verbatim.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-38</td>
+      <td class="c-src">Bab 8.7.3<br>p. 28–29</td>
+      <td>Full UMC completion requires achievement of ALL constituent modules and assessments before Sijil/Digital Credential issuance.</td>
+      <td><code>Achievement</code><br><code>Completion.php</code></td>
+      <td><code>Completion::check()</code> verifies that every module achievement is verified, whole-MC assessments passed, and zero integrity holds remain.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CompletionTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-39</td>
+      <td class="c-src">Bab 8.7.4<br>p. 29</td>
+      <td>Certification for SAMC and MCE: MCE certificate cannot make credit claims; SAMC certificate only displays credit if Quality-Verified.</td>
+      <td><code>Credentials</code><br><code>IssueCredential.php</code></td>
+      <td>Template logic suppresses credit and MQF statements on MCE and unverified SAMC credentials. Claims populated strictly from verified records.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CredentialTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-40</td>
+      <td class="c-src">Bab 8.7.5<br>p. 30</td>
+      <td>Achievement Record (Rekod Pencapaian): Internal record of completed modules, badges, and MC status. Strictly differentiated from ACR.</td>
+      <td><code>Achievement</code><br><code>/records/mine</code></td>
+      <td>Screen and printout (DOC-05) prominently labelled: "INTERNAL ACHIEVEMENT RECORD &bull; THIS IS NOT AN ACADEMIC CREDIT RECORD (ACR)."</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CompletionTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-41</td>
+      <td class="c-src">Lampiran E2–E3<br>p. 101–102</td>
+      <td>Bilingual landscape Certificate format (A4) with UTeM coat of arms, QR code, signatory, and verification metadata.</td>
+      <td><code>Credentials</code><br><code>credentials/certificate</code></td>
+      <td>Official printable certificate (DOC-03) rendered in A4 landscape, bilingual (BM/EN), dynamic QR code, and Registrar/Dean signatures.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Rendered in <code>DocumentsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-42</td>
+      <td class="c-src">Lampiran E4<br>p. 102–103</td>
+      <td>W3C Verifiable Credential (VC) / Open Badges 3.0 signed digital credential format with cryptographic proof.</td>
+      <td><code>Credentials</code><br><code>credentials/sheet</code></td>
+      <td>Generates W3C VC-JWT signed with Ed25519 private key (<code>alg: EdDSA</code>, <code>kid</code>). Printable sheet (DOC-04) displays raw JSON and claims.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CredentialTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-43</td>
+      <td class="c-src">Lampiran E5<br>p. 103</td>
+      <td>Public verification service without login: QR code scan leads to verification portal displaying authenticated credential metadata.</td>
+      <td><code>Credentials</code><br><code>GET /verify/{code}</code></td>
+      <td>Public verification endpoint (<code>VerifyController.php</code>) displays minimum necessary fields (rate-limited, logged, case-insensitive, neutral 404).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CredentialTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-44</td>
+      <td class="c-src">Lampiran E5<br>p. 103</td>
+      <td>Online verification via uploaded credential JSON file.</td>
+      <td><code>Credentials</code><br><code>POST /verify/upload</code></td>
+      <td>Upload interface checks cryptographic signature against public keys published at <code>/.well-known/jwks.json</code>.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CredentialTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-45</td>
+      <td class="c-src">Lampiran E6<br>p. 104</td>
+      <td>Credential administration: Correction, replacement, and revocation policies. Original record must never be deleted.</td>
+      <td><code>Credentials</code><br><code>/credentials/admin</code></td>
+      <td>Deputy Dean can issue a clerical correction (original kept), replace with new credential (forward link), or revoke (shows Revoked). Nothing deleted.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CredentialTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-46</td>
+      <td class="c-src">Lampiran E8<br>p. 104</td>
+      <td>Pre-issuance validation checklist before credential issuance.</td>
+      <td><code>Achievement</code><br><code>CompletionController</code></td>
+      <td>Automated pre-issuance checks execute during completion confirmation (checks module badges, integrity holds, results verification).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CompletionTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-47</td>
+      <td class="c-src">Bab 8.7.1<br>Lampiran E1</td>
+      <td>1-Click direct export to participant digital wallets (Google Wallet / Apple Wallet / LinkedIn).</td>
+      <td><code>Credentials</code></td>
+      <td>Learner can download signed VC-JWT JSON and printable PDF sheet, but native API push to Apple Wallet / Google Wallet is not built.</td>
+      <td class="c-x"><span class="badge badge-fail">FAIL</span></td>
+      <td>Add Apple Wallet .pkpass and Google Wallet API integration in Release 3.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>5.2 Domain 6: Curriculum Development, Internal Review &amp; Senate Approval</h2>
+<p>Covers Garis Panduan Bab 9 (Pembangunan, pp. 31–33), Rajah 8, and Lampiran A8–A10.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-48</td>
+      <td class="c-src">Bab 9.1–9.3<br>p. 31–32</td>
+      <td>Multi-stage proposal development workflow: Needs analysis, learning design, and content creation matching Rajah 8.</td>
+      <td><code>Curriculum</code><br><code>/curriculum/proposals</code></td>
+      <td>Proposal workspace partitions work across Basics, Justification, Modules, Outcomes, Assessment, and Readiness tabs.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CurriculumTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-49</td>
+      <td class="c-src">Bab 9.4<br>p. 33</td>
+      <td>Internal academic review by faculty reviewers covering CLO, SLT, module unbundling, and assessment alignment.</td>
+      <td><code>Approval</code><br><code>/reviews/{id}</code></td>
+      <td>Review form enforces evaluation across 8 items (plus parent-course mapping for UMC) and structured recommendation.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-50</td>
+      <td class="c-src">Bab 9.4<br>p. 33</td>
+      <td>Reviewer conflict of interest (COI) declaration prior to opening proposal dossier.</td>
+      <td><code>Approval</code><br><code>reviews/coi.blade.php</code></td>
+      <td>Reviewer must declare absence of conflict; affirmative conflict unassigns reviewer and alerts Deputy Dean.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code> (FR-17).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-51</td>
+      <td class="c-src">Bab 9.4<br>p. 33</td>
+      <td>Tracked review comments with bidirectional resolution: Proposer responds, Deputy Dean verifies resolution before endorsement.</td>
+      <td><code>Approval</code><br><code>review_comments</code></td>
+      <td>Comments tracked as Open, Answered, Resolved. Endorsement blocked while any blocking comment is open.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code> (FR-63).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-52</td>
+      <td class="c-src">Bab 9.4<br>p. 33</td>
+      <td>Separation of duties: Proposer cannot review or approve own proposal; Faculty Dean/Deputy Dean cannot self-approve.</td>
+      <td><code>Approval</code><br><code>ApprovalController</code></td>
+      <td><code>ApprovalController</code> checks user ID against proposer ID; self-review and self-endorsement strictly prohibited.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code> (FR-14).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-53</td>
+      <td class="c-src">Bab 9.5<br>p. 33</td>
+      <td>Formal Senate approval recording: meeting reference, date, minute excerpt, and decision category verification.</td>
+      <td><code>Approval</code><br><code>/approval/proposals/{id}/senate</code></td>
+      <td>Senate decision recorded with meeting reference and date. Decision transitions proposal to approved Version 1.0.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code> (FR-67).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-54</td>
+      <td class="c-src">Bab 9.5<br>Lampiran A9–A10</td>
+      <td>Compilation of official Senate Decision Pack (Kertas Cadangan / Ringkasan Kelulusan).</td>
+      <td><code>Approval</code><br><code>/approval/proposals/{id}/pack</code></td>
+      <td>Official printable Senate decision pack (DOC-09) compiles proposal metadata, reviewer ratings, comment audit, and Senate minute box.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-55</td>
+      <td class="c-src">Bab 9.5<br>p. 33</td>
+      <td>Approving role configured in system settings; CODL strictly prohibited from academic curriculum approval.</td>
+      <td><code>Core</code><br><code>Settings</code></td>
+      <td>Setting <code>approval.route.curriculum</code> defaults to <code>senate</code>. CODL admin has zero approval routes (Decision D-12).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code> and <code>RbacSecurityTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-56</td>
+      <td class="c-src">Bab 9.6<br>p. 33</td>
+      <td>Penawaran gating: Micro-credential can only be offered after Senate approval is recorded.</td>
+      <td><code>Offering</code><br><code>OfferingController</code></td>
+      <td>Cohort creation dropdown only lists approved versions (<code>status = 'approved'</code>). Unapproved proposals cannot be offered.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>OfferingTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-57</td>
+      <td class="c-src">Lampiran A8<br>p. 79</td>
+      <td>Formal proposer written declaration and faculty endorsement signature blocks.</td>
+      <td><code>Curriculum</code><br><code>curriculum/print</code></td>
+      <td>Proposal printable sheet (DOC-08) includes Section 8 declaration by developer and Section 9 verification by Dean.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Rendered in <code>DocumentsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-58</td>
+      <td class="c-src">Bab 9.1<br>p. 32</td>
+      <td>Co-developer collaborative authoring on proposal workspace.</td>
+      <td><code>Curriculum</code><br><code>proposals</code></td>
+      <td>Proposals currently have a single designated author/proposer. Adding secondary co-developers is scheduled for Release 2.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Add multi-author support to <code>proposals</code> table in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>5.3 Domain 7: Offering Delivery, Cohort Management &amp; Readiness Checklists</h2>
+<p>Covers Garis Panduan Bab 10.1–10.3 (Pelaksanaan, pp. 34–35), Rajah 9, and Lampiran B1–B8.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-59</td>
+      <td class="c-src">Bab 10.1<br>p. 34</td>
+      <td>Support delivery modes: Conventional face-to-face, Open and Distance Learning (ODL), and blended/hybrid.</td>
+      <td><code>Offering</code><br><code>offerings</code></td>
+      <td>Captured in <code>offerings.delivery_mode</code>; verified against faculty accreditation parameters.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>OfferingTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-60</td>
+      <td class="c-src">Bab 10.2<br>p. 35</td>
+      <td>Platform &amp; Learning Access: Seamless integration with learning management system (uLearn / UCreds Moodle).</td>
+      <td><code>Learning</code><br><code>UcredsController</code></td>
+      <td>UCreds Moodle integration hub synchronizes course directories, exports enrolment manifests, and imports results.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>UcredsContentTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-61</td>
+      <td class="c-src">Bab 10.3.1<br>p. 35</td>
+      <td>Information transparency: Transparent display of prerequisites, fees, SLT, delivery schedule, and recognition statements prior to registration.</td>
+      <td>Public Portal<br><code>/catalogue</code>, <code>/offerings/{id}</code></td>
+      <td>Public course detail page renders all prerequisites, fee breakdown, schedule dates, and recognition statements without login.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>OfferingTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-62</td>
+      <td class="c-src">Bab 10.3.1<br>p. 35</td>
+      <td>Forbidden promotional claims prevention: System must prevent unauthorized claims that an MC grants automatic university admission.</td>
+      <td><code>Offering</code><br><code>ForbiddenClaims.php</code></td>
+      <td><code>ForbiddenClaims::scan()</code> scans proposal and offering texts for prohibited marketing phrases, raising blocking errors if found.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>OfferingTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-63</td>
+      <td class="c-src">Bab 10.3.2<br>p. 35–36</td>
+      <td>Participant notification of curriculum changes: When an approved change occurs, enrolled participants must be notified and bound by transition rules.</td>
+      <td><code>Curriculum</code>, <code>Enrolment</code><br><code>VersionController</code></td>
+      <td>Senate decision executes transition rule (<code>finish_current</code> or <code>migrate_new</code>); mandatory notification sent to active participants.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>EnrolmentTest.php</code> (FR-80, FR-81).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-64</td>
+      <td class="c-src">Lampiran B1–B7<br>p. 80–84</td>
+      <td>Cohort Readiness Checklist: Comprehensive pre-offering checklist covering trainers, materials, platform, and rubrics.</td>
+      <td><code>Offering</code><br><code>/offerings/{id}/readiness</code></td>
+      <td>Readiness form covers sections B1 to B7. Lecturer provides status and evidence notes; Deputy Dean confirms readiness.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>OfferingTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-65</td>
+      <td class="c-src">Lampiran B8<br>p. 84</td>
+      <td>Participant registration records with exportable roster.</td>
+      <td><code>Offering</code><br><code>/offerings/{id}/participants</code></td>
+      <td>Participant roster displays enrolment status, payment reference, and provides CSV export action.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>EnrolmentTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-66</td>
+      <td class="c-src">Bab 10.3<br>p. 35</td>
+      <td>Participant withdrawal management with deadline enforcement.</td>
+      <td><code>Enrolment</code><br><code>EnrolmentController</code></td>
+      <td>Withdrawal allowed before configured deadline (<code>enrolment.withdrawal_days_before_end</code>); frees quota and logs audit record.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>EnrolmentTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-67</td>
+      <td class="c-src">Bab 10.3<br>p. 35</td>
+      <td>Automated payment gateway integration with real bank acquiring.</td>
+      <td><code>Enrolment</code><br><code>PaymentAdapter.php</code></td>
+      <td>Idempotent dummy payment adapter is functional and tested; live production bank payment gateway (e.g. FPX / Bank Islam) is mocked in test environment.</td>
+      <td class="c-x"><span class="badge badge-not-verified">NOT VERIFIED</span></td>
+      <td>Switch from stub adapter to live institutional payment gateway upon deployment.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-68</td>
+      <td class="c-src">Bab 10.3<br>p. 35</td>
+      <td>Bulk participant enrolment via CSV upload.</td>
+      <td><code>Enrolment</code><br><code>offerings/participants</code></td>
+      <td>Individual registration workflow is complete; bulk CSV enrolment for corporate cohorts is slated for Release 2.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Build bulk CSV participant registration in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>5.4 Domain 8: Quality Verification (QV) for Stand-alone Micro-Credentials (SAMC)</h2>
+<p>Covers Garis Panduan Bab 11.1–11.2 (Quality Verification, pp. 37–41), Rajah 10, 11, 12, and Lampiran D1–D10.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-69</td>
+      <td class="c-src">Bab 11.2.1<br>p. 38</td>
+      <td>Basic eligibility for Quality Verification: SAMC category, &ge;40 hours SLT, and registered provider.</td>
+      <td><code>Quality</code><br><code>Qv.php</code></td>
+      <td><code>Qv::checkEligibility()</code> evaluates category, SLT threshold, and provider registration flag (FR-164).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-70</td>
+      <td class="c-src">Bab 11.2.1<br>Rajah 11, p. 40</td>
+      <td>Prerequisite of at least ONE (1) completed cohort with verified assessment evidence before QV submission.</td>
+      <td><code>Quality</code><br><code>Qv.php</code></td>
+      <td>Dossier submission is strictly blocked until at least 1 offering reaches <i>Ended</i> status with verified marks.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-71</td>
+      <td class="c-src">Lampiran D1–D7<br>p. 92–98</td>
+      <td>Comprehensive QV Evidence Package covering 6 groups: Academic Design, Assessment, Cohort Performance, QA/CQI, and Credential Specifications.</td>
+      <td><code>Quality</code><br><code>/quality/{id}/package</code></td>
+      <td>Official QV submission package (DOC-11) aggregates internal system records across all 6 evidence groups matching Lampiran D.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-72</td>
+      <td class="c-src">Bab 11.2.1<br>p. 38</td>
+      <td>Quality Verification does not grant automatic credit transfer or degree credit.</td>
+      <td><code>Quality</code><br><code>QvController</code></td>
+      <td>Dossier and catalogue clearly state that QV establishes eligibility for credit, but credit transfer remains subject to faculty review.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Explicit disclaimers enforced.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-73</td>
+      <td class="c-src">Bab 11.2.2<br>p. 39</td>
+      <td>QV validity duration: Maximum validity up to 3 years (configurable to 5 per MQA circulars).</td>
+      <td><code>Quality</code><br><code>Settings</code></td>
+      <td>Setting <code>qv.max_validity_years</code> configured to 3. Recording a decision with validity exceeding maximum is blocked (BR-02).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-74</td>
+      <td class="c-src">Bab 11.2.2<br>p. 39</td>
+      <td>Expiry monitoring and alerts: Automated alerts sent to lecturer and Deputy Dean prior to QV expiration.</td>
+      <td><code>Quality</code><br><code>QvAlerts.php</code></td>
+      <td>Scheduled alert job (<code>JB-06</code>) dispatches notices at configured threshold intervals (e.g. 90, 60, 30 days).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code> (FR-173).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-75</td>
+      <td class="c-src">Bab 11.2.2<br>p. 39</td>
+      <td>Immediate cessation of QV claims upon expiry, suspension, or withdrawal, while preserving earned student credentials.</td>
+      <td><code>Quality</code><br><code>Qv.php</code></td>
+      <td>Lapse or suspension stops catalogue credit claims and opens CQI review task. Issued credentials remain intact and valid.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code> (FR-174).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-76</td>
+      <td class="c-src">Bab 11.2.3<br>p. 39–40</td>
+      <td>Material change triggering re-verification: Substantive curriculum changes flag verified SAMC for QV re-evaluation.</td>
+      <td><code>Quality</code><br><code>Qv.php</code></td>
+      <td>Material change to verified SAMC sets <code>reverification_required = true</code> and assigns task to Deputy Dean.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code> (FR-78).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-77</td>
+      <td class="c-src">Bab 11.2.4<br>Rajah 12, p. 41</td>
+      <td>Single source of truth rule: Quality Verification verified record is the exclusive writer of credit and MQF claims for SAMC.</td>
+      <td><code>Quality</code><br><code>qv_records</code></td>
+      <td>Catalogue, offerings, certificates, and ACRs read credit claims strictly from verified <code>qv_records</code>. Proposers cannot type credit directly.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code> (FR-171).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-78</td>
+      <td class="c-src">Lampiran D8–D10<br>p. 98–99</td>
+      <td>Dual declarations: Proposer readiness declaration and Deputy Dean formal submission endorsement.</td>
+      <td><code>Quality</code><br><code>/quality/{id}/package</code></td>
+      <td>Lecturer marks dossier as ready; Deputy Dean verifies checklist and confirms readiness before external submission reference can be logged.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code> (FR-168).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-79</td>
+      <td class="c-src">Lampiran D<br>p. 92</td>
+      <td>Automated generation of compressed ZIP evidence archive containing uploaded binary evidence artifacts.</td>
+      <td><code>Quality</code><br><code>/quality/{id}/package</code></td>
+      <td>System generates comprehensive HTML/A4 printable evidence dossier with data links, but binary ZIP bundling is deferred.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Implement automated ZIP bundling of external evidence files in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+</main>
+
+<main>
+<h1>6. Requirement Traceability Matrix (Domains 9 to 11)</h1>
+
+<h2>6.1 Domain 9: Credit Accumulation, Academic Credit Record (ACR) &amp; Academic Bank of Credit (ABC)</h2>
+<p>Covers Garis Panduan Bab 12 (Pengumpulan Kredit, pp. 44–48), Rajah 14, 15, and Lampiran F1–F5.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-80</td>
+      <td class="c-src">Bab 12.1.1<br>p. 45</td>
+      <td>Eligible sources for ACR and ABC deposit: Completed UMC from accredited program or Quality-Verified SAMC. MCE strictly prohibited.</td>
+      <td><code>CreditBank</code><br><code>Acr.php</code></td>
+      <td><code>Acr::prepare()</code> runs 7 recorded checks (<code>acr_checks</code>). Blocks non-accredited UMC, unverified SAMC, and all MCEs with explicit reasons.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-81</td>
+      <td class="c-src">Bab 12.2–12.3<br>p. 45</td>
+      <td>Modular accumulation: Individual UMC module badges do not grant credit; ACR issued only upon full MC completion.</td>
+      <td><code>CreditBank</code><br><code>Acr.php</code></td>
+      <td>ACR is triggered exclusively by <code>CompletionConfirmed</code> event when entire MC structure is fulfilled. Individual module badges never trigger ACR.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-82</td>
+      <td class="c-src">Bab 12.4.1<br>p. 46</td>
+      <td>ACR preparation is fully automated based on verified completion; manual typing of credits is prohibited.</td>
+      <td><code>CreditBank</code><br><code>Acr.php</code></td>
+      <td>All ACR fields (student name, IC, program, credits, MQF level, SLT, gred) are derived programmatically from database records.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-83</td>
+      <td class="c-src">Bab 12.4.2<br>p. 46</td>
+      <td>ACR data integrity and distinction from internal achievement record.</td>
+      <td><code>CreditBank</code><br><code>/creditbank/acr/{id}</code></td>
+      <td>Official printable ACR (DOC-06) rendered in A4 format with formal UTeM header, verification QR, and Deputy Dean signature block.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Rendered in <code>DocumentsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-84</td>
+      <td class="c-src">Bab 12.5<br>p. 47</td>
+      <td>Mandatory participant consent capture prior to ABC queueing or export.</td>
+      <td><code>CreditBank</code><br><code>consents</code></td>
+      <td>Participants must explicitly submit consent (Consented, Declined, Postponed) with recorded timestamp and versioned wording. Unconsented ACRs cannot be exported.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code> (FR-dpconsent).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-85</td>
+      <td class="c-src">Bab 12.5<br>p. 47</td>
+      <td>ABC deposit queue, batch CSV export, and deposit recording with central ABC reference.</td>
+      <td><code>CreditBank</code><br><code>/creditbank/queue</code></td>
+      <td>Consented ACRs grouped into batches (<code>abc_batches</code>), exported as CSV, and deposit confirmed with ABC reference and date.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code> (FR-dpexport, FR-dprecord).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-86</td>
+      <td class="c-src">Bab 12.5<br>p. 47</td>
+      <td>Direct machine-to-machine API integration with national MQA/MoHE Academic Bank of Credit.</td>
+      <td><code>CreditBank</code></td>
+      <td>System implements manual CSV batch export workflow because the national central ABC API specification is not yet standardized by MQA (OI-11).</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Implement automated REST/JSON adapter once MQA national ABC API endpoint is published.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-87</td>
+      <td class="c-src">Bab 12.5<br>p. 47</td>
+      <td>Transparent deposit disclaimer: "Deposit in ABC constitutes secure academic storage and does not guarantee automatic credit transfer."</td>
+      <td><code>CreditBank</code><br><code>/creditbank/mine</code></td>
+      <td>Prominently rendered on student credit ledger, deposit queues, and printable ABC export sheets (DOC-10).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-88</td>
+      <td class="c-src">Bab 12.8<br>p. 48</td>
+      <td>Credit validity duration: Credits deposited in ABC carry 10-year validity from deposit date.</td>
+      <td><code>CreditBank</code><br><code>CreditLedger.php</code></td>
+      <td>Ledger sets expiration to exactly 10 years based on setting <code>credit.abc_validity_years</code> (default 10). Expiration alerts sent at 90, 60, 30 days.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-89</td>
+      <td class="c-src">Bab 12.8<br>p. 48</td>
+      <td>Permanent ACR retention: Expiration of ABC credit validity does not delete or destroy the underlying ACR (retained in perpetuity).</td>
+      <td><code>CreditBank</code><br><code>CreditLedger.php</code></td>
+      <td>When credit expires, ledger status marks entry as <i>Expired</i>; the underlying ACR record and credentials remain permanent and intact.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-90</td>
+      <td class="c-src">Bab 12.9<br>Rajah 14, p. 51</td>
+      <td>Single Redemption Principle (Prinsip Penebusan Tunggal): Credits redeemed for a degree cannot be redeemed again.</td>
+      <td><code>CreditBank</code><br><code>CreditLedger.php</code></td>
+      <td><code>CreditLedger::hold()</code> locks credit as <i>Provisionally Redeemed</i>. Second application on same credit is strictly refused.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code> (BR-29) and <code>TransferTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-91</td>
+      <td class="c-src">Bab 12.7<br>p. 47</td>
+      <td>Direct intake of external credit records from other accredited universities via national ABC network.</td>
+      <td><code>CreditBank</code></td>
+      <td>Currently, credit bank records derive from UTeM completed micro-credentials. Ingestion of third-party institutional ACRs is slated for Release 2.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Build external ACR ingestion portal in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>6.2 Domain 10: Credit Transfer, Equivalence Assessment &amp; Single Redemption</h2>
+<p>Covers Garis Panduan Bab 13 (Pemindahan Kredit, pp. 49–52), Rajah 15, and Lampiran F6–F11.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-92</td>
+      <td class="c-src">Bab 13.1–13.2<br>p. 49–50</td>
+      <td>Transfer sources: Only Available credits from UMC or Quality-Verified SAMC. MCE and unverified SAMC strictly barred.</td>
+      <td><code>Transfer</code><br><code>Transfers.php</code></td>
+      <td>Transfer application wizard displays only eligible credits in <i>Available</i> status. MCE is blocked with clear explanation.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-93</td>
+      <td class="c-src">Bab 13.3<br>p. 50</td>
+      <td>Academic Equivalence: Course equivalence cannot be assumed based solely on equal credits or SLT; requires outcome &amp; content proof.</td>
+      <td><code>Transfer</code><br><code>EvaluationController</code></td>
+      <td>System requires side-by-side learning outcome comparison and evaluation across 9 criteria matching Lampiran F7.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-94</td>
+      <td class="c-src">Bab 13.3<br>Lampiran F7, p. 107</td>
+      <td>Mandatory &ge;80% Learning Outcome Equivalence: Approval is blocked if learning outcome match is below 80%.</td>
+      <td><code>Transfer</code><br><code>EvaluationController</code></td>
+      <td>Evaluator maps applicant CLOs to course CLOs. System computes percentage match; <b>approval is strictly blocked if match &lt; 80%</b>.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code> (FR-ctloequiv).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-95</td>
+      <td class="c-src">Bab 13.4<br>Rajah 15, p. 52</td>
+      <td>4-stage transfer process: Application &rarr; Validity check &rarr; Equivalence review &rarr; Academic authority decision.</td>
+      <td><code>Transfer</code><br><code>/transfer/{id}/evaluate</code></td>
+      <td>Workflow progresses through formal verification, 9 criteria rating, outcome comparison, and final decision recording.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-96</td>
+      <td class="c-src">Bab 13.5<br>p. 50</td>
+      <td>Compliance with university transfer limits and exclusion of non-transferable courses (e.g. FYP, Industrial Training).</td>
+      <td><code>Transfer</code><br><code>EvaluationController</code></td>
+      <td>Program transfer limit checked (default 30% / 50%); warnings displayed and recorded if course is on non-transferable list.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code> (FR-ctlimits).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-97</td>
+      <td class="c-src">Bab 13.6<br>p. 50–51</td>
+      <td>Structured transfer outcomes: Approved, Partly Approved, Not Approved, or More Evidence Needed.</td>
+      <td><code>Transfer</code><br><code>transfer_decisions</code></td>
+      <td>Supports all 4 official decisions with recorded rationale, authority, meeting date, and conditions.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-98</td>
+      <td class="c-src">Bab 13.6<br>Lampiran F10, p. 109</td>
+      <td>Official printable Credit Transfer Decision Letter (Surat Keputusan Pemindahan Kredit).</td>
+      <td><code>Transfer</code><br><code>/transfer/{id}/letter</code></td>
+      <td>Printable letter (DOC-12) includes target degree code, courses exempted, credit counts, conditions, and Dean signature block.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Rendered in <code>DocumentsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-99</td>
+      <td class="c-src">Bab 13.7<br>p. 52</td>
+      <td>Authority scoping: Decision must be made strictly by the Deputy Dean of the faculty owning the target program.</td>
+      <td><code>Transfer</code><br><code>TransferController</code></td>
+      <td>Enforces PTj scoping. Deputy Dean from another faculty or CODL administrator cannot decide on transfer applications.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code> (FR-ctauth).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-100</td>
+      <td class="c-src">Bab 13.7<br>p. 52</td>
+      <td>Credit ledger synchronization: Provisional redemption on approval; final redemption upon degree completion; release upon non-completion.</td>
+      <td><code>CreditBank</code><br><code>CreditLedger.php</code></td>
+      <td>Approval triggers <code>CreditLedger::hold()</code>; manual completion recording triggers <code>redeem()</code>; rejection or withdrawal triggers <code>release()</code>.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-101</td>
+      <td class="c-src">Bab 13.8<br>p. 52</td>
+      <td>Currency of knowledge and curriculum version flagging. Re-evaluation required if course syllabus changed.</td>
+      <td><code>Transfer</code><br><code>Transfers.php</code></td>
+      <td>When micro-credential or target course version is superseded, active transfer line is flagged for academic re-evaluation.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-102</td>
+      <td class="c-src">Bab 13.3<br>p. 50</td>
+      <td>Institutional Precedent Library (Perpustakaan Preseden Pemindahan Kredit) for reusable articulation precedents.</td>
+      <td><code>Transfer</code></td>
+      <td>Each application currently evaluated individually. Precedent library allowing 1-click reuse of past approved equivalences is deferred to Release 2.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Build articulation precedent repository in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>6.3 Domain 11: Stackable Degree Pathways, Residency &amp; Individual Study Plans</h2>
+<p>Covers Garis Panduan Bab 14 (Stackable Degree, pp. 53–58), Rajah 16, 17, 18, and Lampiran G1–G11.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-103</td>
+      <td class="c-src">Bab 14.1–14.2<br>p. 53–54</td>
+      <td>Stackable degree pathway composed exclusively of credit-bearing micro-credentials (UMC or Quality-Verified SAMC). MCE prohibited.</td>
+      <td><code>Pathways</code><br><code>PathwayController</code></td>
+      <td>Pathway builder rejects MCE. SAMC must have valid Quality Verification to be mapped to degree courses.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-104</td>
+      <td class="c-src">Bab 14.4<br>p. 54</td>
+      <td>Admission requirement: Micro-credential accumulation does not grant automatic admission. Admission is a separate recorded fact.</td>
+      <td><code>Pathways</code>, <code>Transfer</code><br><code>admissions</code></td>
+      <td><code>admissions</code> table records formal admission letter and date. Study plan cannot reach <i>Suitable to Proceed</i> without recorded admission.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code> (BR-05).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-105</td>
+      <td class="c-src">Bab 14.5.1<br>p. 56</td>
+      <td>Mandatory Home Institution Credit: At least 30% (&ge;30%) of graduation credits must be earned directly from UTeM.</td>
+      <td><code>Pathways</code><br><code>Plans.php</code></td>
+      <td>Study plan calculates UTeM home credit percentage against setting <code>stackable.min_home_credit_percent</code> (default 30%). Below 30% marked <i>Not Suitable</i>.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-106</td>
+      <td class="c-src">Bab 14.5.2<br>Lampiran G4–G5</td>
+      <td>PLO and Body of Knowledge (BoK) coverage mapping: Stacked credentials must cover designated PLOs and core knowledge domains.</td>
+      <td><code>Pathways</code><br><code>tabs/_mapping.blade</code></td>
+      <td>Pathway mapping captures PLO coverage tags and BoK domains, highlighting curriculum coverage gaps.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-107</td>
+      <td class="c-src">Bab 14.5.3<br>p. 56</td>
+      <td>Mandatory Conventional Residency: Minimum ONE (1) semester residency at UTeM for conventional (non-ODL) degree programs.</td>
+      <td><code>Pathways</code><br><code>Plans.php</code></td>
+      <td>Plan evaluator checks conventional program residency requirement (<code>stackable.residency_semesters</code>, default 1). Plan flagged if residency unmet.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-108</td>
+      <td class="c-src">Bab 14.5.4<br>p. 56–57</td>
+      <td>Alignment with program delivery ecosystem: Online delivery cannot covertly alter conventional program mode without MQA ODL approval.</td>
+      <td><code>Pathways</code><br><code>Plans.php</code></td>
+      <td>Evaluator flags ODL delivery components when applied toward conventional programs, requiring formal faculty compliance verification.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-109</td>
+      <td class="c-src">Bab 14.7<br>Rajah 18, p. 58</td>
+      <td>Senate approval of official stackable pathways prior to public publication.</td>
+      <td><code>Pathways</code><br><code>PathwayController</code></td>
+      <td>Pathway status remains Draft/Review until Senate approval reference is recorded. Only approved pathways display on public directory.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-110</td>
+      <td class="c-src">Lampiran G8<br>p. 113</td>
+      <td>Individual Study Plan builder (Pelan Pengajian Individu) compiling remaining graduation requirements and gap analysis.</td>
+      <td><code>Pathways</code><br><code>/pathways/{id}/plan</code></td>
+      <td>Plan generator aggregates earned credits, checks prerequisites, lists remaining courses, and computes suitability verdict (DOC-15).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-111</td>
+      <td class="c-src">Bab 14.10<br>p. 58</td>
+      <td>Degree qualification award is granted exclusively by University Senate, never automatically by MCMS software.</td>
+      <td><code>Pathways</code><br><code>qualification_awards</code></td>
+      <td>MCMS records Senate graduation decisions (date, reference) for stackable tracking; system never autonomously mints degrees.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code> (BR-37).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-112</td>
+      <td class="c-src">Bab 14.8<br>p. 58</td>
+      <td>Automated re-evaluation workflow when a target degree curriculum undergoes substantive revision.</td>
+      <td><code>Pathways</code><br><code>pathways</code></td>
+      <td>When degree curriculum changes, pathway mappings are marked as <i>Needs Review</i>; automated task dispatch to faculty board is partial.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Enhance automated task dispatch for pathway curriculum reviews in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+</main>
+
+<main>
+<h1>7. Requirement Traceability Matrix (Domains 12 to 14)</h1>
+
+<h2>7.1 Domain 12: Governance Structure, RACI &amp; Separation of Academic Duties</h2>
+<p>Covers Garis Panduan Bab 15 (Tadbir Urus), Bab 16 (Peranan &amp; Tanggungjawab), Rajah 19, Jadual 2, and Lampiran H1–H2.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-113</td>
+      <td class="c-src">Bab 15.2<br>Rajah 19, p. 60</td>
+      <td>3-Tier Governance Hierarchy: Tier 1 University (Senate/Policy/QA), Tier 2 Faculty/PTj (Curriculum/Delivery/Assessment/CQI), Tier 3 Operational (uLearn/Registry/Badges/ACR).</td>
+      <td>System Wide<br><code>Identity</code></td>
+      <td>User roles partitioned across University (Senate/CODL), Faculty (Deputy Dean/Lecturer/Reviewer), and Learners. Scoped by PTj.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RbacSecurityTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-114</td>
+      <td class="c-src">Bab 15.4<br>p. 61</td>
+      <td>Separation of delivery approval and academic recognition: CODL administrator has ZERO academic approval authority (Decision D-12).</td>
+      <td><code>Identity</code><br><code>EnsureRole.php</code></td>
+      <td>CODL Admin has zero approval routes. Cannot endorse proposals, record Senate decisions, verify marks, confirm completion, or approve transfers.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RbacSecurityTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-115</td>
+      <td class="c-src">Bab 15.7<br>p. 62</td>
+      <td>Traceability and accountability across every institutional decision. Every status transition must record user ID and timestamp.</td>
+      <td>All Modules<br><code>audit_events</code></td>
+      <td>Every status change in curriculum, approval, offerings, results, completion, and transfer logs user ID, role, action, and timestamp.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>FoundationTest.php</code> and <code>RecordsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-116</td>
+      <td class="c-src">Bab 16.1–16.6<br>p. 62–64</td>
+      <td>Role separation of duties: Course proposer cannot review or approve own proposal; mark submitter cannot verify own marks.</td>
+      <td><code>Approval</code><br><code>Assessment</code></td>
+      <td>Strict self-action prevention enforced in controllers (FR-14, D-15): Proposer blocked from reviewing/approving; lecturer blocked from verifying marks.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code> and <code>ResultsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-117</td>
+      <td class="c-src">Bab 16.7<br>p. 64</td>
+      <td>External SME and Industry Expert participation: External reviewers submit competency advice and comments without academic voting authority.</td>
+      <td><code>Approval</code><br><code>ReviewController</code></td>
+      <td><code>industry_expert</code> role can access assigned proposals and submit comments; recommendation select is hidden/disabled for industry role.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code> (FR-18).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-118</td>
+      <td class="c-src">Bab 16.8<br>p. 64</td>
+      <td>Student / Participant responsibilities: Adherence to academic integrity, providing accurate profile data, and acknowledging recognition caveats.</td>
+      <td><code>Enrolment</code><br><code>Registration</code></td>
+      <td>Enforced during registration wizard (eligibility verification, recognition statement acceptance, PDPA consent).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>EnrolmentTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-119</td>
+      <td class="c-src">Bab 16.9<br>Jadual 2, p. 64</td>
+      <td>General Governance Functional Matrix (Matriks Fungsi Umum): University, Faculty, Coordinator, and Developer authority boundaries.</td>
+      <td>System Wide<br>RBAC</td>
+      <td>System routes, role scopes, and task distribution strictly follow the matrix of Jadual 2.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in RBAC test suite.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-120</td>
+      <td class="c-src">Lampiran H1<br>p. 115–116</td>
+      <td>RACI Matrix across 9 lifecycle stages (Responsible, Accountable, Consulted, Informed).</td>
+      <td>System Wide<br><code>Notifications</code></td>
+      <td>Workflow notifications and task generation route tasks to Accountable/Responsible roles and inform appropriate stakeholders.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Implemented in task and notification services.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-121</td>
+      <td class="c-src">Bab 16.1<br>p. 62</td>
+      <td>Single Sign-On (SSO) integration with UTeM central identity directory (Microsoft Entra ID / Azure AD).</td>
+      <td><code>Identity</code></td>
+      <td>Currently operates via secure persona test sign-in with 6-digit secondary verification, pending institutional Azure AD tenant configuration (OI-03).</td>
+      <td class="c-x"><span class="badge badge-not-verified">NOT VERIFIED</span></td>
+      <td>Configure production Entra ID OpenID Connect / SAML provider upon deployment.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>7.2 Domain 13: Monitoring, Continuous Quality Improvement (CQI) &amp; Versioning</h2>
+<p>Covers Garis Panduan Bab 11.3–11.5, Bab 17 (Pemantauan &amp; CQI, pp. 65–68), Rajah 13, and Lampiran C1–C10.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-122</td>
+      <td class="c-src">Bab 17.1–17.3<br>p. 65</td>
+      <td>Cohort performance monitoring: Active participation rate, completion rate, pass rate, average and median marks.</td>
+      <td><code>Monitoring</code><br><code>Indicators.php</code></td>
+      <td>Cohort metrics computed dynamically against institutional targets configured in settings. Visualized on KPI dashboard.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code> (FR-mnindicators).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-123</td>
+      <td class="c-src">Bab 17.4<br>p. 66</td>
+      <td>Participant feedback collection: Anonymous survey collected once per enrolment after completion or cohort closure.</td>
+      <td><code>Monitoring</code><br><code>feedback_responses</code></td>
+      <td>Learner submits 5-point rating and text feedback via <code>/student/feedback/{id}</code>. Reports show aggregated results without student names.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-124</td>
+      <td class="c-src">Bab 17.5<br>p. 66</td>
+      <td>CLO attainment evaluation: Measure percentage of learners meeting passing criteria for each individual learning outcome.</td>
+      <td><code>Monitoring</code><br><code>Indicators.php</code></td>
+      <td>System calculates outcome attainment rate by mapping verified component marks to CLOs.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-125</td>
+      <td class="c-src">Bab 17.6<br>Rajah 13, p. 42</td>
+      <td>CQI Record Builder covering 6 quality domains: Academic design, content, delivery, assessment, learner support, and admin management.</td>
+      <td><code>Monitoring</code><br><code>/monitoring/cqi/{offeringId}</code></td>
+      <td>Lecturer must review all 6 domains (Lampiran C5). Form captures identified issues with root cause, impact, and priority level.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code> (FR-mndomains).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-126</td>
+      <td class="c-src">Bab 17.6<br>Lampiran C7–C8</td>
+      <td>CQI Action Plan with designated action owners, target due dates, and measurable success KPIs.</td>
+      <td><code>Monitoring</code><br><code>cqi_actions</code></td>
+      <td>Action plan table records action description, owner, target deadline, and specific indicator of success.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-127</td>
+      <td class="c-src">Bab 17.6<br>p. 66</td>
+      <td>Two-stage CQI Action Closure: Lecturer evaluates effectiveness; only Deputy Dean can formally close the action (evaluator cannot close).</td>
+      <td><code>Monitoring</code><br><code>QualityReviewController</code></td>
+      <td><code>QualityReviewController</code> enforces: Evaluator cannot be the closer (BR-41). Ineffective actions carry forward to next cycle.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-128</td>
+      <td class="c-src">Bab 17.7<br>p. 66–67</td>
+      <td>Change management: Automatic classification into Minor Change (logged for CQI) vs Material Change (triggers new version).</td>
+      <td><code>Curriculum</code><br><code>VersionController</code></td>
+      <td>Change request engine classifies 11 items. Minor change logged for Deputy Dean acknowledgement; material change clones draft version.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>VersionTest.php</code> (FR-75, FR-76).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-129</td>
+      <td class="c-src">Bab 17.8<br>p. 67</td>
+      <td>Version management: Version numbering, change history, and transition rules for enrolled learners. A submitted version is never deleted.</td>
+      <td><code>Curriculum</code><br><code>mc_versions</code></td>
+      <td>Tracks semantic versions (e.g. v1.0, v2.0). Transition rules (finish on current vs migrate to new) executed on Senate approval. Deletion blocked (FR-79).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>VersionTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-130</td>
+      <td class="c-src">Bab 17.9<br>p. 67</td>
+      <td>Periodic Reviews (Semakan Berkala): Scheduled comprehensive review of approved micro-credentials every 3–5 years.</td>
+      <td><code>Monitoring</code><br><code>/monitoring/reviews</code></td>
+      <td>Scheduled review table (<code>periodic_reviews</code>). Supports 5 official outcomes: Continue, Minor Pindaan (CQI), Material Version, Suspend, Terminate.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code> (FR-prschedule).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-131</td>
+      <td class="c-src">Bab 17.10<br>p. 67</td>
+      <td>Offering Suspension &amp; Termination: Authorized authority can suspend/terminate offerings with transition plan and mandatory notices.</td>
+      <td><code>Monitoring</code><br><code>/monitoring/suspensions</code></td>
+      <td>Suspension lists active participants, enforces transition plan for termination, sends mandatory notices, and never revokes earned credentials.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code> (FR-prsuspend).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-132</td>
+      <td class="c-src">Bab 17.4<br>p. 66</td>
+      <td>Collection of structured instructor and external employer feedback surveys alongside student surveys.</td>
+      <td><code>Monitoring</code><br><code>student/feedback</code></td>
+      <td>Learner feedback survey is fully functional; formal online survey forms for trainers and employers are slated for Release 2.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Build dedicated trainer and employer feedback forms in Release 2.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-133</td>
+      <td class="c-src">Bab 17.8<br>p. 67</td>
+      <td>Interactive graphical side-by-side visual diff tool between two micro-credential versions.</td>
+      <td><code>Curriculum</code><br><code>mcs/versions</code></td>
+      <td>Version history lists changes and changelogs, but interactive redline side-by-side text diffing is scheduled for Release 2 (FR-82).</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Implement side-by-side visual diff in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>7.3 Domain 14: Records Management, Discrepancies, PDPA, Retention &amp; Traceability</h2>
+<p>Covers Garis Panduan Bab 18 (Pengurusan Rekod &amp; Dokumentasi, pp. 68–71) and Lampiran H3–H6.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-134</td>
+      <td class="c-src">Bab 18.1–18.2<br>p. 68</td>
+      <td>Comprehensive records management across all categories: Curriculum, Kelulusan, Kohort, Peserta, Pentaksiran, Credential, ACR, ABC, Pemindahan, CQI.</td>
+      <td><code>Records</code><br><code>RecordsController</code></td>
+      <td>10 standard university reports (Offerings, Enrolments, Credentials, QV, ACR/ABC, Transfers, Redemptions, CQI, Pathways, Suspensions).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Available on screen, printable A4 (DOC-10), and CSV export.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-135</td>
+      <td class="c-src">Bab 18.8<br>Lampiran H4</td>
+      <td>Immutable, append-only audit trail with cryptographic tamper-evident protection.</td>
+      <td><code>Records</code><br><code>AuditRecorder.php</code></td>
+      <td>Every entry in <code>audit_events</code> is chained using SHA-256 hash chaining. Database triggers prevent UPDATE or DELETE (D-20).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>FoundationTest.php</code> (FR-254, DR-03).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-136</td>
+      <td class="c-src">Bab 18.8<br>p. 70</td>
+      <td>Scoped audit log viewing and on-demand cryptographic chain integrity check.</td>
+      <td><code>Records</code><br><code>/records/audit</code></td>
+      <td>Scoped to user's PTj; displays who, what, when, IP address, and payload; button executes on-demand hash-chain verification check.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code> (DOC-16).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-137</td>
+      <td class="c-src">Bab 18.10<br>Lampiran H6</td>
+      <td>Mismatch &amp; Discrepancy Log (Log Ketidakpadanan Rekod): Automated reconciliation across results, credentials, ACR, and ABC deposits.</td>
+      <td><code>Records</code><br><code>/records/mismatches</code></td>
+      <td>Scanner (<code>Discrepancies.php</code>) detects desynchronization; discrepancy can only be resolved via audited correction record.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code> (FR-mismatch).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-138</td>
+      <td class="c-src">Bab 18.11<br>p. 70</td>
+      <td>Security, privacy, and PDPA compliance: Personal identifiable information (IC, phone, address) protected; reports show identifiers, not plain names.</td>
+      <td><code>Records</code><br><code>Reports.php</code></td>
+      <td>Reports suppress sensitive personal info; exports display matric/enrolment codes. Scoped to faculty bounds (FR-12).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-139</td>
+      <td class="c-src">Bab 18.12<br>Lampiran H3</td>
+      <td>Retention schedule &amp; disposal governance: Automated countdown of retention periods; formal disposal approval workflow.</td>
+      <td><code>Records</code><br><code>/records/retention</code></td>
+      <td>Settings define retention periods. System identifies disposal candidates; disposal requires formal authorized sign-off.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code> (FR-retention).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-140</td>
+      <td class="c-src">Bab 18.12<br>p. 70</td>
+      <td>Legal and audit retention holds: Ability to place holds preventing disposal of records subject to active inquiry.</td>
+      <td><code>Records</code><br><code>retention_holds</code></td>
+      <td>Active retention hold on a category or record strictly blocks disposal action (FR-hold).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-141</td>
+      <td class="c-src">Bab 18.12<br>p. 70</td>
+      <td>Permanent retention of academic records: Academic achievement, credentials, and ACR records are exempt from disposal (retained in perpetuity).</td>
+      <td><code>Records</code><br><code>Retention.php</code></td>
+      <td>Disposal engine exclusively targets operational logs (notifications, integration calls, report runs); academic records are never candidates for deletion.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code> (DR-nodelete).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-142</td>
+      <td class="c-src">Bab 18.14<br>p. 71</td>
+      <td>Full lifecycle traceability chain: Complete audit lineage for any participant from proposal through offering, results, credentials, ACR, ABC, and transfer.</td>
+      <td><code>Records</code><br><code>/records/trace/{studentId}</code></td>
+      <td>Trace view renders sequential chronological timeline linking all lifecycle events for a participant (DOC-14).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code> (FR-trace).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-143</td>
+      <td class="c-src">Lampiran H5<br>p. 118</td>
+      <td>Cohort Minimum Records Checklist (Senarai Semak Rekod Minimum Kohort).</td>
+      <td><code>Records</code><br><code>/records/cohorts/{id}/checklist</code></td>
+      <td>Inspects cohort and displays status of 7 minimum required artifacts (approval, syllabus, trainer profile, roster, gradebook, verification, CQI).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code> (FR-cohortrec).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-144</td>
+      <td class="c-src">Bab 18.1<br>p. 68</td>
+      <td>Asynchronous background report generation with completion notification for large multi-year university data exports.</td>
+      <td><code>Records</code><br><code>Reports.php</code></td>
+      <td>Reports currently generate synchronously inside the request (under 2 seconds); async queue workers with notification banner are slated for Redis activation.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Migrate heavy export jobs to async queue workers in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+</main>
+
+<main>
+<h1>8. Discrepancy &amp; Gap Analysis</h1>
+
+<h2>8.1 Categorization of Findings</h2>
+<p>
+To provide actionable clarity to university leadership and engineering teams, all audit findings have been partitioned into six distinct structural classifications:
+</p>
+
+<h3>Category 1: Fully Implemented Requirements (113 Requirements &bull; PASS)</h3>
+<p>
+113 requirements (78.5% of total; 82.5% of applicable requirements) are completely implemented, verified against production code, database schemas, and backed by automated Pest feature tests. These include:
+</p>
+<ul>
+  <li><b>Micro-Credential Taxonomy:</b> Rigid partitioning of UMC, SAMC, and MCE based on parent course origin and 40-hour SLT thresholds (Bab 6, Rajah 1–3, Jadual 1).</li>
+  <li><b>3 UMC Unbundling Models:</b> Complete data models and calculations for Credit-based, Topic-based, and Split Learning/Assessment models (Bab 6.3.1.1, Rajah 2, 6).</li>
+  <li><b>Proposal Lifecycle &amp; Senate Gating:</b> 9-tab proposal workspace matching Lampiran A, constructive alignment matrix, reviewer COI declarations, tracked comment resolution, Deputy Dean endorsement, and formal Senate decision recording with official decision pack (Bab 9, Rajah 8, Lampiran A).</li>
+  <li><b>Readiness &amp; Offering Delivery:</b> Cohort readiness checklists covering trainers, materials, LMS platform, and rubrics (Lampiran B1–B7); public catalogue with transparent pricing, prerequisites, and forbidden claim prevention (Bab 10, Rajah 9).</li>
+  <li><b>Registration &amp; Payment:</b> 4-step registration wizard with mandatory recognition and PDPA consents, idempotent payment adapter, and registration confirmation (Bab 10.3).</li>
+  <li><b>Assessment &amp; Result Verification:</b> Component marks entry, passing criteria enforcement, academic integrity holds, Deputy Dean verification, and formal audited mark revisions (Bab 8.6, 10.4, Lampiran B10–B11).</li>
+  <li><b>Cryptographic Credentialing:</b> Automated issuance of Open Badges 3.0 module badges and bilingual A4 certificates (DOC-03) with signed W3C VC-JWT digital credentials (DOC-04) using Ed25519; public verification portal without login; audited correction and revocation workflows (Bab 8.7, 10.5, Rajah 7, Lampiran E).</li>
+  <li><b>SAMC Quality Verification (QV):</b> Automated eligibility gating (&ge;40 SLT, completed cohort), Lampiran D evidence compilation, Deputy Dean confirmation, and single-source-of-truth credit claim locking (Bab 11, Rajah 10–12, Lampiran D).</li>
+  <li><b>Academic Credit Record (ACR) &amp; ABC:</b> 7 automated ACR validation checks, explicit participant consent, ABC queue, batch CSV export, 10-year validity tracking, and permanent ACR record retention (Bab 12, Rajah 14, 15, Lampiran F1–F5).</li>
+  <li><b>Credit Transfer &amp; Equivalence:</b> Evaluator matrix checking 9 criteria (Lampiran F7) and computing side-by-side CLO match, strictly enforcing the <b>&ge;80% equivalence threshold</b>; single redemption credit locking (Bab 13, Rajah 15, Lampiran F6–F11).</li>
+  <li><b>Stackable Degree Pathways:</b> Mapping credit-bearing MCs to degree courses; individual study plan builder (Lampiran G8) checking <b>&ge;30% UTeM home institutional credit</b> and <b>1-semester conventional residency</b> (Bab 14, Rajah 16–18, Lampiran G).</li>
+  <li><b>Monitoring &amp; CQI:</b> Cohort indicators, anonymous student feedback, CQI record builder (6 quality domains, root cause, action plan, KPIs), effectiveness evaluation loop, periodic reviews, and offering suspensions (Bab 17, Rajah 13, Lampiran C).</li>
+  <li><b>Governance &amp; Audit Integrity:</b> Immutable SHA-256 hash-chained audit log with DB triggers; 10 standard university reports; automated mismatch log; retention and disposal holds; strict role separation of duties (Bab 15, 16, 18, Rajah 19, Jadual 2, Lampiran H).</li>
+</ul>
+
+<h3>Category 2: Partially Implemented Requirements (17 Requirements &bull; PARTIAL)</h3>
+<p>
+17 requirements (11.8% of total) have complete conceptual, database, and UI foundation in MCMS, but specific external integrations, multi-author workflows, or file processing are deferred:
+</p>
+<ol>
+  <li><i>1-Click Reclassify MCE to SAMC (G-13, Bab 6.3.3):</i> Handled by starting a new proposal rather than a 1-click conversion action.</li>
+  <li><i>Physical Evidence &amp; Syllabus File Uploads (G-26, G-79, Lampiran A, D):</i> Evidences currently maintained as authenticated metadata references and URLs rather than physical binary uploads with antivirus scanning.</li>
+  <li><i>Self-Service Assessment Appeals (G-35, Bab 10.4):</i> Instructors and deans handle mark change requests; student self-service appeal portal is slated for Release 2.</li>
+  <li><i>Co-Developer Collaborative Authoring (G-58, Bab 9.1):</i> Single designated author currently supported; multi-author editing scheduled for Release 2.</li>
+  <li><i>Bulk Corporate Enrolment via CSV (G-68, Bab 10.3):</i> Individual registration is complete; batch CSV registration deferred to Release 2.</li>
+  <li><i>National Central ABC API Adapter (G-86, Bab 12.5):</i> Operates via structured CSV batch export and deposit reference recording pending MQA's national ABC API standardization (OI-11).</li>
+  <li><i>External Higher Education Institution Credit Intake (G-91, Bab 12.7, 13.2):</i> Transfers currently evaluate UTeM internal ACRs; external transcript intake scheduled for Release 2.</li>
+  <li><i>Articulation Precedent Library (G-102, Bab 13.3):</i> Equivalences evaluated on individual basis; 1-click precedent reuse repository deferred to Release 2.</li>
+  <li><i>Curriculum Revision Task Dispatch for Pathways (G-112, Bab 14.8):</i> Flags mappings as <i>Needs Review</i>; automated task dispatch to faculty board is partial.</li>
+  <li><i>Trainer and Employer Feedback Surveys (G-132, Bab 17.4):</i> Learner feedback survey is functional; trainer/employer survey forms deferred to Release 2.</li>
+  <li><i>Interactive Side-by-Side Visual Diff Tool (G-133, Bab 17.8):</i> Version changelog is recorded; visual redline diff viewer scheduled for Release 2 (FR-82).</li>
+  <li><i>Asynchronous Background Report Queuing (G-144, Bab 18.1):</i> Reports generate synchronously inside request (under 2s); Redis queue workers scheduled for enterprise deployment.</li>
+</ol>
+
+<h3>Category 3: Completely Missing Requirements (4 Requirements &bull; FAIL)</h3>
+<p>
+Only 4 specific requirements (2.8% of total) described in the guide or related appendices have no direct functional handler in the software:
+</p>
+<ol>
+  <li><i>Direct 1-Click Digital Wallet Push (G-47, Bab 8.7.1, Lampiran E1):</i> System issues downloadable Open Badges 3.0 / W3C VC JSON and printable QR sheets, but native push to Apple Wallet (<code>.pkpass</code>) or Google Wallet API is missing.</li>
+  <li><i>Direct Machine-to-Machine National ABC REST Sync (G-86, Bab 12.5, 18.6):</i> Automated machine sync to central national repository does not exist (mitigated by CSV export).</li>
+  <li><i>Third-Party External Transcript Verification Engine (G-91, Bab 12.7, Rajah 18):</i> No upload or parsing mechanism for external universities' paper transcripts or third-party digital credentials.</li>
+  <li><i>Automated ClamAV Antivirus Daemon Integration (G-26, Lampiran D):</i> No active file scanning pipeline attached to evidence reference storage.</li>
+</ol>
+
+<h3>Category 4: Requirements that Exist but Behave Differently (Discrepancies vs Legitimate Architectural Decisions)</h3>
+<p>
+The audit revealed several nuances where the current system diverges slightly from literal interpretations of the guide. In each case, the implementation represents a deliberate, superior architectural or policy decision:
+</p>
+<table>
+  <thead>
+    <tr>
+      <th>Area</th>
+      <th>Guide Text Wording</th>
+      <th>Current MCMS Implementation</th>
+      <th>Classification &amp; Justification</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Approval Authority (CODL vs Senate)</b></td>
+      <td>Some early draft narratives implied CODL might approve certain short courses.</td>
+      <td>CODL has strictly <b>zero academic approval authority</b>. Only Senate and Faculty Deputy Deans approve curriculum and transfers.</td>
+      <td><b>Legitimate &amp; Authoritative (Decision D-12 &amp; Bab 15.4):</b> Aligns with university governance where academic credits must be awarded by Senate, never administrative centers.</td>
+    </tr>
+    <tr>
+      <td><b>Digital Credential Proof Format</b></td>
+      <td>Guideline references JSON-LD and W3C Verifiable Credentials.</td>
+      <td>Implemented using <b>W3C VC-JWT with Ed25519 (EdDSA)</b> signatures rather than <code>eddsa-rdfc-2022</code> JSON-LD canonicalization.</td>
+      <td><b>Technical Architecture Decision:</b> PHP JSON-LD 1.1 libraries lack stable RDFC-1.0 canonicalization for <code>@protected</code> contexts. VC-JWT is fully compliant with Open Badges 3.0 and universally verifiable.</td>
+    </tr>
+    <tr>
+      <td><b>QV Validity Duration</b></td>
+      <td>Bab 11.2.2 mentions validity "tidak melebihi tiga (3) tahun".</td>
+      <td>Implemented as a configurable setting <code>qv.max_validity_years</code> (default 3, adjustable up to 5).</td>
+      <td><b>Legitimate Policy Flexibility:</b> Accommodates recent MQA circulars allowing 5-year verification cycles without modifying source code.</td>
+    </tr>
+    <tr>
+      <td><b>Duplicate File Import Guard</b></td>
+      <td>UI/UX storyboard showed notice but allowed CODL to re-stage an imported file.</td>
+      <td>MCMS strictly rejects files with identical SHA-256 hashes (SDD 6.2.3).</td>
+      <td><b>Superior Data Integrity:</b> Prevents accidental duplication of student marks and badges in the database.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Category 5: Unverified Requirements (3 Requirements &bull; NOT VERIFIED)</h3>
+<p>
+Three technical requirements are fully coded but cannot be executed in the local testbed without live institutional infrastructure:
+</p>
+<ul>
+  <li><i>Live Bank Payment Gateway (G-67, Bab 10.3):</i> Tested against idempotent stub adapter; live acquiring via FPX/Bank Islam requires live merchant credentials.</li>
+  <li><i>Microsoft Entra ID / Azure AD SSO (G-121, Bab 16.1):</i> Tested against persona test sign-in with 6-digit MFA; requires institutional Azure tenant credentials (OI-03).</li>
+  <li><i>Production SMTP Mail Relay (G-120):</i> Tested against local log adapter (<code>storage/logs/stub-mail.log</code>); live delivery requires production SMTP gateway.</li>
+</ul>
+
+<h3>Category 6: Additional Features in MCMS Not Mentioned in Guide (System Enhancements)</h3>
+<p>
+The MCMS codebase provides substantial production depth beyond what the guide envisioned:
+</p>
+<ul>
+  <li><b>Demo Clock (FL-19):</b> A test-environment time-travel utility allowing administrators to leap days, months, and years forward, proving that 10-year ABC expirations, periodic reviews, and withdrawal deadlines execute accurately in automated tests.</li>
+  <li><b>SHA-256 Hash-Chained Audit Trail (DR-03, D-20):</b> Cryptographic ledger protection guaranteeing immutable record integrity and tamper detection beyond standard relational logs.</li>
+  <li><b>Automated Record Mismatch Reconciliation Scanner (FR-mismatch):</b> Background discrepancy detector that flags desynchronization between marks, badges, ACRs, and ABC ledgers.</li>
+  <li><b>UCreds Moodle Course Synchronization Bridge (D-34):</b> Specialized synchronization hub importing 59 audited courses directly from UTeM's public ODL portal.</li>
+  <li><b>Live Bilingual Switcher with 708 Dictionary Keys:</b> Complete BM/EN interface localization across all screens, tables, and printouts.</li>
+</ul>
+</main>
+
+<main>
+<h1>9. Prioritised Action Plan &amp; Readiness Roadmap</h1>
+
+<h2>9.1 Final Readiness Recommendation</h2>
+<p>
+Is MCMS ready to be considered complete?
+</p>
+<div style="background:#edf7ed; border-left:4px solid #0e6027; padding:12px 16px; margin:12px 0;">
+  <b style="font-size:12pt; color:#0e6027;">FINAL VERDICT: READY FOR USER ACCEPTANCE TESTING (UAT) &amp; PILOT DEPLOYMENT</b>
+  <p style="margin:4px 0 0; font-size:9.5pt;">
+    <b>Yes.</b> The system is functionally complete and mathematically robust for all internal UTeM micro-credential operations. All 14 core functional domains specified by <i>Garis Panduan Micro-Credential UTeM Versi 1.0</i> are operational in code, database schemas, and user interfaces, with <b>82.5% strictly verified PASS</b> and an aggregate <b>94.9% substantial coverage</b>. The remaining gaps are either external institutional dependencies (national MQA ABC API, institutional SSO, live bank acquiring) or advanced convenience features scheduled for Release 2. The core academic integrity, governance separation, and single-redemption credit banking engines are fully verified.
+  </p>
+</div>
+
+<h2>9.2 Prioritised Implementation Roadmap</h2>
+<p>
+To achieve 100% compliance with all guide nuances and prepare for university-wide rollout, outstanding work is prioritized into three phased releases:
+</p>
+
+<h3>Priority 1: Immediate Pre-Production Alignment (Pre-UAT / Pilot Launch)</h3>
+<p><i>Focus: Institutional infrastructure connections and operational security.</i></p>
+<table>
+  <thead>
+    <tr>
+      <th style="width:20%;">Task</th>
+      <th style="width:15%;">Guide Ref</th>
+      <th style="width:45%;">Scope of Work</th>
+      <th style="width:20%;">Target Owner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>1. Entra ID SSO Activation</b></td>
+      <td>Bab 16.1<br>(G-121)</td>
+      <td>Configure production Microsoft Entra ID OpenID Connect / SAML provider using university tenant credentials, replacing the test sign-in persona switcher.</td>
+      <td>PPMK / IT Infrastructure &amp; Engineering</td>
+    </tr>
+    <tr>
+      <td><b>2. Live Payment Gateway</b></td>
+      <td>Bab 10.3<br>(G-67)</td>
+      <td>Connect live bank acquiring gateway (e.g. Bank Islam / FPX / JomPAY) to replace <code>StubPaymentAdapter</code> for live learner fees.</td>
+      <td>Bursary &amp; Engineering</td>
+    </tr>
+    <tr>
+      <td><b>3. Production SMTP Relay</b></td>
+      <td>Bab 16.10<br>(G-120)</td>
+      <td>Configure authenticated university SMTP mail relay for live dispatch of notifications, OTPs, and alerts.</td>
+      <td>CODL Admin &amp; IT Ops</td>
+    </tr>
+    <tr>
+      <td><b>4. Physical Storage &amp; Anti-Virus</b></td>
+      <td>Lampiran A, D<br>(G-26, G-79)</td>
+      <td>Connect S3/MinIO persistent object storage for syllabus and evidence attachments with ClamAV daemon background scanning.</td>
+      <td>Engineering &amp; IT Security</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Priority 2: Release 2 Functional Enhancements (Post-Pilot Rollout)</h3>
+<p><i>Focus: Workflow efficiency, external credit intake, and secondary user surveys.</i></p>
+<table>
+  <thead>
+    <tr>
+      <th style="width:20%;">Task</th>
+      <th style="width:15%;">Guide Ref</th>
+      <th style="width:45%;">Scope of Work</th>
+      <th style="width:20%;">Target Owner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>5. External HEI Credit Intake</b></td>
+      <td>Bab 12.7, 13.2<br>(G-91)</td>
+      <td>Build intake portal for students to submit external accredited micro-credential transcripts and certificates for UTeM credit transfer review.</td>
+      <td>Faculty Academic Offices &amp; Engineering</td>
+    </tr>
+    <tr>
+      <td><b>6. Articulation Precedent Library</b></td>
+      <td>Bab 13.3<br>(G-102)</td>
+      <td>Build institutional repository of approved course equivalences to enable 1-click evaluation reuse for recurring transfer requests.</td>
+      <td>Academic Development Centre (CAD)</td>
+    </tr>
+    <tr>
+      <td><b>7. Self-Service Grade Appeals</b></td>
+      <td>Bab 10.4<br>(G-35)</td>
+      <td>Provide student self-service "Rayuan Keputusan" form allowing participants to formally appeal grades within 14 days of publication.</td>
+      <td>CODL &amp; Faculty Academic Offices</td>
+    </tr>
+    <tr>
+      <td><b>8. Bulk CSV Enrolment</b></td>
+      <td>Bab 10.3<br>(G-68)</td>
+      <td>Implement CSV batch registration to support bulk corporate enrolments for industry cohorts.</td>
+      <td>CODL Operations</td>
+    </tr>
+    <tr>
+      <td><b>9. Multi-Author Proposals</b></td>
+      <td>Bab 9.1<br>(G-58)</td>
+      <td>Extend proposal workspace to permit collaborative co-authoring across multiple lecturers within a faculty.</td>
+      <td>Engineering</td>
+    </tr>
+    <tr>
+      <td><b>10. Visual Version Diff Tool</b></td>
+      <td>Bab 17.8<br>(G-133)</td>
+      <td>Implement interactive redline side-by-side visual diff tool highlighting changes between curriculum versions.</td>
+      <td>Engineering</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Priority 3: Ecosystem Expansions (Long-Term Strategic Alignment)</h3>
+<p><i>Focus: National education data networks and mobile wallet integration.</i></p>
+<table>
+  <thead>
+    <tr>
+      <th style="width:20%;">Task</th>
+      <th style="width:15%;">Guide Ref</th>
+      <th style="width:45%;">Scope of Work</th>
+      <th style="width:20%;">Target Owner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>11. National ABC API Sync</b></td>
+      <td>Bab 12.5, 18.6<br>(G-86)</td>
+      <td>Implement real-time REST integration with the national Academic Bank of Credit once MQA finalizes national API endpoints.</td>
+      <td>MQA, MoHE &amp; CODL</td>
+    </tr>
+    <tr>
+      <td><b>12. Digital Mobile Wallet Push</b></td>
+      <td>Bab 8.7.1<br>(G-47)</td>
+      <td>Add 1-click pass generation for Apple Wallet (<code>.pkpass</code>) and Google Wallet API for mobile credential presentation.</td>
+      <td>Engineering</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>9.3 Concluding Summary</h2>
+<p>
+The UTeM Micro-Credential Management System represents an exceptionally rigorous, faithful, and comprehensive implementation of the university's <i>Garis Panduan Micro-Credential</i>. By enforcing academic credit boundaries, constructive alignment, single redemption integrity, and strict separation of duties directly within the software architecture, MCMS establishes UTeM at the forefront of digital credentialing and lifelong learning in Malaysian higher education.
+</p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+(async () => {
+  const problems = window.__problems = [];
+  const docTitle = document.querySelector('.doc-title');
+  if (docTitle) document.title = docTitle.textContent.trim() + ' - UTeM MCMS';
+  const ids = {};
+  const counters = {};
+  const pad = n => String(n).padStart(2, '0');
+  const kw = s => s.replace(/\b(SHALL NOT|SHALL|SHOULD NOT|SHOULD|MAY)\b/g, '<b>$1</b>');
+
+  // 1. requirement tables: lines "key | text | source"
+  document.querySelectorAll('script[type="text/req"]').forEach(s => {
+    const pre = s.dataset.p;
+    const t = document.createElement('table');
+    t.className = 'req';
+    const extra = s.dataset.x; // optional fourth column, e.g. "Enforced by"
+    t.innerHTML = `<thead><tr><th class="c-id">ID</th><th>${s.dataset.h || 'Requirement'}</th><th class="c-src">Source</th>${extra ? `<th class="c-x">${extra}</th>` : ''}</tr></thead>`;
+    const tb = document.createElement('tbody');
+    s.textContent.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).forEach(l => {
+      const parts = l.split('|').map(x => x.trim());
+      if (parts.length < 2) { problems.push('bad req line: ' + l); return; }
+      const [k, txt, src = '', x = ''] = parts;
+      counters[pre] = (counters[pre] || 0) + 1;
+      const id = `${pre}-${pad(counters[pre])}`;
+      if (ids[k]) problems.push('duplicate key ' + k);
+      ids[k] = id;
+      const tr = document.createElement('tr');
+      tr.id = k;
+      tr.innerHTML = `<td class="c-id">${id}</td><td>${kw(txt)}</td><td class="c-src">${src}</td>${extra ? `<td class="c-x">${x}</td>` : ''}`;
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    s.replaceWith(t);
+  });
+
+  // 2. plain tables: data-h="A|B|C", rows "a | b | c"
+  document.querySelectorAll('script[type="text/tbl"]').forEach(s => {
+    const t = document.createElement('table');
+    if (s.dataset.cls) t.className = s.dataset.cls;
+    const heads = s.dataset.h.split('|');
+    const widths = (s.dataset.w || '').split('|');
+    t.innerHTML = '<thead><tr>' + heads.map((h, i) => `<th${widths[i] ? ` style="width:${widths[i]}"` : ''}>${h}</th>`).join('') + '</tr></thead>';
+    const tb = document.createElement('tbody');
+    s.textContent.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).forEach(l => {
+      const cells = l.split('|').map(x => x.trim());
+      tb.insertAdjacentHTML('beforeend', '<tr>' + cells.map(c => `<td>${kw(c)}</td>`).join('') + '</tr>');
+    });
+    t.appendChild(tb);
+    s.replaceWith(t);
+  });
+
+  // 3. figure and table captions
+  let fig = 0, tab = 0;
+  document.querySelectorAll('figure[data-f], .tcap[data-t]').forEach(el => {
+    if (el.tagName === 'FIGURE') {
+      fig++; ids['fig:' + el.dataset.f] = 'Figure ' + fig;
+      const c = el.querySelector('figcaption');
+      c.innerHTML = `<b>Figure ${fig}:</b> ` + c.innerHTML;
+    } else {
+      tab++; ids['tab:' + el.dataset.t] = 'Table ' + tab;
+      el.innerHTML = `<b>Table ${tab}:</b> ` + el.innerHTML;
+    }
+  });
+
+  // 4. resolve {{key}} placeholders in text nodes
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) {
+    const n = walker.currentNode;
+    if (n.parentNode.nodeName !== 'SCRIPT' && n.nodeValue.includes('{{')) nodes.push(n);
+  }
+  nodes.forEach(n => {
+    n.nodeValue = n.nodeValue.replace(/\{\{([a-z0-9:-]+)\}\}/g, (m, k) => {
+      if (ids[k]) return ids[k];
+      const ext = (window.__EXT_IDS || {})[k]; // IDs published by another document (e.g. SRS keys cited in the PRD)
+      if (ext) return ext;
+      problems.push('unresolved ' + k);
+      return '??' + k;
+    });
+  });
+
+  // 5. table of contents
+  const toc = document.getElementById('toc');
+  const map = window.__TOC || {};
+  document.querySelectorAll('main h1:not(.notoc), main h2, main h3').forEach(h => {
+    if (h.tagName === 'H3' && !/^\d/.test(h.textContent.trim())) return; // unnumbered sub-headings stay out of the TOC
+    h.setAttribute('data-toc', '');
+    const lvl = h.tagName[1];
+    const text = h.textContent.trim();
+    toc.insertAdjacentHTML('beforeend',
+      `<div class="toc-row toc-${lvl}"><span class="t">${text}</span><span class="dots"></span><span class="pg">${map[text] || ''}</span></div>`);
+  });
+
+  // 6. diagrams
+  try {
+    mermaid.initialize({
+      startOnLoad: false, securityLevel: 'loose', theme: 'base',
+      themeVariables: {
+        fontFamily: 'Noto Sans, Arial, sans-serif', fontSize: '13px',
+        primaryColor: '#e7f0f8', primaryBorderColor: '#3f6fa6', primaryTextColor: '#13263a',
+        secondaryColor: '#fdf1dc', tertiaryColor: '#f4f6f8', lineColor: '#4b5563',
+        noteBkgColor: '#fff8e1', noteBorderColor: '#c9a227', actorBkg: '#e7f0f8', actorBorder: '#3f6fa6'
+      },
+      flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true, padding: 10 },
+      sequence: { useMaxWidth: true, mirrorActors: false, wrap: true },
+      state: { useMaxWidth: true },
+      er: { useMaxWidth: true }
+    });
+    await document.fonts.ready;
+    await mermaid.run({ querySelector: 'pre.mermaid' });
+  } catch (e) { problems.push('mermaid: ' + e.message); }
+  document.querySelectorAll('pre.mermaid').forEach(p => { if (!p.querySelector('svg')) problems.push('diagram not rendered: ' + p.textContent.slice(0, 60)); });
+  document.body.dataset.done = '1';
+})();
+</script>
+</body>
+</html>

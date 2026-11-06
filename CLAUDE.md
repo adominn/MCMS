@@ -1,0 +1,2 @@
+Follow DESIGN.md for all UI work.
+For questions about the project documents (Guide, Glossary and Decision Log, SRS, design docs), read graphify-out/GRAPH_REPORT.md first and answer with `graphify query "<question>"`; run `/graphify --update` after documents change, then re-run `graphify-out/link_modules.py` with the graphify Python (it re-adds the SDD module MD-xx to `app/app/Modules` code links that an update drops).

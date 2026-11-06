@@ -1,0 +1,208 @@
+<!-- ===================== SECTION 6: DEPUTY DEAN ROLE ===================== -->
+<h1>6. Deputy Dean Pages & Functionality Analysis</h1>
+
+<p>The Deputy Dean Academic (Persona P2) is the primary faculty academic authority in MCMS. The role oversees the entire lifecycle of micro-credentials within the faculty: curriculum endorsement, Senate decision recording, cohort readiness confirmation, assessment verification, completion confirmation, credential lifecycle governance, quality verification, ABC credit deposits, and credit transfer evaluations.</p>
+
+<!-- ---------------- 6.1 Approvals & Senate Decision ---------------- -->
+<h2>6.1 Proposal Endorsement & Senate Approval Recording (MD-03)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Approvals Hub (<code>/approvals</code>), Proposal Endorsement Review (<code>/approvals/{id}</code>), Assign Reviewers (<code>POST /approvals/{id}/reviewers</code>), Senate Recording (<code>/approvals/{id}/senate</code>), Decision Pack (<code>/approvals/{id}/pack</code>)</li>
+  <li><b>Role:</b> Deputy Dean (<code>deputy_dean</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /approvals</code>, <code>GET /approvals/{id}</code>, <code>POST /approvals/{id}/reviewers</code>, <code>POST /approvals/{id}/endorse</code>, <code>POST /approvals/{id}/{how}</code>, <code>GET /approvals/{id}/senate</code>, <code>POST /approvals/{id}/senate</code>, <code>GET /approvals/{id}/pack</code></li>
+  <li><b>Page Type:</b> Multi-Stage Approval Portal & Institutional Decision Recording</li>
+  <li><b>Related Database Tables:</b> <code>mc_versions</code>, <code>micro_credentials</code>, <code>review_assignments</code>, <code>reviews</code>, <code>review_comments</code>, <code>approval_decisions</code>, <code>tasks</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Approval\ApprovalController</code>, Views: <code>approval.index</code>, <code>approval.show</code>, <code>approval.senate</code>, <code>approval.pack</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Governs the faculty approval pipeline (FR-60 to FR-71):
+(1) <b>Assign Reviewers:</b> Selects one or more peer reviewers or industry experts with a target due date.
+(2) <b>Endorsement Review:</b> Inspects curriculum tabs, reviewer rubrics, and tracked comments. Verifies category classification (SAMC vs UMC). Resolves or enforces blocking comments. Actions: <i>Endorse</i>, <i>Return for Amendment</i>, or <i>Do Not Support</i>.
+(3) <b>Senate Approval Recording:</b> Senate is the supreme academic authority but does not log in (D-28). The Deputy Dean officially records the formal Senate decision (Meeting Reference, Senate Approval Date, Effective Date, Conditions).
+(4) <b>Senate Decision Pack:</b> Compiles an executive summary pack of the curriculum, outcomes, assessment matrix, and reviewer recommendations for submission to Senate.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-04 and scenario Act 1. Endorsement blocks if any reviewer comments marked <i>Blocking</i> remain unresolved. Self-endorsement is strictly prevented. Recording Senate approval transitions the version status to <code>approved</code>, making it eligible for cohort offerings.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Endorsement checks, comment resolution, Senate recording, and audit logging operate as specified.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Deputy Dean opens Queue<br/>/approvals"] --> B["Select Submitted Proposal<br/>/approvals/{id}"]
+    B --> C["Assign Peer / Industry Reviewers<br/>Set due date & scope"]
+    C --> D["Reviewers submit evaluations<br/>Comments visible on proposal"]
+    D --> E["Deputy Dean reviews comments<br/>Check blocking issues"]
+    E -->|"Amendments Required"| F["Click 'Return for Amendment'<br/>Returns to Developer"]
+    E -->|"Satisfactory"| G["Click 'Endorse Proposal'<br/>Status: 'endorsed'"]
+    
+    G --> H["Senate Reviews Pack<br/>/approvals/{id}/pack (External Meeting)"]
+    H --> I["Deputy Dean opens Senate Record Form<br/>/approvals/{id}/senate"]
+    I --> J["Record Senate Meeting Ref & Date<br/>POST /approvals/{id}/senate"]
+    J --> K["Version status becomes 'approved'<br/>Eligible for Cohort Offerings"]
+</pre>
+<figcaption>Figure 6.1: Proposal Review, Endorsement & Senate Decision Flow</figcaption>
+</figure>
+
+<!-- ---------------- 6.2 Cohort Readiness Confirmation ---------------- -->
+<h2>6.2 Cohort Readiness Confirmation & Cancellation (MD-04)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Offerings Review (<code>/offerings</code>), Confirm Readiness (<code>POST /offerings/{id}/readiness</code>), Cohort Cancellation (<code>POST /offerings/{id}/cancel</code>)</li>
+  <li><b>Role:</b> Deputy Dean (<code>deputy_dean</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /offerings</code>, <code>GET /offerings/{id}</code>, <code>POST /offerings/{id}/readiness</code>, <code>POST /offerings/{id}/cancel</code></li>
+  <li><b>Page Type:</b> Administrative Verification & Lifecycle Control</li>
+  <li><b>Related Database Tables:</b> <code>offerings</code>, <code>readiness_items</code>, <code>readiness_confirmations</code>, <code>enrolments</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Offering\OfferingController</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Enforces the two-party institutional readiness check (FR-86). The Deputy Dean inspects the lecturer's readiness submission across 6 operational dimensions. If satisfied, the Deputy Dean records formal acceptance. Only when confirmed does the offering status transition to <code>ready</code> / <code>open</code>, automatically publishing it in the public catalogue. In emergencies, the Deputy Dean can cancel a cohort with a documented reason, automatically notifying participants and triggering refunds.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-05. Independent confirmation is enforced: the confirm button is disabled if the logged-in user authored the readiness submission.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Tested in scenario Act 1.</p>
+
+<!-- ---------------- 6.3 Results Verification & Completion ---------------- -->
+<h2>6.3 Assessment Results Verification & Completion Confirmation (MD-07, MD-08)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Results Hub (<code>/results</code>), Cohort Results Verification (<code>/results/{id}</code>), Verify Marks (<code>POST /results/{id}/verify</code>), Completion Check (<code>/completions/{id}</code>), Confirm Completion (<code>POST /completions/{id}/confirm</code>)</li>
+  <li><b>Role:</b> Deputy Dean (<code>deputy_dean</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /results</code>, <code>GET /results/{id}</code>, <code>POST /results/{id}/verify</code>, <code>POST /results/{id}/verify-module</code>, <code>POST /results/{id}/verify-revision</code>, <code>GET /completions/{id}</code>, <code>POST /completions/{id}/confirm</code></li>
+  <li><b>Page Type:</b> Grade Verification & Official Completion Authority</li>
+  <li><b>Related Database Tables:</b> <code>assessment_results</code>, <code>module_achievements</code>, <code>digital_badges</code>, <code>enrolments</code>, <code>achievement_records</code>, <code>credentials</code>, <code>integrity_cases</code></li>
+  <li><b>Related Components & Controllers:</b> <code>ResultsController</code>, <code>CompletionController</code>, Views: <code>results.index</code>, <code>results.verify</code>, <code>completion.show</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Core academic certification engine:
+(1) <b>Results Verification:</b> Inspects grade distributions, raw marks, and pass rates submitted by lecturers. Verifying marks generates official <code>module_achievements</code> and <code>digital_badges</code>. Learners under integrity holds are automatically bypassed.
+(2) <b>Completion Confirmation:</b> Verifies that the participant has achieved every required module, satisfied all whole-micro-credential assessments, and holds no open disciplinary cases. Formal confirmation sets enrolment status to <code>completed</code>, stores final weighted marks, and fires the <code>CompletionConfirmed</code> event (EV-31) &mdash; the sole automated trigger for digital credential issuance.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-08 and scenario Act 2. Results verification is atomic. The completion confirmation check dynamically validates all prerequisites before enabling the confirm button.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Verified end-to-end.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Lecturer Submits Marks<br/>Cohort status: pending_verification"] --> B["Deputy Dean opens /results/{id}"]
+    B --> C["Review Mark Distribution & Pass Rates"]
+    C --> D["Click 'Verify Marks'<br/>POST /results/{id}/verify"]
+    D --> E["System generates module_achievements & badges<br/>Marks become visible to Students"]
+    E --> F["System runs Completion Check<br/>Opens Task when criteria met"]
+    
+    F --> G["Deputy Dean opens /completions/{id}"]
+    G --> H["Inspect Diagnostic Checklist<br/>All modules passed? Integrity clear?"]
+    H --> I["Click 'Confirm Completion'<br/>POST /completions/{id}/confirm"]
+    I --> J["Set Enrolment Status: 'completed'<br/>Store Confirmer & Final Mark"]
+    J --> K["Fire Event: CompletionConfirmed (EV-31)"]
+    K --> L["Listener Mints Digital Credential<br/>Prepares Academic Credit Record (ACR)"]
+</pre>
+<figcaption>Figure 6.3: Assessment Results Verification & Completion Issuance Lifecycle</figcaption>
+</figure>
+
+<!-- ---------------- 6.4 Credential Administration ---------------- -->
+<h2>6.4 Credential Administration & Lifecycle Corrections (MD-09)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Credential Admin Directory (<code>/admin/credentials</code>), Credential Admin Detail (<code>/admin/credentials/{id}</code>), Correct (<code>POST /admin/credentials/{id}/correct</code>), Replace (<code>POST /admin/credentials/{id}/replace</code>), Revoke (<code>POST /admin/credentials/{id}/revoke</code>)</li>
+  <li><b>Role:</b> Deputy Dean (<code>deputy_dean</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /admin/credentials</code>, <code>GET /admin/credentials/{id}</code>, <code>POST /admin/credentials/{id}/correct</code>, <code>POST /admin/credentials/{id}/replace</code>, <code>POST /admin/credentials/{id}/revoke</code></li>
+  <li><b>Page Type:</b> Credential Governance & Cryptographic Status Operations</li>
+  <li><b>Related Database Tables:</b> <code>credentials</code>, <code>credential_revisions</code>, <code>enrolments</code>, <code>users</code></li>
+  <li><b>Related Components & Controllers:</b> <code>CredentialController@adminIndex</code>, <code>@adminShow</code>, Views: <code>credentials.admin</code>, <code>credentials.admin-show</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Administers all issued micro-credentials within the faculty scope (FR-143 to FR-147). In the event of administrative errors, data updates, or academic misconduct, the Deputy Dean executes immutable lifecycle corrections:
+- <b>Correction:</b> Fixes typographical errors (e.g., student name spelling). Maintains identical verification URL; shows status <i>Corrected</i> with public revision audit history.
+- <b>Replacement:</b> Issues a new credential code for substantial structural changes. The old credential permanently indicates status <i>Replaced</i> pointing to the new reference.
+- <b>Revocation:</b> Immediately invalidates the credential. Public verification permanently shows status <i>Revoked</i> with documented legal justification. Nothing is ever hard-deleted.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-10 and scenario Act 2. Revisions are immutably logged in <code>credential_revisions</code> with user, reason, before/after JSON diffs, and timestamp.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Audit-trailed lifecycle operations operate reliably.</p>
+
+<!-- ---------------- 6.5 ACR & National ABC Deposits ---------------- -->
+<h2>6.5 Academic Credit Record (ACR) & ABC Banking (MD-11)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Credit Bank Queue (<code>/admin/creditbank</code>), Confirm ACR (<code>POST /admin/creditbank/acrs/{id}/confirm</code>), Batch Export Detail (<code>/admin/creditbank/batches/{id}</code>), Record Deposit (<code>POST /admin/creditbank/batches/{id}/deposit</code>)</li>
+  <li><b>Role:</b> Deputy Dean (<code>deputy_dean</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /admin/creditbank</code>, <code>POST /admin/creditbank/acrs/{id}/confirm</code>, <code>GET /admin/creditbank/batches/{id}</code>, <code>POST /admin/creditbank/batches/{id}/deposit</code></li>
+  <li><b>Page Type:</b> National Credit Banking & Batch File Management</li>
+  <li><b>Related Database Tables:</b> <code>acrs</code>, <code>acr_checks</code>, <code>consents</code>, <code>abc_batches</code>, <code>abc_deposits</code>, <code>credit_ledger_entries</code></li>
+  <li><b>Related Components & Controllers:</b> <code>CreditBankController</code>, Views: <code>creditbank.queue</code>, <code>creditbank.batch</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Oversees credit banking operations with the Malaysian Academic Credit Bank (ABC). The ACR is generated automatically following 7 automated checks (valid accreditation, credit-bearing category, no unresolved disciplinary cases). Once the student submits consent, the record enters the ABC Queue. The Deputy Dean confirms the record, exports compliant CSV batch files for ABC upload, and officially records the returned ABC deposit reference (e.g., <code>ABC-FTMK-2026-03</code>), activating the 10-year validity counter in the student's ledger.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-11 and scenario Act 3. Blocks any ACR where student consent is missing or declined. Deposit recording atomically creates credit ledger entries.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Export, confirmation, and ledger activation operate correctly.</p>
+
+<!-- ---------------- 6.6 Credit Transfer Evaluation ---------------- -->
+<h2>6.6 Credit Transfer Evaluation & Programme Admission (MD-12)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Transfer Queue (<code>/transfers</code>), Evaluation Workspace (<code>/transfers/{id}</code>), Record Decision (<code>POST /transfers/{id}/decide</code>), Record Admission (<code>POST /admissions</code>)</li>
+  <li><b>Role:</b> Deputy Dean (<code>deputy_dean</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /transfers</code>, <code>GET /transfers/{id}</code>, <code>POST /transfers/{id}/decide</code>, <code>POST /admissions</code></li>
+  <li><b>Page Type:</b> Academic Credit Evaluation & Degree Admission Authority</li>
+  <li><b>Related Database Tables:</b> <code>transfer_applications</code>, <code>transfer_lines</code>, <code>equivalence_criteria</code>, <code>equivalence_assessments</code>, <code>transfer_decisions</code>, <code>admissions</code>, <code>credit_ledger_entries</code></li>
+  <li><b>Related Components & Controllers:</b> <code>EvaluationController</code>, Views: <code>transfer.queue</code>, <code>transfer.decide</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Evaluates student applications to transfer micro-credential credit toward academic degree courses (FR-ct*). The Deputy Dean executes a rigorous evaluation:
+(1) <b>Validity Check:</b> Verifies ACR authenticity and validity period.
+(2) <b>Equivalence Matrix:</b> Evaluates 9 mandatory Appendix F7 criteria and compares micro-credential learning outcomes directly against target course syllabus outcomes. <i>Approval is strictly blocked if any course learning outcome lacks a matching micro-credential outcome</i>, regardless of credit hours.
+(3) <b>Residency & Transfer Limits:</b> Verifies that transferred credit does not breach the faculty 30% credit limit.
+(4) <b>Decision:</b> <i>Approved</i>, <i>Partly Approved</i>, <i>More Evidence Needed</i>, or <i>Not Approved</i>. Approval atomically updates the credit ledger to <code>redeemed</code>.
+(5) <b>Admission Recording:</b> Admission is a distinct fact that credit transfer never automatically creates (D-28). The Deputy Dean independently records the matriculation reference.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-12 and scenario Act 3. Outcome-based matching is strictly enforced by backend validation rules.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Rigorous evaluation logic and single redemption protection verified.</p>
+
+<!-- ---------------- 6.7 Quality Verification & Traceability ---------------- -->
+<h2>6.7 Quality Oversight, Traceability & Discrepancy Log (MD-10, MD-14, MD-15)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> SAMC QV Endorsement (<code>/quality/{mc}</code>), QV Package (<code>/quality/{mc}/package</code>), Record QV Result (<code>POST /quality/{mc}/decision</code>), Periodic Reviews (<code>/reviews/periodic</code>), Suspensions Hub (<code>/suspensions</code>), Student Traceability Chain (<code>/records/trace/{user}</code>), Cohort Inspection (<code>/records/cohort/{offering}</code>), Discrepancy Log (<code>/records/discrepancies</code>)</li>
+  <li><b>Role:</b> Deputy Dean (<code>deputy_dean</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /quality/{mc}</code>, <code>GET /quality/{mc}/package</code>, <code>POST /quality/{mc}/decision</code>, <code>GET /reviews/periodic</code>, <code>POST /reviews/periodic/{mc}</code>, <code>GET /suspensions</code>, <code>POST /suspensions</code>, <code>POST /suspensions/{id}/lift</code>, <code>GET /records/trace</code>, <code>GET /records/trace/{user}</code>, <code>GET /records/cohort/{offering}</code>, <code>GET /records/discrepancies</code>, <code>POST /records/discrepancies/{id}/correct</code></li>
+  <li><b>Page Type:</b> Institutional Governance, Traceability Engine & Integrity Audit</li>
+  <li><b>Related Database Tables:</b> <code>qv_records</code>, <code>periodic_reviews</code>, <code>suspensions</code>, <code>discrepancies</code>, <code>corrections</code>, <code>audit_events</code>, <code>enrolments</code></li>
+  <li><b>Related Components & Controllers:</b> <code>QvController</code>, <code>QualityReviewController</code>, <code>RecordsController</code>, Views: <code>quality.package</code>, <code>monitoring.index</code>, <code>monitoring.suspensions</code>, <code>records.trace</code>, <code>records.cohort</code>, <code>records.discrepancies</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Comprehensive institutional oversight:
+- <b>SAMC QV Result:</b> Records MQA Quality Verification references, valid dates, and credit values. The verified record is the exclusive system writer of credit and MQF claims.
+- <b>Suspension Governance:</b> Suspends/terminates offerings with mandatory learner notification; earned credentials remain untouched.
+- <b>Traceability Chain:</b> Reconstructs a student's full historical audit trail from initial proposal development through enrollment, assessment, credentials, and credit transfer.
+- <b>Discrepancy Log:</b> Detects mismatches between Achievement Records, Credentials, ACRs, and ABC deposits, enforcing audit-logged resolutions.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flows FL-14, FL-16, FL-18, and scenario Act 4. Traceability queries join across 12 relational tables to deliver complete audit verification.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Tested and operational.</p>

@@ -1,0 +1,87 @@
+<!-- ===================== SECTION 3 ===================== -->
+<h1>3. Academic Framework, Stackable Pathways & Credit Governance</h1>
+
+<h2>3.1 Micro-Credential Architecture at UTeM</h2>
+<p>In accordance with the <i>Garis Panduan Micro-Credential Universiti Teknikal Malaysia Melaka</i> and the <i>Malaysian Qualifications Agency (MQA) Guidelines to Good Practices: Micro-credentials</i>, UTeM classifies micro-credentials into distinct academic tiers designed to serve both professional upskilling and accredited degree attainment.</p>
+
+<div class="note">
+  <b>Core Pedagogical Principle:</b> A micro-credential at UTeM is defined as a digital credential certifying the achievement of coherent, verifiable learning outcomes equivalent to a defined volume of student learning time (SLT). One academic credit corresponds strictly to <b>40 hours of SLT</b>.
+</div>
+
+<h2>3.2 The Stackable Degree Pathway</h2>
+<p>A central pillar of UCreds is the <b>Stackable Degree Pathway</b> (Laluan Ijazah Bertingkat). Rather than requiring prospective students to commit to a multi-year master's programme from day one, learners can acquire standalone micro-credentials at their own pace. When assembled according to an approved programme structure, these credits can be transferred toward a full degree.</p>
+
+<figure data-f="stackable-model">
+<pre class="mermaid">
+flowchart TD
+    subgraph Tier1["Tier 1: Standalone Micro-Courses (10 - 20 Hours SLT)"]
+        MC1["1. [MAXL5123] Big Data Demystified"]
+        MC2["6. [MAXL5123] Document & Graph DBs"]
+        MC3["7. [MAXL5123] Hadoop Core Tech"]
+        MC4["10. [MAXL5123] Spark Data Analysis"]
+    end
+    
+    subgraph Tier2["Tier 2: Subject Module / Course Learning Path (120 Hours SLT = 3 Credits)"]
+        SUB1["MAXL5123 Big Data Management (3 Credits)"]
+    end
+    
+    subgraph Tier3["Tier 3: Core Academic Curriculum (40 - 42 Credits)"]
+        SUB2["MAXL5113 Fund. of Data Science"]
+        SUB3["MAXL5133 Applied Statistical Methods"]
+        SUB4["MAXL5143 Applied Machine Learning"]
+        SUB5["MAXL5153 Big Data Visualization"]
+        SUB6["MAXL5163 Modelling & Decision"]
+        SUB7["MPSW5013 Research Methodology"]
+        SUB8["MAXL5223 Group Project"]
+    end
+    
+    subgraph Tier4["Tier 4: Fully Accredited Award (MQA / Senate Conferred)"]
+        DEGREE["Master of Technology in Data Science & Analytics (MTDL - ODL)"]
+    end
+    
+    MC1 --> SUB1
+    MC2 --> SUB1
+    MC3 --> SUB1
+    MC4 --> SUB1
+    
+    SUB1 --> DEGREE
+    SUB2 --> DEGREE
+    SUB3 --> DEGREE
+    SUB4 --> DEGREE
+    SUB5 --> DEGREE
+    SUB6 --> DEGREE
+    SUB7 --> DEGREE
+    SUB8 --> DEGREE
+    
+    classDef t1 fill:#e1f5fe,stroke:#0288d1,stroke-width:1px;
+    classDef t2 fill:#fff8e1,stroke:#ffa000,stroke-width:1.5px;
+    classDef t3 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1.5px;
+    classDef t4 fill:#dcebf1,stroke:#3f6fa6,stroke-width:2px;
+    class MC1,MC2,MC3,MC4 t1;
+    class SUB1 t2;
+    class SUB2,SUB3,SUB4,SUB5,SUB6,SUB7,SUB8 t3;
+    class DEGREE t4;
+</pre>
+<figcaption>The UTeM Stackable Micro-Credential Architecture: From Micro-Course to Master's Degree</figcaption>
+</figure>
+
+<h2>3.3 The Journey of a Credit in UCreds</h2>
+<p>A student or lifelong learner who completes a course on UCreds navigates a defined credit lifecycle governed by academic quality assurance rules:</p>
+<ol>
+  <li><b>Enrolment & Assessment:</b> The learner registers for the course (either free of charge or upon paying the course fee, e.g. RM 12.00 to RM 150.00). Assessment tasks (quizzes, practical lab assignments, capstone projects) are graded by course facilitators.</li>
+  <li><b>Digital Badging & Internal Achievement Record:</b> Upon achieving the passing threshold (minimum Grade C / 50%), UCreds issues a <i>Digital Badge</i> and records the module completion in the learner's <i>Rekod Pencapaian Pembelajaran</i> (Internal Achievement Record).</li>
+  <li><b>The Choice: Kept on Record vs. Deposited to Academic Bank of Credit (ABC):</b>
+    <ul>
+      <li><i>Kept on Record (Penyimpanan Dalaman):</i> The learner retains their digital badge and certificate for career upskilling, resume enhancement, or professional development. No formal academic credit transfer is initiated. This carries zero administrative deposit fees and has indefinite validity within UTeM's continuing education registry.</li>
+      <li><i>Deposited to Academic Bank of Credit (Deposit ABC):</i> If the completed module is quality-verified and accredited (UMC or SAMC), an official <b>Academic Credit Record (ACR)</b> is prepared. Once deposited into the national Academic Bank of Credit, the credits become available for formal credit transfer (Pindahan Kredit) toward a degree at UTeM or any participating higher education institution in Malaysia.</li>
+    </ul>
+  </li>
+  <li><b>The Single Redemption Principle:</b> In compliance with MQA governance [Guide Clause 12.9], an academic credit can only be counted <i>once</i> toward the award of a formal academic qualification. Once a credit is redeemed toward an awarded degree, its status transitions permanently to <i>Redeemed</i> and it cannot be re-used for a second qualification.</li>
+</ol>
+
+<h2>3.4 Accreditation Status & Quality Verification</h2>
+<p>Offerings on UCreds are rigorously bench-marked against national regulatory standards:</p>
+<ul>
+  <li><b>MQA Provisional & Full Accreditation:</b> Flagship postgraduate degrees offered via Open and Distance Learning carry formal accreditation. For instance, the <i>Master of Technology in Data Science and Analytics</i> bears accreditation reference number <b>MQA/PA17473</b>.</li>
+  <li><b>APEL Integration (Prior Experiential Learning):</b> In accordance with national lifelong learning mandates, admission into UCreds ODL programmes supports <b>APEL.A</b> (Accreditation of Prior Experiential Learning for Access) for candidates lacking formal academic prerequisites, as well as <b>APEL.C</b> (Credit Award) allowing work experience to substitute for specific modular requirements.</li>
+</ul>

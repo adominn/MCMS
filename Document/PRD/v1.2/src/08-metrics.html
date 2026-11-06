@@ -1,0 +1,112 @@
+<!-- ===================== 9. SUCCESS METRICS ===================== -->
+<h1>9. Success Metrics</h1>
+<p>Targets are proposed values based on the assumptions of this document; they will be confirmed with CODL after the prototype is shown (D-23). KPI-09 applies to the Release 1 prototype; the others apply once MCMS runs a real pilot.</p>
+<p class="tcap" data-t="kpis">Key performance indicators</p>
+<script type="text/tbl" data-h="ID|Measure|Target (proposed)|Goal|How measured" data-w="8%|32%|20%|8%|32%" data-cls="small">
+KPI-01 | Proposals returned for errors that MCMS checks automatically (SLT sum, weightings, alignment, category) | 0 | G2 | Review comments tagged by type
+KPI-02 | Median days from proposal submission to approval decision | ≤ 30 days (excluding committee schedule) | G2 | Workflow timestamps
+KPI-03 | Credentials verified successfully by the public page | ≥ 99% of requests for existing IDs | G3 | Verification log
+KPI-04 | Days from PTj completion confirmation to credential issuance | ≤ 5 working days | G3 | Workflow timestamps
+KPI-05 | Credentials or catalogue entries with an unsupported credit, MQF or QV claim | 0 | G1 | Automated check of issued records against approval and QV records
+KPI-06 | Recognition decisions with a complete audit entry (who, what, when, reason) | 100% | G1, G4 | Audit log completeness report
+KPI-07 | Participants who can find their credit status without help (usability test) | ≥ 80% | G3 | Moderated test with 5–8 participants
+KPI-08 | Time to produce the traceability record for one participant in an audit | ≤ 5 minutes | G4 | Timed task
+KPI-09 | Release 1 demonstration scenario steps passing | 100% | G5 | Scripted run of Section 7.1
+</script>
+
+<!-- ===================== 10. ASSUMPTIONS, DEPENDENCIES, RISKS ===================== -->
+<h1>10. Assumptions, Dependencies and Risks</h1>
+
+<h2>10.1 Product Assumptions</h2>
+<p>These assumptions are made in this PRD in addition to the assumptions of the Glossary and Decision Log v0.6.</p>
+<script type="text/tbl" data-h="ID|Assumption|Effect if wrong" data-w="8%|56%|36%">
+PA-01 | Release 1 is built by one developer (the intern) with AI-assisted development, in two-week sprints. | Roadmap dates shift; increment order stays.
+PA-02 | Work on Release 1 starts on 2 November 2026, after the SDD is drafted. | Roadmap dates shift.
+PA-03 | A test server or local environment with PHP, PostgreSQL and Edge or Chrome is available for development and demonstration. | Demonstration runs on a developer laptop.
+PA-04 | Fictional seed data is acceptable for the supervisor demonstration. | Anonymised real data must be prepared under PDPA controls.
+PA-05 | The first real pilot, if approved, covers CODL-run offerings only. | KPI baselines and training plans grow.
+</script>
+
+<h2>10.2 Dependencies</h2>
+<ul>
+  <li>The SDD, which turns this PRD and the SRS into a buildable design (next document, D-23).</li>
+  <li>Reference data for at least one programme and parent course for the demonstration (seed data stands in until then).</li>
+  <li>For a real pilot only: SSO tenant access (OI-03), the UCreds exchange format (OI-04), the ABC deposit format (OI-11) and a production host (OI-02).</li>
+</ul>
+
+<h2>10.3 Risk Register</h2>
+<p class="tcap" data-t="risks">Product risks</p>
+<script type="text/tbl" data-h="ID|Risk|Likelihood|Impact|Mitigation" data-w="7%|35%|11%|10%|37%" data-cls="small">
+RK-01 | Release 1 scope (all SHALL requirements) is too large for one developer in the time available. | High | High | Four increments with a demonstration each; Release 1.4 items can slip to a later increment without blocking 1.1–1.3; AI-assisted development; business rules tested first.
+RK-02 | UCreds cannot export results in a usable form. | Medium | High | CSV adapter with published templates; manual result entry as fallback ({{fr-asentry}}).
+RK-03 | SSO access is not granted for the pilot. | Medium | Medium | Stub identity provider for the prototype; local accounts are not added (D-10).
+RK-04 | Users confuse ACR deposit with credit transfer or badges with credit. | Medium | High | One-stage-one-look design, generated wording, help pages, usability test (KPI-07).
+RK-05 | The Guide or MQA rules change during the project. | Medium | Medium | Thresholds are settings (D-16); rules are tested individually; source tags make affected requirements easy to find.
+RK-06 | Approving bodies differ from the decided model (deputy dean endorses, Senate approves). | Low | Low | Approving roles are settings (D-11).
+RK-07 | Credential signing keys are lost or leaked. | Low | High | Protected key store, rotation without invalidating old credentials ({{sr-keys}}); ownership decided under OI-08.
+RK-08 | Personal data exposure in the prototype or pilot. | Low | High | Fictional seed data; minimum public data; encryption at rest; PDPA notice ({{sr-pdpa}}).
+RK-09 | Supervisor review late in the project (D-23) finds a fundamental issue. | Medium | High | Decisions and assumptions are explicit and changeable; the demonstration after each increment can be shown early if needed.
+RK-10 | Deputy deans carry most decisions (endorse, verify, confirm, deposit, transfer) and may become a bottleneck. | Medium | Medium | Bulk actions, a single task queue, automatic credential issuance, reminders; delegation in Release 2 ({{fr-delegate}}).
+</script>
+
+<figure data-f="riskmatrix">
+<pre class="mermaid">
+quadrantChart
+  title Risk matrix
+  x-axis Low likelihood --> High likelihood
+  y-axis Low impact --> High impact
+  quadrant-1 Act now
+  quadrant-2 Prepare
+  quadrant-3 Accept
+  quadrant-4 Monitor
+  RK-01 scope: [0.85, 0.85]
+  RK-02 UCreds: [0.55, 0.80]
+  RK-03 SSO: [0.58, 0.44]
+  RK-04 confusion: [0.55, 0.75]
+  RK-05 rule change: [0.40, 0.60]
+  RK-06 approvers: [0.45, 0.20]
+  RK-07 keys: [0.15, 0.85]
+  RK-08 data: [0.20, 0.90]
+  RK-09 late review: [0.60, 0.88]
+  RK-10 deputy dean load: [0.62, 0.62]
+</pre>
+<figcaption>Risk matrix of {{tab:risks}}. Top-right risks are addressed first in the plan.</figcaption>
+</figure>
+
+<!-- ===================== 11. OPEN ITEMS ===================== -->
+<h1>11. Open Items</h1>
+<p>Open items are kept in one place, the Glossary and Decision Log v0.6. None blocks the Release 1 prototype; each has a working assumption. The items that matter most for the product are:</p>
+<script type="text/tbl" data-h="Open item|Why it matters to the product|Working assumption" data-w="22%|46%|32%">
+OI-03 SSO protocol and applicants | Needed before a real pilot; not for the prototype. | Stub sign-in for the prototype.
+OI-04 UCreds connection | Decides how much manual work lecturers do for results. | CSV exchange.
+OI-09 Transfer limits per programme | Affects transfer decisions and stackable plans. | Limits entered per programme; warning only.
+OI-10 Programme status feed | Drives final redemption of credit. | Manual recording from programme records.
+OI-11 ABC deposit format | Affects the deputy dean's workload; the national ABC platform is still a concept. | CSV and PDF export.
+OI-13 Modular UMC completion window | Affects reminders and participant expectations. | Set per offering.
+OI-15 Online assessment identity checks | Affects integrity evidence for QV. | Recorded per assessment by the PTj.
+</script>
+
+<!-- ===================== APPENDICES ===================== -->
+<h1>Appendix A: Traceability from Features to Stories</h1>
+<p class="tcap" data-t="trace">Features, their stories and SRS sections</p>
+<script type="text/tbl" data-h="Epic|Features|User stories|SRS sections" data-w="20%|22%|36%|22%" data-cls="small">
+E1 Platform foundation | {{f-sso}}–{{f-notify}} | {{us-signin}}–{{us-notify}} | 3.1, 3.17
+E2 Curriculum | {{f-proposal}}–{{f-versions}} | {{us-category}}–{{us-versionbind}} | 3.2, 3.3
+E3 Offering and enrolment | {{f-readiness}}–{{f-register}} | {{us-readiness}}–{{us-waitlist}} | 3.4, 3.5
+E4 Learning results | {{f-csv}}–{{f-achrec}} | {{us-csvexport}}–{{us-umccomplete}} | 3.6, 3.7, 3.8
+E5 Credentials | {{f-issue}}–{{f-correct}} | {{us-batchissue}}–{{us-revoke}} | 3.9
+E6 Quality Verification | {{f-qv}} | {{us-qvgate}}–{{us-qvexpiry}} | 3.10
+E7 ACR and ABC | {{f-acr}}–{{f-ledger}} | {{us-acreligible}}–{{us-ledger}} | 3.11
+E8 Transfer and redemption | {{f-transfer}}–{{f-redeem}} | {{us-apply}}–{{us-redeemfinal}} | 3.12, 3.13
+E9 Stackable degree | {{f-stackmap}}–{{f-stackplan}} | {{us-pathway}}–{{us-noguarantee}} | 3.14
+E10 Quality and records | {{f-cqi}}–{{f-reports}} | {{us-indicators}}–{{us-dashboard}} | 3.15, 3.16
+</script>
+
+<h1>Appendix B: Document History</h1>
+<script type="text/tbl" data-h="Version|Date|Author|Change" data-w="12%|18%|18%|52%">
+1.0 | 26 October 2026 | Aliff, Intern | First PRD, written against Glossary and Decision Log v0.5 and SRS v1.0 (users per D-28 and D-29): vision, goals, personas, journeys, feature list and release plan, user stories, Release 1 demonstration scenario, design principles, success metrics and risks.
+1.1 | 27 October 2026 | Aliff, Intern | Aligned with Glossary and Decision Log v0.6 and SRS v1.1: document set (D-30), design prototype and Release 1 prototype defined (D-31), increments fixed (D-32). The demonstration scenario of Section 7 is the acceptance script of Release 1 and the UI/UX flow FL-19 follows it. No feature, story or release assignment changed.
+1.2 | 6 November 2026 | Aliff, Intern | Aligned with Glossary and Decision Log v0.9 and SRS v1.3: updated user journeys and feature descriptions for public verification certificate slip layout, direct cryptographic file downloads, statutory PDPA compliance notice, tag and badge simplification policy (D-42), centralized Office 365 sign-in guidance (D-44), and degree articulation modal workflow.
+</script>
+<p class="small"><i>Review of this document: under D-23 the SDD and Release 1 prototype proceed on the recorded assumptions; the supervisor's comments will be applied to all documents together once the prototype can be shown.</i></p>
+</main>

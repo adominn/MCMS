@@ -1,0 +1,299 @@
+<!-- ===================== 2. OVERALL DESCRIPTION ===================== -->
+<h1>2. Overall Description</h1>
+
+<h2>2.1 Product Perspective</h2>
+<p>MCMS is a new system. It does not extend UCreds or the student information system. It has its own database, sign-in handling and workflow, and it runs on UTeM-controlled servers (D-06, constraint C1, C2). MCMS is the system of record for micro-credential proposals, approvals, versions, offerings, enrolments, verified achievements, credentials, ACR preparation and the University's own credit-use records. It is <b>not</b> the system of record for learning content (UCreds), national credit storage (ABC), Quality Verification decisions (QVC/MQA) or programme admission and graduation (student information system); it stores references to those decisions.</p>
+<p>MCMS talks to every external system through an <b>adapter</b>: a defined interface with a stub or manual implementation in Release 1 that can later be replaced by a live connector without changing the business modules (D-06, D-14). The context diagram below shows who uses MCMS and which systems it connects to.</p>
+
+<figure data-f="context">
+<pre class="mermaid">
+flowchart LR
+  subgraph People["People"]
+    direction TB
+    P8["Students (P8)<br/>incl. staff and outside applicants"]
+    P1["Lecturers (P1)"]
+    P2["Deputy deans, PTj (P2)"]
+    P3["Senate (P3)<br/>no login; decisions<br/>recorded by deputy dean"]
+    S1["CODL (S1, P5)<br/>administration and<br/>technical operation only"]
+
+    X3["Public verifier, employer (X3)<br/>no login"]
+  end
+  M(["<b>MCMS</b><br/>Micro-Credential<br/>Management System"])
+  subgraph Systems["External systems (through adapters)"]
+    direction TB
+    SSO["UTeM SSO<br/>Microsoft education account"]
+    UC["UCreds learning platform"]
+    ABC["National ABC platform"]
+    QV["QVC / MQA"]
+    PAY["Payment hub<br/>(dummy in Release 1)"]
+    MAIL["UTeM email service"]
+    SIS["Student information system<br/>(future)"]
+  end
+  P8 --- M
+  P1 --- M
+  P2 --- M
+  P3 -. "recorded by P2" .- M
+  S1 --- M
+  X3 -. "verify credential" .- M
+  M -- "sign-in (OIDC)" --- SSO
+  M -- "enrolments out, results in (CSV)" --- UC
+  M -. "ACR deposit (manual)" .- ABC
+  M -. "QV package (manual)" .- QV
+  M -- "payment requests" --- PAY
+  M -- "notifications" --- MAIL
+  M -. "admission, graduation" .- SIS
+</pre>
+<figcaption>System context of MCMS. Solid lines are automated exchanges in Release 1; dotted lines are manual exchanges or later integrations.</figcaption>
+</figure>
+
+<h2>2.2 Product Functions</h2>
+<p>MCMS will provide the following major functions. They are grouped into sixteen modules (M1–M16) carried from the draft SRS. The modules form a <b>modular monolith</b>: one deployable application with clearly separated modules that call each other through internal interfaces (D-07, proposed).</p>
+<ol>
+  <li><b>Identity and governance foundation</b>: sign-in, roles and scopes, settings, approving bodies, notifications and the integration hub.</li>
+  <li><b>Curriculum management</b>: category determination, proposal and design workspace, review and approval, versioning and material change.</li>
+  <li><b>Offering and delivery</b>: readiness checks, catalogue, registration and enrolment, connection to the learning platform, assessment and verification of achievement.</li>
+  <li><b>Recognition</b>: Achievement Record, Digital Badges, Certificates, Digital Credentials, public verification, and Quality Verification for SAMC.</li>
+  <li><b>Credit</b>: ACR, ABC deposit tracking, credit validity, credit transfer, single redemption and stackable degree pathways.</li>
+  <li><b>Quality and records</b>: monitoring, CQI, periodic review, suspension and termination, audit trail, records and reports.</li>
+</ol>
+<p class="tcap" data-t="modules">Modules of MCMS</p>
+<script type="text/tbl" data-h="Module|Function|Main Guide source|SRS section" data-w="10%|44%|26%|20%">
+M1 | Identity, roles and access | Bab 15–16, 18.11, App H | 3.1
+M2 | Category determination | 6.3–6.5 | 3.2
+M3 | Proposal and design workspace | Bab 8–9, App A | 3.2
+M4 | Review, approval and versioning | 9.4–9.5, 15.4, 17.7–17.8 | 3.3
+M5 | Offering, catalogue and readiness | 9.6, 10.3.1, App B | 3.4
+M6 | Registration, enrolment and cohorts | 10.3 | 3.5
+M7 | Learning platform connection | 10.1–10.2 | 3.6
+M8 | Assessment and achievement verification | 8.6, 10.4 | 3.7
+M9 | Achievement Record (internal) | 8.7.5, 12.2, 18.3 | 3.8
+M10 | Credential issuance and verification | 8.7, 10.5, App E | 3.9
+M11 | Quality Verification management (SAMC) | 11.2, App D | 3.10
+M12 | ACR, ABC tracking and redemption | Bab 12, App F | 3.11, 3.13
+M13 | Credit transfer and stackable pathway | Bab 13–14, App F–G | 3.12, 3.14
+M14 | Monitoring, CQI and change control | Bab 11, 17, App C | 3.15
+M15 | Records, audit and reporting | Bab 18, App H | 3.16
+M16 | Notifications and integration hub | Bab 10, 18 | 3.17
+</script>
+
+<figure data-f="architecture">
+<pre class="mermaid">
+flowchart TB
+  UI["<b>Presentation (web, BM / EN)</b><br/>Staff portal · Participant portal · Public catalogue and verification"]
+  subgraph APP["MCMS application (modular monolith)"]
+    direction TB
+    subgraph CUR["Curriculum"]
+      direction LR
+      M2["M2 Category"]
+      M3["M3 Proposal"]
+      M4["M4 Approval and versions"]
+      M5["M5 Offering"]
+    end
+    subgraph DEL["Delivery"]
+      direction LR
+      M6["M6 Enrolment"]
+      M7["M7 Learning platform"]
+      M8["M8 Assessment"]
+    end
+    subgraph REC["Recognition"]
+      direction LR
+      M9["M9 Achievement Record"]
+      M10["M10 Credentials"]
+      M11["M11 Quality Verification"]
+    end
+    subgraph CRE["Credit"]
+      direction LR
+      M12["M12 ACR, ABC, redemption"]
+      M13["M13 Transfer and stackable"]
+    end
+    subgraph GOV["Governance and platform services"]
+      direction LR
+      M1["M1 Identity and roles"]
+      M14["M14 Monitoring and CQI"]
+      M15["M15 Audit and records"]
+      M16["M16 Notifications"]
+      ST["Settings"]
+    end
+  end
+  ADP["<b>Adapter layer (stub / manual / live)</b><br/>SSO · Learning platform · ABC · QVC / MQA · Payment · Email · SIS"]
+  EXT["External systems"]
+  ADP --> EXT
+  DB[("MCMS database<br/>PostgreSQL (proposed)")]
+  UI --> APP
+  APP --> ADP
+  APP --> DB
+</pre>
+<figcaption>Logical architecture: one application with separated modules, a single database, and an adapter for every external system.</figcaption>
+</figure>
+
+<h2>2.3 The Central Rule: Separate Recognition Stages</h2>
+<p>The Guide treats each of the stages below as a different thing with its own decision and its own record, and it warns repeatedly against merging them [G 12–14, 15.4, 18.14]. MCMS SHALL store them as separate records with separate decisions, so that none can be skipped or mistaken for another (D-15). This is the single most important rule for developers. It overrides any convenience shortcut: no single status field, screen action or button may combine two stages.</p>
+
+<figure data-f="stages">
+<pre class="mermaid">
+flowchart LR
+  S1["<b>1. Approval to offer</b><br/>Senate, after deputy<br/>dean endorsement"]
+  S2["<b>2. Module achievement</b><br/>Digital Badge<br/>verified by deputy dean"]
+  S3["<b>3. MC completion</b><br/>Certificate / Digital<br/>Credential (system)"]
+  S4["<b>4. Quality Verification</b><br/>SAMC only<br/>QVC / MQA"]
+  S5["<b>5. ACR and<br/>ABC deposit</b><br/>system generates ACR,<br/>student consents,<br/>deputy dean records"]
+  S6["<b>6. Credit transfer</b><br/>deputy dean of the<br/>degree faculty"]
+  S7["<b>7. Stackable degree<br/>award</b><br/>academic programme"]
+  S1 --> S2 --> S3 --> S5 --> S6 --> S7
+  S4 -. "needed for SAMC credit" .-> S5
+  S1 -. "separate decision" .- S4
+</pre>
+<figcaption>The seven recognition stages. Each arrow is a separate decision by a separate party; reaching one stage never grants the next.</figcaption>
+</figure>
+
+<p class="tcap" data-t="stages">Recognition stages, who decides, and what each stage does not imply</p>
+<script type="text/tbl" data-h="Stage|Decided by|Record kept in MCMS|Does NOT imply" data-w="22%|26%|28%|24%">
+1. Approval to offer | Senate, after deputy dean endorsement; recorded by the deputy dean | Approval decision on an MC version | Credit, QV, transfer
+2. Module achievement (Digital Badge) | Lecturer assesses; deputy dean verifies; system issues the badge | Module result, badge record | Whole-MC completion, credit
+3. MC completion (Certificate / Digital Credential) | Deputy dean confirms; system issues the credential | Achievement Record status, credential record | Credit, ACR, transfer
+4. Quality Verification (SAMC only) | QVC / MQA | QV record with reference, credit, MQF level, validity | Transfer or admission
+5. ACR and ABC deposit | System generates ACR; deputy dean confirms; student consents; deputy dean records the deposit | ACR, consent, deposit record | Transfer approval
+6. Credit transfer | Deputy dean of the faculty that owns the degree | Transfer application, equivalence assessment, decision | Admission, degree award
+7. Stackable degree award | UTeM academic programme | Reference to the award recorded by the programme | Nothing further
+</script>
+
+<p>The life of a single micro-credential follows the cycle below [G 8, 15.3]. Each step has a responsible party, a review or approval mechanism and a record.</p>
+<figure data-f="lifecycle">
+<pre class="mermaid">
+flowchart LR
+  A["Needs analysis"] --> B["Design and<br/>development"] --> C["Academic<br/>review"] --> D["Approval"] --> E["Offering and<br/>delivery"] --> F["Assessment and<br/>verification"] --> G["Badge /<br/>Certificate /<br/>Digital Credential"] --> H["Records and academic<br/>recognition, if eligible"] --> I["Monitoring<br/>and CQI"]
+  I -- "minor update" --> E
+  I -- "material change" --> C
+</pre>
+<figcaption>Micro-credential life cycle. A minor update returns to delivery; a material change returns to review and re-approval.</figcaption>
+</figure>
+
+<h2>2.4 Micro-Credential Categories</h2>
+<p>Every rule in MCMS depends on the category of the micro-credential. The category is proposed early, checked at review and fixed by approval [G 6.5]. {{tab:categories}} gives the differences that the system enforces.</p>
+<p class="tcap" data-t="categories">Comparison of UTeM micro-credential categories (Guide Table 1, clauses 6.3–6.5)</p>
+<script type="text/tbl" data-h="Criterion|UMC|SAMC|MCE" data-w="17%|29%|29%|25%">
+Origin | Unbundled from a credit course of an accredited UTeM programme; keeps its parent link | Own offering, not a formal part of an accredited programme | Own non-credit short learning
+SLT | Total equals the parent course; whole UMC at least 40 h or 1 credit | At least 40 h | Under 40 h
+Credit | Possible, subject to academic rules; only the whole UMC carries credit | Only after Quality Verification | None
+Quality route | Quality assurance of the parent programme | Internal QA, plus QV if credit or MQF level is sought | Internal UTeM QA
+ABC deposit | Yes, if eligible (formal learning) | Only if Quality-Verified (non-formal learning) | No
+Credit transfer | Yes, subject to equivalence | Only if Quality-Verified | No
+Stackable degree | Yes, subject to conditions | Only if Quality-Verified | No
+Credential | Badge per module; Certificate / Digital Credential for the whole UMC | Certificate / Digital Credential; credit and MQF only after QV | Certificate / Digital Credential stating non-credit completion
+</script>
+
+<h2>2.5 User Classes, Characteristics, and Needs</h2>
+<p>MCMS has six kinds of user (D-28). The codes keep the numbering of Guide Appendix H2 so that requirements stay traceable to the Guide; the Guide's other general roles (a separate quality unit P4, records and credential unit P6, ABC depositor P7 and receiving-programme evaluator X4) are not used as separate users, and their tasks are carried by the deputy dean or done automatically by the system (D-28, D-29). A person may hold several roles, each with its own scope (Section 3.1.2).</p>
+<p class="tcap" data-t="users">Users of MCMS</p>
+<script type="text/tbl" data-h="User (code)|Who|Logs in?|Main functions in MCMS" data-w="20%|22%|10%|48%">
+Student (P8) | UTeM students and staff, graduates, professionals and members of the public registered by Pejabat Pendaftar or HEPA | Yes | Browse the catalogue; register and pay; follow module progress; view, download and share credentials; give or decline consent for ABC deposit; view the credit ledger; apply for credit transfer.
+Lecturer (P1) | Academic staff of a PTj | Yes | Propose and design micro-credentials; teach on UCreds; enter and check results; perform the quality review and CQI after each cohort; collect QV evidence for a SAMC. When assigned, reviews a colleague's proposal as reviewer (X1).
+Deputy dean (P2) | Deputy dean of the PTj that owns the offering | Yes | Assign reviewers; verify category and endorse; record Senate decisions; confirm readiness; verify results and confirm completion (which triggers automatic credentials); confirm quality reviews, CQI and QV evidence; correct, replace or revoke credentials; confirm ACR and record ABC deposits; approve module credit (D-18). The deputy dean of the faculty that owns a degree decides credit transfer cases into it.
+Senate (P3) | UTeM Senate | No | Gives final approval to offer, approves material changes and stackable degree mappings. Its decisions are recorded in MCMS by the deputy dean with the meeting reference (D-11).
+CODL (S1, P5) | CODL system administrators and technical staff | Yes, administration only | Manage users, roles, settings, templates and reference data; exchange data with UCreds; monitor adapters. CODL takes no academic decision and holds no academic records role (D-12).
+Public verifier (X3) | Employers and members of the public | No | Check a credential by link or QR code; see only the minimum permitted information.
+Industry expert (X2, optional) | External subject-matter expert invited to a proposal | Yes, limited | Comment on competencies and relevance only; no decisions [G 16.7].
+</script>
+<p>In addition, <b>the system itself</b> acts automatically: it issues Digital Badges, Certificates and Digital Credentials once the deputy dean has verified results or confirmed completion and the pre-issuance checks pass; it generates ACR for eligible learning; and it sends reminders and expiry alerts (D-29).</p>
+
+<p>The Guide's general RACI matrix (Appendix H3) is mapped onto these users below. MCMS uses it to route tasks and notifications; the actual role holders are settings (D-11, D-12).</p>
+<p class="tcap" data-t="raci">RACI matrix of the micro-credential life cycle, mapped to MCMS users (from Guide Appendix H3)</p>
+<script type="text/tbl" data-h="Activity|Lecturer P1|Deputy dean P2|Senate P3|CODL S1/P5|System|Student P8" data-w="34%|11%|11%|11%|11%|11%|11%" data-cls="small">
+Proposal and design of an MC | R | A | I | – | – | –
+Category check UMC / SAMC / MCE | R | A | I | – | Suggests | –
+Academic review | R (reviewer) | A | – | – | – | –
+Approval to offer | C | R (endorses, records) | A | – | – | –
+Platform and materials preparation | R | A | – | R (UCreds) | – | –
+Registration and enrolment | I | A | – | C | R | R
+Learning delivery and assessment | R | A | – | C | – | R
+Verification of achievement | C | A/R | – | – | – | I
+Issue Digital Badge / Certificate / Digital Credential | I | A (triggers) | – | – | R | I
+Correction, replacement, revocation | C | A/R | – | – | – | I
+Monitoring and CQI | R | A | – | – | Calculates | C
+QV evidence and maintenance (SAMC) | R | A | – | – | Links evidence | –
+ACR preparation for eligible credit | I | A (confirms) | – | – | R (generates) | I
+Consent to ABC deposit | – | I | – | – | – | R
+Recording the ABC deposit | – | A/R | – | – | – | I
+Credit transfer evaluation and decision | C | A/R (degree faculty) | – | – | Checks rules | R (applies)
+Stackable degree mapping | R/C | R | A | – | – | I
+Material change | R | R (endorses) | A | – | Detects | I
+Suspension / termination | C | R | A | – | – | I
+</script>
+<h2>2.6 Operating Environment</h2>
+<p>The platform will operate in the following environment:</p>
+<ol>
+  <li><b>Technical environment</b>
+    <ul><li>A web application accessible through current versions of Microsoft Edge, Google Chrome, Mozilla Firefox and Apple Safari (latest two major versions).</li>
+    <li>Fully responsive design for phones and tablets; no native mobile application.</li>
+    <li>Hosted on UTeM on-premises servers (virtual machines or containers), with separate development, test and production environments.</li></ul></li>
+  <li><b>Software environment</b>
+    <ul><li>Laravel (PHP) application framework, a currently supported release (D-08).</li>
+    <li>PostgreSQL as the primary database; MySQL or MariaDB as an accepted fallback if CODL already hosts it (D-09, OI-02). Queries stay portable through Laravel's database layer.</li>
+    <li>A queue worker for background jobs (imports, credential issuance, notifications, alerts) and a scheduler for timed jobs (expiry alerts, retention checks).</li>
+    <li>UTeM single sign-on based on the Microsoft education account (OpenID Connect assumed, OI-03); UTeM SMTP email service.</li></ul></li>
+  <li><b>User environment</b>
+    <ul><li>Staff use office desktops and laptops on the campus network or remotely over the internet.</li>
+    <li>Participants use personal devices, often phones, with varying connection quality.</li>
+    <li>Verifiers open a credential link or scan a QR code without signing in.</li>
+    <li>Interface in Bahasa Melayu and English.</li></ul></li>
+  <li><b>Organisational environment</b>
+    <ul><li>Offices and data owners: PTj (academic owner of offerings and records), CODL (system operation), Pejabat Pendaftar, HEPA and UTeM ICT.</li></ul></li>
+</ol>
+
+<h2>2.7 Design and Implementation Constraints</h2>
+<p>The following constraints will affect the design and implementation of the platform:</p>
+<ol>
+  <li><b>Technical constraints</b>
+    <ul><li>C1: MCMS SHALL be a new standalone system, not an extension of UCreds or the student information system (D-06).</li>
+    <li>C3: Every external system SHALL be reached through an adapter with a stub or manual implementation for Release 1 (D-06, D-14).</li>
+    <li>Architecture: a modular monolith built on Laravel (D-07, D-08).</li>
+    <li>C8: Credentials SHALL use an open, signed format; blockchain is not required (D-19).</li></ul></li>
+  <li><b>Data and rule constraints</b>
+    <ul><li>C2: All data SHALL stay on UTeM-controlled infrastructure.</li>
+    <li>C4: Thresholds and lists SHALL be settings, not code (D-16).</li>
+    <li>C5: Credit value, MQF level and QV wording SHALL be generated only from verified records, never typed by hand (D-17).</li>
+    <li>C6: Approvals, credential actions, result changes and corrections SHALL be written to an append-only audit log (D-20).</li>
+    <li>The recognition stages SHALL be separate records (D-15).</li></ul></li>
+  <li><b>Regulatory constraints</b>
+    <ul><li>Compliance with the Guide, MQA guidelines and the MQF.</li>
+    <li>Compliance with PDPA 2010 and UTeM policies on records, information security and privacy.</li></ul></li>
+  <li><b>Business constraints</b>
+    <ul><li>Built by an intern as a concept and prototype; Release 1 is the prototype scope (D-22).</li>
+    <li>Maintainable by CODL staff who mainly use PHP (D-08).</li>
+    <li>Approving bodies and role holders may change; the system must adapt by configuration (D-11, D-12).</li></ul></li>
+  <li><b>User constraints</b>
+    <ul><li>C7: Interface and credentials SHALL support Bahasa Melayu and English (D-02).</li>
+    <li>Accessible to users with disabilities (WCAG 2.1 AA) and usable on low-end phones.</li></ul></li>
+</ol>
+
+<h2>2.8 User Documentation</h2>
+<p>The following user documentation will be developed with the system:</p>
+<ol>
+  <li><b>Online help</b>: context help on each screen and a Frequently Asked Questions page that explains, in plain words, the difference between a badge, a certificate, an ACR, an ABC deposit and a credit transfer.</li>
+  <li><b>User guides</b>, in Bahasa Melayu and English: Lecturer and Developer Guide; PTj and Approver Guide; Quality Assurance Guide; Records, Credential and ABC Guide; Participant Guide; System Administrator Guide.</li>
+  <li><b>Technical documentation</b>: adapter interface guide, CSV import and export templates, credential format and verification guide, installation and operations guide.</li>
+  <li><b>Training materials</b>: quick reference cards per role and short demonstration videos.</li>
+</ol>
+
+<h2>2.9 Assumptions and Dependencies</h2>
+<h3>Assumptions</h3>
+<p>The assumptions below are carried from the Glossary and Decision Log. Each one is built so that, if it proves wrong, only configuration or a single adapter changes.</p>
+<script type="text/tbl" data-h="ID|Assumption|Effect if wrong" data-w="9%|55%|36%">
+A-01 | Superseded by D-11: deputy dean endorses, Senate approves (recorded by the deputy dean), degree-owning deputy dean decides transfers. | Approver bodies remain settings.
+A-02 | ABC and QVC/MQA accept submissions manually in Release 1. | A live adapter is added later.
+A-03 | UTeM's payment hub is not ready; a dummy payment service is used. | Replace one adapter.
+A-04 | UCreds is the pilot learning platform; its connection method is unknown. | CSV import is the fallback; connector design shifts.
+A-05 | UCreds already issues module badges and has its own database. | MCMS issues badges itself.
+A-06 | Outside applicants register at Pejabat Pendaftar or HEPA, then sign in with a Microsoft education account. | Add an applicant pre-registration screen.
+A-07 | Superseded by D-12 and D-29: CODL is administrator and technical operator only; credentials and ACR are produced by the system after deputy dean verification. | Role holders change in settings.
+A-08 | Retention periods are placeholders. | Edit settings.
+A-09 | Sizing is indicative: 200 offerings and 20,000 participants a year, peaks of 2,000 registering within hours. | Capacity plan changes.
+</script>
+<h3>Dependencies</h3>
+<ol>
+  <li>Access to the UTeM SSO tenant and agreement on the sign-in protocol (OI-03).</li>
+  <li>Agreement with the UCreds team on the data exchange format (OI-04).</li>
+  <li>Availability of a database server and hosting environment at UTeM (OI-02).</li>
+  <li>Reference data for PTj, programmes and parent courses, including accreditation status, from the relevant offices.</li>
+  <li>Decisions on the approving bodies, retention periods and ownership of credential signing keys (OI-06, OI-07, OI-08).</li>
+</ol>

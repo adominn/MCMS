@@ -1,0 +1,15 @@
+<!-- ===================== APPENDIX A ===================== -->
+<h1>Appendix A. Using the Prototype</h1>
+<p>The prototype is the living part of this specification. It runs from the project folder without installation:</p>
+<script type="text/tbl" data-h="Task|How" data-w="30%|70%">
+Start it | Run <code>py UIUX/v2/tools/serve.py 8731</code> and open http://localhost:8731
+Choose a person | The Personas page opens first: student, lecturer, deputy dean, CODL, industry expert, public visitor, or the real sign-in screens
+Walk a process | Flows (bottom left) lists the 26 flows; Start shows a step bar with what to click next
+See what is clickable | Hotspots, or the H key, outlines every clickable element
+Start again | Reset data restores the sample records
+Open a document | Any download or print button, or the document index at <code>#/doc/index</code>
+Check it | <code>node UIUX/v2/tools/check.js</code> (screens and links), <code>clickcheck.js</code> (dialogs), <code>scenario.js</code> (hand-offs), <code>pdfs.js</code> (sample PDFs)
+</script>
+<figure data-f="personas"><img src="../../../../UIUX%20Spec/v1.1/src/img/personas.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Prototype start page: choose a persona.</figcaption></figure>
+<figure data-f="flowbar"><img src="../../../../UIUX%20Spec/v1.1/src/img/flowbar.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>A flow in progress: the step bar explains the step and offers Back, Next step and Exit.</figcaption></figure>
+<p>The pictures of Appendices B to D are captured from the prototype by <code>UIUX/v2/tools/gallery.js</code> and laid out by <code>UIUX/v2/tools/specgallery.js</code>, so they can be regenerated whenever the prototype changes.</p>

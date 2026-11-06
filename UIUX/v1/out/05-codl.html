@@ -1,0 +1,244 @@
+<!doctype html><html><head><meta charset="utf-8"><title>05-codl</title><style>/* MCMS screens — DESIGN.md (ulearn-carbon) mapped to app-screen roles */
+:root {
+  --primary: #1e2a6e; --primary-hover: #18225a; --blue-60: #2e3d94;
+  --ink: #161616; --muted: #525252; --subtle: #6f6f6f;
+  --canvas: #ffffff; --s1: #f4f4f4; --s2: #e0e0e0; --hair: #e0e0e0; --rule: #ececec; --control: #8d8d8d;
+  --ok: #24a148; --warn: #f1c21b; --err: #da1e28;
+  --ok-bg: #defbe6; --ok-ink: #0e6027; --warn-bg: #fcf4d6; --warn-ink: #684e00;
+  --err-bg: #fff1f1; --err-ink: #a2191f; --info-bg: #e8eaf6; --info-ink: #1e2a6e; --n-bg: #e8e8e8; --n-ink: #393939;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif; color: var(--ink); background: #d9d9d9;
+  font-size: 14px; line-height: 20px; letter-spacing: .16px; padding: 40px; display: flex; flex-wrap: wrap; gap: 80px; align-items: flex-start; }
+.num, td.num, th.num { font-variant-numeric: tabular-nums; text-align: right; }
+a, .link { color: var(--primary); text-decoration: none; }
+
+/* screen frames */
+.screen, .phone, .sheet { flex: none; }
+.screen { width: 1440px; min-height: 900px; background: var(--canvas); display: flex; flex-direction: column; }
+.phone { width: 390px; min-height: 844px; background: var(--canvas); display: flex; flex-direction: column; }
+.sheet { width: 1440px; background: var(--canvas); padding: 48px 56px 64px; }
+
+/* shell */
+.top { height: 48px; border-bottom: 1px solid var(--hair); display: flex; align-items: center; padding: 0 24px 0 20px; gap: 24px; flex: none; }
+.brand { display: flex; align-items: baseline; gap: 8px; font-size: 14px; }
+.brand b { font-weight: 600; }
+.brand span { color: var(--muted); }
+.top .scope { margin-left: auto; display: flex; align-items: center; gap: 20px; color: var(--muted); font-size: 13px; }
+.top .scope .who { color: var(--ink); }
+.lang { display: flex; border: 1px solid var(--hair); }
+.lang span { padding: 2px 8px; font-size: 12px; }
+.lang .on { background: var(--ink); color: #fff; }
+.body { display: flex; flex: 1; }
+.side { width: 248px; border-right: 1px solid var(--hair); padding: 16px 12px; flex: none; display: flex; flex-direction: column; gap: 2px; }
+.side .grp { font-size: 12px; color: var(--subtle); padding: 16px 12px 6px; }
+.nav { height: 36px; display: flex; align-items: center; padding: 0 12px; color: var(--muted); font-size: 14px; gap: 10px; }
+.nav svg { width: 16px; height: 16px; flex: none; }
+.nav .c { margin-left: auto; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.nav.on { background: var(--s1); color: var(--ink); font-weight: 600; }
+.main { flex: 1; padding: 24px 40px 48px; display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.crumb { font-size: 12px; color: var(--muted); display: flex; gap: 8px; }
+.crumb a { color: var(--primary); }
+.title { display: flex; align-items: flex-end; gap: 16px; }
+.title h1 { font-size: 28px; line-height: 36px; font-weight: 400; letter-spacing: 0; }
+.title .sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+.title .act { margin-left: auto; display: flex; gap: 8px; }
+h2 { font-size: 16px; line-height: 24px; font-weight: 600; }
+h3 { font-size: 14px; font-weight: 600; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; line-height: 16px; letter-spacing: .32px; }
+.row { display: flex; gap: 24px; align-items: flex-start; }
+.col { display: flex; flex-direction: column; gap: 16px; }
+.grow { flex: 1; min-width: 0; }
+
+/* buttons */
+.btn { height: 40px; padding: 0 16px; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; border: 0; background: var(--primary); color: #fff; white-space: nowrap; font-family: inherit; }
+.btn.sec { background: var(--ink); }
+.btn.ter { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+.btn.ghost { background: transparent; color: var(--primary); padding: 0 8px; }
+.btn.danger { background: var(--err); }
+.btn.dis { background: var(--s2); color: #8d8d8d; }
+.btn.sm { height: 32px; padding: 0 12px; }
+
+/* panels */
+.panel { border: 1px solid var(--hair); background: #fff; }
+.panel > .hd { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--hair); }
+.panel > .hd .r { margin-left: auto; font-size: 12px; color: var(--muted); }
+.panel > .bd { padding: 20px; }
+.band { background: var(--s1); padding: 16px 20px; }
+
+/* KPI strip: one container split by hairlines */
+.kpis { display: flex; border: 1px solid var(--hair); }
+.kpi { flex: 1; padding: 16px 20px; border-left: 1px solid var(--hair); }
+.kpi:first-child { border-left: 0; }
+.kpi .l { font-size: 12px; color: var(--muted); }
+.kpi .v { font-size: 28px; line-height: 36px; font-weight: 300; font-variant-numeric: tabular-nums; margin-top: 4px; }
+.kpi .n { font-size: 12px; color: var(--muted); }
+
+/* tables */
+table { border-collapse: collapse; width: 100%; }
+th { font-size: 12px; font-weight: 400; color: var(--muted); text-align: left; padding: 0 12px; height: 36px; border-bottom: 1px solid var(--hair); white-space: nowrap; }
+td { padding: 0 12px; height: 48px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+td .s { display: block; font-size: 12px; color: var(--muted); line-height: 16px; }
+tr.sel td { background: var(--s1); }
+th:first-child, td:first-child { padding-left: 20px; }
+th:last-child, td:last-child { padding-right: 20px; }
+
+/* tags */
+.tag { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 10px; font-size: 12px; white-space: nowrap; background: var(--n-bg); color: var(--n-ink); }
+.tag.ok { background: var(--ok-bg); color: var(--ok-ink); }
+.tag.warn { background: var(--warn-bg); color: var(--warn-ink); }
+.tag.err { background: var(--err-bg); color: var(--err-ink); }
+.tag.info { background: var(--info-bg); color: var(--info-ink); }
+.nm { display: inline-flex; gap: 8px; align-items: baseline; }
+td.num { white-space: nowrap; }
+.cat { flex: none; font-size: 12px; font-weight: 600; letter-spacing: .32px; border: 1px solid var(--ink); padding: 0 5px; height: 18px; display: inline-flex; align-items: center; }
+
+/* forms */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 12px; color: var(--muted); letter-spacing: .32px; }
+.input { height: 40px; background: var(--s1); border-bottom: 1px solid var(--control); padding: 0 16px; display: flex; align-items: center; font-size: 14px; }
+.input.ph { color: var(--subtle); }
+.input.focus { border: 2px solid var(--primary); padding: 0 14px; }
+.input.error { border: 2px solid var(--err); padding: 0 14px; }
+.input.area { height: 88px; align-items: flex-start; padding-top: 10px; }
+.input.read { background: #fff; border-bottom: 1px solid var(--hair); padding: 0; }
+.help { font-size: 12px; color: var(--muted); }
+.help.err { color: var(--err-ink); }
+.choice { display: flex; gap: 10px; align-items: flex-start; padding: 12px 16px; border: 1px solid var(--hair); }
+.choice.on { border: 2px solid var(--primary); padding: 11px 15px; }
+.radio { width: 16px; height: 16px; border: 1px solid var(--ink); border-radius: 8px; flex: none; margin-top: 2px; }
+.radio.on { border: 5px solid var(--primary); }
+.box { width: 16px; height: 16px; border: 1px solid var(--ink); flex: none; }
+.box.on { background: var(--ink); border-color: var(--ink); }
+
+/* tabs */
+.tabs { display: flex; border-bottom: 1px solid var(--hair); }
+.tab { padding: 12px 16px; color: var(--muted); font-size: 14px; }
+.tab.on { color: var(--ink); font-weight: 600; box-shadow: inset 0 -2px 0 var(--primary); }
+.tab .c { color: var(--muted); font-weight: 400; margin-left: 6px; }
+
+/* notices: a tint is never a ground; inline only */
+.note { display: flex; gap: 12px; padding: 12px 16px; border-left: 3px solid var(--primary); background: var(--info-bg); font-size: 14px; }
+.note.warn { border-color: var(--warn); background: var(--warn-bg); }
+.note.err { border-color: var(--err); background: var(--err-bg); }
+.note.ok { border-color: var(--ok); background: var(--ok-bg); }
+
+/* checks list */
+.check { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule); align-items: flex-start; }
+.check:last-child { border-bottom: 0; }
+.dot { width: 8px; height: 8px; border-radius: 4px; background: var(--ok); margin-top: 6px; flex: none; }
+.dot.warn { background: var(--warn); } .dot.err { background: var(--err); } .dot.n { background: #a8a8a8; }
+
+/* stage track: the recognition chain, kept as separate steps [G 12-14] */
+.track { display: flex; }
+.stp { flex: 1; padding: 10px 12px 10px 0; border-top: 3px solid var(--s2); font-size: 12px; color: var(--muted); }
+.stp b { display: block; font-size: 13px; font-weight: 600; color: var(--muted); }
+.stp.done { border-color: var(--ink); } .stp.done b { color: var(--ink); }
+.stp.now { border-color: var(--primary); } .stp.now b { color: var(--primary); }
+
+/* definition list */
+.dl { display: grid; grid-template-columns: 160px 1fr; row-gap: 10px; column-gap: 16px; font-size: 14px; }
+.dl dt { color: var(--muted); font-size: 13px; }
+
+/* bars */
+.bar { height: 8px; background: var(--s2); position: relative; }
+.bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--primary); }
+
+/* phone */
+.ptop { height: 52px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid var(--hair); gap: 12px; flex: none; }
+.ptop b { font-weight: 600; }
+.pmain { flex: 1; padding: 20px 16px 24px; display: flex; flex-direction: column; gap: 20px; }
+.pmain h1 { font-size: 24px; line-height: 32px; font-weight: 400; }
+.pnav { height: 64px; border-top: 1px solid var(--hair); display: flex; flex: none; }
+.pnav div { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; color: var(--muted); }
+.pnav svg { width: 20px; height: 20px; }
+.pnav .on { color: var(--ink); font-weight: 600; box-shadow: inset 0 2px 0 var(--ink); }
+.li { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.li .t { flex: 1; min-width: 0; }
+.li .t .s { display: block; font-size: 12px; color: var(--muted); line-height: 16px; }
+
+/* foundation sheet */
+.sw { width: 168px; }
+.sw i { display: block; height: 64px; border: 1px solid var(--hair); }
+.sw b { display: block; font-weight: 600; font-size: 13px; margin-top: 8px; }
+.lbl { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+</style></head><body><!-- CODL system administrator (S1, P5), Farid Hashim. Admin and technical only: no screen approves, verifies or issues. -->
+
+<section class="screen" data-name="CODL-01 Users and roles"><div class="top"><div class="brand"><b>UTeM MCMS</b><span>Micro-Credential Management</span></div><div class="scope"><span class="lang"><span class="on">EN</span><span>BM</span></span><span><span class="who">Farid Hashim</span> · System administrator, CODL</span></div></div><div class="body"><div class="side"><div class="grp">Administration</div><div class="nav on"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#161616" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M16 4.5a3.5 3.5 0 0 1 0 7M21 20c0-3-1.7-5.3-4-6"/></svg>Users and roles</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Settings</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>Templates</div><div class="grp">Data</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.5-4M4 13a8 8 0 0 0 14.5 4M5 3v4h4M19 21v-4h-4"/></svg>UCreds exchange</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/></svg>Adapter status<span class="c">1</span></div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18H6zM9 8h6M9 12h6M9 16h3"/></svg>Audit trail</div></div><div class="main">
+  <div class="title"><div><h1>Users and roles</h1><div class="sub">Accounts come from UTeM single sign-on. You assign the role and the PTj it applies to.</div></div><div class="act"><span class="btn">Assign role</span></div></div>
+  <div class="row" style="gap:8px;align-items:center">
+    <div class="input ph" style="width:320px;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 5 5"/></svg> Search name or staff number</div>
+    <div class="input" style="width:200px">All roles <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div><div class="input" style="width:200px">All PTj <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
+  </div>
+  <div class="panel"><table>
+    <tr><th>Name</th><th>Role</th><th>Scope</th><th>Since</th><th>Status</th><th></th></tr>
+    <tr><td>Hakim Rahman<span class="s">hakim.rahman@utem.edu.my</span></td><td>Deputy dean</td><td>FTMK</td><td>1 Jan 2026</td><td><span class="tag ok">Active</span></td><td><a>Edit</a></td></tr>
+    <tr><td>Dr. Aina Zulkifli<span class="s">aina.z@utem.edu.my</span></td><td>Lecturer</td><td>FTMK</td><td>3 Feb 2025</td><td><span class="tag ok">Active</span></td><td><a>Edit</a></td></tr>
+    <tr><td>Dr. Rosli Hamzah<span class="s">rosli.h@utem.edu.my</span></td><td>Lecturer</td><td>FTMK</td><td>3 Feb 2025</td><td><span class="tag ok">Active</span></td><td><a>Edit</a></td></tr>
+    <tr><td>Dr. Farah Nadia Ismail<span class="s">farahnadia@utem.edu.my</span></td><td>Deputy dean</td><td>FKE</td><td>1 Jan 2026</td><td><span class="tag ok">Active</span></td><td><a>Edit</a></td></tr>
+    <tr><td>Farid Hashim<span class="s">farid.h@utem.edu.my</span></td><td>System administrator</td><td>All PTj</td><td>1 Oct 2024</td><td><span class="tag ok">Active</span></td><td><a>Edit</a></td></tr>
+    <tr><td>Dr. Kamal Ariffin<span class="s">kamal.a@utem.edu.my</span></td><td>Lecturer</td><td>FKE</td><td>3 Feb 2025</td><td><span class="tag">Deactivated</span></td><td><a>Edit</a></td></tr>
+  </table><div class="band small" style="display:flex">Showing 6 of 148<a style="margin-left:auto">Show all</a></div></div>
+  <div class="note small" style="font-size:14px">A system administrator can't hold a lecturer or deputy dean role at the same time. Deactivating an account keeps every record that person made.</div>
+</div></div></section>
+
+<section class="screen" data-name="CODL-02 Settings"><div class="top"><div class="brand"><b>UTeM MCMS</b><span>Micro-Credential Management</span></div><div class="scope"><span class="lang"><span class="on">EN</span><span>BM</span></span><span><span class="who">Farid Hashim</span> · System administrator, CODL</span></div></div><div class="body"><div class="side"><div class="grp">Administration</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M16 4.5a3.5 3.5 0 0 1 0 7M21 20c0-3-1.7-5.3-4-6"/></svg>Users and roles</div><div class="nav on"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#161616" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Settings</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>Templates</div><div class="grp">Data</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.5-4M4 13a8 8 0 0 0 14.5 4M5 3v4h4M19 21v-4h-4"/></svg>UCreds exchange</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/></svg>Adapter status<span class="c">1</span></div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18H6zM9 8h6M9 12h6M9 16h3"/></svg>Audit trail</div></div><div class="main">
+  <div class="title"><div><h1>Settings</h1><div class="sub">Rule values the system checks against. A decision always uses the value in force on its date.</div></div></div>
+  <div class="panel"><table>
+    <tr><th>Setting</th><th class="num">Value</th><th>Source</th><th>Last changed</th><th></th></tr>
+    <tr><td>Learning hours per credit<span class="s">credit.slt_hours_per_credit</span></td><td class="num">40 hours</td><td>MQF, D-27</td><td class="muted">Default</td><td><a>Change</a></td></tr>
+    <tr><td>Minimum learning time for a SAMC<span class="s">slt.min_hours_samc</span></td><td class="num">40 hours</td><td>G 6.3.2</td><td class="muted">Default</td><td><a>Change</a></td></tr>
+    <tr class="sel"><td>Maximum QV validity<span class="s">qv.max_validity_years</span></td><td class="num">3 years</td><td>G 11.2.2</td><td class="muted">Default</td><td><a>Change</a></td></tr>
+    <tr><td>Credit validity in ABC<span class="s">credit.abc_validity_years</span></td><td class="num">10 years</td><td>G 12.8</td><td class="muted">Default</td><td><a>Change</a></td></tr>
+    <tr><td>Minimum credit earned at UTeM, stackable<span class="s">stackable.min_home_credit_percent</span></td><td class="num">30%</td><td>G 14.5.1</td><td class="muted">Default</td><td><a>Change</a></td></tr>
+    <tr><td>QV expiry alerts<span class="s">alerts.qv_expiry_days</span></td><td class="num">180, 90, 30 days</td><td>D-16</td><td>Farid Hashim, 2 Sep 2026</td><td><a>Change</a></td></tr>
+    <tr><td>Remind a pending decision after<span class="s">alerts.decision_overdue_days</span></td><td class="num">14 days</td><td>—</td><td class="muted">Default</td><td><a>Change</a></td></tr>
+  </table></div>
+  <div class="row">
+    <div class="panel grow"><div class="hd"><h2>Change: Maximum QV validity</h2></div><div class="bd col">
+      <div class="row" style="gap:16px">
+        <div class="field" style="width:200px"><label>New value (years)</label><div class="input focus">3</div></div>
+        <div class="field" style="width:220px"><label>Effective from</label><div class="input ph">Choose a date</div></div>
+      </div>
+      <div class="field"><label>Reason (required, kept in history)</label><div class="input area ph">Cite the Guide revision or decision behind the change</div></div>
+      <div class="row" style="gap:8px"><span class="btn dis">Save · enter a new value</span><span class="btn ter">Cancel</span></div>
+    </div></div>
+    <div class="panel" style="width:380px"><div class="hd"><h2>History</h2></div><div class="bd small muted" style="font-size:14px;line-height:20px">No changes since the system started on 1 Oct 2024.</div></div>
+  </div>
+</div></div></section>
+
+<section class="screen" data-name="CODL-03 UCreds exchange"><div class="top"><div class="brand"><b>UTeM MCMS</b><span>Micro-Credential Management</span></div><div class="scope"><span class="lang"><span class="on">EN</span><span>BM</span></span><span><span class="who">Farid Hashim</span> · System administrator, CODL</span></div></div><div class="body"><div class="side"><div class="grp">Administration</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M16 4.5a3.5 3.5 0 0 1 0 7M21 20c0-3-1.7-5.3-4-6"/></svg>Users and roles</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Settings</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>Templates</div><div class="grp">Data</div><div class="nav on"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#161616" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.5-4M4 13a8 8 0 0 0 14.5 4M5 3v4h4M19 21v-4h-4"/></svg>UCreds exchange</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/></svg>Adapter status<span class="c">1</span></div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18H6zM9 8h6M9 12h6M9 16h3"/></svg>Audit trail</div></div><div class="main">
+  <div class="title"><div><h1>UCreds exchange</h1><div class="sub">Release 1 moves data with CSV files. Enrolments go out; results come back.</div></div><div class="act"><span class="btn ter">Export enrolments</span><span class="btn">Import results</span></div></div>
+  <div class="panel"><div class="hd"><h2>Last import: results-CND-2026-2.csv</h2><span class="r">25 Oct, 08:00 · Cloud Native Development, cohort 2026/2</span></div><div class="bd col">
+    <div class="kpis"><div class="kpi"><div class="l">Rows</div><div class="v">24</div></div><div class="kpi"><div class="l">Imported</div><div class="v">22</div></div><div class="kpi"><div class="l">Rows with a problem</div><div class="v">2</div></div></div>
+    <table><tr><th class="num" style="width:60px">Row</th><th>Learner</th><th>Problem</th><th>What happens</th></tr>
+      <tr><td class="num">7</td><td>Daniel Ong, X2026-0196</td><td>Column project_mark is empty</td><td class="muted">Lecturer enters it or fixes it in UCreds</td></tr>
+      <tr><td class="num">19</td><td>Wong Kar Seng, X2026-0201</td><td>Column module2_mark is empty</td><td class="muted">Lecturer enters it or fixes it in UCreds</td></tr></table>
+  </div></div>
+  <div class="panel"><div class="hd"><h2>Recent files</h2></div><table>
+    <tr><th>File</th><th>Direction</th><th class="num">Rows</th><th>Result</th><th>When</th></tr>
+    <tr><td>results-CND-2026-2.csv</td><td>Import</td><td class="num">24</td><td><span class="tag warn">22 imported, 2 problems</span></td><td>25 Oct, 08:00</td></tr>
+    <tr><td>results-DS-2026-2.csv</td><td>Import</td><td class="num">28</td><td><span class="tag ok">All imported</span></td><td>24 Oct, 08:00</td></tr>
+    <tr><td>enrol-IIOT-2026-2.csv</td><td>Export</td><td class="num">35</td><td><span class="tag ok">Sent</span></td><td>1 Sep, 09:30</td></tr>
+  </table></div>
+</div></div></section>
+
+<section class="screen" data-name="CODL-04 Adapter status"><div class="top"><div class="brand"><b>UTeM MCMS</b><span>Micro-Credential Management</span></div><div class="scope"><span class="lang"><span class="on">EN</span><span>BM</span></span><span><span class="who">Farid Hashim</span> · System administrator, CODL</span></div></div><div class="body"><div class="side"><div class="grp">Administration</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M16 4.5a3.5 3.5 0 0 1 0 7M21 20c0-3-1.7-5.3-4-6"/></svg>Users and roles</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Settings</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>Templates</div><div class="grp">Data</div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.5-4M4 13a8 8 0 0 0 14.5 4M5 3v4h4M19 21v-4h-4"/></svg>UCreds exchange</div><div class="nav on"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#161616" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/></svg>Adapter status<span class="c">1</span></div><div class="nav"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18H6zM9 8h6M9 12h6M9 16h3"/></svg>Audit trail</div></div><div class="main">
+  <div class="title"><div><h1>Adapter status</h1><div class="sub">How MCMS reaches each outside service, and whether it is working</div></div></div>
+  <div class="panel"><table>
+    <tr><th>Adapter</th><th>Mode</th><th>Last run</th><th>Status</th><th>Recent errors</th></tr>
+    <tr><td>UCreds learning platform</td><td>Manual (CSV)</td><td>25 Oct, 08:00</td><td><span class="tag ok">Working</span></td><td class="muted">None</td></tr>
+    <tr><td>UTeM single sign-on</td><td>Live</td><td>26 Oct, 10:12</td><td><span class="tag ok">Working</span></td><td class="muted">None</td></tr>
+    <tr class="sel"><td>Email notifications</td><td>Live</td><td>26 Oct, 10:05</td><td><span class="tag err">Failing</span></td><td>3 messages not sent since 09:40</td></tr>
+    <tr><td>Payment</td><td>Stub (dummy service)</td><td>25 Oct, 15:31</td><td><span class="tag ok">Working</span></td><td class="muted">None</td></tr>
+    <tr><td>ABC</td><td>Manual (deputy dean records)</td><td>20 Oct</td><td><span class="tag">No connector</span></td><td class="muted">—</td></tr>
+  </table></div>
+  <div class="panel"><div class="hd"><h2>Email notifications: last errors</h2><a class="r link">Retry 3 messages</a></div><table>
+    <tr><th>Time</th><th>Message</th><th>Error</th></tr>
+    <tr><td>10:05</td><td>Results ready to verify, to Hakim Rahman</td><td>SMTP 421: service not available</td></tr>
+    <tr><td>09:52</td><td>Review due 30 Oct, to Dr. Aina Zulkifli</td><td>SMTP 421: service not available</td></tr>
+    <tr><td>09:40</td><td>ABC consent reminder, to Rajesh Kumar</td><td>SMTP 421: service not available</td></tr>
+  </table></div>
+</div></div></section>
+</body></html>

@@ -1,0 +1,123 @@
+<!-- ===================== 7. RELEASE 1 PROTOTYPE ===================== -->
+<h1>7. Release 1 Prototype and Demonstration</h1>
+<p>The Release 1 prototype must show, on realistic sample data, that MCMS handles the whole life of a micro-credential and keeps each recognition stage separate. This section fixes the demonstration scenario, the seed data and the behaviour of the stub adapters, so that the Release 1 prototype and its demonstration can be built and tested against a known script. This scenario is the acceptance script of Release 1 (D-31): the UI/UX Design Specification flow FL-19 and the Playwright end-to-end test follow it, act by act.</p>
+
+<h2>7.1 Demonstration Scenario</h2>
+<p>The scenario follows three offerings — one of each category — and one participant, Amir, through every stage. It is the script for the supervisor demonstration (D-23) and the end-to-end acceptance test of Release 1.</p>
+<figure data-f="demo">
+<table class="small storyboard">
+  <thead><tr>
+    <th style="width:25%">Act 1 · Curriculum<br><span style="font-weight:400">Increment 1.2</span></th>
+    <th style="width:25%">Act 2 · Learning and credentials<br><span style="font-weight:400">Increment 1.3</span></th>
+    <th style="width:25%">Act 3 · Credit<br><span style="font-weight:400">Increment 1.4</span></th>
+    <th style="width:25%">Act 4 · Quality<br><span style="font-weight:400">Increment 1.4</span></th>
+  </tr></thead>
+  <tbody><tr>
+    <td><ol>
+      <li>Dr. Aina proposes UMC "Data Structures" from BITS 1123 (3 credits, 120 h, 3 modules).</li>
+      <li>SLT check fails at 110 h; fixed to 120 h.</li>
+      <li>Colleague review, deputy dean endorsement with category check; Senate approval recorded by the deputy dean.</li>
+      <li>Readiness confirmed; cohort Jan 2027 opens and appears in the catalogue.</li>
+    </ol></td>
+    <td><ol>
+      <li>Amir registers; dummy payment succeeds.</li>
+      <li>UCreds results imported by CSV; one bad row rejected.</li>
+      <li>Deputy dean verifies; the system issues badges for modules 1–3.</li>
+      <li>Deputy dean confirms completion; the system issues the certificate and signed Digital Credential.</li>
+      <li>Employer verifies by QR; a name typo is corrected with history kept.</li>
+    </ol></td>
+    <td><ol>
+      <li>System generates the ACR; deputy dean confirms it.</li>
+      <li>Amir consents; deputy dean records the ABC reference.</li>
+      <li>Ledger: 3 credits Available, expiry in 10 years.</li>
+      <li>Amir admitted to a programme; applies for transfer.</li>
+      <li>Equivalence judged on outcomes; approved, credit Provisionally Redeemed.</li>
+      <li>A second application using the same credit is blocked.</li>
+      <li>Stackable plan shows 25% UTeM credit: Not yet suitable.</li>
+    </ol></td>
+    <td><ol>
+      <li>SAMC "Cloud Native" QV evidence linked; QV recorded: 2 credits, MQF level 4.</li>
+      <li>Demo clock passes the QV expiry: Quality-Verified claims disappear.</li>
+      <li>MCE "Leadership Essentials" completes: no ACR is offered.</li>
+      <li>CQI item closes only after its effectiveness check; traceability view for Amir.</li>
+    </ol></td>
+  </tr></tbody>
+</table>
+<figcaption>Release 1 demonstration scenario in four acts, read left to right. Every step is a separate, recorded decision.</figcaption>
+</figure>
+
+<p class="tcap" data-t="democheck">What each act proves</p>
+<script type="text/tbl" data-h="Act|What the audience sees|Rules proven" data-w="14%|52%|34%">
+1 Curriculum | Guided proposal stops an invalid UMC; approval applies to one version only. | {{br-umcslt}}, {{br-separate}}, {{br-offer}}
+2 Learning and credentials | Imported data stays provisional until verified; credentials are generated, signed and verifiable; corrections keep history. | {{br-verifyfirst}}, {{br-certwhole}}, {{br-noclaim}}, {{br-audit}}
+3 Credit | ACR needs eligibility and consent; deposit is not transfer; transfer is decided on outcomes; credit cannot be used twice; stackable rules are checked. | {{br-acrelig}}, {{br-consent}}, {{br-deposit}}, {{br-equiv}}, {{br-redeem}}, {{br-home30}}
+4 Quality | QV gives credit and MQF level only while valid; MCE never earns ACR; CQI closes only after its effect is checked. | {{br-samccredit}}, {{br-qvlapse}}, {{br-mce}}, {{br-cqi}}
+</script>
+
+<h2>7.2 Seed Data</h2>
+<p>The prototype ships with fictional seed data so that the scenario can be run at any time and reset. No real personal data is used ({{nfr-envs}}).</p>
+<script type="text/tbl" data-h="Data|Seed content" data-w="24%|76%">
+PTj | Faculty of Information and Communication Technology (FTMK); Faculty of Electrical Engineering; CODL.
+Programmes and parent courses | Bachelor of Computer Science (120 graduating credits, conventional, accredited) with parent course BITS 1123 Data Structures (3 credits, 120 h SLT, 4 CLOs).
+Micro-credentials | UMC "Data Structures" (3 modules of 40 h, credit-based model); SAMC "Cloud Native Development" (80 h, QV sought); MCE "Leadership Essentials" (16 h).
+Users and roles | Test users for every user: students, lecturers, deputy deans of two faculties (one owning the degree), a CODL administrator, an industry expert; plus one lecturer who is also a reviewer, to show separation of duties.
+Settings | All defaults of SRS Table "Configurable settings", including 1 credit = 40 h (D-27).
+Clock | A "demo clock" setting, available only in test environments, that moves the date forward so that QV and credit expiry can be shown.
+</script>
+
+<h2>7.3 Stub and Manual Adapters in the Prototype</h2>
+<script type="text/tbl" data-h="Adapter|Prototype behaviour" data-w="22%|78%">
+Identity (SSO) | Stub sign-in page listing test users; real Microsoft sign-in only in production (D-10).
+Learning platform (UCreds) | CSV export of enrolments and CSV import of results and badges, with sample files that include one invalid row.
+Payment | Dummy service: "Pay" succeeds with a reference number; a test card number forces failure (A-03).
+ABC | Export of deposit data as CSV and PDF; the deputy dean types the ABC reference back into MCMS; the national ABC platform is a concept (D-14).
+QVC / MQA | Submission package download; the QV decision is entered by the deputy dean.
+Email | Sent to a test mailbox viewer instead of real inboxes.
+Credential signing | A test key pair; the public key is published on the verification page of the test environment.
+</script>
+
+<h2>7.4 Prototype Constraints</h2>
+<ul>
+  <li>The prototype runs in a test environment with seed data only; it is not a production service.</li>
+  <li>The demo clock and stub sign-in must be impossible to enable in production ({{fr-devidp}}).</li>
+  <li>Performance targets of SRS Section 7.1 are measured once on the test environment and reported, but not tuned beyond Release 1 needs.</li>
+</ul>
+
+<!-- ===================== 8. UX AND DESIGN ===================== -->
+<h1>8. Experience and Design Principles</h1>
+
+<h2>8.1 Design System</h2>
+<p>All screens follow the project design system <b>DESIGN.md "ulearn-carbon"</b>: IBM Carbon's flat, square geometry; IBM Plex Sans; white and light-gray surfaces; charcoal text; and uLearn Navy (#1e2a6e) as the single accent for links, primary actions and focus. MCMS adds the product rules below on top of it.</p>
+
+<h2>8.2 Product Design Principles</h2>
+<ol>
+  <li><b>One stage, one look.</b> Each recognition stage has its own label and status style, used everywhere, so that a badge never looks like credit and a deposit never looks like a transfer ({{ir-stagecolours}}).</li>
+  <li><b>Honest by default.</b> Recognition text is generated, not typed; when the system cannot support a claim, it says what is true instead.</li>
+  <li><b>Guide, then check.</b> Forms explain the rule next to the field and check it as the user types, rather than failing at submission.</li>
+  <li><b>Tasks first.</b> Staff land on "what needs me today"; participants land on "my learning and my credit".</li>
+  <li><b>Bilingual and mobile.</b> Every participant task works on a phone in Bahasa Melayu or English.</li>
+  <li><b>History is visible.</b> Any record shows who decided what and when, one click away.</li>
+</ol>
+
+<h2>8.3 Status Vocabulary and Tag Policy</h2>
+<p>The statuses below appear across screens, credentials and notices. Colours use DESIGN.md semantic tokens, always with a text label (colour is never the only signal, {{nfr-wcag}}). In accordance with decision D-42, coloured background pills and badges are strictly reserved for operational states, eligibility conditions, and progress indicators (e.g. <code>Passed (Final)</code>, <code>0 / 2 eligible</code>, <code>Provisional (1/3)</code>). Decorative, technical-standard, or implementation tags (such as <code>Ed25519</code>, <code>W3C VC 2.0</code>, <code>RFC 7519</code>, or duplicate <code>Course Completed</code> badges beside completed headings) are prohibited from end-user screens.</p>
+<p class="tcap" data-t="statuses">Status vocabulary and visual treatment</p>
+<script type="text/tbl" data-h="Stage|Statuses shown|Visual treatment (DESIGN.md tokens)" data-w="24%|42%|34%">
+Approval (MC version) | Draft, Submitted, In review, Returned for amendment, Endorsed, Pending approval, Approved, Superseded, Suspended, Terminated | Neutral tag; Approved uses primary (navy) outline
+Module achievement | In progress, Achieved (badge) | Neutral tag with badge icon
+MC completion and credential | Complete, Issued, Corrected, Replaced, Revoked | Success green for Issued; error red for Revoked
+Quality Verification | Not applied, Preparing, Ready, Submitted, Quality-Verified, Expired, Suspended, Withdrawn | Info (navy) for Quality-Verified; warning yellow for expiring within 90 days
+ACR and ABC deposit | ACR prepared, Verified, Consent given, Deposited, Correction needed | Neutral tag labelled "Storage only — not a credit transfer"
+Credit status | Available, Provisionally Redeemed, Redeemed, Expired | Success green, info, neutral and subtle gray respectively
+Credit transfer | Submitted, Under evaluation, Approved, Partly approved, Not approved, More evidence needed | Success / warning / error by outcome
+</script>
+
+<h2>8.4 Gaps in the Design System</h2>
+<p>DESIGN.md lists known gaps: it has no data tables, breadcrumbs, validation styling or dark theme, because it was extracted from marketing pages. MCMS is a data-heavy application, so the SDD shall define these components from Carbon's product guidance in the same flat, square style:</p>
+<ul>
+  <li>data tables with sorting, filtering, row selection and bulk actions (queues, cohort results, ledgers);</li>
+  <li>breadcrumbs and page headers for deep records (proposal → version → review);</li>
+  <li>form validation and error states (blocking errors versus warnings that need a response);</li>
+  <li>status tags for {{tab:statuses}}.</li>
+</ul>
+<p>A dark theme is not needed for Release 1.</p>

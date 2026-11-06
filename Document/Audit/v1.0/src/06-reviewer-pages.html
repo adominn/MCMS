@@ -1,0 +1,70 @@
+<!-- ===================== SECTION 5: REVIEWER ROLE ===================== -->
+<h1>5. Reviewer & Industry Expert Pages & Functionality Analysis</h1>
+
+<p>The Reviewer (Persona X1) and Industry Expert (Persona X2) roles represent internal academic peers and external industry specialists assigned to evaluate curriculum proposals. The interface focuses strictly on objective evaluation, conflict of interest mitigation, and structured rubric recommendations.</p>
+
+<!-- ---------------- 5.1 Review Invitations ---------------- -->
+<h2>5.1 Review Invitations & Evaluation Queue</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> My Review Invitations / Reviews Hub</li>
+  <li><b>Role:</b> Reviewer (<code>reviewer</code>) & Industry Expert (<code>industry_expert</code>)</li>
+  <li><b>Exact Route:</b> <code>GET /reviews</code> (Route Name: <code>reviews</code>)</li>
+  <li><b>Page Type:</b> Evaluation Queue / Assignment Directory</li>
+  <li><b>Related Database Tables:</b> <code>review_assignments</code>, <code>mc_versions</code>, <code>micro_credentials</code>, <code>users</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Approval\ReviewController@index</code>, View: <code>reviews.index</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Serves as the primary landing page for assigned reviewers. Lists all pending and completed evaluation assignments with proposal title, developer name, assigned date, due date, review scope (Full Academic Review vs Industry Relevance Evaluation), and current status (Pending Declaration, In Review, Submitted).</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and tested by Playwright flow FL-03. Strictly filters assignments by the logged-in user ID. Reviewers holding only the <code>industry_expert</code> role are automatically redirected directly to this page upon sign-in by <code>TaskController@index</code>.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Role scoping and assignment filtering operate reliably.</p>
+
+<!-- ---------------- 5.2 COI Declaration & Review Form ---------------- -->
+<h2>5.2 Conflict of Interest (COI) Declaration & Proposal Review Form</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Proposal Review Form (<code>/reviews/{id}</code>), Declare COI (<code>POST /reviews/{id}/declare</code>), Post Comment (<code>POST /reviews/{id}/comments</code>), Submit Review (<code>POST /reviews/{id}/submit</code>)</li>
+  <li><b>Role:</b> Reviewer (<code>reviewer</code>) & Industry Expert (<code>industry_expert</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /reviews/{id}</code>, <code>POST /reviews/{id}/declare</code>, <code>POST /reviews/{id}/comments</code>, <code>POST /reviews/{id}/submit</code></li>
+  <li><b>Page Type:</b> Formal Evaluation Form & Multi-Item Rubric</li>
+  <li><b>Related Database Tables:</b> <code>reviews</code>, <code>review_assignments</code>, <code>review_comments</code>, <code>mc_versions</code>, <code>mc_modules</code>, <code>learning_outcomes</code>, <code>assessment_components</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Approval\ReviewController</code>, View: <code>reviews.show</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Enforces a mandatory two-stage review process (FR-14 to FR-18, FR-60 to FR-68):
+(1) <b>Conflict of Interest Declaration:</b> Before viewing proposal contents, the reviewer must legally declare that no conflict of interest exists (e.g., co-authorship, personal relationship, or direct financial interest). A positive declaration immediately recuses the reviewer and reassigns the task.
+(2) <b>Evaluation Form:</b> Academic reviewers evaluate 8 core dimensions (alignment with MQF, SLT realism, outcome clarity, assessment validity, syllabus currency, prerequisites, resource adequacy, unbundling integrity). Industry experts complete a streamlined industry alignment rubric.
+(3) <b>Tracked Comments:</b> Reviewers post granular comments tied to specific tabs/modules, flagged as <i>Blocking</i> (must be resolved) or <i>Advisory</i>.
+(4) <b>Final Recommendation:</b> Recommends <i>Support</i>, <i>Support with Amendments</i>, or <i>Do Not Support</i>.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-03. Proposal content is completely shielded until the COI declaration is submitted. Self-review is strictly blocked by <code>EnsureNotSelfReview</code> checks. Comments correctly bind to the version record and must be addressed before the Deputy Dean can endorse.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> COI gating, rubric validation, comment tracking, and audit logging operate as specified.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Reviewer on Invitations<br/>/reviews"] --> B["Select Assignment<br/>/reviews/{id}"]
+    B --> C{"COI Declared?"}
+    C -->|"No"| D["Display Mandatory COI Gate<br/>Declaration Checkbox"]
+    D -->|"Declares Conflict"| E["POST /reviews/{id}/declare (conflict)<br/>Recuse Reviewer & Audit"]
+    D -->|"No Conflict"| F["POST /reviews/{id}/declare (clear)<br/>Unlock Proposal Content"]
+    
+    C -->|"Yes"| F
+    F --> G["Inspect Proposal Details<br/>Curriculum, Modules, Matrix"]
+    G --> H["Post Section Comments<br/>Flag as 'Blocking' or 'Advisory'"]
+    H --> I["Complete 8-Item Rubric & Recommendation"]
+    I --> J["Submit Review<br/>Status: 'submitted'"]
+    J --> K["Notify Deputy Dean<br/>Comments visible to Developer"]
+</pre>
+<figcaption>Figure 5.2: Reviewer Conflict of Interest Declaration & Evaluation Flow</figcaption>
+</figure>

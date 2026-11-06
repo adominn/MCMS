@@ -1,0 +1,220 @@
+<!-- ===================== 9. QUALITY ATTRIBUTES ===================== -->
+<h1>9. Quality Attributes</h1>
+<p>This section states how the design meets the non-functional requirements of SRS Section 7. Load figures come from the indicative sizing of A-09 and are not binding commitments (D-21). Where a figure is a value the sources do not fix, it is marked as an assumption for confirmation.</p>
+
+<h2>9.1 Performance</h2>
+<p class="tcap" data-t="q-perf">Performance targets and how the design meets them</p>
+<script type="text/tbl" data-h="Requirement|Target|How it is met|How it is checked" data-w="16%|24%|36%|24%" data-cls="small">
+{{nfr-page}} | 95% of page requests within 2 seconds at the server | Server-rendered pages with eager loading (no N+1 queries), indexes on scope and status columns, paginated lists (default 10 rows), OPcache, Redis cache for settings and reference data | Request timing in logs; a load test on the test environment
+{{nfr-search}} | First page of search results within 2 seconds for 95% of requests | PostgreSQL full-text search with GIN indexes on search columns, always filtered by the user's scope first (AD-16); results paginated | Load test with the sample world and ten times its volume
+{{nfr-verify}} | Public verification page within 1 second for 95% of requests | Lookup by indexed random code; one query; the page is a small view with no sign-in and no session write; the signature is checked at issue and stored, and rechecked in the background rather than on each view | Load test of the public route
+{{nfr-report}} | Standard report for one PTj and one year within 10 seconds; larger reports in the background | Reports read through the read-only query contracts with indexed date and PTj columns; a report that exceeds the limit is queued on the <code>reports</code> queue and the user is notified when ready ({{fr-reports}}) | Timing on seed data of one year
+{{nfr-peak}} | 2,000 registrations in 2 hours with at least 100 concurrent users, no errors or loss | Registration is one short transaction; the offering row is locked only for the capacity check; payment and email are not inside the transaction; PHP-FPM sized for 100 concurrent requests | Load test script of the registration flow on the test environment
+{{nfr-capacity}} | Never over capacity | Row lock (<code>SELECT ... FOR UPDATE</code> through Eloquent <code>lockForUpdate</code>) on the offering during the capacity check, plus a database check on the counter | Concurrency test in Pest
+{{nfr-import}} | 5,000 result rows validated and staged within 2 minutes | Streamed CSV read, validation in chunks of 500, bulk insert into staging, run as a job on the <code>imports</code> queue ({{fr-lpimport}}, {{fr-lpstaged}}) | Timing with a 5,000-row file
+{{nfr-issue}} | 500 credentials in 10 minutes | One issue job per credential on the <code>credentials</code> queue, run by several workers; PDF rendering on its own queue; signing is local with the vault key service ({{fr-crbatch}}); jobs are idempotent | Timing with a 500-learner cohort and stub vault
+{{nfr-cpu}} | Average CPU under 70% at peak | Heavy work is queued ({{nfr-queue}}); capacity plan in {{tab:q-scale}} | Load test measurement
+</script>
+<div class="note"><b>Note:</b> As the PRD states for Release 1, performance targets are measured once on the test environment and reported; they are not tuned beyond Release 1 needs.</div>
+
+<h2>9.2 Scalability</h2>
+<p>The sizing of A-09 is 200 offerings and 20,000 participants a year, with peaks of 2,000 registrations within a few hours. The design must allow ten times the volume without a change of architecture ({{nfr-growth}}).</p>
+<p class="tcap" data-t="q-scale">Scalability measures</p>
+<script type="text/tbl" data-h="Concern|Measure|Basis" data-w="24%|56%|20%" data-cls="small">
+Application servers | Stateless: sessions, cache and locks in Redis; files in MinIO; the code and the web process hold nothing on local disk. A second web node is added behind a load balancer without code change. | {{nfr-stateless}}
+Workers | Each queue has its own worker count in Horizon configuration; credential issuing and PDF rendering can be given more workers during a cohort release. | AD-05
+Database | Indexes by scope, status and date; no table scans in lists; audit and integration logs are partitioned by month once they pass an agreed row count (assumption DA to be set by Section 11); a read replica can serve reports without changing code because reads use the Laravel connection. | AD-03
+Search | Stays in PostgreSQL. If volume outgrows it, a search service replaces one repository class behind the search contract. | AD-16
+Storage | Object storage grows by disk addition; files are addressed by key, not by path. | AD-14
+Initial deployment | Production starts with one web VM, one worker VM, one database VM and one VM for Redis and MinIO (assumption; to be sized by the load test). | AD-18, D-21
+</script>
+
+<h2>9.3 Availability</h2>
+<p>The targets are 99.5% availability during working hours, 08:00 to 18:00 Monday to Friday ({{nfr-avail}}), and 99.5% for the public verification page at all hours ({{nfr-verifyavail}}).</p>
+<ul>
+  <li><b>Single points of failure.</b> In Release 1 the database and Redis are single instances. Failure of either stops the system until it is restored; the recovery time is that of {{nfr-recover}}. A standby database is a later option and is not needed to meet 99.5%.</li>
+  <li><b>Verification page.</b> It reads one table and can be served by a second web node and a database read connection. It does not depend on Redis for a session, and the rate limiter falls back to allowing requests if Redis is down, so verifiers are not locked out by a cache failure.</li>
+  <li><b>External systems.</b> A failed adapter never stops a function that does not use it. Dependent jobs wait and retry ({{nfr-adapterfail}}).</li>
+  <li><b>Maintenance.</b> Planned maintenance is announced 48 hours ahead through the banner and kept outside working hours ({{nfr-maint}}). A deployment uses maintenance mode for the migration step only, and migrations are written to be backward compatible with the previous release where practicable (expand, then contract).</li>
+  <li><b>Errors.</b> Users see a clear message with a reference code; the detail is logged ({{nfr-errors}}).</li>
+</ul>
+
+<h2>9.4 Backup and Restore</h2>
+<p class="tcap" data-t="q-backup">Backup and restore design</p>
+<script type="text/tbl" data-h="Item|Design|Basis" data-w="22%|56%|22%" data-cls="small">
+Database | Daily full backup with continuous archiving of the write-ahead log, so that restore to a point in time is possible. Encrypted at rest. | {{nfr-backup}}, {{sr-rest}}
+Files | Daily copy of the MinIO buckets to separate storage; object versioning on. | {{nfr-backup}}
+Signing keys | Held in the CODL key vault with its own backup procedure owned by CODL; never in the application backup. | AD-09, {{sr-keys}}
+Retention of backups | At least 30 days. | {{nfr-backup}}
+Location and access | Stored separately from the production system; access limited to named administrators. | {{sr-backupprotect}}
+Recovery point objective | 24 hours (assumption of the SRS, to be confirmed by CODL and UTeM ICT). Log archiving can reduce it. | {{nfr-backup}}
+Recovery time objective | 8 working hours (assumption of the SRS, to be confirmed). | {{nfr-recover}}
+Restore test | At least twice a year, a restore to a clean environment with a check that the audit hash chain verifies and the sample counts match. | {{nfr-recover}}, {{sr-tamper}}
+</script>
+<div class="note"><b>Note:</b> RPO 24 hours and RTO 8 working hours are the SRS values, which are themselves assumptions awaiting UTeM ICT. They are flagged for confirmation in Section 11.</div>
+
+<h2>9.5 Accessibility</h2>
+<p>The interface conforms to WCAG 2.1 level AA ({{nfr-wcag}}, {{ir-accessible}}). The rules below are build rules for developers; they are applied once, in the shared components, and checked in tests.</p>
+<ol>
+  <li>Every control works by keyboard. Dialogs and drawers trap focus, close on Escape and return focus to the control that opened them. Table rows that open records are focusable and respond to Enter and Space.</li>
+  <li>Every field has a visible label tied to the input. Placeholders never stand in for labels. Errors are linked to the field with <code>aria-describedby</code> and announced in a live region.</li>
+  <li>Status is never shown by colour alone: <code>x-ui.status-tag</code> always prints the word. The stage track gives each stage a text state.</li>
+  <li>Text contrast is at least 4.5:1, including white and light-blue text on the navy side navigation. Tokens that fail the ratio are not added to <code>tokens.css</code>; a CI step checks the token pairs.</li>
+  <li>Images have text alternatives. Icons are decorative unless they carry the only label, in which case they have an accessible name.</li>
+  <li>The layout reflows to one column below 760 px; tables scroll inside their frame; the page does not scroll sideways ({{ir-responsive}}, {{nfr-mobile}}).</li>
+  <li>Toasts use a polite live region. Idle timeout warnings use an alert dialog with a safe default.</li>
+  <li>Pages for participants stay under 1.5 MB without media where practicable ({{nfr-lowbandwidth}}).</li>
+  <li>Generated PDFs are tagged with the document language and have a logical reading order where Chromium supports it.</li>
+</ol>
+<p>Checks: automated axe checks run in the Playwright suite on every main screen in both languages; a keyboard-only walk of the hand-off scenario is done by hand before each release.</p>
+
+<h2>9.6 Bilingual Operation</h2>
+<p>Every screen, notice and credential exists in Bahasa Melayu and English (AD-13, {{ir-lang}}). The language switch keeps the user on the same page with entered data ({{nfr-langswitch}}). Tests compare the two language files for missing keys and render each main screen in both languages. Bilingual content fields mark a missing language and a record cannot be issued as a credential in a language whose required fields are empty. Fonts are bundled so that long Malaysian names print in full ({{nfr-names}}).</p>
+
+<h2>9.7 Observability</h2>
+<p class="tcap" data-t="q-observe">Logging, metrics and health checks</p>
+<script type="text/tbl" data-h="Area|Design|Basis" data-w="18%|62%|20%" data-cls="small">
+Application log | Structured JSON lines with time, level, request identifier, user identifier and module. Kept at least 90 days. A log processor removes identity card numbers, tokens and secrets. | {{nfr-applog}}
+Error reference | Each unhandled error gets a reference code shown to the user and stored with the full detail. | {{nfr-errors}}
+Security log | Sign-in, failed authorisation, role change, key use and personal-data export are written to a separate channel that UTeM ICT security monitoring can read. | {{sr-seclog}}
+Queues | Laravel Horizon shows throughput, wait time, failed jobs and worker load. Failed jobs are listed for administrators with a retry action. | {{nfr-monitor}}
+Scheduler | Each timed job writes a run record with its result; a missed run raises an alert. | {{nfr-scheduler}}
+Integration log | Every adapter call is logged and visible to administrators ({{fr-adapterstatus}}, {{fr-lplog}}). | AD-08
+Health checks | A <code>/health</code> endpoint (protected by token and network) checks database, Redis, MinIO, ClamAV, queue lag, disk and certificate expiry. The public site has a separate minimal <code>/up</code> check. | {{nfr-monitor}}
+Metrics | Request time, error rate, queue length, job failures, disk use and CPU are exported to the monitoring system chosen by UTeM ICT (to be confirmed). | {{nfr-monitor}}
+Audit | The audit trail is a business record, not a log; its integrity check can be run from the administration screen and by a scheduled job ({{sr-tamper}}). | AD-11
+</script>
+
+<h2>9.8 Maintainability</h2>
+<ul>
+  <li><b>Modularity.</b> Modules and their allowed dependencies are enforced by Deptrac and architecture tests ({{nfr-modular}}).</li>
+  <li><b>Conventions.</b> Laravel conventions, PSR-12, strict types and static analysis at level 8 ({{nfr-laravel}}).</li>
+  <li><b>Tests.</b> Every business rule has at least one automated test, and the suite runs on every change ({{nfr-rulestests}}). Test names carry the requirement key, which gives a traceability list for free.</li>
+  <li><b>Portability.</b> Queries use Eloquent and the query builder; vendor-specific features appear only in migrations and are listed in the release notes ({{nfr-dbportable}}).</li>
+  <li><b>Configuration.</b> Environment values are configuration and business values are settings ({{nfr-config}}, {{fr-settings}}).</li>
+  <li><b>Documentation.</b> The SDD, adapter interfaces, CSV templates and operating procedures are updated with each release ({{nfr-docs}}).</li>
+  <li><b>Administration without the database.</b> Users, roles, settings, templates, reference data and adapter modes are managed in the interface ({{nfr-admin}}).</li>
+</ul>
+
+<!-- ===================== 10. DEPLOYMENT AND OPERATIONS ===================== -->
+<h1>10. Deployment and Operations</h1>
+<p>This section describes where MCMS runs, how a change reaches production, and how it is watched. The hosting is Linux virtual machines at the UTeM data centre, which is an assumption awaiting confirmation (AD-18, A-09, {{nfr-deploy}}).</p>
+
+<h2>10.1 Environments</h2>
+<p class="tcap" data-t="dep-env">Environments and their settings</p>
+<script type="text/tbl" data-h="Setting|Development|Test|Staging|Production" data-w="20%|18%|20%|20%|22%" data-cls="small">
+Purpose | Developer work | Automated tests, user acceptance | Release rehearsal on production-like data shape | Real use
+<code>APP_ENV</code> | <code>local</code> | <code>testing</code> | <code>staging</code> | <code>production</code>
+Identity provider | Stub | Stub | Live Entra ID test tenant (assumed available), or Stub | Live Entra ID only
+Payment | Stub | Stub | Stub | Stub in Release 1
+UCreds | Manual, sample files | Manual, sample files | Manual | Manual
+ABC and QVC / MQA | Manual | Manual | Manual | Manual
+SMTP | Mailpit | Mailpit | Mailpit or relay to test addresses | Live relay
+Signing key | Test key file | Test key | Test key in a test vault | CODL vault key
+Demo clock | Allowed | Allowed | Allowed | Disabled; the app refuses to boot with it on
+Data | Seed (sample world) | Seed (sample world) | Seed or masked copy | Real data
+Debug tools (Telescope) | On | On | Off | Off
+</script>
+<p>Development and test environments hold no real personal data unless it is masked ({{nfr-envs}}). Only the stub identity provider and the demo clock are limited to non-production, and the start-up check described in Section 3.6 enforces it (AD-06, AD-18).</p>
+
+<h2>10.2 Deployment Architecture</h2>
+<figure data-f="dep-diagram">
+<pre class="mermaid">
+flowchart TB
+  USR["Users, browsers"]
+  LB["Reverse proxy or load balancer<br/>TLS"]
+  subgraph WEB["Web VM"]
+    NG["Nginx + PHP-FPM"]
+  end
+  subgraph WRK["Worker VM"]
+    HZ["Horizon workers<br/>scheduler, Chromium"]
+  end
+  subgraph DATA["Data VMs"]
+    PG[("PostgreSQL 16")]
+    RD[("Redis")]
+    MN[("MinIO + ClamAV")]
+  end
+  KV["CODL key vault"]
+  BK["Backup storage<br/>separate"]
+  USR --> LB --> NG
+  NG --> PG
+  NG --> RD
+  NG --> MN
+  HZ --> PG
+  HZ --> RD
+  HZ --> MN
+  HZ --> KV
+  PG --> BK
+  MN --> BK
+</pre>
+<figcaption>Production deployment. The web and worker VMs run the same release; a second web VM can be added behind the proxy.</figcaption>
+</figure>
+<p>All traffic uses HTTPS (TLS 1.2 or later) ({{ir-https}}, {{sr-tls}}). The database, Redis and MinIO accept connections only from the web and worker VMs. Only the proxy is reachable from users. The database account used by the application has no UPDATE or DELETE right on the audit table (AD-11); migrations run under a separate account.</p>
+
+<h2>10.3 CI/CD Pipeline</h2>
+<figure data-f="dep-pipeline">
+<pre class="mermaid">
+flowchart LR
+  A["Commit<br/>push"] --> B["Lint<br/>Pint"] --> C["Static analysis<br/>Larastan, Deptrac"] --> D["Tests<br/>Pest"] --> E["Build assets<br/>Vite, package"] --> F["E2E<br/>Playwright"] --> G["Deploy<br/>staging"] --> H["Approve"] --> I["Deploy<br/>production"]
+</pre>
+<figcaption>Pipeline from commit to production. A failing step stops the pipeline.</figcaption>
+</figure>
+<p class="tcap" data-t="dep-pipeline">Pipeline steps</p>
+<script type="text/tbl" data-h="Step|What runs|Fails when" data-w="20%|50%|30%" data-cls="small">
+Lint | <code>pint --test</code> | Code style differs from PSR-12
+Static analysis | <code>phpstan</code> (Larastan, level 8) and <code>deptrac</code> | Type error or forbidden module dependency
+Tests | Pest on a PostgreSQL 16 service with migrations and the test seed; includes architecture, contract and language-file tests | Any test fails; a requirement key without a test is reported
+Build assets | <code>npm ci</code> and <code>vite build</code>; contrast check of tokens; a release archive or container image is created once | Build error or token below 4.5:1
+End-to-end | Playwright runs the prototype's flows and the hand-off scenario against a built instance, with axe checks | A flow differs from the scenario
+Deploy to staging | Same artefact; <code>php artisan down</code> only for the migration step; <code>migrate --force</code>; cache warm; Horizon restart (<code>horizon:terminate</code>); smoke test of <code>/health</code> | Migration or smoke test fails
+Approve | A named person approves promotion after the staging check | Not approved
+Deploy to production | The same artefact as staging; same steps; the previous artefact is kept for rollback | Smoke test fails; rollback to the previous artefact
+</script>
+<p>The artefact is built once and promoted unchanged; only configuration differs between environments ({{nfr-config}}, {{nfr-deploy}}). The deployment procedure is a script in <code>deploy/</code> and is documented in the operations guide so that it is repeatable. A rollback restores the previous artefact; a migration that cannot be reversed is announced as such in the release notes and a database backup is taken before it runs.</p>
+
+<h2>10.4 Configuration and Secrets</h2>
+<ul>
+  <li>Environment values are held in <code>.env</code> files that are created on each server by the deployment, not committed to the repository.</li>
+  <li>Secrets (database password, Redis password, MinIO keys, Entra ID client secret, SMTP credentials) are held in the secret store of UTeM ICT or, until one is agreed, in a file readable only by the application account (assumption). Secrets are rotated when a person with access leaves.</li>
+  <li>The credential signing private key is never an environment value. It stays in the CODL key vault and the application asks the vault to sign (AD-09, {{sr-keys}}). Key rotation does not invalidate credentials already issued.</li>
+  <li>Logs and error pages never print secrets ({{nfr-applog}}).</li>
+</ul>
+
+<h2>10.5 Database Migrations and Seed Data</h2>
+<ul>
+  <li><b>Migrations.</b> Versioned migrations are the only way to change the schema ({{nfr-migrations}}). They run in the deployment under the migration account. A migration is small, backward compatible with the previous release where practicable, and tested on a copy of staging.</li>
+  <li><b>Reference seeder.</b> <code>ReferenceSeeder</code> loads reference data that production needs: roles, status lists, default settings, notification templates, PTj and programme lists as agreed with the offices ({{fr-refdata}}, {{dr-refimport}}).</li>
+  <li><b>Sample world.</b> <code>SampleWorldSeeder</code> loads the prototype's sample world: users in every role, three offerings of the three categories, one participant followed through every stage, and the stub adapter behaviour of PRD Section 7. It is the seed of the development, test and staging environments and the base of the Pest and Playwright tests. It is never run in production.</li>
+  <li><b>No legacy credentials.</b> No credential is created for results before go-live ({{dr-nolegacycred}}).</li>
+  <li><b>Production data.</b> Production starts with the reference seed and the first administrators. All other data comes from use.</li>
+</ul>
+
+<h2>10.6 Monitoring and Alerting</h2>
+<p class="tcap" data-t="dep-alerts">Monitored items and alert rules</p>
+<script type="text/tbl" data-h="Item|Alert when|To|Basis" data-w="22%|42%|18%|18%" data-cls="small">
+Availability | <code>/up</code> or <code>/health</code> fails for 2 checks in a row | Operations team | {{nfr-monitor}}
+Response time | The 95th percentile page time stays above 2 seconds for 10 minutes | Operations team | {{nfr-page}}
+Queue length and wait | A queue waits longer than an agreed time (assumption: 5 minutes, 30 for reports) | Operations team | {{nfr-queue}}
+Failed jobs | Any failed job in <code>credentials</code> or <code>integration</code>; more than a set number elsewhere | Operations team | {{nfr-monitor}}
+Scheduler | A timed job misses its run or ends with an error | Operations team | {{nfr-scheduler}}
+Disk | Database, MinIO or log disk above 80% | Operations team | {{nfr-monitor}}
+Backup | A backup is missing or a restore test is overdue | Operations team | {{nfr-backup}}
+Adapter | An adapter is failing or retrying beyond the limit | Administrator | {{fr-adapterstatus}}
+Security | Many failed authorisations, mass export of personal data, key use outside issue jobs | UTeM ICT security | {{sr-alerts}}, {{sr-seclog}}
+Audit chain | The integrity check finds a break | Operations team and security | {{sr-tamper}}
+Certificate | A TLS certificate expires within 30 days | Operations team | {{sr-tls}}
+</script>
+<p>Planned maintenance is announced 48 hours ahead in the banner ({{nfr-maint}}). An incident procedure covering detection, containment, notification and recovery is written before the first production release ({{sr-incident}}), and a security test is carried out first ({{sr-pentest}}).</p>
+
+<h2>10.7 Release Flags: Release 1 and Later</h2>
+<p class="tcap" data-t="dep-flags">Release switches</p>
+<script type="text/tbl" data-h="Switch|Release 1 value|Effect when turned on|Release" data-w="22%|16%|46%|16%" data-cls="small">
+<code>features.live_ucreds</code> | off (manual CSV) | Binds the live <code>LearningPlatformGateway</code> ({{fr-lplive}}, {{fr-lpsync}}) | Later release (assumed 2)
+<code>features.live_abc</code> | off (manual) | Binds a live <code>AbcGateway</code> ({{fr-dplive}}) | Later release (assumed 2)
+<code>features.live_qv</code> | off (manual) | Binds a live <code>QvGateway</code> ({{fr-qvportal}}) | Later release (assumed 2)
+<code>features.live_payment</code> | off (stub) | Binds the live payment service when UTeM provides it (A-03) | Later release (assumed 2)
+<code>features.sis_link</code> | off | Admission and graduation records from the student information system ({{fr-spsis}}) | Later release (assumed 3)
+<code>features.wallet_share</code> | off | Credential wallet integration ({{fr-crwalletint}}) | Later release (assumed 3)
+<code>demo_clock</code> | on in non-production | Allows a pretend date | Never in production
+</script>
+<p>Release 1 contains all four increments (1.1 to 1.4) of the PRD. A flag that is off hides its screens and routes, and the manual path remains in use. Turning a flag on in production follows the pipeline: change the configuration in staging, test, approve, then change production.</p>

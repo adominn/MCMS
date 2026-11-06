@@ -1,0 +1,41 @@
+<!-- ===================== 7. FLOWS ===================== -->
+<h1>7. User Flows</h1>
+<p>A flow is a process walked across screens and, often, across roles. Each flow of {{tab:flows}} is in the prototype's Flows page; starting one shows a step bar at the bottom of the screen that says what is happening and what to click next. Negative paths have flows of their own, for example a payment failure, a transfer line that cannot be approved, or a credential that was revoked.</p>
+
+<h2>7.1 End-to-End Journey</h2>
+<p>{{fig:e2e}} shows the journey of SRS use case A.5 as it runs in the prototype (flow FL-19). Each box is a separate decision by a separate role; the system issues credentials and generates the ACR only after the deputy dean's decision.</p>
+<figure data-f="e2e">
+<pre class="mermaid">
+flowchart TD
+  A["Public: find offering"] --> B["Student: register and pay"]
+  B --> C["CODL: import results from UCreds"]
+  C --> D["Lecturer: complete marks, send"]
+  D --> E["Deputy dean: verify results"]
+  E --> F["Deputy dean: confirm completion"]
+  F --> G["System: issue credentials"]
+  G --> H["Employer: verify credential"]
+  G --> I["Student: consent to deposit"]
+  I --> J["Deputy dean: record ABC deposit"]
+  J --> K["Student: apply for transfer"]
+  K --> L["Deputy dean: decide on outcomes"]
+  L --> M["Credit provisionally redeemed"]
+</pre>
+<figcaption>End-to-end journey (FL-19): one stage, one decision, one role.</figcaption></figure>
+
+<h2>7.2 Hand-offs Between Roles</h2>
+<p>When one role finishes a step, the next role sees it at once: a task appears in the deputy dean's queue, a notification reaches the person affected, and the record's status and history change. {{tab:handoffs}} lists the hand-offs the design guarantees; each is tested end to end in the prototype.</p>
+<p class="tcap" data-t="handoffs">Hand-offs between roles</p>
+<script type="text/tbl" data-h="From|Action|Lands with|Result seen" data-w="16%|30%|16%|38%" data-cls="small">
+Lecturer | Sends cohort results for verification | Deputy dean | Task "Verify results"; every learner's provisional result on the verify screen
+Lecturer | Sends the readiness checklist | Deputy dean | Task "Confirm readiness"; uploaded evidence ready to accept; after Ready the offering appears in the public catalogue
+Lecturer | Answers a review comment | Deputy dean | Comment shows as Answered and can be resolved; endorsement unblocks when no blocking comment is open
+Deputy dean | Confirms completion | Student | Credentials issued; enrolment Completed; notification
+Student | Gives consent to deposit | Deputy dean | Task "Record ABC deposit"; ACR in the deposit queue
+Deputy dean | Records the deposit | Student | Ledger shows the credit Available for 10 years
+Student | Applies for transfer | Deputy dean | Task "Decide credit transfer" with the evidence attached
+Deputy dean | Approves a transfer line | Student | Credit Provisionally redeemed; it can no longer be selected for another application
+Deputy dean | Asks for more evidence | Student | Upload form on the application; the upload reopens the deputy dean's task
+CODL | Imports UCreds results with problems | Lecturer | Notification naming the missing marks; rows needing marks listed first
+</script>
+
+<h2>7.3 Flow Catalogue</h2>

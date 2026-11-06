@@ -1,0 +1,2177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Software Requirements Specification - UTeM MCMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --blue:#3f6fa6; --tint:#dcebf1; --line:#444; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family:'Noto Serif', Cambria, Georgia, serif; font-size:10pt; line-height:1.45; color:#1a1a1a;
+         font-variant-ligatures:none; margin:0; background:#fff; }
+  /* cover */
+  .cover { break-after:page; padding-top:28mm; }
+  .cover .doc-title { text-align:center; font-size:23pt; font-weight:700; margin:0 0 6px; }
+  .cover .doc-sub { text-align:center; font-size:14pt; font-weight:700; font-style:italic; margin:0 0 30px; }
+  .cover h3 { font-size:13pt; margin:0 0 4px; }
+  .cover table td:first-child { width:34%; font-weight:700; }
+  .cover .disclaimer { margin-top:38mm; font-style:italic; font-size:9.5pt; text-align:justify; }
+  .cover .disclaimer b { display:block; font-size:10.5pt; margin-bottom:2px; }
+  .tint, .cover th { background:var(--tint) !important; }
+  /* toc */
+  .toc { break-after:page; }
+  .toc-title, h1.notoc { background:var(--tint); text-align:center; font-size:14pt; font-weight:700; padding:6px; margin:0 0 12px; color:#111; }
+  .toc-row { display:flex; align-items:baseline; font-size:9.5pt; margin:3px 0; }
+  .toc-row .t { white-space:nowrap; }
+  .toc-row .dots { flex:1; border-bottom:1px dotted #777; margin:0 4px; transform:translateY(-3px); }
+  .toc-row .pg { min-width:16px; text-align:right; }
+  .toc-1 { font-weight:700; margin-top:7px; }
+  .toc-2 { padding-left:16px; }
+  .toc-3 { padding-left:32px; font-size:9pt; }
+  .tocend { color:#fff; font-size:2pt; }
+  /* headings */
+  main h1 { break-before:page; background:var(--tint); color:var(--blue); font-size:15pt; padding:5px 8px; margin:0 0 10px; break-after:avoid; }
+  main h2 { color:var(--blue); font-size:12.5pt; margin:16px 0 6px 10px; break-after:avoid; }
+  main h3 { color:var(--blue); font-size:11pt; margin:12px 0 5px 20px; font-style:italic; break-after:avoid; }
+  main h4 { font-size:10pt; margin:10px 0 4px; break-after:avoid; }
+  p { margin:0 0 7px; text-align:justify; }
+  ul, ol { margin:2px 0 8px 4px; padding-left:20px; }
+  li { margin:1px 0; }
+  td ul, td ol { margin:2px 0 2px 0; padding-left:16px; }
+  table { width:100%; border-collapse:collapse; margin:6px 0 12px; font-size:9pt; }
+  th, td { border:0.6pt solid var(--line); padding:3px 6px; vertical-align:top; text-align:left; }
+  th { background:#ececec; font-weight:700; }
+  thead { display:table-header-group; }
+  tr { break-inside:avoid; }
+  td.c-id, th.c-id { white-space:nowrap; width:50px; font-weight:600; }
+  td.c-src, th.c-src { width:74px; font-size:8pt; color:#333; }
+  td.c-src { font-family:'Noto Sans', Arial, sans-serif; }
+  td.c-x, th.c-x { width:92px; font-size:8pt; }
+  .tcap, figcaption { font-style:italic; font-size:8.5pt; color:#333; margin:2px 0 12px; text-align:left; }
+  .tcap { margin:10px 0 0; }
+  figure { margin:10px 0 12px; break-inside:avoid; }
+  figure .mermaid { text-align:center; }
+  figure .mermaid svg { max-height:205mm; }
+  .note { border-left:3pt solid var(--blue); background:#f3f7fb; padding:5px 9px; margin:8px 0 10px; font-size:9.5pt; break-inside:avoid; }
+  .note b:first-child { color:var(--blue); }
+  code { font-family:Consolas, 'Courier New', monospace; font-size:8.3pt; background:#f1f1f1; padding:0 2px; }
+  .small { font-size:8.5pt; }
+  .center { text-align:center; }
+  .keep { break-inside:avoid; }
+  .pb { break-before:page; }
+  pre.mermaid { font-family:'Noto Sans', Arial, sans-serif; white-space:pre; }
+</style>
+</head>
+<body>
+<!-- ===================== COVER ===================== -->
+<section class="cover">
+  <p class="doc-title">Software Requirements Specification (SRS)</p>
+  <p class="doc-sub">UTeM Micro-Credential Management System (MCMS)</p>
+  <h3>Document Control</h3>
+  <table>
+    <thead><tr><th colspan="2">Document Information</th></tr></thead>
+    <tbody>
+      <tr><td>Title</td><td>Software Requirements Specification for the UTeM Micro-Credential Management System (MCMS)</td></tr>
+      <tr><td>Date</td><td>6 November 2026</td></tr>
+      <tr><td>Status</td><td>Draft; supervisor review planned once the Release 1 prototype can be shown (D-23)</td></tr>
+      <tr><td>Version</td><td>1.3</td></tr>
+      <tr><td>Prepared for</td><td>Supervisor review; Centre for Open and Distance Learning (CODL), Universiti Teknikal Malaysia Melaka (assumed system owner)</td></tr>
+      <tr><td>Prepared by</td><td>Aliff, Intern</td></tr>
+      <tr><td>Reference</td><td>MCMS_SRS_V1.3_Nov_2026</td></tr>
+      <tr><td>Written against</td><td>Glossary and Decision Log v0.9 (MCMS_FND_V0.9_Nov_2026)</td></tr>
+      <tr><td>Document set</td><td>Software Requirements Specification (SRS) (this document), Product Requirements Document (PRD), UI/UX Design Specification, Software Design Description (SDD), System Flow Map (D-30)</td></tr>
+    </tbody>
+  </table>
+  <div class="disclaimer">
+    <b>Disclaimer:</b>
+    This document is a working draft prepared by an intern as part of a concept and mock-up for a proposed system. It is not an official document of UTeM or CODL. Rules taken from the Garis Panduan Micro-Credential UTeM remain the property of UTeM. Items marked Assumed, Proposed or TBD have not been confirmed by the system owner. Unauthorised modification, distribution or misrepresentation is prohibited.
+  </div>
+</section>
+
+<!-- ===================== TABLE OF CONTENTS ===================== -->
+<section class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <div id="toc"></div>
+  <span class="tocend">TOCENDMARKER</span>
+</section>
+
+<main>
+<!-- ===================== GLOSSARY ===================== -->
+<h1 class="notoc">Glossary</h1>
+<p>The terms below carry exactly the meaning fixed in the Glossary and Decision Log v0.6. Where this SRS adds a term that the Glossary does not define, it is marked <i>(SRS)</i>. Source tags such as [G 12.9] refer to clauses of the Garis Panduan Micro-Credential UTeM (the Guide).</p>
+<script type="text/tbl" data-h="Term|Definition" data-w="27%|73%">
+ABC | Academic Bank of Credit. Central digital depository of ACR. A deposit is storage and does not approve transfer. [G 12.5]
+Academic authority | The body that takes final academic decisions such as approval to offer and stackable mapping: the Senate, whose decisions are recorded in MCMS by the deputy dean (D-11). Configured as a setting, not code.
+ACR | Academic Credit Record. Academic record used in the ABC mechanism; prepared only for an eligible completed UMC or Quality-Verified SAMC. [G 12.4]
+Achievement Record | UTeM internal record of modules passed, Digital Badges and MC completion (Rekod Pencapaian Pembelajaran). It is not an ACR. [G 8.7.5, 18.3]
+Adapter | A defined interface to an external system (UCreds, ABC, QVC/MQA, payment, SSO, email) with a stub or manual version in the first release.
+API | Application Programming Interface.
+Audit trail | Append-only record of approvals, credential actions, result changes and corrections. History is never erased. [G 10.5.1, 18.10]
+Available / Provisionally Redeemed / Redeemed | Credit status under the Single Redemption Principle: not yet used; used in an approved transfer to a programme still in progress; used toward a qualification already awarded. [G 12.9, App F9]
+Body of Knowledge (BoK) | The knowledge domains a target qualification must cover; used in stackable degree mapping. [G 14.5.2]
+CLO / PLO | Course Learning Outcome / Programme Learning Outcome.
+CODL | Centre for Open and Distance Learning. System administrator and technical operator of MCMS and operator of UCreds; takes no academic decision (D-12).
+Deputy dean (PTj) | The faculty deputy dean who owns micro-credential offerings in MCMS: endorses, verifies, confirms quality and records decisions (D-28).
+Cohort (Offering) | One run of an approved MC version with its own dates, participants and results. <i>(SRS)</i>
+Configurable value | A threshold or list kept in settings and never hard-coded (40 h SLT, 3-year QV limit, 10-year credit validity, 30% home credit, residency, alert days, retention).
+CQI | Continuous Quality Improvement: finding, evidence, analysis, action, implementation and effectiveness check. [G 17]
+Credit accumulation | Building a record of eligible credit over time. Separate from credit transfer. [G 12]
+Credit transfer | Evaluation and acceptance of credit by the programme that receives it; in MCMS decided by the deputy dean of the faculty that owns the degree (D-11). Equivalence is judged on learning outcomes, not on credit or SLT alone. [G 13]
+Credit validity | Credit in ABC is valid 10 years from deposit date. This differs from ACR retention (indefinite unless the owner or authority directs otherwise). [G 12.8]
+Currency of knowledge | How up to date and relevant earlier learning still is when it is evaluated for equivalence or transfer. [G 4]
+Digital Badge | Proof of achievement of one module or unit. Not academic credit and not an ACR. [G 8.7.1, App E1]
+Digital Credential / Certificate | Proof of completing the whole MC (Sijil / Digital Credential). Does not by itself give credit or transfer. [G 8.7.3, App E1]
+HEPA | Student Affairs and Alumni Department. Assumed to register outside applicants together with Pejabat Pendaftar.
+Material change | Change to outcomes, SLT, assessment, module structure, credit, MQF level, parent course link or QV status. Needs review and re-approval and is versioned. [G 9.5, 17.7, 17.8]
+MC version | One approved, immutable definition of a micro-credential (outcomes, SLT, modules, assessment, credential). A material change creates a new version. <i>(SRS)</i>
+MCE | Micro-Credential Eksekutif. Non-credit short learning under 40 hours SLT. Never carries credit unless reclassified and re-approved as a SAMC. [G 6.3.3]
+Micro-Credential (MC) | Certification of a small, focused unit of learning with defined outcomes and assessment. Recognition follows achievement, not attendance. [G 6.1]
+Module | A smaller unit of a UMC. Completion earns a Digital Badge, not credit and not whole-UMC completion. [G 8.7.1]
+MQA / MQF | Malaysian Qualifications Agency / Malaysian Qualifications Framework.
+OIDC | OpenID Connect, the sign-in protocol assumed for the Microsoft education account (OI-03). <i>(SRS)</i>
+Participant | Any person enrolled or applying to enrol in an MC offering: UTeM student, staff or outside applicant (user class P8).
+PDPA | Personal Data Protection Act 2010 (Act 709), with current amendments.
+PTj | Pusat Tanggungjawab: the faculty, school, institute or centre that owns an offering. [G 15.2.2]
+QA / QV / QVC | Quality Assurance applies to every MC. Quality Verification is the SAMC-specific check run by the QVC under MQA rules. Approval to offer is a separate decision from QV. [G 7.6, 11.2]
+Quality-Verified SAMC | A SAMC that has passed QV. QV is valid for at most 3 continuous years and needs one completed cohort before submission. [G 11.2.1, 11.2.2]
+RACI | Responsible, Accountable, Consulted, Informed: the role matrix of Guide Appendix H.
+RBAC | Role-Based Access Control.
+Release 1 / 2 / 3 | Delivery stages of MCMS. Release 1 is the first buildable release (prototype scope). See Section 1.2 and decision D-24.
+RPO / RTO | Recovery Point Objective / Recovery Time Objective. <i>(SRS)</i>
+SAMC | Stand-alone Micro-Credential. Own offering, at least 40 hours SLT. Credit and MQF level exist only after QV. [G 6.3.2]
+SDD | Software Design Description.
+Single Redemption | Credit used for one qualification cannot be used for another. Transfer makes credit provisionally redeemed; completing the programme makes it redeemed. [G 12.9]
+SIS | Student Information System of UTeM. Outside MCMS scope; a future adapter. <i>(SRS)</i>
+SLT | Student Learning Time: all learning and assessment time, not only contact time. [G 8.3]
+SME | Subject-Matter Expert from industry or a profession (user class X2). [G 16.7]
+SRS / PRD | Software Requirements Specification / Product Requirements Document.
+SSO | Single Sign-On.
+Stackable Degree | Planned pathway where eligible credit counts toward part of a degree. Needs admission, transfer approval, at least 30% credit earned at UTeM, residency (1 semester for conventional programmes), PLO mapping and graduation requirements. [G 14]
+UCreds | UTeM online learning platform for micro-credentials; the pilot learning platform. Reached only through an adapter.
+UMC | Unbundled Micro-Credential. Made by unbundling an accredited credit course; keeps its parent link; total SLT equals the parent course; whole UMC is at least 40 hours SLT or one credit. [G 6.3.1]
+WCAG | Web Content Accessibility Guidelines (version 2.1 is the target).
+</script>
+
+<!-- ===================== 1. INTRODUCTION ===================== -->
+<h1>1. Introduction</h1>
+
+<h2>1.1 Purpose</h2>
+<p>This Software Requirements Specification (SRS) gives a complete description of the UTeM Micro-Credential Management System (MCMS). MCMS is a proposed system that manages the whole life of a UTeM micro-credential: proposal and approval, offering and enrolment, learning results and credentials, Academic Credit Record (ACR) and Academic Bank of Credit (ABC) tracking, credit transfer, stackable degree pathways, and monitoring with Continuous Quality Improvement (CQI).</p>
+<p>The document states <b>what</b> the system shall do, for whom, and under which rules. It does not state how the system is built; code structure, screen layouts and database scripts belong to the Software Design Description (SDD). The SRS is the agreed basis for the PRD, the SDD, development, and acceptance testing. Every requirement has a stable identifier so that it can be traced back to the Guide clause it comes from and forward to the design and the tests that prove it (decision D-01).</p>
+<p>The document is written for two readers at once: a supervisor who reviews it, and developers and AI development agents who use it as the rule set for building the system (D-05). For that reason each requirement is a single statement, the source of every business rule is cited, and every assumption is visible.</p>
+
+<h2>1.2 Document Conventions</h2>
+<p>This document follows these conventions:</p>
+<script type="text/tbl" data-h="Term|Description" data-w="18%|82%">
+SHALL | Mandatory requirement that must be fulfilled in <b>Release 1</b>, the first buildable release (the Release 1 prototype of D-31, decision D-22). The developer is required to cover this feature in Release 1.
+SHALL NOT | Prohibition that applies from Release 1 onward.
+SHOULD | Requirement planned for <b>Release 2</b>. The developer should take it into account in the design so that it can be added without rework.
+MAY | Requirement anticipated for <b>Release 3 or later</b>. The developer is encouraged to keep it in mind for future scalability.
+TBD | To Be Determined. Information not yet available that will be provided in a later version. Every TBD is linked to an open item (OI-xx) in Appendix C.
+Note | Provides additional information or clarification.
+</script>
+<div class="note"><b>Note:</b> A requirement tagged with a Guide source, for example [G 12.9], states a rule that is mandatory for the complete system under UTeM policy. Its SHALL / SHOULD / MAY wording states only the release in which MCMS implements it. Guide rules are never relaxed by the release plan (D-24). Where a Guide rule is planned for a later release, Release 1 SHALL NOT contradict it; for example, it may block an action that it cannot yet support.</div>
+
+<p>Requirements are categorised as follows:</p>
+<script type="text/tbl" data-h="Requirement Number|Description|Section" data-w="22%|58%|20%">
+FR-XX | Functional Requirements | Section 3
+BR-XX | Business Rules taken from the Guide (D-25) | Section 4
+IR-XX | Interface Requirements | Section 5
+DR-XX | Data Requirements | Section 6
+NFR-XX | Non-Functional Requirements | Section 7
+SR-XX | Security Requirements | Section 7.2
+D-XX / A-XX / OI-XX | Decision / Assumption / Open item, as kept in the Glossary and Decision Log | Appendix C
+</script>
+<p>Each requirement table has three columns: <b>ID</b>, <b>Requirement</b> and <b>Source</b>. The Source column cites the Guide clause (<code>G 12.9</code>), Guide appendix table (<code>App E5</code>), decision (<code>D-17</code>) or assumption (<code>A-04</code>) that justifies the requirement. An empty source means the requirement is a good-practice or usability need introduced by this SRS. Identifiers are stable: once issued, an ID is never reused for a different requirement, and a withdrawn requirement keeps its ID with the word <i>Withdrawn</i>.</p>
+<p>Configurable values are written in code font, for example <code>credit.abc_validity_years</code>. Each one is a setting that the System Administrator can change (D-16); the default value and its source are listed in {{tab:settings}}.</p>
+<p>Diagrams use common notations: flowcharts for processes, state diagrams for the life of a record, sequence diagrams for interactions between people and systems, and entity-relationship diagrams for the data model. Diagrams explain the requirements; where a diagram and a requirement differ, the requirement prevails.</p>
+
+<h2>1.3 Intended Audience</h2>
+<p>This document is intended for the following stakeholders:</p>
+<script type="text/tbl" data-h="Stakeholder|Role|Read first" data-w="28%|47%|25%">
+Supervisor | Reviews the requirements and the decisions they rest on. | Sections 1, 2, 4, Appendix C
+CODL / UTeM reviewers | Confirm assumptions and open items; assumed system owner. | Sections 1, 2, 3, Appendix C
+Development team and AI development agents | Design and implement the system, using the requirement IDs and business rules as fixed rules. | Sections 2.3, 3, 4, 5, 6
+Testers and quality assurance | Derive acceptance tests from requirement IDs and business rules. | Sections 3, 4, 7
+Architects and security reviewers | Check the architecture, interfaces, data and security needs. | Sections 2, 5, 6, 7
+System administrators | Maintain and configure the system after delivery. | Sections 3.1, 5, 7.7
+</script>
+
+<h2>1.4 Project Scope</h2>
+<p>UTeM offers micro-credentials in three categories: Unbundled Micro-Credentials (UMC) taken from accredited credit courses, Stand-alone Micro-Credentials (SAMC), and the non-credit Micro-Credential Eksekutif (MCE). The Garis Panduan Micro-Credential UTeM sets strict rules for each category. Most importantly, it separates approval, achievement, credentials, Quality Verification, ACR and ABC deposit, credit transfer and the award of a qualification into distinct steps that must never be merged [G 12–14, 18.14]. These rules are difficult to apply consistently with documents and spreadsheets. MCMS gives the University one system in which each step is a separate, traceable record.</p>
+<p>MCMS is a new, standalone web system with its own database, sign-in handling and workflow (D-06). Learning content stays on the UCreds platform, and other external services are reached through adapters.</p>
+
+<h3>In Scope</h3>
+<p>The system will include the following key components:</p>
+<ul>
+  <li><b>Identity, roles and settings:</b> single sign-on with the Microsoft education account, role- and scope-based access, configurable thresholds and approving bodies.</li>
+  <li><b>Curriculum management:</b> category determination for UMC, SAMC and MCE, the proposal and design workspace of Guide Appendix A, review, approval, versioning and material-change control.</li>
+  <li><b>Offering and delivery:</b> readiness checks (Appendix B), public catalogue, registration, enrolment, cohorts, a dummy payment service, and import of learning results from UCreds.</li>
+  <li><b>Achievement and credentials:</b> assessment verification, the internal Achievement Record, Digital Badges, Certificates and Digital Credentials in an open signed format, and public verification without login.</li>
+  <li><b>Quality Verification for SAMC:</b> QV readiness evidence (Appendix D), QV status, validity and expiry control.</li>
+  <li><b>Credit recognition:</b> ACR preparation, participant consent, ABC deposit tracking, credit validity, credit transfer evaluation, the Single Redemption Principle and stackable degree pathway checks (Appendices F and G).</li>
+  <li><b>Governance:</b> monitoring, CQI (Appendix C), periodic review, suspension and termination, the append-only audit trail, records management and reports (Appendix H).</li>
+  <li><b>Bilingual operation:</b> screens, notifications and credentials in Bahasa Melayu and English (D-02).</li>
+</ul>
+
+<h3>Out of Scope</h3>
+<p>The following items are explicitly excluded:</p>
+<ol>
+  <li>Delivering learning content; this stays on UCreds or another learning platform.</li>
+  <li>The national ABC platform and the QVC/MQA procedures themselves. MCMS prepares and tracks; UTeM staff submit (D-14).</li>
+  <li>The full student information system, programme admission and degree programme regulations. MCMS records the results of these decisions but does not take them.</li>
+  <li>The UTeM payment hub itself; a dummy payment service stands in for Release 1 (A-03).</li>
+  <li>Open public self-registration; outside applicants first register at Pejabat Pendaftar or HEPA (D-10).</li>
+  <li>Partner-delivered micro-credentials run by other institutions (possible later).</li>
+  <li>Hardware procurement, and native mobile applications.</li>
+</ol>
+
+<h3>Release Overview</h3>
+<p>The release in which each capability is delivered follows from the SHALL / SHOULD / MAY wording of its requirements. {{tab:releases}} summarises the result. The PRD will hold the detailed release plan (D-22).</p>
+<p class="tcap" data-t="releases">Summary of capabilities by release</p>
+<script type="text/tbl" data-h="Capability area|Release 1 (SHALL)|Release 2 (SHOULD)|Release 3+ (MAY)" data-w="22%|30%|26%|22%">
+Identity and access | SSO (stub outside production), roles with scope, separation of duties, settings | Delegation of approval roles | –
+Curriculum | Category rules, proposal workspace, review, approval, versioning, material change | Version comparison, batch meeting decisions, parent-course change alerts | –
+Offering and enrolment | Readiness, catalogue, registration, dummy payment, cohorts | Waitlist, fee waivers, bulk enrolment | Live UTeM payment hub
+Learning platform | CSV import and export with UCreds | Live UCreds connector | Near-real-time synchronisation
+Credentials | Badges, certificates, signed Digital Credentials, public verification, correction and revocation | Signature check of uploaded credentials, sharing to professional networks | Credential wallet integration
+Quality Verification | QV status, validity, expiry alerts, evidence checklist, manual submission package | – | Electronic submission to QVC/MQA
+ACR, ABC and transfer | ACR, consent, manual ABC tracking, credit transfer, single redemption | External credit records, equivalence precedents | Live ABC connector
+Stackable degree | Pathway record, 30% and residency checks, individual plan | PLO and Body of Knowledge matrices | SIS link for admission and graduation
+Governance | Audit trail, corrections, traceability, standard reports, retention settings, cohort indicators, CQI records, periodic review, suspension and termination | Monitoring dashboards, facilitator and industry feedback, record holds | Analytics
+</script>
+
+<h2>1.5 References</h2>
+<p>This SRS is based on the following documents and sources:</p>
+<ol>
+  <li>Garis Panduan Micro-Credential UTeM (the Guide), CODL UTeM, Bab 1–18 with Lampiran A–H: the copy held in the project, Versi 1.0, 18 September 2026 (D-03).</li>
+  <li>Glossary and Decision Log for the UTeM MCMS, version 0.6, 27 October 2026 (MCMS_FND_V0.6_Oct_2026). This SRS is written against that version.</li>
+  <li>Software Requirements Specification, UTeM MCMS, informal draft v0.1, 23 October 2026 (input material only, D-04).</li>
+  <li>Software Requirements Specification for an AI-Driven Job Matching Platform, v1.0, May 2025. Used as a format reference only; no content is reused (D-26).</li>
+  <li>MQA: Guidelines to Good Practices: Micro-Credentials; Quality Verification of Stand-alone Micro-Credentials; Guidelines on the Academic Bank of Credit; Malaysian Qualifications Framework, second edition; Code of Practice for Programme Accreditation: Open and Distance Learning.</li>
+  <li>Guidelines on Developing Academic Programme through Stackable Degree Pathway.</li>
+  <li>UTeM academic regulations, academic quality assurance policy, and records and document management policy.</li>
+  <li>ISO/IEC/IEEE 29148, Systems and software engineering: Requirements engineering.</li>
+  <li>1EdTech Open Badges 3.0 and W3C Verifiable Credentials Data Model (credential format guidance).</li>
+  <li>WCAG 2.1; OWASP Application Security Verification Standard 4.0; Personal Data Protection Act 2010 (Act 709) with current amendments.</li>
+</ol>
+
+<!-- ===================== 2. OVERALL DESCRIPTION ===================== -->
+<h1>2. Overall Description</h1>
+
+<h2>2.1 Product Perspective</h2>
+<p>MCMS is a new system. It does not extend UCreds or the student information system. It has its own database, sign-in handling and workflow, and it runs on UTeM-controlled servers (D-06, constraint C1, C2). MCMS is the system of record for micro-credential proposals, approvals, versions, offerings, enrolments, verified achievements, credentials, ACR preparation and the University's own credit-use records. It is <b>not</b> the system of record for learning content (UCreds), national credit storage (ABC), Quality Verification decisions (QVC/MQA) or programme admission and graduation (student information system); it stores references to those decisions.</p>
+<p>MCMS talks to every external system through an <b>adapter</b>: a defined interface with a stub or manual implementation in Release 1 that can later be replaced by a live connector without changing the business modules (D-06, D-14). The context diagram below shows who uses MCMS and which systems it connects to.</p>
+
+<figure data-f="context">
+<pre class="mermaid">
+flowchart LR
+  subgraph People["People"]
+    direction TB
+    P8["Students (P8)<br/>incl. staff and outside applicants"]
+    P1["Lecturers (P1)"]
+    P2["Deputy deans, PTj (P2)"]
+    P3["Senate (P3)<br/>no login; decisions<br/>recorded by deputy dean"]
+    S1["CODL (S1, P5)<br/>administration and<br/>technical operation only"]
+
+    X3["Public verifier, employer (X3)<br/>no login"]
+  end
+  M(["<b>MCMS</b><br/>Micro-Credential<br/>Management System"])
+  subgraph Systems["External systems (through adapters)"]
+    direction TB
+    SSO["UTeM SSO<br/>Microsoft education account"]
+    UC["UCreds learning platform"]
+    ABC["National ABC platform"]
+    QV["QVC / MQA"]
+    PAY["Payment hub<br/>(dummy in Release 1)"]
+    MAIL["UTeM email service"]
+    SIS["Student information system<br/>(future)"]
+  end
+  P8 --- M
+  P1 --- M
+  P2 --- M
+  P3 -. "recorded by P2" .- M
+  S1 --- M
+  X3 -. "verify credential" .- M
+  M -- "sign-in (OIDC)" --- SSO
+  M -- "enrolments out, results in (CSV)" --- UC
+  M -. "ACR deposit (manual)" .- ABC
+  M -. "QV package (manual)" .- QV
+  M -- "payment requests" --- PAY
+  M -- "notifications" --- MAIL
+  M -. "admission, graduation" .- SIS
+</pre>
+<figcaption>System context of MCMS. Solid lines are automated exchanges in Release 1; dotted lines are manual exchanges or later integrations.</figcaption>
+</figure>
+
+<h2>2.2 Product Functions</h2>
+<p>MCMS will provide the following major functions. They are grouped into sixteen modules (M1–M16) carried from the draft SRS. The modules form a <b>modular monolith</b>: one deployable application with clearly separated modules that call each other through internal interfaces (D-07, proposed).</p>
+<ol>
+  <li><b>Identity and governance foundation</b>: sign-in, roles and scopes, settings, approving bodies, notifications and the integration hub.</li>
+  <li><b>Curriculum management</b>: category determination, proposal and design workspace, review and approval, versioning and material change.</li>
+  <li><b>Offering and delivery</b>: readiness checks, catalogue, registration and enrolment, connection to the learning platform, assessment and verification of achievement.</li>
+  <li><b>Recognition</b>: Achievement Record, Digital Badges, Certificates, Digital Credentials, public verification, and Quality Verification for SAMC.</li>
+  <li><b>Credit</b>: ACR, ABC deposit tracking, credit validity, credit transfer, single redemption and stackable degree pathways.</li>
+  <li><b>Quality and records</b>: monitoring, CQI, periodic review, suspension and termination, audit trail, records and reports.</li>
+</ol>
+<p class="tcap" data-t="modules">Modules of MCMS</p>
+<script type="text/tbl" data-h="Module|Function|Main Guide source|SRS section" data-w="10%|44%|26%|20%">
+M1 | Identity, roles and access | Bab 15–16, 18.11, App H | 3.1
+M2 | Category determination | 6.3–6.5 | 3.2
+M3 | Proposal and design workspace | Bab 8–9, App A | 3.2
+M4 | Review, approval and versioning | 9.4–9.5, 15.4, 17.7–17.8 | 3.3
+M5 | Offering, catalogue and readiness | 9.6, 10.3.1, App B | 3.4
+M6 | Registration, enrolment and cohorts | 10.3 | 3.5
+M7 | Learning platform connection | 10.1–10.2 | 3.6
+M8 | Assessment and achievement verification | 8.6, 10.4 | 3.7
+M9 | Achievement Record (internal) | 8.7.5, 12.2, 18.3 | 3.8
+M10 | Credential issuance and verification | 8.7, 10.5, App E | 3.9
+M11 | Quality Verification management (SAMC) | 11.2, App D | 3.10
+M12 | ACR, ABC tracking and redemption | Bab 12, App F | 3.11, 3.13
+M13 | Credit transfer and stackable pathway | Bab 13–14, App F–G | 3.12, 3.14
+M14 | Monitoring, CQI and change control | Bab 11, 17, App C | 3.15
+M15 | Records, audit and reporting | Bab 18, App H | 3.16
+M16 | Notifications and integration hub | Bab 10, 18 | 3.17
+</script>
+
+<figure data-f="architecture">
+<pre class="mermaid">
+flowchart TB
+  UI["<b>Presentation (web, BM / EN)</b><br/>Staff portal · Participant portal · Public catalogue and verification"]
+  subgraph APP["MCMS application (modular monolith)"]
+    direction TB
+    subgraph CUR["Curriculum"]
+      direction LR
+      M2["M2 Category"]
+      M3["M3 Proposal"]
+      M4["M4 Approval and versions"]
+      M5["M5 Offering"]
+    end
+    subgraph DEL["Delivery"]
+      direction LR
+      M6["M6 Enrolment"]
+      M7["M7 Learning platform"]
+      M8["M8 Assessment"]
+    end
+    subgraph REC["Recognition"]
+      direction LR
+      M9["M9 Achievement Record"]
+      M10["M10 Credentials"]
+      M11["M11 Quality Verification"]
+    end
+    subgraph CRE["Credit"]
+      direction LR
+      M12["M12 ACR, ABC, redemption"]
+      M13["M13 Transfer and stackable"]
+    end
+    subgraph GOV["Governance and platform services"]
+      direction LR
+      M1["M1 Identity and roles"]
+      M14["M14 Monitoring and CQI"]
+      M15["M15 Audit and records"]
+      M16["M16 Notifications"]
+      ST["Settings"]
+    end
+  end
+  ADP["<b>Adapter layer (stub / manual / live)</b><br/>SSO · Learning platform · ABC · QVC / MQA · Payment · Email · SIS"]
+  EXT["External systems"]
+  ADP --> EXT
+  DB[("MCMS database<br/>PostgreSQL (proposed)")]
+  UI --> APP
+  APP --> ADP
+  APP --> DB
+</pre>
+<figcaption>Logical architecture: one application with separated modules, a single database, and an adapter for every external system.</figcaption>
+</figure>
+
+<h2>2.3 The Central Rule: Separate Recognition Stages</h2>
+<p>The Guide treats each of the stages below as a different thing with its own decision and its own record, and it warns repeatedly against merging them [G 12–14, 15.4, 18.14]. MCMS SHALL store them as separate records with separate decisions, so that none can be skipped or mistaken for another (D-15). This is the single most important rule for developers. It overrides any convenience shortcut: no single status field, screen action or button may combine two stages.</p>
+
+<figure data-f="stages">
+<pre class="mermaid">
+flowchart LR
+  S1["<b>1. Approval to offer</b><br/>Senate, after deputy<br/>dean endorsement"]
+  S2["<b>2. Module achievement</b><br/>Digital Badge<br/>verified by deputy dean"]
+  S3["<b>3. MC completion</b><br/>Certificate / Digital<br/>Credential (system)"]
+  S4["<b>4. Quality Verification</b><br/>SAMC only<br/>QVC / MQA"]
+  S5["<b>5. ACR and<br/>ABC deposit</b><br/>system generates ACR,<br/>student consents,<br/>deputy dean records"]
+  S6["<b>6. Credit transfer</b><br/>deputy dean of the<br/>degree faculty"]
+  S7["<b>7. Stackable degree<br/>award</b><br/>academic programme"]
+  S1 --> S2 --> S3 --> S5 --> S6 --> S7
+  S4 -. "needed for SAMC credit" .-> S5
+  S1 -. "separate decision" .- S4
+</pre>
+<figcaption>The seven recognition stages. Each arrow is a separate decision by a separate party; reaching one stage never grants the next.</figcaption>
+</figure>
+
+<p class="tcap" data-t="stages">Recognition stages, who decides, and what each stage does not imply</p>
+<script type="text/tbl" data-h="Stage|Decided by|Record kept in MCMS|Does NOT imply" data-w="22%|26%|28%|24%">
+1. Approval to offer | Senate, after deputy dean endorsement; recorded by the deputy dean | Approval decision on an MC version | Credit, QV, transfer
+2. Module achievement (Digital Badge) | Lecturer assesses; deputy dean verifies; system issues the badge | Module result, badge record | Whole-MC completion, credit
+3. MC completion (Certificate / Digital Credential) | Deputy dean confirms; system issues the credential | Achievement Record status, credential record | Credit, ACR, transfer
+4. Quality Verification (SAMC only) | QVC / MQA | QV record with reference, credit, MQF level, validity | Transfer or admission
+5. ACR and ABC deposit | System generates ACR; deputy dean confirms; student consents; deputy dean records the deposit | ACR, consent, deposit record | Transfer approval
+6. Credit transfer | Deputy dean of the faculty that owns the degree | Transfer application, equivalence assessment, decision | Admission, degree award
+7. Stackable degree award | UTeM academic programme | Reference to the award recorded by the programme | Nothing further
+</script>
+
+<p>The life of a single micro-credential follows the cycle below [G 8, 15.3]. Each step has a responsible party, a review or approval mechanism and a record.</p>
+<figure data-f="lifecycle">
+<pre class="mermaid">
+flowchart LR
+  A["Needs analysis"] --> B["Design and<br/>development"] --> C["Academic<br/>review"] --> D["Approval"] --> E["Offering and<br/>delivery"] --> F["Assessment and<br/>verification"] --> G["Badge /<br/>Certificate /<br/>Digital Credential"] --> H["Records and academic<br/>recognition, if eligible"] --> I["Monitoring<br/>and CQI"]
+  I -- "minor update" --> E
+  I -- "material change" --> C
+</pre>
+<figcaption>Micro-credential life cycle. A minor update returns to delivery; a material change returns to review and re-approval.</figcaption>
+</figure>
+
+<h2>2.4 Micro-Credential Categories</h2>
+<p>Every rule in MCMS depends on the category of the micro-credential. The category is proposed early, checked at review and fixed by approval [G 6.5]. {{tab:categories}} gives the differences that the system enforces.</p>
+<p class="tcap" data-t="categories">Comparison of UTeM micro-credential categories (Guide Table 1, clauses 6.3–6.5)</p>
+<script type="text/tbl" data-h="Criterion|UMC|SAMC|MCE" data-w="17%|29%|29%|25%">
+Origin | Unbundled from a credit course of an accredited UTeM programme; keeps its parent link | Own offering, not a formal part of an accredited programme | Own non-credit short learning
+SLT | Total equals the parent course; whole UMC at least 40 h or 1 credit | At least 40 h | Under 40 h
+Credit | Possible, subject to academic rules; only the whole UMC carries credit | Only after Quality Verification | None
+Quality route | Quality assurance of the parent programme | Internal QA, plus QV if credit or MQF level is sought | Internal UTeM QA
+ABC deposit | Yes, if eligible (formal learning) | Only if Quality-Verified (non-formal learning) | No
+Credit transfer | Yes, subject to equivalence | Only if Quality-Verified | No
+Stackable degree | Yes, subject to conditions | Only if Quality-Verified | No
+Credential | Badge per module; Certificate / Digital Credential for the whole UMC | Certificate / Digital Credential; credit and MQF only after QV | Certificate / Digital Credential stating non-credit completion
+</script>
+
+<h2>2.5 User Classes, Characteristics, and Needs</h2>
+<p>MCMS has six kinds of user (D-28). The codes keep the numbering of Guide Appendix H2 so that requirements stay traceable to the Guide; the Guide's other general roles (a separate quality unit P4, records and credential unit P6, ABC depositor P7 and receiving-programme evaluator X4) are not used as separate users, and their tasks are carried by the deputy dean or done automatically by the system (D-28, D-29). A person may hold several roles, each with its own scope (Section 3.1.2).</p>
+<p class="tcap" data-t="users">Users of MCMS</p>
+<script type="text/tbl" data-h="User (code)|Who|Logs in?|Main functions in MCMS" data-w="20%|22%|10%|48%">
+Student (P8) | UTeM students and staff, graduates, professionals and members of the public registered by Pejabat Pendaftar or HEPA | Yes | Browse the catalogue; register and pay; follow module progress; view, download and share credentials; give or decline consent for ABC deposit; view the credit ledger; apply for credit transfer.
+Lecturer (P1) | Academic staff of a PTj | Yes | Propose and design micro-credentials; teach on UCreds; enter and check results; perform the quality review and CQI after each cohort; collect QV evidence for a SAMC. When assigned, reviews a colleague's proposal as reviewer (X1).
+Deputy dean (P2) | Deputy dean of the PTj that owns the offering | Yes | Assign reviewers; verify category and endorse; record Senate decisions; confirm readiness; verify results and confirm completion (which triggers automatic credentials); confirm quality reviews, CQI and QV evidence; correct, replace or revoke credentials; confirm ACR and record ABC deposits; approve module credit (D-18). The deputy dean of the faculty that owns a degree decides credit transfer cases into it.
+Senate (P3) | UTeM Senate | No | Gives final approval to offer, approves material changes and stackable degree mappings. Its decisions are recorded in MCMS by the deputy dean with the meeting reference (D-11).
+CODL (S1, P5) | CODL system administrators and technical staff | Yes, administration only | Manage users, roles, settings, templates and reference data; exchange data with UCreds; monitor adapters. CODL takes no academic decision and holds no academic records role (D-12).
+Public verifier (X3) | Employers and members of the public | No | Check a credential by link or QR code; see only the minimum permitted information.
+Industry expert (X2, optional) | External subject-matter expert invited to a proposal | Yes, limited | Comment on competencies and relevance only; no decisions [G 16.7].
+</script>
+<p>In addition, <b>the system itself</b> acts automatically: it issues Digital Badges, Certificates and Digital Credentials once the deputy dean has verified results or confirmed completion and the pre-issuance checks pass; it generates ACR for eligible learning; and it sends reminders and expiry alerts (D-29).</p>
+
+<p>The Guide's general RACI matrix (Appendix H3) is mapped onto these users below. MCMS uses it to route tasks and notifications; the actual role holders are settings (D-11, D-12).</p>
+<p class="tcap" data-t="raci">RACI matrix of the micro-credential life cycle, mapped to MCMS users (from Guide Appendix H3)</p>
+<script type="text/tbl" data-h="Activity|Lecturer P1|Deputy dean P2|Senate P3|CODL S1/P5|System|Student P8" data-w="34%|11%|11%|11%|11%|11%|11%" data-cls="small">
+Proposal and design of an MC | R | A | I | – | – | –
+Category check UMC / SAMC / MCE | R | A | I | – | Suggests | –
+Academic review | R (reviewer) | A | – | – | – | –
+Approval to offer | C | R (endorses, records) | A | – | – | –
+Platform and materials preparation | R | A | – | R (UCreds) | – | –
+Registration and enrolment | I | A | – | C | R | R
+Learning delivery and assessment | R | A | – | C | – | R
+Verification of achievement | C | A/R | – | – | – | I
+Issue Digital Badge / Certificate / Digital Credential | I | A (triggers) | – | – | R | I
+Correction, replacement, revocation | C | A/R | – | – | – | I
+Monitoring and CQI | R | A | – | – | Calculates | C
+QV evidence and maintenance (SAMC) | R | A | – | – | Links evidence | –
+ACR preparation for eligible credit | I | A (confirms) | – | – | R (generates) | I
+Consent to ABC deposit | – | I | – | – | – | R
+Recording the ABC deposit | – | A/R | – | – | – | I
+Credit transfer evaluation and decision | C | A/R (degree faculty) | – | – | Checks rules | R (applies)
+Stackable degree mapping | R/C | R | A | – | – | I
+Material change | R | R (endorses) | A | – | Detects | I
+Suspension / termination | C | R | A | – | – | I
+</script>
+<h2>2.6 Operating Environment</h2>
+<p>The platform will operate in the following environment:</p>
+<ol>
+  <li><b>Technical environment</b>
+    <ul><li>A web application accessible through current versions of Microsoft Edge, Google Chrome, Mozilla Firefox and Apple Safari (latest two major versions).</li>
+    <li>Fully responsive design for phones and tablets; no native mobile application.</li>
+    <li>Hosted on UTeM on-premises servers (virtual machines or containers), with separate development, test and production environments.</li></ul></li>
+  <li><b>Software environment</b>
+    <ul><li>Laravel (PHP) application framework, a currently supported release (D-08).</li>
+    <li>PostgreSQL as the primary database; MySQL or MariaDB as an accepted fallback if CODL already hosts it (D-09, OI-02). Queries stay portable through Laravel's database layer.</li>
+    <li>A queue worker for background jobs (imports, credential issuance, notifications, alerts) and a scheduler for timed jobs (expiry alerts, retention checks).</li>
+    <li>UTeM single sign-on based on the Microsoft education account (OpenID Connect assumed, OI-03); UTeM SMTP email service.</li></ul></li>
+  <li><b>User environment</b>
+    <ul><li>Staff use office desktops and laptops on the campus network or remotely over the internet.</li>
+    <li>Participants use personal devices, often phones, with varying connection quality.</li>
+    <li>Verifiers open a credential link or scan a QR code without signing in.</li>
+    <li>Interface in Bahasa Melayu and English.</li></ul></li>
+  <li><b>Organisational environment</b>
+    <ul><li>Offices and data owners: PTj (academic owner of offerings and records), CODL (system operation), Pejabat Pendaftar, HEPA and UTeM ICT.</li></ul></li>
+</ol>
+
+<h2>2.7 Design and Implementation Constraints</h2>
+<p>The following constraints will affect the design and implementation of the platform:</p>
+<ol>
+  <li><b>Technical constraints</b>
+    <ul><li>C1: MCMS SHALL be a new standalone system, not an extension of UCreds or the student information system (D-06).</li>
+    <li>C3: Every external system SHALL be reached through an adapter with a stub or manual implementation for Release 1 (D-06, D-14).</li>
+    <li>Architecture: a modular monolith built on Laravel (D-07, D-08).</li>
+    <li>C8: Credentials SHALL use an open, signed format; blockchain is not required (D-19).</li></ul></li>
+  <li><b>Data and rule constraints</b>
+    <ul><li>C2: All data SHALL stay on UTeM-controlled infrastructure.</li>
+    <li>C4: Thresholds and lists SHALL be settings, not code (D-16).</li>
+    <li>C5: Credit value, MQF level and QV wording SHALL be generated only from verified records, never typed by hand (D-17).</li>
+    <li>C6: Approvals, credential actions, result changes and corrections SHALL be written to an append-only audit log (D-20).</li>
+    <li>The recognition stages SHALL be separate records (D-15).</li></ul></li>
+  <li><b>Regulatory constraints</b>
+    <ul><li>Compliance with the Guide, MQA guidelines and the MQF.</li>
+    <li>Compliance with PDPA 2010 and UTeM policies on records, information security and privacy.</li></ul></li>
+  <li><b>Business constraints</b>
+    <ul><li>Built by an intern as a concept and prototype; Release 1 is the prototype scope (D-22).</li>
+    <li>Maintainable by CODL staff who mainly use PHP (D-08).</li>
+    <li>Approving bodies and role holders may change; the system must adapt by configuration (D-11, D-12).</li></ul></li>
+  <li><b>User constraints</b>
+    <ul><li>C7: Interface and credentials SHALL support Bahasa Melayu and English (D-02).</li>
+    <li>Accessible to users with disabilities (WCAG 2.1 AA) and usable on low-end phones.</li></ul></li>
+</ol>
+
+<h2>2.8 User Documentation</h2>
+<p>The following user documentation will be developed with the system:</p>
+<ol>
+  <li><b>Online help</b>: context help on each screen and a Frequently Asked Questions page that explains, in plain words, the difference between a badge, a certificate, an ACR, an ABC deposit and a credit transfer.</li>
+  <li><b>User guides</b>, in Bahasa Melayu and English: Lecturer and Developer Guide; PTj and Approver Guide; Quality Assurance Guide; Records, Credential and ABC Guide; Participant Guide; System Administrator Guide.</li>
+  <li><b>Technical documentation</b>: adapter interface guide, CSV import and export templates, credential format and verification guide, installation and operations guide.</li>
+  <li><b>Training materials</b>: quick reference cards per role and short demonstration videos.</li>
+</ol>
+
+<h2>2.9 Assumptions and Dependencies</h2>
+<h3>Assumptions</h3>
+<p>The assumptions below are carried from the Glossary and Decision Log. Each one is built so that, if it proves wrong, only configuration or a single adapter changes.</p>
+<script type="text/tbl" data-h="ID|Assumption|Effect if wrong" data-w="9%|55%|36%">
+A-01 | Superseded by D-11: deputy dean endorses, Senate approves (recorded by the deputy dean), degree-owning deputy dean decides transfers. | Approver bodies remain settings.
+A-02 | ABC and QVC/MQA accept submissions manually in Release 1. | A live adapter is added later.
+A-03 | UTeM's payment hub is not ready; a dummy payment service is used. | Replace one adapter.
+A-04 | UCreds is the pilot learning platform; its connection method is unknown. | CSV import is the fallback; connector design shifts.
+A-05 | UCreds already issues module badges and has its own database. | MCMS issues badges itself.
+A-06 | Outside applicants register at Pejabat Pendaftar or HEPA, then sign in with a Microsoft education account. | Add an applicant pre-registration screen.
+A-07 | Superseded by D-12 and D-29: CODL is administrator and technical operator only; credentials and ACR are produced by the system after deputy dean verification. | Role holders change in settings.
+A-08 | Retention periods are placeholders. | Edit settings.
+A-09 | Sizing is indicative: 200 offerings and 20,000 participants a year, peaks of 2,000 registering within hours. | Capacity plan changes.
+</script>
+<h3>Dependencies</h3>
+<ol>
+  <li>Access to the UTeM SSO tenant and agreement on the sign-in protocol (OI-03).</li>
+  <li>Agreement with the UCreds team on the data exchange format (OI-04).</li>
+  <li>Availability of a database server and hosting environment at UTeM (OI-02).</li>
+  <li>Reference data for PTj, programmes and parent courses, including accreditation status, from the relevant offices.</li>
+  <li>Decisions on the approving bodies, retention periods and ownership of credential signing keys (OI-06, OI-07, OI-08).</li>
+</ol>
+
+<!-- ===================== 3. FUNCTIONAL REQUIREMENTS (A) ===================== -->
+<h1>3. System Features and Functional Requirements</h1>
+<p>This section details the functional requirements of MCMS, organised by system feature in the order of the micro-credential life cycle. Each subsection begins with a short description of the feature and, where it helps, a diagram, followed by a requirement table. Each requirement has a unique ID (FR-XX) for traceability. The business rules that these requirements enforce are listed with their own IDs in Section 4.</p>
+
+<!-- ============ 3.1 ============ -->
+<h2>3.1 Identity, Roles and Access (M1)</h2>
+<p>Staff and participants sign in with their Microsoft education account through UTeM single sign-on; MCMS keeps no passwords of its own in production (D-10). Access is controlled by role and by scope: a person sees and acts only on the PTj and micro-credentials assigned to them. Approving bodies and role holders are settings, so a change in the University's committees does not need a code change (D-11, D-12).</p>
+
+<h3>3.1.1 Sign-in and Account Recognition</h3>
+<script type="text/req" data-p="FR">
+fr-sso | The system SHALL authenticate staff and participants through UTeM single sign-on using their Microsoft education account. The protocol is assumed to be OpenID Connect (TBD, OI-03). | D-10
+fr-nosignup | The system SHALL NOT offer open public self-registration. A local account SHALL be created only on a person's first successful SSO sign-in or by an import of applicants registered by Pejabat Pendaftar or HEPA. | D-10, A-06
+fr-firstlogin | On first sign-in the system SHALL create a local user profile from the SSO claims (full name, email, staff or matric number where present) and SHALL assign the Participant role by default. | D-10
+fr-applicant | The system SHALL recognise outside applicants registered by Pejabat Pendaftar or HEPA through a configurable account attribute or an imported applicant list (TBD, OI-03). | A-06
+fr-devidp | In development and test environments the system SHALL provide a stub identity provider that lets testers sign in as any configured test user and role without the real SSO tenant. The stub SHALL be impossible to enable in production. | D-14
+fr-session | The system SHALL end an idle session after <code>auth.idle_timeout_minutes</code> and SHALL provide a sign-out action that ends the local session. |
+fr-profile | A user SHALL be able to view their profile and edit only non-authoritative fields (preferred language, notification preferences, contact phone). Name and identifiers SHALL come only from the authoritative source. | G 18.11
+fr-signinguide | The sign-in screen SHALL provide explicit institutional format guidance for UTeM Office 365 credentials, distinguishing staff (<code>UserId@utem.edu.my</code>) and student (<code>MatricNo@student.utem.edu.my</code>) account patterns, with vertically centered presentation and test persona access isolated to non-production environments. | D-44
+fr-lang | Each user SHALL be able to choose Bahasa Melayu or English as interface language at any time; the choice SHALL be remembered across sessions. | D-02
+fr-idmerge | The system SHOULD let the System Administrator merge two local accounts that belong to the same person, keeping every linked record and writing the merge to the audit trail. |
+</script>
+
+<h3>3.1.2 Roles, Scopes and Separation of Duties</h3>
+<script type="text/req" data-p="FR">
+fr-rbac | The system SHALL control access by role-based access control using the users of Section 2.5 (P1, P2, P3, P5, P8, X1–X3, S1). Permissions SHALL be checked on the server for every action, not only hidden in the interface. | G 15–16, App H
+fr-multirole | A user SHALL be able to hold more than one role at the same time, each with its own scope. | App H2
+fr-scope | Every staff role assignment SHALL carry a scope: the whole University, one or more PTj, or one or more specific micro-credentials. A user SHALL see and act only on records inside their scope. | G 15.2.2
+fr-roleassign | Only the System Administrator (S1) SHALL assign or revoke roles. Each change SHALL record the role, scope, reason, effective date and the person making the change in the audit trail. | D-20
+fr-sod | The system SHALL prevent the same person from both submitting and deciding the same item. A lecturer SHALL NOT review or approve their own proposal, and the person who enters a result SHALL NOT be its only verifier. | G 15.1
+fr-adminlimits | The System Administrator role SHALL NOT include permission to approve academic matters, verify results, issue credentials, prepare ACR or decide credit transfer. | G 15.2.3
+fr-approverbody | The approving body for each decision type (approval to offer, material change, transfer rules, individual transfer case, stackable mapping, suspension) SHALL be a setting that maps the decision type to a role. Changing it SHALL NOT need a code change. | D-11, A-01, OI-06
+fr-coi | A reviewer (X1) SHALL declare whether they have a conflict of interest before opening a review. A declared conflict SHALL remove the reviewer from that item and notify the person who assigned them. | G 16.6
+fr-sme | An industry expert or SME (X2) SHALL be able to read the proposal and add comments on competencies and relevance only; X2 SHALL have no decision rights. | G 16.7
+fr-delegate | An approver SHOULD be able to delegate their approval role to another eligible user for a set period. The delegation SHALL be shown on every decision taken under it. |
+</script>
+
+<h3>3.1.3 System Administration and Settings</h3>
+<p>Thresholds from the Guide may be revised by UTeM or MQA, so they are kept as settings (D-16). {{tab:settings}} lists the settings that Release 1 must provide, with their default values.</p>
+<p class="tcap" data-t="settings">Configurable settings and default values</p>
+<script type="text/tbl" data-h="Setting key|Meaning|Default|Source" data-w="30%|42%|13%|15%" data-cls="small">
+<code>slt.min_hours_samc</code> | Minimum SLT for a SAMC | 40 hours | G 6.3.2, BR-01
+<code>slt.min_hours_umc_whole</code> | Minimum SLT for a whole UMC (or 1 credit) | 40 hours | G 6.3.1, BR-01
+<code>slt.min_hours_module_credit_model</code> | Minimum SLT per module under the credit-based unbundling model | 40 hours | G 6.3.1.1
+<code>credit.slt_hours_per_credit</code> | Notional learning hours per credit | 40 hours | MQF, D-27
+<code>qv.max_validity_years</code> | Maximum continuous validity of QV | 3 years | G 11.2.2, BR-02
+<code>qv.min_completed_cohorts</code> | Completed cohorts needed before QV submission | 1 | G 11.2.1, BR-03
+<code>credit.abc_validity_years</code> | Validity of credit in ABC from deposit date | 10 years | G 12.8, BR-04
+<code>stackable.min_home_credit_percent</code> | Minimum share of graduating credit earned at UTeM | 30% | G 14.5.1, BR-05
+<code>stackable.residency_semesters</code> | Residency for conventional programmes | 1 semester | G 14.5.3, BR-06
+<code>alerts.qv_expiry_days</code> | Days before QV expiry at which alerts are sent | 180, 90, 30 | D-16
+<code>alerts.credit_expiry_days</code> | Days before credit expiry at which the participant is alerted | 365, 90 | D-16
+<code>alerts.decision_overdue_days</code> | Days after which a pending review or decision is reminded | 14 |
+<code>umc.completion_window_months</code> | Default period to complete all modules of a modular UMC; an offering may set its own period | TBD (no value until OI-13 is answered) | G 7.4 (OI-13)
+<code>auth.idle_timeout_minutes</code> | Idle session timeout | 30 minutes |
+<code>retention.*</code> | Retention period per record category. The Release 1 prototype sets 2 years for the notification log, the report run log and the integration call log (<code>retention.notifications_years</code>, <code>retention.report_runs_years</code>, <code>retention.integration_years</code>); academic records stay TBD | TBD | G 18.12 (A-08, OI-07)
+<code>verification.public_fields</code> | Fields shown on the public verification page | Name, credential, issuer, date, status | App E6
+<code>approval.route.*</code> | Approving role per decision type: endorsement, senate, transfer, stackable, suspension, disposal | See 3.1.2; deputy dean in Release 1 | D-11
+<code>qv.provider_registered</code> | Whether UTeM is registered and authorised to offer the programme, checked before a SAMC can be ready to submit for QV | 1 (yes) | {{fr-qveligible}}
+<code>quality.target_participation_percent</code>, <code>quality.target_completion_percent</code>, <code>quality.target_pass_percent</code>, <code>quality.target_issuance_percent</code> | Targets that the cohort indicators of Appendix C2 are compared with | 80%, 70%, 70%, 95% | App C2
+<code>review.interval_months</code> | Months between the periodic reviews of a micro-credential | 24 months | G 17.9, {{fr-prschedule}}
+<code>review.remind_days</code> | Days before a periodic review at which the lecturer and PTj are reminded | 30 days | {{fr-prschedule}}
+<code>demo.clock_offset_days</code> | Days the demo clock is ahead of the real date; exists only in a test environment and is refused in production | 0 | PRD 7.2, {{fr-devidp}}
+</script>
+<script type="text/req" data-p="FR">
+fr-settings | The system SHALL keep every value of {{tab:settings}} in a settings store that S1 can edit through the interface. No business rule SHALL read a threshold from program code. | D-16
+fr-settinghist | Each settings change SHALL record the old value, new value, editor, reason and effective date. A decision SHALL be evaluated with the value that was in force on the date of the decision. | D-16, D-20
+fr-templates | S1 SHALL be able to manage, in both languages, the templates for notifications, certificates, Digital Credential display and recognition statements. Template changes SHALL be versioned. | D-02
+fr-userlist | S1 SHALL be able to search, view, deactivate and reactivate user accounts. Deactivation SHALL NOT delete or alter any record linked to the user. | G 18.1
+fr-refdata | S1 SHALL maintain reference data for PTj, academic programmes (code, name, MQF level, mode, accreditation status, total graduating credits) and parent courses (code, name, credit, SLT, CLOs), by form or by CSV import. | G 6.3.1, App G1
+fr-adapterstatus | S1 and P5 SHALL see the mode of each adapter (stub, manual or live), the time of its last run and its recent errors. | D-14
+</script>
+
+<!-- ============ 3.2 ============ -->
+<h2>3.2 Category Determination and Proposal (M2, M3)</h2>
+<p>A micro-credential starts as a proposal prepared by a lecturer in a guided workspace that follows Guide Appendix A. The first step is to determine the category, because the category decides the design rules, the approval route, the quality route and the possible recognition [G 6.5]. The decision logic is shown in {{fig:category}}.</p>
+
+<figure data-f="category">
+<pre class="mermaid">
+flowchart TD
+  Q1{"Is the offering unbundled from a<br/>credit course of an accredited<br/>UTeM programme?"}
+  Q1 -- "Yes" --> UMC["<b>UMC</b><br/>keeps parent course link<br/>total SLT = parent course SLT<br/>whole UMC ≥ 40 h or ≥ 1 credit"]
+  Q1 -- "No (own offering)" --> Q2{"Total SLT ≥ 40 hours?"}
+  Q2 -- "No" --> MCE["<b>MCE</b><br/>non-credit, internal QA<br/>no QV, no ABC, no transfer"]
+  Q2 -- "Yes" --> SAMC["<b>SAMC</b>"]
+  SAMC --> Q3{"Is a credit value or MQF<br/>level sought?"}
+  Q3 -- "Yes" --> QV["Quality Verification required<br/>before credit or MQF level<br/>may be stated (Section 3.10)"]
+  Q3 -- "No" --> NQ["SAMC without credit claim"]
+  UMC --> C["Category confirmed only through<br/>UTeM review and approval"]
+  MCE --> C
+  QV --> C
+  NQ --> C
+  MCE -. "credit later only by reclassifying<br/>and re-approving as SAMC" .-> SAMC
+</pre>
+<figcaption>Category determination, following Guide clause 6.5 and Figure 3 of the Guide.</figcaption>
+</figure>
+
+<h3>3.2.1 Category Determination</h3>
+<script type="text/req" data-p="FR">
+fr-catwizard | The system SHALL guide the proposer through category determination by asking for (a) the origin of the offering (unbundled from a credit course of an accredited UTeM programme, or an own offering), (b) the planned total SLT, and (c) whether a credit value or MQF level is sought. | G 6.5
+fr-catsuggest | From the answers the system SHALL propose a category according to {{fig:category}} and SHALL show the reason in plain words. | G 6.5
+fr-catumc | When the origin is a credit course of an accredited UTeM programme, the system SHALL allow only the category UMC. | G 6.5
+fr-catmce | When the offering is an own offering with total SLT below <code>slt.min_hours_samc</code>, the system SHALL allow only the category MCE and SHALL mark it non-credit. | G 6.3.3
+fr-catsamc | When the offering is an own offering with total SLT of at least <code>slt.min_hours_samc</code>, the system SHALL allow the category SAMC. If a credit value or MQF level is sought, the system SHALL record that QV is planned. | G 6.3.2
+fr-catconfirm | The category SHALL stay "proposed" until it is verified by the PTj and fixed by approval. Only a confirmed category SHALL drive offering, credential and credit rules. | G 6.5, App H3
+fr-umcnotsamc | The system SHALL NOT allow a module of a UMC to be proposed as a SAMC only because it can be completed separately. | G 6.2
+fr-mcereclass | An MCE SHALL become eligible for credit only through a new proposal version that reclassifies it as a SAMC, followed by approval and QV. The system SHALL offer this as a "Reclassify" action that starts such a version. | G 6.3.3
+</script>
+
+<h3>3.2.2 Proposal and Design Workspace</h3>
+<p>The workspace collects the content of Guide Appendix A (template sections A1–A10). Fields that do not apply are marked "Not applicable (TB)" rather than left empty.</p>
+<script type="text/req" data-p="FR">
+fr-propnew | A lecturer (P1) SHALL be able to create a proposal of type New, Revision or Re-offer for a PTj inside their scope. | App A1
+fr-propbasic | The proposal SHALL capture the basic information of Appendix A1: <ul><li>title in Bahasa Melayu and English;</li><li>owning PTj and lecturer (academic owner);</li><li>category (from 3.2.1) and proposal type;</li><li>field or discipline and target group;</li><li>delivery mode (face-to-face, online, blended, other) and delivery language;</li><li>proposed offering period.</li></ul> | App A1
+fr-propjust | The proposal SHALL capture the justification of Appendix A2: the need or problem addressed, the evidence of need (industry or employer analysis, participant feedback, programme need, professional standard, technology change, other) with attachments, and the added value compared with existing courses or training. | G 9.1, App A2
+fr-proplo | The proposer SHALL enter learning outcomes as separate items. Each outcome SHALL be linked to content, learning activities, assessment and SLT, as in the learning design table of Appendix A5. | G 8.2, App A5
+fr-propslt | The system SHALL calculate total SLT from the design rows, show the split between learning activities and assessment, and show the result against the category threshold. | G 8.3
+fr-propassess | The proposal SHALL capture the assessment design of Appendix A6: methods, weightings, pass or completion standard, identity and integrity mechanism, and feedback to participants. The system SHALL check that weightings total 100%. | G 8.6, App A6
+fr-propalign | The system SHALL show an alignment matrix of learning outcomes against assessment components and SHALL warn about any outcome without assessment and any assessment component not linked to an outcome. | G 8.2, 9.3
+fr-propcred | The proposal SHALL capture the credential design of Appendix A7: credential types (Digital Badge, Certificate, Digital Credential, other), achievement level (module or whole MC), QV status for a SAMC (not applied, will apply, Quality-Verified, not applicable) and the verification method. | App A7
+fr-propcredit | Credit value and MQF level SHALL be entered only as "proposed" values. They SHALL NOT appear in the catalogue or on any credential until confirmed by approval (UMC) or by a QV decision (SAMC). | G 10.5, App D2, D-17
+fr-propready | The proposal SHALL capture the readiness items of Appendix A8 (materials, platform, assessment and rubrics, facilitators, participant information, records and credential mechanism, accessibility) with status Yes / Not yet / Not applicable and evidence notes. | App A8
+fr-propattach | The proposer SHALL be able to attach supporting documents (PDF, Office documents, images) within a configurable size limit. |
+fr-propcollab | The proposer SHALL be able to add co-developers from the same PTj, who may edit the draft. Every edit SHALL be attributed to its author. | G 16.4
+fr-propautosave | The system SHALL save drafts automatically and SHALL let the proposer leave and resume a proposal. |
+fr-propip | The proposer SHALL confirm that third-party materials respect copyright and intellectual property rules, with a note on any licensed material. | G 9.3
+fr-propvalidate | Before submission the system SHALL check the proposal against the category rules of Section 4 and SHALL list blocking errors (which prevent submission) and warnings (which need a written response). | G 9.4
+fr-propprint | The system SHALL produce a printable proposal document in the layout of Appendix A for meetings and records. | App A
+</script>
+
+<h3>3.2.3 UMC Unbundling and Module Structure</h3>
+<p>A UMC must keep a clear academic link with its parent course: learning outcome mapping, SLT, content and assessment [G 6.3.1]. The unbundling model decides how modules and assessment are arranged [G 6.3.1.1].</p>
+<script type="text/req" data-p="FR">
+fr-umcparent | For a UMC the system SHALL record the parent programme, the parent course (code, name, credit, total SLT, CLOs), the accreditation status of the programme, the unbundling model and the number of modules. These SHALL be selected from reference data, not typed. | App A4
+fr-umcaccred | The system SHALL block submission of a UMC whose parent programme is not recorded as meeting the required accreditation status. | G 6.3.1, BR-09
+fr-umcmodel | The proposer SHALL choose one unbundling model: credit-based (each module at least <code>slt.min_hours_module_credit_model</code> with its own learning, activities and assessment), topic-based (modules by topic, SLT may differ), or separate learning and assessment (learning modules plus a separate integrated assessment module). | G 6.3.1.1
+fr-umcsltsum | The system SHALL block submission unless the total SLT of all modules equals the SLT of the parent course. | G 6.3.1, BR-08
+fr-umcwhole | The system SHALL block submission of a UMC whose whole structure has less than <code>slt.min_hours_umc_whole</code> or less than one credit. | G 6.3.1, BR-01
+fr-umccreditmodel | Under the credit-based model the system SHALL block submission if any module has less than <code>slt.min_hours_module_credit_model</code>. | G 6.3.1.1(a)
+fr-umctopicmodel | Under the topic-based model the system SHALL permit individual module SLT to vary without requiring the 40-hour threshold, SHALL require at least two modules, and SHALL enforce that total module SLT strictly matches parent course SLT. | G 6.3.1.1(b), Rajah 6
+fr-umcassessmodule | Under the separate learning and assessment model the system SHALL require at least one assessment module and SHALL check that the assessment structure as a whole covers every CLO of the parent course. | G 6.3.1.1(c), 8.6
+fr-umcclo | Each module learning outcome SHALL be mapped to one or more parent course CLOs. The system SHALL warn if any parent CLO is not covered by at least one module. | G 8.2, 9.4
+fr-umcmodcredit | Each module SHALL have a flag "separately recognisable credit unit" with default No. The system SHALL let the flag be set to Yes only by a recorded case-by-case decision of the role configured as the academic authority for this decision type; the System Administrator role SHALL NOT be able to set it. The whole UMC always carries the credit of its parent course. | G 13.5, 14.2.1, 15.2.3, D-18
+fr-umcparentchange | When the reference record of a parent course changes in learning outcomes, content, SLT, assessment or credit, the system SHOULD flag every linked UMC for review and notify its lecturer and PTj. | G 11.5, 14.8
+</script>
+
+<!-- ============ 3.3 ============ -->
+<h2>3.3 Review, Approval and Versioning (M4)</h2>
+<p>Every micro-credential must be reviewed and approved by the authority set by UTeM before it is offered [G 9.4–9.5]. Approval applies to one exact version of the structure. A material change creates a new version that needs review and re-approval before it takes effect [G 17.7–17.8]. {{fig:propstate}} shows the life of a proposal version.</p>
+
+<figure data-f="propstate">
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> Draft
+  Draft --> Submitted : P1 submits
+  Submitted --> InReview : PTj assigns reviewers
+  InReview --> Amend : amend requested
+  Amend --> Submitted : P1 resubmits
+  InReview --> Endorsed : PTj endorses and verifies category
+  InReview --> NotSupported : PTj does not support
+  Endorsed --> PendingApproval : sent to approving authority
+  PendingApproval --> Approved : approve
+  PendingApproval --> Amend : return
+  PendingApproval --> Rejected : reject
+  Approved --> Superseded : later version approved
+  Approved --> Suspended : authority suspends
+  Suspended --> Approved : authority lifts
+  Approved --> Terminated : authority terminates
+  Suspended --> Terminated
+  NotSupported --> [*]
+  Rejected --> [*]
+  state "Returned for amendment" as Amend
+  state "Not supported" as NotSupported
+  state "Pending approval" as PendingApproval
+  state "In review" as InReview
+  state "Endorsed by PTj" as Endorsed
+</pre>
+<figcaption>States of a micro-credential version from draft to approval, and later supersession, suspension or termination.</figcaption>
+</figure>
+
+<h3>3.3.1 Academic Review</h3>
+<script type="text/req" data-p="FR">
+fr-revassign | The PTj (P2) SHALL be able to assign one or more reviewers (X1) to a submitted proposal, with a due date and the scope of review. | G 9.4, 16.6
+fr-revform | The review form SHALL cover: suitability of learning outcomes; alignment of learning and assessment; adequacy of SLT; level and scope of content; delivery mode; module structure; credential information; and compliance with academic and QA requirements. For a UMC it SHALL also cover evidence of mapping to the parent course. Each item SHALL be rated Satisfactory or Needs amendment, with comments. | G 9.4
+fr-revrec | Each reviewer SHALL give a recommendation: Support, Amend or Do not support (Sokong / Pinda / Tidak Sokong). | App A9
+fr-revcomments | Each review comment SHALL be tracked with a status (open, answered, resolved) and the proposer's response. The proposal SHALL NOT go forward for approval while any comment marked as blocking is unresolved. | G 9.4
+fr-revcategory | The PTj SHALL explicitly verify the category when endorsing a proposal. The verified category SHALL be recorded separately from the proposed category. | App H3
+fr-revsummary | The system SHALL produce a review summary for the approving authority showing all recommendations, unresolved warnings and the proposer's responses. | G 9.5
+</script>
+
+<h3>3.3.2 Approval Workflow</h3>
+<script type="text/req" data-p="FR">
+fr-wfstages | The approval workflow SHALL record three stages, as in Appendix A9: academic or technical review, PTj or faculty endorsement, and approval by the UTeM authority configured for the decision type. | App A9, D-11
+fr-wfrecord | Each decision SHALL record the decision-maker, their role, the decision (support / amend / not support, or approve / return / reject), the date, comments and an external reference such as a Senate meeting number. | G 15.7
+fr-wfversion | An approval SHALL refer to one exact version of the micro-credential. Approval of one version SHALL NOT carry over to any other version. | G 9.5
+fr-wflock | Once a version is submitted its content SHALL be locked. Changes SHALL be possible only after it is returned for amendment, or through a new version. | G 9.5
+fr-wfnotcredit | Approval to offer SHALL NOT set, imply or display any QV status, ABC status, credit transfer status or stackable status. | G 15.4, D-15, BR-16
+fr-wfqueue | Approvers SHALL see a queue of items awaiting their decision with the age of each item. Items older than <code>alerts.decision_overdue_days</code> SHALL be reminded to the approver. |
+fr-wfbatch | The approving authority SHOULD be able to record decisions for several items from one meeting in a single action with one meeting reference. |
+fr-wfpack | The system SHALL produce a decision pack per item (proposal summary, review summary, readiness, category verification) printable for meetings. | G 9.5
+</script>
+
+<h3>3.3.3 Material Change and Version Control</h3>
+<script type="text/req" data-p="FR">
+fr-verhistory | Every micro-credential SHALL have a version history. Each version SHALL record its number, effective date, change summary, approval decision and the implications for participants currently enrolled. | G 17.8, 18.8
+fr-chgclassify | Every change request SHALL be classified as minor or material. The system SHALL classify a change as material automatically when it touches learning outcomes, SLT or credit, MQF level, core content, major assessment or pass standard, module structure, parent course link, QV status, a substantive delivery mode, the provider or partner, or the identity and integrity mechanism. | G 9.5, 11.2.3, 17.7, App A10
+fr-chgmaterial | A material change SHALL create a new version that goes through review and approval again. It SHALL NOT take effect before it is approved. | G 17.7, BR-18
+fr-chgminor | A minor change SHALL be recorded with a description and impact note, acknowledged by the PTj, and logged in the CQI record of the offering. | G 17.7, App H7
+fr-chgqv | For a Quality-Verified SAMC, a material change SHALL be flagged as affecting QV and SHALL create a QV re-verification task (Section 3.10). | G 11.2.3, 17.7
+fr-verkeep | A version referenced by any participant record SHALL never be deleted. | G 18.8, BR-39
+fr-verbind | Each enrolment SHALL be bound to the version under which the participant enrolled. When a new version takes effect, the PTj SHALL record the transition rule for current participants (finish on old version, move to new version, or equivalence). | G 10.3.2, 17.10
+fr-vernotify | When an approved change affects current participants, the system SHALL notify them of the change, the effective date and the transition rule. | G 10.3.2
+fr-vercompare | The system SHOULD show a side-by-side comparison of two versions with the changed fields highlighted. |
+</script>
+
+<!-- ============ 3.4 ============ -->
+<h2>3.4 Offering, Catalogue and Readiness (M5)</h2>
+<p>An approved version is offered as one or more cohorts. Before registration opens, the PTj confirms that materials, platform, assessment, facilitators, registration, records and certification are ready, using the checklist of Guide Appendix B [G 9.6]. Participants must receive honest, complete information before they enrol [G 10.3.1].</p>
+
+<h3>3.4.1 Offering and Readiness</h3>
+<script type="text/req" data-p="FR">
+fr-offcreate | P1 or P2 SHALL be able to create an offering (cohort) for an approved version with: cohort name, start and end dates, delivery mode, capacity, registration window, fee, facilitators, eligible participant groups and the learning platform course reference. | App B1
+fr-offapproved | The system SHALL NOT allow an offering to be created for a version that is not in state Approved. | G 9.6, BR-17
+fr-offreadiness | Each offering SHALL have a readiness checklist with the items of Appendix B2–B7 (transparency of information, materials and platform, assessment and integrity, participant and achievement records, completion and credential process, change notification), each with status Yes / Not yet / Not applicable and evidence notes. | App B
+fr-offconfirm | Readiness SHALL be confirmed by the lecturer, a PTj representative and, where relevant, support or system staff, each choosing Ready, Ready with conditions or Not ready, as in Appendix B8. | App B8
+fr-offopen | Registration SHALL NOT open until the PTj confirmation is Ready, or Ready with conditions where the conditions are recorded. | G 9.6
+fr-offrecheck | The checklist SHALL be repeated for every new cohort, pre-filled from the previous cohort. If the check reveals a material change, the offering SHALL be held until the change is approved. | App B, B8 note
+fr-offqv | For a SAMC that advertises Quality-Verified status, the system SHALL check that QV is valid until the end date of the cohort. If it is not, the offering SHALL NOT display a Quality-Verified claim, credit value or MQF level. | G 11.2.2, BR-23
+</script>
+
+<h3>3.4.2 Catalogue and Participant Transparency</h3>
+<script type="text/req" data-p="FR">
+fr-catpublic | The system SHALL provide a public catalogue, without login, of offerings that are open or upcoming. | G 9.6
+fr-catinfo | Each catalogue entry SHALL show at least: name, category, learning outcomes, content or modules, SLT, delivery mode, prerequisites, access period, assessment methods and standard, completion conditions, fees, learning support, the credential to be received, and, where applicable and valid, QV status, credit value and MQF level. | G 9.6, 10.3.1, App B2
+fr-catsearch | Users SHALL be able to search and filter the catalogue by category, PTj, field, delivery mode, language, start date and fee. |
+fr-catwording | Recognition statements in the catalogue SHALL be generated from the approved wording for the category and status (Section 3.9.2). Free-text descriptions SHALL be checked for forbidden claims, such as a promise that credit will transfer or that a number of micro-credentials leads to a degree. | App E5, G 14.9, BR-22
+fr-catstages | For an offering with credit potential, the catalogue entry SHALL show a standard explanation that MC completion, credential award, ACR preparation, ABC deposit and credit transfer approval are separate steps and that none guarantees admission, transfer or a qualification. | G 10.3.1, BR-26
+fr-catmodular | For a modular UMC, the catalogue entry SHALL show the module structure, how modules relate to the whole UMC, and whether staged completion is allowed. | G 9.6
+fr-catlang | The catalogue SHALL be available in Bahasa Melayu and English. | D-02
+</script>
+
+<!-- ============ 3.5 ============ -->
+<h2>3.5 Registration, Enrolment and Cohorts (M6)</h2>
+<p>Participants register for open offerings after reading the offering information. Fees are handled through the payment adapter; in Release 1 a dummy payment service records simulated payments (A-03). For a modular UMC, participants may complete modules in different periods, and each module status is kept separately [G 10.3, 12.2].</p>
+
+<figure data-f="enrolstate">
+<pre class="mermaid">
+stateDiagram-v2
+  direction LR
+  [*] --> Registered
+  Registered --> PendingPayment : fee applies
+  Registered --> Enrolled : no fee or waiver
+  PendingPayment --> Enrolled : payment confirmed
+  PendingPayment --> Cancelled : payment window ends
+  Enrolled --> Withdrawn : participant withdraws
+  Enrolled --> Completed : completion confirmed by PTj
+  Enrolled --> NotCompleted : cohort closes without completion
+  Enrolled --> Transferred : moved to a new version
+  state "Pending payment" as PendingPayment
+  state "Not completed" as NotCompleted
+  state "Transferred to new version" as Transferred
+</pre>
+<figcaption>States of an enrolment.</figcaption>
+</figure>
+
+<script type="text/req" data-p="FR">
+fr-regopen | A signed-in user SHALL be able to register for an offering whose registration window is open and whose capacity is not full. | G 10.3
+fr-regelig | The system SHALL check the eligibility rules of the offering (participant group, prerequisites) and SHALL explain why a user is not eligible. | G 10.3.1
+fr-regack | Before confirming registration the participant SHALL acknowledge the offering information, including the recognition statements and the explanation of separate stages. The acknowledged text version SHALL be stored with the enrolment. | G 10.3.1
+fr-regpdpa | At first registration the system SHALL show the personal data notice and record the participant's acknowledgement. | PDPA
+fr-regpay | Where a fee applies, the system SHALL request payment through the payment adapter. In Release 1 the adapter SHALL be a dummy service that records a simulated success or failure with a reference number. | D-14, A-03
+fr-regwaiver | P2 SHOULD be able to grant a fee waiver or sponsorship to a participant with a recorded reason. |
+fr-regstatus | Each enrolment SHALL have one of the states of {{fig:enrolstate}}. Every change of state SHALL be time-stamped and attributed. | G 10.3
+fr-regmodule | For a modular UMC that allows staged completion, the system SHALL record enrolment and completion status per module, with dates, even when modules are taken in different periods. | G 10.3, 12.2
+fr-regwithdraw | A participant SHALL be able to withdraw before the deadline set for the offering. Refunds are handled outside MCMS. |
+fr-regwaitlist | The system SHOULD keep a waiting list when an offering is full and offer released places in order. |
+fr-regbulk | P5 SHOULD be able to enrol a group of participants from a CSV file, for example a sponsored company group, with the same checks as individual registration. |
+fr-cohortlist | P1 and P2 SHALL be able to view, filter and export the participant list of a cohort. | App H5
+fr-regconfirm | The participant SHALL receive confirmation of registration, payment and enrolment, with access instructions for the learning platform. | G 10.2
+</script>
+
+<!-- ============ 3.6 ============ -->
+<h2>3.6 Learning Platform Connection (M7)</h2>
+<p>Learning takes place on UCreds, the pilot learning platform. MCMS exchanges enrolments, progress, module completion, results and badge data with UCreds through the learning platform adapter. Because the connection method is not yet known, Release 1 uses CSV files (D-13, A-04, OI-04). Imported data is never final: it lands as provisional data awaiting verification (Section 3.7).</p>
+
+<figure data-f="csvimport">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  participant P5 as CODL technical operator (P5)
+  participant M as MCMS
+  participant U as UCreds
+  participant P2 as PTj verifier (P2)
+  P5->>M: Export enrolment list for offering
+  M-->>P5: CSV in UCreds template
+  P5->>U: Load enrolments
+  Note over U: Learning and assessment take place on UCreds
+  P5->>U: Export results and badge data
+  P5->>M: Upload results CSV
+  M->>M: Validate file and every row
+  alt File-level error
+    M-->>P5: Reject whole file with error report
+  else Rows valid or partly valid
+    M-->>P5: Row report, valid rows staged as provisional
+  end
+  M->>P2: Task: verify staged results
+  P2->>M: Verify (or return) results
+  M->>M: Record verified achievements
+</pre>
+<figcaption>Release 1 exchange with UCreds through CSV files. Imported results become achievements only after PTj verification.</figcaption>
+</figure>
+
+<script type="text/req" data-p="FR">
+fr-lpadapter | All data exchange with UCreds SHALL pass through the learning platform adapter interface, so that another platform or a live connector can replace the CSV implementation without changing other modules. | D-06, D-13
+fr-lpexport | The system SHALL export the enrolment list of an offering in a published CSV template for loading into UCreds. | A-04
+fr-lpimport | The system SHALL import progress, module completion, assessment results and badge data from UCreds in published CSV templates. | A-04
+fr-lpvalidate | Every import SHALL be validated: file format and template version; each row matched to an enrolment, module and assessment component; score ranges; duplicates. A file-level error SHALL reject the whole file; row-level errors SHALL be listed in a downloadable report. |
+fr-lpstaged | Imported results SHALL be stored as provisional and SHALL NOT create achievements, badges or credentials until verified under Section 3.7. | G 10.4, BR-20
+fr-lpbadge | When UCreds issues module badges (A-05), the system SHALL import the badge identifier, link and date, match it to the verified module achievement, and flag any badge without a matching verified achievement. | A-05, G 8.7.1
+fr-lplog | Every export and import SHALL be logged with file name, file hash, row counts, result, user and time. Uploaded files SHALL be kept for the retention period. | G 18.2
+fr-lplive | The system SHOULD provide a live connector to UCreds (web service or Moodle interface) once the connection method is agreed. | OI-04
+fr-lpsync | The system MAY synchronise progress with the learning platform in near real time. |
+</script>
+
+<!-- ===================== 3. FUNCTIONAL REQUIREMENTS (B) ===================== -->
+
+<!-- ============ 3.7 ============ -->
+<h2>3.7 Assessment and Achievement Verification (M8)</h2>
+<p>Recognition follows achievement, not attendance [G 6.1, 8.6]. Results are entered or imported, then verified by the owning PTj before any badge, certificate or Digital Credential is issued. Verification links the participant's identity, the assessment evidence and the result [G 10.4].</p>
+<script type="text/req" data-p="FR">
+fr-asplan | The assessment plan of each offering SHALL be taken from the approved version: components per module or per micro-credential, weighting, pass standard and linked learning outcomes. Facilitators SHALL NOT change it outside the change process of Section 3.3.3. | G 8.6, 10.4
+fr-asentry | Facilitators (P1) SHALL be able to enter results per participant and component, or import them (Section 3.6). The system SHALL compute totals and pass or fail against the pass standard. | G 10.4
+fr-asnoattend | The system SHALL NOT allow a pass, module completion or MC completion to be based only on attendance or participation records. | G 8.6, BR-19
+fr-asintegrity | For each assessment the system SHALL record the identity verification and integrity mechanism applied. Facilitators SHALL be able to flag an integrity case; results under an open case SHALL be held and SHALL NOT be verified. | G 10.4, App B4, H7
+fr-asverify | Results SHALL be verified by an authorised PTj user (P2) before they create achievements. Verification SHALL record the verifier, the date and the evidence that links the participant's identity, the assessment and the result. | G 10.4, BR-20
+fr-asbulkverify | The verifier SHALL be able to verify the results of a whole cohort or module at once, after reviewing a summary of pass rates and outstanding flags. |
+fr-aschange | After verification, any change to a result SHALL require a reason and approval by P2. The previous value SHALL be kept and the change written to the audit trail. If a credential was already issued, the system SHALL open a credential correction task (Section 3.9.4). | G 18.10, D-20
+fr-asmodule | A module achievement SHALL be recorded when all learning outcomes and assessments of the module are met and verified. | G 12.2
+fr-asappeal | A participant SHOULD be able to raise a query or appeal on a result. The case SHALL be tracked to a decision and linked to any result change. | G 15.8
+fr-asfeedback | Participants SHALL be able to see their verified results and the feedback released by the facilitator. | App A6
+</script>
+
+<!-- ============ 3.8 ============ -->
+<h2>3.8 Achievement Record (M9)</h2>
+<p>The Achievement Record (Rekod Pencapaian Pembelajaran Micro-Credential UTeM) is UTeM's internal record of modules completed, results, badges and MC completion. It is not an ACR and it is not evidence that credit was deposited to ABC or accepted by a programme [G 8.7.5, 18.3]. {{fig:umcflow}} shows how a modular UMC builds up to completion.</p>
+
+<figure data-f="umcflow">
+<pre class="mermaid">
+flowchart LR
+  M1["Module 1<br/>verified"] --> B1["Digital Badge 1"]
+  M2["Module 2<br/>verified"] --> B2["Digital Badge 2"]
+  M3["Module n<br/>verified"] --> B3["Digital Badge n"]
+  B1 --> AR[("Achievement Record<br/>(internal, not ACR)")]
+  B2 --> AR
+  B3 --> AR
+  AR --> Q{"All modules and<br/>requirements of the<br/>approved structure met?"}
+  Q -- "No" --> W["Keep record; remind<br/>before completion<br/>window ends"]
+  Q -- "Yes" --> C["UMC complete<br/>(confirmed by PTj)"]
+  C --> CR["Certificate /<br/>Digital Credential"]
+  C -. "separate process,<br/>only if eligible" .-> ACR["ACR (Section 3.11)"]
+</pre>
+<figcaption>Staged completion of a modular UMC [G 12.2, App E9]. A badge proves a module, not the UMC and not credit.</figcaption>
+</figure>
+
+<script type="text/req" data-p="FR">
+fr-arkeep | The system SHALL maintain one Achievement Record per participant and micro-credential, holding modules completed, verified results, Digital Badges, MC completion status and credentials awarded. | G 8.7.5, 18.3
+fr-arlabel | The Achievement Record SHALL be stored separately from ACR records and SHALL be labelled on every screen and export as an internal record that is not an Academic Credit Record. | G 18.3, BR-25
+fr-arumc | A UMC SHALL be marked complete only when every module and every requirement of its approved structure is met. The system SHALL calculate this automatically and SHALL require confirmation by P2. | G 8.7.3, 12.3.1
+fr-arnomix | The system SHALL NOT combine badges or modules from different UMCs or different parent courses to complete a UMC. A module from another structure SHALL count only through a recorded equivalence decision by the academic authority. | G 8.7.2, 12.2, BR-12
+fr-arwindow | For a modular UMC the system SHALL track the completion window (default <code>umc.completion_window_months</code>, which has no value until OI-13 is answered; an offering MAY set its own period) and SHALL remind the participant before it ends. While no period is set, no reminder is sent. | G 7.4, 12.2, OI-13
+fr-arsamc | A SAMC or MCE SHALL be marked complete only when all learning outcomes, SLT activities, assessments and completion conditions are met and verified, and the completion is confirmed by P2. | G 12.3.2, 8.7.4
+fr-arview | The participant SHALL be able to see their own Achievement Record, including progress across modules taken in different periods. | G 10.3
+fr-arstaff | P1 and P2 SHALL be able to see the Achievement Records of participants in their offerings. | App H4
+</script>
+
+<!-- ============ 3.9 ============ -->
+<h2>3.9 Credential Issuance and Verification (M10)</h2>
+<p>MCMS issues three kinds of proof of achievement. They have different functions and must never be used in place of each other [App E1]. Credentials are issued in an open, signed format so that anyone can verify them without contacting UTeM (D-19).</p>
+<p class="tcap" data-t="credtypes">Types of proof of achievement (Guide Appendix E1)</p>
+<script type="text/tbl" data-h="Type|Main function|Level of achievement|Relation to credit" data-w="18%|32%|24%|26%">
+Digital Badge | Proof of achievement of a module, unit or milestone | Usually a module or learning unit | Not academic credit by itself
+Certificate (Sijil) | Proof of completing the offering under its conditions | Whole micro-credential | Does not guarantee credit or transfer
+Digital Credential | Verifiable digital record describing the achievement, the issuer and related information | Whole micro-credential or a set achievement | May state credit or MQF level only when verified; does not guarantee transfer
+</script>
+
+<h3>3.9.1 Issuance</h3>
+<script type="text/req" data-p="FR">
+fr-crcheck | Before any credential is issued the system SHALL run the checks of Appendix E8 automatically: identity matches the official record; all completion conditions are met; results are verified; the credential type fits the level of achievement; the title and category match the approved version; any credit, MQF or QV information is verified and still valid; the verification mechanism works. Issuance SHALL be blocked if any check fails. | App E8, BR-21
+fr-crbadge | The system SHALL issue a Digital Badge for each verified module achievement when the approved design includes badges and UCreds does not issue them (A-05). A badge SHALL contain: badge name, parent micro-credential, issuer (UTeM or the authorised PTj), recipient, issue date, achievement criteria, learning outcomes or competencies in its metadata, and a verification link. | App E2, A-05
+fr-crbadgetext | A Digital Badge SHALL NOT be described or displayed as academic credit. | App E2, BR-11
+fr-crcert | The system SHALL issue a Certificate only after the whole micro-credential is complete. A Certificate SHALL contain: the official name of UTeM or the provider; the participant's name as in the official record; the approved title; the category where needed for clarity; a statement of completion; the award date; a unique certificate number; the authorised signatory; credit, QV and MQF information only when applicable, verified and valid; and a QR code for verification. | App E3, G 10.5
+fr-crdc | The system SHALL issue a Digital Credential with the metadata of Appendix E4: unique credential ID; credential name; recipient; issuer; issue date; learning outcomes or competencies; learning time (SLT); assessment basis; credit value and MQF level only when verified; QV status only after QV is obtained; expiry date of a related status where required; and the verification mechanism. | App E4
+fr-crformat | Digital Credentials SHALL follow the Open Badges 3.0 and W3C Verifiable Credentials data models as guidance, SHALL be digitally signed with a UTeM key (VC-JOSE, Ed25519), and SHALL be downloadable as signed JSON (<code>.json</code>), signed token (<code>.jwt</code>), and PDF rendering files. Blockchain SHALL NOT be required. | D-19, D-36, C8
+fr-crgenerated | Credit value, MQF level and QV wording on any credential SHALL be filled only from verified records: the approved UMC credit, or the QV decision for a SAMC. These fields SHALL NOT be editable by hand. | D-17, C5, BR-22
+fr-crbatch | The system SHALL issue credentials automatically, for one participant or a whole cohort, as soon as the deputy dean (P2) has verified the results or confirmed completion and the pre-issuance checks pass. No separate manual issuing step SHALL be required; participants who fail a check SHALL be listed for the deputy dean with the reason. | App H3, D-29
+fr-crlang | Certificates and Digital Credentials SHALL be available in Bahasa Melayu and English. | D-02, C7
+fr-crid | Every credential SHALL have a unique, non-guessable identifier formatted as a hyphenated Crockford Base32 code (e.g. <code>OOP01-3Q7SX</code>), and a canonical verification URL encoded as a high-resolution QR code (exportable at 3x scale PNG and vector SVG). Verification URLs SHALL dynamically resolve to the active host and port in local development and staging environments. | App E6, D-40, D-41
+fr-crwallet | The participant SHALL be able to view and download their credentials and copy a share link. |
+fr-crshare | The participant SHOULD be able to add a credential to professional networking profiles directly. |
+fr-crwalletint | The system MAY export credentials to external digital credential wallets. |
+</script>
+
+<h3>3.9.2 Recognition Wording Control</h3>
+<p>Credentials and offering information must not suggest credit, MQF level or QV status that has not been formally obtained [G 10.5, App E5]. The system therefore builds recognition statements from controlled templates.</p>
+<p class="tcap" data-t="wording">Allowed and forbidden recognition statements (Guide Appendix E5)</p>
+<script type="text/tbl" data-h="Situation|Allowed statement|Statement to avoid" data-w="20%|42%|38%">
+UMC | Link to the parent course or programme and the approved credit information under academic rules | "Credit will certainly transfer"; any promise of admission to a programme
+SAMC before QV | SLT, and that QV is in progress or not applied for, if needed | Credit value or MQF level presented as verified
+Quality-Verified SAMC | Credit value, MQF level and QV status as verified and still valid | That QV guarantees credit transfer
+MCE | Completion of learning or competency, and suitable duration or SLT | MCE as academic credit or as a direct credit transfer route
+</script>
+<script type="text/req" data-p="FR">
+fr-wdtemplate | The system SHALL generate every recognition statement on credentials, catalogue entries and participant notices from the template for the confirmed category and current status in {{tab:wording}}. | App E5, BR-22
+fr-wdblock | The system SHALL block issuing or publishing any text that states a credit value, MQF level or QV status not supported by a verified and valid record. | G 10.5, D-17
+fr-wdqvlapse | When QV expires or is suspended or withdrawn, credentials issued afterwards SHALL carry no Quality-Verified claim. Verification of an earlier credential SHALL show the QV status that was valid on its issue date. | G 11.2.2, BR-23
+</script>
+
+<h3>3.9.3 Public Verification</h3>
+<script type="text/req" data-p="FR">
+fr-vfpage | The system SHALL provide a public verification page, without login, reached by credential ID, verification URL or QR code. | App E6, D-19
+fr-vffields | The verification page SHALL present an authoritative certificate-style result slip featuring a single prominent status seal (e.g. "Status: Valid"), a copyable verification code, a structured two-column key-value summary, direct verifier download actions for <code>.json</code> and <code>.jwt</code> cryptographic files, print slip styling, and an explicit statutory Personal Data Protection Act 2010 (PDPA) notice. It SHALL NOT expose identity card or passport numbers, matric numbers, email addresses or results. | App E6, PDPA, D-43
+fr-vfsignature | The verification page SHOULD let a verifier upload a Digital Credential file and check its signature and integrity against the issuer key. | D-19
+fr-vftrust | Machine-to-machine public key discovery SHALL be published at <code>/.well-known/jwks.json</code> adhering to RFC 7517. It SHALL NOT be rendered as an interactive button within public navigation headers, and SHALL be linked from the institutional trust framework. | D-40
+fr-vflog | Each verification request SHALL be logged with time, credential ID and outcome, without storing the verifier's personal data beyond a network address kept for security purposes. | App E6
+fr-vfnotfound | A request for an unknown or malformed credential ID SHALL return a neutral "not found" message that does not reveal whether a similar ID exists. |
+</script>
+
+<h3>3.9.4 Correction, Replacement and Revocation</h3>
+<figure data-f="credstate">
+<pre class="mermaid">
+stateDiagram-v2
+  direction LR
+  [*] --> Issued : P2 confirms, checks pass, system issues
+  Issued --> Corrected : confirmed error, new revision
+  Corrected --> Corrected : further correction
+  Issued --> Replaced : new credential ID issued
+  Corrected --> Replaced
+  Issued --> Revoked : decision of authorised body
+  Corrected --> Revoked
+  Replaced --> [*]
+  Revoked --> [*]
+</pre>
+<figcaption>Life of an issued credential [App E7]. No state change deletes the earlier record.</figcaption>
+</figure>
+<script type="text/req" data-p="FR">
+fr-crcorrect | A credential SHALL be corrected only for a confirmed error, by the deputy dean (P2) of the owning PTj. The record SHALL keep the original content, the reason, the correction, the persons involved and the date. | App E7, G 10.5.1
+fr-crreplace | Replacement SHALL issue a new credential with a new ID linked to the old one. Verification of the old ID SHALL show "Replaced" and the new ID. | App E7
+fr-crrevoke | Revocation SHALL be possible only through a recorded decision of an authorised body with a stated reason. Verification SHALL show "Revoked" and the date. | App E7
+fr-crnoerase | No credential record or earlier revision SHALL ever be deleted. | G 10.5.1, 18.4, BR-38
+fr-crnotify | The participant SHALL be notified of any correction, replacement or revocation of their credential, with the reason. | G 18.10
+</script>
+
+<!-- ============ 3.10 ============ -->
+<h2>3.10 Quality Verification Management for SAMC (M11)</h2>
+<p>Quality Verification (QV) is the quality check for a SAMC carried out by the QVC under MQA rules. It is separate from UTeM's approval to offer: approval lets a micro-credential be offered; QV confirms its quality and gives it a credit value and MQF level [G 11.2]. QV requires at least one completed cohort and is valid for at most three continuous years [G 11.2.1–11.2.2]. In Release 1, MCMS prepares and tracks; UTeM staff submit to QVC/MQA outside the system (D-14).</p>
+
+<figure data-f="qvstate">
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> NotApplied
+  NotApplied --> Preparing : PTj decides to seek QV
+  Preparing --> Ready : internal readiness confirmed (App D9, D10)
+  Ready --> Submitted : staff submit to QVC / MQA
+  Submitted --> Verified : QV obtained
+  Submitted --> NotVerified : QV not obtained
+  NotVerified --> Preparing : address findings
+  Verified --> Reverify : material change
+  Reverify --> Submitted
+  Verified --> Expired : validity end reached
+  Verified --> Suspended : QVC / MQA decision
+  Verified --> Withdrawn : QVC / MQA or UTeM decision
+  Suspended --> Verified : reinstated
+  Expired --> Preparing : renewal
+  state "Not applied" as NotApplied
+  state "Preparing evidence" as Preparing
+  state "Ready to submit" as Ready
+  state "Submitted to QVC / MQA" as Submitted
+  state "Quality-Verified" as Verified
+  state "Not verified" as NotVerified
+  state "Re-verification required" as Reverify
+</pre>
+<figcaption>QV status of a SAMC. Only the state Quality-Verified allows credit value, MQF level and QV claims.</figcaption>
+</figure>
+
+<script type="text/req" data-p="FR">
+fr-qvsamc | The QV functions SHALL be available only for micro-credentials whose confirmed category is SAMC. | G 7.6, 11.2
+fr-qveligible | The system SHALL allow the status "Ready to submit" only when the basic conditions of Appendix D2 are met: the SAMC is a stand-alone offering; total SLT is at least <code>slt.min_hours_samc</code>; the provider is registered and authorised; at least <code>qv.min_completed_cohorts</code> cohort has completed with complete evidence; and any proposed credit value and MQF level are justified and marked as proposed. | G 11.2.1, App D2, BR-03
+fr-qvevidence | The system SHALL keep an evidence checklist with the items of Appendix D3–D7 (academic design, assessment and achievement, delivery and participant support, quality assurance and CQI, Digital Credential), each with status Available / Not yet / Not applicable, file reference and notes. | App D
+fr-qvautolink | The system SHALL link evidence that already exists in MCMS automatically: learning outcomes and mapping, SLT calculation, assessment plan, cohort results and achievement analysis, feedback, CQI records, version history and credential design. | App D3–D7
+fr-qvchange | The system SHALL keep the material change review of Appendix D8 for each QV cycle, listing for each component whether it changed and whether it needs internal review or referral to QVC/MQA. | App D8, G 11.2.3
+fr-qvreadiness | The internal readiness decision of Appendix D9 (ready; ready with minor corrections; not ready), the list of missing critical evidence and the target submission date SHALL be recorded by the lecturer and confirmed by the deputy dean (Appendix D10; D-28). | App D9, D10
+fr-qvpackage | The system SHALL produce a submission package: an evidence index, a summary document and a compressed file of the evidence, for staff to submit to QVC/MQA. | D-14, A-02
+fr-qvsubmit | Staff SHALL record the submission date, the QVC/MQA reference and the person who submitted. | G 11.2
+fr-qvresult | Staff SHALL record the QV decision: verified or not verified, QV reference number, verified credit value, verified MQF level, start date, expiry date and any conditions, with the decision document attached. The system SHALL reject an expiry date more than <code>qv.max_validity_years</code> after the start date. | G 11.2.2, BR-02
+fr-qvsource | The verified credit value and MQF level in the QV record SHALL be the only source of these values for catalogue entries, credentials and ACR of the SAMC. | D-17, BR-14
+fr-qvalerts | The system SHALL alert the lecturer (P1) and deputy dean (P2) at each interval in <code>alerts.qv_expiry_days</code> before QV expires. | G 11.2.2, D-16
+fr-qvlapse | When QV expires, is suspended or is withdrawn, the system SHALL immediately stop Quality-Verified claims in the catalogue and on new credentials, SHALL stop new ACR eligibility for completions after that date, and SHALL create a task for the PTj to manage affected participants and records. | G 11.2.2, App H7, BR-23
+fr-qvnotransfer | A QV status SHALL NOT set or imply any credit transfer, admission or stackable status. | G 11.2, 15.4, BR-16
+fr-qvportal | The system MAY submit QV applications to QVC/MQA electronically when such an interface exists. | A-02
+</script>
+
+<!-- ===================== 3. FUNCTIONAL REQUIREMENTS (C) ===================== -->
+
+<!-- ============ 3.11 ============ -->
+<h2>3.11 ACR and ABC Deposit (M12)</h2>
+<p>For eligible learning, an Academic Credit Record (ACR) can be prepared and deposited to the Academic Bank of Credit (ABC). Only two sources are eligible: a completed UMC from an accredited programme (formal learning) and a completed Quality-Verified SAMC (non-formal learning) [G 12.1.1]. The deposit is storage, not approval: credit in ABC still has to be evaluated by a receiving programme before it can be used [G 12.5]. The participant's consent is required [G 12.4.2]. {{fig:acrseq}} shows the Release 1 process, in which the system generates the ACR, the deputy dean confirms it and, after the participant consents, records the deposit; the national ABC platform is still a concept, so no live connection exists yet (D-14, D-29).</p>
+
+<figure data-f="acrseq">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  participant P8 as Participant (P8)
+  participant M as MCMS
+  participant P2 as Deputy dean (P2)
+  participant ABC as National ABC
+  Note over M: MC completion confirmed for an eligible UMC or Quality-Verified SAMC
+  M->>M: Run ACR eligibility checks (App F2)
+  M->>M: Generate ACR from verified records
+  M->>P2: Task: confirm generated ACR
+  P2->>M: Confirm ACR
+  M->>P8: Request consent to deposit ACR to ABC
+  alt Participant consents
+    P8->>M: Give consent (wording version stored)
+    M->>P2: Add ACR to deposit queue
+    P2->>M: Export deposit data
+    P2->>ABC: Deposit (manual, national platform is a concept)
+    P2->>M: Record ABC reference, date, credits, status
+    M->>M: Set credit status Available, expiry = deposit date + 10 years
+    M->>P8: Notify deposit recorded (not a credit transfer)
+  else Participant declines
+    P8->>M: Decline
+    M->>M: ACR kept, no deposit
+  end
+</pre>
+<figcaption>Preparing an ACR and recording its deposit to ABC in Release 1.</figcaption>
+</figure>
+
+<h3>3.11.1 ACR Eligibility and Preparation</h3>
+<script type="text/req" data-p="FR">
+fr-acrelig | The system SHALL allow an ACR only for (a) a completed UMC from an accredited programme that meets the deposit requirements, or (b) a completed Quality-Verified SAMC whose QV was valid on the completion date. It SHALL NOT allow an ACR for an MCE, a SAMC without valid QV, a single module, a badge or a certificate. | G 12.1.1, 12.5, BR-24
+fr-acrchecks | Before an ACR is prepared the system SHALL run and record the checks of Appendix F2: MC completed; identity and results verified; UMC from an accredited parent programme where relevant; valid Quality-Verified status for a SAMC where relevant; credit value and MQF level based on a valid approval or QV decision; source records and credential traceable. | App F2
+fr-acrprep | The system SHALL generate the ACR from verified records with the fields of Appendix F3 and clause 12.4.2: ACR reference, date created, participant identity, provider or issuer, course or credential name, learning outcomes, credit value, MQF level, completion date, assessment basis and verification metadata. These fields SHALL NOT be typed by hand. | G 12.4.2, App F3, D-17
+fr-acrverify | The deputy dean (P2) of the owning PTj SHALL confirm each generated ACR before it can be offered for deposit. The system is Responsible for generating it and P2 Accountable for confirming it. | App F3, H3, D-29
+fr-acrseparate | ACR SHALL be a separate record type from the Achievement Record and from credentials, and SHALL be clearly labelled as such on every screen and export. | G 12.4, 18.5, D-15
+fr-acrmulti | A participant SHALL be able to hold several ACRs. Each ACR SHALL keep its own identity and academic information. | G 12.6
+fr-acrnocombine | The system SHALL NOT combine credits or modules from different ACRs to form a UMC, course or programme component without a recorded equivalence decision. | G 12.6
+fr-acrexternal | The system SHOULD let staff record credit records from other institutions that a participant presents for transfer, marked as external, with their provider, QV or accreditation status, credit, MQF level and evidence. | G 12.7
+</script>
+
+<h3>3.11.2 Consent and Deposit Tracking</h3>
+<script type="text/req" data-p="FR">
+fr-dpconsent | The system SHALL NOT place an ACR in the deposit queue without the participant's explicit consent. The consent record SHALL hold the date, the wording version and the channel. | G 12.4.2, App F4, BR-27
+fr-dpdecline | The participant SHALL be able to decline or postpone consent. The ACR SHALL be kept and can be deposited later if the participant consents. | G 16.8
+fr-dpqueue | The deputy dean (P2) SHALL have a queue of consented, confirmed ACRs awaiting deposit. | App H3, D-28
+fr-dpexport | The system SHALL export the deposit data of selected ACRs in a file format agreed with ABC (TBD, OI-11). | D-14
+fr-dprecord | The deputy dean (P2) SHALL record for each deposit: deposit date, ABC reference, credits deposited, status (Successful, In process, Correction needed) and the person recording it. | App F4
+fr-dpnottransfer | The system SHALL NEVER display or record an ABC deposit as an approved credit transfer. Deposit screens and notices SHALL state that deposit is storage only. | G 12.5, 18.6, BR-26
+fr-dponlyacr | Badges, certificates, Digital Credentials and module records SHALL NOT be selectable for deposit. | G 12.5
+fr-dplive | The system MAY deposit ACR to ABC through a live interface when ABC provides one. | A-02
+</script>
+
+<h3>3.11.3 Credit Validity, Ledger and Retention</h3>
+<script type="text/req" data-p="FR">
+fr-cvexpiry | On recording a deposit the system SHALL compute the credit expiry date as the deposit date plus <code>credit.abc_validity_years</code> and SHALL show it to the participant. | G 12.8, BR-04
+fr-cvalert | The system SHALL alert the participant at each interval in <code>alerts.credit_expiry_days</code> before credit expires. | D-16
+fr-cvexpired | After the expiry date the credit SHALL show as Expired for transfer purposes. The ACR itself SHALL remain. A later transfer request using expired credit SHALL be flagged for re-evaluation, including currency of knowledge. | G 12.8, BR-28
+fr-cvledger | The participant SHALL have a credit ledger in the layout of Appendix F5 listing, per ACR: credential, provider, credits, deposit date, expiry date and status (Available, Provisionally Redeemed, Redeemed, Expired), with a total and a note that accumulated credits are not automatically accepted by any programme. | App F5
+fr-cvretain | ACR SHALL be retained indefinitely unless the participant as record owner, or a recognised authority, directs otherwise. Such a direction SHALL be recorded and carried out only by an authorised user. | G 12.8, BR-28
+</script>
+
+<!-- ============ 3.12 ============ -->
+<h2>3.12 Credit Transfer (M13)</h2>
+<p>Credit transfer is the evaluation and acceptance, by the programme that receives it (in MCMS, the deputy dean of the faculty that owns the degree, D-11), of valid credit to meet part of its requirements [G 13]. It is separate from accumulation: credit that is verified, recorded in an ACR or deposited in ABC must still be evaluated. Equivalence is judged on learning outcomes and related criteria, never on credit value or SLT alone [G 13.3].</p>
+
+<figure data-f="transfer">
+<pre class="mermaid">
+flowchart TD
+  A["Eligible credit / ACR<br/>(status Available, within validity)"] --> B["Transfer application<br/>(App F6)"]
+  B --> C{"Record valid?<br/>source, ACR, ABC status,<br/>QV or accreditation"}
+  C -- "No" --> R1["Not approved,<br/>reason recorded"]
+  C -- "Yes" --> D["Equivalence evaluation<br/>(App F7)"]
+  D --> E{"Conditions and limits<br/>met? (programme limit,<br/>non-transferable components)"}
+  E -- "No" --> R1
+  E -- "More evidence needed" --> B
+  E -- "Yes" --> F{"Academic decision<br/>(App F8)"}
+  F -- "Approved / partly approved" --> G["Credit used in programme<br/>status: Provisionally Redeemed"]
+  F -- "Not approved" --> R1
+  R1 --> K["ACR, badges and credentials<br/>remain unchanged"]
+</pre>
+<figcaption>Credit transfer process [G 13.4, Figure 14 of the Guide].</figcaption>
+</figure>
+
+<script type="text/req" data-p="FR">
+fr-ctapply | A participant, or staff on the participant's behalf, SHALL be able to submit a transfer application with the fields of Appendix F6: target programme, receiving institution, course or component requested, credits requested, application date, the ACR or credits used, and supporting documents (ACR, credential, learning outcomes, content, SLT, assessment, QV evidence, other). | App F6
+fr-ctsource | The system SHALL accept as sources only a UMC of UTeM, a UMC of another eligible institution, or a Quality-Verified SAMC with verifiable status, credit and MQF level. An application using an MCE SHALL be refused with an explanation. | G 13.2, BR-32
+fr-ctavailable | Only credit with status Available SHALL be selectable. Expired credit SHALL be selectable only with a flag requiring re-evaluation. | G 12.8, 12.9
+fr-ctvalidity | The evaluator SHALL record a check of the validity of the record: authenticity of the ACR or credential, ABC status, and QV or accreditation status. | G 13.4
+fr-ctequiv | The deputy dean (P2) of the faculty that owns the target degree SHALL complete an equivalence evaluation with the criteria of Appendix F7: learning outcomes; credit value and SLT; MQF level; content and depth; learning activities; assessment and standard; accreditation or QV status; currency of knowledge; programme or professional body requirements. Each criterion SHALL have a finding and a result. | G 13.3, App F7
+fr-ctloequiv | The system SHALL NOT allow the decision Approved for a course or component where the learning outcome criterion is recorded as Not equivalent. Matching credit value or SLT alone SHALL NOT be accepted as evidence of equivalence. | G 13.3, BR-30
+fr-ctlimits | The system SHALL check the application against the transfer limit of the target programme and its list of non-transferable components (programme settings, TBD, OI-09), and SHALL warn the decision-maker of any breach. | G 13.5
+fr-ctpartial | A partly completed UMC, or a set of badges, SHALL NOT be accepted for full credit of the parent course, unless a module carries an approved "separately recognisable credit unit" flag. | G 13.5, D-18, BR-13
+fr-ctdecision | The decision SHALL be recorded with the fields of Appendix F8: Approved, Partly approved, Not approved or More evidence needed; credits approved; course or component credited; decision date; deciding authority; conditions or justification. | G 13.6, App F8
+fr-ctauthority | Only a user holding the role configured as the transfer decision authority for the target programme SHALL record the decision. | App H3, D-11, A-01
+fr-ctreject | A decision of Not approved SHALL NOT change the ACR, Digital Badges, Certificates or Digital Credentials, and SHALL NOT change the credit status. | G 13.6, BR-33
+fr-cttrace | Each decision SHALL be traceable to the credit source, the ACR, the equivalence evaluation, the approval and the programme record. | G 13.7
+fr-ctversion | Each equivalence evaluation SHALL record the curriculum version of the target programme and the version of the micro-credential. When either has a material change, earlier equivalence results SHALL be flagged for review before reuse. | G 13.8, 14.8
+fr-ctadmission | The system SHALL treat programme admission as a separate fact from transfer approval. Approval of a transfer SHALL NOT mark a participant as admitted. | G 14.4, BR-34
+fr-ctprecedent | The system SHOULD keep a library of approved equivalence mappings (micro-credential to course) that evaluators can consult. A precedent SHALL NOT replace the individual decision. | G 14.7
+</script>
+
+<!-- ============ 3.13 ============ -->
+<h2>3.13 Single Redemption of Credit (M12)</h2>
+<p>Credit that has been used toward one qualification cannot be used toward another. Transferred credit is <i>provisionally redeemed</i> until the participant completes the programme; it then becomes <i>redeemed</i>. If the participant does not complete the programme, the credit can become available again while it is still valid [G 12.9].</p>
+
+<figure data-f="redemption">
+<pre class="mermaid">
+stateDiagram-v2
+  direction LR
+  [*] --> Available : ACR deposited
+  Available --> Provisional : transfer approved
+  Provisional --> Redeemed : programme completed, qualification awarded
+  Provisional --> Available : programme not completed, credit still valid
+  Provisional --> Expired : programme not completed, validity ended
+  Available --> Expired : 10 years after deposit
+  Redeemed --> [*]
+  state "Provisionally Redeemed" as Provisional
+</pre>
+<figcaption>Credit status under the Single Redemption Principle [G 12.9, App F9]. Redemption never deletes the ACR or the credentials.</figcaption>
+</figure>
+
+<script type="text/req" data-p="FR">
+fr-rdprov | When a transfer is approved, the credits used SHALL change to Provisionally Redeemed and SHALL be linked to the programme and the participant's programme record. | G 12.9, App F9, BR-29
+fr-rdfinal | When completion of the programme is recorded, the linked credits SHALL change to Redeemed. | G 12.9
+fr-rdrelease | When the participant's withdrawal or non-completion of the programme is recorded, the linked credits SHALL return to Available if still within validity, or change to Expired otherwise, subject to ABC rules. | G 12.9
+fr-rdnoreuse | Credit in status Provisionally Redeemed or Redeemed SHALL NOT be selectable in any other transfer application. The system SHALL explain why. | G 12.9, BR-29
+fr-rdconflict | The system SHALL block submission of a second active application that uses the same ACR credits as an application still under evaluation. | G 12.9
+fr-rdkeep | Redemption SHALL NOT delete or alter the ACR, Digital Badges, Certificates or Digital Credentials. | G 12.9
+fr-rdsource | In Release 1, programme completion and non-completion SHALL be recorded manually by an authorised user from the programme's records. Each status change SHALL record the evidence reference. | G 14.10, OI-10
+fr-rdabcsync | For each status change the system SHALL record whether the matching update was made in ABC (manual in Release 1), with date and reference. | G 12.9, 18.6
+</script>
+
+<!-- ============ 3.14 ============ -->
+<h2>3.14 Stackable Degree Pathway (M13)</h2>
+<p>A stackable degree pathway lets eligible credit from micro-credentials count toward part of a degree. It is not a sum of credits. The participant must be admitted to the programme, have credit approved through transfer, meet the minimum of 30% of graduating credit earned at UTeM, meet residency for conventional programmes, cover the programme learning outcomes and Body of Knowledge, and meet all graduation requirements [G 14]. MCMS supports two levels: a <b>pathway mapping</b> for a target programme, approved by the academic authority, and an <b>individual stackable plan</b> per participant, using Guide Appendix G.</p>
+
+<figure data-f="stackable">
+<pre class="mermaid">
+flowchart TD
+  A["Eligible micro-credentials<br/>(UMC, Quality-Verified SAMC)"] --> B["ACR / ABC"]
+  B --> C["Programme admission<br/>(separate decision)"]
+  C --> D["Credit transfer approved<br/>(Section 3.12)"]
+  D --> E["Individual stackable plan<br/>(App G2, G6–G10)"]
+  E --> F{"≥ 30% of graduating credit<br/>earned directly at UTeM?"}
+  F -- "No" --> X["Plan not yet suitable:<br/>record gaps and conditions"]
+  F -- "Yes" --> G{"Conventional programme:<br/>≥ 1 semester residency<br/>planned or met?"}
+  G -- "No" --> X
+  G -- "Yes / not applicable" --> H{"PLO and Body of<br/>Knowledge covered?"}
+  H -- "Gaps" --> X
+  H -- "Yes" --> I["Complete remaining<br/>programme requirements"]
+  I --> J["Graduation requirements met"]
+  J --> K["Qualification awarded by<br/>the academic programme"]
+</pre>
+<figcaption>Stackable degree pathway [G 14.3, Figure 16 of the Guide]. Admission, transfer and award are separate decisions.</figcaption>
+</figure>
+
+<h3>3.14.1 Pathway Mapping for a Programme</h3>
+<script type="text/req" data-p="FR">
+fr-spdefine | P1 or P2 SHALL be able to define a pathway mapping for a target programme via an accessible multi-step modal dialog ("+ Define mapping") with the information of Appendix G1: programme name and code, MQF level, total graduating credits, approved mode (conventional, ODL, other), faculty, accreditation status and intake. | App G1, D-44
+fr-spmap | The mapping SHALL list each micro-credential or credit source and the target course or component it maps to, with credits, learning outcome and content equivalence (High, Partial, None) and a preliminary decision (Suitable, Needs review, Not suitable). | App G3, G 14.7
+fr-spcreditbearing | Only credit-bearing credentials (UMC, Quality-Verified SAMC, prior qualifications with credit) SHALL be mapped. An MCE SHALL NOT be mapped. | G 14.1.1, BR-35
+fr-spapprove | A pathway mapping SHALL be approved by the authority configured for stackable mapping before it is published to participants. | App H3, D-11
+fr-spnotransfer | An approved mapping SHALL NOT itself transfer any credit. Each participant's credit SHALL still go through Section 3.12. | G 14.7
+fr-spplo | The mapping SHOULD include the PLO matrix of Appendix G4 (credential, PLO, contribution as main or supporting, evidence, gap) and the Body of Knowledge matrix of Appendix G5 (domain, requirement, contributing credential, coverage, gap). The system SHOULD warn when any PLO or domain has no coverage. | G 14.5.2, App G4, G5, BR-36
+fr-spcurrchange | When the target programme curriculum changes materially, the system SHALL flag the mapping for review. | G 14.8
+</script>
+
+<h3>3.14.2 Individual Stackable Plan</h3>
+<script type="text/req" data-p="FR">
+fr-spplan | P1 or P2 SHALL be able to create an individual stackable plan for a participant with the content of Appendix G2 and G6–G10: the credentials and credits proposed, the UTeM credit check, the residency check, the remaining programme requirements, the credit and gap summary and the decision. | App G
+fr-sp30 | The system SHALL calculate the share of graduating credit to be earned directly at UTeM and SHALL mark the plan as not meeting the requirement when it is below <code>stackable.min_home_credit_percent</code>. The system SHALL state that meeting 30% does not mean 70% can be transferred automatically. | G 14.5.1, App G6, BR-05
+fr-spresidency | For a conventional programme the system SHALL require at least <code>stackable.residency_semesters</code> of residency to be planned or met, and SHALL record the proposed semester and delivery method. For a delivery method that may enter ODL scope, the plan SHALL be flagged for review under ODL policy. | G 14.5.3, 14.5.4, App G7, BR-06
+fr-spremain | The plan SHALL list the remaining programme requirements (core, elective, project or capstone, industrial training, university requirements, professional body requirements) with status and planned completion. | G 14.5, App G8
+fr-spdecision | The plan decision SHALL be one of Suitable to proceed, Suitable with conditions, Not yet suitable or Not suitable, with conditions and follow-up actions, confirmed as in Appendix G11. | App G10, G11
+fr-spadmit | The system SHALL NOT allow the plan decision Suitable to proceed unless programme admission is recorded. | G 14.4, BR-34
+fr-spaward | The award of a qualification SHALL be recorded only by an authorised user from the programme's records after admission and all requirements are met. MCMS SHALL NOT award qualifications. | G 14.10, BR-37
+fr-spinfo | Participants SHALL see accurate information about the pathway: target programme, mapping, admission requirements, transfer process, credit limits, credit validity, remaining requirements and graduation conditions. No screen SHALL state or imply that a number of micro-credentials or badges leads to a degree automatically. | G 14.9
+fr-spsis | The system MAY read admission, enrolment and graduation status from the student information system through an adapter. | OI-10
+</script>
+
+<!-- ============ 3.15 ============ -->
+<h2>3.15 Monitoring and Continuous Quality Improvement (M14)</h2>
+<p>Each offering is monitored with evidence, especially learning outcome attainment, assessment performance, completion and participant experience; the findings drive CQI [G 11.3–11.4, 17]. CQI is complete only when the effect of an action has been evaluated [G 17.12].</p>
+
+<figure data-f="cqi">
+<pre class="mermaid">
+flowchart LR
+  A["Plan"] --> B["Implement"] --> C["Monitor<br/>(App C2–C5)"] --> D["Evaluate<br/>issues, root cause<br/>(App C6)"] --> E["Improve<br/>action plan<br/>(App C7)"] --> F["Check<br/>effectiveness<br/>(App C8)"]
+  F -- "effective" --> G["Next offering cycle"]
+  F -- "not effective" --> D
+  E -. "material change" .-> H["Change request<br/>(Section 3.3.3)"]
+  G --> A
+</pre>
+<figcaption>CQI cycle [G 17.6, 17.12]. A CQI action that changes key academic components goes through re-approval.</figcaption>
+</figure>
+
+<h3>3.15.1 Monitoring</h3>
+<script type="text/req" data-p="FR">
+fr-mnindicators | The system SHALL compute for each cohort the indicators of Appendix C2: active participation rate, completion rate, pass rate, average and median achievement, credential issuance rate, and significant access or technical issues, each compared with a target set for the offering. | App C2
+fr-mnlo | The system SHALL compute learning outcome attainment per outcome (share of participants who achieved it) from the mapping of assessment to outcomes. | G 17.5, App C3
+fr-mnfeedback | The system SHALL collect participant feedback after completion with a configurable questionnaire covering content, activities, assessment, platform, support and relevance. It SHOULD also collect facilitator and industry feedback. | G 17.4, App C4
+fr-mnmodular | For a modular UMC, monitoring SHALL show participant progress across modules and periods. | G 11.3, 17.2
+fr-mndomains | The lecturer SHALL record the quality monitoring domains of Appendix C5 with status Satisfactory or Needs action and evidence. | App C5
+fr-mndash | Lecturers (P1) and deputy deans (P2) SHOULD have a dashboard of their offerings showing indicators, open CQI actions, upcoming QV expiries and periodic reviews due. | G 17.2
+</script>
+
+<h3>3.15.2 CQI Records</h3>
+<script type="text/req" data-p="FR">
+fr-cqiissue | The lecturer SHALL record issues or gaps with evidence, root cause, impact and priority (High, Medium, Low). | App C6
+fr-cqiaction | The lecturer SHALL record an action plan per issue: improvement action, owner, due date, success indicator and status (Not started, In progress, Done). | App C7
+fr-cqieffect | Each completed action SHALL be evaluated for effectiveness (Effective, Partly effective, Not effective) with before and after evidence. An action SHALL be closed only after this evaluation; an action that is not effective SHALL be carried to the next cycle. | G 17.12, App C8, BR-41
+fr-cqitrace | The system SHALL link each CQI record along the chain issue, evidence, analysis, action, implementation and effectiveness check. | G 17.6, 18.9
+fr-cqichange | A CQI action that affects learning outcomes, SLT or credit, MQF level or QV, core content, major assessment, delivery mode, credential or partner SHALL create a change request under Section 3.3.3. | G 17.7, App C9
+fr-cqisign | Each CQI record SHALL be prepared by the lecturer and confirmed by the deputy dean, covering the confirmations of Appendix C10. | App C10
+</script>
+
+<h3>3.15.3 Periodic Review, Suspension and Termination</h3>
+<script type="text/req" data-p="FR">
+fr-prschedule | Each micro-credential SHALL have a periodic review date. The system SHALL remind the lecturer and PTj before it is due. | G 11.5, 17.9
+fr-proutcome | A periodic review SHALL record its outcome as in Appendix C9: continue without significant change; continue with minor CQI; content or assessment review needed; review and re-approval needed; or consider suspension or termination. | App C9
+fr-prsuspend | Suspension or termination of an offering SHALL be decided by the configured authority. Before the decision is final, the system SHALL list active participants and require a transition plan (completion window, mapping to a new version, or equivalence of earlier achievement). | G 17.10, App H7
+fr-prnotify | Affected participants SHALL be notified of the status of the offering, their transition options, the period to act and the implications for credentials or academic recognition. | G 17.10
+fr-prkeep | Suspension or termination SHALL NOT cancel valid achievements, credentials or ACR. All related records SHALL be kept for their retention period. | G 18.13, BR-40
+</script>
+
+<!-- ============ 3.16 ============ -->
+<h2>3.16 Records, Audit Trail and Reporting (M15)</h2>
+<p>Every decision that affects the status of an offering, a participant's achievement, a credential, a credit value or the use of credit must have a source record, a decision-maker and a date that can be traced [G 15.7]. Corrections never erase history [G 18.10]. MCMS must allow the whole chain from development to CQI to be traced for any participant [G 18.14].</p>
+<script type="text/req" data-p="FR">
+fr-auditlog | The system SHALL write an append-only audit entry for every approval and decision, credential action, result change, ACR, deposit, transfer and redemption status change, role and setting change, correction, and record disposal. Each entry SHALL hold time, actor, actor's role, action, record affected, values before and after, reason and external reference. | G 15.7, 18.10, D-20, C6
+fr-auditview | Authorised users SHALL be able to search and view the audit trail of a record within their scope. | App H6
+fr-correct | A correction to any record SHALL follow the Guide procedure: check against the valid source record; carry out by the party with authority; record the original record, reason, action, approver or executor and date. If it affects a credential, ACR, deposit or credit status, the participant SHALL be notified and the linked records SHALL be updated in a controlled way. | G 18.10, App F10, BR-38
+fr-mismatch | The system SHALL keep a discrepancy log for mismatches between achievement records, credentials, ACR and ABC information, each resolved through the correction procedure. | G 12.10, 18.10
+fr-trace | For any participant and micro-credential the system SHALL show the traceability chain: development, approval, offering, learning, assessment, achievement, credential, ACR and ABC (if any), transfer and use of credit (if any), and monitoring and CQI. | G 18.14
+fr-cohortrec | For each cohort the system SHALL show the minimum records of Appendix H5 and whether each is present. | App H5
+fr-reports | The system SHALL provide standard reports, filtered by the user's scope: offerings by category, PTj and status; enrolments and completions; credentials issued, corrected and revoked; QV status and upcoming expiries; ACR prepared and deposits recorded; transfer applications and decisions; credit redemption status; open CQI actions. | G 17.2
+fr-export | Reports SHALL be exportable to CSV, Excel and PDF. |
+fr-retention | Each record category SHALL have a retention period setting. Records SHALL be disposed of only after the period has passed and when not held for audit, quality assurance, academic recognition, legal reasons or participant protection. Each disposal SHALL be approved and logged. | G 18.12, A-08, OI-07
+fr-hold | An authorised user SHOULD be able to place a hold on records that stops disposal. | G 18.12
+fr-analytics | The system MAY provide analytical dashboards across years, such as trends in enrolment, completion and credit use. |
+</script>
+
+<!-- ============ 3.17 ============ -->
+<h2>3.17 Notifications and Integration Hub (M16)</h2>
+<script type="text/req" data-p="FR">
+fr-ntevents | The system SHALL send in-system notifications and email for at least these events: proposal submitted, reviewer assigned, review due, amendment requested, decision made; offering open; registration, payment and enrolment confirmed; results verified; credential issued, corrected, replaced or revoked; QV expiry alerts; consent requested; deposit recorded; transfer decision; credit expiry alert; CQI action due; periodic review due; change affecting enrolled participants. | G 10.3.2, 18.10
+fr-ntlang | Notifications SHALL be sent in the recipient's chosen language using the managed templates. | D-02
+fr-ntprefs | Users SHALL be able to switch off optional notifications. Mandatory notices (decisions, credential actions, consent requests, changes affecting enrolment) SHALL NOT be switched off. |
+fr-ntlog | The system SHALL log each notification with recipient, channel, time and delivery status. |
+fr-ntdigest | Approvers and lecturers SHOULD be able to receive a daily digest instead of individual emails. |
+fr-ihregistry | The integration hub SHALL register each adapter (SSO, learning platform, ABC, QVC/MQA, payment, email, student information system) with its current mode: stub, manual or live. | D-06, D-14
+fr-ihretry | Failed outbound calls SHALL be retried with increasing delay. Calls that still fail SHALL be listed for P5 to resolve, without blocking the business process that created them. |
+</script>
+
+<!-- ===================== 4. BUSINESS RULES ===================== -->
+<h1>4. Business Rules</h1>
+<p>This section lists the rules of the Guide that MCMS enforces, as a separate requirement category (D-25). A business rule is binding on the complete system under UTeM policy, whatever the release (D-24). The column <b>Enforced by</b> names the functional requirements that put the rule into effect; acceptance tests SHALL cover every rule. Rules BR-01 to BR-06 keep the numbers given in the Glossary and Decision Log; their values are settings ({{tab:settings}}).</p>
+
+<h2>4.1 Numeric Rules (Configurable)</h2>
+<script type="text/req" data-p="BR" data-h="Rule" data-x="Enforced by">
+br-slt | A SAMC and a whole UMC SHALL have at least 40 hours SLT (a UMC: or at least 1 credit). | G 6.3.1, 6.3.2 | {{fr-catsamc}}, {{fr-umcwhole}}
+br-qvvalid | Quality Verification SHALL be valid for at most 3 continuous years. | G 11.2.2 | {{fr-qvresult}}
+br-qvcohort | A SAMC SHALL have at least one completed cohort before it is submitted for QV. | G 11.2.1 | {{fr-qveligible}}
+br-creditvalid | Credit in ABC SHALL be valid for 10 years from the deposit date. | G 12.8 | {{fr-cvexpiry}}
+br-home30 | At least 30% of graduating credit for a stackable degree SHALL be earned directly at UTeM. | G 14.5.1 | {{fr-sp30}}
+br-residency | A participant graduating through a stackable pathway in a conventional programme SHALL complete at least 1 semester of residency at UTeM. | G 14.5.3 | {{fr-spresidency}}
+</script>
+
+<h2>4.2 Category and Design Rules</h2>
+<script type="text/req" data-p="BR" data-h="Rule" data-x="Enforced by">
+br-mce | An MCE has less than 40 hours SLT, carries no credit, is not subject to QV, and cannot be used for credit transfer or stackable pathways. It becomes credit-eligible only by reclassification and re-approval as a SAMC. | G 6.3.3 | {{fr-catmce}}, {{fr-mcereclass}}
+br-umcslt | The total SLT of all modules of a UMC SHALL equal the SLT of the parent course. | G 6.3.1, 8.3 | {{fr-umcsltsum}}
+br-umclink | A UMC SHALL come from a credit course of an accredited UTeM programme and SHALL keep its link to the parent course, with its outcomes mapped to the parent CLOs. | G 6.3.1, 8.2 | {{fr-umcaccred}}, {{fr-umcclo}}
+br-creditmodel | Under the credit-based unbundling model, every module SHALL have at least 40 hours SLT. | G 6.3.1.1(a) | {{fr-umccreditmodel}}
+br-topicmodel | Under the topic-based unbundling model, module SLT may vary to match topical learning clusters, modules need not reach 40 hours individually, and total module SLT SHALL equal parent course SLT. | G 6.3.1.1(b), Rajah 6 | {{fr-umctopicmodel}}
+br-assessmodule | Under the separate learning and assessment model, content delivery SHALL be partitioned across learning modules while integrated summative assessment SHALL be isolated in a dedicated assessment module. | G 6.3.1.1(c), 8.6 | {{fr-umcassessmodule}}
+br-badge | Module completion or a Digital Badge SHALL NOT count as completion of the whole UMC or as academic credit. | G 8.7.1, 12.3.1 | {{fr-crbadgetext}}, {{fr-arumc}}
+br-nomix | Badges or modules from different UMCs or parent courses SHALL NOT form a UMC without an equivalence decision. | G 8.7.2, 12.2 | {{fr-arnomix}}
+br-modcredit | A UMC module SHALL NOT be a credit unit unless specifically approved as a separately recognisable credit unit. | G 13.5, 14.2.1, D-18 | {{fr-umcmodcredit}}, {{fr-ctpartial}}
+br-samccredit | A SAMC SHALL have a credit value and MQF level only after Quality Verification, using the values in the QV decision. | G 6.3.2, 12.3.2 | {{fr-propcredit}}, {{fr-qvsource}}
+br-sltnotcredit | Reaching 40 hours SLT SHALL NOT by itself give credit value or MQF level. | G 6.5, 11.2.1 | {{fr-catsamc}}, {{fr-qveligible}}
+</script>
+
+<h2>4.3 Approval, Delivery and Credential Rules</h2>
+<script type="text/req" data-p="BR" data-h="Rule" data-x="Enforced by">
+br-separate | Approval to offer, Quality Verification and credit transfer SHALL be separate decisions; none implies another. | G 11.2, 15.4 | {{fr-wfnotcredit}}, {{fr-qvnotransfer}}
+br-offer | No micro-credential SHALL be offered before it is approved and its readiness is confirmed. | G 9.6 | {{fr-offapproved}}, {{fr-offopen}}
+br-material | A material change SHALL be reviewed and re-approved before it is implemented. | G 9.5, 17.7 | {{fr-chgmaterial}}
+br-achieve | Recognition SHALL be based on evidence of achievement, not on attendance or participation alone. | G 6.1, 8.6 | {{fr-asnoattend}}
+br-verifyfirst | Achievement SHALL be verified before a Digital Badge, Certificate or Digital Credential is issued. | G 10.4 | {{fr-asverify}}, {{fr-lpstaged}}
+br-certwhole | A Certificate or Digital Credential for the whole micro-credential SHALL be issued only after all completion requirements are met. | G 8.7.3, 10.5 | {{fr-crcheck}}, {{fr-crcert}}
+br-noclaim | No credential or offering information SHALL suggest a credit value, MQF level or QV status that has not been formally obtained. | G 10.5, App E5 | {{fr-wdtemplate}}, {{fr-wdblock}}
+br-qvlapse | When QV expires, is suspended or is withdrawn, UTeM SHALL stop claiming Quality-Verified status for the offering. | G 11.2.2 | {{fr-qvlapse}}, {{fr-offqv}}
+</script>
+
+<h2>4.4 Credit, Transfer and Stackable Rules</h2>
+<script type="text/req" data-p="BR" data-h="Rule" data-x="Enforced by">
+br-acrelig | An ACR SHALL be prepared only for an eligible completed UMC or a completed Quality-Verified SAMC. | G 12.1.1, 12.4.1 | {{fr-acrelig}}
+br-arnotacr | The internal Achievement Record SHALL be kept distinct from the ACR. | G 8.7.5, 18.3 | {{fr-arlabel}}, {{fr-acrseparate}}
+br-deposit | An ABC deposit is storage of a credit record and SHALL NOT be treated as approval of credit transfer. | G 12.5, 18.6 | {{fr-dpnottransfer}}
+br-consent | An ACR SHALL be submitted to ABC only with the participant's consent. | G 12.4.2, 16.8 | {{fr-dpconsent}}
+br-acrkeep | Expiry of credit validity SHALL NOT delete the ACR; the ACR is kept in perpetuity unless the owner or a recognised authority directs otherwise. | G 12.8 | {{fr-cvexpired}}, {{fr-cvretain}}
+br-redeem | Credit used toward one qualification SHALL NOT be used toward another: it is provisionally redeemed on transfer, redeemed on programme completion, and may become available again if the programme is not completed while the credit is valid. | G 12.9 | {{fr-rdprov}}, {{fr-rdnoreuse}}
+br-equiv | Academic equivalence SHALL be judged on learning outcomes and related criteria, not on equal credit or SLT alone. | G 13.3 | {{fr-ctloequiv}}
+br-receiver | Acceptance of credit SHALL be decided by the receiving programme or institution; neither ABC nor MCMS decides it. | G 12.5, 13.1 | {{fr-ctauthority}}
+br-mcetransfer | An MCE SHALL NOT be used directly for credit transfer. | G 13.2 | {{fr-ctsource}}
+br-rejectkeep | A refused transfer SHALL NOT cancel a valid ACR, badge, certificate or Digital Credential. | G 13.6 | {{fr-ctreject}}
+br-admission | Programme admission SHALL be decided separately from credit transfer; holding micro-credentials, ACR or ABC credit SHALL NOT give automatic admission. | G 14.4 | {{fr-ctadmission}}, {{fr-spadmit}}
+br-creditbearing | Only credit-bearing credentials SHALL count toward a stackable degree. | G 14.1.1 | {{fr-spcreditbearing}}
+br-plo | Credit used for a stackable degree SHALL be mapped to the programme learning outcomes and Body of Knowledge. | G 14.5.2 | {{fr-spplo}}
+br-award | A qualification SHALL be awarded only after lawful admission and completion of all programme and graduation requirements. | G 14.10 | {{fr-spaward}}
+</script>
+
+<h2>4.5 Governance and Record Rules</h2>
+<script type="text/req" data-p="BR" data-h="Rule" data-x="Enforced by">
+br-audit | Corrections SHALL be made only by the party with authority and SHALL keep an audit trail; earlier actions are never erased. | G 10.5.1, 15.7, 18.10 | {{fr-crnoerase}}, {{fr-correct}}, {{fr-auditlog}}
+br-version | A version of a micro-credential linked to participant records SHALL NOT be deleted while its records must be kept. | G 18.8 | {{fr-verkeep}}
+br-terminate | Suspension or termination of an offering SHALL protect current participants and SHALL NOT cancel valid achievements. | G 17.10, 18.13 | {{fr-prsuspend}}, {{fr-prkeep}}
+br-cqi | A CQI action SHALL be considered complete only after its effectiveness is evaluated. | G 17.12 | {{fr-cqieffect}}
+br-authority | Lecturers and operational units SHALL NOT take academic decisions outside the authority given to them. | G 15.2.3, 16.3 | {{fr-sod}}, {{fr-adminlimits}}
+</script>
+
+<!-- ===================== 5. EXTERNAL INTERFACE REQUIREMENTS ===================== -->
+<h1>5. External Interface Requirements</h1>
+
+<h2>5.1 User Interfaces</h2>
+<p>MCMS has three web front ends sharing one design: the <b>staff portal</b> (lecturers, deputy deans, CODL administrators and invited experts), the <b>participant portal</b> (P8) and the <b>public pages</b> (catalogue and credential verification). {{fig:screenmap}} shows the main screens by audience. Detailed layouts belong to the SDD and the design work.</p>
+
+<figure data-f="screenmap">
+<pre class="mermaid">
+flowchart TB
+  subgraph PUB["Public pages (no login)"]
+    direction LR
+    C1["Catalogue"] --> C2["Offering details"]
+    V1["Verify credential<br/>(ID, URL, QR)"]
+  end
+  subgraph PAR["Participant portal"]
+    direction LR
+    H1["My learning"] --> H2["Enrolment and<br/>module progress"]
+    H1 --> H3["My credentials"]
+    H1 --> H4["My credit ledger<br/>(ACR, ABC, status)"]
+    H4 --> H5["Consent requests"]
+    H4 --> H6["Transfer applications"]
+  end
+  STF["<b>Staff portal</b> (menus shown by role)<br/>My tasks and decision queue · Micro-credentials: proposals, versions · Offerings: readiness, cohorts, results<br/>Credentials and ACR · ABC deposit queue · QV management · Transfer and stackable plans<br/>CQI and monitoring · Reports and audit · Administration: users, roles, settings"]
+  C2 -- "sign in to register" --> H1
+  PAR ~~~ STF
+</pre>
+<figcaption>Main screens by audience. Each staff user sees only the menus their roles allow.</figcaption>
+</figure>
+
+<script type="text/req" data-p="IR">
+ir-responsive | The user interface SHALL be a responsive web interface usable on screens from 360 px wide (phones) to desktop monitors. |
+ir-lang | Every screen SHALL be available in Bahasa Melayu and English, with a language switch on every page. | D-02
+ir-home | After sign-in each staff user SHALL land on a task page that lists the items waiting for their action, across all their roles. |
+ir-stagecolours | Each recognition stage (approval, badge, certificate or Digital Credential, QV, ACR, ABC deposit, credit transfer, redemption) SHALL have a distinct label and visual style, used consistently, so that users cannot confuse one stage with another. | D-15
+ir-forms | Forms SHALL validate input on entry, show errors next to the field in plain language, and keep entered data when an error occurs. |
+ir-confirm | Actions that issue, approve, revoke, deposit or redeem SHALL ask for confirmation and show a summary of their effect before they run. | G 15.7
+ir-print | Proposal documents, decision packs, certificates, ACR views and reports SHALL have print-friendly layouts. | App A, E3
+ir-identity | The interface and credentials SHALL follow UTeM corporate identity guidelines, using DESIGN.md (Carbon with uLearn Navy) and displaying the official Centre for Open and Distance Learning (CODL) logo in the public website footer (D-33, D-44, A-10). | App E3
+ir-badges | The interface across all roles SHALL distinguish between operational status indicators (such as <code>Passed (Final)</code>, <code>0 / 2 eligible</code>, <code>Provisional (1/3)</code>, <code>Revoked</code>, and <code>Replaced</code>) and technical implementation details. Technical cryptographic labels (e.g. <code>Ed25519</code>, <code>W3C VC 2.0</code>, <code>RFC 7519</code>) and redundant status badges beside completed sections SHALL NOT be rendered as decorative pills on user-facing screens. | D-42
+ir-help | Each screen SHALL have context help, and the help centre SHALL explain the separate recognition stages in plain words. | G 10.3.1
+ir-accessible | The interface SHALL meet WCAG 2.1 level AA (see Section 7.4). |
+</script>
+
+<h2>5.2 Hardware Interfaces</h2>
+<p>MCMS has no special hardware interface. It runs on standard UTeM server infrastructure.</p>
+<script type="text/req" data-p="IR">
+ir-qrscan | Verification QR codes SHALL be readable by the standard camera application of current smartphones and SHALL open the verification page directly. | App E6
+ir-print-hw | Certificates SHALL print correctly on standard A4 office printers. |
+ir-hsm | Credential signing keys MAY be held in a hardware security module or an equivalent managed key store. | OI-08
+</script>
+
+<h2>5.3 Software Interfaces</h2>
+<p>All external systems are reached through adapters. Each adapter has a fixed interface towards the MCMS modules and one or more implementations: <b>stub</b> (simulated, for development and testing), <b>manual</b> (staff exchange files or enter data), and <b>live</b> (automated connection).</p>
+<p class="tcap" data-t="adapters">Adapters and their modes by release</p>
+<script type="text/tbl" data-h="Adapter|External system|Data exchanged|Release 1|Later" data-w="15%|20%|33%|16%|16%" data-cls="small">
+Identity | UTeM SSO (Microsoft education account) | Sign-in, name, email, staff or matric number, account attributes | Live in production; stub in development and test | –
+Learning platform | UCreds | Enrolments out; progress, results, module completion, badge data in | Manual (CSV) | Live connector (R2)
+ABC | National Academic Bank of Credit | ACR deposit data out; deposit reference and status in; redemption updates | Manual (export and record) | Live (R3, MAY)
+Quality Verification | QVC / MQA | QV submission package out; QV decision in | Manual (package and record) | Electronic (R3, MAY)
+Payment | UTeM payment hub | Payment request out; payment result in | Stub (dummy service) | Live (R3, MAY)
+Email | UTeM SMTP service | Notification messages | Live | –
+Student information | UTeM student information system | Admission, enrolment and graduation status | None (manual recording) | Live (R3, MAY)
+Credential signing | Key store within UTeM infrastructure | Signing of Digital Credentials; public key for verification | Live | –
+</script>
+<script type="text/req" data-p="IR">
+ir-adapter | Each adapter SHALL expose a documented, versioned interface to the MCMS modules. Business modules SHALL NOT call external systems directly. | D-06, C3
+ir-stubs | Every adapter SHALL have a stub implementation usable in development and test environments. | D-14
+ir-mode | The active implementation of each adapter SHALL be chosen by configuration, without code change. | D-14
+ir-idempotent | Operations that send data out (deposit export, payment request, notification) SHALL be safe to repeat: a repeated call SHALL NOT create a duplicate record. |
+ir-oidc | The identity adapter SHALL use OpenID Connect with the UTeM Microsoft tenant, unless CODL specifies another protocol (TBD, OI-03). | D-10
+ir-csvtemplates | CSV templates for the learning platform SHALL be versioned and published in the technical documentation, with UTF-8 encoding, a header row and ISO 8601 dates. | A-04
+ir-obv3 | Digital Credentials SHALL be produced as JSON documents following the Open Badges 3.0 / W3C Verifiable Credentials data model, signed by UTeM, with the public verification key published at a stable address. | D-19
+ir-api | The system SHOULD provide an authenticated REST API for read access to catalogue data and credential verification, to allow later integration by other UTeM systems. |
+</script>
+
+<h2>5.4 Communications Interfaces</h2>
+<script type="text/req" data-p="IR">
+ir-https | All web traffic SHALL use HTTPS with TLS 1.2 or later. Plain HTTP requests SHALL be redirected to HTTPS. | OWASP ASVS
+ir-smtp | Email SHALL be sent through the UTeM SMTP service using TLS, from a monitored UTeM address. |
+ir-time | Servers SHALL synchronise time with a trusted time source. Times SHALL be stored in UTC and shown in Malaysia time (Asia/Kuala_Lumpur). | G 15.7
+ir-dates | Dates SHALL be shown as DD/MM/YYYY in the interface and exchanged as ISO 8601 in files and APIs. |
+ir-files | Files exchanged with external parties SHALL be transferred only through approved UTeM channels and SHALL NOT be sent by personal email. | App H6
+</script>
+
+<!-- ===================== 6. DATA REQUIREMENTS ===================== -->
+<h1>6. Data Requirements</h1>
+<p>This section describes the information MCMS must hold, as a conceptual model. It names the main entities and their relationships so that reviewers can check that every record required by the Guide exists, and so that the SDD can derive the physical database design. Table names, column types and indexes belong to the SDD.</p>
+
+<h2>6.1 Conceptual Data Model</h2>
+<p>The model is shown in three parts. The most important property is visible in all three: each recognition stage is its own entity (approval decision, Digital Badge, credential, QV record, ACR, ABC deposit, transfer decision, redemption event), never a status field on another entity (D-15).</p>
+
+<h3>6.1.1 Curriculum and Approval</h3>
+<figure data-f="ercurriculum">
+<pre class="mermaid">
+erDiagram
+  PTJ ||--o{ MICRO_CREDENTIAL : owns
+  MICRO_CREDENTIAL ||--|{ MC_VERSION : "has versions"
+  PROGRAMME ||--|{ PARENT_COURSE : includes
+  PARENT_COURSE ||--o{ MC_VERSION : "unbundled into (UMC)"
+  MC_VERSION ||--|{ LEARNING_OUTCOME : defines
+  MC_VERSION ||--o{ MODULE : "structured in"
+  MODULE ||--|{ ASSESSMENT_COMPONENT : "assessed by"
+  LEARNING_OUTCOME }o--o{ ASSESSMENT_COMPONENT : "aligned with"
+  MC_VERSION ||--o{ REVIEW : "reviewed in"
+  MC_VERSION ||--o{ APPROVAL_DECISION : "decided by"
+  MC_VERSION ||--o{ CHANGE_REQUEST : "changed through"
+  MICRO_CREDENTIAL ||--o{ QV_RECORD : "verified by (SAMC)"
+  QV_RECORD ||--o{ QV_EVIDENCE : contains
+  MICRO_CREDENTIAL {
+    uuid id
+    string code
+    enum confirmed_category
+    uuid ptj_id
+  }
+  MC_VERSION {
+    int version_no
+    enum state
+    int total_slt_hours
+    decimal approved_credit
+    date effective_date
+  }
+  APPROVAL_DECISION {
+    enum stage
+    enum decision
+    uuid decided_by
+    string external_ref
+    datetime decided_at
+  }
+  QV_RECORD {
+    enum status
+    string qv_reference
+    decimal verified_credit
+    string verified_mqf_level
+    date valid_from
+    date valid_until
+  }
+</pre>
+<figcaption>Conceptual model of curriculum, versions, approval and Quality Verification. Only a few key attributes are shown.</figcaption>
+</figure>
+
+<h3>6.1.2 Delivery, Achievement and Credentials</h3>
+<figure data-f="erdelivery">
+<pre class="mermaid">
+erDiagram
+  MC_VERSION ||--o{ OFFERING : "offered as"
+  OFFERING ||--o{ READINESS_CHECK : "confirmed by"
+  OFFERING ||--o{ ENROLMENT : has
+  USER ||--o{ ENROLMENT : makes
+  ENROLMENT ||--o{ MODULE_ENROLMENT : "tracks modules"
+  ENROLMENT ||--o{ ASSESSMENT_RESULT : earns
+  ENROLMENT ||--o| PAYMENT : "paid by"
+  ENROLMENT ||--|| ACHIEVEMENT_RECORD : "summarised in"
+  MODULE_ENROLMENT ||--o| DIGITAL_BADGE : "proved by"
+  ACHIEVEMENT_RECORD ||--o{ CREDENTIAL : "certified by"
+  CREDENTIAL ||--o{ CREDENTIAL_EVENT : "history of"
+  CREDENTIAL ||--o{ VERIFICATION_LOG : "checked in"
+  OFFERING ||--o{ CQI_RECORD : "improved through"
+  CQI_RECORD ||--o{ CQI_ACTION : plans
+  ASSESSMENT_RESULT {
+    decimal score
+    enum state
+    uuid verified_by
+    datetime verified_at
+  }
+  ACHIEVEMENT_RECORD {
+    enum completion_status
+    date completed_on
+    uuid confirmed_by
+  }
+  CREDENTIAL {
+    uuid credential_id
+    enum type
+    enum status
+    json signed_payload
+    date issued_on
+  }
+  CREDENTIAL_EVENT {
+    enum action
+    string reason
+    uuid actor
+    datetime at
+  }
+</pre>
+<figcaption>Conceptual model of offerings, enrolment, results, the Achievement Record and credentials.</figcaption>
+</figure>
+
+<h3>6.1.3 Credit, Transfer and Stackable Pathway</h3>
+<figure data-f="ercredit">
+<pre class="mermaid">
+erDiagram
+  ACHIEVEMENT_RECORD ||--o| ACR : "may produce"
+  USER ||--o{ ACR : owns
+  ACR ||--o{ CONSENT : "authorised by"
+  ACR ||--o| ABC_DEPOSIT : "deposited as"
+  ABC_DEPOSIT ||--o{ REDEMPTION_EVENT : "status history"
+  USER ||--o{ TRANSFER_APPLICATION : submits
+  TRANSFER_APPLICATION }o--|{ ACR : uses
+  TRANSFER_APPLICATION ||--o| EQUIVALENCE_ASSESSMENT : "evaluated in"
+  TRANSFER_APPLICATION ||--o| TRANSFER_DECISION : "decided by"
+  PROGRAMME ||--o{ PATHWAY_MAPPING : "has"
+  PATHWAY_MAPPING ||--|{ PATHWAY_ITEM : lists
+  USER ||--o{ STACKABLE_PLAN : "follows"
+  STACKABLE_PLAN }o--|| PATHWAY_MAPPING : "based on"
+  STACKABLE_PLAN }o--o{ ACR : "stacks"
+  ACR {
+    string acr_reference
+    decimal credit
+    string mqf_level
+    date completion_date
+    uuid verified_by
+  }
+  ABC_DEPOSIT {
+    string abc_reference
+    date deposit_date
+    date credit_expiry
+    enum deposit_status
+    enum credit_status
+  }
+  TRANSFER_DECISION {
+    enum decision
+    decimal credits_approved
+    string authority
+    date decided_on
+  }
+  STACKABLE_PLAN {
+    decimal utem_credit_percent
+    enum residency_status
+    enum decision
+  }
+</pre>
+<figcaption>Conceptual model of ACR, ABC deposit, redemption, credit transfer and stackable plans.</figcaption>
+</figure>
+
+<p class="tcap" data-t="entities">Main entities and their purpose</p>
+<script type="text/tbl" data-h="Entity|Purpose|Owner (App H4)|Main requirements" data-w="20%|46%|14%|20%" data-cls="small">
+PTJ, PROGRAMME, PARENT_COURSE | Reference data for owners, target programmes and parent courses with accreditation status, credits, SLT and CLOs | S1 | {{fr-refdata}}
+MICRO_CREDENTIAL, MC_VERSION | A micro-credential and its immutable approved versions | P1 / P2 | {{fr-verhistory}}
+LEARNING_OUTCOME, MODULE, ASSESSMENT_COMPONENT | Learning design and alignment | P1 | {{fr-proplo}}, {{fr-umcmodel}}
+REVIEW, APPROVAL_DECISION, CHANGE_REQUEST | Review results, decisions per stage, minor and material changes | P1 / P2 (records Senate decisions) | {{fr-wfrecord}}, {{fr-chgclassify}}
+QV_RECORD, QV_EVIDENCE | QV cycles, evidence checklist, verified credit and MQF, validity | P1 / P2 | {{fr-qvresult}}
+OFFERING, READINESS_CHECK | Cohorts and their readiness confirmation | P2 | {{fr-offcreate}}, {{fr-offconfirm}}
+USER, ROLE_ASSIGNMENT | People, roles and scopes | S1 | {{fr-scope}}
+ENROLMENT, MODULE_ENROLMENT, PAYMENT | Registration, module progress and fee status | PTj (P2); CODL operates the data | {{fr-regstatus}}, {{fr-regmodule}}
+ASSESSMENT_RESULT | Provisional and verified results | P1 / P2 | {{fr-asverify}}
+ACHIEVEMENT_RECORD | Internal record of modules, badges and completion; not an ACR | P1 / P2 | {{fr-arkeep}}
+DIGITAL_BADGE, CREDENTIAL, CREDENTIAL_EVENT | Proofs of achievement and their history | P2 (issued by the system) | {{fr-crdc}}, {{fr-crcorrect}}
+ACR, CONSENT, ABC_DEPOSIT, REDEMPTION_EVENT | Academic credit records, consent, deposit and credit status history | P2 (ACR generated by the system) | {{fr-acrprep}}, {{fr-dprecord}}, {{fr-rdprov}}
+TRANSFER_APPLICATION, EQUIVALENCE_ASSESSMENT, TRANSFER_DECISION | Credit transfer cases | P2 of the degree faculty | {{fr-ctapply}}, {{fr-ctdecision}}
+PATHWAY_MAPPING, PATHWAY_ITEM, STACKABLE_PLAN | Programme pathway mappings and individual plans | P1 / P2; Senate approval recorded by P2 | {{fr-spmap}}, {{fr-spplan}}
+CQI_RECORD, CQI_ACTION | Monitoring findings and improvement actions | P1 / P2 | {{fr-cqiaction}}
+AUDIT_LOG, SETTING, NOTIFICATION, INTEGRATION_JOB | Audit trail, configuration, messages and adapter jobs | System | {{fr-auditlog}}, {{fr-settings}}
+</script>
+
+<h2>6.2 Data Integrity Rules</h2>
+<script type="text/req" data-p="DR">
+dr-separate | Each recognition stage SHALL be stored in its own entity with its own decision fields. No single status field SHALL represent more than one stage. | D-15
+dr-versionref | Offerings, enrolments, results, credentials, ACR and equivalence evaluations SHALL reference the exact MC version they belong to. | G 13.8, 18.8
+dr-immutable | Approved versions, issued credential payloads, verified results, decisions and audit entries SHALL NOT be updated in place. A change SHALL create a new record linked to the previous one. | D-20, G 18.10
+dr-nodelete | Records SHALL NOT be physically deleted except by the approved disposal process after their retention period. | G 18.12
+dr-derived | Credit value, MQF level and QV status shown anywhere SHALL be derived from the approval or QV record, with a reference to that record. | D-17
+dr-asof | Each decision SHALL store the settings values it used (for example the credit validity period), so that later setting changes do not alter past decisions. | D-16
+dr-publicid | Records exposed outside the staff portal (credentials, verification links) SHALL use random, non-sequential identifiers. |
+dr-time | All timestamps SHALL be stored in UTC with time zone. |
+dr-refint | Relationships SHALL be enforced by the database (foreign keys and constraints), not only by application code. | D-09
+dr-bilingual | Text that participants see (titles, outcomes, recognition statements) SHALL be stored in both Bahasa Melayu and English. | D-02
+</script>
+
+<h2>6.3 Data Retention and Ownership</h2>
+<p>The Guide requires retention according to UTeM's records policy and, for ACR and ABC data, the ABC rules [G 18.12]. The periods below are placeholders (A-08, OI-07); only the ACR rule is fixed by the Guide.</p>
+<p class="tcap" data-t="retention">Record categories, owners and retention (placeholders)</p>
+<script type="text/tbl" data-h="Record category|Owner / custodian|Retention|Source" data-w="34%|24%|24%|18%" data-cls="small">
+Development and approval documents, versions | PTj / designated party | TBD (UTeM records policy); versions linked to participants kept while those records are kept | G 18.2, 18.8
+Learning materials and versions | PTj / academic owner | TBD | App H4
+Assessment instruments, rubrics and results | PTj / academic party | TBD | App H4
+Registration records | PTj (P2) | TBD | App H4
+Achievement Record | PTj (P2) | TBD | G 18.3
+Badges, Certificates, Digital Credentials and their history | PTj (P2); issued by the system | TBD; verification remains possible for the life of the credential | App E6, H4
+QA, monitoring and CQI records | PTj (P2) | TBD | G 18.9
+QV documents and decisions (SAMC) | PTj (P2) | At least the QV validity period plus records requirement | App H4
+Academic Credit Record (ACR) | PTj (P2); generated by the system | Indefinite, unless the owner or a recognised authority directs otherwise | G 12.8
+ABC deposit records | PTj (P2) | Per ABC rules | App H4
+Credit transfer decisions | Academic / records party | TBD (academic regulations) | App H4
+Stackable mapping matrices | Programme / PTj | Programme lifetime plus review period | App H4
+Audit trail | System (CODL) | At least as long as the longest linked record | G 15.7
+Verification request logs | System (CODL) | TBD | App E6
+</script>
+
+<h2>6.4 Data Migration and Reference Data</h2>
+<script type="text/req" data-p="DR">
+dr-refimport | The system SHALL import reference data for PTj, programmes and parent courses from CSV files supplied by the responsible offices. |
+dr-legacy | The system SHOULD import existing micro-credential records kept in spreadsheets (offerings, participants, completions) as historical records, marked as migrated and not re-verified. |
+dr-nolegacycred | Migrated records SHALL NOT produce ACR or credit claims unless their eligibility is verified under Section 3.11. | G 12.1, D-17
+</script>
+
+<h2>6.5 Data Classification</h2>
+<p class="tcap" data-t="classification">Data classification</p>
+<script type="text/tbl" data-h="Class|Examples|Handling" data-w="16%|44%|40%" data-cls="small">
+Public | Catalogue entries, public verification fields, issuer public key | May be shown without login
+Internal | Proposals, reviews, decisions, CQI records, reports | Staff within scope only
+Confidential | Participant identity (name, identity card or passport number, matric number, contact details), results, ACR, consent, transfer cases | Role and scope controlled; encrypted at rest; minimum exposure
+Restricted | Credential signing keys, system secrets, audit integrity data | Administrators of the key store only; never shown in the interface
+</script>
+
+<!-- ===================== 7. NON-FUNCTIONAL REQUIREMENTS ===================== -->
+<h1>7. Non-Functional Requirements</h1>
+<p>This section states the quality the system must achieve. Figures for load are based on the indicative sizing of A-09 (up to 200 offerings and 20,000 participants a year, peaks of 2,000 registrations within a few hours); they are not binding commitments (D-21) and will be revised when real figures are known.</p>
+
+<h2>7.1 Performance Requirements</h2>
+<h3>7.1.1 Response Time</h3>
+<script type="text/req" data-p="NFR">
+nfr-page | 95% of page requests SHALL complete within 2 seconds under normal load, measured at the server. |
+nfr-search | Catalogue and record searches SHALL return the first page of results within 2 seconds for 95% of requests. |
+nfr-verify | The public verification page SHALL respond within 1 second for 95% of requests. | App E6
+nfr-report | Standard reports for one PTj and one year SHALL be produced within 10 seconds; larger reports SHALL run in the background and notify the user when ready. |
+</script>
+<h3>7.1.2 Throughput</h3>
+<script type="text/req" data-p="NFR">
+nfr-peak | The system SHALL handle 2,000 registrations within 2 hours, with at least 100 concurrent users submitting, without errors or loss of data. | A-09
+nfr-capacity | Registration SHALL never accept more participants than the capacity of an offering, even under concurrent submissions. |
+nfr-import | A CSV import of 5,000 result rows SHALL be validated and staged within 2 minutes. |
+nfr-issue | Issuing 500 signed Digital Credentials for a cohort SHALL complete within 10 minutes as a background job. |
+</script>
+<h3>7.1.3 Resource Utilisation and Scalability</h3>
+<script type="text/req" data-p="NFR">
+nfr-cpu | At the peak load of {{nfr-peak}}, average CPU use of application servers SHALL stay below 70%, leaving headroom for unexpected load. | D-21
+nfr-stateless | Application servers SHALL keep no session state on local disk, so that more servers can be added behind a load balancer. | D-21
+nfr-queue | Long-running work (imports, credential issuance, reports, notifications, alerts) SHALL run in background queues, so that interactive response times are not affected. |
+nfr-growth | The design SHALL allow ten times the indicative annual volume without a change of architecture. | D-21
+</script>
+
+<h2>7.2 Security Requirements</h2>
+<h3>7.2.1 Authentication and Authorisation</h3>
+<script type="text/req" data-p="SR">
+sr-sso | In production, all users except public verifiers SHALL authenticate through UTeM SSO. MCMS SHALL NOT store user passwords. | D-10
+sr-mfa | Staff roles that approve, verify, issue, deposit or administer SHALL require multi-factor authentication, enforced through the SSO provider where possible. |
+sr-authz | Every request SHALL be checked on the server against the user's roles and scope. Access to a record outside scope SHALL be refused and logged. | G 18.11
+sr-leastpriv | Roles SHALL follow least privilege: each role SHALL have only the permissions needed for its functions in {{tab:raci}}. | App H6
+sr-review | S1 SHALL be able to produce a list of all role assignments for periodic access review. | App H6
+</script>
+<h3>7.2.2 Data Protection</h3>
+<script type="text/req" data-p="SR">
+sr-tls | Data in transit SHALL be encrypted (Section 5.4). |
+sr-rest | The database, file storage and backups SHALL be encrypted at rest. Identity card and passport numbers SHALL additionally be encrypted at field level. | PDPA
+sr-keys | Credential signing keys SHALL be generated and stored in a protected key store, SHALL never leave it in readable form, and SHALL be rotatable without invalidating credentials already issued. Key ownership is TBD (OI-08). | D-19
+sr-uploads | Uploaded files SHALL be checked for allowed type and size, scanned for malware where a scanner is available, and stored outside the public web root. |
+sr-tamper | The audit trail SHALL be tamper-evident (for example, each entry carries a hash of the previous one), and the system SHALL be able to check its integrity. | D-20
+sr-backupprotect | Backups SHALL be stored separately from the production system with access restricted to authorised administrators. | App H6
+</script>
+<h3>7.2.3 Privacy and Compliance</h3>
+<script type="text/req" data-p="SR">
+sr-pdpa | Processing of personal data SHALL comply with PDPA 2010: notice at collection, use only for stated purposes, disclosure only as permitted, and retention only as long as needed. | PDPA, G 18.11
+sr-minimal | The public verification page and any shared data SHALL show only the minimum permitted information (Section 3.9.3). | App E6, H6
+sr-access | A participant SHALL be able to see the personal data MCMS holds about them and request correction through the correction procedure. | PDPA, G 18.10
+sr-sharing | Data SHALL be shared with external parties (ABC, QVC/MQA, partners) only through approved mechanisms and only to the extent needed. | App H6
+</script>
+<h3>7.2.4 Application Security, Monitoring and Incident Response</h3>
+<script type="text/req" data-p="SR">
+sr-asvs | The application SHALL meet OWASP ASVS 4.0 level 2, including input validation, output encoding, protection against cross-site request forgery and injection, and secure session cookies. |
+sr-ratelimit | Public endpoints (catalogue, verification) SHALL be rate-limited to resist automated abuse and enumeration of credential IDs. |
+sr-seclog | Security events (sign-in, failed authorisation, role changes, key use, export of personal data) SHALL be logged and SHALL be available to UTeM ICT security monitoring. |
+sr-alerts | The system SHOULD alert administrators to suspicious patterns, such as many failed authorisations or mass data export. |
+sr-incident | An incident procedure SHALL be documented, covering detection, containment, notification of affected participants where required, and recovery. | PDPA
+sr-pentest | A security test SHALL be carried out before the first production release and after major changes. |
+</script>
+
+<h2>7.3 Reliability and Availability</h2>
+<script type="text/req" data-p="NFR">
+nfr-avail | The system SHALL be available 99.5% of the time during UTeM working hours (08:00–18:00, Monday to Friday), excluding announced maintenance. |
+nfr-verifyavail | The public verification page SHOULD be available 99.5% of the time at all hours, because employers may check credentials at any time. | App E6
+nfr-maint | Planned maintenance SHALL be announced to users at least 48 hours in advance and SHALL be scheduled outside working hours unless an urgent fix requires otherwise. |
+nfr-backup | The database and stored files SHALL be backed up daily, with backups kept for at least 30 days. The recovery point objective (RPO) SHALL be 24 hours. | App H6
+nfr-recover | The system SHALL be restorable from backup within a recovery time objective (RTO) of 8 working hours. A restore SHALL be tested at least twice a year. |
+nfr-adapterfail | Failure or unavailability of an external system SHALL NOT stop the business functions that do not depend on it; affected jobs SHALL wait and retry. | D-06
+nfr-errors | Errors SHALL be shown to users as clear messages in their language with a reference code, without technical details. Full details SHALL be logged for support staff. |
+nfr-transactions | Each business action that changes several records (for example approving a transfer and changing credit status) SHALL succeed or fail as a whole. |
+</script>
+
+<h2>7.4 Usability and Accessibility</h2>
+<script type="text/req" data-p="NFR">
+nfr-wcag | The interface SHALL conform to WCAG 2.1 level AA, including keyboard operation, sufficient colour contrast, text alternatives and labels readable by screen readers. Status SHALL never be shown by colour alone. |
+nfr-plain | Labels, messages and help SHALL use plain language. Each recognition status SHALL have a short explanation available on the screen where it appears. | G 10.3.1
+nfr-tasks | A trained staff user SHALL be able to complete a common task (verify a cohort's results, issue credentials, record a deposit) in no more than five steps from their task page. |
+nfr-mobile | Participant functions (catalogue, registration, progress, credentials, consent, ledger) SHALL be fully usable on a phone. |
+nfr-langswitch | Switching language SHALL keep the user on the same page with entered data intact. | D-02
+nfr-lowbandwidth | Pages for participants SHOULD remain usable on slow mobile connections (for example, page weight under 1.5 MB without media). |
+</script>
+
+<h2>7.5 Maintainability and Portability</h2>
+<script type="text/req" data-p="NFR">
+nfr-modular | The code SHALL be organised into the modules of {{tab:modules}}, each with its own internal interface. A module SHALL NOT read or write another module's tables directly. | D-07
+nfr-laravel | The system SHALL follow the conventions of the Laravel framework and the PHP-FIG coding standards, so that CODL PHP developers can maintain it. | D-08
+nfr-rulestests | Every business rule of Section 4 SHALL have at least one automated test. The automated test suite SHALL run on every change. | D-01, D-05
+nfr-dbportable | Database access SHALL use the Laravel database layer, keeping vendor-specific features to a documented minimum, so that the system can run on PostgreSQL or MySQL/MariaDB. | D-09
+nfr-config | Environment-specific values (addresses, keys, adapter modes) SHALL be configuration, not code. | D-14
+nfr-migrations | Database changes SHALL be applied through versioned migration scripts. |
+nfr-deploy | The system SHALL be deployable to the development, test and production environments by a documented, repeatable procedure, preferably as containers. |
+nfr-docs | The SDD, adapter interfaces, CSV templates and operating procedures SHALL be kept up to date with each release. |
+</script>
+
+<h2>7.6 Legal and Compliance Requirements</h2>
+<script type="text/req" data-p="NFR">
+nfr-guide | The system SHALL comply with the Guide and the MQA guidelines it refers to, as they apply to the controlling copy of the Guide (Versi 1.0, 18 September 2026). | D-03
+nfr-pdpa | The system SHALL comply with the Personal Data Protection Act 2010 and UTeM data protection policy (Section 7.2.3). |
+nfr-records | The system SHALL support UTeM's records and document management policy, including retention and controlled disposal. | G 18.12
+nfr-ip | Software components used SHALL have licences compatible with UTeM ownership and on-premises use. The use of third-party learning materials is governed by Section 3.2.2. | G 9.3
+nfr-standards | Digital Credentials SHALL follow the open standards of reference 9 so that they can be verified by third parties without UTeM software. | D-19
+</script>
+
+<h2>7.7 Operational Requirements</h2>
+<script type="text/req" data-p="NFR">
+nfr-monitor | The system SHALL expose health checks and SHALL be monitored for availability, response time, queue length, failed jobs and disk use, with alerts to the operations team. |
+nfr-applog | Application logs SHALL be structured, time-stamped and kept for at least 90 days. Logs SHALL NOT contain identity card numbers, tokens or secrets. | PDPA
+nfr-admin | Routine administration (users, roles, settings, templates, reference data, adapter modes) SHALL be possible through the interface without database access. | D-16
+nfr-scheduler | Timed jobs (expiry alerts, overdue reminders, retention checks) SHALL run on a scheduler, and each run SHALL be logged with its result. |
+nfr-envs | Development and test environments SHALL NOT contain real personal data unless it is masked. | PDPA
+</script>
+
+<h2>7.8 Cultural and Language Considerations</h2>
+<script type="text/req" data-p="NFR">
+nfr-names | Name fields SHALL accept long names and Malaysian naming forms (for example bin, binti, a/l, a/p) and SHALL print them in full on certificates. | App E3
+nfr-bmterms | The Bahasa Melayu interface SHALL use the terms of the Guide (for example Rekod Pencapaian Pembelajaran, Pemindahan Kredit, Penebusan Tunggal) consistently. | D-02
+nfr-holidays | Reminders and due dates SHOULD take account of Malaysian public holidays and the UTeM academic calendar. |
+</script>
+
+<!-- ===================== 8. OTHER REQUIREMENTS ===================== -->
+<h1>8. Other Requirements</h1>
+
+<h2>8.1 Internationalisation Requirements</h2>
+<script type="text/req" data-p="NFR">
+nfr-i18n | All interface text, notifications, templates and recognition statements SHALL be held in language resource files or managed templates, never fixed in code, so that a further language could be added. | D-02
+nfr-bilingualcontent | Where a bilingual content field has only one language filled, the system SHALL show the available language with a marker rather than an empty field. |
+nfr-currency | Fees SHALL be shown in Malaysian ringgit (RM) with two decimal places. |
+</script>
+
+<h2>8.2 Training Requirements</h2>
+<script type="text/req" data-p="NFR">
+nfr-train-roles | Role-based training SHALL be provided before go-live for lecturers, deputy deans and CODL administrators and technical staff, with a short guide for students. | D-28
+nfr-train-cards | Each role SHALL receive a quick reference card in Bahasa Melayu and English. | D-02
+nfr-train-sandbox | A training environment with sample data and the stub adapters SHOULD be available so that staff can practise without affecting real records. | D-14
+nfr-train-tot | CODL staff SHOULD be trained as trainers so that later staff can be trained internally. |
+</script>
+
+<h2>8.3 Acceptance Approach</h2>
+<p>A separate Test Plan is not part of the controlling document set; acceptance tests are traced directly from the requirement IDs of this SRS (D-01). For Release 1, acceptance requires that:</p>
+<ol>
+  <li>every SHALL requirement of Sections 3, 5, 6 and 7 has at least one passing acceptance test that names its ID;</li>
+  <li>every business rule of Section 4 has at least one passing automated test, including a test that the system refuses the forbidden case (for example, an ACR for an MCE, or reuse of redeemed credit);</li>
+  <li>an end-to-end walkthrough of {{fig:journey}} is completed in the test environment with stub adapters;</li>
+  <li>open items that block a Release 1 requirement (Appendix C) are either resolved or covered by the documented working assumption.</li>
+</ol>
+
+<!-- ===================== APPENDIX A ===================== -->
+<h1>Appendix A: Analysis Models</h1>
+<p>This appendix gathers models that show how the requirements work together. They are explanatory; the requirements in Sections 3–7 prevail.</p>
+
+<h2>A.1 Use Case Overview: Staff</h2>
+<figure data-f="ucstaff">
+<pre class="mermaid">
+flowchart LR
+  P1(["Lecturer (P1)"])
+  P2(["Deputy dean (P2)"])
+  S1(["CODL (S1, P5)"])
+  subgraph SYS["MCMS"]
+    direction TB
+    U1(["Prepare proposal"])
+    U13(["Review a colleague's proposal"])
+    U4(["Run offering and enter results"])
+    U12(["Quality review and CQI"])
+    U7(["Collect QV evidence"])
+    U2(["Endorse and record Senate decision"])
+    U5(["Verify results, confirm completion"])
+    U15(["Correct or revoke credential"])
+    U14(["Confirm ACR and record ABC deposit"])
+    U10(["Decide credit transfer"])
+    U11(["Map stackable pathway"])
+    U16(["Users, roles, settings"])
+    U17(["UCreds data exchange"])
+  end
+  P1 --- U1
+  P1 --- U13
+  P1 --- U4
+  P1 --- U12
+  P1 --- U7
+  P2 --- U2
+  P2 --- U5
+  P2 --- U15
+  P2 --- U14
+  P2 --- U10
+  P2 --- U11
+  S1 --- U16
+  S1 --- U17</pre>
+<figcaption>Main use cases of staff users. When the deputy dean verifies results or confirms completion, the system issues credentials and generates ACR automatically (D-29). The Senate does not log in; its decisions are recorded by the deputy dean.</figcaption>
+</figure>
+
+<h2>A.2 Use Case Overview: Participants and Public</h2>
+<figure data-f="ucpart">
+<pre class="mermaid">
+flowchart LR
+  P8(["Participant (P8)"])
+  X3(["Verifier /<br/>employer (X3)"])
+  subgraph SYS["MCMS"]
+    direction TB
+    V2(["Register and pay"])
+    V3(["Track module progress"])
+    V4(["View and share credentials"])
+    V5(["Give or decline ACR consent"])
+    V6(["View credit ledger"])
+    V7(["Apply for credit transfer"])
+    V1(["Browse catalogue"])
+    V8(["Verify a credential"])
+  end
+  P8 --- V1
+  P8 --- V2
+  P8 --- V3
+  P8 --- V4
+  P8 --- V5
+  P8 --- V6
+  P8 --- V7
+  X3 --- V1
+  X3 --- V8
+</pre>
+<figcaption>Main use cases of participants and the public.</figcaption>
+</figure>
+
+<h2>A.3 Sequence: From Proposal to Approved Offering</h2>
+<figure data-f="seqapproval">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor P1 as Lecturer (P1)
+  participant M as MCMS
+  actor P2 as PTj (P2)
+  actor X1 as Reviewer (X1)
+  participant S as Senate (no login)
+  P1->>M: Determine category, complete proposal (App A)
+  M->>M: Validate against category rules
+  P1->>M: Submit version
+  P2->>M: Assign reviewer
+  M->>X1: Review task
+  X1->>M: Declare no conflict, submit review (Support / Amend / Do not support)
+  opt Amendment needed
+    M->>P1: Comments to resolve
+    P1->>M: Respond and resubmit
+  end
+  P2->>M: Verify category and endorse
+  M->>P2: Decision pack for the Senate meeting
+  P2->>S: Present at Senate meeting
+  S-->>P2: Approved
+  P2->>M: Record Senate approval (meeting reference)
+  M->>M: Version state Approved (no credit, QV or transfer status set)
+  P2->>M: Create offering and complete readiness (App B)
+  M->>M: Open registration and publish to catalogue
+</pre>
+<figcaption>Proposal, review, approval and offering.</figcaption>
+</figure>
+
+<h2>A.4 Sequence: Credential Issuance and Public Verification</h2>
+<figure data-f="seqcred">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor P2 as PTj (P2)
+  participant M as MCMS
+
+  actor P8 as Participant (P8)
+  actor X3 as Employer (X3)
+  P2->>M: Confirm MC completion for cohort
+  M->>M: Run App E8 checks per participant
+  M->>M: Build credential from verified records, sign with UTeM key
+  M->>P8: Credential issued (JSON, PDF, QR)
+  P8->>X3: Share link or QR code
+  X3->>M: Open verification page
+  M->>M: Check signature and current status
+  M-->>X3: Minimum permitted information and status
+</pre>
+<figcaption>Issuing a credential and verifying it publicly.</figcaption>
+</figure>
+
+<h2>A.5 End-to-End Participant Journey</h2>
+<p>The diagram follows one participant from a modular UMC to a stackable degree, showing every separate decision on the way.</p>
+<figure data-f="journey">
+<pre class="mermaid">
+flowchart TD
+  A["Finds UMC in catalogue,<br/>reads recognition notice"] --> B["Registers, pays<br/>(dummy service)"]
+  B --> C["Completes modules on UCreds<br/>over several periods"]
+  C --> D["PTj verifies results"]
+  D --> E["Digital Badge per module"]
+  E --> F["All modules met:<br/>UMC complete (PTj)"]
+  F --> G["Certificate and<br/>Digital Credential (system)"]
+  F --> H["ACR generated (system),<br/>confirmed by deputy dean"]
+  H --> I{"Participant<br/>consents?"}
+  I -- "No" --> I2["ACR kept, not deposited"]
+  I -- "Yes" --> J["ABC deposit recorded<br/>(deputy dean); credit Available,<br/>10-year validity"]
+  J --> K["Admitted to programme<br/>(separate decision)"]
+  K --> L["Credit transfer application<br/>and equivalence evaluation"]
+  L --> M{"Approved?"}
+  M -- "No" --> M2["Credit stays Available;<br/>ACR and credentials unchanged"]
+  M -- "Yes" --> N["Credit Provisionally Redeemed"]
+  N --> O["Stackable plan: 30% UTeM credit,<br/>residency, PLO, remaining courses"]
+  O --> P["Programme completed"]
+  P --> Q["Qualification awarded;<br/>credit Redeemed"]
+</pre>
+<figcaption>End-to-end journey of a participant through MCMS.</figcaption>
+</figure>
+
+<!-- ===================== APPENDIX B ===================== -->
+<h1>Appendix B: Traceability to the Guide</h1>
+<p>The table maps each part of the Guide that affects the system to the sections of this SRS that implement it. It lets the supervisor check coverage and lets developers find the source of a rule.</p>
+<p class="tcap" data-t="trace">Traceability from Guide chapters and appendices to SRS sections</p>
+<script type="text/tbl" data-h="Guide part|Subject|SRS sections|Business rules" data-w="16%|38%|24%|22%" data-cls="small">
+Bab 1–5 | Introduction, purpose, scope, definitions | 1, Glossary | –
+Bab 6 | Concept and categories (UMC, SAMC, MCE), category determination | 2.4, 3.2.1, 3.2.3 | {{br-slt}}, {{br-mce}}, {{br-umcslt}}, {{br-umclink}}, {{br-creditmodel}}, {{br-samccredit}}, {{br-sltnotcredit}}
+Bab 7 | Principles: outcomes, competence, flexibility, QA, improvement | 3.2.2, 3.7, 3.15 | {{br-achieve}}
+Bab 8 | Framework: outcomes, SLT, content, assessment, certification, records | 3.2.2, 3.7, 3.8, 3.9 | {{br-badge}}, {{br-nomix}}, {{br-certwhole}}, {{br-arnotacr}}
+Bab 9 | Development, review, approval, offering | 3.2, 3.3, 3.4 | {{br-offer}}, {{br-material}}
+Bab 10 | Delivery, platform, participants, assessment, certification, records | 3.4.2, 3.5, 3.6, 3.7, 3.9 | {{br-verifyfirst}}, {{br-noclaim}}
+Bab 11 | Quality assurance, Quality Verification, monitoring, review | 3.10, 3.15 | {{br-qvvalid}}, {{br-qvcohort}}, {{br-qvlapse}}, {{br-separate}}
+Bab 12 | Credit accumulation, ACR, ABC, validity, single redemption | 3.11, 3.13 | {{br-creditvalid}}, {{br-acrelig}}, {{br-deposit}}, {{br-consent}}, {{br-acrkeep}}, {{br-redeem}}
+Bab 13 | Credit transfer | 3.12 | {{br-equiv}}, {{br-receiver}}, {{br-mcetransfer}}, {{br-rejectkeep}}, {{br-modcredit}}
+Bab 14 | Stackable degree | 3.14 | {{br-home30}}, {{br-residency}}, {{br-admission}}, {{br-creditbearing}}, {{br-plo}}, {{br-award}}
+Bab 15 | Governance structure, separation of decisions, traceability | 2.5, 3.1, 3.3, 3.16 | {{br-separate}}, {{br-authority}}
+Bab 16 | Roles and responsibilities | 2.5, 3.1.2 | {{br-authority}}
+Bab 17 | Monitoring and CQI, changes, versions, suspension | 3.3.3, 3.15 | {{br-material}}, {{br-cqi}}, {{br-terminate}}
+Bab 18 | Records and documentation | 3.8, 3.16, 6 | {{br-audit}}, {{br-version}}, {{br-terminate}}
+Lampiran A | Development and approval template | 3.2.2, 3.2.3, 3.3 | –
+Lampiran B | Readiness and participant records checklist | 3.4.1, 3.5 | –
+Lampiran C | QA, monitoring and CQI template | 3.15 | –
+Lampiran D | QV evidence list for SAMC | 3.10 | –
+Lampiran E | Badge, certificate and Digital Credential specification | 3.9 | –
+Lampiran F | ACR, ABC, accumulation and transfer records | 3.11, 3.12, 3.13 | –
+Lampiran G | Stackable degree mapping matrix | 3.14 | –
+Lampiran H | Governance, RACI and records matrix | 2.5, 3.1, 3.16, 6.3 | –
+</script>
+
+<!-- ===================== APPENDIX C ===================== -->
+<h1>Appendix C: Issues List</h1>
+<p>Open items OI-01 to OI-08 come from the Glossary and Decision Log v0.2. Items OI-09 to OI-15 were found while writing this SRS and have been entered in the Glossary and Decision Log v0.3. The Glossary and Decision Log v0.6 (MCMS_FND_V0.6_Oct_2026) is the controlling list; in it OI-01, OI-05, OI-06 and OI-14 are closed.</p>
+<p class="tcap" data-t="issues">Open items</p>
+<script type="text/tbl" data-h="ID|Question|Needed by|Working assumption|Affects" data-w="7%|37%|11%|27%|18%" data-cls="small">
+OI-01 | Which Guide version is controlling: V2.0 (15 Sep 2026) or V1.0 (18 Sep 2026)? | Closed | The project's copy, Versi 1.0, 18 Sep 2026 (D-03) | Source tags throughout
+OI-02 | Is a PostgreSQL server available, or must the system use MySQL/MariaDB? | Before SDD | PostgreSQL, portable queries (D-09) | 2.6, {{nfr-dbportable}}
+OI-03 | Which SSO protocol and tenant settings does UTeM allow? How are outside applicants recognised? | Before SDD | OpenID Connect; account attribute or imported list (D-10) | {{fr-sso}}, {{fr-applicant}}, {{ir-oidc}}
+OI-04 | How does UCreds connect (web service, data export, Moodle link) and does it issue badges? | Next iteration | CSV import; UCreds issues badges (D-13) | 3.6, {{fr-lpbadge}}
+OI-05 | Is a separately credit-bearing UMC module an approved case at UTeM, and who approves it? | Closed | Case-by-case academic approval; approving role is a setting (D-18) | {{fr-umcmodcredit}}, {{fr-ctpartial}}
+OI-06 | Which committee or role approves each decision type? | Closed | Deputy dean endorses, Senate approves (recorded by the deputy dean), degree-owning deputy dean decides transfers (D-11) | {{fr-approverbody}}
+OI-07 | Retention periods for each record category. | Before go-live | Placeholder settings; ACR indefinite [G 12.8] | {{fr-retention}}, {{tab:retention}}
+OI-08 | Who owns the credential signing keys and the public verification page? | Before SDD | CODL (D-12) | {{sr-keys}}, {{ir-hsm}}
+OI-09 | What are the credit transfer limits and non-transferable components of each target programme, and who maintains them? | Before Release 1 testing | Programme settings entered by the faculty; warning only | {{fr-ctlimits}}
+OI-10 | How will MCMS learn of programme admission, completion and withdrawal, which drive redemption status? | Before SDD | Manual recording by an authorised user | {{fr-rdsource}}, {{fr-spsis}}
+OI-11 | What data and file format does ABC require for deposit, and how are redemption updates sent to ABC? | Before Release 1 testing | Export of ACR fields of Appendix F3 in CSV and PDF | {{fr-dpexport}}
+OI-12 | What fee rules, refund rules and sponsorship arrangements apply? | Before Release 2 | Fee per offering; refunds outside MCMS | {{fr-regpay}}, {{fr-regwaiver}}
+OI-13 | What is the completion window for a modular UMC (Guide 7.4 "tempoh kesahan pembelajaran")? | Before Release 1 testing | Set per offering; no default | {{fr-arwindow}}
+OI-14 | Confirm the conversion of 40 notional learning hours to 1 credit for UMC and SAMC calculations. | Closed | Confirmed: 40 hours = 1 credit (D-27) | {{tab:settings}}
+OI-15 | Which identity verification methods are required for online assessment at each risk level? | Before Release 1 testing | Recorded per assessment; method chosen by PTj | {{fr-asintegrity}}
+</script>
+
+<!-- ===================== APPENDIX D ===================== -->
+<h1>Appendix D: Document History</h1>
+<script type="text/tbl" data-h="Version|Date|Author|Change" data-w="12%|18%|18%|52%">
+0.1 | 23 October 2026 | Aliff, Intern | Informal draft (sections 1 to 2.8); input material only.
+1.0 | 23 October 2026 | Aliff, Intern | First formal SRS, written against Glossary and Decision Log v0.2, in the layout of the reference SRS (D-04, D-26). Adds functional requirements for all sixteen modules, business rules, interface, data and non-functional requirements, diagrams, traceability and the issues list.
+1.0 (rev. 1) | 26 October 2026 | Aliff, Intern | Aligned with Glossary and Decision Log v0.4: the Guide copy is fixed (D-03), module credit approval is academic and case by case (D-18), 1 credit = 40 hours (D-27); OI-01, OI-05 and OI-14 closed.
+1.0 (rev. 2) | 26 October 2026 | Aliff, Intern | Aligned with Glossary and Decision Log v0.5: users simplified to Student, Lecturer, Deputy dean, Senate (no login), CODL (administration only) and public verifiers (D-28); credentials and ACR produced by the system after deputy dean verification (D-29); RACI, diagrams and requirements updated accordingly.
+1.1 | 27 October 2026 | Aliff, Intern | Aligned with Glossary and Decision Log v0.6 after the cross-document review of 27 October 2026: document set now includes the UI/UX Design Specification and the System Flow Map (D-30); Release 1 prototype defined (D-31); corporate identity assumption recorded (D-33, A-10); completion window (FR-133, OI-13) may be set per offering and sends no reminder while unset. No requirement ID changed.
+1.2 | 28 October 2026 | Aliff, Intern | Updated after the Release 1 prototype was built and its four-act scenario passed: the settings table lists the settings the prototype added (quality targets, periodic review, the registered-provider flag, the retention periods of the logs, the demo clock) and the approval routes for transfer, stackable mapping, suspension and disposal. No requirement ID or wording changed. Findings of the build that affect the SRS are in the Release 1 review of 28 October 2026 (for example: the module field of an assessment component, and the repeated import file, which is refused).
+1.3 | 6 November 2026 | Aliff, Intern | Aligned with Glossary and Decision Log v0.9 (D-39 to D-44): updated authentication guidance (fr-signinguide), credential verification URLs with Crockford Base32 and dynamic host resolution (fr-crid), verification result slip certificate layout with statutory PDPA notice and direct cryptographic file downloads (fr-vffields), machine JWKS discovery separation (fr-vftrust), UI badge simplification vs operational status indicators (ir-badges), articulation modal dialog (fr-spdefine), and institutional CODL branding (ir-identity).
+</script>
+<p class="small"><i>Review of this document: under D-23 the PRD, SDD and Release 1 prototype proceed on the recorded assumptions; the supervisor's comments will be applied to all documents together once the prototype can be shown.</i></p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+(async () => {
+  const problems = window.__problems = [];
+  const docTitle = document.querySelector('.doc-title');
+  if (docTitle) document.title = docTitle.textContent.trim() + ' - UTeM MCMS';
+  const ids = {};
+  const counters = {};
+  const pad = n => String(n).padStart(2, '0');
+  const kw = s => s.replace(/\b(SHALL NOT|SHALL|SHOULD NOT|SHOULD|MAY)\b/g, '<b>$1</b>');
+
+  // 1. requirement tables: lines "key | text | source"
+  document.querySelectorAll('script[type="text/req"]').forEach(s => {
+    const pre = s.dataset.p;
+    const t = document.createElement('table');
+    t.className = 'req';
+    const extra = s.dataset.x; // optional fourth column, e.g. "Enforced by"
+    t.innerHTML = `<thead><tr><th class="c-id">ID</th><th>${s.dataset.h || 'Requirement'}</th><th class="c-src">Source</th>${extra ? `<th class="c-x">${extra}</th>` : ''}</tr></thead>`;
+    const tb = document.createElement('tbody');
+    s.textContent.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).forEach(l => {
+      const parts = l.split('|').map(x => x.trim());
+      if (parts.length < 2) { problems.push('bad req line: ' + l); return; }
+      const [k, txt, src = '', x = ''] = parts;
+      counters[pre] = (counters[pre] || 0) + 1;
+      const id = `${pre}-${pad(counters[pre])}`;
+      if (ids[k]) problems.push('duplicate key ' + k);
+      ids[k] = id;
+      const tr = document.createElement('tr');
+      tr.id = k;
+      tr.innerHTML = `<td class="c-id">${id}</td><td>${kw(txt)}</td><td class="c-src">${src}</td>${extra ? `<td class="c-x">${x}</td>` : ''}`;
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    s.replaceWith(t);
+  });
+
+  // 2. plain tables: data-h="A|B|C", rows "a | b | c"
+  document.querySelectorAll('script[type="text/tbl"]').forEach(s => {
+    const t = document.createElement('table');
+    if (s.dataset.cls) t.className = s.dataset.cls;
+    const heads = s.dataset.h.split('|');
+    const widths = (s.dataset.w || '').split('|');
+    t.innerHTML = '<thead><tr>' + heads.map((h, i) => `<th${widths[i] ? ` style="width:${widths[i]}"` : ''}>${h}</th>`).join('') + '</tr></thead>';
+    const tb = document.createElement('tbody');
+    s.textContent.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).forEach(l => {
+      const cells = l.split('|').map(x => x.trim());
+      tb.insertAdjacentHTML('beforeend', '<tr>' + cells.map(c => `<td>${kw(c)}</td>`).join('') + '</tr>');
+    });
+    t.appendChild(tb);
+    s.replaceWith(t);
+  });
+
+  // 3. figure and table captions
+  let fig = 0, tab = 0;
+  document.querySelectorAll('figure[data-f], .tcap[data-t]').forEach(el => {
+    if (el.tagName === 'FIGURE') {
+      fig++; ids['fig:' + el.dataset.f] = 'Figure ' + fig;
+      const c = el.querySelector('figcaption');
+      c.innerHTML = `<b>Figure ${fig}:</b> ` + c.innerHTML;
+    } else {
+      tab++; ids['tab:' + el.dataset.t] = 'Table ' + tab;
+      el.innerHTML = `<b>Table ${tab}:</b> ` + el.innerHTML;
+    }
+  });
+
+  // 4. resolve {{key}} placeholders in text nodes
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) {
+    const n = walker.currentNode;
+    if (n.parentNode.nodeName !== 'SCRIPT' && n.nodeValue.includes('{{')) nodes.push(n);
+  }
+  nodes.forEach(n => {
+    n.nodeValue = n.nodeValue.replace(/\{\{([a-z0-9:-]+)\}\}/g, (m, k) => {
+      if (ids[k]) return ids[k];
+      const ext = (window.__EXT_IDS || {})[k]; // IDs published by another document (e.g. SRS keys cited in the PRD)
+      if (ext) return ext;
+      problems.push('unresolved ' + k);
+      return '??' + k;
+    });
+  });
+
+  // 5. table of contents
+  const toc = document.getElementById('toc');
+  const map = window.__TOC || {};
+  document.querySelectorAll('main h1:not(.notoc), main h2, main h3').forEach(h => {
+    if (h.tagName === 'H3' && !/^\d/.test(h.textContent.trim())) return; // unnumbered sub-headings stay out of the TOC
+    h.setAttribute('data-toc', '');
+    const lvl = h.tagName[1];
+    const text = h.textContent.trim();
+    toc.insertAdjacentHTML('beforeend',
+      `<div class="toc-row toc-${lvl}"><span class="t">${text}</span><span class="dots"></span><span class="pg">${map[text] || ''}</span></div>`);
+  });
+
+  // 6. diagrams
+  try {
+    mermaid.initialize({
+      startOnLoad: false, securityLevel: 'loose', theme: 'base',
+      themeVariables: {
+        fontFamily: 'Noto Sans, Arial, sans-serif', fontSize: '13px',
+        primaryColor: '#e7f0f8', primaryBorderColor: '#3f6fa6', primaryTextColor: '#13263a',
+        secondaryColor: '#fdf1dc', tertiaryColor: '#f4f6f8', lineColor: '#4b5563',
+        noteBkgColor: '#fff8e1', noteBorderColor: '#c9a227', actorBkg: '#e7f0f8', actorBorder: '#3f6fa6'
+      },
+      flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true, padding: 10 },
+      sequence: { useMaxWidth: true, mirrorActors: false, wrap: true },
+      state: { useMaxWidth: true },
+      er: { useMaxWidth: true }
+    });
+    await document.fonts.ready;
+    await mermaid.run({ querySelector: 'pre.mermaid' });
+  } catch (e) { problems.push('mermaid: ' + e.message); }
+  document.querySelectorAll('pre.mermaid').forEach(p => { if (!p.querySelector('svg')) problems.push('diagram not rendered: ' + p.textContent.slice(0, 60)); });
+  document.body.dataset.done = '1';
+})();
+</script>
+</body>
+</html>

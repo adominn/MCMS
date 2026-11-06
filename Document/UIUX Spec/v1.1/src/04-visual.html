@@ -1,0 +1,57 @@
+<!-- ===================== 3. VISUAL DESIGN SYSTEM ===================== -->
+<h1>3. Visual Design System</h1>
+<p>MCMS uses the design system of DESIGN.md, "ulearn-carbon": IBM Carbon geometry and type with uLearn Navy as the single brand colour. This section fixes how that system is applied to working screens. {{fig:shell}} shows the result on the deputy dean's task queue.</p>
+<figure data-f="shell"><img src="../../../../UIUX%20Spec/v1.1/src/img/shell-dd-queue.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Application shell: top bar, navy side navigation and white content area (deputy dean task queue, DD-01).</figcaption></figure>
+
+<h2>3.1 Colour</h2>
+<p class="tcap" data-t="colours">Colour roles</p>
+<script type="text/tbl" data-h="Role|Value|Use" data-w="24%|18%|58%">
+Primary (uLearn Navy) | #1e2a6e | Side navigation background, the one filled primary button per screen, links, focus outline, selected tab underline
+Navy hover / selected | #18225a / #2e3d94 | Hover on navigation items; the current page in the side navigation (with a 3 px white left bar)
+Ink | #161616 | Text, secondary buttons, the dark flow bar
+Muted | #525252 | Labels, table headers, meta text (meets 4.5:1 on white)
+Surface 1 | #f4f4f4 | Input fields, table bands, hover rows
+Hairline | #e0e0e0 | Panel borders and table header rule; row rules #ececec
+Success / Warning / Error | #24a148 / #f1c21b / #da1e28 | Dots, tag tints, notice bars and the danger button only. Never a full background. One red mark per object.
+</script>
+<div class="note"><b>Note:</b> The navy side navigation is the owner's decision of 26 October 2026, overriding the neutral-sidebar guidance of the design craft rules, to give the uLearn brand colour more presence. Content areas stay white.</div>
+
+<h2>3.2 Typography</h2>
+<p>IBM Plex Sans is the only typeface; IBM Plex Mono is used only for identifiers such as setting keys and file names. Every number in a table, KPI or form is set in tabular figures and right-aligned.</p>
+<script type="text/tbl" data-h="Role|Size and weight|Use" data-w="24%|22%|54%">
+Page title | 28 / 400 | One per screen, sentence case
+KPI value | 28 / 300 | Figures in a KPI strip; light weight per DESIGN.md
+Section title | 16 / 600 | Panel and section headings
+Body, cells, navigation | 14 / 400, tracking 0.16 px | Everything else
+Labels, meta, table headers | 12 / 400 | Sentence case, grey; never uppercase tracked
+Documents | 11 pt body, 20 pt light title | A4 printable documents (Section 8)
+</script>
+
+<h2>3.3 Shape, Spacing and Elevation</h2>
+<p>Corners are square (0 px) for buttons, inputs, panels and modals; only status tags are pill-shaped. Spacing follows a 4 px grid: 24 px between sections, 16 px between fields, 20 px panel padding. Panels are separated by 1 px hairlines and surface change, never by shadows. Shadows are reserved for what floats: menus, toasts, dialogs and drawers.</p>
+
+<h2>3.4 Layout and Shell</h2>
+<script type="text/tbl" data-h="Region|Specification" data-w="22%|78%">
+Top bar (48 px, white, sticky) | Product name (goes home) · global search (staff) · language switch EN/BM · help · notification bell with unread count · profile button with avatar, name and post
+Side navigation (248 px, navy, sticky) | Grouped items with outline icons (16 px) and counts on the right that come from the live task data; the current page is highlighted
+Content (white, max 1400 px) | Breadcrumb · title row (title, subtitle, status tag, actions on the right) · content blocks. One filled primary button per screen.
+Public site | Top navigation (Home, Catalogue, Pathways to a degree, How it works, FAQ, Verify a credential), Sign in, and a dark footer with contact and policy links
+Maintenance banner | A warning bar under the top bar, shown from 48 hours before planned maintenance
+</script>
+
+<h2>3.5 Components</h2>
+<p class="tcap" data-t="comps">Component catalogue</p>
+<script type="text/tbl" data-h="Component|Specification" data-w="22%|78%" data-cls="small">
+Buttons | 40 px high, square. Primary (navy, one per screen), secondary (ink), tertiary (white with navy border), ghost (text), danger (red). A disabled button stays readable and states why, for example "Submit · 1 check failing" or "Confirm ready · 1 item open".
+Fields | Label above (12 px), input on Surface 1 with a bottom rule; focus is a 2 px navy outline; error is a 2 px red outline with the message under the field in plain language. Required labels end with an asterisk.
+Choice cards | Radio or checkbox inside a bordered card with a title and one-line consequence; the chosen card has a 2 px navy border.
+Status tags | Pale tint with dark text of the same hue, always with the status word (Section 4.8). Never above a heading.
+Category mark | UMC, SAMC or MCE in a 1 px ink box beside the micro-credential name.
+Tables | 12 px grey sentence-case headers, rules between rows, no zebra striping, numbers right-aligned. Search bar above long lists; pager below (Section 4.5).
+Tabs | Text tabs with counts; the selected tab has a 2 px navy underline.
+KPI strip | One bordered container split by hairlines; label over value; no icons, no sparklines.
+Recognition track | A horizontal track of stages (for example Earned, ACR, ABC, Transfer): done stages in ink, the current stage in navy, later stages grey.
+Notices | Inline bar with a coloured left edge: info (navy), warning, error, success. Never used as a page background.
+Checks list | Dot, statement and one-line evidence; used for system checks, readiness items and rules.
+Dialogs, drawers, menus, toasts | See Section 4.
+</script>

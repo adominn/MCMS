@@ -1,0 +1,52 @@
+<!-- ===================== COVER ===================== -->
+<section class="cover">
+  <p class="doc-title">UI/UX Design Specification</p>
+  <p class="doc-sub">UTeM Micro-Credential Management System (MCMS)</p>
+  <h3>Document Control</h3>
+  <table>
+    <thead><tr><th colspan="2">Document Information</th></tr></thead>
+    <tbody>
+      <tr><td>Title</td><td>UI/UX Design Specification for the UTeM Micro-Credential Management System (MCMS)</td></tr>
+      <tr><td>Date</td><td>27 October 2026</td></tr>
+      <tr><td>Status</td><td>Approved design basis for the Release 1 prototype; supervisor review planned once the prototype is shown (D-23)</td></tr>
+      <tr><td>Version</td><td>1.1</td></tr>
+      <tr><td>Prepared for</td><td>Supervisor review; Centre for Open and Distance Learning (CODL), Universiti Teknikal Malaysia Melaka (assumed system owner)</td></tr>
+      <tr><td>Prepared by</td><td>Aliff, Intern</td></tr>
+      <tr><td>Reference</td><td>MCMS_UIUX_V1.1_Oct_2026</td></tr>
+      <tr><td>Written against</td><td>Glossary and Decision Log v0.5 (MCMS_FND_V0.5_Oct_2026); Software Requirements Specification v1.0 (MCMS_SRS_V1.0_Oct_2026); Product Requirements Document v1.0 (MCMS_PRD_V1.0_Oct_2026); DESIGN.md (ulearn-carbon)</td></tr>
+      <tr><td>Design source</td><td>Clickable prototype v2, <code>UIUX/v2/prototype</code>, approved 26 October 2026</td></tr>
+      <tr><td>Document set</td><td>SRS, PRD, UI/UX Design Specification (this document), Software Design Description (SDD)</td></tr>
+    </tbody>
+  </table>
+  <div class="disclaimer">
+    <b>Disclaimer:</b>
+    This document is a working draft prepared by an intern as part of a concept and mock-up for a proposed system. It is not an official document of UTeM or CODL. Names, sample records and figures in screens and documents are fictional. Items marked Assumed or TBD have not been confirmed by the system owner. Unauthorised modification, distribution or misrepresentation is prohibited.
+  </div>
+</section>
+
+<section class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <div id="toc"></div>
+  <span class="tocend">TOCENDMARKER</span>
+</section>
+
+<main>
+<h1 class="notoc">Revision History</h1>
+<script type="text/tbl" data-h="Version|Date|Change" data-w="12%|18%|70%">
+1.0 | 26 Oct 2026 | First issue, written from the approved clickable prototype v2: design principles, visual system, interaction rules, 114 screens, 26 flows and 16 printable documents. Includes the corrections from the planner review of the prototype (Section 9).
+1.1 | 27 Oct 2026 | Added Appendix B (every screen with its tabs, wizard steps, pop-ups, warnings, side panels and menus), Appendix C (every page of every printable document and report template) and Appendix D (a storyboard of every step of every flow), all captured from the approved prototype. Fixed in the prototype: the Import CSV and Add buttons of the CODL reference data screen were not shown.
+</script>
+
+<h1 class="notoc">Glossary</h1>
+<p>All terms of the Glossary and Decision Log v0.5 apply with exactly the same meaning. The table below adds only the design terms used here.</p>
+<script type="text/tbl" data-h="Term|Definition" data-w="24%|76%">
+Confirmation dialog | A pop-up that states the effect of an action and asks the user to confirm it before anything is saved.
+Drawer | A panel that slides in from the right to show a record without leaving the current list.
+Flow (FL-XX) | A guided walk-through of a process across screens and roles, with a step bar at the bottom of the prototype.
+Hotspot | An outline the prototype draws around every clickable element when the viewer presses H.
+Persona | A fictional representative user (Section 2.3). Personas and their data are illustrative.
+Route | The address of a screen in the prototype, for example <code>#/dd/verify/DS-2026-2</code>. Used as the screen's identifier.
+Screen ID | Short identifier of a screen in this document, for example DD-12 (Section 6).
+Status tag | A small label with a pale tint and dark text showing the status of a record, always with its word.
+Toast | A short message at the top right that confirms a finished action and names the next step.
+</script>

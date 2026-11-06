@@ -1,0 +1,47 @@
+<!-- ===================== 9. TRACEABILITY AND VERIFICATION ===================== -->
+<h1>9. Traceability and Verification</h1>
+
+<h2>9.1 Requirements to Screens</h2>
+<p>{{tab:trace}} maps each SRS functional module to the screens that deliver it. The per-requirement detail (actor, action, confirmation, result and blocking checks) is kept in <code>UIUX/v2/basis/srs-fr-inventory.md</code>.</p>
+<p class="tcap" data-t="trace">SRS modules and the screens that deliver them</p>
+<script type="text/tbl" data-h="SRS section|Module|Screens" data-w="12%|36%|52%" data-cls="small">
+3.1 | Identity, roles and access | Sign-in, MFA, profile, CODL users and roles, settings, templates, reference data, adapter status
+3.2 | Category determination and proposal | Lecturer new proposal, proposal workspace, proposals and versions
+3.3 | Review, approval and versioning | Lecturer and expert review, deputy dean proposal review, Senate decision, decision pack, change to an approved version
+3.4 | Offering, catalogue and readiness | Lecturer create offering and readiness, deputy dean readiness, public catalogue and offering
+3.5 | Registration, enrolment and cohorts | Student register, registrations and payments, enrolment; lecturer cohorts
+3.6 | Learning platform connection | CODL UCreds exchange, import report, enrolment export
+3.7 | Assessment and achievement verification | Lecturer cohort results; deputy dean results and verify
+3.8 | Achievement Record | Student achievement record; deputy dean completion
+3.9 | Credential issuance and verification | Deputy dean completion and credentials; student credentials; public verify; certificate and credential documents
+3.10 | Quality Verification for SAMC | Lecturer QV evidence; deputy dean quality, QV record; QV package
+3.11 | ACR and ABC deposit | Student ledger and ACR consent; deputy dean ACR and deposit; ABC export
+3.12–3.13 | Credit transfer and single redemption | Student transfer; deputy dean transfer; transfer letter
+3.14 | Stackable degree pathway | Deputy dean pathways and plans; student plan; public pathways
+3.15 | Monitoring and CQI | Lecturer quality review; deputy dean quality review, periodic review, suspension
+3.16 | Records, audit trail and reporting | Reports, traceability, audit trail, retention, report documents
+3.17 | Notifications and integration hub | Notifications, preferences, adapter status, test mailbox
+</script>
+
+<h2>9.2 How the Design Was Verified</h2>
+<p>The prototype was checked in three ways before approval:</p>
+<ol>
+  <li><b>Automated screen checks.</b> Every screen draws without script errors and every link, dialog, drawer and action it contains exists (the 114 screens plus the prototype's two index pages, 51 dialogs and panels, 0 problems).</li>
+  <li><b>Hand-off test.</b> A scripted walk through the real screens checks the role hand-offs of Section 7.2 (14 checks, all passing).</li>
+  <li><b>Design review.</b> Three independent reviews compared every screen with the design basis and the SRS. They found 124 issues: 23 that broke a rule or blocked a flow, 70 missing states or confusing behaviours, and 31 polish items. All rule and flow issues were fixed.</li>
+</ol>
+
+<h2>9.3 Corrections to the First Design</h2>
+<p>The first design (v1, Figma) was corrected against the SRS before the prototype was built. The main corrections, kept in the design rules, are:</p>
+<script type="text/tbl" data-h="First design|Corrected rule" data-w="44%|56%" data-cls="small">
+Verifying results issued credentials | Verify results gives module achievements; confirming completion is a separate step that triggers issue (D-15)
+Public pages claimed SAMC credit and QV beyond their validity | Credit and QV shown only while verified and valid for the cohort dates (BR-14, BR-23)
+The deputy dean could revoke alone; "superseded" wording | Revoke needs the authorised body's decision reference; statuses Corrected, Replaced, Revoked
+Review labels "Ready / Not ready" | Support, Amend, Do not support; conflict of interest declared first
+Endorse allowed with open comments | Endorse blocked by open blocking comments
+Dates and money in mixed formats | DD/MM/YYYY and RM 0.00
+Public verification showed credit | Minimum fields: name, credential, issuer, date, status
+Transfer could approve a line with no outcome match | Approve disabled for that line, with the reason (BR-30)
+Phone-first student screens | Web first, reflowing to a phone
+Neutral side navigation | Navy side navigation (owner's decision)
+</script>

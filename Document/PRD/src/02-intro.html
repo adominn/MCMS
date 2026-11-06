@@ -1,0 +1,88 @@
+<!-- ===================== 1. INTRODUCTION ===================== -->
+<h1>1. Introduction</h1>
+
+<h2>1.1 Purpose</h2>
+<p>This Product Requirements Document (PRD) describes MCMS as a product: who it serves, what problems it solves, which features it offers, in which release each feature is delivered, and how success is measured. It complements the Software Requirements Specification (SRS). The SRS states precisely <i>what the system shall do</i>; this PRD explains <i>what to build first, for whom and why</i>, and turns the SRS into a release plan, user stories and a demonstrable Release 1 prototype (D-22).</p>
+<p>Where this PRD and the SRS differ on a requirement, the SRS prevails; where this PRD and the Glossary and Decision Log differ on a term or decision, the Glossary and Decision Log prevails. Every feature and user story in this document cites the SRS requirements it delivers, so the two documents can be checked against each other.</p>
+
+<h2>1.2 Document Conventions</h2>
+<script type="text/tbl" data-h="Convention|Meaning" data-w="22%|78%">
+Release 1 / 2 / 3 | Follows the SRS: SHALL = Release 1 (prototype scope), SHOULD = Release 2, MAY = Release 3 or later (D-24).
+Must / Should / Could / Won't | MoSCoW priority inside a release. All Release 1 features are Must; the priority orders work within later releases.
+F-XX | Feature. US-XX: user story. KPI-XX: success measure. PA-XX: product assumption. RK-XX: product risk.
+FR-XX, BR-XX, NFR-XX | Requirement IDs of the SRS v1.0, cited exactly as published there.
+D-XX, A-XX, OI-XX | Decisions, assumptions and open items of the Glossary and Decision Log v0.5.
+Given / When / Then | Format of acceptance criteria: the starting situation, the action, and the expected result.
+</script>
+<div class="note"><b>Note:</b> Personas, sample names and sample data in this document are fictional and illustrative. Targets of Section 9 are proposed values based on assumptions; they will be confirmed with CODL after the prototype is shown (D-23).</div>
+
+<h2>1.3 Intended Audience</h2>
+<script type="text/tbl" data-h="Reader|Use of this document|Read first" data-w="28%|47%|25%">
+Supervisor and CODL | Check that the product solves the right problems and that the release plan is sensible. | Sections 2, 5, 7, 9
+Developers and AI development agents | Know what to build in which order, and the acceptance criteria for each story. | Sections 5, 6, 7
+Designers | Understand users, journeys and design principles. | Sections 3, 4, 8
+Testers | Derive acceptance tests from stories and the demonstration scenario. | Sections 6, 7
+</script>
+
+<h2>1.4 Product Scope</h2>
+<p>MCMS manages the whole life of a UTeM micro-credential under the Garis Panduan Micro-Credential UTeM. Its scope is defined in SRS Section 1.4 and is not repeated here. This PRD adds three things:</p>
+<ol>
+  <li><b>A release plan</b>: Release 1 is split into four demonstrable increments (Section 5.3).</li>
+  <li><b>User stories</b> for every Release 1 feature, with acceptance criteria (Section 6).</li>
+  <li><b>A demonstration scenario</b> for the Release 1 prototype, with sample data, that shows every recognition stage working as a separate step (Section 7).</li>
+</ol>
+
+<h2>1.5 References</h2>
+<ol>
+  <li>Glossary and Decision Log for the UTeM MCMS, version 0.5, 26 October 2026 (MCMS_FND_V0.5_Oct_2026).</li>
+  <li>Software Requirements Specification for the UTeM MCMS, version 1.0, 26 October 2026 (MCMS_SRS_V1.0_Oct_2026).</li>
+  <li>Garis Panduan Micro-Credential UTeM (the Guide), Versi 1.0, 18 September 2026, Bab 1–18 with Lampiran A–H (D-03).</li>
+  <li>DESIGN.md "ulearn-carbon": the project's user interface design system (Carbon-based, uLearn Navy accent).</li>
+  <li>Software Requirements Specification for an AI-Driven Job Matching Platform, v1.0, May 2025. Format reference only (D-26).</li>
+</ol>
+
+<!-- ===================== 2. PRODUCT OVERVIEW ===================== -->
+<h1>2. Product Overview</h1>
+
+<h2>2.1 Background and Problem Statement</h2>
+<p>UTeM offers three kinds of micro-credential (UMC, SAMC, MCE), each with different rules for SLT, quality assurance, credentials and credit. The Guide requires seven recognition stages — approval to offer, module achievement, MC completion, Quality Verification, ACR and ABC deposit, credit transfer and the award of a qualification — to be decided and recorded separately [G 12–14, 18.14]. Today these steps are handled with forms, spreadsheets and email, and the learning platform (UCreds) records learning but not academic recognition.</p>
+<p class="tcap" data-t="problems">Problems MCMS addresses</p>
+<script type="text/tbl" data-h="Problem today|Consequence|How MCMS responds" data-w="30%|34%|36%">
+Proposals follow the Appendix A template on paper or in documents, with no check of the category rules. | Proposals are returned late for errors such as SLT that does not match the parent course. | Guided proposal with automatic category, SLT and alignment checks before submission.
+Approval, QV, ACR, deposit and transfer status are tracked in separate spreadsheets. | A step can be skipped or mistaken for another; for example, a deposit may be read as an approved transfer. | Each stage is its own record with its own decision and label (D-15).
+Certificates are prepared by hand. | Credit, MQF level or QV status may be stated wrongly, or after QV has expired. | Credentials generated only from verified records; wording controlled by category and status (D-17).
+Employers cannot check a certificate easily. | Credentials have low trust and value. | Signed Digital Credentials with public verification by link or QR code (D-19).
+Credit use across programmes is not traceable. | The same credit could be used twice. | Single redemption ledger with Available / Provisionally Redeemed / Redeemed status.
+Monitoring and CQI evidence is scattered. | QV renewal and audits are slow. | Cohort indicators, CQI records and an append-only audit trail in one place.
+</script>
+
+<h2>2.2 Product Vision</h2>
+<div class="note"><b>Vision:</b> Every UTeM micro-credential, from proposal to credit used in a degree, is managed in one trusted system where each recognition step is clear, honest and traceable — so that participants can trust what they earn, staff can follow the Guide without extra effort, and employers and programmes can verify what a credential really means.</div>
+
+<h2>2.3 Goals and Non-Goals</h2>
+<p class="tcap" data-t="goals">Product goals</p>
+<script type="text/tbl" data-h="ID|Goal|Measured by" data-w="9%|61%|30%">
+G1 | Make the Guide's rules the default path: staff cannot accidentally skip or merge recognition stages. | KPI-05, KPI-06
+G2 | Shorten the time from proposal to approved, ready offering. | KPI-01, KPI-02
+G3 | Give participants honest, verifiable credentials and a clear view of their credit. | KPI-03, KPI-07
+G4 | Give CODL and PTj complete, auditable records for QA, QV and audits. | KPI-06, KPI-08
+G5 | Deliver a working Release 1 prototype that demonstrates the full chain on sample data. | KPI-09
+</script>
+<p><b>Non-goals</b> (things MCMS deliberately does not try to do):</p>
+<ul>
+  <li>Teach or host learning content — that stays on UCreds.</li>
+  <li>Decide academic matters — MCMS records decisions made by the authorised people; it never approves on their behalf.</li>
+  <li>Replace the national ABC platform, the QVC/MQA process, the student information system or the payment hub.</li>
+  <li>Promise credit, admission or a degree to participants (G 14.9).</li>
+</ul>
+
+<h2>2.4 Value for Each Stakeholder</h2>
+<script type="text/tbl" data-h="Stakeholder|Main value from MCMS" data-w="26%|74%">
+Students (P8) | Clear information before enrolling; progress across modules; shareable, verifiable credentials; control over ACR deposit; one ledger of credit and its status.
+Lecturers (P1) | A guided proposal that catches rule errors early; cohort and result management; quality review and QV evidence collected as they go.
+Deputy deans (P2) | One queue for reviews, endorsements, Senate decisions, readiness and result verification; oversight of all PTj offerings.
+Deputy deans as decision makers (P2) | Credentials issued automatically after verification; correct-by-construction ACR; a deposit queue with consent already checked; equivalence evaluation with all evidence linked and protection against double use of credit; monitoring and QV evidence without chasing spreadsheets.
+Senate (P3) | Concise decision packs prepared by the deputy dean; a recorded history of its decisions with meeting references.
+Employers and the public (X3) | Instant verification of a credential without contacting UTeM.
+CODL as system operator (S1, P5) | One system to administer, with roles and rules changed by settings, and no academic decisions to take; ready for later integration with UCreds, ABC and the student system.
+</script>

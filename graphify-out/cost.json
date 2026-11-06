@@ -1,0 +1,51 @@
+{
+  "runs": [
+    {
+      "date": "2026-10-23T08:56:47.095865+00:00",
+      "input_tokens": 716338,
+      "output_tokens": 0,
+      "files": 20
+    },
+    {
+      "date": "2026-10-23T09:03:41.835306+00:00",
+      "input_tokens": 92417,
+      "output_tokens": 0,
+      "files": 1
+    },
+    {
+      "date": "2026-10-26T00:32:17.738042+00:00",
+      "input_tokens": 292001,
+      "output_tokens": 0,
+      "files": 8
+    },
+    {
+      "date": "2026-10-26T01:25:38.391572+00:00",
+      "input_tokens": 495121,
+      "output_tokens": 0,
+      "files": 18
+    },
+    {
+      "date": "2026-10-26T12:35:59.566919+00:00",
+      "input_tokens": 283082,
+      "output_tokens": 0,
+      "files": 15,
+      "note": "UI/UX spec v1.0 + DESIGN-BASIS; subagent total tokens, split unknown"
+    },
+    {
+      "date": "2026-10-27T01:49:51.553399+00:00",
+      "input_tokens": 445343,
+      "output_tokens": 0,
+      "files": 11,
+      "note": "SDD v1.0; subagent totals, split unknown"
+    },
+    {
+      "date": "2026-10-29T08:04:21.090336+00:00",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "files": 459,
+      "note": "17 subagents, about 2.4M subagent tokens total (tracked by host, not per chunk)"
+    }
+  ],
+  "total_input_tokens": 2324302,
+  "total_output_tokens": 0
+}

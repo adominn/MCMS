@@ -1,0 +1,88 @@
+<!-- ===================== COVER ===================== -->
+<section class="cover">
+  <p class="doc-title">Software Requirements Specification (SRS)</p>
+  <p class="doc-sub">UTeM Micro-Credential Management System (MCMS)</p>
+  <h3>Document Control</h3>
+  <table>
+    <thead><tr><th colspan="2">Document Information</th></tr></thead>
+    <tbody>
+      <tr><td>Title</td><td>Software Requirements Specification for the UTeM Micro-Credential Management System (MCMS)</td></tr>
+      <tr><td>Date</td><td>6 November 2026</td></tr>
+      <tr><td>Status</td><td>Draft; supervisor review planned once the Release 1 prototype can be shown (D-23)</td></tr>
+      <tr><td>Version</td><td>1.3</td></tr>
+      <tr><td>Prepared for</td><td>Supervisor review; Centre for Open and Distance Learning (CODL), Universiti Teknikal Malaysia Melaka (assumed system owner)</td></tr>
+      <tr><td>Prepared by</td><td>Aliff, Intern</td></tr>
+      <tr><td>Reference</td><td>MCMS_SRS_V1.3_Nov_2026</td></tr>
+      <tr><td>Written against</td><td>Glossary and Decision Log v0.9 (MCMS_FND_V0.9_Nov_2026)</td></tr>
+      <tr><td>Document set</td><td>Software Requirements Specification (SRS) (this document), Product Requirements Document (PRD), UI/UX Design Specification, Software Design Description (SDD), System Flow Map (D-30)</td></tr>
+    </tbody>
+  </table>
+  <div class="disclaimer">
+    <b>Disclaimer:</b>
+    This document is a working draft prepared by an intern as part of a concept and mock-up for a proposed system. It is not an official document of UTeM or CODL. Rules taken from the Garis Panduan Micro-Credential UTeM remain the property of UTeM. Items marked Assumed, Proposed or TBD have not been confirmed by the system owner. Unauthorised modification, distribution or misrepresentation is prohibited.
+  </div>
+</section>
+
+<!-- ===================== TABLE OF CONTENTS ===================== -->
+<section class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <div id="toc"></div>
+  <span class="tocend">TOCENDMARKER</span>
+</section>
+
+<main>
+<!-- ===================== GLOSSARY ===================== -->
+<h1 class="notoc">Glossary</h1>
+<p>The terms below carry exactly the meaning fixed in the Glossary and Decision Log v0.6. Where this SRS adds a term that the Glossary does not define, it is marked <i>(SRS)</i>. Source tags such as [G 12.9] refer to clauses of the Garis Panduan Micro-Credential UTeM (the Guide).</p>
+<script type="text/tbl" data-h="Term|Definition" data-w="27%|73%">
+ABC | Academic Bank of Credit. Central digital depository of ACR. A deposit is storage and does not approve transfer. [G 12.5]
+Academic authority | The body that takes final academic decisions such as approval to offer and stackable mapping: the Senate, whose decisions are recorded in MCMS by the deputy dean (D-11). Configured as a setting, not code.
+ACR | Academic Credit Record. Academic record used in the ABC mechanism; prepared only for an eligible completed UMC or Quality-Verified SAMC. [G 12.4]
+Achievement Record | UTeM internal record of modules passed, Digital Badges and MC completion (Rekod Pencapaian Pembelajaran). It is not an ACR. [G 8.7.5, 18.3]
+Adapter | A defined interface to an external system (UCreds, ABC, QVC/MQA, payment, SSO, email) with a stub or manual version in the first release.
+API | Application Programming Interface.
+Audit trail | Append-only record of approvals, credential actions, result changes and corrections. History is never erased. [G 10.5.1, 18.10]
+Available / Provisionally Redeemed / Redeemed | Credit status under the Single Redemption Principle: not yet used; used in an approved transfer to a programme still in progress; used toward a qualification already awarded. [G 12.9, App F9]
+Body of Knowledge (BoK) | The knowledge domains a target qualification must cover; used in stackable degree mapping. [G 14.5.2]
+CLO / PLO | Course Learning Outcome / Programme Learning Outcome.
+CODL | Centre for Open and Distance Learning. System administrator and technical operator of MCMS and operator of UCreds; takes no academic decision (D-12).
+Deputy dean (PTj) | The faculty deputy dean who owns micro-credential offerings in MCMS: endorses, verifies, confirms quality and records decisions (D-28).
+Cohort (Offering) | One run of an approved MC version with its own dates, participants and results. <i>(SRS)</i>
+Configurable value | A threshold or list kept in settings and never hard-coded (40 h SLT, 3-year QV limit, 10-year credit validity, 30% home credit, residency, alert days, retention).
+CQI | Continuous Quality Improvement: finding, evidence, analysis, action, implementation and effectiveness check. [G 17]
+Credit accumulation | Building a record of eligible credit over time. Separate from credit transfer. [G 12]
+Credit transfer | Evaluation and acceptance of credit by the programme that receives it; in MCMS decided by the deputy dean of the faculty that owns the degree (D-11). Equivalence is judged on learning outcomes, not on credit or SLT alone. [G 13]
+Credit validity | Credit in ABC is valid 10 years from deposit date. This differs from ACR retention (indefinite unless the owner or authority directs otherwise). [G 12.8]
+Currency of knowledge | How up to date and relevant earlier learning still is when it is evaluated for equivalence or transfer. [G 4]
+Digital Badge | Proof of achievement of one module or unit. Not academic credit and not an ACR. [G 8.7.1, App E1]
+Digital Credential / Certificate | Proof of completing the whole MC (Sijil / Digital Credential). Does not by itself give credit or transfer. [G 8.7.3, App E1]
+HEPA | Student Affairs and Alumni Department. Assumed to register outside applicants together with Pejabat Pendaftar.
+Material change | Change to outcomes, SLT, assessment, module structure, credit, MQF level, parent course link or QV status. Needs review and re-approval and is versioned. [G 9.5, 17.7, 17.8]
+MC version | One approved, immutable definition of a micro-credential (outcomes, SLT, modules, assessment, credential). A material change creates a new version. <i>(SRS)</i>
+MCE | Micro-Credential Eksekutif. Non-credit short learning under 40 hours SLT. Never carries credit unless reclassified and re-approved as a SAMC. [G 6.3.3]
+Micro-Credential (MC) | Certification of a small, focused unit of learning with defined outcomes and assessment. Recognition follows achievement, not attendance. [G 6.1]
+Module | A smaller unit of a UMC. Completion earns a Digital Badge, not credit and not whole-UMC completion. [G 8.7.1]
+MQA / MQF | Malaysian Qualifications Agency / Malaysian Qualifications Framework.
+OIDC | OpenID Connect, the sign-in protocol assumed for the Microsoft education account (OI-03). <i>(SRS)</i>
+Participant | Any person enrolled or applying to enrol in an MC offering: UTeM student, staff or outside applicant (user class P8).
+PDPA | Personal Data Protection Act 2010 (Act 709), with current amendments.
+PTj | Pusat Tanggungjawab: the faculty, school, institute or centre that owns an offering. [G 15.2.2]
+QA / QV / QVC | Quality Assurance applies to every MC. Quality Verification is the SAMC-specific check run by the QVC under MQA rules. Approval to offer is a separate decision from QV. [G 7.6, 11.2]
+Quality-Verified SAMC | A SAMC that has passed QV. QV is valid for at most 3 continuous years and needs one completed cohort before submission. [G 11.2.1, 11.2.2]
+RACI | Responsible, Accountable, Consulted, Informed: the role matrix of Guide Appendix H.
+RBAC | Role-Based Access Control.
+Release 1 / 2 / 3 | Delivery stages of MCMS. Release 1 is the first buildable release (prototype scope). See Section 1.2 and decision D-24.
+RPO / RTO | Recovery Point Objective / Recovery Time Objective. <i>(SRS)</i>
+SAMC | Stand-alone Micro-Credential. Own offering, at least 40 hours SLT. Credit and MQF level exist only after QV. [G 6.3.2]
+SDD | Software Design Description.
+Single Redemption | Credit used for one qualification cannot be used for another. Transfer makes credit provisionally redeemed; completing the programme makes it redeemed. [G 12.9]
+SIS | Student Information System of UTeM. Outside MCMS scope; a future adapter. <i>(SRS)</i>
+SLT | Student Learning Time: all learning and assessment time, not only contact time. [G 8.3]
+SME | Subject-Matter Expert from industry or a profession (user class X2). [G 16.7]
+SRS / PRD | Software Requirements Specification / Product Requirements Document.
+SSO | Single Sign-On.
+Stackable Degree | Planned pathway where eligible credit counts toward part of a degree. Needs admission, transfer approval, at least 30% credit earned at UTeM, residency (1 semester for conventional programmes), PLO mapping and graduation requirements. [G 14]
+UCreds | UTeM online learning platform for micro-credentials; the pilot learning platform. Reached only through an adapter.
+UMC | Unbundled Micro-Credential. Made by unbundling an accredited credit course; keeps its parent link; total SLT equals the parent course; whole UMC is at least 40 hours SLT or one credit. [G 6.3.1]
+WCAG | Web Content Accessibility Guidelines (version 2.1 is the target).
+</script>

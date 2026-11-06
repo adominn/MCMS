@@ -1,0 +1,244 @@
+<!-- ===================== 8. OTHER REQUIREMENTS ===================== -->
+<h1>8. Other Requirements</h1>
+
+<h2>8.1 Internationalisation Requirements</h2>
+<script type="text/req" data-p="NFR">
+nfr-i18n | All interface text, notifications, templates and recognition statements SHALL be held in language resource files or managed templates, never fixed in code, so that a further language could be added. | D-02
+nfr-bilingualcontent | Where a bilingual content field has only one language filled, the system SHALL show the available language with a marker rather than an empty field. |
+nfr-currency | Fees SHALL be shown in Malaysian ringgit (RM) with two decimal places. |
+</script>
+
+<h2>8.2 Training Requirements</h2>
+<script type="text/req" data-p="NFR">
+nfr-train-roles | Role-based training SHALL be provided before go-live for lecturers, deputy deans and CODL administrators and technical staff, with a short guide for students. | D-28
+nfr-train-cards | Each role SHALL receive a quick reference card in Bahasa Melayu and English. | D-02
+nfr-train-sandbox | A training environment with sample data and the stub adapters SHOULD be available so that staff can practise without affecting real records. | D-14
+nfr-train-tot | CODL staff SHOULD be trained as trainers so that later staff can be trained internally. |
+</script>
+
+<h2>8.3 Acceptance Approach</h2>
+<p>A separate Test Plan is not part of the controlling document set; acceptance tests are traced directly from the requirement IDs of this SRS (D-01). For Release 1, acceptance requires that:</p>
+<ol>
+  <li>every SHALL requirement of Sections 3, 5, 6 and 7 has at least one passing acceptance test that names its ID;</li>
+  <li>every business rule of Section 4 has at least one passing automated test, including a test that the system refuses the forbidden case (for example, an ACR for an MCE, or reuse of redeemed credit);</li>
+  <li>an end-to-end walkthrough of {{fig:journey}} is completed in the test environment with stub adapters;</li>
+  <li>open items that block a Release 1 requirement (Appendix C) are either resolved or covered by the documented working assumption.</li>
+</ol>
+
+<!-- ===================== APPENDIX A ===================== -->
+<h1>Appendix A: Analysis Models</h1>
+<p>This appendix gathers models that show how the requirements work together. They are explanatory; the requirements in Sections 3–7 prevail.</p>
+
+<h2>A.1 Use Case Overview: Staff</h2>
+<figure data-f="ucstaff">
+<pre class="mermaid">
+flowchart LR
+  P1(["Lecturer (P1)"])
+  P2(["Deputy dean (P2)"])
+  S1(["CODL (S1, P5)"])
+  subgraph SYS["MCMS"]
+    direction TB
+    U1(["Prepare proposal"])
+    U13(["Review a colleague's proposal"])
+    U4(["Run offering and enter results"])
+    U12(["Quality review and CQI"])
+    U7(["Collect QV evidence"])
+    U2(["Endorse and record Senate decision"])
+    U5(["Verify results, confirm completion"])
+    U15(["Correct or revoke credential"])
+    U14(["Confirm ACR and record ABC deposit"])
+    U10(["Decide credit transfer"])
+    U11(["Map stackable pathway"])
+    U16(["Users, roles, settings"])
+    U17(["UCreds data exchange"])
+  end
+  P1 --- U1
+  P1 --- U13
+  P1 --- U4
+  P1 --- U12
+  P1 --- U7
+  P2 --- U2
+  P2 --- U5
+  P2 --- U15
+  P2 --- U14
+  P2 --- U10
+  P2 --- U11
+  S1 --- U16
+  S1 --- U17</pre>
+<figcaption>Main use cases of staff users. When the deputy dean verifies results or confirms completion, the system issues credentials and generates ACR automatically (D-29). The Senate does not log in; its decisions are recorded by the deputy dean.</figcaption>
+</figure>
+
+<h2>A.2 Use Case Overview: Participants and Public</h2>
+<figure data-f="ucpart">
+<pre class="mermaid">
+flowchart LR
+  P8(["Participant (P8)"])
+  X3(["Verifier /<br/>employer (X3)"])
+  subgraph SYS["MCMS"]
+    direction TB
+    V2(["Register and pay"])
+    V3(["Track module progress"])
+    V4(["View and share credentials"])
+    V5(["Give or decline ACR consent"])
+    V6(["View credit ledger"])
+    V7(["Apply for credit transfer"])
+    V1(["Browse catalogue"])
+    V8(["Verify a credential"])
+  end
+  P8 --- V1
+  P8 --- V2
+  P8 --- V3
+  P8 --- V4
+  P8 --- V5
+  P8 --- V6
+  P8 --- V7
+  X3 --- V1
+  X3 --- V8
+</pre>
+<figcaption>Main use cases of participants and the public.</figcaption>
+</figure>
+
+<h2>A.3 Sequence: From Proposal to Approved Offering</h2>
+<figure data-f="seqapproval">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor P1 as Lecturer (P1)
+  participant M as MCMS
+  actor P2 as PTj (P2)
+  actor X1 as Reviewer (X1)
+  participant S as Senate (no login)
+  P1->>M: Determine category, complete proposal (App A)
+  M->>M: Validate against category rules
+  P1->>M: Submit version
+  P2->>M: Assign reviewer
+  M->>X1: Review task
+  X1->>M: Declare no conflict, submit review (Support / Amend / Do not support)
+  opt Amendment needed
+    M->>P1: Comments to resolve
+    P1->>M: Respond and resubmit
+  end
+  P2->>M: Verify category and endorse
+  M->>P2: Decision pack for the Senate meeting
+  P2->>S: Present at Senate meeting
+  S-->>P2: Approved
+  P2->>M: Record Senate approval (meeting reference)
+  M->>M: Version state Approved (no credit, QV or transfer status set)
+  P2->>M: Create offering and complete readiness (App B)
+  M->>M: Open registration and publish to catalogue
+</pre>
+<figcaption>Proposal, review, approval and offering.</figcaption>
+</figure>
+
+<h2>A.4 Sequence: Credential Issuance and Public Verification</h2>
+<figure data-f="seqcred">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor P2 as PTj (P2)
+  participant M as MCMS
+
+  actor P8 as Participant (P8)
+  actor X3 as Employer (X3)
+  P2->>M: Confirm MC completion for cohort
+  M->>M: Run App E8 checks per participant
+  M->>M: Build credential from verified records, sign with UTeM key
+  M->>P8: Credential issued (JSON, PDF, QR)
+  P8->>X3: Share link or QR code
+  X3->>M: Open verification page
+  M->>M: Check signature and current status
+  M-->>X3: Minimum permitted information and status
+</pre>
+<figcaption>Issuing a credential and verifying it publicly.</figcaption>
+</figure>
+
+<h2>A.5 End-to-End Participant Journey</h2>
+<p>The diagram follows one participant from a modular UMC to a stackable degree, showing every separate decision on the way.</p>
+<figure data-f="journey">
+<pre class="mermaid">
+flowchart TD
+  A["Finds UMC in catalogue,<br/>reads recognition notice"] --> B["Registers, pays<br/>(dummy service)"]
+  B --> C["Completes modules on UCreds<br/>over several periods"]
+  C --> D["PTj verifies results"]
+  D --> E["Digital Badge per module"]
+  E --> F["All modules met:<br/>UMC complete (PTj)"]
+  F --> G["Certificate and<br/>Digital Credential (system)"]
+  F --> H["ACR generated (system),<br/>confirmed by deputy dean"]
+  H --> I{"Participant<br/>consents?"}
+  I -- "No" --> I2["ACR kept, not deposited"]
+  I -- "Yes" --> J["ABC deposit recorded<br/>(deputy dean); credit Available,<br/>10-year validity"]
+  J --> K["Admitted to programme<br/>(separate decision)"]
+  K --> L["Credit transfer application<br/>and equivalence evaluation"]
+  L --> M{"Approved?"}
+  M -- "No" --> M2["Credit stays Available;<br/>ACR and credentials unchanged"]
+  M -- "Yes" --> N["Credit Provisionally Redeemed"]
+  N --> O["Stackable plan: 30% UTeM credit,<br/>residency, PLO, remaining courses"]
+  O --> P["Programme completed"]
+  P --> Q["Qualification awarded;<br/>credit Redeemed"]
+</pre>
+<figcaption>End-to-end journey of a participant through MCMS.</figcaption>
+</figure>
+
+<!-- ===================== APPENDIX B ===================== -->
+<h1>Appendix B: Traceability to the Guide</h1>
+<p>The table maps each part of the Guide that affects the system to the sections of this SRS that implement it. It lets the supervisor check coverage and lets developers find the source of a rule.</p>
+<p class="tcap" data-t="trace">Traceability from Guide chapters and appendices to SRS sections</p>
+<script type="text/tbl" data-h="Guide part|Subject|SRS sections|Business rules" data-w="16%|38%|24%|22%" data-cls="small">
+Bab 1–5 | Introduction, purpose, scope, definitions | 1, Glossary | –
+Bab 6 | Concept and categories (UMC, SAMC, MCE), category determination | 2.4, 3.2.1, 3.2.3 | {{br-slt}}, {{br-mce}}, {{br-umcslt}}, {{br-umclink}}, {{br-creditmodel}}, {{br-samccredit}}, {{br-sltnotcredit}}
+Bab 7 | Principles: outcomes, competence, flexibility, QA, improvement | 3.2.2, 3.7, 3.15 | {{br-achieve}}
+Bab 8 | Framework: outcomes, SLT, content, assessment, certification, records | 3.2.2, 3.7, 3.8, 3.9 | {{br-badge}}, {{br-nomix}}, {{br-certwhole}}, {{br-arnotacr}}
+Bab 9 | Development, review, approval, offering | 3.2, 3.3, 3.4 | {{br-offer}}, {{br-material}}
+Bab 10 | Delivery, platform, participants, assessment, certification, records | 3.4.2, 3.5, 3.6, 3.7, 3.9 | {{br-verifyfirst}}, {{br-noclaim}}
+Bab 11 | Quality assurance, Quality Verification, monitoring, review | 3.10, 3.15 | {{br-qvvalid}}, {{br-qvcohort}}, {{br-qvlapse}}, {{br-separate}}
+Bab 12 | Credit accumulation, ACR, ABC, validity, single redemption | 3.11, 3.13 | {{br-creditvalid}}, {{br-acrelig}}, {{br-deposit}}, {{br-consent}}, {{br-acrkeep}}, {{br-redeem}}
+Bab 13 | Credit transfer | 3.12 | {{br-equiv}}, {{br-receiver}}, {{br-mcetransfer}}, {{br-rejectkeep}}, {{br-modcredit}}
+Bab 14 | Stackable degree | 3.14 | {{br-home30}}, {{br-residency}}, {{br-admission}}, {{br-creditbearing}}, {{br-plo}}, {{br-award}}
+Bab 15 | Governance structure, separation of decisions, traceability | 2.5, 3.1, 3.3, 3.16 | {{br-separate}}, {{br-authority}}
+Bab 16 | Roles and responsibilities | 2.5, 3.1.2 | {{br-authority}}
+Bab 17 | Monitoring and CQI, changes, versions, suspension | 3.3.3, 3.15 | {{br-material}}, {{br-cqi}}, {{br-terminate}}
+Bab 18 | Records and documentation | 3.8, 3.16, 6 | {{br-audit}}, {{br-version}}, {{br-terminate}}
+Lampiran A | Development and approval template | 3.2.2, 3.2.3, 3.3 | –
+Lampiran B | Readiness and participant records checklist | 3.4.1, 3.5 | –
+Lampiran C | QA, monitoring and CQI template | 3.15 | –
+Lampiran D | QV evidence list for SAMC | 3.10 | –
+Lampiran E | Badge, certificate and Digital Credential specification | 3.9 | –
+Lampiran F | ACR, ABC, accumulation and transfer records | 3.11, 3.12, 3.13 | –
+Lampiran G | Stackable degree mapping matrix | 3.14 | –
+Lampiran H | Governance, RACI and records matrix | 2.5, 3.1, 3.16, 6.3 | –
+</script>
+
+<!-- ===================== APPENDIX C ===================== -->
+<h1>Appendix C: Issues List</h1>
+<p>Open items OI-01 to OI-08 come from the Glossary and Decision Log v0.2. Items OI-09 to OI-15 were found while writing this SRS and have been entered in the Glossary and Decision Log v0.3. The Glossary and Decision Log v0.6 (MCMS_FND_V0.6_Oct_2026) is the controlling list; in it OI-01, OI-05, OI-06 and OI-14 are closed.</p>
+<p class="tcap" data-t="issues">Open items</p>
+<script type="text/tbl" data-h="ID|Question|Needed by|Working assumption|Affects" data-w="7%|37%|11%|27%|18%" data-cls="small">
+OI-01 | Which Guide version is controlling: V2.0 (15 Sep 2026) or V1.0 (18 Sep 2026)? | Closed | The project's copy, Versi 1.0, 18 Sep 2026 (D-03) | Source tags throughout
+OI-02 | Is a PostgreSQL server available, or must the system use MySQL/MariaDB? | Before SDD | PostgreSQL, portable queries (D-09) | 2.6, {{nfr-dbportable}}
+OI-03 | Which SSO protocol and tenant settings does UTeM allow? How are outside applicants recognised? | Before SDD | OpenID Connect; account attribute or imported list (D-10) | {{fr-sso}}, {{fr-applicant}}, {{ir-oidc}}
+OI-04 | How does UCreds connect (web service, data export, Moodle link) and does it issue badges? | Next iteration | CSV import; UCreds issues badges (D-13) | 3.6, {{fr-lpbadge}}
+OI-05 | Is a separately credit-bearing UMC module an approved case at UTeM, and who approves it? | Closed | Case-by-case academic approval; approving role is a setting (D-18) | {{fr-umcmodcredit}}, {{fr-ctpartial}}
+OI-06 | Which committee or role approves each decision type? | Closed | Deputy dean endorses, Senate approves (recorded by the deputy dean), degree-owning deputy dean decides transfers (D-11) | {{fr-approverbody}}
+OI-07 | Retention periods for each record category. | Before go-live | Placeholder settings; ACR indefinite [G 12.8] | {{fr-retention}}, {{tab:retention}}
+OI-08 | Who owns the credential signing keys and the public verification page? | Before SDD | CODL (D-12) | {{sr-keys}}, {{ir-hsm}}
+OI-09 | What are the credit transfer limits and non-transferable components of each target programme, and who maintains them? | Before Release 1 testing | Programme settings entered by the faculty; warning only | {{fr-ctlimits}}
+OI-10 | How will MCMS learn of programme admission, completion and withdrawal, which drive redemption status? | Before SDD | Manual recording by an authorised user | {{fr-rdsource}}, {{fr-spsis}}
+OI-11 | What data and file format does ABC require for deposit, and how are redemption updates sent to ABC? | Before Release 1 testing | Export of ACR fields of Appendix F3 in CSV and PDF | {{fr-dpexport}}
+OI-12 | What fee rules, refund rules and sponsorship arrangements apply? | Before Release 2 | Fee per offering; refunds outside MCMS | {{fr-regpay}}, {{fr-regwaiver}}
+OI-13 | What is the completion window for a modular UMC (Guide 7.4 "tempoh kesahan pembelajaran")? | Before Release 1 testing | Set per offering; no default | {{fr-arwindow}}
+OI-14 | Confirm the conversion of 40 notional learning hours to 1 credit for UMC and SAMC calculations. | Closed | Confirmed: 40 hours = 1 credit (D-27) | {{tab:settings}}
+OI-15 | Which identity verification methods are required for online assessment at each risk level? | Before Release 1 testing | Recorded per assessment; method chosen by PTj | {{fr-asintegrity}}
+</script>
+
+<!-- ===================== APPENDIX D ===================== -->
+<h1>Appendix D: Document History</h1>
+<script type="text/tbl" data-h="Version|Date|Author|Change" data-w="12%|18%|18%|52%">
+0.1 | 23 October 2026 | Aliff, Intern | Informal draft (sections 1 to 2.8); input material only.
+1.0 | 23 October 2026 | Aliff, Intern | First formal SRS, written against Glossary and Decision Log v0.2, in the layout of the reference SRS (D-04, D-26). Adds functional requirements for all sixteen modules, business rules, interface, data and non-functional requirements, diagrams, traceability and the issues list.
+1.0 (rev. 1) | 26 October 2026 | Aliff, Intern | Aligned with Glossary and Decision Log v0.4: the Guide copy is fixed (D-03), module credit approval is academic and case by case (D-18), 1 credit = 40 hours (D-27); OI-01, OI-05 and OI-14 closed.
+1.0 (rev. 2) | 26 October 2026 | Aliff, Intern | Aligned with Glossary and Decision Log v0.5: users simplified to Student, Lecturer, Deputy dean, Senate (no login), CODL (administration only) and public verifiers (D-28); credentials and ACR produced by the system after deputy dean verification (D-29); RACI, diagrams and requirements updated accordingly.
+1.1 | 27 October 2026 | Aliff, Intern | Aligned with Glossary and Decision Log v0.6 after the cross-document review of 27 October 2026: document set now includes the UI/UX Design Specification and the System Flow Map (D-30); Release 1 prototype defined (D-31); corporate identity assumption recorded (D-33, A-10); completion window (FR-133, OI-13) may be set per offering and sends no reminder while unset. No requirement ID changed.
+1.2 | 28 October 2026 | Aliff, Intern | Updated after the Release 1 prototype was built and its four-act scenario passed: the settings table lists the settings the prototype added (quality targets, periodic review, the registered-provider flag, the retention periods of the logs, the demo clock) and the approval routes for transfer, stackable mapping, suspension and disposal. No requirement ID or wording changed. Findings of the build that affect the SRS are in the Release 1 review of 28 October 2026 (for example: the module field of an assessment component, and the repeated import file, which is refused).
+</script>
+<p class="small"><i>Review of this document: under D-23 the PRD, SDD and Release 1 prototype proceed on the recorded assumptions; the supervisor's comments will be applied to all documents together once the prototype can be shown.</i></p>
+</main>

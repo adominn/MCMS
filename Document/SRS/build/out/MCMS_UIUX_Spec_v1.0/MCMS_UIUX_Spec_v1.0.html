@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Software Requirements Specification - UTeM MCMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --blue:#3f6fa6; --tint:#dcebf1; --line:#444; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family:'Noto Serif', Cambria, Georgia, serif; font-size:10pt; line-height:1.45; color:#1a1a1a;
+         font-variant-ligatures:none; margin:0; background:#fff; }
+  /* cover */
+  .cover { break-after:page; padding-top:28mm; }
+  .cover .doc-title { text-align:center; font-size:23pt; font-weight:700; margin:0 0 6px; }
+  .cover .doc-sub { text-align:center; font-size:14pt; font-weight:700; font-style:italic; margin:0 0 30px; }
+  .cover h3 { font-size:13pt; margin:0 0 4px; }
+  .cover table td:first-child { width:34%; font-weight:700; }
+  .cover .disclaimer { margin-top:38mm; font-style:italic; font-size:9.5pt; text-align:justify; }
+  .cover .disclaimer b { display:block; font-size:10.5pt; margin-bottom:2px; }
+  .tint, .cover th { background:var(--tint) !important; }
+  /* toc */
+  .toc { break-after:page; }
+  .toc-title, h1.notoc { background:var(--tint); text-align:center; font-size:14pt; font-weight:700; padding:6px; margin:0 0 12px; color:#111; }
+  .toc-row { display:flex; align-items:baseline; font-size:9.5pt; margin:3px 0; }
+  .toc-row .t { white-space:nowrap; }
+  .toc-row .dots { flex:1; border-bottom:1px dotted #777; margin:0 4px; transform:translateY(-3px); }
+  .toc-row .pg { min-width:16px; text-align:right; }
+  .toc-1 { font-weight:700; margin-top:7px; }
+  .toc-2 { padding-left:16px; }
+  .toc-3 { padding-left:32px; font-size:9pt; }
+  .tocend { color:#fff; font-size:2pt; }
+  /* headings */
+  main h1 { break-before:page; background:var(--tint); color:var(--blue); font-size:15pt; padding:5px 8px; margin:0 0 10px; break-after:avoid; }
+  main h2 { color:var(--blue); font-size:12.5pt; margin:16px 0 6px 10px; break-after:avoid; }
+  main h3 { color:var(--blue); font-size:11pt; margin:12px 0 5px 20px; font-style:italic; break-after:avoid; }
+  main h4 { font-size:10pt; margin:10px 0 4px; break-after:avoid; }
+  p { margin:0 0 7px; text-align:justify; }
+  ul, ol { margin:2px 0 8px 4px; padding-left:20px; }
+  li { margin:1px 0; }
+  td ul, td ol { margin:2px 0 2px 0; padding-left:16px; }
+  table { width:100%; border-collapse:collapse; margin:6px 0 12px; font-size:9pt; }
+  th, td { border:0.6pt solid var(--line); padding:3px 6px; vertical-align:top; text-align:left; }
+  th { background:#ececec; font-weight:700; }
+  thead { display:table-header-group; }
+  tr { break-inside:avoid; }
+  td.c-id, th.c-id { white-space:nowrap; width:50px; font-weight:600; }
+  td.c-src, th.c-src { width:74px; font-size:8pt; color:#333; }
+  td.c-src { font-family:'Noto Sans', Arial, sans-serif; }
+  td.c-x, th.c-x { width:92px; font-size:8pt; }
+  .tcap, figcaption { font-style:italic; font-size:8.5pt; color:#333; margin:2px 0 12px; text-align:left; }
+  .tcap { margin:10px 0 0; }
+  figure { margin:10px 0 12px; break-inside:avoid; }
+  figure .mermaid { text-align:center; }
+  figure .mermaid svg { max-height:205mm; }
+  .note { border-left:3pt solid var(--blue); background:#f3f7fb; padding:5px 9px; margin:8px 0 10px; font-size:9.5pt; break-inside:avoid; }
+  .note b:first-child { color:var(--blue); }
+  code { font-family:Consolas, 'Courier New', monospace; font-size:8.3pt; background:#f1f1f1; padding:0 2px; }
+  .small { font-size:8.5pt; }
+  .center { text-align:center; }
+  .keep { break-inside:avoid; }
+  .pb { break-before:page; }
+  pre.mermaid { font-family:'Noto Sans', Arial, sans-serif; white-space:pre; }
+</style>
+</head>
+<body>
+<!-- ===================== COVER ===================== -->
+<section class="cover">
+  <p class="doc-title">UI/UX Design Specification</p>
+  <p class="doc-sub">UTeM Micro-Credential Management System (MCMS)</p>
+  <h3>Document Control</h3>
+  <table>
+    <thead><tr><th colspan="2">Document Information</th></tr></thead>
+    <tbody>
+      <tr><td>Title</td><td>UI/UX Design Specification for the UTeM Micro-Credential Management System (MCMS)</td></tr>
+      <tr><td>Date</td><td>26 October 2026</td></tr>
+      <tr><td>Status</td><td>Approved design basis for the Release 1 prototype; supervisor review planned once the prototype is shown (D-23)</td></tr>
+      <tr><td>Version</td><td>1.0</td></tr>
+      <tr><td>Prepared for</td><td>Supervisor review; Centre for Open and Distance Learning (CODL), Universiti Teknikal Malaysia Melaka (assumed system owner)</td></tr>
+      <tr><td>Prepared by</td><td>Aliff, Intern</td></tr>
+      <tr><td>Reference</td><td>MCMS_UIUX_V1.0_Oct_2026</td></tr>
+      <tr><td>Written against</td><td>Glossary and Decision Log v0.5 (MCMS_FND_V0.5_Oct_2026); Software Requirements Specification v1.0 (MCMS_SRS_V1.0_Oct_2026); Product Requirements Document v1.0 (MCMS_PRD_V1.0_Oct_2026); DESIGN.md (ulearn-carbon)</td></tr>
+      <tr><td>Design source</td><td>Clickable prototype v2, <code>UIUX/v2/prototype</code>, approved 26 October 2026</td></tr>
+      <tr><td>Document set</td><td>SRS, PRD, UI/UX Design Specification (this document), Software Design Description (SDD)</td></tr>
+    </tbody>
+  </table>
+  <div class="disclaimer">
+    <b>Disclaimer:</b>
+    This document is a working draft prepared by an intern as part of a concept and mock-up for a proposed system. It is not an official document of UTeM or CODL. Names, sample records and figures in screens and documents are fictional. Items marked Assumed or TBD have not been confirmed by the system owner. Unauthorised modification, distribution or misrepresentation is prohibited.
+  </div>
+</section>
+
+<section class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <div id="toc"></div>
+  <span class="tocend">TOCENDMARKER</span>
+</section>
+
+<main>
+<h1 class="notoc">Revision History</h1>
+<script type="text/tbl" data-h="Version|Date|Change" data-w="12%|18%|70%">
+1.0 | 26 Oct 2026 | First issue, written from the approved clickable prototype v2: design principles, visual system, interaction rules, 114 screens, 26 flows and 16 printable documents. Includes the corrections from the planner review of the prototype (Section 9).
+</script>
+
+<h1 class="notoc">Glossary</h1>
+<p>All terms of the Glossary and Decision Log v0.5 apply with exactly the same meaning. The table below adds only the design terms used here.</p>
+<script type="text/tbl" data-h="Term|Definition" data-w="24%|76%">
+Confirmation dialog | A pop-up that states the effect of an action and asks the user to confirm it before anything is saved.
+Drawer | A panel that slides in from the right to show a record without leaving the current list.
+Flow (FL-XX) | A guided walk-through of a process across screens and roles, with a step bar at the bottom of the prototype.
+Hotspot | An outline the prototype draws around every clickable element when the viewer presses H.
+Persona | A fictional representative user (Section 2.3). Personas and their data are illustrative.
+Route | The address of a screen in the prototype, for example <code>#/dd/verify/DS-2026-2</code>. Used as the screen's identifier.
+Screen ID | Short identifier of a screen in this document, for example DD-12 (Section 6).
+Status tag | A small label with a pale tint and dark text showing the status of a record, always with its word.
+Toast | A short message at the top right that confirms a finished action and names the next step.
+</script>
+
+<!-- ===================== 1. INTRODUCTION ===================== -->
+<h1>1. Introduction</h1>
+
+<h2>1.1 Purpose</h2>
+<p>This UI/UX Design Specification describes how MCMS looks and behaves for each of its users: the visual system, the interaction rules, every screen, every flow between screens and roles, and every printable document. It turns the requirements of the SRS and the product decisions of the PRD into a design that developers can build without guessing.</p>
+<p>The specification was written from the approved clickable prototype v2. The prototype is part of the specification: where a screen is described here, the prototype shows it with sample data, and where this text and the prototype differ, this text prevails and the prototype is corrected. Where this document and the SRS differ on a requirement, the SRS prevails.</p>
+
+<h2>1.2 Document Conventions</h2>
+<script type="text/tbl" data-h="Convention|Meaning" data-w="22%|78%">
+Screen ID | Role prefix and number, for example DD-12 or ST-04. The full list with routes is in Section 6.4.
+Route | Prototype address of a screen, written as <code>#/dd/verify/:id</code>. A word after a colon is a record identifier.
+FL-XX | A flow of Section 7.
+Release 1 / 2 | Follows the SRS: SHALL is Release 1, SHOULD is Release 2. Release 2 controls appear disabled and labelled "Release 2".
+FR-XX, BR-XX, NFR-XX | Requirement IDs of the SRS v1.0, as published there.
+D-XX, A-XX, OI-XX | Decisions, assumptions and open items of the Glossary and Decision Log v0.5.
+Dates and money | Written in this document as "26 Oct 2026"; shown to users as DD/MM/YYYY and RM 0.00 (Section 4.9).
+</script>
+<div class="note"><b>Note:</b> Names, records and figures in the screenshots are sample data of the prototype. They are consistent with each other but are not real people or decisions.</div>
+
+<h2>1.3 Intended Audience</h2>
+<script type="text/tbl" data-h="Reader|Use of this document|Read first" data-w="28%|47%|25%">
+Supervisor and CODL | Check that every user can do their work and that the design keeps the Guide's stages separate. | Sections 2, 6, 7
+Developers and AI development agents | Build screens, components and behaviour exactly as specified. | Sections 3, 4, 5, 6
+Testers | Derive UI tests from the interaction rules, flows and screen states. | Sections 4, 7, 9
+Content and translation | Write and translate interface text consistently in BM and EN. | Sections 4.9, 8
+</script>
+
+<h2>1.4 Scope</h2>
+<p>The specification covers the Release 1 web application for all roles: participants (students), lecturers and colleague reviewers, deputy deans, the CODL system administrator and the industry expert. It also covers the public website for visitors and employers, and the documents the system prints or exports. The application is web first and responsive down to a phone width of 360 px (NFR responsiveness); there is no native mobile app (SRS 1.4).</p>
+<p>Out of scope: the visual design of UCreds, the national ABC platform and other external systems; the SDD's technical design of components; and Release 2 features beyond showing them as disabled.</p>
+
+<h2>1.5 References</h2>
+<ol>
+  <li>Glossary and Decision Log for the UTeM MCMS, version 0.5, 26 October 2026 (MCMS_FND_V0.5_Oct_2026).</li>
+  <li>Software Requirements Specification, UTeM MCMS, version 1.0, 26 October 2026 (MCMS_SRS_V1.0_Oct_2026).</li>
+  <li>Product Requirements Document, UTeM MCMS, version 1.0, 26 October 2026 (MCMS_PRD_V1.0_Oct_2026).</li>
+  <li>DESIGN.md, design system "ulearn-carbon" (IBM Carbon with uLearn Navy), held in the project folder.</li>
+  <li>MCMS UI design basis v2 (<code>UIUX/v2/DESIGN-BASIS.md</code>) and SRS screen inventory (<code>UIUX/v2/basis/srs-fr-inventory.md</code>).</li>
+  <li>MCMS clickable prototype v2 (<code>UIUX/v2/prototype</code>) and its sample PDFs (<code>UIUX/v2/samples</code>).</li>
+  <li>WCAG 2.1; Garis Panduan Micro-Credential UTeM, Versi 1.0 (the Guide).</li>
+</ol>
+
+<!-- ===================== 2. PRINCIPLES AND USERS ===================== -->
+<h1>2. Design Principles and Users</h1>
+
+<h2>2.1 Design Principles</h2>
+<p>Seven principles drive every design decision. They come from the Guide's separation of recognition stages, the PRD design principles (PRD 8.2) and the user needs of the personas.</p>
+<script type="text/tbl" data-h="Principle|What it means on screen|Source" data-w="24%|58%|18%">
+One stage, one record, one look | Approval, offering, result verification, completion, credential, QV, ACR, ABC deposit, transfer and redemption are separate decisions with separate screens. No button combines two stages. Verifying results creates module achievements; confirming completion is a later, separate action that makes the system issue credentials. | D-15, BR-16, G 12–14
+Land on what needs me today | Staff open on a task list with age and overdue flags; participants open on their learning and credit. | PRD 8.2
+Only the authorised role sees a decision | Decision buttons appear only for the role that may decide. CODL has no academic decision anywhere. The Senate never signs in; the deputy dean records its decisions with the meeting reference. | D-11, D-12, D-28, BR-42
+Recognition text is generated | Credit, MQF level and QV claims come only from verified records and templates. A SAMC shows "Credit after QV" until QV is recorded; a lapsed QV removes the claim. | D-17, BR-14, BR-22, BR-23
+The rule sits beside the field | Rules are checked as the user types; blocking errors stop submission, warnings let the user continue with the warning on record. | PRD 8.2, ir-forms
+History is one click away | Every record has a history from the append-only audit trail. Nothing is deleted; a correction creates a new revision. | D-20, BR-38
+Honest about credit | Wherever a participant meets credit, the screen says that deposit is storage, not transfer, and that each transfer is decided case by case. | BR-26, BR-31
+</script>
+
+<h2>2.2 Users and Permissions</h2>
+<p>The design follows the six kinds of user of decision D-28. {{tab:perm}} shows what each role can and cannot do in the interface; buttons for actions a role cannot take are not shown at all, rather than shown disabled.</p>
+<p class="tcap" data-t="perm">Roles and their permissions in the interface</p>
+<script type="text/tbl" data-h="Role (persona)|Signs in|Can|Cannot" data-w="18%|12%|42%|28%" data-cls="small">
+Student P8 (Amir Hakimi) | SSO | Browse, register and pay (stub), withdraw, view own records, share credentials, give or decline consent to deposit, apply for transfer, view own stackable plan | See anyone else's records
+Lecturer P1 (Dr. Aina Zulkifli) | SSO + MFA | Propose and edit, answer review comments, create offerings, complete the lecturer's readiness items, enter results, send for verification, write quality reviews, gather QV evidence, review colleagues' proposals after declaring conflict of interest | Review or decide own proposal; verify results they entered
+Deputy dean P2 (Hakim Rahman, FTMK) | SSO + MFA | Assign reviewers, verify category, endorse or return, record Senate decisions, confirm readiness, verify results, confirm completion, correct, replace or revoke on a recorded decision, record QV results, confirm quality reviews, confirm ACR, record deposits, decide transfers into FTMK degrees, redeem or release credit, map pathways and plans, periodic review, suspension | Act outside FTMK; issue credentials by hand (the system issues them)
+Senate P3 | Never | Decides in its meeting | Use MCMS
+CODL S1/P5 (Farid Hashim) | SSO + MFA | Users and scoped roles, reference data, settings with history, bilingual templates, UCreds files, adapter status, test mailbox, audit trail, reports, retention | Any academic decision: approve, verify, issue, ACR, deposit, transfer, module credit flag
+Industry expert X2 (Ir. Siti Aminah Yusof) | SSO (limited) | Declare conflict of interest, comment on invited proposals | Rate, recommend or decide
+Public X3 (Tan Mei Ling) | Never | Catalogue, pathways, how it works, FAQ, verify a credential | See results, identity numbers, email or matric numbers
+</script>
+<p>A person may hold several roles, each with its own scope. Separation of duties is checked per record: a lecturer who is also a reviewer cannot review their own proposal, and a person who entered a result cannot be its only verifier.</p>
+
+<h2>2.3 Personas and Sample Data</h2>
+<p>The personas of PRD Section 3 appear in the prototype with consistent sample data. The world is set on 26 October 2026 at FTMK, with records at different stages so that every flow can be walked: the UMC Data Structures (BITS 1123, 3 credits, 120 hours) with cohorts from 2025/2 to 2027/1, the SAMC Cloud Native Development (2 credits, MQF level 4, Quality-Verified to 6 December 2026), the MCE Leadership Essentials (16 hours, no credit), and Amir's two deposited or pending credits. Figures add up across screens, for example the 28 learners of Data Structures 2026/2, of whom 27 pass.</p>
+
+<!-- ===================== 3. VISUAL DESIGN SYSTEM ===================== -->
+<h1>3. Visual Design System</h1>
+<p>MCMS uses the design system of DESIGN.md, "ulearn-carbon": IBM Carbon geometry and type with uLearn Navy as the single brand colour. This section fixes how that system is applied to working screens. {{fig:shell}} shows the result on the deputy dean's task queue.</p>
+<figure data-f="shell"><img src="../../../../UIUX%20Spec/src/img/shell-dd-queue.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Application shell: top bar, navy side navigation and white content area (deputy dean task queue, DD-01).</figcaption></figure>
+
+<h2>3.1 Colour</h2>
+<p class="tcap" data-t="colours">Colour roles</p>
+<script type="text/tbl" data-h="Role|Value|Use" data-w="24%|18%|58%">
+Primary (uLearn Navy) | #1e2a6e | Side navigation background, the one filled primary button per screen, links, focus outline, selected tab underline
+Navy hover / selected | #18225a / #2e3d94 | Hover on navigation items; the current page in the side navigation (with a 3 px white left bar)
+Ink | #161616 | Text, secondary buttons, the dark flow bar
+Muted | #525252 | Labels, table headers, meta text (meets 4.5:1 on white)
+Surface 1 | #f4f4f4 | Input fields, table bands, hover rows
+Hairline | #e0e0e0 | Panel borders and table header rule; row rules #ececec
+Success / Warning / Error | #24a148 / #f1c21b / #da1e28 | Dots, tag tints, notice bars and the danger button only. Never a full background. One red mark per object.
+</script>
+<div class="note"><b>Note:</b> The navy side navigation is the owner's decision of 26 October 2026, overriding the neutral-sidebar guidance of the design craft rules, to give the uLearn brand colour more presence. Content areas stay white.</div>
+
+<h2>3.2 Typography</h2>
+<p>IBM Plex Sans is the only typeface; IBM Plex Mono is used only for identifiers such as setting keys and file names. Every number in a table, KPI or form is set in tabular figures and right-aligned.</p>
+<script type="text/tbl" data-h="Role|Size and weight|Use" data-w="24%|22%|54%">
+Page title | 28 / 400 | One per screen, sentence case
+KPI value | 28 / 300 | Figures in a KPI strip; light weight per DESIGN.md
+Section title | 16 / 600 | Panel and section headings
+Body, cells, navigation | 14 / 400, tracking 0.16 px | Everything else
+Labels, meta, table headers | 12 / 400 | Sentence case, grey; never uppercase tracked
+Documents | 11 pt body, 20 pt light title | A4 printable documents (Section 8)
+</script>
+
+<h2>3.3 Shape, Spacing and Elevation</h2>
+<p>Corners are square (0 px) for buttons, inputs, panels and modals; only status tags are pill-shaped. Spacing follows a 4 px grid: 24 px between sections, 16 px between fields, 20 px panel padding. Panels are separated by 1 px hairlines and surface change, never by shadows. Shadows are reserved for what floats: menus, toasts, dialogs and drawers.</p>
+
+<h2>3.4 Layout and Shell</h2>
+<script type="text/tbl" data-h="Region|Specification" data-w="22%|78%">
+Top bar (48 px, white, sticky) | Product name (goes home) · global search (staff) · language switch EN/BM · help · notification bell with unread count · profile button with avatar, name and post
+Side navigation (248 px, navy, sticky) | Grouped items with outline icons (16 px) and counts on the right that come from the live task data; the current page is highlighted
+Content (white, max 1400 px) | Breadcrumb · title row (title, subtitle, status tag, actions on the right) · content blocks. One filled primary button per screen.
+Public site | Top navigation (Home, Catalogue, Pathways to a degree, How it works, FAQ, Verify a credential), Sign in, and a dark footer with contact and policy links
+Maintenance banner | A warning bar under the top bar, shown from 48 hours before planned maintenance
+</script>
+
+<h2>3.5 Components</h2>
+<p class="tcap" data-t="comps">Component catalogue</p>
+<script type="text/tbl" data-h="Component|Specification" data-w="22%|78%" data-cls="small">
+Buttons | 40 px high, square. Primary (navy, one per screen), secondary (ink), tertiary (white with navy border), ghost (text), danger (red). A disabled button stays readable and states why, for example "Submit · 1 check failing" or "Confirm ready · 1 item open".
+Fields | Label above (12 px), input on Surface 1 with a bottom rule; focus is a 2 px navy outline; error is a 2 px red outline with the message under the field in plain language. Required labels end with an asterisk.
+Choice cards | Radio or checkbox inside a bordered card with a title and one-line consequence; the chosen card has a 2 px navy border.
+Status tags | Pale tint with dark text of the same hue, always with the status word (Section 4.8). Never above a heading.
+Category mark | UMC, SAMC or MCE in a 1 px ink box beside the micro-credential name.
+Tables | 12 px grey sentence-case headers, rules between rows, no zebra striping, numbers right-aligned. Search bar above long lists; pager below (Section 4.5).
+Tabs | Text tabs with counts; the selected tab has a 2 px navy underline.
+KPI strip | One bordered container split by hairlines; label over value; no icons, no sparklines.
+Recognition track | A horizontal track of stages (for example Earned, ACR, ABC, Transfer): done stages in ink, the current stage in navy, later stages grey.
+Notices | Inline bar with a coloured left edge: info (navy), warning, error, success. Never used as a page background.
+Checks list | Dot, statement and one-line evidence; used for system checks, readiness items and rules.
+Dialogs, drawers, menus, toasts | See Section 4.
+</script>
+
+<!-- ===================== 4. INTERACTION DESIGN ===================== -->
+<h1>4. Interaction Design</h1>
+
+<h2>4.1 Every Control Has a Defined Result</h2>
+<p>Each button, link, tab, table row and menu item does exactly one of the things in {{tab:results}}. A control that does nothing is a defect. A control that cannot be used yet is shown disabled with the reason in its label or beside it.</p>
+<p class="tcap" data-t="results">Possible results of a control</p>
+<script type="text/tbl" data-h="Result|Used for" data-w="28%|72%">
+Go to a screen | Opening a record, the next step of a wizard, a list, a printable document
+Confirmation dialog | Every action listed in Section 4.2
+Drawer | Reading a record without leaving a list: history, evidence, an email, import problems
+In-place change and toast | Saving a draft, marking notifications read, adding a row, accepting evidence
+Menu | Notifications, profile, row actions
+Download | A real file: signed credential (.json), report and export tables (.csv)
+</script>
+
+<h2>4.2 Confirmation Dialogs</h2>
+<p>The system asks for confirmation, with a summary of the effect, before: submit, endorse, return, record a decision, verify results, confirm completion (which issues credentials), correct, replace, revoke, confirm ACR, record a deposit, decide a transfer, redeem or release credit, change a setting, assign or remove a role, deactivate an account, import a file, withdraw an enrolment, give or withdraw consent, pay, and sign out with unsaved work (ir-confirm).</p>
+<script type="text/tbl" data-h="Part|Rule" data-w="24%|76%">
+Kicker | The record the dialog is about, for example the credential number
+Title | A question naming the action and the count, for example "Verify 28 results?"
+Body | What will happen, what will not happen, and who is told. Stage separation is stated where it matters: verifying results does not issue certificates; a deposit is not a transfer; refusing a transfer leaves the ACR and credentials unchanged.
+Fields | Any input the decision needs, such as a meeting reference, a reason or an effective date. Required fields are marked and checked.
+Footer | Cancel on the left; the action as a verb on the right
+Destructive actions | Revoke, deactivate, reject, release, withdraw and terminate use the danger style with a red top edge. The record name appears in the body, a reason is required for the audit trail, and focus starts on a safe control.
+Non-blocking warnings | The same dialog states the risk and asks the user to confirm, for example an unresolved non-blocking review comment.
+</script>
+<figure data-f="dlg"><img src="../../../../UIUX%20Spec/src/img/modal-confirm.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Confirmation dialog: verifying results states that it creates module achievements only and that completion is confirmed separately.</figcaption></figure>
+<figure data-f="danger"><img src="../../../../UIUX%20Spec/src/img/modal-danger.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Destructive dialog: revoking a credential needs the authorised body's decision reference and a reason; the record is never deleted.</figcaption></figure>
+
+<h2>4.3 Feedback</h2>
+<script type="text/tbl" data-h="Situation|Design" data-w="24%|76%">
+Action finished | A toast at the top right for 5 seconds: what happened and the next step, for example "Results verified. 27 module badges issued. Confirm completion next."
+Field error | The message under the field in plain language; entered data is kept; a toast counts the errors (ir-forms).
+System error | Inside the block that failed: what failed, a reference code such as ERR-…, and Retry. No technical detail (nfr-errors).
+Long job | Queued, running with a count ("issuing 14 of 27"), done; the user is notified when it finishes (nfr-queue). Used for issuing credentials, imports and large reports.
+Empty state | The frame and header stay; one sentence says why it is empty and offers the first action.
+Blocked action | The button is disabled and says why; the rule is shown beside the field that causes it.
+</script>
+<figure data-f="valid"><img src="../../../../UIUX%20Spec/src/img/validation.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Rule beside the field: a UMC whose modules total 110 hours cannot be submitted against a 120-hour parent course; the fix is offered in place.</figcaption></figure>
+
+<h2>4.4 Notifications and Profile</h2>
+<p>The bell in the top bar shows the unread count and opens a panel with the five latest notifications, "Mark all read" and "View all". The notifications page filters by read state, marks a notification read when it is opened and takes the user to the record. Decisions on the user's records, credential actions, consent requests and enrolment changes are mandatory notices that cannot be switched off (fr-ntprefs). Lecturers and deputy deans may choose a daily digest instead of single emails.</p>
+<p>The profile button opens a menu: My profile, Notification preferences, Sign-in and sessions, Help and guides, and Sign out (which asks for confirmation). The profile page has four tabs: Details (identity from SSO, read-only; language, phone and name on certificates editable), Notifications, Sign-in and sessions (MFA, active sessions, idle timeout) and My personal data (view and request a correction, sr-access).</p>
+<figure data-f="menus"><img src="../../../../UIUX%20Spec/src/img/menu-notif.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Notification panel opened from the bell.</figcaption></figure>
+<figure data-f="profile"><img src="../../../../UIUX%20Spec/src/img/profile.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Profile, notification preferences: required notices are marked and cannot be switched off.</figcaption></figure>
+
+<h2>4.5 Tables and Pagination</h2>
+<p>Every list that can exceed one page is paginated: rows per page (5, 10, 25 or 50; default 10), a count "1–10 of 28", "Page 1 of 3" and previous and next buttons. Long lists have a search box above the table and filters as selects in the same bar; counts follow the filter. A row that opens a record is clickable across the whole row. A bulk action is one filled button above the table that names the count. Rows that need the user's attention, such as missing marks, are listed first.</p>
+<figure data-f="pager"><img src="../../../../UIUX%20Spec/src/img/table-pager.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Table with search, filters and pagination (CODL users and roles), with the "Needs you" panel above it.</figcaption></figure>
+
+<h2>4.6 Session, Sign-in and Maintenance</h2>
+<p>Staff sign in with the UTeM Microsoft account and a second step (MFA); participants sign in without the second step. There is no MCMS password and no public sign-up; an account that is not recognised gets a page explaining how external learners register at Pejabat Pendaftar or HEPA (D-10, A-06). Two minutes before the 30-minute idle timeout a dialog offers "Stay signed in" or "Sign out now". Planned maintenance is announced in a banner 48 hours ahead.</p>
+
+<h2>4.7 Accessibility and Language</h2>
+<ul>
+  <li>Every control works by keyboard: links, tabs, table rows and menu items are focusable, and Enter or Space activates them. Escape closes dialogs, drawers and menus; focus stays inside an open dialog and returns to the control that opened it.</li>
+  <li>Every field has a visible label; placeholders never replace labels. Status is never shown by colour alone; every tag carries its word.</li>
+  <li>Text meets 4.5:1 contrast; the navy navigation uses white and light-blue text that meets it on #1e2a6e.</li>
+  <li>Every screen, notification and credential exists in BM and EN. The language switch changes the language in place and keeps what the user has typed (nfr-langswitch). Bilingual content fields mark a missing language.</li>
+  <li>The layout reflows to one column below 760 px; the side navigation becomes a scrollable strip, and tables scroll inside their frame (ir-responsive).</li>
+</ul>
+
+<h2>4.8 Status Vocabulary</h2>
+<p>Statuses use the exact words of PRD 8.3 and the SRS state diagrams. Each status has a short explanation where it first appears on a screen (nfr-plain). Negative statuses are checked before positive ones, so "Not approved" is never shown as an approval.</p>
+<p class="tcap" data-t="status">Status words by record type</p>
+<script type="text/tbl" data-h="Record|Statuses" data-w="24%|76%" data-cls="small">
+Proposal or version | Draft, Submitted, In review, Returned for amendment, Endorsed, Pending approval, Approved, Not approved, Superseded, Suspended, Terminated
+Offering | Not ready, Ready, Open, Full, Running, Ended, Cancelled
+Enrolment | Registered, Pending payment, Enrolled, Cancelled, Withdrawn, Completed, Not completed
+Module or result | Not started, In progress, Provisional, Verified, Held (integrity), Achieved
+Completion or credential | Complete, Issued, Corrected, Replaced, Revoked
+QV | Not applied, Preparing, Ready, Submitted, Quality-Verified, Expired, Suspended, Withdrawn
+ACR or deposit | ACR prepared, Verified, Consent given, Consent declined, Deposited, Correction needed
+Credit | Available, Provisionally redeemed, Redeemed, Expired
+Transfer | Submitted, Under evaluation, Approved, Partly approved, Not approved, More evidence needed
+Stackable plan | Suitable, Needs review, Not yet suitable
+CQI action | Open, In progress, Done (effectiveness pending), Closed
+</script>
+
+<h2>4.9 Formats</h2>
+<p>Dates are shown as DD/MM/YYYY and times as 24-hour Malaysia time (ir-dates, ir-time). Money is shown as "RM 450.00" (nfr-currency). Names are printed in full, including bin, binti, a/l and a/p (nfr-names). Setting keys and file names use the mono face.</p>
+
+<!-- ===================== 5. NAVIGATION ===================== -->
+<h1>5. Navigation</h1>
+<p>Each role has its own side navigation, grouped by the kind of work, with its home page first. Counts beside an item come from the live task data and fall as work is done. The profile menu, notifications, help and search are the same for every role; search results always stay inside the signed-in role's own screens, so a search never switches role.</p>
+<p class="tcap" data-t="nav">Side navigation by role</p>
+<script type="text/tbl" data-h="Role|Groups and items (home first)" data-w="20%|80%" data-cls="small">
+Student | <b>Learning:</b> My learning · Find a micro-credential · Registrations and payments. <b>Achievements:</b> Achievement record · Credentials. <b>Credit:</b> Credit ledger and ABC (count: consents waiting) · Credit transfer · Stackable plan
+Lecturer | <b>Teaching:</b> My micro-credentials · Proposals and versions · Reviews for colleagues · Cohorts and results. <b>Quality:</b> Quality review (CQI) · QV evidence. <b>Insight:</b> Reports
+Deputy dean | <b>Work:</b> Task queue · Proposals and approval · Offerings and readiness · Results and completion · Credentials · Quality, QV and review · ACR and ABC deposits · Credit transfer · Stackable pathways. <b>Insight:</b> Reports · Traceability
+CODL administrator | <b>Administration:</b> Users and roles · Reference data · Settings · Templates. <b>Data exchange:</b> UCreds exchange · Adapter status · Test mailbox. <b>Records:</b> Audit trail · Reports · Retention
+Industry expert | <b>Invitations:</b> My review invitations
+Public website | Home · Catalogue · Pathways to a degree · How it works · FAQ · Verify a credential · Sign in; footer: contact, Privacy notice (PDPA), Terms of use, Accessibility
+</script>
+<p>Links that lead from one role's screen into another role's work are not offered: for example, CODL is told which marks are missing but cannot open the lecturer's marks screen, and the deputy dean's traceability view does not open CODL's audit screen. Breadcrumbs show the path inside a role.</p>
+
+<!-- ===================== 6. SCREENS ===================== -->
+<h1>6. Screens</h1>
+<p>This section shows the key screens of each role and what they must do. The complete list of 114 screens with their routes is in Section 6.6. Every screen is in the prototype with sample data; the behaviour of each is described by the SRS requirements listed in <code>UIUX/v2/basis/srs-fr-inventory.md</code>.</p>
+
+<h2>6.1 Deputy Dean</h2>
+<p>The deputy dean lands on the task queue ({{fig:shell}}): every decision waiting for FTMK, grouped by area, with the system's checks and how long each has waited. Overdue items (14 days or more) are marked in words. Key screens:</p>
+<script type="text/tbl" data-h="Screen|Must do" data-w="26%|74%" data-cls="small">
+Proposal review and endorsement | Show system checks, reviews (Support, Amend, Do not support), comments with blocking flags; verify the category as a separate field; assign reviewers when Submitted; Endorse only when no blocking comment is open and the category is verified; Return for amendment with a reason; open the decision pack.
+Record Senate decision | Meeting reference and date (not before endorsement), decision (Approved, Approved with conditions, Not approved, Returned for amendment, Deferred), conditions, minutes extract; state that no credit, QV or transfer status is set; for a new version, the transition rule for enrolled learners.
+Confirm readiness | Appendix B checklist from the lecturer; accept uploaded evidence; Ready, Ready with conditions or Not ready; the offering opens only after the decision.
+Verify results | Learners with provisional results and their source; held results excluded until the case is closed; Verify creates module achievements only.
+Confirm completion | Pre-issue checks per learner; failures listed with reasons and not issued; progress of the issuing job; MCE gets a certificate and no ACR; SAMC without QV covering the cohort gets the credential without the QV claim.
+Credential | Revision history; Correct (new revision, same link), Replace (new credential, old shows Replaced) and Revoke (decision reference of the authorised body and a reason).
+ACR and deposits | Confirm ACR per batch; deposit queue of consented, verified ACR only; export for ABC; record the ABC reference, giving credit valid for 10 years.
+Credit transfer | Outcome-by-outcome comparison per line; Approve blocked for a line with no outcome match or no comparison; decisions Approved, Partly approved, Not approved, More evidence needed; redemption and release of credit.
+Stackable pathways and plans | Map micro-credentials to courses (MCE refused); individual plans with the 30% UTeM credit and residency checks, stating that 30% does not mean 70% transfers.
+Quality, QV and review | QV records with validity and history; QV result (no more than 3 years); quality reviews with action effectiveness; periodic review outcomes; suspension or termination with a transition plan.
+</script>
+<figure data-f="ddproposal"><img src="../../../../UIUX%20Spec/src/img/dd-proposal.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Proposal review and endorsement (BITM 2313 Database Systems).</figcaption></figure>
+<figure data-f="ddtransfer"><img src="../../../../UIUX%20Spec/src/img/dd-transfer.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Credit transfer: a line whose fourth outcome has no match cannot be approved.</figcaption></figure>
+
+<h2>6.2 Lecturer and Reviewer</h2>
+<script type="text/tbl" data-h="Screen|Must do" data-w="26%|74%" data-cls="small">
+My micro-credentials | "Needs you" list (draft to finish, results to send, quality review due, review invitation, readiness item, QV expiry) and all owned micro-credentials with stage.
+New proposal | Three questions decide UMC, SAMC or MCE and explain what the category means for the proposal.
+Proposal workspace | Appendix A sections with live checks; SLT must equal the parent course for a UMC; weightings must total 100%; recognition fields follow the category (an MCE has no credit); comments tab to answer reviewers; Submit only when checks pass.
+Change to an approved version | Minor or material; a material change becomes a new version submitted for review while learners stay on their version.
+Review a colleague's proposal | Conflict of interest first, then the proposal; rate items; recommend Support, Amend or Do not support.
+Cohort results | Results from UCreds marked Provisional; missing marks listed first and required; integrity flag; Send for verification; the lecturer cannot verify their own entries.
+Readiness, quality review, QV evidence | Lecturer's readiness items with evidence upload; quality review with indicators and actions closed only after an effectiveness check; QV evidence checklist and "Ready to submit" gated by a completed cohort.
+</script>
+<figure data-f="lechome"><img src="../../../../UIUX%20Spec/src/img/lec-home.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Lecturer home: what needs Dr. Aina today, then her micro-credentials.</figcaption></figure>
+<figure data-f="lecreview"><img src="../../../../UIUX%20Spec/src/img/lec-review.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Colleague review: the proposal opens only after the conflict-of-interest declaration.</figcaption></figure>
+
+<h2>6.3 Student</h2>
+<p>Student screens are web screens in the same shell as staff, and reflow to a phone.</p>
+<script type="text/tbl" data-h="Screen|Must do" data-w="26%|74%" data-cls="small">
+My learning | In progress with module progress, waiting for verification or completion (worded from the cohort's real state), achieved, and actions for the student.
+Register | Four steps: eligibility (each rule shown with its result), acknowledgement of the recognition statement and PDPA notice (version and date recorded), dummy payment (failure and retry, never a double charge, capacity checked), confirmation with UCreds access and receipt.
+Registrations and payments | Status, receipt, withdraw before the deadline, cancel a pending payment.
+Achievement record and credentials | Achievement record labelled "Internal record, not an Academic Credit Record"; credentials with PDF certificate, signed credential, share link and revision history; Replaced and Revoked shown honestly.
+Credit ledger and ACR | One ledger with Available, Provisionally redeemed, Redeemed and Expired; consent to deposit with Give, Decline or Postpone; withdrawing consent asks for a reason.
+Credit transfer and plan | Apply with deposited, available credit only (MCE and used credit not selectable, with the reason); decision and reason shown; upload more evidence when asked; stackable plan from real records.
+</script>
+<figure data-f="sthome"><img src="../../../../UIUX%20Spec/src/img/st-home.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Student home (Amir Hakimi).</figcaption></figure>
+<figure data-f="stledger"><img src="../../../../UIUX%20Spec/src/img/st-ledger.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Credit ledger: one row per ACR with its stage and the honest note that deposit is storage, not transfer.</figcaption></figure>
+
+<h2>6.4 Public Website</h2>
+<p>The public site informs before it sells. The home page explains the three categories, features the next open offerings, explains how recognition works and links to verification. Offering pages follow the structure of the UCreds course pages: a facts block (institution, format, effort per week, dates, duration, cost, credit, places) and tabs for Overview, Syllabus, Assessment, Prerequisites, Recognition and FAQ, with an Enrol button. Credit is shown only when it is verified for the cohort's dates; the separate-stages notice states that completion, ACR, deposit and transfer are separate with no guarantee.</p>
+<figure data-f="pubhome"><img src="../../../../UIUX%20Spec/src/img/pub-home.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Public home page.</figcaption></figure>
+<figure data-f="pubverify"><img src="../../../../UIUX%20Spec/src/img/pub-verify.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Public verification: only name, credential, issuer, issue date and status, without signing in. Corrected, Replaced, Revoked and Not found each have their own result.</figcaption></figure>
+
+<h2>6.5 CODL Administrator</h2>
+<p>CODL lands on users and roles with a "Needs you" panel (failing adapter, templates missing a language, disposals waiting for the Registrar, imports with problems). Role assignment requires a scope, a reason and an effective date; a future date is scheduled; an administrator cannot change their own roles or remove the only deputy dean of a faculty. Settings changes need a reason and a future effective date and keep a history; the public verification fields can only be chosen from the five allowed fields. Templates cannot be published when the BM and EN placeholders differ or when the text makes an unsupported claim such as an automatic transfer. UCreds imports stage rows as Provisional and never create achievements. No CODL screen has an academic decision; where one might be expected, a note names who decides.</p>
+<figure data-f="codlsettings"><img src="../../../../UIUX%20Spec/src/img/codl-settings.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Settings with source and history; changes take effect from a stated date.</figcaption></figure>
+
+<!-- generated by UIUX/v2/tools/specdata.js from the approved prototype; do not edit by hand -->
+<h2>6.6 Screen Inventory</h2>
+<p>The 114 screens of the approved prototype, by role. The ID is used in tests and in the SDD; the route opens the screen in the prototype with sample data. Routes with a <code>:</code> take a record identifier.</p>
+<h3>Common and sign-in</h3>
+<p class="tcap" data-t="inv-cmn">Screens for Common and sign-in (10)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+CMN-01 | Personas | <code>#/</code>
+CMN-02 | Sign in | <code>#/signin</code>
+CMN-03 | Verify it is you | <code>#/signin/mfa</code>
+CMN-04 | Account not recognised | <code>#/signin/noaccount</code>
+CMN-05 | Test sign-in | <code>#/signin/stub</code>
+CMN-06 | My profile | <code>#/profile</code>
+CMN-07 | Notifications | <code>#/notifications</code>
+CMN-08 | Help | <code>#/help</code>
+CMN-09 | Search | <code>#/search</code>
+CMN-10 | Something went wrong | <code>#/error</code>
+</script>
+<h3>Public website</h3>
+<p class="tcap" data-t="inv-pub">Screens for Public website (11)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+PUB-01 | Micro-credentials at UTeM | <code>#/public/home</code>
+PUB-02 | Catalogue | <code>#/public/catalogue</code>
+PUB-03 | Offering | <code>#/public/offering/:id</code>
+PUB-04 | Pathways to a degree | <code>#/public/pathways</code>
+PUB-05 | How recognition works | <code>#/public/how</code>
+PUB-06 | FAQ | <code>#/public/faq</code>
+PUB-07 | Verify a credential | <code>#/public/verify</code>
+PUB-08 | Verification result | <code>#/public/verify/:code</code>
+PUB-09 | Privacy notice | <code>#/public/privacy</code>
+PUB-10 | Terms of use | <code>#/public/terms</code>
+PUB-11 | Accessibility statement | <code>#/public/accessibility</code>
+</script>
+<h3>Student (P8)</h3>
+<p class="tcap" data-t="inv-st">Screens for Student (P8) (14)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+ST-01 | My learning | <code>#/st/home</code>
+ST-02 | Find a micro-credential | <code>#/st/catalogue</code>
+ST-03 | Register | <code>#/st/register/:cohort</code>
+ST-04 | Registrations and payments | <code>#/st/enrolments</code>
+ST-05 | Registration | <code>#/st/enrolment/:id</code>
+ST-06 | Achievement record | <code>#/st/record</code>
+ST-07 | Credentials | <code>#/st/credentials</code>
+ST-08 | Credential | <code>#/st/credential/:id</code>
+ST-09 | Credit ledger and ABC | <code>#/st/ledger</code>
+ST-10 | Academic Credit Record | <code>#/st/acr/:id</code>
+ST-11 | Credit transfer | <code>#/st/transfer</code>
+ST-12 | New transfer application | <code>#/st/transfer/new</code>
+ST-13 | Transfer application | <code>#/st/transfer/:id</code>
+ST-14 | Stackable plan | <code>#/st/plan</code>
+</script>
+<h3>Lecturer (P1)</h3>
+<p class="tcap" data-t="inv-lec">Screens for Lecturer (P1) (18)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+LEC-01 | My micro-credentials | <code>#/lec/home</code>
+LEC-02 | Micro-credential | <code>#/lec/mc/:id</code>
+LEC-03 | Proposals and versions | <code>#/lec/proposals</code>
+LEC-04 | New proposal | <code>#/lec/new</code>
+LEC-05 | Proposal workspace | <code>#/lec/proposal/:id</code>
+LEC-06 | Request a change | <code>#/lec/change/:id</code>
+LEC-07 | Reviews for colleagues | <code>#/lec/reviews</code>
+LEC-08 | Review a proposal | <code>#/lec/review/:id</code>
+LEC-09 | Cohorts and results | <code>#/lec/cohorts</code>
+LEC-10 | Cohort results | <code>#/lec/cohort/:id</code>
+LEC-11 | Create an offering | <code>#/lec/offering/new</code>
+LEC-12 | Readiness checklist | <code>#/lec/readiness/:id</code>
+LEC-13 | Quality review (CQI) | <code>#/lec/cqi</code>
+LEC-14 | Quality review record | <code>#/lec/cqi/:id</code>
+LEC-15 | QV evidence | <code>#/lec/qv</code>
+LEC-16 | QV evidence | <code>#/lec/qv/:id</code>
+LEC-17 | Reports | <code>#/lec/reports</code>
+LEC-18 | Report | <code>#/lec/report/:id</code>
+</script>
+<h3>Industry expert (X2)</h3>
+<p class="tcap" data-t="inv-ext">Screens for Industry expert (X2) (2)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+EXT-01 | My review invitations | <code>#/ext/home</code>
+EXT-02 | Comment on a proposal | <code>#/ext/review/:id</code>
+</script>
+<h3>Deputy dean (P2)</h3>
+<p class="tcap" data-t="inv-dd">Screens for Deputy dean (P2) (29)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+DD-01 | Task queue | <code>#/dd/queue</code>
+DD-02 | Proposals and approval | <code>#/dd/proposals</code>
+DD-03 | Proposal review | <code>#/dd/proposal/:id</code>
+DD-04 | Record Senate decision | <code>#/dd/senate/:id</code>
+DD-05 | Decision pack | <code>#/dd/pack</code>
+DD-06 | Offerings and readiness | <code>#/dd/offerings</code>
+DD-07 | Confirm readiness | <code>#/dd/readiness/:id</code>
+DD-08 | Results and completion | <code>#/dd/results</code>
+DD-09 | Verify results | <code>#/dd/verify/:id</code>
+DD-10 | Confirm completion | <code>#/dd/completion/:id</code>
+DD-11 | Credentials | <code>#/dd/creds</code>
+DD-12 | Credential | <code>#/dd/cred/:id</code>
+DD-13 | Quality, QV and review | <code>#/dd/quality</code>
+DD-14 | QV record | <code>#/dd/qv/:id</code>
+DD-15 | Quality review | <code>#/dd/cqi/:id</code>
+DD-16 | Periodic review | <code>#/dd/review/:id</code>
+DD-17 | Suspension or termination | <code>#/dd/suspend/:id</code>
+DD-18 | ACR and ABC deposits | <code>#/dd/acr</code>
+DD-19 | Confirm ACR | <code>#/dd/acr/:id</code>
+DD-20 | Record ABC deposit | <code>#/dd/deposit/:id</code>
+DD-21 | Credit transfer | <code>#/dd/transfer</code>
+DD-22 | Transfer decision | <code>#/dd/transfer/:id</code>
+DD-23 | Stackable pathways | <code>#/dd/stack</code>
+DD-24 | Pathway mapping | <code>#/dd/pathway/:id</code>
+DD-25 | Individual stackable plan | <code>#/dd/plan/:id</code>
+DD-26 | Reports | <code>#/dd/reports</code>
+DD-27 | Report | <code>#/dd/report/:id</code>
+DD-28 | Traceability | <code>#/dd/trace</code>
+DD-29 | Trace a participant | <code>#/dd/trace/:who</code>
+</script>
+<h3>CODL system administrator (S1/P5)</h3>
+<p class="tcap" data-t="inv-codl">Screens for CODL system administrator (S1/P5) (13)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+CODL-01 | Users and roles | <code>#/codl/users</code>
+CODL-02 | User | <code>#/codl/user/:id</code>
+CODL-03 | Reference data | <code>#/codl/refdata</code>
+CODL-04 | Settings | <code>#/codl/settings</code>
+CODL-05 | Templates | <code>#/codl/templates</code>
+CODL-06 | Template | <code>#/codl/template/:id</code>
+CODL-07 | UCreds exchange | <code>#/codl/ucreds</code>
+CODL-08 | Adapter status | <code>#/codl/adapters</code>
+CODL-09 | Test mailbox | <code>#/codl/mailbox</code>
+CODL-10 | Audit trail | <code>#/codl/audit</code>
+CODL-11 | Reports | <code>#/codl/reports</code>
+CODL-12 | Report | <code>#/codl/report/:id</code>
+CODL-13 | Retention | <code>#/codl/retention</code>
+</script>
+<h3>Printable documents</h3>
+<p class="tcap" data-t="inv-doc">Screens for Printable documents (17)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+DOC-01 | Payment receipt | <code>#/doc/receipt/:id</code>
+DOC-02 | Enrolment confirmation | <code>#/doc/enrolment/:id</code>
+DOC-03 | Certificate | <code>#/doc/certificate/:id</code>
+DOC-04 | Digital credential | <code>#/doc/credential/:id</code>
+DOC-05 | Achievement record | <code>#/doc/record/:who</code>
+DOC-06 | Academic Credit Record | <code>#/doc/acr/:id</code>
+DOC-07 | Proposal print | <code>#/doc/proposal/:id</code>
+DOC-08 | Senate decision pack | <code>#/doc/pack/:id</code>
+DOC-09 | Report | <code>#/doc/report/:id</code>
+DOC-10 | ABC deposit export | <code>#/doc/abc/:id</code>
+DOC-11 | QV submission package | <code>#/doc/qvpack/:id</code>
+DOC-12 | Credit transfer decision letter | <code>#/doc/transfer/:id</code>
+DOC-13 | Suspension notice | <code>#/doc/suspend/:id</code>
+DOC-14 | Import validation report | <code>#/doc/import/:file</code>
+DOC-15 | UCreds enrolment export | <code>#/doc/export/:cohortId</code>
+DOC-16 | Audit trail export | <code>#/doc/audit</code>
+DOC-17 | Documents and PDFs | <code>#/doc/index</code>
+</script>
+
+<!-- ===================== 7. FLOWS ===================== -->
+<h1>7. User Flows</h1>
+<p>A flow is a process walked across screens and, often, across roles. Each flow of {{tab:flows}} is in the prototype's Flows page; starting one shows a step bar at the bottom of the screen that says what is happening and what to click next. Negative paths have flows of their own, for example a payment failure, a transfer line that cannot be approved, or a credential that was revoked.</p>
+
+<h2>7.1 End-to-End Journey</h2>
+<p>{{fig:e2e}} shows the journey of SRS use case A.5 as it runs in the prototype (flow FL-19). Each box is a separate decision by a separate role; the system issues credentials and generates the ACR only after the deputy dean's decision.</p>
+<figure data-f="e2e">
+<pre class="mermaid">
+flowchart TD
+  A["Public: find offering"] --> B["Student: register and pay"]
+  B --> C["CODL: import results from UCreds"]
+  C --> D["Lecturer: complete marks, send"]
+  D --> E["Deputy dean: verify results"]
+  E --> F["Deputy dean: confirm completion"]
+  F --> G["System: issue credentials"]
+  G --> H["Employer: verify credential"]
+  G --> I["Student: consent to deposit"]
+  I --> J["Deputy dean: record ABC deposit"]
+  J --> K["Student: apply for transfer"]
+  K --> L["Deputy dean: decide on outcomes"]
+  L --> M["Credit provisionally redeemed"]
+</pre>
+<figcaption>End-to-end journey (FL-19): one stage, one decision, one role.</figcaption></figure>
+
+<h2>7.2 Hand-offs Between Roles</h2>
+<p>When one role finishes a step, the next role sees it at once: a task appears in the deputy dean's queue, a notification reaches the person affected, and the record's status and history change. {{tab:handoffs}} lists the hand-offs the design guarantees; each is tested end to end in the prototype.</p>
+<p class="tcap" data-t="handoffs">Hand-offs between roles</p>
+<script type="text/tbl" data-h="From|Action|Lands with|Result seen" data-w="16%|30%|16%|38%" data-cls="small">
+Lecturer | Sends cohort results for verification | Deputy dean | Task "Verify results"; every learner's provisional result on the verify screen
+Lecturer | Sends the readiness checklist | Deputy dean | Task "Confirm readiness"; uploaded evidence ready to accept; after Ready the offering appears in the public catalogue
+Lecturer | Answers a review comment | Deputy dean | Comment shows as Answered and can be resolved; endorsement unblocks when no blocking comment is open
+Deputy dean | Confirms completion | Student | Credentials issued; enrolment Completed; notification
+Student | Gives consent to deposit | Deputy dean | Task "Record ABC deposit"; ACR in the deposit queue
+Deputy dean | Records the deposit | Student | Ledger shows the credit Available for 10 years
+Student | Applies for transfer | Deputy dean | Task "Decide credit transfer" with the evidence attached
+Deputy dean | Approves a transfer line | Student | Credit Provisionally redeemed; it can no longer be selected for another application
+Deputy dean | Asks for more evidence | Student | Upload form on the application; the upload reopens the deputy dean's task
+CODL | Imports UCreds results with problems | Lecturer | Notification naming the missing marks; rows needing marks listed first
+</script>
+
+<h2>7.3 Flow Catalogue</h2>
+
+<!-- generated by UIUX/v2/tools/specdata.js from the approved prototype; do not edit by hand -->
+<p class="tcap" data-t="flows">Walk-through flows in the prototype</p>
+<script type="text/tbl" data-h="ID|Flow|Actors|Steps" data-w="10%|56%|24%|10%" data-cls="small">
+FL-00 | <b>Tour the deputy dean task queue</b>. How the queue, tabs, search and pagination behave | Deputy dean | 2
+FL-01 | <b>Sign in with SSO and MFA, land on the task page</b>. UTeM Microsoft sign-in, second step, then the task queue | Any staff | 3
+FL-02 | <b>Propose a UMC, fix the SLT, submit</b>. Category wizard, a blocked draft at 110 h, the fix to 120 h, and submit | Lecturer | 5
+FL-03 | <b>Review a colleague's proposal</b>. Conflict of interest first, then rate, then recommend | Lecturer as reviewer | 4
+FL-04 | <b>Endorse a proposal, then record the Senate decision</b>. Endorse is blocked until the category is verified and the blocking comment is resolved | Deputy dean | 7
+FL-05 | <b>Create an offering and confirm readiness</b>. The cohort opens only after every Appendix B item is done and you confirm | Lecturer, deputy dean | 4
+FL-06 | <b>Find, register and pay</b>. Public offering page to a paid registration for Cloud Native Development 2027/1 | Student | 6
+FL-06b | <b>Payment failure and retry</b>. A declined card changes nothing; a second try works and charges once | Student | 3
+FL-07 | <b>Import UCreds results with a bad row</b>. Import results-CND-2026-2.csv with 2 problems; the lecturer enters the missing marks and submits for verification | CODL, lecturer, deputy dean | 3
+FL-08 | <b>Verify results, then confirm completion</b>. Two separate decisions: verifying gives module badges, confirming completion makes the system issue credentials | Deputy dean | 3
+FL-09 | <b>Share a credential and have it verified</b>. Share link, a genuine check, a revoked credential and a code that does not exist | Student, public | 4
+FL-10 | <b>Correct a credential name</b>. A correction makes a new revision; the original is kept and the public link shows Corrected | Deputy dean | 2
+FL-11 | <b>Consent to ABC deposit, confirm ACR, record deposit, see ledger</b>. Amir gives consent, Hakim finds the ACR in the deposit queue and records the deposit, and the ledger shows the credit | Student, deputy dean | 4
+FL-12 | <b>Apply for credit transfer; decide by outcome; provisionally redeemed; second use blocked</b>. Amir applies, Hakim approves, the credit is held, and a second case with an unmatched outcome is blocked | Student, deputy dean | 5
+FL-13 | <b>Stackable plan: 25% "Not yet suitable" and a suitable plan</b>. Two individual plans for BITZ, one below 30% UTeM credit and one that is suitable | Deputy dean | 4
+FL-14 | <b>QV evidence, gate, record QV result; expiry removes claims</b>. Evidence on the lecturer side, then the deputy dean builds the package, records the submission and the result | Lecturer, deputy dean | 4
+FL-15 | <b>Quality review: close an action only after the effectiveness check</b>. The lecturer view, then submit to the deputy dean | Lecturer, deputy dean | 4
+FL-16 | <b>Suspend an offering with a transition plan</b>. Periodic review leads to a suspension with a transition plan; earned credentials stay valid | Deputy dean | 4
+FL-17 | <b>Assign a scoped role and change a setting</b>. Give a role with scope, reason and date; change a setting with a reason; see its history and the audit trail | CODL administrator | 4
+FL-18 | <b>Trace a participant from approval to credit use; audit trail</b>. Follow Amir through every stage, then read the audit rows for the same records | Deputy dean | 3
+FL-19 | <b>End-to-end: Amir from catalogue to credit used in a degree</b>. SRS use case A.5 and PRD demo scenario: every recognition stage as its own decision | All roles | 17
+FL-20 | <b>Industry expert comments on a proposal</b>. Conflict of interest, then comment only | Industry expert | 3
+FL-21 | <b>Withdraw from an enrolment</b>. Withdraw with a reason; achieved modules stay on record | Student | 3
+FL-22 | <b>A visitor explores the public site</b>. From the home page to a filtered catalogue, an offering, how recognition works and pathways | Public visitor | 5
+FL-23 | <b>An employer verifies a credential</b>. Valid, corrected, revoked and not-found results | Tan Mei Ling, HR manager (public) | 7
+FL-24 | <b>Documents and PDFs</b>. Open the printable documents: receipt, certificate, Digital Credential, full report, ABC export. | All roles | 8
+</script>
+
+<!-- ===================== 8. DOCUMENTS AND CONTENT ===================== -->
+<h1>8. Printable Documents and Content</h1>
+
+<h2>8.1 Printable Documents</h2>
+<p>Every download, print or export in MCMS opens a document laid out on A4 pages, which the user can print or save as PDF. Where a machine-readable file is needed, the document also offers a real download. Each page has a header with the UTeM name, the document title, reference and date, and a footer with the reference, page number, generation time and "Generated by MCMS". Documents for participants are bilingual, with BM beneath EN (D-02). No identity number, email or marks appear on documents that leave UTeM.</p>
+<p class="tcap" data-t="docs">Printable documents</p>
+<script type="text/tbl" data-h="Document|Opened from|Content|File" data-w="20%|20%|46%|14%" data-cls="small">
+Payment receipt | Student registrations | Receipt number, payer, offering, fee breakdown, method, reference, total; "No payment received" when unpaid | PDF
+Enrolment confirmation | Student registrations | Access to UCreds, dates, withdrawal deadline, recognition statement, separate-stages notice | PDF
+Certificate | Student and deputy dean credential pages | Landscape, bilingual; holder, micro-credential, category, verified credit only, credential ID, verification code and link, QR, two signatures; Revoked band or revision line when relevant | PDF
+Digital Credential | Credential pages | Signed credential shaped on Open Badges 3.0 / W3C VC with a summary and proof | JSON, PDF
+Achievement record | Student, profile | Labelled "Internal record, not an Academic Credit Record"; enrolments, modules, badges, completions | PDF
+Academic Credit Record | Ledger, deposit screens | Credits, MQF level, completion, verifier, consent, ABC reference and expiry; storage, not transfer | PDF
+Proposal (Appendix A) | Lecturer workspace, deputy dean review | All Appendix A sections with SLT totals, weightings, alignment, version and status | PDF
+Senate decision pack | Deputy dean proposal review | Cover, summary, category verification, reviews, comment resolution, endorsement, space for the minute reference | PDF
+Report (10 kinds) | Reports | Cover, scope, period, filters, summary figures, tables that add up, method notes, page numbers | PDF, CSV
+ABC deposit export | ACR and deposits | Batch header, one row per ACR, totals, format note | PDF, CSV
+QV submission package | QV records | Cover, evidence index, cohort results, quality reviews, declaration | PDF
+Transfer decision letter | Transfer case | Outcome per line, credits approved, conditions, statement that refusal leaves ACR and credentials unchanged | PDF
+Suspension notice | Suspension | Notice to participants with the transition plan; earned credentials stay valid | PDF
+UCreds import report | UCreds exchange | File, row counts, rows staged as Provisional, rejected rows with reasons | PDF, CSV
+Enrolment export | UCreds exchange, lecturer cohort | Template version, columns, one row per enrolled learner | PDF, CSV
+Audit export | Audit trail | Entries with an integrity line | PDF, CSV
+</script>
+<figure data-f="cert"><img src="../../../../UIUX%20Spec/src/img/doc-certificate.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Certificate document with the print bar (sample PDFs of every document are in <code>UIUX/v2/samples</code>).</figcaption></figure>
+<figure data-f="report"><img src="../../../../UIUX%20Spec/src/img/doc-report.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Full report template (credentials issued), with PDF and CSV output.</figcaption></figure>
+
+<h2>8.2 Content and Copy</h2>
+<script type="text/tbl" data-h="Rule|Example" data-w="40%|60%">
+Plain, specific sentences with real figures | "Verifying issues module badges to 27 learners. Completion is confirmed separately."
+Sentence case; no exclamation marks; no emoji | "Record Senate decision", not "RECORD SENATE DECISION!"
+Never promise credit or transfer | "You may later apply to have it recognised; each transfer is decided case by case."
+Name the category as in the Glossary | Unbundled Micro-Credential (UMC), Stand-alone Micro-Credential (SAMC), Micro-Credential Eksekutif (MCE)
+No requirement codes in user text | Say the rule ("at least 1 completed cohort is required"), not its code
+Say why a control is disabled | "Submit · 1 check failing", "Withdraw: the deadline 30/11/2026 has passed"
+Status words exactly as in Section 4.8 | "Provisionally redeemed", not "Used"
+Both languages for every string | Missing BM or EN is marked on content fields and blocks template publishing
+</script>
+
+<!-- ===================== 9. TRACEABILITY AND VERIFICATION ===================== -->
+<h1>9. Traceability and Verification</h1>
+
+<h2>9.1 Requirements to Screens</h2>
+<p>{{tab:trace}} maps each SRS functional module to the screens that deliver it. The per-requirement detail (actor, action, confirmation, result and blocking checks) is kept in <code>UIUX/v2/basis/srs-fr-inventory.md</code>.</p>
+<p class="tcap" data-t="trace">SRS modules and the screens that deliver them</p>
+<script type="text/tbl" data-h="SRS section|Module|Screens" data-w="12%|36%|52%" data-cls="small">
+3.1 | Identity, roles and access | Sign-in, MFA, profile, CODL users and roles, settings, templates, reference data, adapter status
+3.2 | Category determination and proposal | Lecturer new proposal, proposal workspace, proposals and versions
+3.3 | Review, approval and versioning | Lecturer and expert review, deputy dean proposal review, Senate decision, decision pack, change to an approved version
+3.4 | Offering, catalogue and readiness | Lecturer create offering and readiness, deputy dean readiness, public catalogue and offering
+3.5 | Registration, enrolment and cohorts | Student register, registrations and payments, enrolment; lecturer cohorts
+3.6 | Learning platform connection | CODL UCreds exchange, import report, enrolment export
+3.7 | Assessment and achievement verification | Lecturer cohort results; deputy dean results and verify
+3.8 | Achievement Record | Student achievement record; deputy dean completion
+3.9 | Credential issuance and verification | Deputy dean completion and credentials; student credentials; public verify; certificate and credential documents
+3.10 | Quality Verification for SAMC | Lecturer QV evidence; deputy dean quality, QV record; QV package
+3.11 | ACR and ABC deposit | Student ledger and ACR consent; deputy dean ACR and deposit; ABC export
+3.12–3.13 | Credit transfer and single redemption | Student transfer; deputy dean transfer; transfer letter
+3.14 | Stackable degree pathway | Deputy dean pathways and plans; student plan; public pathways
+3.15 | Monitoring and CQI | Lecturer quality review; deputy dean quality review, periodic review, suspension
+3.16 | Records, audit trail and reporting | Reports, traceability, audit trail, retention, report documents
+3.17 | Notifications and integration hub | Notifications, preferences, adapter status, test mailbox
+</script>
+
+<h2>9.2 How the Design Was Verified</h2>
+<p>The prototype was checked in three ways before approval:</p>
+<ol>
+  <li><b>Automated screen checks.</b> Every screen draws without script errors and every link, dialog, drawer and action it contains exists (the 114 screens plus the prototype's two index pages, 51 dialogs and panels, 0 problems).</li>
+  <li><b>Hand-off test.</b> A scripted walk through the real screens checks the role hand-offs of Section 7.2 (14 checks, all passing).</li>
+  <li><b>Design review.</b> Three independent reviews compared every screen with the design basis and the SRS. They found 124 issues: 23 that broke a rule or blocked a flow, 70 missing states or confusing behaviours, and 31 polish items. All rule and flow issues were fixed.</li>
+</ol>
+
+<h2>9.3 Corrections to the First Design</h2>
+<p>The first design (v1, Figma) was corrected against the SRS before the prototype was built. The main corrections, kept in the design rules, are:</p>
+<script type="text/tbl" data-h="First design|Corrected rule" data-w="44%|56%" data-cls="small">
+Verifying results issued credentials | Verify results gives module achievements; confirming completion is a separate step that triggers issue (D-15)
+Public pages claimed SAMC credit and QV beyond their validity | Credit and QV shown only while verified and valid for the cohort dates (BR-14, BR-23)
+The deputy dean could revoke alone; "superseded" wording | Revoke needs the authorised body's decision reference; statuses Corrected, Replaced, Revoked
+Review labels "Ready / Not ready" | Support, Amend, Do not support; conflict of interest declared first
+Endorse allowed with open comments | Endorse blocked by open blocking comments
+Dates and money in mixed formats | DD/MM/YYYY and RM 0.00
+Public verification showed credit | Minimum fields: name, credential, issuer, date, status
+Transfer could approve a line with no outcome match | Approve disabled for that line, with the reason (BR-30)
+Phone-first student screens | Web first, reflowing to a phone
+Neutral side navigation | Navy side navigation (owner's decision)
+</script>
+
+<!-- ===================== 10. OPEN ITEMS ===================== -->
+<h1>10. Assumptions, Open Items and Prototype Limits</h1>
+
+<h2>10.1 Design Assumptions</h2>
+<script type="text/tbl" data-h="ID|Assumption" data-w="12%|88%">
+UA-01 | The "advisor" of a stackable plan (PRD US-48) is the deputy dean of the degree's faculty.
+UA-02 | A lecturer's scope is their own micro-credentials plus the reviews they are invited to.
+UA-03 | DESIGN.md (Carbon with uLearn Navy) is accepted as the UTeM corporate identity for MCMS (ir-identity).
+UA-04 | Participants sign in without MFA; every staff role that approves, verifies, issues, deposits or administers uses MFA.
+UA-05 | The withdrawal deadline is 20 days before the cohort ends until the fee and refund rules are set.
+</script>
+
+<h2>10.2 Open Items Carried into Design</h2>
+<script type="text/tbl" data-h="Item|Design treatment until it closes" data-w="18%|82%">
+OI-07 Retention periods | Retention categories shown with "TBD"; disposal requests wait for the Registrar.
+OI-09 Transfer limits | Transfer case shows the limit check as "not configured yet; no limit is applied".
+OI-11 ABC file format | ABC export marked "format not final"; columns shown can change.
+OI-12 Fees and refunds | Receipts and withdrawals say refund rules are not decided yet.
+OI-13 Completion window | Setting shown as TBD; no window reminder is sent.
+</script>
+
+<h2>10.3 Prototype Limits</h2>
+<ul>
+  <li>The prototype runs in a browser with sample data kept for the browser tab; "Reset data" restores the starting state. It has no server, accounts or real integrations.</li>
+  <li>Screens show English text; the language switch works and is recorded, but BM strings are not written yet.</li>
+  <li>The QR code on certificates is a drawn placeholder; signatures and hashes are test values.</li>
+  <li>Excel export is marked Release 2; CSV and PDF are available.</li>
+  <li>Screens were checked automatically at desktop width; the phone layout follows the responsive rules but has not been reviewed screen by screen.</li>
+  <li>One sample learner appears in two Cloud Native Development cohorts; it does not affect any flow.</li>
+</ul>
+
+<!-- ===================== APPENDIX A ===================== -->
+<h1>Appendix A. Using the Prototype</h1>
+<p>The prototype is the living part of this specification. It runs from the project folder without installation:</p>
+<script type="text/tbl" data-h="Task|How" data-w="30%|70%">
+Start it | Run <code>py UIUX/v2/tools/serve.py 8731</code> and open http://localhost:8731
+Choose a person | The Personas page opens first: student, lecturer, deputy dean, CODL, industry expert, public visitor, or the real sign-in screens
+Walk a process | Flows (bottom left) lists the 26 flows; Start shows a step bar with what to click next
+See what is clickable | Hotspots, or the H key, outlines every clickable element
+Start again | Reset data restores the sample records
+Open a document | Any download or print button, or the document index at <code>#/doc/index</code>
+Check it | <code>node UIUX/v2/tools/check.js</code> (screens and links), <code>clickcheck.js</code> (dialogs), <code>scenario.js</code> (hand-offs), <code>pdfs.js</code> (sample PDFs)
+</script>
+<figure data-f="personas"><img src="../../../../UIUX%20Spec/src/img/personas.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Prototype start page: choose a persona.</figcaption></figure>
+<figure data-f="flowbar"><img src="../../../../UIUX%20Spec/src/img/flowbar.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>A flow in progress: the step bar explains the step and offers Back, Next step and Exit.</figcaption></figure>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+(async () => {
+  const problems = window.__problems = [];
+  const docTitle = document.querySelector('.doc-title');
+  if (docTitle) document.title = docTitle.textContent.trim() + ' - UTeM MCMS';
+  const ids = {};
+  const counters = {};
+  const pad = n => String(n).padStart(2, '0');
+  const kw = s => s.replace(/\b(SHALL NOT|SHALL|SHOULD NOT|SHOULD|MAY)\b/g, '<b>$1</b>');
+
+  // 1. requirement tables: lines "key | text | source"
+  document.querySelectorAll('script[type="text/req"]').forEach(s => {
+    const pre = s.dataset.p;
+    const t = document.createElement('table');
+    t.className = 'req';
+    const extra = s.dataset.x; // optional fourth column, e.g. "Enforced by"
+    t.innerHTML = `<thead><tr><th class="c-id">ID</th><th>${s.dataset.h || 'Requirement'}</th><th class="c-src">Source</th>${extra ? `<th class="c-x">${extra}</th>` : ''}</tr></thead>`;
+    const tb = document.createElement('tbody');
+    s.textContent.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).forEach(l => {
+      const parts = l.split('|').map(x => x.trim());
+      if (parts.length < 2) { problems.push('bad req line: ' + l); return; }
+      const [k, txt, src = '', x = ''] = parts;
+      counters[pre] = (counters[pre] || 0) + 1;
+      const id = `${pre}-${pad(counters[pre])}`;
+      if (ids[k]) problems.push('duplicate key ' + k);
+      ids[k] = id;
+      const tr = document.createElement('tr');
+      tr.id = k;
+      tr.innerHTML = `<td class="c-id">${id}</td><td>${kw(txt)}</td><td class="c-src">${src}</td>${extra ? `<td class="c-x">${x}</td>` : ''}`;
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    s.replaceWith(t);
+  });
+
+  // 2. plain tables: data-h="A|B|C", rows "a | b | c"
+  document.querySelectorAll('script[type="text/tbl"]').forEach(s => {
+    const t = document.createElement('table');
+    if (s.dataset.cls) t.className = s.dataset.cls;
+    const heads = s.dataset.h.split('|');
+    const widths = (s.dataset.w || '').split('|');
+    t.innerHTML = '<thead><tr>' + heads.map((h, i) => `<th${widths[i] ? ` style="width:${widths[i]}"` : ''}>${h}</th>`).join('') + '</tr></thead>';
+    const tb = document.createElement('tbody');
+    s.textContent.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).forEach(l => {
+      const cells = l.split('|').map(x => x.trim());
+      tb.insertAdjacentHTML('beforeend', '<tr>' + cells.map(c => `<td>${kw(c)}</td>`).join('') + '</tr>');
+    });
+    t.appendChild(tb);
+    s.replaceWith(t);
+  });
+
+  // 3. figure and table captions
+  let fig = 0, tab = 0;
+  document.querySelectorAll('figure[data-f], .tcap[data-t]').forEach(el => {
+    if (el.tagName === 'FIGURE') {
+      fig++; ids['fig:' + el.dataset.f] = 'Figure ' + fig;
+      const c = el.querySelector('figcaption');
+      c.innerHTML = `<b>Figure ${fig}:</b> ` + c.innerHTML;
+    } else {
+      tab++; ids['tab:' + el.dataset.t] = 'Table ' + tab;
+      el.innerHTML = `<b>Table ${tab}:</b> ` + el.innerHTML;
+    }
+  });
+
+  // 4. resolve {{key}} placeholders in text nodes
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) {
+    const n = walker.currentNode;
+    if (n.parentNode.nodeName !== 'SCRIPT' && n.nodeValue.includes('{{')) nodes.push(n);
+  }
+  nodes.forEach(n => {
+    n.nodeValue = n.nodeValue.replace(/\{\{([a-z0-9:-]+)\}\}/g, (m, k) => {
+      if (ids[k]) return ids[k];
+      const ext = (window.__EXT_IDS || {})[k]; // IDs published by another document (e.g. SRS keys cited in the PRD)
+      if (ext) return ext;
+      problems.push('unresolved ' + k);
+      return '??' + k;
+    });
+  });
+
+  // 5. table of contents
+  const toc = document.getElementById('toc');
+  const map = window.__TOC || {};
+  document.querySelectorAll('main h1:not(.notoc), main h2, main h3').forEach(h => {
+    if (h.tagName === 'H3' && !/^\d/.test(h.textContent.trim())) return; // unnumbered sub-headings stay out of the TOC
+    h.setAttribute('data-toc', '');
+    const lvl = h.tagName[1];
+    const text = h.textContent.trim();
+    toc.insertAdjacentHTML('beforeend',
+      `<div class="toc-row toc-${lvl}"><span class="t">${text}</span><span class="dots"></span><span class="pg">${map[text] || ''}</span></div>`);
+  });
+
+  // 6. diagrams
+  try {
+    mermaid.initialize({
+      startOnLoad: false, securityLevel: 'loose', theme: 'base',
+      themeVariables: {
+        fontFamily: 'Noto Sans, Arial, sans-serif', fontSize: '13px',
+        primaryColor: '#e7f0f8', primaryBorderColor: '#3f6fa6', primaryTextColor: '#13263a',
+        secondaryColor: '#fdf1dc', tertiaryColor: '#f4f6f8', lineColor: '#4b5563',
+        noteBkgColor: '#fff8e1', noteBorderColor: '#c9a227', actorBkg: '#e7f0f8', actorBorder: '#3f6fa6'
+      },
+      flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true, padding: 10 },
+      sequence: { useMaxWidth: true, mirrorActors: false, wrap: true },
+      state: { useMaxWidth: true },
+      er: { useMaxWidth: true }
+    });
+    await document.fonts.ready;
+    await mermaid.run({ querySelector: 'pre.mermaid' });
+  } catch (e) { problems.push('mermaid: ' + e.message); }
+  document.querySelectorAll('pre.mermaid').forEach(p => { if (!p.querySelector('svg')) problems.push('diagram not rendered: ' + p.textContent.slice(0, 60)); });
+  document.body.dataset.done = '1';
+})();
+</script>
+</body>
+</html>

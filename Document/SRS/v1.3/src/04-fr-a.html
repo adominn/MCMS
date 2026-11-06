@@ -1,0 +1,322 @@
+<!-- ===================== 3. FUNCTIONAL REQUIREMENTS (A) ===================== -->
+<h1>3. System Features and Functional Requirements</h1>
+<p>This section details the functional requirements of MCMS, organised by system feature in the order of the micro-credential life cycle. Each subsection begins with a short description of the feature and, where it helps, a diagram, followed by a requirement table. Each requirement has a unique ID (FR-XX) for traceability. The business rules that these requirements enforce are listed with their own IDs in Section 4.</p>
+
+<!-- ============ 3.1 ============ -->
+<h2>3.1 Identity, Roles and Access (M1)</h2>
+<p>Staff and participants sign in with their Microsoft education account through UTeM single sign-on; MCMS keeps no passwords of its own in production (D-10). Access is controlled by role and by scope: a person sees and acts only on the PTj and micro-credentials assigned to them. Approving bodies and role holders are settings, so a change in the University's committees does not need a code change (D-11, D-12).</p>
+
+<h3>3.1.1 Sign-in and Account Recognition</h3>
+<script type="text/req" data-p="FR">
+fr-sso | The system SHALL authenticate staff and participants through UTeM single sign-on using their Microsoft education account. The protocol is assumed to be OpenID Connect (TBD, OI-03). | D-10
+fr-nosignup | The system SHALL NOT offer open public self-registration. A local account SHALL be created only on a person's first successful SSO sign-in or by an import of applicants registered by Pejabat Pendaftar or HEPA. | D-10, A-06
+fr-firstlogin | On first sign-in the system SHALL create a local user profile from the SSO claims (full name, email, staff or matric number where present) and SHALL assign the Participant role by default. | D-10
+fr-applicant | The system SHALL recognise outside applicants registered by Pejabat Pendaftar or HEPA through a configurable account attribute or an imported applicant list (TBD, OI-03). | A-06
+fr-devidp | In development and test environments the system SHALL provide a stub identity provider that lets testers sign in as any configured test user and role without the real SSO tenant. The stub SHALL be impossible to enable in production. | D-14
+fr-session | The system SHALL end an idle session after <code>auth.idle_timeout_minutes</code> and SHALL provide a sign-out action that ends the local session. |
+fr-profile | A user SHALL be able to view their profile and edit only non-authoritative fields (preferred language, notification preferences, contact phone). Name and identifiers SHALL come only from the authoritative source. | G 18.11
+fr-signinguide | The sign-in screen SHALL provide explicit institutional format guidance for UTeM Office 365 credentials, distinguishing staff (<code>UserId@utem.edu.my</code>) and student (<code>MatricNo@student.utem.edu.my</code>) account patterns, with vertically centered presentation and test persona access isolated to non-production environments. | D-44
+fr-lang | Each user SHALL be able to choose Bahasa Melayu or English as interface language at any time; the choice SHALL be remembered across sessions. | D-02
+fr-idmerge | The system SHOULD let the System Administrator merge two local accounts that belong to the same person, keeping every linked record and writing the merge to the audit trail. |
+</script>
+
+<h3>3.1.2 Roles, Scopes and Separation of Duties</h3>
+<script type="text/req" data-p="FR">
+fr-rbac | The system SHALL control access by role-based access control using the users of Section 2.5 (P1, P2, P3, P5, P8, X1–X3, S1). Permissions SHALL be checked on the server for every action, not only hidden in the interface. | G 15–16, App H
+fr-multirole | A user SHALL be able to hold more than one role at the same time, each with its own scope. | App H2
+fr-scope | Every staff role assignment SHALL carry a scope: the whole University, one or more PTj, or one or more specific micro-credentials. A user SHALL see and act only on records inside their scope. | G 15.2.2
+fr-roleassign | Only the System Administrator (S1) SHALL assign or revoke roles. Each change SHALL record the role, scope, reason, effective date and the person making the change in the audit trail. | D-20
+fr-sod | The system SHALL prevent the same person from both submitting and deciding the same item. A lecturer SHALL NOT review or approve their own proposal, and the person who enters a result SHALL NOT be its only verifier. | G 15.1
+fr-adminlimits | The System Administrator role SHALL NOT include permission to approve academic matters, verify results, issue credentials, prepare ACR or decide credit transfer. | G 15.2.3
+fr-approverbody | The approving body for each decision type (approval to offer, material change, transfer rules, individual transfer case, stackable mapping, suspension) SHALL be a setting that maps the decision type to a role. Changing it SHALL NOT need a code change. | D-11, A-01, OI-06
+fr-coi | A reviewer (X1) SHALL declare whether they have a conflict of interest before opening a review. A declared conflict SHALL remove the reviewer from that item and notify the person who assigned them. | G 16.6
+fr-sme | An industry expert or SME (X2) SHALL be able to read the proposal and add comments on competencies and relevance only; X2 SHALL have no decision rights. | G 16.7
+fr-delegate | An approver SHOULD be able to delegate their approval role to another eligible user for a set period. The delegation SHALL be shown on every decision taken under it. |
+</script>
+
+<h3>3.1.3 System Administration and Settings</h3>
+<p>Thresholds from the Guide may be revised by UTeM or MQA, so they are kept as settings (D-16). {{tab:settings}} lists the settings that Release 1 must provide, with their default values.</p>
+<p class="tcap" data-t="settings">Configurable settings and default values</p>
+<script type="text/tbl" data-h="Setting key|Meaning|Default|Source" data-w="30%|42%|13%|15%" data-cls="small">
+<code>slt.min_hours_samc</code> | Minimum SLT for a SAMC | 40 hours | G 6.3.2, BR-01
+<code>slt.min_hours_umc_whole</code> | Minimum SLT for a whole UMC (or 1 credit) | 40 hours | G 6.3.1, BR-01
+<code>slt.min_hours_module_credit_model</code> | Minimum SLT per module under the credit-based unbundling model | 40 hours | G 6.3.1.1
+<code>credit.slt_hours_per_credit</code> | Notional learning hours per credit | 40 hours | MQF, D-27
+<code>qv.max_validity_years</code> | Maximum continuous validity of QV | 3 years | G 11.2.2, BR-02
+<code>qv.min_completed_cohorts</code> | Completed cohorts needed before QV submission | 1 | G 11.2.1, BR-03
+<code>credit.abc_validity_years</code> | Validity of credit in ABC from deposit date | 10 years | G 12.8, BR-04
+<code>stackable.min_home_credit_percent</code> | Minimum share of graduating credit earned at UTeM | 30% | G 14.5.1, BR-05
+<code>stackable.residency_semesters</code> | Residency for conventional programmes | 1 semester | G 14.5.3, BR-06
+<code>alerts.qv_expiry_days</code> | Days before QV expiry at which alerts are sent | 180, 90, 30 | D-16
+<code>alerts.credit_expiry_days</code> | Days before credit expiry at which the participant is alerted | 365, 90 | D-16
+<code>alerts.decision_overdue_days</code> | Days after which a pending review or decision is reminded | 14 |
+<code>umc.completion_window_months</code> | Default period to complete all modules of a modular UMC; an offering may set its own period | TBD (no value until OI-13 is answered) | G 7.4 (OI-13)
+<code>auth.idle_timeout_minutes</code> | Idle session timeout | 30 minutes |
+<code>retention.*</code> | Retention period per record category. The Release 1 prototype sets 2 years for the notification log, the report run log and the integration call log (<code>retention.notifications_years</code>, <code>retention.report_runs_years</code>, <code>retention.integration_years</code>); academic records stay TBD | TBD | G 18.12 (A-08, OI-07)
+<code>verification.public_fields</code> | Fields shown on the public verification page | Name, credential, issuer, date, status | App E6
+<code>approval.route.*</code> | Approving role per decision type: endorsement, senate, transfer, stackable, suspension, disposal | See 3.1.2; deputy dean in Release 1 | D-11
+<code>qv.provider_registered</code> | Whether UTeM is registered and authorised to offer the programme, checked before a SAMC can be ready to submit for QV | 1 (yes) | {{fr-qveligible}}
+<code>quality.target_participation_percent</code>, <code>quality.target_completion_percent</code>, <code>quality.target_pass_percent</code>, <code>quality.target_issuance_percent</code> | Targets that the cohort indicators of Appendix C2 are compared with | 80%, 70%, 70%, 95% | App C2
+<code>review.interval_months</code> | Months between the periodic reviews of a micro-credential | 24 months | G 17.9, {{fr-prschedule}}
+<code>review.remind_days</code> | Days before a periodic review at which the lecturer and PTj are reminded | 30 days | {{fr-prschedule}}
+<code>demo.clock_offset_days</code> | Days the demo clock is ahead of the real date; exists only in a test environment and is refused in production | 0 | PRD 7.2, {{fr-devidp}}
+</script>
+<script type="text/req" data-p="FR">
+fr-settings | The system SHALL keep every value of {{tab:settings}} in a settings store that S1 can edit through the interface. No business rule SHALL read a threshold from program code. | D-16
+fr-settinghist | Each settings change SHALL record the old value, new value, editor, reason and effective date. A decision SHALL be evaluated with the value that was in force on the date of the decision. | D-16, D-20
+fr-templates | S1 SHALL be able to manage, in both languages, the templates for notifications, certificates, Digital Credential display and recognition statements. Template changes SHALL be versioned. | D-02
+fr-userlist | S1 SHALL be able to search, view, deactivate and reactivate user accounts. Deactivation SHALL NOT delete or alter any record linked to the user. | G 18.1
+fr-refdata | S1 SHALL maintain reference data for PTj, academic programmes (code, name, MQF level, mode, accreditation status, total graduating credits) and parent courses (code, name, credit, SLT, CLOs), by form or by CSV import. | G 6.3.1, App G1
+fr-adapterstatus | S1 and P5 SHALL see the mode of each adapter (stub, manual or live), the time of its last run and its recent errors. | D-14
+</script>
+
+<!-- ============ 3.2 ============ -->
+<h2>3.2 Category Determination and Proposal (M2, M3)</h2>
+<p>A micro-credential starts as a proposal prepared by a lecturer in a guided workspace that follows Guide Appendix A. The first step is to determine the category, because the category decides the design rules, the approval route, the quality route and the possible recognition [G 6.5]. The decision logic is shown in {{fig:category}}.</p>
+
+<figure data-f="category">
+<pre class="mermaid">
+flowchart TD
+  Q1{"Is the offering unbundled from a<br/>credit course of an accredited<br/>UTeM programme?"}
+  Q1 -- "Yes" --> UMC["<b>UMC</b><br/>keeps parent course link<br/>total SLT = parent course SLT<br/>whole UMC ≥ 40 h or ≥ 1 credit"]
+  Q1 -- "No (own offering)" --> Q2{"Total SLT ≥ 40 hours?"}
+  Q2 -- "No" --> MCE["<b>MCE</b><br/>non-credit, internal QA<br/>no QV, no ABC, no transfer"]
+  Q2 -- "Yes" --> SAMC["<b>SAMC</b>"]
+  SAMC --> Q3{"Is a credit value or MQF<br/>level sought?"}
+  Q3 -- "Yes" --> QV["Quality Verification required<br/>before credit or MQF level<br/>may be stated (Section 3.10)"]
+  Q3 -- "No" --> NQ["SAMC without credit claim"]
+  UMC --> C["Category confirmed only through<br/>UTeM review and approval"]
+  MCE --> C
+  QV --> C
+  NQ --> C
+  MCE -. "credit later only by reclassifying<br/>and re-approving as SAMC" .-> SAMC
+</pre>
+<figcaption>Category determination, following Guide clause 6.5 and Figure 3 of the Guide.</figcaption>
+</figure>
+
+<h3>3.2.1 Category Determination</h3>
+<script type="text/req" data-p="FR">
+fr-catwizard | The system SHALL guide the proposer through category determination by asking for (a) the origin of the offering (unbundled from a credit course of an accredited UTeM programme, or an own offering), (b) the planned total SLT, and (c) whether a credit value or MQF level is sought. | G 6.5
+fr-catsuggest | From the answers the system SHALL propose a category according to {{fig:category}} and SHALL show the reason in plain words. | G 6.5
+fr-catumc | When the origin is a credit course of an accredited UTeM programme, the system SHALL allow only the category UMC. | G 6.5
+fr-catmce | When the offering is an own offering with total SLT below <code>slt.min_hours_samc</code>, the system SHALL allow only the category MCE and SHALL mark it non-credit. | G 6.3.3
+fr-catsamc | When the offering is an own offering with total SLT of at least <code>slt.min_hours_samc</code>, the system SHALL allow the category SAMC. If a credit value or MQF level is sought, the system SHALL record that QV is planned. | G 6.3.2
+fr-catconfirm | The category SHALL stay "proposed" until it is verified by the PTj and fixed by approval. Only a confirmed category SHALL drive offering, credential and credit rules. | G 6.5, App H3
+fr-umcnotsamc | The system SHALL NOT allow a module of a UMC to be proposed as a SAMC only because it can be completed separately. | G 6.2
+fr-mcereclass | An MCE SHALL become eligible for credit only through a new proposal version that reclassifies it as a SAMC, followed by approval and QV. The system SHALL offer this as a "Reclassify" action that starts such a version. | G 6.3.3
+</script>
+
+<h3>3.2.2 Proposal and Design Workspace</h3>
+<p>The workspace collects the content of Guide Appendix A (template sections A1–A10). Fields that do not apply are marked "Not applicable (TB)" rather than left empty.</p>
+<script type="text/req" data-p="FR">
+fr-propnew | A lecturer (P1) SHALL be able to create a proposal of type New, Revision or Re-offer for a PTj inside their scope. | App A1
+fr-propbasic | The proposal SHALL capture the basic information of Appendix A1: <ul><li>title in Bahasa Melayu and English;</li><li>owning PTj and lecturer (academic owner);</li><li>category (from 3.2.1) and proposal type;</li><li>field or discipline and target group;</li><li>delivery mode (face-to-face, online, blended, other) and delivery language;</li><li>proposed offering period.</li></ul> | App A1
+fr-propjust | The proposal SHALL capture the justification of Appendix A2: the need or problem addressed, the evidence of need (industry or employer analysis, participant feedback, programme need, professional standard, technology change, other) with attachments, and the added value compared with existing courses or training. | G 9.1, App A2
+fr-proplo | The proposer SHALL enter learning outcomes as separate items. Each outcome SHALL be linked to content, learning activities, assessment and SLT, as in the learning design table of Appendix A5. | G 8.2, App A5
+fr-propslt | The system SHALL calculate total SLT from the design rows, show the split between learning activities and assessment, and show the result against the category threshold. | G 8.3
+fr-propassess | The proposal SHALL capture the assessment design of Appendix A6: methods, weightings, pass or completion standard, identity and integrity mechanism, and feedback to participants. The system SHALL check that weightings total 100%. | G 8.6, App A6
+fr-propalign | The system SHALL show an alignment matrix of learning outcomes against assessment components and SHALL warn about any outcome without assessment and any assessment component not linked to an outcome. | G 8.2, 9.3
+fr-propcred | The proposal SHALL capture the credential design of Appendix A7: credential types (Digital Badge, Certificate, Digital Credential, other), achievement level (module or whole MC), QV status for a SAMC (not applied, will apply, Quality-Verified, not applicable) and the verification method. | App A7
+fr-propcredit | Credit value and MQF level SHALL be entered only as "proposed" values. They SHALL NOT appear in the catalogue or on any credential until confirmed by approval (UMC) or by a QV decision (SAMC). | G 10.5, App D2, D-17
+fr-propready | The proposal SHALL capture the readiness items of Appendix A8 (materials, platform, assessment and rubrics, facilitators, participant information, records and credential mechanism, accessibility) with status Yes / Not yet / Not applicable and evidence notes. | App A8
+fr-propattach | The proposer SHALL be able to attach supporting documents (PDF, Office documents, images) within a configurable size limit. |
+fr-propcollab | The proposer SHALL be able to add co-developers from the same PTj, who may edit the draft. Every edit SHALL be attributed to its author. | G 16.4
+fr-propautosave | The system SHALL save drafts automatically and SHALL let the proposer leave and resume a proposal. |
+fr-propip | The proposer SHALL confirm that third-party materials respect copyright and intellectual property rules, with a note on any licensed material. | G 9.3
+fr-propvalidate | Before submission the system SHALL check the proposal against the category rules of Section 4 and SHALL list blocking errors (which prevent submission) and warnings (which need a written response). | G 9.4
+fr-propprint | The system SHALL produce a printable proposal document in the layout of Appendix A for meetings and records. | App A
+</script>
+
+<h3>3.2.3 UMC Unbundling and Module Structure</h3>
+<p>A UMC must keep a clear academic link with its parent course: learning outcome mapping, SLT, content and assessment [G 6.3.1]. The unbundling model decides how modules and assessment are arranged [G 6.3.1.1].</p>
+<script type="text/req" data-p="FR">
+fr-umcparent | For a UMC the system SHALL record the parent programme, the parent course (code, name, credit, total SLT, CLOs), the accreditation status of the programme, the unbundling model and the number of modules. These SHALL be selected from reference data, not typed. | App A4
+fr-umcaccred | The system SHALL block submission of a UMC whose parent programme is not recorded as meeting the required accreditation status. | G 6.3.1, BR-09
+fr-umcmodel | The proposer SHALL choose one unbundling model: credit-based (each module at least <code>slt.min_hours_module_credit_model</code> with its own learning, activities and assessment), topic-based (modules by topic, SLT may differ), or separate learning and assessment (learning modules plus a separate integrated assessment module). | G 6.3.1.1
+fr-umcsltsum | The system SHALL block submission unless the total SLT of all modules equals the SLT of the parent course. | G 6.3.1, BR-08
+fr-umcwhole | The system SHALL block submission of a UMC whose whole structure has less than <code>slt.min_hours_umc_whole</code> or less than one credit. | G 6.3.1, BR-01
+fr-umccreditmodel | Under the credit-based model the system SHALL block submission if any module has less than <code>slt.min_hours_module_credit_model</code>. | G 6.3.1.1(a)
+fr-umctopicmodel | Under the topic-based model the system SHALL permit individual module SLT to vary without requiring the 40-hour threshold, SHALL require at least two modules, and SHALL enforce that total module SLT strictly matches parent course SLT. | G 6.3.1.1(b), Rajah 6
+fr-umcassessmodule | Under the separate learning and assessment model the system SHALL require at least one assessment module and SHALL check that the assessment structure as a whole covers every CLO of the parent course. | G 6.3.1.1(c), 8.6
+fr-umcclo | Each module learning outcome SHALL be mapped to one or more parent course CLOs. The system SHALL warn if any parent CLO is not covered by at least one module. | G 8.2, 9.4
+fr-umcmodcredit | Each module SHALL have a flag "separately recognisable credit unit" with default No. The system SHALL let the flag be set to Yes only by a recorded case-by-case decision of the role configured as the academic authority for this decision type; the System Administrator role SHALL NOT be able to set it. The whole UMC always carries the credit of its parent course. | G 13.5, 14.2.1, 15.2.3, D-18
+fr-umcparentchange | When the reference record of a parent course changes in learning outcomes, content, SLT, assessment or credit, the system SHOULD flag every linked UMC for review and notify its lecturer and PTj. | G 11.5, 14.8
+</script>
+
+<!-- ============ 3.3 ============ -->
+<h2>3.3 Review, Approval and Versioning (M4)</h2>
+<p>Every micro-credential must be reviewed and approved by the authority set by UTeM before it is offered [G 9.4–9.5]. Approval applies to one exact version of the structure. A material change creates a new version that needs review and re-approval before it takes effect [G 17.7–17.8]. {{fig:propstate}} shows the life of a proposal version.</p>
+
+<figure data-f="propstate">
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> Draft
+  Draft --> Submitted : P1 submits
+  Submitted --> InReview : PTj assigns reviewers
+  InReview --> Amend : amend requested
+  Amend --> Submitted : P1 resubmits
+  InReview --> Endorsed : PTj endorses and verifies category
+  InReview --> NotSupported : PTj does not support
+  Endorsed --> PendingApproval : sent to approving authority
+  PendingApproval --> Approved : approve
+  PendingApproval --> Amend : return
+  PendingApproval --> Rejected : reject
+  Approved --> Superseded : later version approved
+  Approved --> Suspended : authority suspends
+  Suspended --> Approved : authority lifts
+  Approved --> Terminated : authority terminates
+  Suspended --> Terminated
+  NotSupported --> [*]
+  Rejected --> [*]
+  state "Returned for amendment" as Amend
+  state "Not supported" as NotSupported
+  state "Pending approval" as PendingApproval
+  state "In review" as InReview
+  state "Endorsed by PTj" as Endorsed
+</pre>
+<figcaption>States of a micro-credential version from draft to approval, and later supersession, suspension or termination.</figcaption>
+</figure>
+
+<h3>3.3.1 Academic Review</h3>
+<script type="text/req" data-p="FR">
+fr-revassign | The PTj (P2) SHALL be able to assign one or more reviewers (X1) to a submitted proposal, with a due date and the scope of review. | G 9.4, 16.6
+fr-revform | The review form SHALL cover: suitability of learning outcomes; alignment of learning and assessment; adequacy of SLT; level and scope of content; delivery mode; module structure; credential information; and compliance with academic and QA requirements. For a UMC it SHALL also cover evidence of mapping to the parent course. Each item SHALL be rated Satisfactory or Needs amendment, with comments. | G 9.4
+fr-revrec | Each reviewer SHALL give a recommendation: Support, Amend or Do not support (Sokong / Pinda / Tidak Sokong). | App A9
+fr-revcomments | Each review comment SHALL be tracked with a status (open, answered, resolved) and the proposer's response. The proposal SHALL NOT go forward for approval while any comment marked as blocking is unresolved. | G 9.4
+fr-revcategory | The PTj SHALL explicitly verify the category when endorsing a proposal. The verified category SHALL be recorded separately from the proposed category. | App H3
+fr-revsummary | The system SHALL produce a review summary for the approving authority showing all recommendations, unresolved warnings and the proposer's responses. | G 9.5
+</script>
+
+<h3>3.3.2 Approval Workflow</h3>
+<script type="text/req" data-p="FR">
+fr-wfstages | The approval workflow SHALL record three stages, as in Appendix A9: academic or technical review, PTj or faculty endorsement, and approval by the UTeM authority configured for the decision type. | App A9, D-11
+fr-wfrecord | Each decision SHALL record the decision-maker, their role, the decision (support / amend / not support, or approve / return / reject), the date, comments and an external reference such as a Senate meeting number. | G 15.7
+fr-wfversion | An approval SHALL refer to one exact version of the micro-credential. Approval of one version SHALL NOT carry over to any other version. | G 9.5
+fr-wflock | Once a version is submitted its content SHALL be locked. Changes SHALL be possible only after it is returned for amendment, or through a new version. | G 9.5
+fr-wfnotcredit | Approval to offer SHALL NOT set, imply or display any QV status, ABC status, credit transfer status or stackable status. | G 15.4, D-15, BR-16
+fr-wfqueue | Approvers SHALL see a queue of items awaiting their decision with the age of each item. Items older than <code>alerts.decision_overdue_days</code> SHALL be reminded to the approver. |
+fr-wfbatch | The approving authority SHOULD be able to record decisions for several items from one meeting in a single action with one meeting reference. |
+fr-wfpack | The system SHALL produce a decision pack per item (proposal summary, review summary, readiness, category verification) printable for meetings. | G 9.5
+</script>
+
+<h3>3.3.3 Material Change and Version Control</h3>
+<script type="text/req" data-p="FR">
+fr-verhistory | Every micro-credential SHALL have a version history. Each version SHALL record its number, effective date, change summary, approval decision and the implications for participants currently enrolled. | G 17.8, 18.8
+fr-chgclassify | Every change request SHALL be classified as minor or material. The system SHALL classify a change as material automatically when it touches learning outcomes, SLT or credit, MQF level, core content, major assessment or pass standard, module structure, parent course link, QV status, a substantive delivery mode, the provider or partner, or the identity and integrity mechanism. | G 9.5, 11.2.3, 17.7, App A10
+fr-chgmaterial | A material change SHALL create a new version that goes through review and approval again. It SHALL NOT take effect before it is approved. | G 17.7, BR-18
+fr-chgminor | A minor change SHALL be recorded with a description and impact note, acknowledged by the PTj, and logged in the CQI record of the offering. | G 17.7, App H7
+fr-chgqv | For a Quality-Verified SAMC, a material change SHALL be flagged as affecting QV and SHALL create a QV re-verification task (Section 3.10). | G 11.2.3, 17.7
+fr-verkeep | A version referenced by any participant record SHALL never be deleted. | G 18.8, BR-39
+fr-verbind | Each enrolment SHALL be bound to the version under which the participant enrolled. When a new version takes effect, the PTj SHALL record the transition rule for current participants (finish on old version, move to new version, or equivalence). | G 10.3.2, 17.10
+fr-vernotify | When an approved change affects current participants, the system SHALL notify them of the change, the effective date and the transition rule. | G 10.3.2
+fr-vercompare | The system SHOULD show a side-by-side comparison of two versions with the changed fields highlighted. |
+</script>
+
+<!-- ============ 3.4 ============ -->
+<h2>3.4 Offering, Catalogue and Readiness (M5)</h2>
+<p>An approved version is offered as one or more cohorts. Before registration opens, the PTj confirms that materials, platform, assessment, facilitators, registration, records and certification are ready, using the checklist of Guide Appendix B [G 9.6]. Participants must receive honest, complete information before they enrol [G 10.3.1].</p>
+
+<h3>3.4.1 Offering and Readiness</h3>
+<script type="text/req" data-p="FR">
+fr-offcreate | P1 or P2 SHALL be able to create an offering (cohort) for an approved version with: cohort name, start and end dates, delivery mode, capacity, registration window, fee, facilitators, eligible participant groups and the learning platform course reference. | App B1
+fr-offapproved | The system SHALL NOT allow an offering to be created for a version that is not in state Approved. | G 9.6, BR-17
+fr-offreadiness | Each offering SHALL have a readiness checklist with the items of Appendix B2–B7 (transparency of information, materials and platform, assessment and integrity, participant and achievement records, completion and credential process, change notification), each with status Yes / Not yet / Not applicable and evidence notes. | App B
+fr-offconfirm | Readiness SHALL be confirmed by the lecturer, a PTj representative and, where relevant, support or system staff, each choosing Ready, Ready with conditions or Not ready, as in Appendix B8. | App B8
+fr-offopen | Registration SHALL NOT open until the PTj confirmation is Ready, or Ready with conditions where the conditions are recorded. | G 9.6
+fr-offrecheck | The checklist SHALL be repeated for every new cohort, pre-filled from the previous cohort. If the check reveals a material change, the offering SHALL be held until the change is approved. | App B, B8 note
+fr-offqv | For a SAMC that advertises Quality-Verified status, the system SHALL check that QV is valid until the end date of the cohort. If it is not, the offering SHALL NOT display a Quality-Verified claim, credit value or MQF level. | G 11.2.2, BR-23
+</script>
+
+<h3>3.4.2 Catalogue and Participant Transparency</h3>
+<script type="text/req" data-p="FR">
+fr-catpublic | The system SHALL provide a public catalogue, without login, of offerings that are open or upcoming. | G 9.6
+fr-catinfo | Each catalogue entry SHALL show at least: name, category, learning outcomes, content or modules, SLT, delivery mode, prerequisites, access period, assessment methods and standard, completion conditions, fees, learning support, the credential to be received, and, where applicable and valid, QV status, credit value and MQF level. | G 9.6, 10.3.1, App B2
+fr-catsearch | Users SHALL be able to search and filter the catalogue by category, PTj, field, delivery mode, language, start date and fee. |
+fr-catwording | Recognition statements in the catalogue SHALL be generated from the approved wording for the category and status (Section 3.9.2). Free-text descriptions SHALL be checked for forbidden claims, such as a promise that credit will transfer or that a number of micro-credentials leads to a degree. | App E5, G 14.9, BR-22
+fr-catstages | For an offering with credit potential, the catalogue entry SHALL show a standard explanation that MC completion, credential award, ACR preparation, ABC deposit and credit transfer approval are separate steps and that none guarantees admission, transfer or a qualification. | G 10.3.1, BR-26
+fr-catmodular | For a modular UMC, the catalogue entry SHALL show the module structure, how modules relate to the whole UMC, and whether staged completion is allowed. | G 9.6
+fr-catlang | The catalogue SHALL be available in Bahasa Melayu and English. | D-02
+</script>
+
+<!-- ============ 3.5 ============ -->
+<h2>3.5 Registration, Enrolment and Cohorts (M6)</h2>
+<p>Participants register for open offerings after reading the offering information. Fees are handled through the payment adapter; in Release 1 a dummy payment service records simulated payments (A-03). For a modular UMC, participants may complete modules in different periods, and each module status is kept separately [G 10.3, 12.2].</p>
+
+<figure data-f="enrolstate">
+<pre class="mermaid">
+stateDiagram-v2
+  direction LR
+  [*] --> Registered
+  Registered --> PendingPayment : fee applies
+  Registered --> Enrolled : no fee or waiver
+  PendingPayment --> Enrolled : payment confirmed
+  PendingPayment --> Cancelled : payment window ends
+  Enrolled --> Withdrawn : participant withdraws
+  Enrolled --> Completed : completion confirmed by PTj
+  Enrolled --> NotCompleted : cohort closes without completion
+  Enrolled --> Transferred : moved to a new version
+  state "Pending payment" as PendingPayment
+  state "Not completed" as NotCompleted
+  state "Transferred to new version" as Transferred
+</pre>
+<figcaption>States of an enrolment.</figcaption>
+</figure>
+
+<script type="text/req" data-p="FR">
+fr-regopen | A signed-in user SHALL be able to register for an offering whose registration window is open and whose capacity is not full. | G 10.3
+fr-regelig | The system SHALL check the eligibility rules of the offering (participant group, prerequisites) and SHALL explain why a user is not eligible. | G 10.3.1
+fr-regack | Before confirming registration the participant SHALL acknowledge the offering information, including the recognition statements and the explanation of separate stages. The acknowledged text version SHALL be stored with the enrolment. | G 10.3.1
+fr-regpdpa | At first registration the system SHALL show the personal data notice and record the participant's acknowledgement. | PDPA
+fr-regpay | Where a fee applies, the system SHALL request payment through the payment adapter. In Release 1 the adapter SHALL be a dummy service that records a simulated success or failure with a reference number. | D-14, A-03
+fr-regwaiver | P2 SHOULD be able to grant a fee waiver or sponsorship to a participant with a recorded reason. |
+fr-regstatus | Each enrolment SHALL have one of the states of {{fig:enrolstate}}. Every change of state SHALL be time-stamped and attributed. | G 10.3
+fr-regmodule | For a modular UMC that allows staged completion, the system SHALL record enrolment and completion status per module, with dates, even when modules are taken in different periods. | G 10.3, 12.2
+fr-regwithdraw | A participant SHALL be able to withdraw before the deadline set for the offering. Refunds are handled outside MCMS. |
+fr-regwaitlist | The system SHOULD keep a waiting list when an offering is full and offer released places in order. |
+fr-regbulk | P5 SHOULD be able to enrol a group of participants from a CSV file, for example a sponsored company group, with the same checks as individual registration. |
+fr-cohortlist | P1 and P2 SHALL be able to view, filter and export the participant list of a cohort. | App H5
+fr-regconfirm | The participant SHALL receive confirmation of registration, payment and enrolment, with access instructions for the learning platform. | G 10.2
+</script>
+
+<!-- ============ 3.6 ============ -->
+<h2>3.6 Learning Platform Connection (M7)</h2>
+<p>Learning takes place on UCreds, the pilot learning platform. MCMS exchanges enrolments, progress, module completion, results and badge data with UCreds through the learning platform adapter. Because the connection method is not yet known, Release 1 uses CSV files (D-13, A-04, OI-04). Imported data is never final: it lands as provisional data awaiting verification (Section 3.7).</p>
+
+<figure data-f="csvimport">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  participant P5 as CODL technical operator (P5)
+  participant M as MCMS
+  participant U as UCreds
+  participant P2 as PTj verifier (P2)
+  P5->>M: Export enrolment list for offering
+  M-->>P5: CSV in UCreds template
+  P5->>U: Load enrolments
+  Note over U: Learning and assessment take place on UCreds
+  P5->>U: Export results and badge data
+  P5->>M: Upload results CSV
+  M->>M: Validate file and every row
+  alt File-level error
+    M-->>P5: Reject whole file with error report
+  else Rows valid or partly valid
+    M-->>P5: Row report, valid rows staged as provisional
+  end
+  M->>P2: Task: verify staged results
+  P2->>M: Verify (or return) results
+  M->>M: Record verified achievements
+</pre>
+<figcaption>Release 1 exchange with UCreds through CSV files. Imported results become achievements only after PTj verification.</figcaption>
+</figure>
+
+<script type="text/req" data-p="FR">
+fr-lpadapter | All data exchange with UCreds SHALL pass through the learning platform adapter interface, so that another platform or a live connector can replace the CSV implementation without changing other modules. | D-06, D-13
+fr-lpexport | The system SHALL export the enrolment list of an offering in a published CSV template for loading into UCreds. | A-04
+fr-lpimport | The system SHALL import progress, module completion, assessment results and badge data from UCreds in published CSV templates. | A-04
+fr-lpvalidate | Every import SHALL be validated: file format and template version; each row matched to an enrolment, module and assessment component; score ranges; duplicates. A file-level error SHALL reject the whole file; row-level errors SHALL be listed in a downloadable report. |
+fr-lpstaged | Imported results SHALL be stored as provisional and SHALL NOT create achievements, badges or credentials until verified under Section 3.7. | G 10.4, BR-20
+fr-lpbadge | When UCreds issues module badges (A-05), the system SHALL import the badge identifier, link and date, match it to the verified module achievement, and flag any badge without a matching verified achievement. | A-05, G 8.7.1
+fr-lplog | Every export and import SHALL be logged with file name, file hash, row counts, result, user and time. Uploaded files SHALL be kept for the retention period. | G 18.2
+fr-lplive | The system SHOULD provide a live connector to UCreds (web service or Moodle interface) once the connection method is agreed. | OI-04
+fr-lpsync | The system MAY synchronise progress with the learning platform in near real time. |
+</script>

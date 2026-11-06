@@ -1,0 +1,110 @@
+<!-- ===================== SECTION 9: CROSS-ROLE RELATIONSHIPS ===================== -->
+<h1>9. Cross-Role Relationships & End-to-End Workflows</h1>
+
+<p>The strength of the MCMS architecture lies in its rigorous cross-role handoffs. No single persona operates in isolation; academic integrity, quality verification, and credit mobility depend on multi-stage workflows spanning multiple actors, distinct pages, and transactional state changes.</p>
+
+<!-- ---------------- 9.1 Multi-Stage Workflows ---------------- -->
+<h2>9.1 End-to-End Multi-Stage Workflow Maps</h2>
+
+<h3>Workflow 1: Curriculum Development, Review & Senate Approval</h3>
+<p><b>Participating Roles:</b> Lecturer (Author), Peer Reviewer / Industry Expert (Evaluator), Deputy Dean (Endorser & Senate Recorder), Senate (Supreme Authority).</p>
+
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Lecturer<br/>Proposal Workspace<br/>/proposals/{id}"] -->|"Submit Proposal"| B["Content Locked<br/>Status: submitted<br/>Task created for DD"]
+    B --> C["Deputy Dean<br/>Approvals Hub<br/>/approvals/{id}"]
+    C -->|"Assign Reviewers"| D["Reviewer<br/>Evaluation Form<br/>/reviews/{id}"]
+    D -->|"Declare COI & Submit Comments"| E["Reviews Completed<br/>Status: in_review"]
+    E --> C
+    C -->|"Endorse Proposal"| F["Senate Decision Pack<br/>/approvals/{id}/pack"]
+    F -->|"External Senate Meeting"| G["Senate Approves Proposal<br/>(D-11 Meeting Ref)"]
+    G --> H["Deputy Dean<br/>Senate Record Form<br/>/approvals/{id}/senate"]
+    H -->|"Submit Senate Ref & Date"| I["Version Status: approved<br/>Eligible for Cohorts"]
+</pre>
+<figcaption>Figure 9.1: Cross-Role Curriculum Approval & Senate Recording Lifecycle</figcaption>
+</figure>
+
+<h3>Workflow 2: Cohort Readiness, Enrolment & Delivery Handoff</h3>
+<p><b>Participating Roles:</b> Lecturer (Coordinator), Deputy Dean (Verifier), Prospective Student (Learner).</p>
+
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Lecturer<br/>Create Offering<br/>/offerings/new"] -->|"Save Cohort"| B["Status: draft<br/>Readiness: not_started"]
+    B --> C["Lecturer<br/>Readiness Checklist<br/>/offerings/{id}/readiness"]
+    C -->|"Submit Checklist Notes"| D["Readiness: submitted<br/>Task dispatched to DD"]
+    D --> E["Deputy Dean<br/>Readiness Confirmation<br/>/offerings/{id}/readiness"]
+    E -->|"Confirm Institutional Readiness"| F["Readiness: confirmed<br/>Offering Status: open"]
+    F --> G["Public Visitor<br/>Public Catalogue<br/>/public/catalogue"]
+    G -->|"Select Offering"| H["Student<br/>4-Step Wizard<br/>/register/{offering}"]
+    H -->|"Pay Fee"| I["Enrolment Status: enrolled<br/>Appears on Lecturer Roster<br/>/offerings/{id}/participants"]
+</pre>
+<figcaption>Figure 9.2: Cohort Readiness, Verification & Enrolment Workflow</figcaption>
+</figure>
+
+<h3>Workflow 3: Assessment, Completion Confirmation & Credential Issuance</h3>
+<p><b>Participating Roles:</b> Lecturer (Instructor), Deputy Dean (Academic Authority), Student (Graduate), Employer (Verifier).</p>
+
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Lecturer<br/>Marks Entry Grid<br/>/results/{offering}"] -->|"Submit Cohort Marks"| B["Grade Sheet Locked<br/>Status: pending_verification"]
+    B --> C["Deputy Dean<br/>Results Verification<br/>/results/{id}"]
+    C -->|"Verify Results"| D["Generate module_achievements & badges<br/>Visible in /my-results"]
+    D --> E["Completion Diagnostics Check<br/>Open Task if all criteria met"]
+    E --> F["Deputy Dean<br/>Completion Screen<br/>/completions/{id}"]
+    F -->|"Confirm Completion"| G["Enrolment Status: completed<br/>Fire CompletionConfirmed (EV-31)"]
+    G --> H["Automated Credential Listener<br/>Mints Digital Credential & Prepares ACR"]
+    H --> I["Student<br/>Credentials Wallet<br/>/my-credentials"]
+    I -->|"Share Verification URL"| J["Employer<br/>Public Verification<br/>/public/verify/{code}"]
+</pre>
+<figcaption>Figure 9.3: Results Verification, Completion & Credential Issuance Lifecycle</figcaption>
+</figure>
+
+<h3>Workflow 4: Academic Credit Banking (ACR), Consent & National ABC Deposit</h3>
+<p><b>Participating Roles:</b> System (ACR Generator), Student (Owner & Consenter), Deputy Dean (Depositor), National ABC Bank.</p>
+
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Credential Issued<br/>System prepares ACR"] --> B["Student notified<br/>Action Required"]
+    B --> C["Student<br/>ACR & Consent Review<br/>/my-credit/{id}"]
+    C -->|"Submit Legal Consent"| D["Record Consent (consents table)<br/>ACR Status: consented"]
+    D --> E["Deputy Dean<br/>ABC Deposits Queue<br/>/admin/creditbank"]
+    E -->|"Confirm ACR & Export CSV"| F["Generate Batch File (abc_batches)<br/>Upload to External ABC Portal"]
+    F -->|"Receive ABC Reference"| G["Deputy Dean<br/>Batch Detail Page<br/>/admin/creditbank/batches/{id}"]
+    G -->|"Record Deposit Reference"| H["Ledger Service updates Status: Available<br/>10-Year Expiry Clock Activated"]
+    H --> I["Student Ledger<br/>/my-credit<br/>Shows Available Credits"]
+</pre>
+<figcaption>Figure 9.4: Academic Credit Record (ACR) Consent & National ABC Deposit Lifecycle</figcaption>
+</figure>
+
+<h3>Workflow 5: Credit Transfer Application, Equivalence & Degree Admission</h3>
+<p><b>Participating Roles:</b> Student (Applicant), Deputy Dean of Receiving Faculty (Evaluator).</p>
+
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Student<br/>New Transfer Application<br/>/transfer/new"] -->|"Select Programme & Credits"| B["Ledger locks Credits: provisionally_redeemed<br/>Status: submitted"]
+    B --> C["Deputy Dean<br/>Transfer Evaluation Queue<br/>/transfers/{id}"]
+    C --> D["Step 1: Check ACR Validity"]
+    D --> E["Step 2: Map Outcome Equivalence Matrix<br/>Every CLO must match!"]
+    E --> F{"Approval Decision"}
+    F -->|"Approved"| G["POST /transfers/{id}/decide<br/>Credits Status: redeemed<br/>Applies toward Degree"]
+    F -->|"Rejected / More Evidence"| H["POST /transfers/{id}/decide<br/>Credits Status: Available<br/>Lock Released"]
+    G --> I["Deputy Dean<br/>Record Matriculation Admission<br/>POST /admissions"]
+    I --> J["Student tracks completion<br/>/my-plan"]
+</pre>
+<figcaption>Figure 9.5: Credit Transfer Application, Equivalence Assessment & Admission Flow</figcaption>
+</figure>
+
+<h2>9.2 Disconnected Workflows & Continuity Gaps</h2>
+<p>The audit identified specific points where user workflows experience friction, incomplete automation, or disconnected handoffs:</p>
+
+<ol>
+  <li><b>Quality Verification Re-Verification Task Handoff (FR-175):</b> When an approved SAMC undergoes a material change, the system successfully flags the version as requiring re-verification and logs an event. However, it does not automatically instantiate a new draft QV record in <code>qv_records</code>; the lecturer must manually create a new portfolio from scratch.</li>
+  <li><b>CQI Action to Change Request Bridge (EV-08):</b> In the CQI module (MD-14), if an approved improvement action requires a curriculum alteration, the system creates a generic task reminder for the lecturer rather than directly pre-populating a draft Change Request in <code>/my-mcs/{id}/change</code>.</li>
+  <li><b>Student Notice on Cohort Cancellation:</b> When a Deputy Dean cancels an offering (<code>POST /offerings/{id}/cancel</code>), database records and payments are updated correctly, but the participant cancellation email notification relies on an inline job rather than an asynchronous event queue.</li>
+  <li><b>Transfer Decision Letter PDF Generation (DOC-12):</b> While the credit transfer decision is recorded and viewable in the web interface (<code>/transfer/{id}</code>), the formal Senate Transfer Decision Letter template remains unimplemented as a downloadable document.</li>
+</ol>

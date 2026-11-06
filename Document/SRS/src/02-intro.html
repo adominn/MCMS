@@ -1,0 +1,103 @@
+<!-- ===================== 1. INTRODUCTION ===================== -->
+<h1>1. Introduction</h1>
+
+<h2>1.1 Purpose</h2>
+<p>This Software Requirements Specification (SRS) gives a complete description of the UTeM Micro-Credential Management System (MCMS). MCMS is a proposed system that manages the whole life of a UTeM micro-credential: proposal and approval, offering and enrolment, learning results and credentials, Academic Credit Record (ACR) and Academic Bank of Credit (ABC) tracking, credit transfer, stackable degree pathways, and monitoring with Continuous Quality Improvement (CQI).</p>
+<p>The document states <b>what</b> the system shall do, for whom, and under which rules. It does not state how the system is built; code structure, screen layouts and database scripts belong to the Software Design Description (SDD). The SRS is the agreed basis for the PRD, the SDD, development, and acceptance testing. Every requirement has a stable identifier so that it can be traced back to the Guide clause it comes from and forward to the design and the tests that prove it (decision D-01).</p>
+<p>The document is written for two readers at once: a supervisor who reviews it, and developers and AI development agents who use it as the rule set for building the system (D-05). For that reason each requirement is a single statement, the source of every business rule is cited, and every assumption is visible.</p>
+
+<h2>1.2 Document Conventions</h2>
+<p>This document follows these conventions:</p>
+<script type="text/tbl" data-h="Term|Description" data-w="18%|82%">
+SHALL | Mandatory requirement that must be fulfilled in <b>Release 1</b>, the first buildable release (prototype scope, decision D-22). The developer is required to cover this feature in Release 1.
+SHALL NOT | Prohibition that applies from Release 1 onward.
+SHOULD | Requirement planned for <b>Release 2</b>. The developer should take it into account in the design so that it can be added without rework.
+MAY | Requirement anticipated for <b>Release 3 or later</b>. The developer is encouraged to keep it in mind for future scalability.
+TBD | To Be Determined. Information not yet available that will be provided in a later version. Every TBD is linked to an open item (OI-xx) in Appendix C.
+Note | Provides additional information or clarification.
+</script>
+<div class="note"><b>Note:</b> A requirement tagged with a Guide source, for example [G 12.9], states a rule that is mandatory for the complete system under UTeM policy. Its SHALL / SHOULD / MAY wording states only the release in which MCMS implements it. Guide rules are never relaxed by the release plan (D-24). Where a Guide rule is planned for a later release, Release 1 SHALL NOT contradict it; for example, it may block an action that it cannot yet support.</div>
+
+<p>Requirements are categorised as follows:</p>
+<script type="text/tbl" data-h="Requirement Number|Description|Section" data-w="22%|58%|20%">
+FR-XX | Functional Requirements | Section 3
+BR-XX | Business Rules taken from the Guide (D-25) | Section 4
+IR-XX | Interface Requirements | Section 5
+DR-XX | Data Requirements | Section 6
+NFR-XX | Non-Functional Requirements | Section 7
+SR-XX | Security Requirements | Section 7.2
+D-XX / A-XX / OI-XX | Decision / Assumption / Open item, as kept in the Glossary and Decision Log | Appendix C
+</script>
+<p>Each requirement table has three columns: <b>ID</b>, <b>Requirement</b> and <b>Source</b>. The Source column cites the Guide clause (<code>G 12.9</code>), Guide appendix table (<code>App E5</code>), decision (<code>D-17</code>) or assumption (<code>A-04</code>) that justifies the requirement. An empty source means the requirement is a good-practice or usability need introduced by this SRS. Identifiers are stable: once issued, an ID is never reused for a different requirement, and a withdrawn requirement keeps its ID with the word <i>Withdrawn</i>.</p>
+<p>Configurable values are written in code font, for example <code>credit.abc_validity_years</code>. Each one is a setting that the System Administrator can change (D-16); the default value and its source are listed in {{tab:settings}}.</p>
+<p>Diagrams use common notations: flowcharts for processes, state diagrams for the life of a record, sequence diagrams for interactions between people and systems, and entity-relationship diagrams for the data model. Diagrams explain the requirements; where a diagram and a requirement differ, the requirement prevails.</p>
+
+<h2>1.3 Intended Audience</h2>
+<p>This document is intended for the following stakeholders:</p>
+<script type="text/tbl" data-h="Stakeholder|Role|Read first" data-w="28%|47%|25%">
+Supervisor | Reviews the requirements and the decisions they rest on. | Sections 1, 2, 4, Appendix C
+CODL / UTeM reviewers | Confirm assumptions and open items; assumed system owner. | Sections 1, 2, 3, Appendix C
+Development team and AI development agents | Design and implement the system, using the requirement IDs and business rules as fixed rules. | Sections 2.3, 3, 4, 5, 6
+Testers and quality assurance | Derive acceptance tests from requirement IDs and business rules. | Sections 3, 4, 7
+Architects and security reviewers | Check the architecture, interfaces, data and security needs. | Sections 2, 5, 6, 7
+System administrators | Maintain and configure the system after delivery. | Sections 3.1, 5, 7.7
+</script>
+
+<h2>1.4 Project Scope</h2>
+<p>UTeM offers micro-credentials in three categories: Unbundled Micro-Credentials (UMC) taken from accredited credit courses, Stand-alone Micro-Credentials (SAMC), and the non-credit Micro-Credential Eksekutif (MCE). The Garis Panduan Micro-Credential UTeM sets strict rules for each category. Most importantly, it separates approval, achievement, credentials, Quality Verification, ACR and ABC deposit, credit transfer and the award of a qualification into distinct steps that must never be merged [G 12–14, 18.14]. These rules are difficult to apply consistently with documents and spreadsheets. MCMS gives the University one system in which each step is a separate, traceable record.</p>
+<p>MCMS is a new, standalone web system with its own database, sign-in handling and workflow (D-06). Learning content stays on the UCreds platform, and other external services are reached through adapters.</p>
+
+<h3>In Scope</h3>
+<p>The system will include the following key components:</p>
+<ul>
+  <li><b>Identity, roles and settings:</b> single sign-on with the Microsoft education account, role- and scope-based access, configurable thresholds and approving bodies.</li>
+  <li><b>Curriculum management:</b> category determination for UMC, SAMC and MCE, the proposal and design workspace of Guide Appendix A, review, approval, versioning and material-change control.</li>
+  <li><b>Offering and delivery:</b> readiness checks (Appendix B), public catalogue, registration, enrolment, cohorts, a dummy payment service, and import of learning results from UCreds.</li>
+  <li><b>Achievement and credentials:</b> assessment verification, the internal Achievement Record, Digital Badges, Certificates and Digital Credentials in an open signed format, and public verification without login.</li>
+  <li><b>Quality Verification for SAMC:</b> QV readiness evidence (Appendix D), QV status, validity and expiry control.</li>
+  <li><b>Credit recognition:</b> ACR preparation, participant consent, ABC deposit tracking, credit validity, credit transfer evaluation, the Single Redemption Principle and stackable degree pathway checks (Appendices F and G).</li>
+  <li><b>Governance:</b> monitoring, CQI (Appendix C), periodic review, suspension and termination, the append-only audit trail, records management and reports (Appendix H).</li>
+  <li><b>Bilingual operation:</b> screens, notifications and credentials in Bahasa Melayu and English (D-02).</li>
+</ul>
+
+<h3>Out of Scope</h3>
+<p>The following items are explicitly excluded:</p>
+<ol>
+  <li>Delivering learning content; this stays on UCreds or another learning platform.</li>
+  <li>The national ABC platform and the QVC/MQA procedures themselves. MCMS prepares and tracks; UTeM staff submit (D-14).</li>
+  <li>The full student information system, programme admission and degree programme regulations. MCMS records the results of these decisions but does not take them.</li>
+  <li>The UTeM payment hub itself; a dummy payment service stands in for Release 1 (A-03).</li>
+  <li>Open public self-registration; outside applicants first register at Pejabat Pendaftar or HEPA (D-10).</li>
+  <li>Partner-delivered micro-credentials run by other institutions (possible later).</li>
+  <li>Hardware procurement, and native mobile applications.</li>
+</ol>
+
+<h3>Release Overview</h3>
+<p>The release in which each capability is delivered follows from the SHALL / SHOULD / MAY wording of its requirements. {{tab:releases}} summarises the result. The PRD will hold the detailed release plan (D-22).</p>
+<p class="tcap" data-t="releases">Summary of capabilities by release</p>
+<script type="text/tbl" data-h="Capability area|Release 1 (SHALL)|Release 2 (SHOULD)|Release 3+ (MAY)" data-w="22%|30%|26%|22%">
+Identity and access | SSO (stub outside production), roles with scope, separation of duties, settings | Delegation of approval roles | –
+Curriculum | Category rules, proposal workspace, review, approval, versioning, material change | Version comparison, batch meeting decisions, parent-course change alerts | –
+Offering and enrolment | Readiness, catalogue, registration, dummy payment, cohorts | Waitlist, fee waivers, bulk enrolment | Live UTeM payment hub
+Learning platform | CSV import and export with UCreds | Live UCreds connector | Near-real-time synchronisation
+Credentials | Badges, certificates, signed Digital Credentials, public verification, correction and revocation | Signature check of uploaded credentials, sharing to professional networks | Credential wallet integration
+Quality Verification | QV status, validity, expiry alerts, evidence checklist, manual submission package | – | Electronic submission to QVC/MQA
+ACR, ABC and transfer | ACR, consent, manual ABC tracking, credit transfer, single redemption | External credit records, equivalence precedents | Live ABC connector
+Stackable degree | Pathway record, 30% and residency checks, individual plan | PLO and Body of Knowledge matrices | SIS link for admission and graduation
+Governance | Audit trail, corrections, traceability, standard reports, retention settings, cohort indicators, CQI records, periodic review, suspension and termination | Monitoring dashboards, facilitator and industry feedback, record holds | Analytics
+</script>
+
+<h2>1.5 References</h2>
+<p>This SRS is based on the following documents and sources:</p>
+<ol>
+  <li>Garis Panduan Micro-Credential UTeM (the Guide), CODL UTeM, Bab 1–18 with Lampiran A–H: the copy held in the project, Versi 1.0, 18 September 2026 (D-03).</li>
+  <li>Glossary and Decision Log for the UTeM MCMS, version 0.5, 26 October 2026 (MCMS_FND_V0.5_Oct_2026). This SRS is written against that version.</li>
+  <li>Software Requirements Specification, UTeM MCMS, informal draft v0.1, 23 October 2026 (input material only, D-04).</li>
+  <li>Software Requirements Specification for an AI-Driven Job Matching Platform, v1.0, May 2025. Used as a format reference only; no content is reused (D-26).</li>
+  <li>MQA: Guidelines to Good Practices: Micro-Credentials; Quality Verification of Stand-alone Micro-Credentials; Guidelines on the Academic Bank of Credit; Malaysian Qualifications Framework, second edition; Code of Practice for Programme Accreditation: Open and Distance Learning.</li>
+  <li>Guidelines on Developing Academic Programme through Stackable Degree Pathway.</li>
+  <li>UTeM academic regulations, academic quality assurance policy, and records and document management policy.</li>
+  <li>ISO/IEC/IEEE 29148, Systems and software engineering: Requirements engineering.</li>
+  <li>1EdTech Open Badges 3.0 and W3C Verifiable Credentials Data Model (credential format guidance).</li>
+  <li>WCAG 2.1; OWASP Application Security Verification Standard 4.0; Personal Data Protection Act 2010 (Act 709) with current amendments.</li>
+</ol>

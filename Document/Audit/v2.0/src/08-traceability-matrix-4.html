@@ -1,0 +1,348 @@
+<main>
+<h1>7. Requirement Traceability Matrix (Domains 12 to 14)</h1>
+
+<h2>7.1 Domain 12: Governance Structure, RACI &amp; Separation of Academic Duties</h2>
+<p>Covers Garis Panduan Bab 15 (Tadbir Urus), Bab 16 (Peranan &amp; Tanggungjawab), Rajah 19, Jadual 2, and Lampiran H1–H2.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-113</td>
+      <td class="c-src">Bab 15.2<br>Rajah 19, p. 60</td>
+      <td>3-Tier Governance Hierarchy: Tier 1 University (Senate/Policy/QA), Tier 2 Faculty/PTj (Curriculum/Delivery/Assessment/CQI), Tier 3 Operational (uLearn/Registry/Badges/ACR).</td>
+      <td>System Wide<br><code>Identity</code></td>
+      <td>User roles partitioned across University (Senate/CODL), Faculty (Deputy Dean/Lecturer/Reviewer), and Learners. Scoped by PTj.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RbacSecurityTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-114</td>
+      <td class="c-src">Bab 15.4<br>p. 61</td>
+      <td>Separation of delivery approval and academic recognition: CODL administrator has ZERO academic approval authority (Decision D-12).</td>
+      <td><code>Identity</code><br><code>EnsureRole.php</code></td>
+      <td>CODL Admin has zero approval routes. Cannot endorse proposals, record Senate decisions, verify marks, confirm completion, or approve transfers.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RbacSecurityTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-115</td>
+      <td class="c-src">Bab 15.7<br>p. 62</td>
+      <td>Traceability and accountability across every institutional decision. Every status transition must record user ID and timestamp.</td>
+      <td>All Modules<br><code>audit_events</code></td>
+      <td>Every status change in curriculum, approval, offerings, results, completion, and transfer logs user ID, role, action, and timestamp.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>FoundationTest.php</code> and <code>RecordsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-116</td>
+      <td class="c-src">Bab 16.1–16.6<br>p. 62–64</td>
+      <td>Role separation of duties: Course proposer cannot review or approve own proposal; mark submitter cannot verify own marks.</td>
+      <td><code>Approval</code><br><code>Assessment</code></td>
+      <td>Strict self-action prevention enforced in controllers (FR-14, D-15): Proposer blocked from reviewing/approving; lecturer blocked from verifying marks.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code> and <code>ResultsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-117</td>
+      <td class="c-src">Bab 16.7<br>p. 64</td>
+      <td>External SME and Industry Expert participation: External reviewers submit competency advice and comments without academic voting authority.</td>
+      <td><code>Approval</code><br><code>ReviewController</code></td>
+      <td><code>industry_expert</code> role can access assigned proposals and submit comments; recommendation select is hidden/disabled for industry role.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code> (FR-18).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-118</td>
+      <td class="c-src">Bab 16.8<br>p. 64</td>
+      <td>Student / Participant responsibilities: Adherence to academic integrity, providing accurate profile data, and acknowledging recognition caveats.</td>
+      <td><code>Enrolment</code><br><code>Registration</code></td>
+      <td>Enforced during registration wizard (eligibility verification, recognition statement acceptance, PDPA consent).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>EnrolmentTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-119</td>
+      <td class="c-src">Bab 16.9<br>Jadual 2, p. 64</td>
+      <td>General Governance Functional Matrix (Matriks Fungsi Umum): University, Faculty, Coordinator, and Developer authority boundaries.</td>
+      <td>System Wide<br>RBAC</td>
+      <td>System routes, role scopes, and task distribution strictly follow the matrix of Jadual 2.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in RBAC test suite.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-120</td>
+      <td class="c-src">Lampiran H1<br>p. 115–116</td>
+      <td>RACI Matrix across 9 lifecycle stages (Responsible, Accountable, Consulted, Informed).</td>
+      <td>System Wide<br><code>Notifications</code></td>
+      <td>Workflow notifications and task generation route tasks to Accountable/Responsible roles and inform appropriate stakeholders.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Implemented in task and notification services.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-121</td>
+      <td class="c-src">Bab 16.1<br>p. 62</td>
+      <td>Single Sign-On (SSO) integration with UTeM central identity directory (Microsoft Entra ID / Azure AD).</td>
+      <td><code>Identity</code></td>
+      <td>Currently operates via secure persona test sign-in with 6-digit secondary verification, pending institutional Azure AD tenant configuration (OI-03).</td>
+      <td class="c-x"><span class="badge badge-not-verified">NOT VERIFIED</span></td>
+      <td>Configure production Entra ID OpenID Connect / SAML provider upon deployment.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>7.2 Domain 13: Monitoring, Continuous Quality Improvement (CQI) &amp; Versioning</h2>
+<p>Covers Garis Panduan Bab 11.3–11.5, Bab 17 (Pemantauan &amp; CQI, pp. 65–68), Rajah 13, and Lampiran C1–C10.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-122</td>
+      <td class="c-src">Bab 17.1–17.3<br>p. 65</td>
+      <td>Cohort performance monitoring: Active participation rate, completion rate, pass rate, average and median marks.</td>
+      <td><code>Monitoring</code><br><code>Indicators.php</code></td>
+      <td>Cohort metrics computed dynamically against institutional targets configured in settings. Visualized on KPI dashboard.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code> (FR-mnindicators).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-123</td>
+      <td class="c-src">Bab 17.4<br>p. 66</td>
+      <td>Participant feedback collection: Anonymous survey collected once per enrolment after completion or cohort closure.</td>
+      <td><code>Monitoring</code><br><code>feedback_responses</code></td>
+      <td>Learner submits 5-point rating and text feedback via <code>/student/feedback/{id}</code>. Reports show aggregated results without student names.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-124</td>
+      <td class="c-src">Bab 17.5<br>p. 66</td>
+      <td>CLO attainment evaluation: Measure percentage of learners meeting passing criteria for each individual learning outcome.</td>
+      <td><code>Monitoring</code><br><code>Indicators.php</code></td>
+      <td>System calculates outcome attainment rate by mapping verified component marks to CLOs.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-125</td>
+      <td class="c-src">Bab 17.6<br>Rajah 13, p. 42</td>
+      <td>CQI Record Builder covering 6 quality domains: Academic design, content, delivery, assessment, learner support, and admin management.</td>
+      <td><code>Monitoring</code><br><code>/monitoring/cqi/{offeringId}</code></td>
+      <td>Lecturer must review all 6 domains (Lampiran C5). Form captures identified issues with root cause, impact, and priority level.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code> (FR-mndomains).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-126</td>
+      <td class="c-src">Bab 17.6<br>Lampiran C7–C8</td>
+      <td>CQI Action Plan with designated action owners, target due dates, and measurable success KPIs.</td>
+      <td><code>Monitoring</code><br><code>cqi_actions</code></td>
+      <td>Action plan table records action description, owner, target deadline, and specific indicator of success.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-127</td>
+      <td class="c-src">Bab 17.6<br>p. 66</td>
+      <td>Two-stage CQI Action Closure: Lecturer evaluates effectiveness; only Deputy Dean can formally close the action (evaluator cannot close).</td>
+      <td><code>Monitoring</code><br><code>QualityReviewController</code></td>
+      <td><code>QualityReviewController</code> enforces: Evaluator cannot be the closer (BR-41). Ineffective actions carry forward to next cycle.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-128</td>
+      <td class="c-src">Bab 17.7<br>p. 66–67</td>
+      <td>Change management: Automatic classification into Minor Change (logged for CQI) vs Material Change (triggers new version).</td>
+      <td><code>Curriculum</code><br><code>VersionController</code></td>
+      <td>Change request engine classifies 11 items. Minor change logged for Deputy Dean acknowledgement; material change clones draft version.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>VersionTest.php</code> (FR-75, FR-76).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-129</td>
+      <td class="c-src">Bab 17.8<br>p. 67</td>
+      <td>Version management: Version numbering, change history, and transition rules for enrolled learners. A submitted version is never deleted.</td>
+      <td><code>Curriculum</code><br><code>mc_versions</code></td>
+      <td>Tracks semantic versions (e.g. v1.0, v2.0). Transition rules (finish on current vs migrate to new) executed on Senate approval. Deletion blocked (FR-79).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>VersionTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-130</td>
+      <td class="c-src">Bab 17.9<br>p. 67</td>
+      <td>Periodic Reviews (Semakan Berkala): Scheduled comprehensive review of approved micro-credentials every 3–5 years.</td>
+      <td><code>Monitoring</code><br><code>/monitoring/reviews</code></td>
+      <td>Scheduled review table (<code>periodic_reviews</code>). Supports 5 official outcomes: Continue, Minor Pindaan (CQI), Material Version, Suspend, Terminate.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code> (FR-prschedule).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-131</td>
+      <td class="c-src">Bab 17.10<br>p. 67</td>
+      <td>Offering Suspension &amp; Termination: Authorized authority can suspend/terminate offerings with transition plan and mandatory notices.</td>
+      <td><code>Monitoring</code><br><code>/monitoring/suspensions</code></td>
+      <td>Suspension lists active participants, enforces transition plan for termination, sends mandatory notices, and never revokes earned credentials.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>MonitoringTest.php</code> (FR-prsuspend).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-132</td>
+      <td class="c-src">Bab 17.4<br>p. 66</td>
+      <td>Collection of structured instructor and external employer feedback surveys alongside student surveys.</td>
+      <td><code>Monitoring</code><br><code>student/feedback</code></td>
+      <td>Learner feedback survey is fully functional; formal online survey forms for trainers and employers are slated for Release 2.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Build dedicated trainer and employer feedback forms in Release 2.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-133</td>
+      <td class="c-src">Bab 17.8<br>p. 67</td>
+      <td>Interactive graphical side-by-side visual diff tool between two micro-credential versions.</td>
+      <td><code>Curriculum</code><br><code>mcs/versions</code></td>
+      <td>Version history lists changes and changelogs, but interactive redline side-by-side text diffing is scheduled for Release 2 (FR-82).</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Implement side-by-side visual diff in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>7.3 Domain 14: Records Management, Discrepancies, PDPA, Retention &amp; Traceability</h2>
+<p>Covers Garis Panduan Bab 18 (Pengurusan Rekod &amp; Dokumentasi, pp. 68–71) and Lampiran H3–H6.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-134</td>
+      <td class="c-src">Bab 18.1–18.2<br>p. 68</td>
+      <td>Comprehensive records management across all categories: Curriculum, Kelulusan, Kohort, Peserta, Pentaksiran, Credential, ACR, ABC, Pemindahan, CQI.</td>
+      <td><code>Records</code><br><code>RecordsController</code></td>
+      <td>10 standard university reports (Offerings, Enrolments, Credentials, QV, ACR/ABC, Transfers, Redemptions, CQI, Pathways, Suspensions).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Available on screen, printable A4 (DOC-10), and CSV export.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-135</td>
+      <td class="c-src">Bab 18.8<br>Lampiran H4</td>
+      <td>Immutable, append-only audit trail with cryptographic tamper-evident protection.</td>
+      <td><code>Records</code><br><code>AuditRecorder.php</code></td>
+      <td>Every entry in <code>audit_events</code> is chained using SHA-256 hash chaining. Database triggers prevent UPDATE or DELETE (D-20).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>FoundationTest.php</code> (FR-254, DR-03).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-136</td>
+      <td class="c-src">Bab 18.8<br>p. 70</td>
+      <td>Scoped audit log viewing and on-demand cryptographic chain integrity check.</td>
+      <td><code>Records</code><br><code>/records/audit</code></td>
+      <td>Scoped to user's PTj; displays who, what, when, IP address, and payload; button executes on-demand hash-chain verification check.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code> (DOC-16).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-137</td>
+      <td class="c-src">Bab 18.10<br>Lampiran H6</td>
+      <td>Mismatch &amp; Discrepancy Log (Log Ketidakpadanan Rekod): Automated reconciliation across results, credentials, ACR, and ABC deposits.</td>
+      <td><code>Records</code><br><code>/records/mismatches</code></td>
+      <td>Scanner (<code>Discrepancies.php</code>) detects desynchronization; discrepancy can only be resolved via audited correction record.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code> (FR-mismatch).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-138</td>
+      <td class="c-src">Bab 18.11<br>p. 70</td>
+      <td>Security, privacy, and PDPA compliance: Personal identifiable information (IC, phone, address) protected; reports show identifiers, not plain names.</td>
+      <td><code>Records</code><br><code>Reports.php</code></td>
+      <td>Reports suppress sensitive personal info; exports display matric/enrolment codes. Scoped to faculty bounds (FR-12).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-139</td>
+      <td class="c-src">Bab 18.12<br>Lampiran H3</td>
+      <td>Retention schedule &amp; disposal governance: Automated countdown of retention periods; formal disposal approval workflow.</td>
+      <td><code>Records</code><br><code>/records/retention</code></td>
+      <td>Settings define retention periods. System identifies disposal candidates; disposal requires formal authorized sign-off.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code> (FR-retention).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-140</td>
+      <td class="c-src">Bab 18.12<br>p. 70</td>
+      <td>Legal and audit retention holds: Ability to place holds preventing disposal of records subject to active inquiry.</td>
+      <td><code>Records</code><br><code>retention_holds</code></td>
+      <td>Active retention hold on a category or record strictly blocks disposal action (FR-hold).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-141</td>
+      <td class="c-src">Bab 18.12<br>p. 70</td>
+      <td>Permanent retention of academic records: Academic achievement, credentials, and ACR records are exempt from disposal (retained in perpetuity).</td>
+      <td><code>Records</code><br><code>Retention.php</code></td>
+      <td>Disposal engine exclusively targets operational logs (notifications, integration calls, report runs); academic records are never candidates for deletion.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code> (DR-nodelete).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-142</td>
+      <td class="c-src">Bab 18.14<br>p. 71</td>
+      <td>Full lifecycle traceability chain: Complete audit lineage for any participant from proposal through offering, results, credentials, ACR, ABC, and transfer.</td>
+      <td><code>Records</code><br><code>/records/trace/{studentId}</code></td>
+      <td>Trace view renders sequential chronological timeline linking all lifecycle events for a participant (DOC-14).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code> (FR-trace).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-143</td>
+      <td class="c-src">Lampiran H5<br>p. 118</td>
+      <td>Cohort Minimum Records Checklist (Senarai Semak Rekod Minimum Kohort).</td>
+      <td><code>Records</code><br><code>/records/cohorts/{id}/checklist</code></td>
+      <td>Inspects cohort and displays status of 7 minimum required artifacts (approval, syllabus, trainer profile, roster, gradebook, verification, CQI).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>RecordsTest.php</code> (FR-cohortrec).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-144</td>
+      <td class="c-src">Bab 18.1<br>p. 68</td>
+      <td>Asynchronous background report generation with completion notification for large multi-year university data exports.</td>
+      <td><code>Records</code><br><code>Reports.php</code></td>
+      <td>Reports currently generate synchronously inside the request (under 2 seconds); async queue workers with notification banner are slated for Redis activation.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Migrate heavy export jobs to async queue workers in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+</main>

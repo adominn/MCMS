@@ -1,0 +1,78 @@
+<!-- CODL system administrator (S1, P5), Farid Hashim. Admin and technical only: no screen approves, verifies or issues. -->
+
+<section class="screen" data-role="codl" data-nav="users" data-name="CODL-01 Users and roles">
+  <div class="title"><div><h1>Users and roles</h1><div class="sub">Accounts come from UTeM single sign-on. You assign the role and the PTj it applies to.</div></div><div class="act"><span class="btn">Assign role</span></div></div>
+  <div class="row" style="gap:8px;align-items:center">
+    <div class="input ph" style="width:320px;gap:8px">{i:search} Search name or staff number</div>
+    <div class="input" style="width:200px">All roles {i:down}</div><div class="input" style="width:200px">All PTj {i:down}</div>
+  </div>
+  <div class="panel"><table>
+    <tr><th>Name</th><th>Role</th><th>Scope</th><th>Since</th><th>Status</th><th></th></tr>
+    <tr><td>Hakim Rahman<span class="s">hakim.rahman@utem.edu.my</span></td><td>Deputy dean</td><td>FTMK</td><td>1 Jan 2026</td><td><span class="tag ok">Active</span></td><td><a>Edit</a></td></tr>
+    <tr><td>Dr. Aina Zulkifli<span class="s">aina.z@utem.edu.my</span></td><td>Lecturer</td><td>FTMK</td><td>3 Feb 2025</td><td><span class="tag ok">Active</span></td><td><a>Edit</a></td></tr>
+    <tr><td>Dr. Rosli Hamzah<span class="s">rosli.h@utem.edu.my</span></td><td>Lecturer</td><td>FTMK</td><td>3 Feb 2025</td><td><span class="tag ok">Active</span></td><td><a>Edit</a></td></tr>
+    <tr><td>Dr. Farah Nadia Ismail<span class="s">farahnadia@utem.edu.my</span></td><td>Deputy dean</td><td>FKE</td><td>1 Jan 2026</td><td><span class="tag ok">Active</span></td><td><a>Edit</a></td></tr>
+    <tr><td>Farid Hashim<span class="s">farid.h@utem.edu.my</span></td><td>System administrator</td><td>All PTj</td><td>1 Oct 2024</td><td><span class="tag ok">Active</span></td><td><a>Edit</a></td></tr>
+    <tr><td>Dr. Kamal Ariffin<span class="s">kamal.a@utem.edu.my</span></td><td>Lecturer</td><td>FKE</td><td>3 Feb 2025</td><td><span class="tag">Deactivated</span></td><td><a>Edit</a></td></tr>
+  </table><div class="band small" style="display:flex">Showing 6 of 148<a style="margin-left:auto">Show all</a></div></div>
+  <div class="note small" style="font-size:14px">A system administrator can't hold a lecturer or deputy dean role at the same time. Deactivating an account keeps every record that person made.</div>
+</section>
+
+<section class="screen" data-role="codl" data-nav="settings" data-name="CODL-02 Settings">
+  <div class="title"><div><h1>Settings</h1><div class="sub">Rule values the system checks against. A decision always uses the value in force on its date.</div></div></div>
+  <div class="panel"><table>
+    <tr><th>Setting</th><th class="num">Value</th><th>Source</th><th>Last changed</th><th></th></tr>
+    <tr><td>Learning hours per credit<span class="s">credit.slt_hours_per_credit</span></td><td class="num">40 hours</td><td>MQF, D-27</td><td class="muted">Default</td><td><a>Change</a></td></tr>
+    <tr><td>Minimum learning time for a SAMC<span class="s">slt.min_hours_samc</span></td><td class="num">40 hours</td><td>G 6.3.2</td><td class="muted">Default</td><td><a>Change</a></td></tr>
+    <tr class="sel"><td>Maximum QV validity<span class="s">qv.max_validity_years</span></td><td class="num">3 years</td><td>G 11.2.2</td><td class="muted">Default</td><td><a>Change</a></td></tr>
+    <tr><td>Credit validity in ABC<span class="s">credit.abc_validity_years</span></td><td class="num">10 years</td><td>G 12.8</td><td class="muted">Default</td><td><a>Change</a></td></tr>
+    <tr><td>Minimum credit earned at UTeM, stackable<span class="s">stackable.min_home_credit_percent</span></td><td class="num">30%</td><td>G 14.5.1</td><td class="muted">Default</td><td><a>Change</a></td></tr>
+    <tr><td>QV expiry alerts<span class="s">alerts.qv_expiry_days</span></td><td class="num">180, 90, 30 days</td><td>D-16</td><td>Farid Hashim, 2 Sep 2026</td><td><a>Change</a></td></tr>
+    <tr><td>Remind a pending decision after<span class="s">alerts.decision_overdue_days</span></td><td class="num">14 days</td><td>—</td><td class="muted">Default</td><td><a>Change</a></td></tr>
+  </table></div>
+  <div class="row">
+    <div class="panel grow"><div class="hd"><h2>Change: Maximum QV validity</h2></div><div class="bd col">
+      <div class="row" style="gap:16px">
+        <div class="field" style="width:200px"><label>New value (years)</label><div class="input focus">3</div></div>
+        <div class="field" style="width:220px"><label>Effective from</label><div class="input ph">Choose a date</div></div>
+      </div>
+      <div class="field"><label>Reason (required, kept in history)</label><div class="input area ph">Cite the Guide revision or decision behind the change</div></div>
+      <div class="row" style="gap:8px"><span class="btn dis">Save · enter a new value</span><span class="btn ter">Cancel</span></div>
+    </div></div>
+    <div class="panel" style="width:380px"><div class="hd"><h2>History</h2></div><div class="bd small muted" style="font-size:14px;line-height:20px">No changes since the system started on 1 Oct 2024.</div></div>
+  </div>
+</section>
+
+<section class="screen" data-role="codl" data-nav="ucreds" data-name="CODL-03 UCreds exchange">
+  <div class="title"><div><h1>UCreds exchange</h1><div class="sub">Release 1 moves data with CSV files. Enrolments go out; results come back.</div></div><div class="act"><span class="btn ter">Export enrolments</span><span class="btn">Import results</span></div></div>
+  <div class="panel"><div class="hd"><h2>Last import: results-CND-2026-2.csv</h2><span class="r">25 Oct, 08:00 · Cloud Native Development, cohort 2026/2</span></div><div class="bd col">
+    <div class="kpis"><div class="kpi"><div class="l">Rows</div><div class="v">24</div></div><div class="kpi"><div class="l">Imported</div><div class="v">22</div></div><div class="kpi"><div class="l">Rows with a problem</div><div class="v">2</div></div></div>
+    <table><tr><th class="num" style="width:60px">Row</th><th>Learner</th><th>Problem</th><th>What happens</th></tr>
+      <tr><td class="num">7</td><td>Daniel Ong, X2026-0196</td><td>Column project_mark is empty</td><td class="muted">Lecturer enters it or fixes it in UCreds</td></tr>
+      <tr><td class="num">19</td><td>Wong Kar Seng, X2026-0201</td><td>Column module2_mark is empty</td><td class="muted">Lecturer enters it or fixes it in UCreds</td></tr></table>
+  </div></div>
+  <div class="panel"><div class="hd"><h2>Recent files</h2></div><table>
+    <tr><th>File</th><th>Direction</th><th class="num">Rows</th><th>Result</th><th>When</th></tr>
+    <tr><td>results-CND-2026-2.csv</td><td>Import</td><td class="num">24</td><td><span class="tag warn">22 imported, 2 problems</span></td><td>25 Oct, 08:00</td></tr>
+    <tr><td>results-DS-2026-2.csv</td><td>Import</td><td class="num">28</td><td><span class="tag ok">All imported</span></td><td>24 Oct, 08:00</td></tr>
+    <tr><td>enrol-IIOT-2026-2.csv</td><td>Export</td><td class="num">35</td><td><span class="tag ok">Sent</span></td><td>1 Sep, 09:30</td></tr>
+  </table></div>
+</section>
+
+<section class="screen" data-role="codl" data-nav="adapters" data-name="CODL-04 Adapter status">
+  <div class="title"><div><h1>Adapter status</h1><div class="sub">How MCMS reaches each outside service, and whether it is working</div></div></div>
+  <div class="panel"><table>
+    <tr><th>Adapter</th><th>Mode</th><th>Last run</th><th>Status</th><th>Recent errors</th></tr>
+    <tr><td>UCreds learning platform</td><td>Manual (CSV)</td><td>25 Oct, 08:00</td><td><span class="tag ok">Working</span></td><td class="muted">None</td></tr>
+    <tr><td>UTeM single sign-on</td><td>Live</td><td>26 Oct, 10:12</td><td><span class="tag ok">Working</span></td><td class="muted">None</td></tr>
+    <tr class="sel"><td>Email notifications</td><td>Live</td><td>26 Oct, 10:05</td><td><span class="tag err">Failing</span></td><td>3 messages not sent since 09:40</td></tr>
+    <tr><td>Payment</td><td>Stub (dummy service)</td><td>25 Oct, 15:31</td><td><span class="tag ok">Working</span></td><td class="muted">None</td></tr>
+    <tr><td>ABC</td><td>Manual (deputy dean records)</td><td>20 Oct</td><td><span class="tag">No connector</span></td><td class="muted">—</td></tr>
+  </table></div>
+  <div class="panel"><div class="hd"><h2>Email notifications: last errors</h2><a class="r link">Retry 3 messages</a></div><table>
+    <tr><th>Time</th><th>Message</th><th>Error</th></tr>
+    <tr><td>10:05</td><td>Results ready to verify, to Hakim Rahman</td><td>SMTP 421: service not available</td></tr>
+    <tr><td>09:52</td><td>Review due 30 Oct, to Dr. Aina Zulkifli</td><td>SMTP 421: service not available</td></tr>
+    <tr><td>09:40</td><td>ABC consent reminder, to Rajesh Kumar</td><td>SMTP 421: service not available</td></tr>
+  </table></div>
+</section>

@@ -1,0 +1,31 @@
+<!-- ===================== 2. PRINCIPLES AND USERS ===================== -->
+<h1>2. Design Principles and Users</h1>
+
+<h2>2.1 Design Principles</h2>
+<p>Seven principles drive every design decision. They come from the Guide's separation of recognition stages, the PRD design principles (PRD 8.2) and the user needs of the personas.</p>
+<script type="text/tbl" data-h="Principle|What it means on screen|Source" data-w="24%|58%|18%">
+One stage, one record, one look | Approval, offering, result verification, completion, credential, QV, ACR, ABC deposit, transfer and redemption are separate decisions with separate screens. No button combines two stages. Verifying results creates module achievements; confirming completion is a later, separate action that makes the system issue credentials. | D-15, BR-16, G 12–14
+Land on what needs me today | Staff open on a task list with age and overdue flags; participants open on their learning and credit. | PRD 8.2
+Only the authorised role sees a decision | Decision buttons appear only for the role that may decide. CODL has no academic decision anywhere. The Senate never signs in; the deputy dean records its decisions with the meeting reference. | D-11, D-12, D-28, BR-42
+Recognition text is generated | Credit, MQF level and QV claims come only from verified records and templates. A SAMC shows "Credit after QV" until QV is recorded; a lapsed QV removes the claim. | D-17, BR-14, BR-22, BR-23
+The rule sits beside the field | Rules are checked as the user types; blocking errors stop submission, warnings let the user continue with the warning on record. | PRD 8.2, ir-forms
+History is one click away | Every record has a history from the append-only audit trail. Nothing is deleted; a correction creates a new revision. | D-20, BR-38
+Honest about credit | Wherever a participant meets credit, the screen says that deposit is storage, not transfer, and that each transfer is decided case by case. | BR-26, BR-31
+</script>
+
+<h2>2.2 Users and Permissions</h2>
+<p>The design follows the six kinds of user of decision D-28. {{tab:perm}} shows what each role can and cannot do in the interface; buttons for actions a role cannot take are not shown at all, rather than shown disabled.</p>
+<p class="tcap" data-t="perm">Roles and their permissions in the interface</p>
+<script type="text/tbl" data-h="Role (persona)|Signs in|Can|Cannot" data-w="18%|12%|42%|28%" data-cls="small">
+Student P8 (Amir Hakimi) | SSO | Browse, register and pay (stub), withdraw, view own records, share credentials, give or decline consent to deposit, apply for transfer, view own stackable plan | See anyone else's records
+Lecturer P1 (Dr. Aina Zulkifli) | SSO + MFA | Propose and edit, answer review comments, create offerings, complete the lecturer's readiness items, enter results, send for verification, write quality reviews, gather QV evidence, review colleagues' proposals after declaring conflict of interest | Review or decide own proposal; verify results they entered
+Deputy dean P2 (Hakim Rahman, FTMK) | SSO + MFA | Assign reviewers, verify category, endorse or return, record Senate decisions, confirm readiness, verify results, confirm completion, correct, replace or revoke on a recorded decision, record QV results, confirm quality reviews, confirm ACR, record deposits, decide transfers into FTMK degrees, redeem or release credit, map pathways and plans, periodic review, suspension | Act outside FTMK; issue credentials by hand (the system issues them)
+Senate P3 | Never | Decides in its meeting | Use MCMS
+CODL S1/P5 (Farid Hashim) | SSO + MFA | Users and scoped roles, reference data, settings with history, bilingual templates, UCreds files, adapter status, test mailbox, audit trail, reports, retention | Any academic decision: approve, verify, issue, ACR, deposit, transfer, module credit flag
+Industry expert X2 (Ir. Siti Aminah Yusof) | SSO (limited) | Declare conflict of interest, comment on invited proposals | Rate, recommend or decide
+Public X3 (Tan Mei Ling) | Never | Catalogue, pathways, how it works, FAQ, verify a credential | See results, identity numbers, email or matric numbers
+</script>
+<p>A person may hold several roles, each with its own scope. Separation of duties is checked per record: a lecturer who is also a reviewer cannot review their own proposal, and a person who entered a result cannot be its only verifier.</p>
+
+<h2>2.3 Personas and Sample Data</h2>
+<p>The personas of PRD Section 3 appear in the prototype with consistent sample data. The world is set on 26 October 2026 at FTMK, with records at different stages so that every flow can be walked: the UMC Data Structures (BITS 1123, 3 credits, 120 hours) with cohorts from 2025/2 to 2027/1, the SAMC Cloud Native Development (2 credits, MQF level 4, Quality-Verified to 6 December 2026), the MCE Leadership Essentials (16 hours, no credit), and Amir's two deposited or pending credits. Figures add up across screens, for example the 28 learners of Data Structures 2026/2, of whom 27 pass.</p>

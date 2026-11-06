@@ -1,0 +1,55 @@
+<!-- ===================== 6. SCREENS ===================== -->
+<h1>6. Screens</h1>
+<p>This section shows the key screens of each role and what they must do. The complete list of 114 screens with their routes is in Section 6.6. Every screen is in the prototype with sample data; the behaviour of each is described by the SRS requirements listed in <code>UIUX/v2/basis/srs-fr-inventory.md</code>.</p>
+
+<h2>6.1 Deputy Dean</h2>
+<p>The deputy dean lands on the task queue ({{fig:shell}}): every decision waiting for FTMK, grouped by area, with the system's checks and how long each has waited. Overdue items (14 days or more) are marked in words. Key screens:</p>
+<script type="text/tbl" data-h="Screen|Must do" data-w="26%|74%" data-cls="small">
+Proposal review and endorsement | Show system checks, reviews (Support, Amend, Do not support), comments with blocking flags; verify the category as a separate field; assign reviewers when Submitted; Endorse only when no blocking comment is open and the category is verified; Return for amendment with a reason; open the decision pack.
+Record Senate decision | Meeting reference and date (not before endorsement), decision (Approved, Approved with conditions, Not approved, Returned for amendment, Deferred), conditions, minutes extract; state that no credit, QV or transfer status is set; for a new version, the transition rule for enrolled learners.
+Confirm readiness | Appendix B checklist from the lecturer; accept uploaded evidence; Ready, Ready with conditions or Not ready; the offering opens only after the decision.
+Verify results | Learners with provisional results and their source; held results excluded until the case is closed; Verify creates module achievements only.
+Confirm completion | Pre-issue checks per learner; failures listed with reasons and not issued; progress of the issuing job; MCE gets a certificate and no ACR; SAMC without QV covering the cohort gets the credential without the QV claim.
+Credential | Revision history; Correct (new revision, same link), Replace (new credential, old shows Replaced) and Revoke (decision reference of the authorised body and a reason).
+ACR and deposits | Confirm ACR per batch; deposit queue of consented, verified ACR only; export for ABC; record the ABC reference, giving credit valid for 10 years.
+Credit transfer | Outcome-by-outcome comparison per line; Approve blocked for a line with no outcome match or no comparison; decisions Approved, Partly approved, Not approved, More evidence needed; redemption and release of credit.
+Stackable pathways and plans | Map micro-credentials to courses (MCE refused); individual plans with the 30% UTeM credit and residency checks, stating that 30% does not mean 70% transfers.
+Quality, QV and review | QV records with validity and history; QV result (no more than 3 years); quality reviews with action effectiveness; periodic review outcomes; suspension or termination with a transition plan.
+</script>
+<figure data-f="ddproposal"><img src="../../../../UIUX%20Spec/src/img/dd-proposal.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Proposal review and endorsement (BITM 2313 Database Systems).</figcaption></figure>
+<figure data-f="ddtransfer"><img src="../../../../UIUX%20Spec/src/img/dd-transfer.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Credit transfer: a line whose fourth outcome has no match cannot be approved.</figcaption></figure>
+
+<h2>6.2 Lecturer and Reviewer</h2>
+<script type="text/tbl" data-h="Screen|Must do" data-w="26%|74%" data-cls="small">
+My micro-credentials | "Needs you" list (draft to finish, results to send, quality review due, review invitation, readiness item, QV expiry) and all owned micro-credentials with stage.
+New proposal | Three questions decide UMC, SAMC or MCE and explain what the category means for the proposal.
+Proposal workspace | Appendix A sections with live checks; SLT must equal the parent course for a UMC; weightings must total 100%; recognition fields follow the category (an MCE has no credit); comments tab to answer reviewers; Submit only when checks pass.
+Change to an approved version | Minor or material; a material change becomes a new version submitted for review while learners stay on their version.
+Review a colleague's proposal | Conflict of interest first, then the proposal; rate items; recommend Support, Amend or Do not support.
+Cohort results | Results from UCreds marked Provisional; missing marks listed first and required; integrity flag; Send for verification; the lecturer cannot verify their own entries.
+Readiness, quality review, QV evidence | Lecturer's readiness items with evidence upload; quality review with indicators and actions closed only after an effectiveness check; QV evidence checklist and "Ready to submit" gated by a completed cohort.
+</script>
+<figure data-f="lechome"><img src="../../../../UIUX%20Spec/src/img/lec-home.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Lecturer home: what needs Dr. Aina today, then her micro-credentials.</figcaption></figure>
+<figure data-f="lecreview"><img src="../../../../UIUX%20Spec/src/img/lec-review.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Colleague review: the proposal opens only after the conflict-of-interest declaration.</figcaption></figure>
+
+<h2>6.3 Student</h2>
+<p>Student screens are web screens in the same shell as staff, and reflow to a phone.</p>
+<script type="text/tbl" data-h="Screen|Must do" data-w="26%|74%" data-cls="small">
+My learning | In progress with module progress, waiting for verification or completion (worded from the cohort's real state), achieved, and actions for the student.
+Register | Four steps: eligibility (each rule shown with its result), acknowledgement of the recognition statement and PDPA notice (version and date recorded), dummy payment (failure and retry, never a double charge, capacity checked), confirmation with UCreds access and receipt.
+Registrations and payments | Status, receipt, withdraw before the deadline, cancel a pending payment.
+Achievement record and credentials | Achievement record labelled "Internal record, not an Academic Credit Record"; credentials with PDF certificate, signed credential, share link and revision history; Replaced and Revoked shown honestly.
+Credit ledger and ACR | One ledger with Available, Provisionally redeemed, Redeemed and Expired; consent to deposit with Give, Decline or Postpone; withdrawing consent asks for a reason.
+Credit transfer and plan | Apply with deposited, available credit only (MCE and used credit not selectable, with the reason); decision and reason shown; upload more evidence when asked; stackable plan from real records.
+</script>
+<figure data-f="sthome"><img src="../../../../UIUX%20Spec/src/img/st-home.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Student home (Amir Hakimi).</figcaption></figure>
+<figure data-f="stledger"><img src="../../../../UIUX%20Spec/src/img/st-ledger.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Credit ledger: one row per ACR with its stage and the honest note that deposit is storage, not transfer.</figcaption></figure>
+
+<h2>6.4 Public Website</h2>
+<p>The public site informs before it sells. The home page explains the three categories, features the next open offerings, explains how recognition works and links to verification. Offering pages follow the structure of the UCreds course pages: a facts block (institution, format, effort per week, dates, duration, cost, credit, places) and tabs for Overview, Syllabus, Assessment, Prerequisites, Recognition and FAQ, with an Enrol button. Credit is shown only when it is verified for the cohort's dates; the separate-stages notice states that completion, ACR, deposit and transfer are separate with no guarantee.</p>
+<figure data-f="pubhome"><img src="../../../../UIUX%20Spec/src/img/pub-home.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Public home page.</figcaption></figure>
+<figure data-f="pubverify"><img src="../../../../UIUX%20Spec/src/img/pub-verify.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Public verification: only name, credential, issuer, issue date and status, without signing in. Corrected, Replaced, Revoked and Not found each have their own result.</figcaption></figure>
+
+<h2>6.5 CODL Administrator</h2>
+<p>CODL lands on users and roles with a "Needs you" panel (failing adapter, templates missing a language, disposals waiting for the Registrar, imports with problems). Role assignment requires a scope, a reason and an effective date; a future date is scheduled; an administrator cannot change their own roles or remove the only deputy dean of a faculty. Settings changes need a reason and a future effective date and keep a history; the public verification fields can only be chosen from the five allowed fields. Templates cannot be published when the BM and EN placeholders differ or when the text makes an unsupported claim such as an automatic transfer. UCreds imports stage rows as Provisional and never create achievements. No CODL screen has an academic decision; where one might be expected, a note names who decides.</p>
+<figure data-f="codlsettings"><img src="../../../../UIUX%20Spec/src/img/codl-settings.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Settings with source and history; changes take effect from a stated date.</figcaption></figure>

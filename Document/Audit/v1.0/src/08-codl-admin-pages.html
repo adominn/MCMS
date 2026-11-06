@@ -1,0 +1,119 @@
+<!-- ===================== SECTION 7: CODL ADMIN ROLE ===================== -->
+<h1>7. CODL Administrator Pages & Functionality Analysis</h1>
+
+<p>The Centre for Open and Distance Learning (CODL) Administrator role (Persona S1, P5) represents the technical system operator. In accordance with <b>Decision D-28</b>, CODL has no academic decision authority; the role is strictly focused on user identity governance, reference data management, system configuration, external integration hubs, audit integrity verification, and data retention.</p>
+
+<!-- ---------------- 7.1 User & Role Management ---------------- -->
+<h2>7.1 User Administration & Role Provisioning (MD-01)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> User Directory (<code>/admin/users</code>), User Profile & Roles (<code>/admin/users/{user}</code>), Assign Role (<code>POST /admin/users/{user}/roles</code>), Revoke Role (<code>POST /admin/users/{user}/roles/{assignment}/revoke</code>), Toggle Status (<code>POST /admin/users/{user}/status/{to}</code>)</li>
+  <li><b>Role:</b> CODL Administrator (<code>codl_admin</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /admin/users</code>, <code>GET /admin/users/{user}</code>, <code>POST /admin/users/{user}/roles</code>, <code>POST /admin/users/{user}/roles/{assignment}/revoke</code>, <code>POST /admin/users/{user}/status/{to}</code></li>
+  <li><b>Page Type:</b> User Directory & RBAC Security Administration</li>
+  <li><b>Related Database Tables:</b> <code>users</code>, <code>role_assignments</code>, <code>ptjs</code>, <code>audit_events</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Identity\UserAdminController</code>, Views: <code>admin.users.index</code>, <code>admin.users.show</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Governs user identities across all departments (FR-05, FR-06, FR-13, FR-23). Features: (1) Keyword search by staff/student ID, name, email, or role, (2) User deactivation/reactivation (deactivated users are blocked from sign-in and audited), (3) Scoped role assignments with effective start and end dates (e.g., assigning Deputy Dean scoped strictly to FTMK), and (4) Role revocation with mandatory audit justification.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-17. Role assignments validate that privileged staff roles (Deputy Dean, CODL Admin) require MFA. Scoping correctly binds to PTj faculty records.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Role lifecycle and permission checks operate reliably.</p>
+
+<!-- ---------------- 7.2 Settings & Bilingual Templates ---------------- -->
+<h2>7.2 Versioned Settings, Templates & Reference Data (MD-00)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> System Settings (<code>/admin/settings</code>), Setting History (<code>/admin/settings/{key}</code>), Bilingual Templates (<code>/admin/templates</code>), Template Editor (<code>/admin/templates/{key}</code>), Reference Data (<code>/admin/reference/{entity}</code>)</li>
+  <li><b>Role:</b> CODL Administrator (<code>codl_admin</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /admin/settings</code>, <code>GET /admin/settings/{key}</code>, <code>POST /admin/settings/{key}</code>, <code>GET /admin/templates</code>, <code>GET /admin/templates/{key}</code>, <code>POST /admin/templates/{key}</code>, <code>GET /admin/reference/{entity}</code>, <code>POST /admin/reference/{entity}</code>, <code>POST /admin/reference/{entity}/import</code></li>
+  <li><b>Page Type:</b> Configuration Registry, Template Versioning & Reference Importer</li>
+  <li><b>Related Database Tables:</b> <code>settings</code>, <code>setting_versions</code>, <code>templates</code>, <code>template_versions</code>, <code>ptjs</code>, <code>programmes</code>, <code>parent_courses</code></li>
+  <li><b>Related Components & Controllers:</b> <code>SettingsController</code>, <code>TemplateController</code>, <code>ReferenceDataController</code>, Views: <code>settings.index</code>, <code>settings.history</code>, <code>admin.templates.index</code>, <code>admin.templates.edit</code>, <code>admin.reference</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>System parameter governance:
+- <b>Settings:</b> Manages 34 institutional parameters (credit validity years, decision overdue thresholds, fee waiver defaults). Every modification requires a written reason and is versioned in <code>setting_versions</code>.
+- <b>Templates:</b> Governs official communication and certificate wording in English and Bahasa Melayu (PDPA disclosures, certificate recognition wording). Modifications create immutable numbered versions.
+- <b>Reference Data:</b> Maintains institutional entities (Faculties, Degree Programmes, Parent Courses) via manual web forms or bulk CSV imports.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and verified in Playwright flow FL-17. Setting modifications validate type constraints and log full before/after snapshots into the audit chain.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Complete versioning and rollback capability verified.</p>
+
+<!-- ---------------- 7.3 UCreds Integration Hub ---------------- -->
+<h2>7.3 UCreds Integration Hub & File Exchange (MD-06)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> UCreds Hub (<code>/admin/ucreds</code>), Enrolment Export (<code>/admin/ucreds/export/{offering}</code>), Enrolment Manifest (<code>/admin/ucreds/export/{offering}/manifest</code>), Check Results CSV (<code>POST /admin/ucreds/check</code>), Import Audit Report (<code>/admin/ucreds/imports/{id}</code>), Download Errors (<code>/admin/ucreds/imports/{id}/errors.csv</code>), Stage Valid Results (<code>POST /admin/ucreds/imports/{id}/stage</code>), UCreds Courses (<code>/admin/ucreds/courses</code>)</li>
+  <li><b>Role:</b> CODL Administrator (<code>codl_admin</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /admin/ucreds</code>, <code>GET /admin/ucreds/export/{offering}</code>, <code>GET /admin/ucreds/export/{offering}/manifest</code>, <code>POST /admin/ucreds/check</code>, <code>GET /admin/ucreds/imports/{id}</code>, <code>GET /admin/ucreds/imports/{id}/errors.csv</code>, <code>POST /admin/ucreds/imports/{id}/stage</code>, <code>GET /admin/ucreds/courses</code></li>
+  <li><b>Page Type:</b> Integration Hub, File Parser & Staging Pipeline</li>
+  <li><b>Related Database Tables:</b> <code>export_files</code>, <code>import_files</code>, <code>import_row_errors</code>, <code>enrolments</code>, <code>assessment_results</code>, <code>ucreds_courses</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Learning\UcredsController</code>, Views: <code>ucreds.index</code>, <code>ucreds.manifest</code>, <code>ucreds.report</code>, <code>ucreds.courses</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Executes deterministic CSV data interchange with UCreds (Moodle LMS):
+(1) <b>Enrolment Export:</b> Compiles registered learner rosters in standardized template <code>enrol v3</code>, generating identical byte output and SHA-256 hashes for identical data.
+(2) <b>Check File:</b> Validates imported grades against schema rules without altering live database records. Detects duplicate files via SHA-256 hash checking (SDD 6.2.3).
+(3) <b>Rejected Rows Report:</b> Generates downloadable CSV containing specific row numbers and validation error reasons (e.g., unregistered student ID, mark exceeds 100).
+(4) <b>Staging:</b> Commits valid rows to <code>assessment_results</code> in pending verification state.
+(5) <b>UCreds Courses:</b> Reference catalog of 59 verified pilot courses (D-34).</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flow FL-07 and scenario Act 2. Staging handles partial validation: valid rows stage successfully while rejected rows are isolated in <code>import_row_errors</code>.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Partially Working (By Design).</b> Core file checking, error reporting, and staging operate reliably. File scanning and storage run within local disk storage (<code>storage/app/private/ucreds</code>) pending an enterprise object store and virus scanner.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["CODL Admin on UCreds Hub<br/>/admin/ucreds"] --> B["Upload UCreds Results CSV"]
+    B --> C["Click 'Check File'<br/>POST /admin/ucreds/check"]
+    C --> D["System verifies Header & SHA-256 Hash<br/>Parses every row"]
+    D -->|"Hash Already Imported"| E["Reject File<br/>Refuse Duplicate Import"]
+    D -->|"Syntax / Data Errors Found"| F["Record Row Errors in import_row_errors<br/>Generate /admin/ucreds/imports/{id}"]
+    F --> G["Download Rejected Rows CSV<br/>/admin/ucreds/imports/{id}/errors.csv"]
+    
+    D -->|"Valid Rows Present"| H["Enable 'Stage Valid Rows' Button"]
+    H --> I["Click 'Stage Valid Rows'<br/>POST /admin/ucreds/imports/{id}/stage"]
+    I --> J["Insert into assessment_results<br/>Status: pending_verification"]
+    J --> K["Notify Deputy Dean & Lecturer"]
+</pre>
+<figcaption>Figure 7.3: UCreds Grade Import, Validation & Staging Pipeline</figcaption>
+</figure>
+
+<!-- ---------------- 7.4 Adapters, Audit & Retention ---------------- -->
+<h2>7.4 Adapters, Cryptographic Audit Trail & Retention Governance (MD-15, MD-16)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Integration Adapters (<code>/admin/adapters</code>), Retry Call (<code>POST /admin/adapters/calls/{id}/retry</code>), Notification Log (<code>/admin/notification-log</code>), Demo Clock (<code>/admin/demo-clock</code>), Audit Trail (<code>/admin/audit</code>), Verify Hash Chain (<code>POST /admin/audit/verify</code>), Retention Governance (<code>/records/retention</code>), Apply Hold (<code>POST /records/retention/holds</code>), Lift Hold (<code>POST /records/retention/holds/{id}/lift</code>), Dispose (<code>POST /records/retention/{category}/dispose</code>)</li>
+  <li><b>Role:</b> CODL Administrator (<code>codl_admin</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /admin/adapters</code>, <code>POST /admin/adapters/calls/{id}/retry</code>, <code>GET /admin/notification-log</code>, <code>GET /admin/demo-clock</code>, <code>POST /admin/demo-clock</code>, <code>POST /admin/demo-clock/jobs</code>, <code>GET /admin/audit</code>, <code>POST /admin/audit/verify</code>, <code>GET /records/retention</code>, <code>POST /records/retention/holds</code>, <code>POST /records/retention/holds/{id}/lift</code>, <code>POST /records/retention/{category}/dispose</code></li>
+  <li><b>Page Type:</b> Integration Hub, Security Audit & Legal Compliance Dashboard</li>
+  <li><b>Related Database Tables:</b> <code>integration_calls</code>, <code>notifications</code>, <code>audit_events</code>, <code>audit_chain_heads</code>, <code>retention_holds</code>, <code>disposal_records</code></li>
+  <li><b>Related Components & Controllers:</b> <code>AdapterController</code>, <code>NotificationController</code>, <code>DemoClockController</code>, <code>AuditController</code>, <code>RetentionController</code>, Views: <code>admin.adapters</code>, <code>admin.notification-log</code>, <code>admin.demo-clock</code>, <code>audit.index</code>, <code>records.retention</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Technical and legal governance:
+- <b>Adapters & Notifications:</b> Monitors external API calls (payment gateway, SMS, email), displays latency and error payloads, and enables manual retries.
+- <b>Demo Clock (FL-19):</b> Test-only simulation clock that advances system time to test time-based events (credit expiry, QV lapse) without tampering with database records. Strictly blocked in production environments.
+- <b>Cryptographic Audit Trail (FR-254):</b> Implements an append-only log where every state change is linked to the prior record via a SHA-256 hash chain. "Verify Chain" traverses the chain to detect unauthorized database tampering.
+- <b>Retention & Disposal (FR-retention):</b> Applies legal retention periods to non-academic logs. Supports legal holds that freeze disposal. Disposal permanently purges eligible records and issues a signed certificate of disposal.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flows FL-17, FL-18, and FL-24. Hash chain verification successfully detects modified payloads. Legal holds immediately block disposal actions.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Audit integrity, retry mechanisms, and retention rules operate as specified.</p>

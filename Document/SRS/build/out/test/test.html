@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Software Requirements Specification - UTeM MCMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --blue:#3f6fa6; --tint:#dcebf1; --line:#444; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family:'Noto Serif', Cambria, Georgia, serif; font-size:10pt; line-height:1.45; color:#1a1a1a;
+         font-variant-ligatures:none; margin:0; background:#fff; }
+  /* cover */
+  .cover { break-after:page; padding-top:28mm; }
+  .cover .doc-title { text-align:center; font-size:23pt; font-weight:700; margin:0 0 6px; }
+  .cover .doc-sub { text-align:center; font-size:14pt; font-weight:700; font-style:italic; margin:0 0 30px; }
+  .cover h3 { font-size:13pt; margin:0 0 4px; }
+  .cover table td:first-child { width:34%; font-weight:700; }
+  .cover .disclaimer { margin-top:38mm; font-style:italic; font-size:9.5pt; text-align:justify; }
+  .cover .disclaimer b { display:block; font-size:10.5pt; margin-bottom:2px; }
+  .tint, .cover th { background:var(--tint) !important; }
+  /* toc */
+  .toc { break-after:page; }
+  .toc-title, h1.notoc { background:var(--tint); text-align:center; font-size:14pt; font-weight:700; padding:6px; margin:0 0 12px; color:#111; }
+  .toc-row { display:flex; align-items:baseline; font-size:9.5pt; margin:3px 0; }
+  .toc-row .t { white-space:nowrap; }
+  .toc-row .dots { flex:1; border-bottom:1px dotted #777; margin:0 4px; transform:translateY(-3px); }
+  .toc-row .pg { min-width:16px; text-align:right; }
+  .toc-1 { font-weight:700; margin-top:7px; }
+  .toc-2 { padding-left:16px; }
+  .toc-3 { padding-left:32px; font-size:9pt; }
+  .tocend { color:#fff; font-size:2pt; }
+  /* headings */
+  main h1 { break-before:page; background:var(--tint); color:var(--blue); font-size:15pt; padding:5px 8px; margin:0 0 10px; break-after:avoid; }
+  main h2 { color:var(--blue); font-size:12.5pt; margin:16px 0 6px 10px; break-after:avoid; }
+  main h3 { color:var(--blue); font-size:11pt; margin:12px 0 5px 20px; font-style:italic; break-after:avoid; }
+  main h4 { font-size:10pt; margin:10px 0 4px; break-after:avoid; }
+  p { margin:0 0 7px; text-align:justify; }
+  ul, ol { margin:2px 0 8px 4px; padding-left:20px; }
+  li { margin:1px 0; }
+  td ul, td ol { margin:2px 0 2px 0; padding-left:16px; }
+  table { width:100%; border-collapse:collapse; margin:6px 0 12px; font-size:9pt; }
+  th, td { border:0.6pt solid var(--line); padding:3px 6px; vertical-align:top; text-align:left; }
+  th { background:#ececec; font-weight:700; }
+  thead { display:table-header-group; }
+  tr { break-inside:avoid; }
+  td.c-id, th.c-id { white-space:nowrap; width:50px; font-weight:600; }
+  td.c-src, th.c-src { width:74px; font-size:8pt; color:#333; }
+  td.c-src { font-family:'Noto Sans', Arial, sans-serif; }
+  td.c-x, th.c-x { width:92px; font-size:8pt; }
+  .tcap, figcaption { font-style:italic; font-size:8.5pt; color:#333; margin:2px 0 12px; text-align:left; }
+  .tcap { margin:10px 0 0; }
+  figure { margin:10px 0 12px; break-inside:avoid; }
+  figure .mermaid { text-align:center; }
+  figure .mermaid svg { max-height:205mm; }
+  .note { border-left:3pt solid var(--blue); background:#f3f7fb; padding:5px 9px; margin:8px 0 10px; font-size:9.5pt; break-inside:avoid; }
+  .note b:first-child { color:var(--blue); }
+  code { font-family:Consolas, 'Courier New', monospace; font-size:8.3pt; background:#f1f1f1; padding:0 2px; }
+  .small { font-size:8.5pt; }
+  .center { text-align:center; }
+  .keep { break-inside:avoid; }
+  .pb { break-before:page; }
+  pre.mermaid { font-family:'Noto Sans', Arial, sans-serif; white-space:pre; }
+</style>
+</head>
+<body>
+<!-- Glossary and Decision Log v0.4. Each version's changes are listed in Section 4 (Change Control). -->
+<section class="cover">
+  <p class="doc-title">Glossary and Decision Log</p>
+  <p class="doc-sub">UTeM Micro-Credential Management System (MCMS)</p>
+  <h3>Document Control</h3>
+  <table>
+    <thead><tr><th colspan="2">Document Information</th></tr></thead>
+    <tbody>
+      <tr><td>Title</td><td>Glossary and Decision Log for the UTeM Micro-Credential Management System (MCMS)</td></tr>
+      <tr><td>Date</td><td>28 October 2026</td></tr>
+      <tr><td>Status</td><td>Draft</td></tr>
+      <tr><td>Version</td><td>0.8 (D-38 added: the Release 1 prototype follows the design prototype again; D-35 superseded)</td></tr>
+      <tr><td>Prepared for</td><td>Supervisor review; Centre for Open and Distance Learning (CODL), Universiti Teknikal Malaysia Melaka (assumed system owner)</td></tr>
+      <tr><td>Prepared by</td><td>Aliff, Intern</td></tr>
+      <tr><td>Reference</td><td>MCMS_FND_V0.8_Oct_2026</td></tr>
+      <tr><td>Document set</td><td>Software Requirements Specification (SRS), Product Requirements Document (PRD), UI/UX Design Specification, Software Design Description (SDD), System Flow Map (D-30)</td></tr>
+    </tbody>
+  </table>
+  <div class="disclaimer">
+    <b>Disclaimer:</b>
+    This document is a working draft prepared by an intern as part of a concept and mock-up for a proposed system. It is not an official document of UTeM or CODL. Rules taken from the Garis Panduan Micro-Credential UTeM remain the property of UTeM. Items marked Assumed or Proposed have not been confirmed by the system owner. Unauthorised modification, distribution or misrepresentation is prohibited.
+  </div>
+</section>
+
+<section class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <div id="toc"></div>
+  <span class="tocend">TOCENDMARKER</span>
+</section>
+
+<main>
+<h1 class="notoc">Glossary</h1>
+<script type="text/tbl" data-h="Term|Definition" data-w="24%|76%">
+ABC | Academic Bank of Credit. Central digital depository of ACR. A deposit is storage and does not approve transfer. [G 12.5]
+ACR | Academic Credit Record. Academic record used in the ABC mechanism; prepared only for an eligible completed UMC or Quality-Verified SAMC. [G 12.4]
+Achievement Record | UTeM internal record of modules passed, Digital Badges and MC completion (Rekod Pencapaian Pembelajaran). It is not an ACR. [G 8.7.5, 18.3]
+Adapter | A defined interface to an external system (UCreds, ABC, QVC/MQA, payment, SSO, email) with a stub or manual version in the first release.
+API | Application Programming Interface
+Audit trail | Append-only record of approvals, credential actions, result changes and corrections. History is never erased. [G 10.5.1, 18.10]
+CODL | Centre for Open and Distance Learning. System administrator and technical operator of MCMS and operator of UCreds. CODL takes no academic decision in MCMS (D-12).
+Configurable value | A threshold or list kept in settings and never hard-coded (40 h SLT, 3-year QV limit, 10-year credit validity, 30% home credit, residency, alert days, retention).
+CQI | Continuous Quality Improvement: finding, evidence, analysis, action, implementation and effectiveness check. [G 17]
+Credit accumulation | Building a record of eligible credit over time. Separate from credit transfer. [G 12]
+Credit transfer | Evaluation and acceptance of credit by the programme that receives it; in MCMS decided by the deputy dean of the faculty that owns the degree (D-28). Equivalence is judged on learning outcomes, not on credit or SLT alone. [G 13]
+Credit validity | Credit in ABC is valid 10 years from deposit date. This differs from ACR retention (indefinite unless the owner or authority directs otherwise). [G 12.8]
+Digital Badge | Proof of achievement of one module or unit. Not academic credit and not an ACR. [G 8.7.1, App E1]
+Digital Credential / Certificate | Proof of completing the whole MC (Sijil / Digital Credential). Does not by itself give credit or transfer. [G 8.7.3, App E1]
+Deputy dean (PTj) | The faculty deputy dean who owns micro-credential offerings in MCMS: endorses, verifies, confirms quality and records decisions (D-28).
+HEPA | Student Affairs and Alumni Department. Assumed to register outside applicants together with Pejabat Pendaftar.
+Material change | Change to outcomes, SLT, assessment, module structure, credit, MQF level, parent course link or QV status. Needs review and re-approval and is versioned. [G 9.5, 17.7, 17.8]
+MCE | Micro-Credential Eksekutif. Non-credit short learning under 40 hours SLT. Never carries credit unless reclassified and re-approved as a SAMC. [G 6.3.3]
+MQA / MQF | Malaysian Qualifications Agency / Malaysian Qualifications Framework.
+Micro-Credential (MC) | Certification of a small, focused unit of learning with defined outcomes and assessment. Recognition follows achievement, not attendance. [G 6.1]
+Module | A smaller unit of a UMC. Completion earns a Digital Badge, not credit and not whole-UMC completion. [G 8.7.1]
+PTj | Pusat Tanggungjawab: the faculty, school, institute or centre that owns an offering. [G 15.2.2]
+QA / QV / QVC | Quality Assurance applies to every MC. Quality Verification is the SAMC-specific check run by the QVC under MQA rules. Approval to offer is a separate decision from QV. [G 7.6, 11.2]
+Quality-Verified SAMC | A SAMC that has passed QV. QV is valid for at most 3 continuous years and needs one completed cohort before submission. [G 11.2.1, 11.2.2]
+RBAC | Role-Based Access Control
+SAMC | Stand-alone Micro-Credential. Own offering, at least 40 hours SLT. Credit and MQF level exist only after QV. [G 6.3.2]
+SDD | Software Design Description
+Single Redemption | Credit used for one qualification cannot be used for another. Transfer makes credit provisionally redeemed; completing the programme makes it redeemed. [G 12.9]
+SLT | Student Learning Time: all learning and assessment time, not only contact time. [G 8.3]
+Stackable Degree | Planned pathway where eligible credit counts toward part of a degree. Needs admission, transfer approval, at least 30% credit earned at UTeM, residency (1 semester for conventional programmes), PLO mapping and graduation requirements. [G 14]
+SRS / PRD | Software Requirements Specification / Product Requirements Document
+SSO | Single Sign-On
+UCreds | UTeM online learning platform for micro-credentials (ucreds.utem.edu.my), operated by CODL on Moodle; the pilot learning platform. Reached only through an adapter. Its public content is recorded in Appendix A (D-34).
+UMC | Unbundled Micro-Credential. Made by unbundling an accredited credit course; keeps its parent link; total SLT equals the parent course; whole UMC is at least 40 hours SLT or one credit. [G 6.3.1]
+</script>
+
+<h1>1. Introduction</h1>
+<h2>1.1 Purpose</h2>
+<p>This document fixes the vocabulary and the key decisions that the three controlling documents of the UTeM Micro-Credential Management System (MCMS), namely the Software Requirements Specification (SRS), the Product Requirements Document (PRD) and the Software Design Description (SDD), shall follow. Every later document shall use the terms in the Glossary with exactly these meanings and shall not contradict a decision in Section 3 unless the decision is first changed here and the version of this document is raised.</p>
+<p>The document set is written for two readers at once: a supervisor who reviews it, and AI development agents and developers who use it as the guide, reference and rule set for building the system. For that reason requirements are written as single, identified statements with traceability to the Guide.</p>
+
+<h2>1.2 Document Conventions</h2>
+<p>This document and the document set follow these conventions:</p>
+<script type="text/tbl" data-h="Term|Description" data-w="16%|84%">
+SHALL | Mandatory requirement that must be fulfilled in Release 1, the first buildable release (prototype scope, decision D-22). The developer is required to cover this feature in Release 1.
+SHOULD | Requirement planned for Release 2. The developer should take it into account in the design so that it can be added without rework.
+MAY | Requirement anticipated for Release 3 or later. The developer is encouraged to keep it in mind for future scalability.
+TBD | To Be Determined. Information not yet available that will be provided in a later version. Every TBD is linked to an open item (OI-xx).
+Note | Provides additional information or clarification.
+</script>
+<div class="note"><b>Note:</b> A requirement tagged with a Guide source, for example [G 12.9], states a rule that is mandatory for the complete system under UTeM policy. Its SHALL / SHOULD / MAY wording states only the release in which MCMS implements it. Guide rules are never relaxed by the release plan.</div>
+<p>Requirements and records are categorised as follows:</p>
+<script type="text/tbl" data-h="Requirement Number|Description" data-w="26%|74%">
+FR-XX | Functional Requirements
+NFR-XX | Non-Functional Requirements
+IR-XX | Interface Requirements
+DR-XX | Data Requirements
+SR-XX | Security Requirements
+BR-XX | Business Rules taken from the Guide (added to the reference categories, decision D-25)
+D-XX / A-XX / OI-XX | Decision / Assumption / Open item (this document)
+</script>
+<p>Source tags follow the Guide: [G 12.9] means Guide clause 12.9 and [App E5] means Guide appendix E, table E5.</p>
+
+<h2>1.3 Intended Audience</h2>
+<p>This document is intended for the following stakeholders:</p>
+<script type="text/tbl" data-h="Stakeholder|Role" data-w="38%|62%">
+Supervisor | Reviews the document set and the decisions taken.
+CODL / UTeM reviewers | Confirm assumptions and open items; system owner (assumed).
+Development team and AI development agents | Design and implement the system using these terms and decisions as fixed rules.
+Testers and quality assurance | Derive acceptance tests from requirement IDs and rules.
+System administrators | Maintain and configure the system after delivery.
+</script>
+
+<h2>1.4 Scope of this Document</h2>
+<p><b><i>In Scope</i></b></p>
+<ul>
+  <li>Glossary of terms used across the SRS, PRD and SDD</li>
+  <li>Key concepts of the Guide that drive the design (categories, recognition stages, numeric rules)</li>
+  <li>Decision log, assumptions register and open items with the working assumption for each</li>
+  <li>Change control for this document</li>
+</ul>
+<p><b><i>Out of Scope</i></b></p>
+<ul>
+  <li>Requirements, user needs and design detail, which belong to the SRS, PRD and SDD</li>
+  <li>A Test Plan (acceptance tests are traced from SRS requirement IDs; decision D-01)</li>
+  <li>Any change to the Guide itself</li>
+</ul>
+
+<h2>1.5 References</h2>
+<ol>
+  <li>Garis Panduan Micro-Credential UTeM (the Guide), CODL UTeM, with Lampiran A to H: the copy held in the project (MC UTeM Guide.pdf), cover Versi 1.0, 18 September 2026 (D-03).</li>
+  <li>Software Requirements Specification, UTeM Micro-Credential Management System, informal draft v0.1, 23 October 2026 (input material only).</li>
+  <li>Software Requirements Specification for an AI-Driven Job Matching Platform, v1.0, May 2025. Used as a format reference only; no content is reused.</li>
+  <li>MQA: Guidelines to Good Practices on Micro-Credentials; Quality Verification of Stand-alone Micro-Credentials; Guidelines on the Academic Bank of Credit; Malaysian Qualifications Framework (second edition).</li>
+  <li>Guidelines on Developing Academic Programme through Stackable Degree Pathway.</li>
+  <li>ISO/IEC/IEEE 29148, Requirements engineering.</li>
+  <li>Open Badges 3.0 and W3C Verifiable Credentials data model (guidance for credential format).</li>
+  <li>WCAG 2.1; OWASP Application Security Verification Standard; Personal Data Protection Act 2010 (Act 709) with current amendments.</li>
+  <li>Software Requirements Specification, UTeM Micro-Credential Management System, v1.0 draft, 23 October 2026 (MCMS_SRS_V1.0_Oct_2026), written against v0.2 of this document; source of open items OI-09 to OI-15.</li>
+  <li>UCreds Public Portal Audit and Complete Course Directory, v1.0, 27 October 2026 (UCREDS_AUDIT_V1.0_Oct_2026; folder <code>UCreds</code> of the project): the source of Appendix A (D-34).</li>
+  <li>Software Requirements Specification v1.2 and Software Design Description v1.2, 28 October 2026, and the Release 1 review of 28 October 2026 (Release1_Review_2026-10-28): the build findings behind D-35 to D-37.</li>
+</ol>
+
+<h1>2. Key Concepts from the Guide</h1>
+<p>This section summarises the parts of the Guide that shape every design decision. It does not replace the Guide.</p>
+<h2>2.1 Micro-Credential Categories</h2>
+<script type="text/tbl" data-h="Criterion|UMC|SAMC|MCE" data-w="16%|32%|28%|24%">
+Origin | Unbundled from an accredited credit course; keeps parent link | Own offering, not part of an accredited programme | Own non-credit short learning
+SLT | Total equals parent course; whole UMC at least 40 h or 1 credit | At least 40 h | Under 40 h
+Credit | Possible, subject to academic rules; only the whole UMC carries credit | Only after QV | None
+Quality route | Quality assurance of parent programme | QA, plus QV if credit is sought | Internal UTeM QA
+ABC deposit | Yes, if eligible | Only if Quality-Verified | No
+Stackable degree | Yes, subject to conditions | Only if Quality-Verified | No
+</script>
+<p class="small"><i>Source: Guide Table 1 and clauses 6.3 to 6.5.</i></p>
+
+<h2>2.2 The Separate Recognition Stages</h2>
+<p>The Guide treats each stage below as a different thing with its own decision and its own record [G 12 to 14, 18.14]. MCMS shall store them as separate records so that none can be skipped or mistaken for another.</p>
+<script type="text/tbl" data-h="Stage|Decided by|Does NOT imply" data-w="40%|35%|25%">
+1. Approval to offer | Senate, after deputy dean endorsement; recorded by the deputy dean | Credit, QV, transfer
+2. Module achievement (Digital Badge) | Lecturer assesses; deputy dean verifies; system issues the badge | Whole-MC completion, credit
+3. MC completion (Certificate / Digital Credential) | Deputy dean confirms; system issues the credential | Credit, ACR, transfer
+4. Quality Verification (SAMC only) | QVC / MQA | Transfer or admission
+5. ACR and ABC deposit | System generates the ACR; participant consents; deputy dean records the deposit | Transfer approval
+6. Credit transfer | Deputy dean of the faculty that owns the degree | Admission, degree award
+7. Stackable degree award | UTeM academic programme | Nothing further
+</script>
+
+<h2>2.3 Key Numeric Rules (Configurable)</h2>
+<script type="text/tbl" data-h="ID|Rule|Default|Source" data-w="9%|51%|24%|16%">
+BR-01 | Minimum SLT for SAMC and for a whole UMC | 40 hours (or 1 credit for UMC) | G 6.3.1, 6.3.2
+BR-02 | Maximum validity of Quality Verification | 3 continuous years | G 11.2.2
+BR-03 | QV submission needs at least one completed cohort | 1 cohort | G 11.2.1
+BR-04 | Validity of credit in ABC from deposit date | 10 years | G 12.8
+BR-05 | Minimum credit earned at UTeM for a stackable degree | 30% of graduating credit | G 14.5.1
+BR-06 | Residency for conventional programmes via stackable pathway | 1 semester | G 14.5.3
+</script>
+
+<h1>3. Decision Log</h1>
+<h2>3.1 Status Key</h2>
+<p><b>Decided</b>: stated by the project owner or fixed by the Guide. <b>Assumed</b>: no answer yet; a working assumption is used and its effect if wrong is recorded in 3.3. <b>Proposed</b>: a recommendation awaiting confirmation. Every Assumed or Proposed item shall be built so that it can change through configuration or by replacing one adapter, not by rewriting modules.</p>
+
+<h2>3.2 Decisions</h2>
+<script type="text/tbl" data-h="ID|Decision|Rationale / effect if changed|Status" data-w="7%|43%|36%|14%" data-cls="small">
+D-01 | The controlling document set is the SRS, the PRD and the SDD. A Test Plan is not in this set; acceptance tests are traced from SRS requirement IDs. | Matches the project owner's choice. A Test Plan can be added later without changing the three documents. Extended in v0.6 by D-30 (UI/UX Design Specification and System Flow Map). | Decided
+D-02 | All documents are written in English. The system (screens, notifications, credentials) shall support Bahasa Melayu and English. | Documents are read by a supervisor and by AI agents. Bilingual wording of the Guide is preserved through the Glossary. | Decided
+D-03 | The controlling Guide is the copy held in the project (MC UTeM Guide.pdf), whose cover says Versi 1.0, 18 September 2026. A "Version 2.0 Final, 15 September 2026" was named only in the informal draft SRS v0.1; no such copy is held in the project. | It is the only copy available. If a later version is issued, only the source tags need re-checking. | Decided (v0.4, closes OI-01)
+D-04 | A new, formal SRS shall be written. Its layout follows the reference SRS (document control, contents, glossary, numbered sections, identified requirement tables) with Guide terminology. The informal draft SRS v0.1 is input material only. | The draft ends at section 2.8 and its later sections do not exist. A new SRS avoids inheriting the gaps. | Decided
+D-05 | All documents are formal and professional in style and written so an AI agent can follow them without guessing: stable IDs, one requirement per statement, traceability to Guide clauses, explicit assumptions. | Dual audience: supervisor review and AI-assisted development. | Decided
+D-06 | MCMS is a new standalone system with its own database, login handling and workflow. It talks to other systems only through adapters. | Carried from draft SRS (C1, C3). Keeps UCreds and the student system untouched. | Decided
+D-07 | Architecture is a modular monolith: one deployable application with clearly separated modules (starting from the draft's M1 to M16, regrouped in the SDD if needed). | Simplest to build, test and host for a small team. Modules use internal interfaces, so later splitting stays possible. | Proposed
+D-08 | Primary technology is Laravel (PHP). | CODL mostly uses PHP, so maintenance stays with a familiar stack. Chosen by the project owner. | Decided
+D-09 | Database recommendation: PostgreSQL as the primary choice; MySQL or MariaDB is an acceptable fallback if CODL already hosts and supports it. | PostgreSQL gives strong constraints, transactional integrity, JSON fields for credential metadata and good support for append-only audit design. The SDD keeps queries portable through Laravel's database layer. | Proposed (OI-02)
+D-10 | Identity: staff and participants sign in with their Microsoft education account through single sign-on (OpenID Connect assumed). Outside applicants register first at Pejabat Pendaftar or HEPA and then receive that account. MCMS offers no open public sign-up. | Stated by the project owner with details uncertain. If the method differs, only the SSO adapter and applicant recognition change. | Assumed (A-06, OI-03)
+D-11 | Approvals: the deputy dean (PTj) endorses proposals and the Senate gives final approval to offer, approves material changes and approves stackable degree mappings. The Senate does not use MCMS; the deputy dean records each Senate decision with its meeting reference. Individual credit transfer cases are decided by the deputy dean of the faculty that owns the degree. Approving roles stay settings, not code. | Confirmed by the project owner in v0.5. The Guide names no committees (App H), so routing remains configurable. | Decided (v0.5, closes OI-06)
+D-12 | CODL is the system administrator (S1) and technical operator (P5) of MCMS and the product owner. CODL takes no academic decision and holds no academic records role: it does not issue, correct or revoke credentials, prepare ACR or deposit credit. | Confirmed by the project owner in v0.5. Separates operation of the system from academic authority [G 15.2.3]. | Decided (v0.5)
+D-13 | UCreds is the pilot learning platform. Its connection method is a placeholder for the next iteration; CSV import is the fallback. UCreds issues module badges and keeps its own database (confirmed by the audit of 27 October 2026, D-34); MCMS imports and checks badge data and issues certificates and Digital Credentials. | If UCreds should not issue badges, MCMS issues them instead (one adapter and one module change). | Assumed (A-04, OI-04); A-05 supported by the audit
+D-14 | QVC/MQA submission and payment are manual or stubbed in Release 1: MCMS prepares and tracks; UTeM staff submit. A dummy payment service stands in. The ABC deposit step stays in the flow after the ACR: the deputy dean records each deposit in MCMS. A national ABC platform is still a concept, so no live connection is built; it is added later by swapping one adapter if it becomes available. | External services are not ready or not integrable now. Each is replaced later by swapping one adapter. | Assumed (A-02, A-03)
+D-15 | Recognition stages (Section 2.2) shall be stored as separate records with separate decisions. No single status or button may combine them. | The single most important rule in the Guide [G 12 to 14, 18.14]. Overrides any convenience shortcut in later documents. | Decided
+D-16 | Thresholds in Section 2.3 and other limits shall be configurable settings, including alert days and retention periods. | Rules in the Guide may be revised by UTeM or MQA. Carried from draft SRS (C4). | Decided
+D-17 | Credit value, MQF level and QV wording shall be generated only from verified records, never typed by hand. A credential shall show credit, MQF or QV information only when verified and still valid. | Prevents false claims [G 10.5, App E5]. | Decided
+D-18 | The draft's rule C9 ("a UMC module is never a credit unit") is corrected: a UMC module is not a credit unit unless specifically approved as a separately recognisable credit unit. The whole UMC always carries the credit of its parent course. The approval is an academic decision taken case by case by the deputy dean (the approving role is a setting, D-11). | Guide 13.5 and 14.2.1 allow this exception. Guide 15.2.3 keeps academic decisions away from operational staff, so the System Administrator role does not approve it. The system shall support an approval flag whose default is no. | Decided (v0.5 names the deputy dean; closes OI-05)
+D-19 | Credentials use an open, signed format (Open Badges 3.0 and W3C Verifiable Credentials as guidance); blockchain is not required. Public verification needs no login and shows only the minimum permitted information. | Carried from draft SRS (C8). Privacy limits follow Guide App E6. | Proposed
+D-20 | All approvals, credential actions, result changes and corrections are written to an append-only audit log. Corrections never delete earlier records. | Required by G 10.5.1, 15.7 and 18.10. Also supports supervisor review. | Decided
+D-21 | Sizing figures (up to 200 offerings and 20,000 participants a year, peaks of 2,000 registering within hours) are indicative only and non-binding. | The project owner considers them a possibility, not fact. Design for modest scale without blocking growth. | Assumed (A-09)
+D-22 | The system is produced by an intern as a mock-up and concept. The documents describe the target system. Release 1 is the first buildable release (prototype scope); the PRD shall mark which features belong to Release 1, 2 and 3 or later. | Keeps the specification complete while being honest about prototype scope. Release numbers drive SHALL / SHOULD / MAY (D-24). | Decided
+D-23 | Deliverables are produced as PDF, one at a time, in this order: this document, SRS, PRD, SDD, and then the Release 1 prototype (D-31). The UI/UX Design Specification and System Flow Map were added in v0.6 (D-30). Work continues on the recorded assumptions without waiting for review between documents; supervisor review takes place once something tangible (the prototype) can be shown, and its comments are applied to all documents together. | Changed in v0.4 at the project owner's request: keeps the work moving while assumptions are explicit and changeable. Earlier wording required review before each next document. | Decided
+D-24 | SHALL, SHOULD and MAY indicate Release 1, Release 2 and Release 3 or later respectively, as in the reference SRS. Guide-mandated rules keep their [G] tag and stay binding on the full system regardless of release. | Follows the reference format while preventing the release plan from weakening any Guide rule. Replaces the plain shall / should / may meaning used in v0.1. | Proposed
+D-25 | A sixth requirement category, BR-XX (Business Rules from the Guide), is added to the reference categories FR, NFR, IR, DR and SR. | The Guide's rules are central to this system and need their own traceable IDs. | Proposed
+D-26 | Format of all documents follows the reference SRS: cover with Document Control table and disclaimer, table of contents, glossary, numbered sections with tinted headings, serif body text, and tables with ID and Requirement columns. The PRD and SDD adopt these elements where applicable and use their own section content. | Requested by the project owner. Only structure and layout are adopted; no content from the reference is reused. | Decided
+D-27 | One credit equals 40 notional learning hours (SLT). The value is the default of a configurable setting and is used for UMC and SAMC credit calculations. | Confirmed by the project owner (closes OI-14); follows the MQF convention and the Guide's "40 hours or 1 credit" threshold [G 6.3.1]. | Decided (v0.4)
+D-28 | MCMS has six kinds of user: Student (P8); Lecturer (P1), who creates and runs micro-credentials, assesses students, performs the quality review and collects QV evidence, and reviews colleagues' proposals when assigned (X1); Deputy dean of the PTj (P2), who endorses, records Senate decisions, confirms readiness, verifies results and completion, confirms quality review and QV evidence, corrects or revokes credentials, records ABC deposits, approves module credit, and (for the faculty owning a degree) decides credit transfers; Senate (P3), which approves but does not log in; CODL as system administrator and technical operator (S1, P5); and employers or the public, who verify credentials without login (X3). An industry expert (X2) may comment on proposals. The former separate roles quality unit (P4), records and credential unit (P6), ABC depositor (P7) and receiving programme evaluator (X4) are not used; their tasks move to the deputy dean or the system. | Confirmed by the project owner in v0.5. Fewer roles match how UTeM faculties actually work and keep CODL out of academic decisions. | Decided (v0.5)
+D-29 | Badges, certificates and Digital Credentials are issued automatically by the system when the deputy dean verifies results or confirms completion and the pre-issuance checks pass. ACR is generated automatically for eligible learning and confirmed by the deputy dean. Corrections, replacements and revocations are made by the deputy dean, with history kept. | Confirmed by the project owner in v0.5. Removes manual certificate preparation and keeps every academic decision with an academic role. | Decided (v0.5)
+D-30 | The document set is the SRS, the PRD, the UI/UX Design Specification (approved design basis, v1.1), the SDD and the System Flow Map (a navigable overview of roles, modules, events, jobs and data, derived from the SDD). The Glossary and Decision Log governs all of them. Where the UI/UX Design Specification and the SDD differ on a screen, flow or document ID, the UI/UX Design Specification controls; where they differ on structure or behaviour behind the screen, the SDD controls. | The SDD and the UI/UX Design Specification already treat each other as part of the set, while v0.5 listed only three documents. | Proposed (v0.6)
+D-31 | Two things are called a prototype. The design prototype is the clickable HTML prototype that the UI/UX Design Specification describes. The Release 1 prototype is the working Laravel application of the SDD on seed data with stub and Manual adapters (PRD Sections 5 and 7). D-22 and D-23 refer to the Release 1 prototype. Its acceptance script is the demonstration scenario of PRD Section 7; the walk-through flow FL-19 is rewritten to follow that scenario. | The same word was used for both, and FL-19 mixes three offerings (a Stand-alone Micro-Credential, an Unbundled one and a non-credit one) so it cannot test one record chain. | Proposed (v0.6)
+D-32 | Release 1 is built in the four increments of PRD Section 5.3 (1.1 Foundation, 1.2 Curriculum, 1.3 Delivery and credentials, 1.4 Credit and quality). Build slices are planned inside these increments and do not reorder them. | Keeps one build order across the PRD and the SDD. | Proposed (v0.6)
+D-33 | DESIGN.md (Carbon with uLearn Navy) is accepted as the UTeM corporate identity for MCMS (SRS IR-08) until UTeM supplies its own guidelines. | The UI/UX Design Specification relies on this; v0.5 recorded no assumption for it. | Assumed (A-10)
+D-34 | The content of UCreds is taken from the UCreds Public Portal Audit v1.0 (27 October 2026; the folder <code>UCreds</code> of the project) and is recorded in Appendix A: the public catalogue (programmes, micro-courses, subjects with their codes, levels, durations and fees), the platform and the support services. The Release 1 prototype holds the catalogue as reference data (a screen for the CODL administrator, and course references offered on the offering form). The PRD Section 7 scenario keeps its own fictional micro-credentials. MCMS never copies UCreds content into an approved version: a UMC or SAMC is proposed and approved in MCMS, and a UCreds course is only referred to by its course reference. | The audit read only public pages; it is a working reference, not an agreement with CODL. Appendix A is replaced when CODL supplies the live catalogue. | Decided (v0.7)
+D-35 | The Release 1 prototype is judged against the requirements of the SRS, the PRD, the UI/UX Design Specification and the SDD. Its screens need not match the design prototype in layout or look, as long as every requirement, flow and document of those four documents is met. The navy side navigation and the DESIGN.md tokens stay (A-10). | Stated by the project owner on 28 October 2026. It ends a review of screen fidelity and keeps the effort on requirements. | Superseded by D-38 (v0.8)
+D-36 | For Release 1 a credential is signed as a VC-JOSE (JWT, EdDSA) proof of the Open Badges 3.0 credential, with the Ed25519 key of AD-09. The Data Integrity proof eddsa-rdfc-2022 stays the target. Public keys are published as a JWKS; a rotated key is retired, not deleted. | The spike found no PHP library that canonicalises a Verifiable Credentials v2 document (RDFC-1.0). This is the fallback that the SDD named. | Decided (v0.7)
+D-37 | A demo clock that moves the date forward is part of the Release 1 prototype (PRD 7.2). It exists only in a test environment: it needs the test sign-in and its own switch, and it is refused in production (SRS FR-05). The moved date lasts for one request and never moves the idle timeout. | Quality Verification and credit expiry cannot be shown otherwise. | Decided (v0.7)
+D-38 | The Release 1 prototype follows the approved design prototype (UI/UX Design Specification v1.2, folder UIUX/v2/prototype) in style, arrangement, structure and content: shell, navigation, tables with sortable headers, search and paging, dialogs, toasts, menus and the screens of each role. Features the design prototype does not show but the SRS, PRD, UI/UX Design Specification or SDD require (for example a participant's results and feedback) are added in the same style, and are kept simple: the first view shows the summary and the next action, and detail opens on request (tab, drawer or detail page). The navy side navigation and the DESIGN.md tokens stay (A-10). | Stated by the project owner on 28 October 2026 after seeing the built screens. It replaces D-35. | Decided (v0.8)
+
+  D-39 | The MCMS database architecture is migrated to MySQL 8.4 LTS (InnoDB, utf8mb4) as the primary operational database engine, preserving driver-independent compatibility with PostgreSQL 16. Audit event immutability triggers, credential protection triggers, and version history guards are implemented natively in MySQL. Full-text and case-insensitive search queries are driver-aware (db_like()), JSON document fields map to native MySQL JSON, and PDO connection options enable emulated prepared statements for optimal local socket throughput. | Recommended by comprehensive database audit and approved for production alignment; verified across all unit, feature, and E2E test suites. | Decided (v0.8)
+</script>
+
+<h2>3.3 Assumptions Register</h2>
+<script type="text/tbl" data-h="ID|Assumption|Effect if wrong" data-w="8%|56%|36%">
+A-01 | Superseded in v0.5 by D-11 (deputy dean endorses, Senate approves, deputy dean records Senate decisions, degree-owning deputy dean decides transfers). | Approver bodies remain settings.
+A-02 | ABC and QVC/MQA accept submissions manually in Release 1. | A real adapter is added later.
+A-03 | UTeM's payment hub is not ready; a dummy payment service is used. | Replace one adapter.
+A-04 | UCreds is the pilot learning platform; its connection method is unknown. | CSV import is the fallback; connector design shifts.
+A-05 | UCreds already issues module badges and has its own database. The audit of 27 October 2026 supports this: UCreds runs on Moodle 3.17, grades and badges on its own. | MCMS issues badges itself if UCreds should not.
+A-06 | Outside applicants register at Pejabat Pendaftar or HEPA, then sign in with a Microsoft education account. | Add an applicant pre-registration screen.
+A-07 | Superseded in v0.5 by D-12 and D-29: CODL is administrator and technical operator only; credentials and ACR are produced by the system after deputy dean verification. | Role holders change in settings.
+A-08 | Retention periods are placeholders. | Edit settings.
+A-09 | Sizing is indicative: 200 offerings and 20,000 participants a year, peaks of 2,000 registering within hours. | Capacity plan changes.
+A-10 | DESIGN.md is the UTeM corporate identity for MCMS (D-33). | Colours, type and logo usage change in the style tokens only.
+</script>
+
+<h2>3.4 Open Items for CODL / Supervisor Confirmation</h2>
+<p>OI-01 to OI-08 were raised in v0.1. OI-09 to OI-15 were found while writing the SRS v1.0 draft and are added in v0.3; the SRS requirements they affect are listed in its Appendix C. Closed items keep their row and ID, with the decision that closed them.</p>
+<script type="text/tbl" data-h="ID|Question|Needed by|Working assumption until answered" data-w="8%|48%|16%|28%" data-cls="small">
+OI-01 | Which Guide version is controlling: V2.0 (15 Sep 2026) or V1.0 (18 Sep 2026)? | Closed (v0.4) | The copy held in the project, Versi 1.0, 18 Sep 2026 (D-03)
+OI-02 | Is a PostgreSQL server available, or must the system use MySQL/MariaDB? | Before staging set-up (SDD issued on the working assumption) | PostgreSQL, portable queries (D-09)
+OI-03 | Which SSO protocol and tenant settings does UTeM allow for the Microsoft education account? How are outside applicants recognised? | Before staging set-up (SDD issued on the working assumption) | OpenID Connect; account attribute or imported list (D-10)
+OI-04 | How does UCreds connect (web service, data export, Moodle link) and does it issue badges? Partly answered in v0.7: UCreds runs Moodle 3.17 and issues badges (Appendix A); the connection is still to be agreed. | Next iteration | CSV import; UCreds issues badges (D-13)
+OI-05 | Is a separately credit-bearing UMC module an approved case at UTeM, and who approves it? | Closed (v0.4) | Allowed by case-by-case academic approval; approving role is a setting (D-18)
+OI-06 | Which committee or role approves each decision (offering, transfer rules, stackable mapping, material change)? | Closed (v0.5) | Deputy dean endorses, Senate approves, deputy dean records; degree-owning deputy dean decides transfers (D-11)
+OI-07 | Retention periods for each record category. | Before go-live | Placeholder settings; ACR retained indefinitely [G 12.8]
+OI-08 | Who owns the credential signing keys and the public verification page? | Before go-live | CODL (D-12)
+OI-09 | What are the credit transfer limits and non-transferable components of each target programme, and who maintains them? [G 13.5] | Before Release 1 testing | Programme settings entered by the faculty; the system warns only
+OI-10 | How will MCMS learn of programme admission, completion and withdrawal, which drive the redemption status of credit? [G 12.9, 14.4] | Before SDD | Recorded manually by an authorised user from programme records
+OI-11 | What data and file format does ABC require for an ACR deposit, and how are redemption updates sent to ABC? [G 12.5, 18.6] | Before Release 1 testing | Export of the ACR fields of Appendix F3 in CSV and PDF
+OI-12 | What fee rules, refund rules and sponsorship arrangements apply to offerings? | Before Release 2 | Fee set per offering; refunds handled outside MCMS
+OI-13 | What is the completion window for a modular UMC ("tempoh kesahan pembelajaran", G 7.4, 12.2)? | Before Release 1 testing | Default setting umc.completion_window_months (no value until answered), which an offering may override; no reminder is sent while no value is set
+OI-14 | Confirm that 40 notional learning hours equal 1 credit for UMC and SAMC calculations. [G 6.3.1] | Closed (v0.4) | Confirmed: 40 hours = 1 credit (D-27)
+OI-15 | Which identity verification methods are required for online assessment at each risk level? [G 10.4] | Before Release 1 testing | Recorded per assessment; method chosen by the PTj
+</script>
+
+<h1>4. Change Control</h1>
+<p>This document is the single place where terms and decisions change. A change shall state the decision ID, the new wording, the reason and the date, and shall raise the document version. The SRS, PRD and SDD shall cite the version of this document they were written against.</p>
+<script type="text/tbl" data-h="Version|Date|Change" data-w="12%|20%|68%">
+0.1 | 23 October 2026 | First issue: glossary, decisions D-01 to D-23, open items.
+0.2 | 23 October 2026 | Restyled to follow the reference document format; added Key Concepts, assumptions register, change history, decisions D-24 to D-26; D-04, D-05 and D-22 reworded.
+0.3 | 23 October 2026 | Added open items OI-09 to OI-15 raised while writing the SRS v1.0 draft. "Needed by" of OI-01 and OI-05 changed from "Before SRS" to "Before SRS approval", since the SRS draft now exists and uses their working assumptions. Added the SRS v1.0 draft to the references. The current assumptions (release scope, indicative performance figures) are accepted by the project owner for now. No decision changed.
+0.4 | 26 October 2026 | Closed OI-01 (D-03 now Decided: the project's copy of the Guide, Versi 1.0, 18 Sep 2026, controls), OI-05 (D-18 now Decided: module credit by case-by-case academic approval, approving role is a setting) and OI-14 (new D-27: 1 credit = 40 notional learning hours). D-23 changed: documents and the prototype proceed on recorded assumptions, with supervisor review once the prototype can be shown.
+0.5 | 26 October 2026 | User model simplified to Student, Lecturer, Deputy dean, Senate (no login), CODL (administrator and technical operator only) and public verifiers (new D-28). Credentials and ACR produced by the system after deputy dean verification (new D-29). D-11 now Decided: deputy dean endorses, Senate approves, deputy dean records Senate decisions, degree-owning deputy dean decides transfers (closes OI-06). D-12: CODL holds no academic role. D-14: ABC deposit stays in the flow and is recorded by the deputy dean; the national ABC platform is a concept only. D-18 names the deputy dean as approver. A-01 and A-07 superseded.
+0.6 | 27 October 2026 | Added D-30 (document set now includes the UI/UX Design Specification and the System Flow Map), D-31 (design prototype and Release 1 prototype defined; FL-19 to follow PRD Section 7), D-32 (Release 1 built in the PRD increments) and D-33 with A-10 (DESIGN.md as corporate identity). D-01 and D-23 updated. "Needed by" of OI-02, OI-03 and OI-08 changed because the SDD was issued on their working assumptions. OI-13 working assumption reconciled between SRS and SDD. Source: consistency review of 27 October 2026.
+0.7 | 28 October 2026 | Added Appendix A, the content of UCreds taken from the UCreds Public Portal Audit v1.0, and D-34 (UCreds content basis). Added D-35 (the Release 1 prototype is judged against the requirements, not against the look of the design prototype), D-36 (VC-JOSE credential proof for Release 1) and D-37 (demo clock, test environments only). D-13, A-05 and OI-04 updated with what the audit confirmed. UCreds glossary entry and references updated.
+0.8 | 28 October 2026 | Added D-38 (the Release 1 prototype follows the design prototype in style, arrangement, structure and content; additions for requirements are allowed and kept simple). D-35 marked superseded.
+
+  0.9 | 3 November 2026 | Added D-39 (MCMS database migrated to MySQL 8.4 LTS as primary engine with driver-independent compatibility with PostgreSQL 16; triggers and connection pooling configured).
+</script>
+
+<h1>Appendix A: UCreds Content</h1>
+<p>This appendix records what the UCreds public portal contains and how it works, as found by the UCreds Public Portal Audit v1.0 of 27 October 2026 (D-34). The audit used only public pages. Where this appendix and the live portal differ, the live portal is right, and CODL's catalogue replaces this appendix when it is supplied.</p>
+
+<h2>A.1 The platform</h2>
+<script type="text/tbl" data-h="Part|What the audit found|What it means for MCMS" data-w="20%|42%|38%" data-cls="small">
+Learning engine | Moodle 3.17 (build 20201109) with the Fordson theme; courses, quizzes, gradebooks, SCORM packages and enrolments live here | The source of results and badges; reached only through an adapter (D-06)
+Catalogue | A custom catalogue in front of Moodle (jQuery and AJAX, <code>/catalog/action.php</code>) with search, categories and pages; a course page per Moodle course ID | A UCreds course is identified by its course ID, and by its subject code when it has one (for example MAXL5123)
+Support site | WordPress 6.4.3 with a knowledge base of 36 articles under <code>/support/student/</code> | Outside MCMS; MCMS only links to it
+Sign-in | Microsoft Entra ID (OpenID Connect) for staff and students with UTeM accounts; Google OAuth2 or Moodle accounts for outside learners | Outside learners exist on UCreds; MCMS recognises them as applicants (OI-03)
+Network | A campus web application firewall that blocks unmodified automation (HTTP 500, Attack ID 20000051) | Tests of the UCreds screens need a real browser; the CSV exchange is not affected
+Badges and records | Passing grade C (50%) gives a Digital Badge and a record of the module in the learner's own record | Supports A-05; MCMS imports the badge data and issues the certificate and Digital Credential after verification
+</script>
+
+<h2>A.2 What the catalogue contains</h2>
+<p>The audit states 60 public offerings: 3 ODL Master programmes, 2 structured learning paths and 55 specialised micro-courses, over an underlying Moodle repository of 214 course instances. Fees range from free to RM 150.00 for micro-courses, and up to RM 25,110.00 for a full programme.</p>
+<script type="text/tbl" data-h="Domain|Offerings|Typical duration|Fee range (MYR)|Audience" data-w="30%|10%|18%|20%|22%" data-cls="small">
+ODL Master degree programmes | 3 | 1.5 to 2.0 years | 22,610 to 25,110 | Postgraduate scholars and executives
+Structured learning paths | 2 | 30 to 60 hours | Free to 150.00 | Data engineers and AI practitioners
+Mathematics and computational science | 12 | 10 to 18 hours | 12.00 to free | Engineering and computer science students
+AI, machine learning and analytics | 10 | 12 to 25 hours | 12.00 to free | Industry analysts and software engineers
+Cybersecurity and digital hygiene | 5 | 8 to 15 hours | 12.00 to free | Corporate employees and public learners
+Database systems and big data | 4 | 10 to 18 hours | 12.00 to free | Database administrators and developers
+Programming languages and development | 8 | 10 to 30 hours | 12.00 to free | Novice programmers and mobile developers
+TVET, robotics and engineering | 7 | 8 to 20 hours | 12.00 to free | TVET educators and mechanical engineers
+Languages, soft skills and humanities | 7 | 8 to 15 hours | 12.00 to free | Working professionals and the general public
+Academic research and methodology | 2 | 10 to 15 hours | Free | Postgraduate and final year researchers
+</script>
+
+<h2>A.3 Programmes, subjects and subject codes</h2>
+<p>Three programmes are delivered by Open and Distance Learning. The audit profiles two of them. A subject is a course of 120 hours, which is 3 credits at 40 hours a credit (D-27). Subject codes begin with the programme prefix (MAXL for the data science programme, MPSW for the shared research course).</p>
+<script type="text/tbl" data-h="Programme|Faculty|Duration and fee|Subjects (core curriculum)" data-w="24%|16%|20%|40%" data-cls="small">
+Master of Technology in Data Science and Analytics (MTDL), course ID 80, MQA/PA17473 | FTMK | 1.5 to 3 years, 100% online; MYR 25,110.00 | MAXL5113 Fundamentals of Data Science; MAXL5123 Big Data Management; MAXL5133 Applied Statistical Methods; MAXL5143 Applied Machine Learning; MAXL5153 Big Data Analytics and Visualization; MAXL5163 Modelling and Decision Making; MPSW5013 Research Methodology; MAXL5223 Group Project
+Master of Business Administration (MBA), course ID 78 | FPTT | 1.5 years in trimesters, 100% online; MYR 22,610.00 | Strategic Management, Managerial Economics, Technopreneurship, Corporate Finance, Human Capital Analytics, and a Business Research Dissertation (pillars; the audit lists no subject codes)
+Master of Electronic Engineering (Computer Engineering), course ID 1560 | FKE | 1600 hours; no fee shown | Not profiled in the audit
+</script>
+<p>The audit shows the stackable route of the data science programme in four tiers: standalone micro-courses of 10 to 20 hours (for example MAXL5123 Big Data Management Demystified, Document and Graph Databases, Hadoop Core Technologies, Spark Data Analysis), a subject of 120 hours and 3 credits (MAXL5123 Big Data Management), the core curriculum of 40 to 42 credits, and the accredited award. In MCMS this is the pathway of MD-13: a mapping transfers no credit, and each credit still goes through credit transfer evaluation (MD-12).</p>
+
+<h2>A.4 The public course directory</h2>
+<p>The tables below are the directory of the audit, without the author column. Each row has the Moodle course ID, the title (a subject code may be part of the title), the level, the student learning time and the fee. A row with no duration or fee is free or has no fixed duration. The audit's tables list 59 rows in all (3 programmes and 56 courses), while its summary says 60 offerings, 2 learning paths and 55 micro-courses. The audit lists no learning path, so the difference is for CODL to reconcile. MCMS does not depend on the exact count.</p>
+<h3>ODL Master Degree Programmes (3 listed)</h3>
+<script type="text/tbl" data-h="ID|Programme Title|Level|Duration|Total Fee" data-w="8%|44%|12%|18%|18%" data-cls="small">
+78 | Master of Business Administration | Master | 1600 Hours 00 Minutes | MYR 22,610.00
+80 | Master of Technology in Data Science and Analytics | Master | 1600 Hours 00 Minutes | MYR 25,110.00
+1560 | Master of Electronic Engineering (Computer Engineering) | Master | 1600 Hours 00 Minutes | -
+</script>
+<h3>Mathematics, Calculus & Computational Methods (13 listed)</h3>
+<script type="text/tbl" data-h="ID|Course Title|Level|Duration|Fee" data-w="9%|45%|14%|16%|16%" data-cls="small">
+155 | First Order Differential Equations | Intermediate | 18 Hours 00 Minutes | MYR 12.00
+140 | Second Order Linear Differential Equations | Intermediate | 18 Hours 00 Minutes | MYR 12.00
+138 | Laplace Transform | Intermediate | 33 Hours 00 Minutes | MYR 12.00
+157 | Fourier Series | Intermediate | 18 Hours 00 Minutes | MYR 10.00
+154 | Partial Differential Equations | Intermediate | 33 Hours 00 Minutes | MYR 12.00
+1430 | Math is Fun Aras 1: Penambahan dan Penolakan (Lingkungan 0-100, Tahun 1) | Beginner | - | Free
+1431 | Math is Fun Aras 2: Penambahan dan Penolakan (Lingkungan 1000, Tahun 2) | Beginner | - | Free
+1432 | Math is Fun Aras 3: Penambahan, Penolakan, Darab, dan Bahagi (Lingkungan 10,000, Tahun 3) | Beginner | - | Free
+1433 | Math is Fun Aras 4: Operasi Aritmetik Lanjutan (Lingkungan 100,000, Tahun 4) | Beginner | - | Free
+1434 | Math is Fun Aras 5: Operasi Aritmetik Kompleks (Lingkungan 1,000,000, Tahun 5) | Beginner | - | Free
+1435 | Math is Fun Aras 6: Penguatan Operasi Aritmetik (Lingkungan 10,000,000, Tahun 6) | Beginner | - | Free
+661 | Application of Graph Theory: Network Modelling | Intermediate | 11 Hours 00 Minutes | MYR 29.90
+1425 | MATH is FUN Juara Asas Pengiraan | Beginner | - | Free
+</script>
+<h3>Artificial Intelligence, Data Science & Machine Learning (10 listed)</h3>
+<script type="text/tbl" data-h="ID|Course Title|Level|Duration|Fee" data-w="9%|45%|14%|16%|16%" data-cls="small">
+515 | Embracing Machine Learning for Business Decision [PM Choo] | Beginner | 06 Hours 30 Minutes | MYR 50.00
+517 | 7. [MAXL5143] Introduction to Deep Learning | Intermediate | 07 Hours 30 Minutes | Free
+530 | 6.[MAXL5113] Overview of Analytics Models | Beginner | 06 Hours 00 Minutes | MYR 50.00
+435 | Data Modeling | Beginner | 16 Hours 00 Minutes | MYR 84.00
+262 | Artificial Intelligence for Everyone | Beginner | 08 Hours 00 Minutes | MYR 10.00
+519 | Time Series Forecasting | Intermediate | 08 Hours 00 Minutes | MYR 150.00
+665 | Kick-start Your Ambition as Machine Learning Engineer | Beginner | 08 Hours 00 Minutes | MYR 9.99
+817 | Working with Machine Learning by Examples | Intermediate | 15 Hours 00 Minutes | MYR 19.99
+1296 | MAXL5273 Customer and Financial Analytics [Elective] | Intermediate | 120 Hours 00 Minutes | Free
+648 | Journey Towards Artificial Intelligence | Beginner | 10 Hours 00 Minutes | MYR 10.00
+</script>
+<h3>Cybersecurity, Information Security & Privacy (5 listed)</h3>
+<script type="text/tbl" data-h="ID|Course Title|Level|Duration|Fee" data-w="9%|45%|14%|16%|16%" data-cls="small">
+486 | Phishing Techniques | Beginner | 04 Hours 00 Minutes | MYR 9.99
+436 | Social Engineering | Beginner | 04 Hours 00 Minutes | MYR 9.99
+487 | Security at home | Beginner | 04 Hours 00 Minutes | MYR 9.99
+489 | Password and Authentication 101 | Beginner | 04 Hours 00 Minutes | MYR 9.99
+543 | Public Wi-Fi Security | Beginner | 04 Hours 00 Minutes | MYR 9.99
+</script>
+<h3>Database Engineering & Big Data Management (3 listed)</h3>
+<script type="text/tbl" data-h="ID|Course Title|Level|Duration|Fee" data-w="9%|45%|14%|16%|16%" data-cls="small">
+520 | 1. [MAXL5123] Big Data Management Demystified | Intermediate | 07 Hours 00 Minutes | MYR 50.00
+644 | Fundamentals of a Database | Beginner | 16 Hours 00 Minutes | MYR 84.00
+512 | Maximize Your Database Efficiency: A Normalization Practical Guide | Beginner | 16 Hours 00 Minutes | MYR 80.00
+</script>
+<h3>Software Engineering, Programming & Mobile Apps (7 listed)</h3>
+<script type="text/tbl" data-h="ID|Course Title|Level|Duration|Fee" data-w="9%|45%|14%|16%|16%" data-cls="small">
+1883 | Python Essentials 1: Module 3 | Beginner | - | Free
+2009 | Python Essentials 1: Module 4 | Beginner | - | Free
+290 | Java Programming for Beginners | Beginner | 04 Hours 00 Minutes | MYR 50.00
+571 | Easy-Peasy Python Programming | Beginner | 08 Hours 00 Minutes | MYR 20.00
+827 | Membina Aplikasi Flutter: Panduan Praktikal | Beginner | 25 Hours 00 Minutes | MYR 150.00
+1541 | PlaCe-GMC: Player-Based JavaScript Journey | Beginner | 08 Hours 00 Minutes | Free
+1881 | Level 1: Hello, World! 🐍 — Basics of Python Programming | Beginner | 120 Hours 00 Minutes | Free
+</script>
+<h3>Advanced TVET, Robotics & Mechanical Engineering (10 listed)</h3>
+<script type="text/tbl" data-h="ID|Course Title|Level|Duration|Fee" data-w="9%|45%|14%|16%|16%" data-cls="small">
+132 | Industrial Robotics for Industry 4.0 | Beginner | 08 Hours 00 Minutes | MYR 5.00
+309 | 3D Design using AUTODESK INVENTOR as easy 1 2 3 | Beginner | 01 Hours 25 Minutes | MYR 10.00
+498 | Getting Started with STM32 IoT | Beginner | 06 Hours 00 Minutes | MYR 19.00
+499 | Buoyancy: Float the body, or sink it? | Beginner | 08 Hours 00 Minutes | MYR 2.00
+568 | Control Chart for Beginners in TVET Education | Beginner | 08 Hours 00 Minutes | MYR 39.90
+573 | Mudahnya Robot Mudah Alih! | Beginner | 08 Hours 00 Minutes | MYR 15.00
+580 | CAD Modeling: Easy Modeling Vertebrae Bone using MRI Images | Intermediate | 08 Hours 00 Minutes | MYR 10.00
+659 | 3D Scanning to 3D Printing | Beginner | 08 Hours 00 Minutes | MYR 20.00
+808 | Visualise Product Through Packaging | Beginner | 08 Hours 00 Minutes | MYR 10.00
+809 | Teknologi dan Kejuruteraan Sistem Kawalan dalam Kehidupan | Beginner | 08 Hours 00 Minutes | MYR 20.00
+</script>
+<h3>Languages, Communication & Soft Skills (8 listed)</h3>
+<script type="text/tbl" data-h="ID|Course Title|Level|Duration|Fee" data-w="9%|45%|14%|16%|16%" data-cls="small">
+412 | The Essentials of Critical and Creative Thinking for Innovation | Beginner | 04 Hours 00 Minutes | MYR 4.99
+182 | Speak Mandarin Using Chinese Phonetics | Beginner | 12 Hours 00 Minutes | Free
+184 | The Wonders of Chinese Characters | Beginner | 12 Hours 00 Minutes | Free
+553 | Berani Berucap | Beginner | 42 Hours 00 Minutes | MYR 39.00
+570 | Beautiful Photo with Smartphone Photography Techniques | Beginner | 04 Hours 00 Minutes | MYR 10.00
+1776 | MPU21072 Pengenalan Penghayatan Etika dan Peradaban Dalam Acuan Malaysia | Beginner | 120 Hours 00 Minutes | Free
+1513 | Writing Literature Review | Beginner | 07 Hours 00 Minutes | MYR 100.00
+1770 | Literature Search (FTMK) | Beginner | 06 Hours 00 Minutes | MYR 100.00
+</script>
+
+<h2>A.5 Course profiles</h2>
+<p>The audit profiles seven courses in depth, each with the prerequisites, the syllabus and the learning outcomes. They are the best examples of what a UMC or SAMC proposal in MCMS would be built from.</p>
+<script type="text/tbl" data-h="Course ID|Course|Level and learning time|Fee|Prerequisites" data-w="9%|34%|22%|10%|25%" data-cls="small">
+155 | First Order Differential Equations (mathematics series) | Intermediate; 18 hours | MYR 12.00 | Basic single-variable differential and integral calculus
+517 | Introduction to Deep Learning (MAXL5143) | Intermediate; 15 hours | MYR 12.00 | Foundations of Python programming and linear algebra
+644 | Fundamentals of a Database | Beginner; 12 hours | MYR 12.00 | None
+573 | Mudahnya Robot Mudah Alih! (mobile robotics) | Beginner, TVET; 10 hours | MYR 12.00 | Basic interest in electronics and microcontroller logic
+486 | Phishing Techniques and Cyber Hygiene | Beginner; 8 hours | MYR 12.00 | None (general public)
+80 and 78 | The two ODL Master programmes of A.3 | Master; 1600 hours | See A.3 | A bachelor's degree with a minimum CGPA of 2.50, or relevant experience, or APEL.A
+</script>
+<p>The figures above are those of the profiles. The audit's directory (A.4) gives other figures for the same courses: 517 is 7 hours 30 minutes and free; 644 is 16 hours and MYR 84.00; 573 is 8 hours and MYR 15.00; 486 is 4 hours and MYR 9.99. The audit does not say which is current, so the live course page decides, and the difference is one more item for CODL to reconcile.</p>
+
+<h2>A.6 Learner support</h2>
+<script type="text/tbl" data-h="Service|What it offers" data-w="26%|74%" data-cls="small">
+Helpdesk | Email ucreds.helpdesk@utem.edu.my (reply within 24 operational hours; screenshots needed for errors); telephone 06-229 2272; 8:00 to 17:00 Monday to Friday (Malaysia time); a virtual companion that answers navigation, sign-in and enrolment questions
+Knowledge base (36 articles) | eOrientation and regulations (14 articles: ODL handbook, postgraduate regulations, exam portal, fee schedule, course registration); eCounselling and wellness (19 articles); online campus facilities (3 articles: virtual library, campus VPN, student welfare)
+Regulations the articles state | The UTeM postgraduate grading scheme, where grade B (CGPA 3.00) is the lowest pass for credit towards a degree; authenticated access to the digital library (IEEE Xplore, ScienceDirect, Scopus) through EZproxy and VPN
+</script>
+<p class="small"><i>Source: UCreds Public Portal Audit v1.0 (UCREDS_AUDIT_V1.0_Oct_2026), Sections 2 to 6. The audit's own claim that UCreds meets the single redemption principle and the stackable pathway is a statement about UCreds' content; in MCMS those rules are enforced by MD-11, MD-12 and MD-13.</i></p>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+(async () => {
+  const problems = window.__problems = [];
+  const docTitle = document.querySelector('.doc-title');
+  if (docTitle) document.title = docTitle.textContent.trim() + ' - UTeM MCMS';
+  const ids = {};
+  const counters = {};
+  const pad = n => String(n).padStart(2, '0');
+  const kw = s => s.replace(/\b(SHALL NOT|SHALL|SHOULD NOT|SHOULD|MAY)\b/g, '<b>$1</b>');
+
+  // 1. requirement tables: lines "key | text | source"
+  document.querySelectorAll('script[type="text/req"]').forEach(s => {
+    const pre = s.dataset.p;
+    const t = document.createElement('table');
+    t.className = 'req';
+    const extra = s.dataset.x; // optional fourth column, e.g. "Enforced by"
+    t.innerHTML = `<thead><tr><th class="c-id">ID</th><th>${s.dataset.h || 'Requirement'}</th><th class="c-src">Source</th>${extra ? `<th class="c-x">${extra}</th>` : ''}</tr></thead>`;
+    const tb = document.createElement('tbody');
+    s.textContent.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).forEach(l => {
+      const parts = l.split('|').map(x => x.trim());
+      if (parts.length < 2) { problems.push('bad req line: ' + l); return; }
+      const [k, txt, src = '', x = ''] = parts;
+      counters[pre] = (counters[pre] || 0) + 1;
+      const id = `${pre}-${pad(counters[pre])}`;
+      if (ids[k]) problems.push('duplicate key ' + k);
+      ids[k] = id;
+      const tr = document.createElement('tr');
+      tr.id = k;
+      tr.innerHTML = `<td class="c-id">${id}</td><td>${kw(txt)}</td><td class="c-src">${src}</td>${extra ? `<td class="c-x">${x}</td>` : ''}`;
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    s.replaceWith(t);
+  });
+
+  // 2. plain tables: data-h="A|B|C", rows "a | b | c"
+  document.querySelectorAll('script[type="text/tbl"]').forEach(s => {
+    const t = document.createElement('table');
+    if (s.dataset.cls) t.className = s.dataset.cls;
+    const heads = s.dataset.h.split('|');
+    const widths = (s.dataset.w || '').split('|');
+    t.innerHTML = '<thead><tr>' + heads.map((h, i) => `<th${widths[i] ? ` style="width:${widths[i]}"` : ''}>${h}</th>`).join('') + '</tr></thead>';
+    const tb = document.createElement('tbody');
+    s.textContent.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).forEach(l => {
+      const cells = l.split('|').map(x => x.trim());
+      tb.insertAdjacentHTML('beforeend', '<tr>' + cells.map(c => `<td>${kw(c)}</td>`).join('') + '</tr>');
+    });
+    t.appendChild(tb);
+    s.replaceWith(t);
+  });
+
+  // 3. figure and table captions
+  let fig = 0, tab = 0;
+  document.querySelectorAll('figure[data-f], .tcap[data-t]').forEach(el => {
+    if (el.tagName === 'FIGURE') {
+      fig++; ids['fig:' + el.dataset.f] = 'Figure ' + fig;
+      const c = el.querySelector('figcaption');
+      c.innerHTML = `<b>Figure ${fig}:</b> ` + c.innerHTML;
+    } else {
+      tab++; ids['tab:' + el.dataset.t] = 'Table ' + tab;
+      el.innerHTML = `<b>Table ${tab}:</b> ` + el.innerHTML;
+    }
+  });
+
+  // 4. resolve {{key}} placeholders in text nodes
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) {
+    const n = walker.currentNode;
+    if (n.parentNode.nodeName !== 'SCRIPT' && n.nodeValue.includes('{{')) nodes.push(n);
+  }
+  nodes.forEach(n => {
+    n.nodeValue = n.nodeValue.replace(/\{\{([a-z0-9:-]+)\}\}/g, (m, k) => {
+      if (ids[k]) return ids[k];
+      const ext = (window.__EXT_IDS || {})[k]; // IDs published by another document (e.g. SRS keys cited in the PRD)
+      if (ext) return ext;
+      problems.push('unresolved ' + k);
+      return '??' + k;
+    });
+  });
+
+  // 5. table of contents
+  const toc = document.getElementById('toc');
+  const map = window.__TOC || {};
+  document.querySelectorAll('main h1:not(.notoc), main h2, main h3').forEach(h => {
+    if (h.tagName === 'H3' && !/^\d/.test(h.textContent.trim())) return; // unnumbered sub-headings stay out of the TOC
+    h.setAttribute('data-toc', '');
+    const lvl = h.tagName[1];
+    const text = h.textContent.trim();
+    toc.insertAdjacentHTML('beforeend',
+      `<div class="toc-row toc-${lvl}"><span class="t">${text}</span><span class="dots"></span><span class="pg">${map[text] || ''}</span></div>`);
+  });
+
+  // 6. diagrams
+  try {
+    mermaid.initialize({
+      startOnLoad: false, securityLevel: 'loose', theme: 'base',
+      themeVariables: {
+        fontFamily: 'Noto Sans, Arial, sans-serif', fontSize: '13px',
+        primaryColor: '#e7f0f8', primaryBorderColor: '#3f6fa6', primaryTextColor: '#13263a',
+        secondaryColor: '#fdf1dc', tertiaryColor: '#f4f6f8', lineColor: '#4b5563',
+        noteBkgColor: '#fff8e1', noteBorderColor: '#c9a227', actorBkg: '#e7f0f8', actorBorder: '#3f6fa6'
+      },
+      flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true, padding: 10 },
+      sequence: { useMaxWidth: true, mirrorActors: false, wrap: true },
+      state: { useMaxWidth: true },
+      er: { useMaxWidth: true }
+    });
+    await document.fonts.ready;
+    await mermaid.run({ querySelector: 'pre.mermaid' });
+  } catch (e) { problems.push('mermaid: ' + e.message); }
+  document.querySelectorAll('pre.mermaid').forEach(p => { if (!p.querySelector('svg')) problems.push('diagram not rendered: ' + p.textContent.slice(0, 60)); });
+  document.body.dataset.done = '1';
+})();
+</script>
+</body>
+</html>

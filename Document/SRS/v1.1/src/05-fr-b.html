@@ -1,0 +1,175 @@
+<!-- ===================== 3. FUNCTIONAL REQUIREMENTS (B) ===================== -->
+
+<!-- ============ 3.7 ============ -->
+<h2>3.7 Assessment and Achievement Verification (M8)</h2>
+<p>Recognition follows achievement, not attendance [G 6.1, 8.6]. Results are entered or imported, then verified by the owning PTj before any badge, certificate or Digital Credential is issued. Verification links the participant's identity, the assessment evidence and the result [G 10.4].</p>
+<script type="text/req" data-p="FR">
+fr-asplan | The assessment plan of each offering SHALL be taken from the approved version: components per module or per micro-credential, weighting, pass standard and linked learning outcomes. Facilitators SHALL NOT change it outside the change process of Section 3.3.3. | G 8.6, 10.4
+fr-asentry | Facilitators (P1) SHALL be able to enter results per participant and component, or import them (Section 3.6). The system SHALL compute totals and pass or fail against the pass standard. | G 10.4
+fr-asnoattend | The system SHALL NOT allow a pass, module completion or MC completion to be based only on attendance or participation records. | G 8.6, BR-19
+fr-asintegrity | For each assessment the system SHALL record the identity verification and integrity mechanism applied. Facilitators SHALL be able to flag an integrity case; results under an open case SHALL be held and SHALL NOT be verified. | G 10.4, App B4, H7
+fr-asverify | Results SHALL be verified by an authorised PTj user (P2) before they create achievements. Verification SHALL record the verifier, the date and the evidence that links the participant's identity, the assessment and the result. | G 10.4, BR-20
+fr-asbulkverify | The verifier SHALL be able to verify the results of a whole cohort or module at once, after reviewing a summary of pass rates and outstanding flags. |
+fr-aschange | After verification, any change to a result SHALL require a reason and approval by P2. The previous value SHALL be kept and the change written to the audit trail. If a credential was already issued, the system SHALL open a credential correction task (Section 3.9.4). | G 18.10, D-20
+fr-asmodule | A module achievement SHALL be recorded when all learning outcomes and assessments of the module are met and verified. | G 12.2
+fr-asappeal | A participant SHOULD be able to raise a query or appeal on a result. The case SHALL be tracked to a decision and linked to any result change. | G 15.8
+fr-asfeedback | Participants SHALL be able to see their verified results and the feedback released by the facilitator. | App A6
+</script>
+
+<!-- ============ 3.8 ============ -->
+<h2>3.8 Achievement Record (M9)</h2>
+<p>The Achievement Record (Rekod Pencapaian Pembelajaran Micro-Credential UTeM) is UTeM's internal record of modules completed, results, badges and MC completion. It is not an ACR and it is not evidence that credit was deposited to ABC or accepted by a programme [G 8.7.5, 18.3]. {{fig:umcflow}} shows how a modular UMC builds up to completion.</p>
+
+<figure data-f="umcflow">
+<pre class="mermaid">
+flowchart LR
+  M1["Module 1<br/>verified"] --> B1["Digital Badge 1"]
+  M2["Module 2<br/>verified"] --> B2["Digital Badge 2"]
+  M3["Module n<br/>verified"] --> B3["Digital Badge n"]
+  B1 --> AR[("Achievement Record<br/>(internal, not ACR)")]
+  B2 --> AR
+  B3 --> AR
+  AR --> Q{"All modules and<br/>requirements of the<br/>approved structure met?"}
+  Q -- "No" --> W["Keep record; remind<br/>before completion<br/>window ends"]
+  Q -- "Yes" --> C["UMC complete<br/>(confirmed by PTj)"]
+  C --> CR["Certificate /<br/>Digital Credential"]
+  C -. "separate process,<br/>only if eligible" .-> ACR["ACR (Section 3.11)"]
+</pre>
+<figcaption>Staged completion of a modular UMC [G 12.2, App E9]. A badge proves a module, not the UMC and not credit.</figcaption>
+</figure>
+
+<script type="text/req" data-p="FR">
+fr-arkeep | The system SHALL maintain one Achievement Record per participant and micro-credential, holding modules completed, verified results, Digital Badges, MC completion status and credentials awarded. | G 8.7.5, 18.3
+fr-arlabel | The Achievement Record SHALL be stored separately from ACR records and SHALL be labelled on every screen and export as an internal record that is not an Academic Credit Record. | G 18.3, BR-25
+fr-arumc | A UMC SHALL be marked complete only when every module and every requirement of its approved structure is met. The system SHALL calculate this automatically and SHALL require confirmation by P2. | G 8.7.3, 12.3.1
+fr-arnomix | The system SHALL NOT combine badges or modules from different UMCs or different parent courses to complete a UMC. A module from another structure SHALL count only through a recorded equivalence decision by the academic authority. | G 8.7.2, 12.2, BR-12
+fr-arwindow | For a modular UMC the system SHALL track the completion window (default <code>umc.completion_window_months</code>, which has no value until OI-13 is answered; an offering MAY set its own period) and SHALL remind the participant before it ends. While no period is set, no reminder is sent. | G 7.4, 12.2, OI-13
+fr-arsamc | A SAMC or MCE SHALL be marked complete only when all learning outcomes, SLT activities, assessments and completion conditions are met and verified, and the completion is confirmed by P2. | G 12.3.2, 8.7.4
+fr-arview | The participant SHALL be able to see their own Achievement Record, including progress across modules taken in different periods. | G 10.3
+fr-arstaff | P1 and P2 SHALL be able to see the Achievement Records of participants in their offerings. | App H4
+</script>
+
+<!-- ============ 3.9 ============ -->
+<h2>3.9 Credential Issuance and Verification (M10)</h2>
+<p>MCMS issues three kinds of proof of achievement. They have different functions and must never be used in place of each other [App E1]. Credentials are issued in an open, signed format so that anyone can verify them without contacting UTeM (D-19).</p>
+<p class="tcap" data-t="credtypes">Types of proof of achievement (Guide Appendix E1)</p>
+<script type="text/tbl" data-h="Type|Main function|Level of achievement|Relation to credit" data-w="18%|32%|24%|26%">
+Digital Badge | Proof of achievement of a module, unit or milestone | Usually a module or learning unit | Not academic credit by itself
+Certificate (Sijil) | Proof of completing the offering under its conditions | Whole micro-credential | Does not guarantee credit or transfer
+Digital Credential | Verifiable digital record describing the achievement, the issuer and related information | Whole micro-credential or a set achievement | May state credit or MQF level only when verified; does not guarantee transfer
+</script>
+
+<h3>3.9.1 Issuance</h3>
+<script type="text/req" data-p="FR">
+fr-crcheck | Before any credential is issued the system SHALL run the checks of Appendix E8 automatically: identity matches the official record; all completion conditions are met; results are verified; the credential type fits the level of achievement; the title and category match the approved version; any credit, MQF or QV information is verified and still valid; the verification mechanism works. Issuance SHALL be blocked if any check fails. | App E8, BR-21
+fr-crbadge | The system SHALL issue a Digital Badge for each verified module achievement when the approved design includes badges and UCreds does not issue them (A-05). A badge SHALL contain: badge name, parent micro-credential, issuer (UTeM or the authorised PTj), recipient, issue date, achievement criteria, learning outcomes or competencies in its metadata, and a verification link. | App E2, A-05
+fr-crbadgetext | A Digital Badge SHALL NOT be described or displayed as academic credit. | App E2, BR-11
+fr-crcert | The system SHALL issue a Certificate only after the whole micro-credential is complete. A Certificate SHALL contain: the official name of UTeM or the provider; the participant's name as in the official record; the approved title; the category where needed for clarity; a statement of completion; the award date; a unique certificate number; the authorised signatory; credit, QV and MQF information only when applicable, verified and valid; and a QR code for verification. | App E3, G 10.5
+fr-crdc | The system SHALL issue a Digital Credential with the metadata of Appendix E4: unique credential ID; credential name; recipient; issuer; issue date; learning outcomes or competencies; learning time (SLT); assessment basis; credit value and MQF level only when verified; QV status only after QV is obtained; expiry date of a related status where required; and the verification mechanism. | App E4
+fr-crformat | Digital Credentials SHALL follow the Open Badges 3.0 and W3C Verifiable Credentials data models as guidance, SHALL be digitally signed with a UTeM key, and SHALL be downloadable as a signed JSON file and as a PDF rendering. Blockchain SHALL NOT be required. | D-19, C8
+fr-crgenerated | Credit value, MQF level and QV wording on any credential SHALL be filled only from verified records: the approved UMC credit, or the QV decision for a SAMC. These fields SHALL NOT be editable by hand. | D-17, C5, BR-22
+fr-crbatch | The system SHALL issue credentials automatically, for one participant or a whole cohort, as soon as the deputy dean (P2) has verified the results or confirmed completion and the pre-issuance checks pass. No separate manual issuing step SHALL be required; participants who fail a check SHALL be listed for the deputy dean with the reason. | App H3, D-29
+fr-crlang | Certificates and Digital Credentials SHALL be available in Bahasa Melayu and English. | D-02, C7
+fr-crid | Every credential SHALL have a unique, non-guessable identifier and a verification URL encoded as a QR code. | App E6
+fr-crwallet | The participant SHALL be able to view and download their credentials and copy a share link. |
+fr-crshare | The participant SHOULD be able to add a credential to professional networking profiles directly. |
+fr-crwalletint | The system MAY export credentials to external digital credential wallets. |
+</script>
+
+<h3>3.9.2 Recognition Wording Control</h3>
+<p>Credentials and offering information must not suggest credit, MQF level or QV status that has not been formally obtained [G 10.5, App E5]. The system therefore builds recognition statements from controlled templates.</p>
+<p class="tcap" data-t="wording">Allowed and forbidden recognition statements (Guide Appendix E5)</p>
+<script type="text/tbl" data-h="Situation|Allowed statement|Statement to avoid" data-w="20%|42%|38%">
+UMC | Link to the parent course or programme and the approved credit information under academic rules | "Credit will certainly transfer"; any promise of admission to a programme
+SAMC before QV | SLT, and that QV is in progress or not applied for, if needed | Credit value or MQF level presented as verified
+Quality-Verified SAMC | Credit value, MQF level and QV status as verified and still valid | That QV guarantees credit transfer
+MCE | Completion of learning or competency, and suitable duration or SLT | MCE as academic credit or as a direct credit transfer route
+</script>
+<script type="text/req" data-p="FR">
+fr-wdtemplate | The system SHALL generate every recognition statement on credentials, catalogue entries and participant notices from the template for the confirmed category and current status in {{tab:wording}}. | App E5, BR-22
+fr-wdblock | The system SHALL block issuing or publishing any text that states a credit value, MQF level or QV status not supported by a verified and valid record. | G 10.5, D-17
+fr-wdqvlapse | When QV expires or is suspended or withdrawn, credentials issued afterwards SHALL carry no Quality-Verified claim. Verification of an earlier credential SHALL show the QV status that was valid on its issue date. | G 11.2.2, BR-23
+</script>
+
+<h3>3.9.3 Public Verification</h3>
+<script type="text/req" data-p="FR">
+fr-vfpage | The system SHALL provide a public verification page, without login, reached by credential ID, verification URL or QR code. | App E6, D-19
+fr-vffields | The verification page SHALL show only the minimum permitted information: credential name, recipient name, issuer, issue date, current status (valid, corrected, replaced, revoked) and the fields listed in <code>verification.public_fields</code>. It SHALL NOT show identity card or passport numbers, matric numbers, email addresses or results. | App E6, PDPA
+fr-vfsignature | The verification page SHOULD let a verifier upload a Digital Credential file and check its signature and integrity against the issuer key. | D-19
+fr-vflog | Each verification request SHALL be logged with time, credential ID and outcome, without storing the verifier's personal data beyond a network address kept for security purposes. | App E6
+fr-vfnotfound | A request for an unknown or malformed credential ID SHALL return a neutral "not found" message that does not reveal whether a similar ID exists. |
+</script>
+
+<h3>3.9.4 Correction, Replacement and Revocation</h3>
+<figure data-f="credstate">
+<pre class="mermaid">
+stateDiagram-v2
+  direction LR
+  [*] --> Issued : P2 confirms, checks pass, system issues
+  Issued --> Corrected : confirmed error, new revision
+  Corrected --> Corrected : further correction
+  Issued --> Replaced : new credential ID issued
+  Corrected --> Replaced
+  Issued --> Revoked : decision of authorised body
+  Corrected --> Revoked
+  Replaced --> [*]
+  Revoked --> [*]
+</pre>
+<figcaption>Life of an issued credential [App E7]. No state change deletes the earlier record.</figcaption>
+</figure>
+<script type="text/req" data-p="FR">
+fr-crcorrect | A credential SHALL be corrected only for a confirmed error, by the deputy dean (P2) of the owning PTj. The record SHALL keep the original content, the reason, the correction, the persons involved and the date. | App E7, G 10.5.1
+fr-crreplace | Replacement SHALL issue a new credential with a new ID linked to the old one. Verification of the old ID SHALL show "Replaced" and the new ID. | App E7
+fr-crrevoke | Revocation SHALL be possible only through a recorded decision of an authorised body with a stated reason. Verification SHALL show "Revoked" and the date. | App E7
+fr-crnoerase | No credential record or earlier revision SHALL ever be deleted. | G 10.5.1, 18.4, BR-38
+fr-crnotify | The participant SHALL be notified of any correction, replacement or revocation of their credential, with the reason. | G 18.10
+</script>
+
+<!-- ============ 3.10 ============ -->
+<h2>3.10 Quality Verification Management for SAMC (M11)</h2>
+<p>Quality Verification (QV) is the quality check for a SAMC carried out by the QVC under MQA rules. It is separate from UTeM's approval to offer: approval lets a micro-credential be offered; QV confirms its quality and gives it a credit value and MQF level [G 11.2]. QV requires at least one completed cohort and is valid for at most three continuous years [G 11.2.1–11.2.2]. In Release 1, MCMS prepares and tracks; UTeM staff submit to QVC/MQA outside the system (D-14).</p>
+
+<figure data-f="qvstate">
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> NotApplied
+  NotApplied --> Preparing : PTj decides to seek QV
+  Preparing --> Ready : internal readiness confirmed (App D9, D10)
+  Ready --> Submitted : staff submit to QVC / MQA
+  Submitted --> Verified : QV obtained
+  Submitted --> NotVerified : QV not obtained
+  NotVerified --> Preparing : address findings
+  Verified --> Reverify : material change
+  Reverify --> Submitted
+  Verified --> Expired : validity end reached
+  Verified --> Suspended : QVC / MQA decision
+  Verified --> Withdrawn : QVC / MQA or UTeM decision
+  Suspended --> Verified : reinstated
+  Expired --> Preparing : renewal
+  state "Not applied" as NotApplied
+  state "Preparing evidence" as Preparing
+  state "Ready to submit" as Ready
+  state "Submitted to QVC / MQA" as Submitted
+  state "Quality-Verified" as Verified
+  state "Not verified" as NotVerified
+  state "Re-verification required" as Reverify
+</pre>
+<figcaption>QV status of a SAMC. Only the state Quality-Verified allows credit value, MQF level and QV claims.</figcaption>
+</figure>
+
+<script type="text/req" data-p="FR">
+fr-qvsamc | The QV functions SHALL be available only for micro-credentials whose confirmed category is SAMC. | G 7.6, 11.2
+fr-qveligible | The system SHALL allow the status "Ready to submit" only when the basic conditions of Appendix D2 are met: the SAMC is a stand-alone offering; total SLT is at least <code>slt.min_hours_samc</code>; the provider is registered and authorised; at least <code>qv.min_completed_cohorts</code> cohort has completed with complete evidence; and any proposed credit value and MQF level are justified and marked as proposed. | G 11.2.1, App D2, BR-03
+fr-qvevidence | The system SHALL keep an evidence checklist with the items of Appendix D3–D7 (academic design, assessment and achievement, delivery and participant support, quality assurance and CQI, Digital Credential), each with status Available / Not yet / Not applicable, file reference and notes. | App D
+fr-qvautolink | The system SHALL link evidence that already exists in MCMS automatically: learning outcomes and mapping, SLT calculation, assessment plan, cohort results and achievement analysis, feedback, CQI records, version history and credential design. | App D3–D7
+fr-qvchange | The system SHALL keep the material change review of Appendix D8 for each QV cycle, listing for each component whether it changed and whether it needs internal review or referral to QVC/MQA. | App D8, G 11.2.3
+fr-qvreadiness | The internal readiness decision of Appendix D9 (ready; ready with minor corrections; not ready), the list of missing critical evidence and the target submission date SHALL be recorded by the lecturer and confirmed by the deputy dean (Appendix D10; D-28). | App D9, D10
+fr-qvpackage | The system SHALL produce a submission package: an evidence index, a summary document and a compressed file of the evidence, for staff to submit to QVC/MQA. | D-14, A-02
+fr-qvsubmit | Staff SHALL record the submission date, the QVC/MQA reference and the person who submitted. | G 11.2
+fr-qvresult | Staff SHALL record the QV decision: verified or not verified, QV reference number, verified credit value, verified MQF level, start date, expiry date and any conditions, with the decision document attached. The system SHALL reject an expiry date more than <code>qv.max_validity_years</code> after the start date. | G 11.2.2, BR-02
+fr-qvsource | The verified credit value and MQF level in the QV record SHALL be the only source of these values for catalogue entries, credentials and ACR of the SAMC. | D-17, BR-14
+fr-qvalerts | The system SHALL alert the lecturer (P1) and deputy dean (P2) at each interval in <code>alerts.qv_expiry_days</code> before QV expires. | G 11.2.2, D-16
+fr-qvlapse | When QV expires, is suspended or is withdrawn, the system SHALL immediately stop Quality-Verified claims in the catalogue and on new credentials, SHALL stop new ACR eligibility for completions after that date, and SHALL create a task for the PTj to manage affected participants and records. | G 11.2.2, App H7, BR-23
+fr-qvnotransfer | A QV status SHALL NOT set or imply any credit transfer, admission or stackable status. | G 11.2, 15.4, BR-16
+fr-qvportal | The system MAY submit QV applications to QVC/MQA electronically when such an interface exists. | A-02
+</script>

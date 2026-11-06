@@ -1,0 +1,438 @@
+<!-- ===================== 7. PROCESS DESIGN ===================== -->
+<h1>7. Process Design</h1>
+<p>This section shows how the modules of Section 4 work together in the main business processes. Each process has a sequence diagram, a table of checks, confirmations, events and failure paths, and the requirements it satisfies. Behaviour follows the approved prototype acts and the SRS functional requirements. Event names are <code>PastTense</code> class names. The numbered event list (EV-xx) is owned by Section 4, and these names are used here without numbers so that the two sections stay consistent. Job names are class names for the same reason (JB-xx numbers are in Section 4).</p>
+<p>Conventions that apply to every process:</p>
+<ul>
+<li>Every action on a record is authorised by a Laravel Policy for role, scope and separation of duties (AD-07), before any change is made.</li>
+<li>Every state change and its audit row are written in one database transaction (AD-11). Domain events are dispatched after commit.</li>
+<li>A confirmation dialog is shown for every irreversible action ({{ir-confirm}}). The dialog names the effect. The server also checks that the confirmation token was posted.</li>
+<li>Notifications are stored first and sent by a queued job (AD-15). A failed notification never rolls back the business change ({{fr-ihretry}}).</li>
+<li>Dates and times are stored in UTC and shown as Malaysia time ({{ir-time}}). The demo clock is available only outside production (AD-18).</li>
+</ul>
+
+<h2>7.1 Propose, Review, Endorse and Record the Senate Decision</h2>
+<p>A lecturer prepares a proposal for a new micro-credential. The deputy dean of the PTj assigns reviewers, a colleague reviews after declaring any conflict of interest, and the deputy dean endorses. The Senate does not use MCMS, so the deputy dean records the Senate decision with its meeting reference (D-11).</p>
+<figure data-f="seq-propose"><pre class="mermaid">
+sequenceDiagram
+    actor L as Lecturer
+    actor R as Colleague reviewer
+    actor D as Deputy dean
+    participant W as Web (Livewire)
+    participant A as Approval MD-03
+    participant Au as Audit
+    L->>W: Submit proposal
+    W->>A: Validate against category rules
+    alt blocking errors
+        A-->>W: List of errors
+        W-->>L: Submission stopped
+    else no blocking errors
+        A->>Au: Version locked, status Submitted
+        A-->>D: ProposalSubmitted (EV-06)
+    end
+    D->>W: Assign reviewer with due date
+    W->>A: Check no self-review and no declared conflict
+    A-->>R: ReviewerAssigned (EV-09)
+    R->>W: Declare conflict of interest or open review
+    R->>W: Rate items, comment, recommend
+    A->>Au: ReviewRecorded (EV-10)
+    alt Amend requested
+        D->>W: Return for amendment
+        L->>W: Respond to comments and resubmit
+    end
+    D->>W: Verify category and endorse
+    A->>Au: ProposalEndorsed (EV-12), status Pending approval
+    D->>W: Record Senate decision with meeting reference
+    A->>Au: SenateDecisionRecorded (EV-14), version Approved
+</pre><figcaption>Propose, review, endorse and record the Senate decision.</figcaption></figure>
+<p class="tcap" data-t="seq-propose-steps">Checks, confirmations, events and failures for process 7.1</p>
+<script type="text/tbl" data-h="Step|Checks and rules|Confirmation and event|Failure path" data-w="20%|34%|22%|24%" data-cls="small">
+Submit | Category rules, weightings total 100 percent, UMC rules (parent accredited, module SLT equals parent SLT), IP declaration present, warnings answered in writing | Confirm submit. Content locked. ProposalSubmitted (EV-06) | Blocking errors stop submission and are listed. Warnings need a written response
+Assign reviewer | Reviewer is not the proposer or a co-developer, no declared conflict, due date set | ReviewerAssigned (EV-09) | Self-review is refused with the SoD message
+Declare conflict | Declaration must come before the review form opens | Confirm. ConflictDeclared (EV-03) | Reviewer is removed and the assigning deputy dean is notified
+Review | Item ratings Satisfactory or Needs amendment, recommendation Support, Amend or Not support | Confirm. ReviewRecorded (EV-10) | Review cannot be saved without a recommendation
+Respond to comments | Comment status open, answered or resolved. A blocking comment that is unresolved stops endorsement | ReviewCommentAnswered (audit entry) | Endorse button disabled with the reason shown
+Return and resubmit | Return goes to Returned for amendment. Resubmission repeats the submit checks | ProposalReturned (EV-11), ProposalSubmitted (EV-06) | A returned proposal is unlocked only by this return
+Endorse | Category verified separately from the proposed category, no unresolved blocking comment | Confirm. ProposalEndorsed (EV-12). Status Endorsed then Pending approval | Not supported ends the proposal: ProposalNotSupported (EV-13)
+Record Senate decision | Decision, date, role, comments and meeting reference. Approved only for the exact version | Confirm. SenateDecisionRecorded (EV-14) | Missing meeting reference blocks saving. Overdue decisions are reminded after the setting <code>alerts.decision_overdue_days</code>
+</script>
+<p>Requirements satisfied: {{fr-propnew}}, {{fr-propvalidate}}, {{fr-propip}}, {{fr-revassign}}, {{fr-coi}}, {{fr-sod}}, {{fr-revform}}, {{fr-revrec}}, {{fr-revcomments}}, {{fr-revcategory}}, {{fr-revsummary}}, {{fr-wfstages}}, {{fr-wfrecord}}, {{fr-wfversion}}, {{fr-wflock}}, {{fr-wfnotcredit}}, {{fr-wfqueue}}, {{br-version}}, {{br-authority}}.</p>
+
+<h2>7.2 Material Change to an Approved Version</h2>
+<p>An approved version is never edited. A change creates a new version as a copy. A minor change is logged and acknowledged. A material change repeats the review and approval path of process 7.1 and does not take effect until approved.</p>
+<figure data-f="seq-change"><pre class="mermaid">
+sequenceDiagram
+    actor L as Lecturer
+    actor D as Deputy dean
+    participant W as Web (Livewire)
+    participant A as Approval MD-03
+    participant E as Enrolment MD-05
+    participant Q as Quality verification MD-10
+    participant Au as Audit
+    L->>W: Start change on approved version
+    W->>A: Create new version as Draft copy
+    L->>W: Describe change
+    A->>A: Classify, material if a listed trigger is touched
+    alt minor change
+        A->>Au: MinorChangeLogged (EV-08) with impact note
+        D->>W: Acknowledge minor change
+    else material change
+        A-->>D: Review and approval as in process 7.1
+        D->>W: Record Senate decision and transition rule
+        A->>Au: SenateDecisionRecorded (EV-14), previous version Superseded
+        A-->>E: VersionSuperseded (EV-15)
+        E->>E: Bind enrolments to version by rule
+        A-->>Q: MaterialChangeRecorded (EV-07) for a QV SAMC
+    end
+</pre><figcaption>Material and minor change to an approved version.</figcaption></figure>
+<p class="tcap" data-t="seq-change-steps">Checks, confirmations, events and failures for process 7.2</p>
+<script type="text/tbl" data-h="Step|Checks and rules|Confirmation and event|Failure path" data-w="20%|34%|22%|24%" data-cls="small">
+Start change | Only an Approved version can be copied. The old version stays unchanged and referenced | VersionDraftCreated (audit entry) | Edit of a locked version is refused
+Classify | Listed triggers (outcomes, SLT, credit, MQF, QV, core content, assessment, mode, credential, partner) set the class to material and the proposer cannot lower it | Confirm for material. MaterialChangeRecorded (EV-07) | A minor change needs a description and an impact note, otherwise it is not saved
+Approval | Same checks as process 7.1. The new version is not effective until Approved | SenateDecisionRecorded (EV-14) | If not approved, the old version stays in force
+Transition rule | Deputy dean records one rule: finish on old, move to new, or equivalence | Confirm. TransitionRuleRecorded (EV-16) | The new version cannot take effect without a rule
+Notify participants | Mandatory notice with change, date and rule. It cannot be switched off | ParticipantNoticeQueued (audit entry) | Failed email is retried. The in-system notice remains
+QV SAMC | A re-verification task is created and the QV status becomes Re-verification required in the QV record | QvReverificationRequired (EV-41) | A task is open until QV is recorded again
+Offering hold | An offering with a pending material change is held until the version is approved | OfferingHeld (EV-19) | Registration stays closed while held
+</script>
+<p>Requirements satisfied: {{fr-chgclassify}}, {{fr-chgmaterial}}, {{fr-chgminor}}, {{fr-chgqv}}, {{fr-verkeep}}, {{fr-verbind}}, {{fr-vernotify}}, {{fr-verhistory}}, {{fr-offrecheck}}, {{br-material}}, {{br-version}}.</p>
+
+<h2>7.3 Readiness and Opening an Offering</h2>
+<p>An offering (cohort) is created only for an Approved version. The lecturer and the deputy dean complete the readiness checklist. Registration opens when the deputy dean confirms Ready, or Ready with conditions when the conditions are recorded.</p>
+<figure data-f="seq-open"><pre class="mermaid">
+sequenceDiagram
+    actor L as Lecturer
+    actor D as Deputy dean
+    participant W as Web (Livewire)
+    participant O as Offering MD-04
+    participant Q as Quality verification MD-10
+    participant Au as Audit
+    L->>W: Create offering for approved version
+    W->>O: Check version is Approved
+    L->>W: Complete readiness items with evidence
+    D->>W: Confirm Ready, Ready with conditions or Not ready
+    O->>Q: Is QV valid to cohort end date
+    Q-->>O: Yes or no
+    O->>Au: ReadinessConfirmed (EV-17)
+    O->>O: Open registration
+    O-->>W: OfferingOpened (EV-18)
+</pre><figcaption>Readiness and opening an offering.</figcaption></figure>
+<p class="tcap" data-t="seq-open-steps">Checks, confirmations, events and failures for process 7.3</p>
+<script type="text/tbl" data-h="Step|Checks and rules|Confirmation and event|Failure path" data-w="20%|34%|22%|24%" data-cls="small">
+Create offering | Version status is Approved. Out-of-scope PTj is refused. The offering is not public | OfferingCreated (audit entry) | A version that is not Approved cannot be selected
+Readiness items | Each item Yes, Not yet or Not applicable, with an evidence note | ReadinessItemSaved (audit entry) | Items can be saved incomplete. They gate confirmation only
+Confirm readiness | Ready with conditions requires the conditions in text. Not ready keeps the offering at Not ready | Confirm. ReadinessConfirmed (EV-17) | Without a confirmation the registration window does not open
+QV check | For a SAMC, QV must be valid to the cohort end date. If not, the QV claim, credit and MQF are hidden in the catalogue | Warning to the lecturer | The offering still opens, but without the claim
+Wording check | Recognition statements come from templates. Free text is scanned for forbidden claims | – | Publishing is blocked with the offending phrase shown
+Open | Window start reached. Capacity and deadlines set | OfferingOpened (EV-18). Catalogue shows it | The scheduler opens at window start, and a late run opens it on the next tick
+Recheck for new cohort | Checklist pre-filled from the last cohort. A material change puts the offering on hold | Confirm. OfferingHeld (EV-19) | Hold stays until the version is approved
+</script>
+<p>Requirements satisfied: {{fr-offcreate}}, {{fr-offapproved}}, {{fr-offreadiness}}, {{fr-offconfirm}}, {{fr-offopen}}, {{fr-offrecheck}}, {{fr-offqv}}, {{fr-catpublic}}, {{fr-catinfo}}, {{fr-catwording}}, {{fr-catstages}}, {{fr-wdblock}}, {{br-offer}}, {{br-qvvalid}}.</p>
+
+<h2>7.4 Register and Pay</h2>
+<p>A student registers while the window is open and capacity remains. A fee leads to Pending payment and a payment call through the payment adapter (a stub in Release 1). Capacity is checked under a row lock so that the last seat cannot be given twice. Payment calls carry an idempotency key.</p>
+<figure data-f="seq-register"><pre class="mermaid">
+sequenceDiagram
+    actor S as Student
+    participant W as Web (Livewire)
+    participant E as Enrolment MD-05
+    participant P as Payment adapter
+    participant Q as Queue
+    participant Au as Audit
+    S->>W: Register and acknowledge statements and PDPA notice
+    W->>E: Check window, eligibility and capacity under lock
+    alt closed, full or not eligible
+        E-->>W: Refused with reason per failed rule
+    else seat available
+        E->>Au: Registered, seat counted, status Pending payment
+        W->>P: Pay with idempotency key
+        alt payment succeeds
+            P-->>E: PaymentConfirmed (EV-21) with reference
+            E->>Au: Enrolled
+            E->>Q: Confirmation notification
+        else payment declined
+            P-->>W: Declined with reference
+            S->>W: Retry with same key
+        end
+    end
+</pre><figcaption>Register and pay, including declined payment and capacity full.</figcaption></figure>
+<p class="tcap" data-t="seq-register-steps">Checks, confirmations, events and failures for process 7.4</p>
+<script type="text/tbl" data-h="Step|Checks and rules|Confirmation and event|Failure path" data-w="20%|34%|22%|24%" data-cls="small">
+Acknowledge | Information and recognition statements, text version stored with the enrolment. PDPA notice at first registration | Confirm. StatementsAcknowledged (audit entry) | Registration is blocked until both are acknowledged
+Eligibility | Group and prerequisites checked, each failed rule explained | – | Registration refused with the reason for each failed rule
+Capacity | Count of Registered, Pending payment and Enrolled seats is read after locking the offering row. At the last seat the offering becomes Full | StudentRegistered (EV-20) | Full offering refuses the request. A second request for the last seat waits for the lock and is then refused
+Pay | No fee leads directly to Enrolled. A fee leads to Pending payment and a payment call. The attempt record stores the key, amount and reference | Confirm. PaymentConfirmed (EV-21) or PaymentDeclined (audit entry) | A declined payment shows the reference and the status stays Pending payment. The student can retry until the window ends
+Idempotency | The key is made from enrolment ID and attempt number. A repeated call with the same key returns the first result and creates no second charge or second enrolment | – | A timeout is treated as unknown, and the status is read back before any retry
+Window end | Pending payment older than the window end is cancelled by the scheduler and the seat is freed | EnrolmentCancelled (audit entry) | Late payment confirmation for a cancelled enrolment is logged for follow-up and creates no enrolment
+Confirmation | Notification with access instructions in the recipient language | EnrolmentConfirmed (EV-22) | Failed email is retried. The in-system notice remains
+Withdraw | Allowed while Enrolled and before the offering deadline. Refunds are outside MCMS | Confirm. StudentWithdrew | After the deadline the action is not offered
+</script>
+<div class="note"><b>Note:</b> The SRS state diagram has no path from Pending payment to Withdrawn. This design lets the student withdraw only from Enrolled, and an unpaid enrolment ends as Cancelled at window end. A seat is counted from Registered, which is a design assumption to be listed in Section 11.</div>
+<p>Requirements satisfied: {{fr-regopen}}, {{fr-regelig}}, {{fr-regack}}, {{fr-regpdpa}}, {{fr-regpay}}, {{fr-regstatus}}, {{fr-regwithdraw}}, {{fr-regconfirm}}, {{fr-ihretry}}, {{ir-idempotent}}, {{ir-stubs}}, {{nfr-peak}}, {{nfr-capacity}}, {{nfr-transactions}}.</p>
+
+<h2>7.5 UCreds Import, Rejected Rows and Lecturer Marks</h2>
+<p>CODL exports the enrolment list to UCreds and later imports the results file. The import validates the file and each row. Valid rows are staged as Provisional. Rejected rows are reported. The lecturer then completes marks and sends results for verification.</p>
+<figure data-f="seq-import"><pre class="mermaid">
+sequenceDiagram
+    actor C as CODL operator
+    actor L as Lecturer
+    participant W as Web (Livewire)
+    participant LP as Learning platform MD-06
+    participant Q as Queue
+    participant AS as Assessment MD-07
+    C->>W: Upload results CSV
+    W->>LP: Store file, hash it, check template version
+    LP->>Q: Dispatch import job
+    Q->>LP: Validate format, row match, score range, duplicates
+    alt file-level error
+        LP-->>C: File rejected, nothing staged
+    else rows checked
+        LP->>AS: Stage valid rows as Provisional
+        LP-->>C: Row report with rejected rows
+    end
+    L->>W: Enter missing marks and flag integrity cases
+    L->>W: Send results for verification
+    AS-->>W: ResultsSentForVerification
+</pre><figcaption>UCreds import with rejected rows, then lecturer completes marks.</figcaption></figure>
+<p class="tcap" data-t="seq-import-steps">Checks, confirmations, events and failures for process 7.5</p>
+<script type="text/tbl" data-h="Step|Checks and rules|Confirmation and event|Failure path" data-w="20%|34%|22%|24%" data-cls="small">
+Export | Enrolment list in the UCreds template. File name, hash and count are logged | ImportExportLogged (EV-24) | Adapter failure is retried and then listed for CODL
+Upload | Template version, file hash, duplicate file check. The original file is kept | Confirm. ResultsFileUploaded (audit entry) | A file already imported (same hash and cohort) is refused as a duplicate
+Validate | Format, matching of each row to an enrolment, score range, duplicate rows | – | A file-level error rejects the whole file. Row errors reject only those rows
+Stage | Valid rows are stored as Provisional. No achievement and no badge exists yet | ResultsStaged (EV-25) | A rerun of the same file does not create duplicate staged rows because the natural key is enrolment and component
+Row report | Downloadable report with row number, reason and value | – | Rejected rows are fixed in the file and uploaded again as a new import
+Enter marks | Totals and pass or fail computed against the pass standard of the approved version. Attendance alone cannot give a pass | MarksSaved (audit entry) | Out-of-range score is refused on the form
+Integrity flag | A flag holds the result so that it cannot be verified | Confirm. IntegrityCaseOpened (EV-28) | The hold stays until the case is closed
+Send for verification | The lecturer sends results to the deputy dean | Confirm. ResultsSentForVerification | Blank mandatory component keeps the result In progress
+Badge import | Badge ID, link and date are matched to a verified achievement | BadgeImported (EV-27) | A badge with no verified achievement is flagged and not shown as credit
+</script>
+<p>Requirements satisfied: {{fr-lpadapter}}, {{fr-lpexport}}, {{fr-lpimport}}, {{fr-lpvalidate}}, {{fr-lpstaged}}, {{fr-lpbadge}}, {{fr-lplog}}, {{fr-asentry}}, {{fr-asnoattend}}, {{fr-asintegrity}}, {{ir-csvtemplates}}, {{nfr-import}}, {{br-verifyfirst}}.</p>
+
+<h2>7.6 Verify Results, Confirm Completion and Issue</h2>
+<p>The deputy dean verifies results, which creates achievements. The deputy dean then confirms completion of the micro-credential. The confirmation starts the issuing job, which runs the pre-issue checks, signs each credential, renders the PDF and sends the notifications. The deputy dean does not issue by hand (UI/UX spec §2.2).</p>
+<figure data-f="seq-issue"><pre class="mermaid">
+sequenceDiagram
+    actor D as Deputy dean
+    participant W as Web (Livewire)
+    participant AS as Assessment MD-07
+    participant AR as Achievement MD-08
+    participant Q as Queue
+    participant CR as Credentials MD-09
+    D->>W: Verify results for module or cohort
+    W->>AS: Check no open case and verifier is not enterer
+    AS-->>AR: ResultsVerified (EV-29)
+    D->>W: Confirm completion
+    AR-->>CR: CompletionConfirmed (EV-31)
+    CR->>Q: Dispatch issue job per participant
+    Q->>CR: Pre-issue checks
+    CR->>CR: Choose claim wording from verified records
+    CR->>CR: Sign with key from key vault, then render PDF
+    CR-->>W: CredentialIssued (EV-32), notification queued
+</pre><figcaption>Verify results, confirm completion and the issuing job.</figcaption></figure>
+<p class="tcap" data-t="seq-issue-steps">Checks, confirmations, events and failures for process 7.6</p>
+<script type="text/tbl" data-h="Step|Checks and rules|Confirmation and event|Failure path" data-w="20%|34%|22%|24%" data-cls="small">
+Verify results | Verifier recorded with date and identity evidence link. The user who entered a result cannot be its only verifier. An open integrity case blocks verification | Confirm. ResultsVerified (EV-29). Module achievement recorded when all outcomes and assessments are met | Blocked rows are listed and the rest of a bulk verification proceeds only if the user confirms the listed exceptions
+Confirm completion | UMC complete when all modules and requirements are met. A SAMC or MCE is complete when outcomes, SLT, assessment and conditions are met | Confirm. CompletionConfirmed (EV-31) | Confirmation is blocked until every requirement is met
+Pre-issue checks | Completion confirmed, results verified, no open case, no earlier active credential of the same kind, template present | – | A failing check stops that participant and lists the failing check. Others continue
+Claim wording | Credit and MQF are shown only when verified. For a UMC, ACR eligibility follows accreditation. For an MCE, no credit and no ACR. For a SAMC, the QV claim and ACR eligibility need a QV that is valid at the issue date | – | A SAMC without valid QV is issued with no QV claim and gets no ACR. A forbidden claim blocks issue
+Sign | Open Badges 3.0 JSON-LD signed with Ed25519, key ID stored in the credential. The key stays in the vault | – | Vault unavailable leaves the participant in the queue for retry
+Render PDF | Bilingual A4 template, version recorded | – | PDF failure is retried. The signed credential exists and the PDF is attached when it succeeds
+Notify | Participant receives results verified and credential issued notices | CredentialIssued (EV-32), ResultsVerifiedNoticeQueued (audit entry) | Failed email is retried
+Report | The issuance queue shows each participant as Issued or failed with the reason | – | Failed participants are listed to the deputy dean and can be retried
+</script>
+<p>Requirements satisfied: {{fr-asverify}}, {{fr-asbulkverify}}, {{fr-asmodule}}, {{fr-arumc}}, {{fr-arsamc}}, {{fr-arlabel}}, {{fr-crcheck}}, {{fr-crbadge}}, {{fr-crcert}}, {{fr-crdc}}, {{fr-crformat}}, {{fr-crgenerated}}, {{fr-crbatch}}, {{fr-crid}}, {{fr-wdtemplate}}, {{fr-wdblock}}, {{fr-wdqvlapse}}, {{fr-acrelig}}, {{br-achieve}}, {{br-certwhole}}, {{br-mce}}, {{br-noclaim}}, {{ir-obv3}}, {{nfr-issue}}, {{sr-keys}}.</p>
+
+<h2>7.7 Credential Correction, Replacement and Revocation</h2>
+<p>Credentials are never deleted. A confirmed error is corrected as a new revision, a replacement has a new ID and is linked to the old one, and a revocation is recorded with a stated reason. The deputy dean of the owning PTj records the decision. CODL has no part in these actions (D-12).</p>
+<figure data-f="seq-correct"><pre class="mermaid">
+sequenceDiagram
+    actor D as Deputy dean
+    participant W as Web (Livewire)
+    participant CR as Credentials MD-09
+    participant Q as Queue
+    participant Au as Audit
+    actor P as Public verifier
+    D->>W: Open credential, choose correct, replace or revoke
+    W->>CR: Policy check and reason present
+    alt correct
+        CR->>Au: CredentialCorrected (EV-35), new revision, original kept
+    else replace
+        CR->>Au: CredentialReplaced (EV-36), new ID linked, old marked Replaced
+    else revoke
+        CR->>Au: CredentialRevoked (EV-37) with reason and date
+    end
+    CR->>Q: Re-sign and re-render if revision or new ID
+    CR-->>Q: Notify participant
+    P->>W: Verify by code, link or QR
+    W-->>P: Valid, corrected, replaced or revoked
+</pre><figcaption>Credential correction, replacement and revocation.</figcaption></figure>
+<p class="tcap" data-t="seq-correct-steps">Checks, confirmations, events and failures for process 7.7</p>
+<script type="text/tbl" data-h="Step|Checks and rules|Confirmation and event|Failure path" data-w="20%|34%|22%|24%" data-cls="small">
+Trigger | A result change after issue creates a correction task. A discrepancy or a reported error can also start it | CredentialCorrectionTaskCreated (audit entry) | The task stays open until resolved
+Correct | Reason required. Original revision kept. The change is checked against the source record | Confirm. CredentialCorrected (EV-35) | Without a reason the form is not saved
+Replace | New credential with a new ID, old marked Replaced and showing the new ID | Confirm. CredentialReplaced (EV-36) | Replacement is not offered for a Revoked credential
+Revoke | Recorded decision with stated reason and date | Confirm. CredentialRevoked (EV-37) | Revoked is final, with no undo. A mistaken revocation is handled by a replacement
+Notify | Mandatory notice to the participant | CredentialNoticeQueued (audit entry) | Failed email is retried
+Delete | No delete action exists. The database role has no delete right on credentials | – | Not applicable
+</script>
+<p class="tcap" data-t="seq-public-page">What the public verification page shows by credential status</p>
+<script type="text/tbl" data-h="Status|Shown to the public|Not shown" data-w="18%|52%|30%" data-cls="small">
+Issued | Valid, credential title, issuer, issue date, category, credit and MQF only if verified, QV statement only if valid at issue date, signature check result | Identity number, matric number, email, results
+Corrected | Corrected, plus the same fields as Issued with the date of correction | The old values
+Replaced | Replaced, with the ID of the new credential | The old values
+Revoked | Revoked with date. The reason is shown only if the setting <code>verification.public_fields</code> allows it | Any claim of credit or QV
+Code not found | A neutral not-found message identical for every unknown code | Any similar code
+</script>
+<p>Requirements satisfied: {{fr-crcorrect}}, {{fr-crreplace}}, {{fr-crrevoke}}, {{fr-crnoerase}}, {{fr-crnotify}}, {{fr-aschange}}, {{fr-vfpage}}, {{fr-vffields}}, {{fr-vflog}}, {{fr-vfnotfound}}, {{fr-correct}}, {{br-audit}}, {{dr-nodelete}}, {{dr-immutable}}.</p>
+
+<h2>7.8 ACR Confirmation, Consent, Export and Deposit</h2>
+<p>An ACR is generated for a completed UMC (accredited) or a SAMC with valid QV. The deputy dean confirms it. The participant then gives or declines consent. Consented ACRs enter the deposit queue. The deputy dean exports the deposit data and records the deposit after the ABC accepts it. Deposit is storage only and never a transfer (BR-26).</p>
+<figure data-f="seq-deposit"><pre class="mermaid">
+sequenceDiagram
+    participant CB as Credit bank MD-11
+    actor D as Deputy dean
+    actor S as Student
+    participant W as Web (Livewire)
+    participant ABC as ABC (manual)
+    participant Au as Audit
+    CB->>CB: Run eligibility checks, generate ACR from verified records
+    D->>W: Confirm ACR
+    CB->>Au: AcrConfirmed (EV-44)
+    CB-->>S: AcrConfirmed (EV-44)
+    alt give consent
+        S->>W: Give consent
+        CB->>Au: ConsentGiven (EV-45) with date, wording version, channel
+    else decline or postpone
+        S->>W: Decline
+        CB->>Au: ConsentDeclined (EV-46), ACR kept
+    end
+    D->>W: Export deposit data
+    D->>ABC: Send file outside MCMS
+    D->>W: Record deposit with ABC reference
+    CB->>Au: DepositRecorded (EV-47), credit Available, expiry set
+</pre><figcaption>ACR confirm, consent and deposit recording.</figcaption></figure>
+<p class="tcap" data-t="seq-deposit-steps">Checks, confirmations, events and failures for process 7.8</p>
+<script type="text/tbl" data-h="Step|Checks and rules|Confirmation and event|Failure path" data-w="20%|34%|22%|24%" data-cls="small">
+Eligibility | Only an accredited UMC or a SAMC with valid QV. Blocked for MCE, SAMC without QV, module, badge and certificate. Checks recorded | AcrChecksRecorded (audit entry) | A failing check blocks generation and the reason is shown
+Generate | Fields come from verified records and cannot be typed | AcrPrepared (EV-43) | Missing data stops generation with the field named
+Confirm | Deputy dean reviews the read-only ACR. Label Academic Credit Record shown | Confirm. AcrConfirmed (EV-44) | Confirmation is blocked if any record changed after generation
+Consent | Explicit consent with date, wording version and channel. Withdrawal is recorded as a new event before deposit | Confirm. ConsentGiven (EV-45), ConsentDeclined (EV-46), ConsentWithdrawn | Without consent the ACR is not in the queue. Decline keeps the ACR and a later request is possible
+Queue and export | Only consented and confirmed ACRs. Only an ACR can be selected. Export is a CSV file in the agreed format | DepositExportCreated (audit entry) | Export format is open (OI-11). A format change affects only the export mapper
+Record deposit | Date, ABC reference, credits, status (Successful, In process, Correction needed) and recorder | Confirm. DepositRecorded (EV-47) | Without a reference the form is not saved. A status of Correction needed keeps the ACR in the queue
+Expiry | Expiry is deposit date plus <code>credit.abc_validity_years</code>. The participant sees it | CreditAvailable | Credit expiry alerts run from the scheduler (section 7.12) using <code>alerts.credit_expiry_days</code>
+Notice | Participant is told that deposit is not a credit transfer | DepositNoticeQueued (audit entry) | Failed email is retried
+</script>
+<p>Requirements satisfied: {{fr-acrelig}}, {{fr-acrchecks}}, {{fr-acrprep}}, {{fr-acrverify}}, {{fr-acrseparate}}, {{fr-acrmulti}}, {{fr-dpconsent}}, {{fr-dpdecline}}, {{fr-dpqueue}}, {{fr-dpexport}}, {{fr-dprecord}}, {{fr-dpnottransfer}}, {{fr-dponlyacr}}, {{fr-cvexpiry}}, {{fr-cvalert}}, {{fr-cvledger}}, {{br-acrelig}}, {{br-deposit}}, {{br-consent}}, {{br-arnotacr}}, {{sr-pdpa}}.</p>
+
+<h2>7.9 Credit Transfer Decision, Provisional and Final Redemption</h2>
+<p>A transfer is decided case by case by the deputy dean of the faculty that owns the degree. Equivalence is judged on learning outcomes. An approval makes the credits Provisionally redeemed. The deputy dean later records completion (Redeemed) or release (Available again, or Expired).</p>
+<figure data-f="seq-transfer"><pre class="mermaid">
+sequenceDiagram
+    actor S as Student
+    actor D as Deputy dean
+    participant W as Web (Livewire)
+    participant T as Transfer MD-12
+    participant CB as Credit bank MD-11
+    participant Au as Audit
+    S->>W: Apply with documents
+    W->>T: Check source type, Available credit, no active application
+    D->>W: Record validity check and equivalence per criterion
+    T->>T: Block Approved if a learning outcome is Not equivalent
+    D->>W: Decide with credits, component and conditions
+    T->>Au: TransferDecided (EV-52)
+    T-->>CB: Approved credits to Provisionally redeemed
+    D->>W: Record programme completion or non-completion
+    CB->>Au: CreditRedeemed (EV-49) or CreditReleased (EV-50)
+</pre><figcaption>Credit transfer decision, provisional and final redemption.</figcaption></figure>
+<p class="tcap" data-t="seq-transfer-steps">Checks, confirmations, events and failures for process 7.9</p>
+<script type="text/tbl" data-h="Step|Checks and rules|Confirmation and event|Failure path" data-w="20%|34%|22%|24%" data-cls="small">
+Apply | Source is a UTeM UMC, another eligible UMC or a SAMC with verifiable QV. Only Available credit is selectable. A second application on the same credits is blocked | Confirm. TransferApplied (EV-51) | MCE is refused with an explanation. Redeemed or Provisionally redeemed credit is not selectable. Expired credit is selectable only with a re-evaluation flag
+Validity check | Authenticity, ABC status and QV or accreditation status | Confirm. ValidityChecked (audit entry) | Not valid leads to Not approved
+Equivalence | Each criterion has a finding and a result. Credit or SLT alone is not evidence | Confirm. EquivalenceEvaluated (audit entry) | A criterion with no finding blocks saving
+Limits | Programme transfer limit and non-transferable components are checked. A partly completed UMC or a badge set is not full credit unless flagged separately recognisable | Warning shown to the decision maker | Limit warnings do not block. A learning-outcome mismatch and a partial UMC do block
+Decide | Outcomes are Approved, Partly approved, Not approved and More evidence needed. Only the configured authority can decide, using the setting version in force | Confirm. TransferDecided (EV-52) | Unauthorised user is denied. More evidence needed returns the application
+Provisional redemption | Approved credits become Provisionally redeemed and are linked to the programme and the record | TransferDecided (EV-52) | Not approved changes no ACR, badge, credential or credit status
+Final redemption | Authorised user records programme completion with an evidence reference | Confirm. CreditRedeemed (EV-49) | No evidence reference blocks the form
+Release | Withdrawal or non-completion with an evidence reference. Credit returns to Available if still valid or becomes Expired | Confirm. CreditReleased (EV-50) | Release does not change the ACR
+Admission | Admission is a separate record. An approval does not imply admission | Confirm. AdmissionRecorded (EV-53) | Not applicable
+</script>
+<p>Requirements satisfied: {{fr-ctapply}}, {{fr-ctsource}}, {{fr-ctavailable}}, {{fr-ctvalidity}}, {{fr-ctequiv}}, {{fr-ctloequiv}}, {{fr-ctlimits}}, {{fr-ctpartial}}, {{fr-ctdecision}}, {{fr-ctauthority}}, {{fr-ctreject}}, {{fr-cttrace}}, {{fr-ctadmission}}, {{fr-rdprov}}, {{fr-rdfinal}}, {{fr-rdrelease}}, {{fr-rdnoreuse}}, {{fr-rdconflict}}, {{fr-rdkeep}}, {{fr-rdsource}}, {{fr-rdabcsync}}, {{br-redeem}}, {{br-equiv}}, {{br-receiver}}, {{br-mcetransfer}}, {{br-rejectkeep}}, {{br-admission}}.</p>
+
+<h2>7.10 QV Expiry Alerts and Lapse</h2>
+<p>The scheduler raises alerts before a QV expires. When the QV expires, is suspended or is withdrawn, the QV claim stops, new ACR eligibility stops and a task is created for the deputy dean. A QV result is recorded by the deputy dean (UI/UX spec §2.2).</p>
+<figure data-f="seq-qvlapse"><pre class="mermaid">
+sequenceDiagram
+    participant Sc as Scheduler
+    participant Q as Quality verification MD-10
+    participant Cu as Credentials MD-09
+    participant CB as Credit bank MD-11
+    participant N as Notifications MD-16
+    Sc->>Q: Daily check of QV records
+    Q->>N: QvExpiryAlertDue (audit entry) at 180, 90 and 30 days
+    Sc->>Q: Daily lapse check
+    Q->>Q: Mark Expired, Suspended or Withdrawn
+    Q-->>Cu: QvLapsed (EV-42)
+    Q-->>CB: QvLapsed (EV-42)
+    Cu->>Cu: Stop QV claim on new credentials
+    CB->>CB: Stop new ACR eligibility
+    Q->>N: Task for deputy dean and notice
+</pre><figcaption>QV expiry alerts and lapse.</figcaption></figure>
+<p class="tcap" data-t="seq-qvlapse-steps">Checks, confirmations, events and failures for process 7.10</p>
+<script type="text/tbl" data-h="Step|Checks and rules|Confirmation and event|Failure path" data-w="20%|34%|22%|24%" data-cls="small">
+Alert | Alert days come from <code>alerts.qv_expiry_days</code>. One alert per record and day offset, kept in an alert log | QvExpiryAlertDue (audit entry) | A missed run is caught up on the next run because the rule is "offset reached and not yet sent"
+Lapse | Expiry date passed, or suspension or withdrawal recorded. Status changes in the QV record, the sole source | QvLapsed (EV-42) | The lapse run is idempotent because a record already lapsed is skipped
+Effect on credentials | New credentials get no QV claim. Earlier credentials keep the status they had at issue date | – | Not applicable
+Effect on offerings | Catalogue hides the QV claim, credit and MQF for the affected SAMC | – | Not applicable
+Effect on ACR | A new ACR is not allowed. Existing ACRs remain | – | Not applicable
+Task | A task for the deputy dean to renew or withdraw the claim | QvLapseTaskCreated (audit entry) | Task stays open until the QV is renewed or the state is acknowledged
+Record QV result | Expiry cannot be later than <code>qv.max_validity_years</code> after the start date | Confirm. QvVerified (EV-39) or QvNotVerified (EV-40) | Out-of-range date is refused
+</script>
+<p>Requirements satisfied: {{fr-qvsource}}, {{fr-qvresult}}, {{fr-qvalerts}}, {{fr-qvlapse}}, {{fr-qvnotransfer}}, {{fr-wdqvlapse}}, {{fr-offqv}}, {{br-qvvalid}}, {{br-qvlapse}}, {{nfr-scheduler}}.</p>
+
+<h2>7.11 Stackable Plan Check</h2>
+<p>An individual stackable plan is checked against the home credit share and the residency rule. The plan decision "Suitable to proceed" needs admission to be recorded first. The mapping used by the plan was approved by the Senate.</p>
+<figure data-f="seq-stackable"><pre class="mermaid">
+sequenceDiagram
+    actor D as Deputy dean
+    participant W as Web (Livewire)
+    participant PW as Pathways MD-13
+    participant ST as Settings MD-00
+    participant Au as Audit
+    D->>W: Create plan for student and approved mapping
+    W->>PW: Calculate home credit share
+    PW->>ST: Read stackable settings in force
+    PW-->>W: Share, residency check, remaining requirements
+    D->>W: Record decision with conditions
+    PW->>PW: Check admission record for Suitable
+    PW->>Au: StackablePlanDecided (EV-56)
+</pre><figcaption>Stackable plan check.</figcaption></figure>
+<p class="tcap" data-t="seq-stackable-steps">Checks, confirmations, events and failures for process 7.11</p>
+<script type="text/tbl" data-h="Step|Checks and rules|Confirmation and event|Failure path" data-w="20%|34%|22%|24%" data-cls="small">
+Mapping | Only credit-bearing credentials can be mapped, so an MCE is blocked. An approved mapping transfers no credit | SenateDecisionRecorded (EV-14) | An unapproved mapping cannot be published
+Home credit share | Credit earned at UTeM divided by total credit. Below <code>stackable.min_home_credit_percent</code> the plan is marked not meeting. The screen states that 30 percent does not mean 70 percent is transferable | – | Plan decision is limited to Not yet suitable or Not suitable
+Residency | Residency semesters against <code>stackable.residency_semesters</code> for conventional delivery. ODL scope is flagged for review | – | Missing semesters leave the plan at Needs review
+Decision | Suitable, Needs review or Not yet suitable, with conditions and follow-up | Confirm. StackablePlanDecided (EV-56) | Suitable needs the admission record, otherwise the action is blocked
+Award | Recorded from programme records after admission and requirements. MCMS does not award | Confirm. AwardRecorded (audit entry) | Blocked without admission and requirements
+Curriculum change | A material change to the target curriculum flags the mapping for review | MappingFlaggedForReview | The flag stays until the mapping is reviewed
+</script>
+<p>Requirements satisfied: {{fr-spdefine}}, {{fr-spmap}}, {{fr-spcreditbearing}}, {{fr-spapprove}}, {{fr-spnotransfer}}, {{fr-spcurrchange}}, {{fr-spplan}}, {{fr-sp30}}, {{fr-spresidency}}, {{fr-spremain}}, {{fr-spdecision}}, {{fr-spadmit}}, {{fr-spaward}}, {{br-home30}}, {{br-residency}}, {{br-award}}.</p>
+
+<h2>7.12 Job Designs</h2>
+<p>All background work runs as Laravel queued jobs on Redis under Horizon (AD-05, {{nfr-queue}}). The scheduler starts timed jobs ({{nfr-scheduler}}). Rules common to all jobs:</p>
+<ul>
+<li>A job is idempotent. It records its natural key before it acts, and a second run with the same key returns the first result.</li>
+<li>A job is retried with a growing delay (for example 1, 5, 15 and 60 minutes) up to a set number of tries. When tries are exhausted the job moves to the failed-job list, and an alert is sent to CODL ({{fr-ihretry}}).</li>
+<li>A job never holds a database transaction while it calls an external service. It reads, calls, then writes in a short transaction.</li>
+<li>A job writes progress to a <code>job_runs</code> row (total, done, failed, status). The screen polls that row.</li>
+<li>A failure of one item does not stop the others. Failures are listed with a reason.</li>
+</ul>
+<p class="tcap" data-t="seq-jobs">Job designs</p>
+<script type="text/tbl" data-h="Job (class)|Trigger and queue|Idempotency key|Retries and failure handling|Progress" data-w="16%|20%|20%|27%|17%" data-cls="small">
+IssueCredentialsBatchJob (JB-01) and IssueCredentialJob (JB-22) | CompletionConfirmed (EV-31). Queue <code>credentials</code>. One parent job fans out one job per participant | Participant, micro-credential and credential kind. A unique index stops a second active credential | 5 tries with backoff. Vault or PDF failure leaves the item Queued for retry. A pre-issue check failure is a result, not an exception, and is listed with the reason | Parent job counts total, issued and failed. Issuance queue screen shows them
+ImportResultsJob (JB-02) | Upload by CODL. Queue <code>imports</code> | File hash and cohort. Rows keyed by enrolment and component | 3 tries on infrastructure errors only. A validation error is not retried. The file stays stored | Rows read, staged and rejected. Row report is built at the end
+GenerateReportJob (JB-15) and RenderPdfJob (JB-04) | User request for a report, export or document. Queue <code>reports</code> | Document type, record ID, record revision and template version | 3 tries. Headless Chromium has a time limit per document. A timeout fails that file only. The user can request it again | Status Waiting, Running, Ready or Failed. The download is a signed short-lived URL
+AlertSchedulerJobs (QvExpiryAlertsJob (JB-06), CreditExpiryAlertsJob (JB-07), DecisionOverdueRemindersJob (JB-10), CompletionWindowRemindersJob (JB-11), PeriodicReviewRemindersJob (JB-12)) | Scheduler, daily. Queue <code>default</code> | Record, alert kind and day offset in an alert log | A missed day is caught up because the rule is "offset reached and not yet sent". Sending is a separate notification job with its own retries | Count of alerts raised is logged. Failed sends appear in the notification log
+OpenCloseRegistrationJob (JB-21) and CancelUnpaidEnrolmentsJob (JB-20) | Scheduler, every 5 minutes. Queue <code>default</code> | Offering and window edge. Enrolment and state | A late run applies the same state change. A row already changed is skipped | Count logged
+VerifyAuditChainJob (JB-18) | Scheduler, nightly. Queue <code>default</code> | Date of the run | A broken link raises a security alert at once and is never auto-repaired | Rows checked and result
+</script>
+<div class="note"><b>Note:</b> Job class names above are working names. The JB-xx numbers of Section 4 apply once that section is final (this section was written before Section 4 and uses class names only).</div>
+<p>Requirements satisfied: {{nfr-issue}}, {{nfr-import}}, {{nfr-report}}, {{nfr-queue}}, {{nfr-scheduler}}, {{nfr-adapterfail}}, {{ir-idempotent}}, {{fr-crbatch}}, {{fr-lplog}}, {{fr-qvalerts}}, {{fr-cvalert}}, {{fr-prschedule}}, {{fr-ihretry}}, {{fr-ntlog}}.</p>

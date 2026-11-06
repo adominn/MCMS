@@ -1,0 +1,80 @@
+<!-- ===================== 1. INTRODUCTION ===================== -->
+<h1>1. Introduction</h1>
+
+<h2>1.1 Purpose</h2>
+<p>This Software Design Description (SDD) describes how the UTeM Micro-Credential Management System (MCMS) is built: its architecture, technology, modules, data, interfaces, processes, security, quality attributes and deployment. It is the last document of the set before the Release 1 build. Developers and AI development agents use it, together with the SRS and the UI/UX Design Specification, to build Release 1 without having to guess.</p>
+<p>The SRS states <i>what</i> the system shall do, the PRD <i>what to build first and why</i>, and the UI/UX Design Specification <i>how it looks and behaves</i>. This SDD states <i>how it is made</i>. Where this SDD and the SRS differ on a requirement, the SRS prevails. Where this SDD and the UI/UX Design Specification differ on a screen's look or behaviour, the UI/UX Design Specification prevails. Where they differ on a term or decision, the Glossary and Decision Log prevails.</p>
+
+<h2>1.2 Scope</h2>
+<p>The design covers the complete Release 1 system: every requirement of the SRS marked SHALL, every Release 1 feature of the PRD, and every screen and document of the approved UI/UX Design Specification v1.1. It shows where Release 2 and 3 capabilities (SHOULD and MAY) will attach, without designing them in detail, so that they can be added without rework (D-24).</p>
+<p>MCMS is a new standalone web application with its own database, which reaches other systems only through adapters (D-06). Learning content stays on UCreds. The national ABC platform and the QVC/MQA procedures are outside the system; MCMS prepares and records, and UTeM staff submit (D-14).</p>
+
+<h2>1.3 Document Conventions</h2>
+<script type="text/tbl" data-h="Convention|Meaning" data-w="22%|78%">
+AD-XX | Architecture decision of this SDD (Section 1.6). Every design element cites the decisions it follows.
+DA-XX | Design assumption of this SDD, made where the owner has not yet decided (Section 11.3).
+MD-XX | Module of the modular monolith (Section 2.3). MD-00 is the shared platform kernel.
+EV-XX / JB-XX | Domain event / background job (Section 4.19).
+FR-XX, BR-XX, IR-XX, DR-XX, NFR-XX, SR-XX | Requirement IDs of the SRS v1.0, exactly as published there.
+D-XX, A-XX, OI-XX | Decisions, assumptions and open items of the Glossary and Decision Log v0.5.
+Screen IDs (DD-12, ST-03 …) | Screens of the UI/UX Design Specification v1.1, Section 6.6.
+<code>code</code> | Class, table, column, route or configuration names.
+</script>
+
+<h2>1.4 Intended Audience</h2>
+<script type="text/tbl" data-h="Reader|Use of this document|Read first" data-w="28%|47%|25%">
+Supervisor and CODL | Check that the design is sound, buildable by a small team and safe for UTeM's records. | Sections 1, 2, 8, 11
+Developers and AI development agents | Build the modules, data, interfaces and jobs exactly as designed. | Sections 2 to 7
+Testers | Derive integration and end-to-end tests from the processes, events and traceability. | Sections 7, 11
+System administrators (CODL) | Install, configure, operate, back up and monitor the system. | Sections 9, 10
+Security reviewers | Check authentication, authorisation, key handling, audit integrity and privacy. | Section 8
+</script>
+
+<h2>1.5 References</h2>
+<ol>
+  <li>Glossary and Decision Log for the UTeM MCMS, version 0.5, 26 October 2026 (MCMS_FND_V0.5_Oct_2026).</li>
+  <li>Software Requirements Specification, UTeM MCMS, version 1.0, 26 October 2026 (MCMS_SRS_V1.0_Oct_2026).</li>
+  <li>Product Requirements Document, UTeM MCMS, version 1.0, 26 October 2026 (MCMS_PRD_V1.0_Oct_2026).</li>
+  <li>UI/UX Design Specification, UTeM MCMS, version 1.1, 27 October 2026 (MCMS_UIUX_V1.1_Oct_2026), and its approved clickable prototype (<code>UIUX/v2/prototype</code>).</li>
+  <li>Garis Panduan Micro-Credential UTeM, Versi 1.0, 18 September 2026 (the Guide).</li>
+  <li>IEEE 1016-2009, Standard for Information Technology: Systems Design, Software Design Descriptions (structure guidance).</li>
+  <li>1EdTech Open Badges 3.0; W3C Verifiable Credentials Data Model 2.0; W3C Data Integrity EdDSA Cryptosuites.</li>
+  <li>OWASP Application Security Verification Standard 4.0; WCAG 2.1; Personal Data Protection Act 2010 (Act 709).</li>
+  <li>Laravel 11, Livewire 3, PostgreSQL 16 and Microsoft Entra ID (OpenID Connect) documentation.</li>
+</ol>
+
+<h2>1.6 Architecture Decisions</h2>
+<p>{{tab:ad}} lists the decisions that shape the whole design. Each later section cites them. Decisions marked Assumed rest on an open item of the Glossary and Decision Log; if the open item closes differently, only the parts that cite that decision change.</p>
+<p class="tcap" data-t="ad">Architecture decisions</p>
+<script type="text/tbl" data-h="ID|Decision|Basis|Status" data-w="9%|61%|16%|14%" data-cls="small">
+AD-01 | Modular monolith: one Laravel application with code split into modules under <code>app/Modules/&lt;Module&gt;</code>. A module owns its tables; other modules use its public service interface or its domain events, never its tables. | D-07 | Proposed
+AD-02 | Laravel 11 on PHP 8.3. | D-08 | Decided
+AD-03 | PostgreSQL 16 as the database. Queries go through Eloquent and the query builder, so MySQL 8 stays a fallback. | D-09, OI-02 | Assumed
+AD-04 | Server-rendered user interface: Blade templates with Livewire 3 and Alpine.js. DESIGN.md tokens are CSS custom properties, built with Vite. Shared components mirror the approved prototype. | UI/UX spec 3–4 | Proposed
+AD-05 | Background work as queued jobs on Redis, supervised by Laravel Horizon; timed alerts from the Laravel scheduler. | NFR queue | Proposed
+AD-06 | Sign-in with Microsoft Entra ID through OpenID Connect. Staff MFA is enforced by Entra Conditional Access and checked through the <code>amr</code> claim. A stub identity provider exists only outside production. | D-10, OI-03 | Assumed
+AD-07 | Authorisation by role assignment with scope, checked per record by policies for role, scope and separation of duties. No super-user bypass for academic actions; CODL roles never pass an academic policy. | D-11, D-12, D-28 | Decided basis
+AD-08 | Each external system is an interface with Stub, Manual and Live adapters, chosen by configuration. An integration hub logs and retries calls. | D-06, D-14 | Proposed
+AD-09 | Credentials as Open Badges 3.0 / W3C Verifiable Credentials, signed with Ed25519 (Data Integrity eddsa-rdfc-2022). Keys are held in a key vault owned by CODL. Public verification is by random code, link or QR. | D-19, OI-08 | Assumed
+AD-10 | Printable documents are Blade A4 templates rendered to PDF by headless Chromium in a queue worker; templates are bilingual and versioned. | UI/UX spec 8 | Proposed
+AD-11 | Append-only audit table with a hash chain, written in the same transaction as the change; the application role cannot update or delete it. Audit writes are serialised through a chain-head row lock, which works on PostgreSQL and MySQL at the cost of write throughput (Section 9). | D-20 | Proposed
+AD-12 | Settings versioned with effective dates; each decision stores the setting version it used. | D-16 | Proposed
+AD-13 | Interface strings in Laravel language files (ms, en); user-facing content stored in both languages; locale per user. | D-02 | Proposed
+AD-14 | Files in S3-compatible object storage (MinIO on premises), scanned by ClamAV on upload, served through short-lived signed URLs. | SRS uploads | Assumed
+AD-15 | Email through an SMTP relay; every notification is stored first and sent by a queued job. | SRS SMTP | Assumed
+AD-16 | Staff search with PostgreSQL full-text search, always within the user's scope. | NFR search | Proposed
+AD-17 | Pest feature tests named after the SRS requirement they prove, plus Playwright end-to-end tests reusing the prototype's flows. | D-01 | Proposed
+AD-18 | Hosting on Linux virtual machines in the UTeM data centre: Nginx with PHP-FPM, PostgreSQL, Redis, MinIO and queue workers; environments dev, test, staging and production. Production never runs the stub identity provider or the demo clock; the payment stub and the Manual adapters (UCreds, ABC, QVC/MQA) are the Release 1 production modes. | A-09, D-21, D-14 | Assumed
+AD-19 | Three database roles: <code>mcms_app</code> for the application, without UPDATE or DELETE on append-only tables; <code>mcms_migrator</code> for schema changes; and <code>mcms_disposal</code>, used only by the approved disposal procedure. | D-20, OI-07 | Proposed
+</script>
+
+<h2>1.7 Design Principles</h2>
+<p>The design applies the principles of the UI/UX Design Specification (Section 2.1) to the code:</p>
+<ul>
+  <li><b>One stage, one record.</b> Each recognition stage is its own table, its own action and its own event (D-15). No action changes two stages. Verifying results and confirming completion are separate actions; the system issues credentials only from a completion confirmation (D-29).</li>
+  <li><b>Authority in the policy layer.</b> Who may decide is enforced in policies on the server for every request, not only by hiding buttons (D-11, D-12).</li>
+  <li><b>Generated recognition text.</b> Credit, MQF level and QV wording is computed from verified records and templates, never stored as free text (D-17).</li>
+  <li><b>Nothing is erased.</b> Corrections add revisions and events; the audit trail is append-only (D-20).</li>
+  <li><b>Rules are settings.</b> Thresholds and approving roles are versioned settings, and decisions record the version in force (D-16).</li>
+  <li><b>Adapters at the edge.</b> Every external system can run as a stub, manual exchange or live connection without changing the modules (D-06, D-14).</li>
+</ul>

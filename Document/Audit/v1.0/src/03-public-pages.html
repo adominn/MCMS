@@ -1,0 +1,217 @@
+<!-- ===================== SECTION 2: PUBLIC ROLE ===================== -->
+<h1>2. Public / Guest Pages & Functionality Analysis</h1>
+
+<p>The Public / Guest role encompasses all unauthenticated user interactions. This tier is critical for public course discovery, prospective student engagement, employer credential verification, institutional transparency, and authentication entry.</p>
+
+<!-- ---------------- 2.1 Public Home ---------------- -->
+<h2>2.1 Public Landing Portal</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> Public Landing Portal / Home</li>
+  <li><b>Role:</b> Public / Unauthenticated Guest</li>
+  <li><b>Exact Route:</b> <code>GET /public</code> (Route Name: <code>public.home</code>)</li>
+  <li><b>Page Type:</b> Landing Page / Marketing & Discovery</li>
+  <li><b>Related Database Tables:</b> <code>offerings</code>, <code>mc_versions</code>, <code>micro_credentials</code>, <code>ptjs</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Offering\CatalogueController@home</code>, View: <code>public.home</code>, Layout: <code>layouts.public</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Serves as the primary institutional showcase for UTeM Micro-Credentials. It displays hero messaging, core statistics (active offerings, total learners, participating faculties), featured micro-credentials categorized by discipline (Computing, Engineering, Technology Management), an explainer on micro-credential stacking, and direct navigation links to the catalogue, verification portal, and degree pathways.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and aligned with prototype screen <code>#/public/home</code>. Displays active course cohorts dynamically retrieved from the database where <code>offerings.status = 'open'</code>. Includes bilingual navigation header, search redirect to catalogue, and responsive feature grids. Empty states are handled gracefully when no cohorts are open.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Dynamic database queries correctly filter active, verified offerings. Fast load times, responsive CSS, and full alignment with D-38 styling directives.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<p><b>Entry:</b> User visits root URL <code>/</code> or direct URL <code>/public</code> &rarr; <b>Action:</b> Explores featured courses, clicks category pill or "Explore Catalogue" &rarr; <b>System:</b> Renders homepage with dynamic counts &rarr; <b>Destination:</b> Navigates to <code>/public/catalogue</code> or <code>/public/offering/{id}</code>.</p>
+
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Public Visitor<br/>Landing Page<br/>/public"] --> B["Browse Featured Courses"]
+    B --> C{"User Decision"}
+    C -->|"Click Offering"| D["Public Offering Detail<br/>/public/offering/{id}"]
+    C -->|"Click Browse All"| E["Public Catalogue<br/>/public/catalogue"]
+    C -->|"Click Verify"| F["Verification Portal<br/>/public/verify"]
+    C -->|"Click Sign In"| G["Sign In Screen<br/>/signin"]
+</pre>
+<figcaption>Figure 2.1: Public Landing Portal Navigation Flow (Current & Expected Flow)</figcaption>
+</figure>
+
+<!-- ---------------- 2.2 Public Catalogue ---------------- -->
+<h2>2.2 Public Micro-Credential Catalogue</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> Micro-Credential Course Catalogue</li>
+  <li><b>Role:</b> Public / Guest & Authenticated Learners</li>
+  <li><b>Exact Route:</b> <code>GET /public/catalogue</code> (Route Name: <code>public.catalogue</code>)</li>
+  <li><b>Page Type:</b> Listing / Search & Filter Directory</li>
+  <li><b>Related Database Tables:</b> <code>offerings</code>, <code>mc_versions</code>, <code>micro_credentials</code>, <code>ptjs</code>, <code>qv_records</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Offering\CatalogueController@catalogue</code>, View: <code>public.catalogue</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Allows prospective learners to search, filter, and compare all approved micro-credential offerings. Provides filtering by faculty (PTj), category (SAMC, UMC, MCE), delivery mode (Online, Blended), credit eligibility, and keywords. Displays offering badges indicating MQF level, academic credits, fee (RM), cohort duration, and enrollment deadlines.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional with real-time keyword search and sidebar filters. Filters dynamically query PostgreSQL using Eloquent. Respects D-38 pagination rules (pager rendered only when records exceed 10). Credit and MQF values are displayed strictly from verified records (FR-150).</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Filtering, keyword search, reset actions, and responsive layout are operational and tested by Playwright flow FL-22.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Visitor / Student<br/>Public Catalogue<br/>/public/catalogue"] --> B["Enter Search Keyword or Select Filter"]
+    B --> C["System Queries Database<br/>Filter: status='open', PTj, Category"]
+    C --> D["Render Matching Offering Cards"]
+    D --> E["Select Course Offering"]
+    E --> F["Offering Detail Page<br/>/public/offering/{id}"]
+</pre>
+<figcaption>Figure 2.2: Course Catalogue Search & Filter Flow</figcaption>
+</figure>
+
+<!-- ---------------- 2.3 Public Offering Detail ---------------- -->
+<h2>2.3 Public Course Offering Detail</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> Course Offering Overview & Registration Gate</li>
+  <li><b>Role:</b> Public / Guest</li>
+  <li><b>Exact Route:</b> <code>GET /public/offering/{id}</code> (Route Name: <code>public.offering</code>)</li>
+  <li><b>Page Type:</b> Details Page / Registration Entry</li>
+  <li><b>Related Database Tables:</b> <code>offerings</code>, <code>mc_versions</code>, <code>micro_credentials</code>, <code>mc_modules</code>, <code>learning_outcomes</code>, <code>ptjs</code>, <code>qv_records</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Offering\CatalogueController@offering</code>, View: <code>public.offering</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Provides complete syllabus and administrative disclosure for a specific cohort: course description, target learners, module breakdown, total student learning time (SLT), MQF level, credit eligibility, fee breakdown, instructor credentials, and prerequisite requirements. Includes an official "Register Now" action button that initiates learner enrollment.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Implemented in full alignment with the approved prototype (two-column layout with summary strip). Correctly queries linked modules and learning outcomes. When unauthenticated, clicking "Register" redirects to <code>/signin</code> with an intended return URL; when authenticated as a student, it launches the 4-step wizard at <code>/register/{id}</code>.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Dynamic data binding, prerequisite checks, and role redirection are operational.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["User on Offering Page<br/>/public/offering/{id}"] --> B["Review Syllabus, Modules, Fee & Dates"]
+    B --> C["Click 'Register Now'"]
+    C --> D{"Authenticated as Student?"}
+    D -->|"Yes"| E["Launch 4-Step Registration<br/>/register/{offering}"]
+    D -->|"No Guest"| F["Redirect to Sign In<br/>/signin?intended=/register/{offering}"]
+    F --> G["Sign In / Account Creation"]
+    G --> E
+</pre>
+<figcaption>Figure 2.3: Course Offering Discovery & Registration Handoff Flow</figcaption>
+</figure>
+
+<!-- ---------------- 2.4 How Recognition Works & Pathways ---------------- -->
+<h2>2.4 How Recognition Works & Pathways to a Degree</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> How Recognition Works (<code>/public/how</code>), Pathways to a Degree (<code>/public/pathways</code>)</li>
+  <li><b>Role:</b> Public / Guest</li>
+  <li><b>Exact Routes:</b> <code>GET /public/how</code>, <code>GET /public/pathways</code></li>
+  <li><b>Page Type:</b> Educational / Policy Explainer & Pathway Directory</li>
+  <li><b>Related Database Tables:</b> <code>pathways</code>, <code>pathway_items</code>, <code>programmes</code>, <code>micro_credentials</code></li>
+  <li><b>Related Components & Controllers:</b> <code>CatalogueController@how</code>, <code>CatalogueController@pathways</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p><code>/public/how</code> explains the regulatory and academic framework governing UTeM micro-credentials (MQF compliance, SAMC Quality Verification, Academic Credit Record, ABC banking, and credit transfer). <code>/public/pathways</code> lists all Senate-approved degree pathways, illustrating how specific micro-credential clusters map to target Bachelor and Master degree programmes.</p>
+
+<h3>C. Current Implementation</h3>
+<p><code>/public/how</code> delivers structured bilingual guidelines matching Guide requirements. <code>/public/pathways</code> dynamically renders approved pathway mappings from the <code>pathways</code> table. Prominently displays the mandatory legal disclaimer: <i>"Earning a micro-credential does not guarantee automatic admission to a degree programme."</i></p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Content integrity verified against Senate policy guidelines.</p>
+
+<!-- ---------------- 2.5 Verification Portal ---------------- -->
+<h2>2.5 Public Credential Verification Portal & JWKS</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Public Verification Portal (<code>/public/verify</code>), Verification Result (<code>/public/verify/{code}</code>), File Check (<code>POST /public/verify/file</code>), JWKS (<code>GET /.well-known/jwks.json</code>)</li>
+  <li><b>Role:</b> Public / Employers / Verifiers</li>
+  <li><b>Exact Routes:</b> <code>GET /public/verify</code>, <code>GET /public/verify/{code}</code>, <code>POST /public/verify/file</code>, <code>GET /.well-known/jwks.json</code></li>
+  <li><b>Page Type:</b> Verification Portal / Cryptographic Security Endpoint</li>
+  <li><b>Related Database Tables:</b> <code>credentials</code>, <code>signing_keys</code>, <code>verification_log</code>, <code>enrolments</code>, <code>users</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Credentials\VerifyController</code>, Views: <code>public.verify</code>, <code>public.verify-result</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Enables any third-party employer or academic institution to verify the authenticity of a UTeM micro-credential without requiring an account (X3, FR-155 to FR-162). Verification is supported via two mechanisms: (1) Entering an 8-character public verification code (e.g., <code>7Q2M-K4PA</code>), and (2) Uploading a signed Digital Credential file (VC-JWT). Rate limiting (SR-08) and neutral not-found responses prevent enumeration attacks.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented. Lookup by code retrieves the credential, logs the verification attempt in <code>verification_log</code>, and renders the verification badge showing status (Valid, Corrected, Replaced, or Revoked). File upload validates the Ed25519 cryptographic signature against the public key published at <code>/.well-known/jwks.json</code>. Rate limiting (60 requests/minute) is strictly enforced.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Tested by Playwright flow FL-23 and unit tests in <code>CredentialTest.php</code>.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Employer / Verifier<br/>Verification Portal<br/>/public/verify"] --> B{"Verification Method"}
+    B -->|"Enter Public Code"| C["Submit 8-Digit Code<br/>e.g. 7Q2M-K4PA"]
+    B -->|"Upload File"| D["Upload Credential JSON/JWT"]
+    
+    C --> E["System Validates Rate Limit<br/>Queries credentials table"]
+    D --> F["System Verifies Ed25519 Signature<br/>Checks key in signing_keys"]
+    
+    E --> G{"Credential Found?"}
+    F --> H{"Signature Valid?"}
+    
+    G -->|"Yes"| I["Log Verification in verification_log<br/>Display Result Page<br/>/public/verify/{code}"]
+    G -->|"No"| J["Display Neutral 'Not Found' Notice"]
+    
+    H -->|"Yes"| I
+    H -->|"No"| K["Display Cryptographic Invalid Warning"]
+</pre>
+<figcaption>Figure 2.5: Public Credential Verification Flow (Code Lookup & Cryptographic Verification)</figcaption>
+</figure>
+
+<!-- ---------------- 2.6 Authentication & MFA ---------------- -->
+<h2>2.6 Authentication Portal & MFA Challenge</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Sign In Portal (<code>/signin</code>), MFA Challenge (<code>/signin/mfa</code>), Root Redirect (<code>/</code>), Sign Out (<code>POST /signout</code>)</li>
+  <li><b>Role:</b> Public Guest & Authenticated Users</li>
+  <li><b>Exact Routes:</b> <code>GET /signin</code>, <code>POST /signin/stub</code>, <code>GET /signin/mfa</code>, <code>POST /signin/mfa</code>, <code>POST /signout</code></li>
+  <li><b>Page Type:</b> Authentication & Access Control</li>
+  <li><b>Related Database Tables:</b> <code>users</code>, <code>role_assignments</code>, <code>sessions</code>, <code>audit_events</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Identity\StubSignInController</code>, Views: <code>signin</code>, <code>mfa</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Authenticates system users. Under production requirements (OI-03, SR-01), authentication must integrate with Microsoft Entra ID (UTeM Single Sign-On). In development and demonstration environments, a stub identity provider (FR-05) allows selecting personas. Staff holding privileged decision-making roles (Deputy Dean, CODL Administrator) must complete a second-factor authentication (MFA) step (SR-02).</p>
+
+<h3>C. Current Implementation</h3>
+<p>The stub IdP is fully functional and guarded by <code>config('mcms.stub_idp')</code>. Signing in as a student or lecturer logs in directly; selecting Deputy Dean or CODL Admin redirects to <code>/signin/mfa</code> requiring a 6-digit passcode. Successful authentication regenerates the session, updates <code>last_login_at</code>, and creates an audit record in <code>audit_events</code>.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Partially Working (By Design).</b> The stub IdP and MFA simulator work completely for demonstration and testing, but Microsoft Entra ID integration remains pending external UTeM ICT confirmation (OI-03).</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["User at Sign In<br/>/signin"] --> B["Select Persona / Enter Credentials"]
+    B --> C["Submit Credentials to /signin/stub"]
+    C --> D{"Account Active?"}
+    D -->|"No"| E["Audit auth.refused_inactive<br/>Display Deactivation Error"]
+    D -->|"Yes"| F{"Role Requires MFA?<br/>(Deputy Dean / Admin)"}
+    F -->|"Yes"| G["Set session mfa_pending<br/>Redirect to /signin/mfa"]
+    G --> H["Enter 6-Digit MFA Code"]
+    H --> I["Validate Code regex ^\d{6}$"]
+    I --> J["Complete Authentication"]
+    F -->|"No"| J
+    J --> K["Regenerate Session ID<br/>Audit auth.signed_in<br/>Set active_role"]
+    K --> L["Redirect to Intended Destination<br/>or Universal Task Queue /tasks"]
+</pre>
+<figcaption>Figure 2.6: User Authentication & Privileged Role MFA Flow</figcaption>
+</figure>

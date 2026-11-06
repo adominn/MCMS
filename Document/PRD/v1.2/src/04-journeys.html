@@ -1,0 +1,47 @@
+<!-- ===================== 4. USER JOURNEYS ===================== -->
+<h1>4. User Journeys</h1>
+<p>Journeys show the experience of a persona across several features. The <i>target experience</i> rates each step with MCMS on a scale of 1 (frustrating) to 5 (effortless). Steps that stay at 3 are limited by processes outside MCMS, such as committee meetings, which MCMS records but does not control. Each journey crosses several recognition stages; the stage column shows that the participant or officer always knows which stage they are in.</p>
+
+<h2>4.1 Lecturer: From Idea to Open Offering</h2>
+<p class="tcap" data-t="jcoord">Dr. Aina takes a UMC from idea to an open offering</p>
+<script type="text/tbl" data-h="Phase|Step|Who|Target experience|What MCMS does" data-w="12%|30%|13%|12%|33%" data-cls="small">
+Propose | Answer the category questions | Aina | 5 / 5 | Proposes UMC and explains why ({{f-proposal}})
+Propose | Fill the guided proposal | Aina | 4 / 5 | Calculates SLT live, checks weightings and alignment
+Propose | Fix the SLT warning (110 h vs 120 h) before submitting | Aina | 4 / 5 | Blocks submission with a clear message ({{f-umc}})
+Review | Read reviewer comments and respond | Aina, reviewer | 4 / 5 | Tracks each comment to resolution ({{f-approval}})
+Review | PTj verifies the category and endorses | Hakim | 4 / 5 | Produces the decision pack
+Approve | Deputy dean presents the decision pack at the Senate meeting | Hakim, Senate | 3 / 5 | Outside MCMS; MCMS provides the decision pack
+Approve | Decision recorded with the meeting reference | Hakim | 5 / 5 | Version 1 becomes Approved; nothing else changes
+Offer | Complete the readiness checklist | Aina, Hakim | 4 / 5 | Opens registration only when Ready ({{f-readiness}})
+Offer | Offering appears in the catalogue | Aina | 5 / 5 | Generates honest recognition text ({{f-catalogue}})
+</script>
+
+<h2>4.2 Participant: From Enrolment to Credit Used in a Degree</h2>
+<p class="tcap" data-t="jpart">Amir earns a UMC and later uses its credit</p>
+<script type="text/tbl" data-h="Stage|Step|Who|Target experience|What MCMS does" data-w="15%|29%|12%|12%|32%" data-cls="small">
+Choose | Read the offering details | Amir | 5 / 5 | Shows outcomes, fees, credential and the separate-stages notice
+Choose | Register and pay | Amir | 4 / 5 | Dummy payment; access instructions ({{f-register}})
+2 Module achievement | Study modules on UCreds over several months | Amir | 4 / 5 | Keeps each module record and date
+2 Module achievement | See each module badge | Amir | 5 / 5 | Badge issued after PTj verification ({{f-verify}})
+3 MC completion | Receive certificate and Digital Credential | Amir | 5 / 5 | Signed, bilingual, with QR code ({{f-issue}})
+3 MC completion | Share the link with an employer | Amir, employer | 5 / 5 | Public verification page ({{f-public}})
+5 ACR and ABC | Consent to deposit the ACR to ABC | Amir | 4 / 5 | Records consent; queues for the deputy dean ({{f-deposit}})
+5 ACR and ABC | See 3 credits as Available in the ledger | Amir | 5 / 5 | Shows deposit and expiry dates ({{f-ledger}})
+6 Credit transfer | Get admitted to a degree programme | Programme | 3 / 5 | Outside MCMS; admission recorded separately
+6 Credit transfer | Apply for credit transfer | Amir | 4 / 5 | Attaches ACR and evidence automatically ({{f-transfer}})
+6 Credit transfer | Credit approved and shown as Provisionally Redeemed | Amir, Prof. Lim (deputy dean of the degree faculty) | 4 / 5 | Blocks any reuse of the same credit ({{f-redeem}})
+</script>
+
+<h2>4.3 Deputy Dean: Closing a Cohort</h2>
+<p class="tcap" data-t="jrecords">Hakim closes a cohort: results, credentials, ACR and deposit</p>
+<script type="text/tbl" data-h="Phase|Step|Who|Target experience|What MCMS does" data-w="12%|30%|13%|12%|33%" data-cls="small">
+Verify | Verify the cohort's results and confirm completion | Hakim | 5 / 5 | Lists flags and integrity holds first ({{f-verify}})
+Issue | Credentials are issued without a separate step | System | 5 / 5 | Runs Appendix E8 checks per participant, then issues ({{f-issue}})
+Issue | Review the participants who failed a check | Hakim | 4 / 5 | Gives the reason for each; issues the rest
+Credit | Confirm the generated ACR for eligible participants | Hakim | 4 / 5 | Generates ACR only for eligible UMC or QV-SAMC ({{f-acr}})
+Credit | Record ABC deposits after students consent | Hakim | 3 / 5 | Manual; national ABC platform is a concept (D-14); export provided
+Fix | Correct a misspelt name | Hakim | 4 / 5 | New revision, history kept, student notified ({{f-correct}})
+</script>
+
+<h2>4.4 Employer: Verifying a Credential</h2>
+<p>Tan opens the link or scans the QR code on a certificate. The verification page loads immediately without login and presents an authoritative, centered certificate-style result slip. It features a single prominent status seal (e.g. <code>Status: Valid</code> in emerald), a copyable Crockford Base32 verification code, and a clean two-column summary of the micro-credential, holder, issuer, issue date, and graduating credits. The interface removes distracting implementation pills (such as Ed25519 or RFC specifications) and provides direct action buttons to download the verifiable cryptographic files (<code>.json</code> and <code>.jwt</code>) for HR archival, print the official slip, or review the statutory Personal Data Protection Act 2010 (PDPA) notice ({{fr-vffields}}). If the credential was revoked or replaced, the status seal clearly states so with the effective date. The whole verification journey takes under a minute, needs no contact with UTeM, and resolves cleanly across desktop and mobile devices.</p>

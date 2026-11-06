@@ -1,0 +1,475 @@
+<main>
+<h1>5. Requirement Traceability Matrix (Domains 5 to 8)</h1>
+
+<h2>5.1 Domain 5: Credentialing, Modular Digital Badges, Certificates &amp; Digital Credentials</h2>
+<p>Covers Garis Panduan Bab 8.7, 10.5, Rajah 7, and Lampiran E1–E10.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-36</td>
+      <td class="c-src">Bab 8.7.1<br>p. 28</td>
+      <td>Digital Badge awarded for module/unit achievement. Digital Badge alone does not constitute academic credit.</td>
+      <td><code>Credentials</code><br><code>digital_badges</code></td>
+      <td>Module digital badges minted on module completion (<code>digital_badges</code> table) using Open Badges 3.0 schema. Explicitly labelled non-credit.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CredentialTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-37</td>
+      <td class="c-src">Bab 8.7.2<br>Rajah 7, p. 29</td>
+      <td>3-Tier Recognition Hierarchy: Level 1 (Module Digital Badge), Level 2 (Full MC Sijil / Digital Credential), Level 3 (ACR / ABC Credit).</td>
+      <td><code>Credentials</code><br><code>CreditBank</code></td>
+      <td>System strictly separates Module Badge &rarr; Micro-Credential Certificate &rarr; Academic Credit Record (ACR).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Implements Rajah 7 hierarchy verbatim.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-38</td>
+      <td class="c-src">Bab 8.7.3<br>p. 28–29</td>
+      <td>Full UMC completion requires achievement of ALL constituent modules and assessments before Sijil/Digital Credential issuance.</td>
+      <td><code>Achievement</code><br><code>Completion.php</code></td>
+      <td><code>Completion::check()</code> verifies that every module achievement is verified, whole-MC assessments passed, and zero integrity holds remain.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CompletionTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-39</td>
+      <td class="c-src">Bab 8.7.4<br>p. 29</td>
+      <td>Certification for SAMC and MCE: MCE certificate cannot make credit claims; SAMC certificate only displays credit if Quality-Verified.</td>
+      <td><code>Credentials</code><br><code>IssueCredential.php</code></td>
+      <td>Template logic suppresses credit and MQF statements on MCE and unverified SAMC credentials. Claims populated strictly from verified records.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CredentialTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-40</td>
+      <td class="c-src">Bab 8.7.5<br>p. 30</td>
+      <td>Achievement Record (Rekod Pencapaian): Internal record of completed modules, badges, and MC status. Strictly differentiated from ACR.</td>
+      <td><code>Achievement</code><br><code>/records/mine</code></td>
+      <td>Screen and printout (DOC-05) prominently labelled: "INTERNAL ACHIEVEMENT RECORD &bull; THIS IS NOT AN ACADEMIC CREDIT RECORD (ACR)."</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CompletionTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-41</td>
+      <td class="c-src">Lampiran E2–E3<br>p. 101–102</td>
+      <td>Bilingual landscape Certificate format (A4) with UTeM coat of arms, QR code, signatory, and verification metadata.</td>
+      <td><code>Credentials</code><br><code>credentials/certificate</code></td>
+      <td>Official printable certificate (DOC-03) rendered in A4 landscape, bilingual (BM/EN), dynamic QR code, and Registrar/Dean signatures.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Rendered in <code>DocumentsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-42</td>
+      <td class="c-src">Lampiran E4<br>p. 102–103</td>
+      <td>W3C Verifiable Credential (VC) / Open Badges 3.0 signed digital credential format with cryptographic proof.</td>
+      <td><code>Credentials</code><br><code>credentials/sheet</code></td>
+      <td>Generates W3C VC-JWT signed with Ed25519 private key (<code>alg: EdDSA</code>, <code>kid</code>). Printable sheet (DOC-04) displays raw JSON and claims.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CredentialTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-43</td>
+      <td class="c-src">Lampiran E5<br>p. 103</td>
+      <td>Public verification service without login: QR code scan leads to verification portal displaying authenticated credential metadata.</td>
+      <td><code>Credentials</code><br><code>GET /verify/{code}</code></td>
+      <td>Public verification endpoint (<code>VerifyController.php</code>) displays minimum necessary fields (rate-limited, logged, case-insensitive, neutral 404).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CredentialTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-44</td>
+      <td class="c-src">Lampiran E5<br>p. 103</td>
+      <td>Online verification via uploaded credential JSON file.</td>
+      <td><code>Credentials</code><br><code>POST /verify/upload</code></td>
+      <td>Upload interface checks cryptographic signature against public keys published at <code>/.well-known/jwks.json</code>.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CredentialTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-45</td>
+      <td class="c-src">Lampiran E6<br>p. 104</td>
+      <td>Credential administration: Correction, replacement, and revocation policies. Original record must never be deleted.</td>
+      <td><code>Credentials</code><br><code>/credentials/admin</code></td>
+      <td>Deputy Dean can issue a clerical correction (original kept), replace with new credential (forward link), or revoke (shows Revoked). Nothing deleted.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CredentialTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-46</td>
+      <td class="c-src">Lampiran E8<br>p. 104</td>
+      <td>Pre-issuance validation checklist before credential issuance.</td>
+      <td><code>Achievement</code><br><code>CompletionController</code></td>
+      <td>Automated pre-issuance checks execute during completion confirmation (checks module badges, integrity holds, results verification).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CompletionTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-47</td>
+      <td class="c-src">Bab 8.7.1<br>Lampiran E1</td>
+      <td>1-Click direct export to participant digital wallets (Google Wallet / Apple Wallet / LinkedIn).</td>
+      <td><code>Credentials</code></td>
+      <td>Learner can download signed VC-JWT JSON and printable PDF sheet, but native API push to Apple Wallet / Google Wallet is not built.</td>
+      <td class="c-x"><span class="badge badge-fail">FAIL</span></td>
+      <td>Add Apple Wallet .pkpass and Google Wallet API integration in Release 3.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>5.2 Domain 6: Curriculum Development, Internal Review &amp; Senate Approval</h2>
+<p>Covers Garis Panduan Bab 9 (Pembangunan, pp. 31–33), Rajah 8, and Lampiran A8–A10.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-48</td>
+      <td class="c-src">Bab 9.1–9.3<br>p. 31–32</td>
+      <td>Multi-stage proposal development workflow: Needs analysis, learning design, and content creation matching Rajah 8.</td>
+      <td><code>Curriculum</code><br><code>/curriculum/proposals</code></td>
+      <td>Proposal workspace partitions work across Basics, Justification, Modules, Outcomes, Assessment, and Readiness tabs.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CurriculumTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-49</td>
+      <td class="c-src">Bab 9.4<br>p. 33</td>
+      <td>Internal academic review by faculty reviewers covering CLO, SLT, module unbundling, and assessment alignment.</td>
+      <td><code>Approval</code><br><code>/reviews/{id}</code></td>
+      <td>Review form enforces evaluation across 8 items (plus parent-course mapping for UMC) and structured recommendation.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-50</td>
+      <td class="c-src">Bab 9.4<br>p. 33</td>
+      <td>Reviewer conflict of interest (COI) declaration prior to opening proposal dossier.</td>
+      <td><code>Approval</code><br><code>reviews/coi.blade.php</code></td>
+      <td>Reviewer must declare absence of conflict; affirmative conflict unassigns reviewer and alerts Deputy Dean.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code> (FR-17).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-51</td>
+      <td class="c-src">Bab 9.4<br>p. 33</td>
+      <td>Tracked review comments with bidirectional resolution: Proposer responds, Deputy Dean verifies resolution before endorsement.</td>
+      <td><code>Approval</code><br><code>review_comments</code></td>
+      <td>Comments tracked as Open, Answered, Resolved. Endorsement blocked while any blocking comment is open.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code> (FR-63).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-52</td>
+      <td class="c-src">Bab 9.4<br>p. 33</td>
+      <td>Separation of duties: Proposer cannot review or approve own proposal; Faculty Dean/Deputy Dean cannot self-approve.</td>
+      <td><code>Approval</code><br><code>ApprovalController</code></td>
+      <td><code>ApprovalController</code> checks user ID against proposer ID; self-review and self-endorsement strictly prohibited.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code> (FR-14).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-53</td>
+      <td class="c-src">Bab 9.5<br>p. 33</td>
+      <td>Formal Senate approval recording: meeting reference, date, minute excerpt, and decision category verification.</td>
+      <td><code>Approval</code><br><code>/approval/proposals/{id}/senate</code></td>
+      <td>Senate decision recorded with meeting reference and date. Decision transitions proposal to approved Version 1.0.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code> (FR-67).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-54</td>
+      <td class="c-src">Bab 9.5<br>Lampiran A9–A10</td>
+      <td>Compilation of official Senate Decision Pack (Kertas Cadangan / Ringkasan Kelulusan).</td>
+      <td><code>Approval</code><br><code>/approval/proposals/{id}/pack</code></td>
+      <td>Official printable Senate decision pack (DOC-09) compiles proposal metadata, reviewer ratings, comment audit, and Senate minute box.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-55</td>
+      <td class="c-src">Bab 9.5<br>p. 33</td>
+      <td>Approving role configured in system settings; CODL strictly prohibited from academic curriculum approval.</td>
+      <td><code>Core</code><br><code>Settings</code></td>
+      <td>Setting <code>approval.route.curriculum</code> defaults to <code>senate</code>. CODL admin has zero approval routes (Decision D-12).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>ApprovalTest.php</code> and <code>RbacSecurityTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-56</td>
+      <td class="c-src">Bab 9.6<br>p. 33</td>
+      <td>Penawaran gating: Micro-credential can only be offered after Senate approval is recorded.</td>
+      <td><code>Offering</code><br><code>OfferingController</code></td>
+      <td>Cohort creation dropdown only lists approved versions (<code>status = 'approved'</code>). Unapproved proposals cannot be offered.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>OfferingTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-57</td>
+      <td class="c-src">Lampiran A8<br>p. 79</td>
+      <td>Formal proposer written declaration and faculty endorsement signature blocks.</td>
+      <td><code>Curriculum</code><br><code>curriculum/print</code></td>
+      <td>Proposal printable sheet (DOC-08) includes Section 8 declaration by developer and Section 9 verification by Dean.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Rendered in <code>DocumentsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-58</td>
+      <td class="c-src">Bab 9.1<br>p. 32</td>
+      <td>Co-developer collaborative authoring on proposal workspace.</td>
+      <td><code>Curriculum</code><br><code>proposals</code></td>
+      <td>Proposals currently have a single designated author/proposer. Adding secondary co-developers is scheduled for Release 2.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Add multi-author support to <code>proposals</code> table in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>5.3 Domain 7: Offering Delivery, Cohort Management &amp; Readiness Checklists</h2>
+<p>Covers Garis Panduan Bab 10.1–10.3 (Pelaksanaan, pp. 34–35), Rajah 9, and Lampiran B1–B8.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-59</td>
+      <td class="c-src">Bab 10.1<br>p. 34</td>
+      <td>Support delivery modes: Conventional face-to-face, Open and Distance Learning (ODL), and blended/hybrid.</td>
+      <td><code>Offering</code><br><code>offerings</code></td>
+      <td>Captured in <code>offerings.delivery_mode</code>; verified against faculty accreditation parameters.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>OfferingTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-60</td>
+      <td class="c-src">Bab 10.2<br>p. 35</td>
+      <td>Platform &amp; Learning Access: Seamless integration with learning management system (uLearn / UCreds Moodle).</td>
+      <td><code>Learning</code><br><code>UcredsController</code></td>
+      <td>UCreds Moodle integration hub synchronizes course directories, exports enrolment manifests, and imports results.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>UcredsContentTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-61</td>
+      <td class="c-src">Bab 10.3.1<br>p. 35</td>
+      <td>Information transparency: Transparent display of prerequisites, fees, SLT, delivery schedule, and recognition statements prior to registration.</td>
+      <td>Public Portal<br><code>/catalogue</code>, <code>/offerings/{id}</code></td>
+      <td>Public course detail page renders all prerequisites, fee breakdown, schedule dates, and recognition statements without login.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>OfferingTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-62</td>
+      <td class="c-src">Bab 10.3.1<br>p. 35</td>
+      <td>Forbidden promotional claims prevention: System must prevent unauthorized claims that an MC grants automatic university admission.</td>
+      <td><code>Offering</code><br><code>ForbiddenClaims.php</code></td>
+      <td><code>ForbiddenClaims::scan()</code> scans proposal and offering texts for prohibited marketing phrases, raising blocking errors if found.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>OfferingTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-63</td>
+      <td class="c-src">Bab 10.3.2<br>p. 35–36</td>
+      <td>Participant notification of curriculum changes: When an approved change occurs, enrolled participants must be notified and bound by transition rules.</td>
+      <td><code>Curriculum</code>, <code>Enrolment</code><br><code>VersionController</code></td>
+      <td>Senate decision executes transition rule (<code>finish_current</code> or <code>migrate_new</code>); mandatory notification sent to active participants.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>EnrolmentTest.php</code> (FR-80, FR-81).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-64</td>
+      <td class="c-src">Lampiran B1–B7<br>p. 80–84</td>
+      <td>Cohort Readiness Checklist: Comprehensive pre-offering checklist covering trainers, materials, platform, and rubrics.</td>
+      <td><code>Offering</code><br><code>/offerings/{id}/readiness</code></td>
+      <td>Readiness form covers sections B1 to B7. Lecturer provides status and evidence notes; Deputy Dean confirms readiness.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>OfferingTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-65</td>
+      <td class="c-src">Lampiran B8<br>p. 84</td>
+      <td>Participant registration records with exportable roster.</td>
+      <td><code>Offering</code><br><code>/offerings/{id}/participants</code></td>
+      <td>Participant roster displays enrolment status, payment reference, and provides CSV export action.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>EnrolmentTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-66</td>
+      <td class="c-src">Bab 10.3<br>p. 35</td>
+      <td>Participant withdrawal management with deadline enforcement.</td>
+      <td><code>Enrolment</code><br><code>EnrolmentController</code></td>
+      <td>Withdrawal allowed before configured deadline (<code>enrolment.withdrawal_days_before_end</code>); frees quota and logs audit record.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>EnrolmentTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-67</td>
+      <td class="c-src">Bab 10.3<br>p. 35</td>
+      <td>Automated payment gateway integration with real bank acquiring.</td>
+      <td><code>Enrolment</code><br><code>PaymentAdapter.php</code></td>
+      <td>Idempotent dummy payment adapter is functional and tested; live production bank payment gateway (e.g. FPX / Bank Islam) is mocked in test environment.</td>
+      <td class="c-x"><span class="badge badge-not-verified">NOT VERIFIED</span></td>
+      <td>Switch from stub adapter to live institutional payment gateway upon deployment.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-68</td>
+      <td class="c-src">Bab 10.3<br>p. 35</td>
+      <td>Bulk participant enrolment via CSV upload.</td>
+      <td><code>Enrolment</code><br><code>offerings/participants</code></td>
+      <td>Individual registration workflow is complete; bulk CSV enrolment for corporate cohorts is slated for Release 2.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Build bulk CSV participant registration in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>5.4 Domain 8: Quality Verification (QV) for Stand-alone Micro-Credentials (SAMC)</h2>
+<p>Covers Garis Panduan Bab 11.1–11.2 (Quality Verification, pp. 37–41), Rajah 10, 11, 12, and Lampiran D1–D10.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-69</td>
+      <td class="c-src">Bab 11.2.1<br>p. 38</td>
+      <td>Basic eligibility for Quality Verification: SAMC category, &ge;40 hours SLT, and registered provider.</td>
+      <td><code>Quality</code><br><code>Qv.php</code></td>
+      <td><code>Qv::checkEligibility()</code> evaluates category, SLT threshold, and provider registration flag (FR-164).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-70</td>
+      <td class="c-src">Bab 11.2.1<br>Rajah 11, p. 40</td>
+      <td>Prerequisite of at least ONE (1) completed cohort with verified assessment evidence before QV submission.</td>
+      <td><code>Quality</code><br><code>Qv.php</code></td>
+      <td>Dossier submission is strictly blocked until at least 1 offering reaches <i>Ended</i> status with verified marks.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-71</td>
+      <td class="c-src">Lampiran D1–D7<br>p. 92–98</td>
+      <td>Comprehensive QV Evidence Package covering 6 groups: Academic Design, Assessment, Cohort Performance, QA/CQI, and Credential Specifications.</td>
+      <td><code>Quality</code><br><code>/quality/{id}/package</code></td>
+      <td>Official QV submission package (DOC-11) aggregates internal system records across all 6 evidence groups matching Lampiran D.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-72</td>
+      <td class="c-src">Bab 11.2.1<br>p. 38</td>
+      <td>Quality Verification does not grant automatic credit transfer or degree credit.</td>
+      <td><code>Quality</code><br><code>QvController</code></td>
+      <td>Dossier and catalogue clearly state that QV establishes eligibility for credit, but credit transfer remains subject to faculty review.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Explicit disclaimers enforced.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-73</td>
+      <td class="c-src">Bab 11.2.2<br>p. 39</td>
+      <td>QV validity duration: Maximum validity up to 3 years (configurable to 5 per MQA circulars).</td>
+      <td><code>Quality</code><br><code>Settings</code></td>
+      <td>Setting <code>qv.max_validity_years</code> configured to 3. Recording a decision with validity exceeding maximum is blocked (BR-02).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-74</td>
+      <td class="c-src">Bab 11.2.2<br>p. 39</td>
+      <td>Expiry monitoring and alerts: Automated alerts sent to lecturer and Deputy Dean prior to QV expiration.</td>
+      <td><code>Quality</code><br><code>QvAlerts.php</code></td>
+      <td>Scheduled alert job (<code>JB-06</code>) dispatches notices at configured threshold intervals (e.g. 90, 60, 30 days).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code> (FR-173).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-75</td>
+      <td class="c-src">Bab 11.2.2<br>p. 39</td>
+      <td>Immediate cessation of QV claims upon expiry, suspension, or withdrawal, while preserving earned student credentials.</td>
+      <td><code>Quality</code><br><code>Qv.php</code></td>
+      <td>Lapse or suspension stops catalogue credit claims and opens CQI review task. Issued credentials remain intact and valid.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code> (FR-174).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-76</td>
+      <td class="c-src">Bab 11.2.3<br>p. 39–40</td>
+      <td>Material change triggering re-verification: Substantive curriculum changes flag verified SAMC for QV re-evaluation.</td>
+      <td><code>Quality</code><br><code>Qv.php</code></td>
+      <td>Material change to verified SAMC sets <code>reverification_required = true</code> and assigns task to Deputy Dean.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code> (FR-78).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-77</td>
+      <td class="c-src">Bab 11.2.4<br>Rajah 12, p. 41</td>
+      <td>Single source of truth rule: Quality Verification verified record is the exclusive writer of credit and MQF claims for SAMC.</td>
+      <td><code>Quality</code><br><code>qv_records</code></td>
+      <td>Catalogue, offerings, certificates, and ACRs read credit claims strictly from verified <code>qv_records</code>. Proposers cannot type credit directly.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code> (FR-171).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-78</td>
+      <td class="c-src">Lampiran D8–D10<br>p. 98–99</td>
+      <td>Dual declarations: Proposer readiness declaration and Deputy Dean formal submission endorsement.</td>
+      <td><code>Quality</code><br><code>/quality/{id}/package</code></td>
+      <td>Lecturer marks dossier as ready; Deputy Dean verifies checklist and confirms readiness before external submission reference can be logged.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>QualityTest.php</code> (FR-168).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-79</td>
+      <td class="c-src">Lampiran D<br>p. 92</td>
+      <td>Automated generation of compressed ZIP evidence archive containing uploaded binary evidence artifacts.</td>
+      <td><code>Quality</code><br><code>/quality/{id}/package</code></td>
+      <td>System generates comprehensive HTML/A4 printable evidence dossier with data links, but binary ZIP bundling is deferred.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Implement automated ZIP bundling of external evidence files in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+</main>

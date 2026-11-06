@@ -1,0 +1,290 @@
+<!-- ===================== 2. ARCHITECTURE OVERVIEW ===================== -->
+<h1>2. Architecture Overview</h1>
+<p>This section shows how MCMS is divided: what surrounds it, what runs where, how the code is cut into modules, how modules talk to each other and to external systems, and how one request travels through the layers. It applies decisions AD-01 to AD-18 of Section 1. Module internals are in Section 4, data in Section 5, interfaces in Section 6.</p>
+
+<h2>2.1 System Context</h2>
+<p>MCMS is a new standalone system (SRS Section 2.1). People reach it through a browser. Every external system is reached through an adapter (AD-08, {{ir-adapter}}). {{fig:arch-context}} shows the systems MCMS exchanges data with in Release 1 and how each one is handled.</p>
+<figure data-f="arch-context">
+<pre class="mermaid">
+flowchart LR
+  U["Signed-in users<br/>students, lecturers, deputy deans, CODL"]
+  V["Public verifier<br/>no sign-in"]
+  M(["<b>MCMS</b><br/>Laravel modular monolith"])
+  E["Microsoft Entra ID<br/>OIDC sign-in, MFA"]
+  UC["UCreds<br/>CSV exchange"]
+  PAY["Payment service<br/>stub in Release 1"]
+  SMTP["SMTP relay<br/>UTeM Microsoft 365"]
+  ABC["ABC platform<br/>manual deposit"]
+  QV["QVC / MQA<br/>manual package"]
+  KV["Key vault<br/>signing keys, CODL"]
+  OS["Object storage<br/>MinIO, S3 API"]
+  U --- M
+  V -. "link, QR, code" .- M
+  M -- "OIDC" --- E
+  M -- "CSV out and in" --- UC
+  M -- "payment request" --- PAY
+  M -- "notifications" --- SMTP
+  M -. "ACR export" .- ABC
+  M -. "QV package" .- QV
+  M -- "sign request" --- KV
+  M -- "files, PDFs" --- OS
+</pre>
+<figcaption>System context. Solid lines are automated exchanges, dotted lines are manual or file-based exchanges in Release 1.</figcaption>
+</figure>
+<p class="tcap" data-t="arch-ext">External systems and their Release 1 handling</p>
+<script type="text/tbl" data-h="External system|Adapter interface (MD-16)|Release 1 mode|Basis" data-w="22%|28%|28%|22%" data-cls="small">
+Microsoft Entra ID (UTeM SSO) | <code>IdentityProvider</code> | Live OIDC; Stub only outside production | AD-06, {{fr-sso}}, {{ir-oidc}}
+UCreds learning platform | <code>LearningPlatformGateway</code> | Manual (CSV export and import) | {{fr-lpadapter}}, {{ir-csvtemplates}}
+Payment service | <code>PaymentGateway</code> | Stub (dummy payment) | {{fr-regpay}}, A-03
+SMTP relay | <code>MailTransport</code> | Live SMTP; Stub captures mail outside production | AD-15, {{ir-smtp}}
+ABC platform | <code>AbcGateway</code> | Manual (export file, deputy dean records the deposit) | {{fr-dpexport}}, A-02
+QVC / MQA | <code>QvGateway</code> | Manual (package export, result recorded by hand) | {{fr-qvpackage}}, A-02
+Key vault | <code>SigningKeyStore</code> | Live vault owned by CODL; Stub key only outside production | AD-09, {{sr-keys}}, {{ir-hsm}}
+Object storage | Laravel filesystem disk <code>s3</code> | Live MinIO; local disk in dev | AD-14, {{ir-files}}
+</script>
+<div class="note"><b>Note:</b> The student information system is not connected in Release 1 (SRS Section 2.1). The adapter pattern of Section 2.7 leaves room for it.</div>
+
+<h2>2.2 Runtime Containers</h2>
+<p>MCMS is one code base deployed as several processes (AD-05, AD-18). The web process and the queue workers run the same release of the application. No process keeps session state on its local disk ({{nfr-stateless}}): sessions and cache live in Redis.</p>
+<figure data-f="arch-containers">
+<pre class="mermaid">
+flowchart TB
+  B["Browser"]
+  subgraph APP["Application release (one code base)"]
+    W["Web app<br/>Nginx + PHP-FPM"]
+    Q["Queue workers<br/>Laravel Horizon"]
+    S["Scheduler<br/>artisan schedule:run"]
+    C["Chromium renderer<br/>Browsershot, PDF"]
+  end
+  PG[("PostgreSQL 16")]
+  R[("Redis<br/>queues, cache, sessions")]
+  O[("MinIO<br/>files, ClamAV scan")]
+  B -- "HTTPS" --> W
+  W --> PG
+  W --> R
+  W --> O
+  Q --> R
+  Q --> PG
+  Q --> C
+  Q --> O
+  S --> R
+</pre>
+<figcaption>Runtime containers. The scheduler only dispatches jobs onto Redis; the workers do the work.</figcaption>
+</figure>
+<p class="tcap" data-t="arch-runtime">Runtime containers and their duties</p>
+<script type="text/tbl" data-h="Container|Duty|Scales by|Basis" data-w="20%|46%|20%|14%" data-cls="small">
+Web app (Nginx + PHP-FPM) | Serves Blade and Livewire pages, the public verification page and the JSON API; runs policies and actions; writes the database | More web nodes behind a load balancer | AD-04, {{nfr-page}}
+Queue workers (Horizon) | Run jobs in named queues: <code>default</code>, <code>notifications</code>, <code>imports</code>, <code>credentials</code>, <code>reports</code>, <code>integration</code> | More worker processes per queue | AD-05, {{nfr-queue}}
+Scheduler | One process runs <code>schedule:run</code> every minute; each timed job logs its result | One instance only (single-run lock) | {{nfr-scheduler}}
+PostgreSQL 16 | System of record; full-text search; audit table | Vertical, then read replica if needed | AD-03, AD-16
+Redis | Queues, cache, sessions, rate limiter, locks | Vertical | AD-05, {{nfr-stateless}}
+MinIO | Uploaded files, generated PDFs, export files; ClamAV scans uploads before they are stored for use | Disk | AD-14
+Chromium renderer | Headless Chromium started by a worker to print A4 Blade templates to PDF; never started from a web request | Worker count | AD-10
+</script>
+
+<h2>2.3 Module Map</h2>
+<p>The code is split into the modules of {{tab:arch-modules}} (AD-01, {{nfr-modular}}). The SRS modules M1 to M16 are regrouped as the brief allows: M2 and M3 form one Curriculum module and M13 is split into Transfer and Pathways. MD-00 Platform is the shared kernel. It holds no business rule of its own.</p>
+<p class="tcap" data-t="arch-modules">Module map and dependencies</p>
+<script type="text/tbl" data-h="ID|Module|Responsibility|SRS|Depends on" data-w="7%|16%|43%|9%|25%" data-cls="small">
+MD-00 | Platform | Settings with effective dates, i18n, files, PDF rendering, UI components, clock, base classes | all | none
+MD-01 | Identity | Sign-in, users, roles and scopes, delegation, profile | M1 | MD-00
+MD-02 | Curriculum | Category determination, proposal and design workspace, UMC link to parent course | M2, M3 | MD-00, MD-01
+MD-03 | Approval | Review, endorsement, Senate record, versions, material change | M4 | MD-02, MD-01
+MD-04 | Offering | Offering, readiness checks, public catalogue | M5 | MD-02, MD-03, MD-10
+MD-05 | Enrolment | Registration, eligibility, payment, cohorts, waiting list | M6 | MD-04, MD-01
+MD-06 | Learning platform | Cohort export, results import and staging, badge flow with UCreds | M7 | MD-05
+MD-07 | Assessment | Assessment plan, result entry, verification of achievement, appeals | M8 | MD-05, MD-06
+MD-08 | Achievement record | Achievement Record, module status, completion | M9 | MD-07, MD-05
+MD-09 | Credentials | Badge, Certificate, Digital Credential, public verification, correct, replace, revoke | M10 | MD-08, MD-02, MD-10
+MD-10 | Quality verification | QV record for SAMC, evidence, package, result, lapse | M11 | MD-02
+MD-11 | Credit bank | ACR, consent, deposit, credit ledger, validity, redemption | M12 | MD-08, MD-09, MD-10
+MD-12 | Transfer | Credit transfer application, equivalence, decision | M13 (part) | MD-11, MD-02
+MD-13 | Pathways | Stackable mapping, plans, 30 percent home rule, residency | M13 (part) | MD-02, MD-11, MD-12
+MD-14 | Quality and change | Indicators, CQI, periodic review, suspension and termination | M14 | MD-03, MD-07, MD-10
+MD-15 | Records | Audit trail, traceability, reports, export, retention | M15 | MD-00
+MD-16 | Integration hub | Notifications, adapters, integration log, job registry | M16 | MD-00
+</script>
+<p>Two modules are called by every other module and so are not drawn as arrows: MD-15 offers the <code>AuditRecorder</code> contract and MD-16 offers the <code>Notifier</code> contract. Both depend only on MD-00 and receive other modules' facts through arguments or events, so they never depend back on a business module. {{fig:arch-deps-a}} and {{fig:arch-deps-b}} show the remaining dependencies in two parts; an arrow reads "uses the public contract of".</p>
+<figure data-f="arch-deps-a">
+<pre class="mermaid">
+flowchart LR
+  MD01["MD-01 Identity"]
+  MD02["MD-02 Curriculum"]
+  MD03["MD-03 Approval"]
+  MD04["MD-04 Offering"]
+  MD05["MD-05 Enrolment"]
+  MD06["MD-06 Learning platform"]
+  MD07["MD-07 Assessment"]
+  MD08["MD-08 Achievement record"]
+  MD10["MD-10 Quality verification"]
+  MD02 --> MD01
+  MD03 --> MD02
+  MD04 --> MD03
+  MD04 --> MD10
+  MD05 --> MD04
+  MD06 --> MD05
+  MD07 --> MD06
+  MD08 --> MD07
+  MD10 --> MD02
+</pre>
+<figcaption>Dependencies, part 1: from curriculum to the Achievement Record.</figcaption>
+</figure>
+<figure data-f="arch-deps-b">
+<pre class="mermaid">
+flowchart LR
+  MD02["MD-02 Curriculum"]
+  MD08["MD-08 Achievement record"]
+  MD09["MD-09 Credentials"]
+  MD10["MD-10 Quality verification"]
+  MD11["MD-11 Credit bank"]
+  MD12["MD-12 Transfer"]
+  MD13["MD-13 Pathways"]
+  MD14["MD-14 Quality and change"]
+  MD09 --> MD08
+  MD09 --> MD10
+  MD11 --> MD09
+  MD11 --> MD10
+  MD12 --> MD11
+  MD13 --> MD12
+  MD13 --> MD02
+  MD14 --> MD10
+  MD14 --> MD08
+</pre>
+<figcaption>Dependencies, part 2: from the Achievement Record to credit and monitoring.</figcaption>
+</figure>
+<p>The dependency graph has no cycle. A build check (Section 3, <code>deptrac</code>) fails if a module uses a class outside the contracts of the modules it may depend on.</p>
+
+<h2>2.4 Layering Inside a Module</h2>
+<p>Every module has the same layers. A layer may call only the layer below it.</p>
+<figure data-f="arch-layers">
+<pre class="mermaid">
+flowchart TB
+  H["Http and Livewire<br/>routes, controllers, pages, form requests"]
+  P["Policies<br/>role, scope, separation of duties"]
+  A["Actions<br/>one business operation, one transaction"]
+  M["Models and repositories<br/>Eloquent, queries"]
+  E["Domain events and jobs<br/>after commit"]
+  H --> P
+  H --> A
+  A --> P
+  A --> M
+  A --> E
+</pre>
+<figcaption>Layers inside a module.</figcaption>
+</figure>
+<p class="tcap" data-t="arch-layers">Layer rules</p>
+<script type="text/tbl" data-h="Layer|Holds|Must not" data-w="20%|46%|34%" data-cls="small">
+Http and Livewire | Routes, controllers, Livewire components, form requests (input validation), Blade views | Contain a business rule or write the database directly
+Policies | One Laravel Policy per model; checks role, scope and separation of duties on the record (AD-07, {{sr-authz}}) | Query other modules' tables; contain a super-user bypass for academic actions
+Actions | Invokable classes such as <code>VerifyResults</code>; each runs in one database transaction, checks the policy, applies the rule, writes the audit row (AD-11), then raises events ({{nfr-transactions}}) | Call another module's models; be called from a model
+Models and repositories | Eloquent models of the tables the module owns, query scopes, enums | Reach into another module's models
+Domain events and jobs | Past-tense events (for example <code>ResultsVerified (EV-29)</code>), listeners and queued jobs, dispatched after commit | Carry a whole model; they carry identifiers and the facts needed
+</script>
+<p>The folder example below is the pattern for every module. The full repository tree is in Section 3.</p>
+<pre class="code">app/Modules/Assessment/
+  Http/Controllers/  Http/Requests/  Livewire/
+  Actions/VerifyResults.php  Actions/VerifyResultsData.php (DTO)
+  Models/Result.php  Models/AssessmentPlan.php
+  Enums/ResultStatus.php
+  Policies/ResultPolicy.php
+  Events/ResultsVerified (EV-29).php
+  Listeners/  Jobs/
+  Contracts/AssessmentService.php   (public interface)
+  Database/Migrations/  Database/Factories/
+  Resources/views/  Resources/lang/{ms,en}/
+  AssessmentServiceProvider.php
+  routes.php</pre>
+
+<h2>2.5 Communication Between Modules</h2>
+<p>Modules talk in two ways only (AD-01, {{nfr-modular}}).</p>
+<ol>
+  <li><b>Public service contract.</b> A module that needs an answer from another module calls an interface in that module's <code>Contracts</code> folder, for example <code>AchievementRecordService::isComplete()</code>. The interface returns DTOs or scalars, never Eloquent models.</li>
+  <li><b>Domain event.</b> A module that needs to tell others what happened raises an event. Listeners in other modules react. Events are named in the past tense and listed in Sections 4 and 6.</li>
+</ol>
+<p class="tcap" data-t="arch-rules">Rules of inter-module communication</p>
+<script type="text/tbl" data-h="Rule|Meaning|Enforced by" data-w="6%|66%|28%" data-cls="small">
+R1 | A module reads and writes only the tables it owns. No cross-module join, no foreign key to another module's table except by identifier column checked in the contract. | Review, <code>deptrac</code>, Pest architecture tests ({{nfr-modular}})
+R2 | Reads across modules go through a contract. Reports that need many modules use a read-only query contract that each module offers to MD-15. | <code>deptrac</code>
+R3 | Events are raised only after the transaction commits (<code>ShouldDispatchAfterCommit</code>). A listener that changes data runs as a queued job in its own transaction. | Base event class
+R4 | An action changes one module's data. A change in another module follows from an event, not from a direct write. | Review, Pest architecture test
+R5 | Anything that must reach the user or an outside system is stored first in the same transaction: a <code>notifications</code> row (AD-15) or an <code>integration_calls</code> row, then sent by a queued job. A scheduler sweep re-dispatches rows that are still pending, so a lost queue message does not lose a notice. This is the outbox. | <code>Notifier</code> and <code>IntegrationHub</code> contracts
+R6 | Recognition stages stay separate records and separate actions (D-15). No event of one stage triggers a decision of the next; it only creates a task or notice for the person who decides. | Review, Pest feature tests
+R7 | The audit row is written in the same transaction as the change (AD-11, {{fr-auditlog}}). | <code>AuditRecorder</code> inside every action
+</script>
+<div class="note"><b>Note:</b> Credential issuing after completion is the one place where an event starts automatic work. <code>CompletionConfirmed (EV-31)</code> starts the issue job because the deputy dean's confirmation is itself the decision ({{br-verifyfirst}}). Nothing else is issued without a human decision.</div>
+
+<h2>2.6 Transactions and Events</h2>
+<p>Each action runs in one database transaction so that a multi-record change succeeds or fails as a whole ({{nfr-transactions}}). Inside the transaction an action locks the row it changes, checks the rule, saves, and writes the audit row. After the commit the events fire and jobs are queued. A job is idempotent: it can run twice without a second result, using the record's identifier as the idempotency key ({{ir-idempotent}}). Registration takes a row lock on the offering to keep capacity exact under concurrent submissions ({{nfr-capacity}}).</p>
+
+<h2>2.7 Adapter Pattern</h2>
+<p>Each external system has a PHP interface in MD-16 and three implementations (AD-08, {{ir-adapter}}, {{ir-stubs}}). The configuration for the environment chooses which one is bound in the service container, so a business module never knows which one it is using ({{ir-mode}}, {{nfr-config}}).</p>
+<figure data-f="arch-adapter">
+<pre class="mermaid">
+flowchart LR
+  BM["Business module<br/>for example Enrolment"]
+  I["Interface<br/>PaymentGateway"]
+  ST["Stub<br/>fixed answers"]
+  MA["Manual<br/>file or hand entry"]
+  LI["Live<br/>real service"]
+  HUB["Integration hub<br/>log, retry"]
+  BM --> I
+  I --> HUB
+  HUB --> ST
+  HUB --> MA
+  HUB --> LI
+</pre>
+<figcaption>Adapter pattern. Every call passes through the integration hub, which logs it and retries failures.</figcaption>
+</figure>
+<p class="tcap" data-t="arch-adapterrules">Adapter rules</p>
+<script type="text/tbl" data-h="Topic|Rule" data-w="22%|78%" data-cls="small">
+Selection | <code>config/integrations.php</code> maps each interface to <code>stub</code>, <code>manual</code> or <code>live</code> from an environment value such as <code>INTEGRATION_PAYMENT=stub</code>. A settings screen shows the current mode for each adapter to administrators and changes it only where the environment permits ({{fr-adapterstatus}}).
+Stub | Returns fixed, documented answers, including failure cases, so tests and demonstrations are repeatable. The stub for sign-in and the demo clock exist only when <code>APP_ENV</code> is not <code>production</code> (AD-06).
+Manual | Writes an export file and waits for a person to bring the result back, for example the ABC export and the QV package ({{fr-dpexport}}, {{fr-qvpackage}}).
+Live | Calls the real service. Added in a later release without a change to business modules.
+Integration log | Every call writes an <code>integration_calls</code> row: adapter, operation, correlation identifier, status, duration, attempt number and a redacted summary ({{fr-ihregistry}}, {{fr-lplog}}). The log never holds identity numbers, tokens or secrets ({{nfr-applog}}).
+Retries | A failed call is retried by its job with back-off (1, 5, 15, 60 minutes, then marked failed and shown to administrators). Business functions that do not depend on the system continue ({{nfr-adapterfail}}, {{fr-ihretry}}).
+Idempotency | Each outbound request carries a key built from the record identifier and operation, so a repeat is safe ({{ir-idempotent}}).
+Contract tests | One shared Pest test suite runs against Stub, and against Live when it exists, to prove both follow the interface.
+</script>
+
+<h2>2.8 Request Lifecycle: Deputy Dean Verifies Results</h2>
+<p>{{fig:arch-lifecycle}} follows one request through the layers. The deputy dean opens a cohort in Assessment and presses Verify results (screen and flow as in the UI/UX specification). The request shows how route, middleware, policy, action, audit, event, job and notification fit together ({{fr-asverify}}, {{br-verifyfirst}}).</p>
+<figure data-f="arch-lifecycle">
+<pre class="mermaid">
+sequenceDiagram
+  actor DD as Deputy dean
+  participant W as Web app
+  participant P as ResultPolicy
+  participant A as VerifyResults action
+  participant DB as PostgreSQL
+  participant Q as Queue worker
+  participant N as Notifier
+  DD->>W: POST verify results for cohort, Livewire call
+  W->>W: middleware, session, locale, CSRF, rate limit
+  W->>A: handle(cohort, DTO)
+  A->>P: authorize verify on each result
+  P-->>A: allowed, in scope, not own proposal
+  A->>DB: begin transaction, lock results, apply rule, set status Verified
+  A->>DB: write audit_events row with hash
+  A->>DB: store notifications rows
+  A->>DB: commit
+  A-->>W: summary, count verified
+  W-->>DD: dialog closes, toast "Results verified"
+  A--)Q: ResultsVerified (EV-29) event, after commit
+  Q->>DB: create module achievements, update Achievement Record
+  Q->>N: send stored notifications
+  N-->>DD: notification and email, confirm completion next
+</pre>
+<figcaption>Lifecycle of a Verify results request. Verifying results creates module achievements only. Completion is confirmed in a separate action.</figcaption>
+</figure>
+<p class="tcap" data-t="arch-lifecycle">Steps of the request lifecycle</p>
+<script type="text/tbl" data-h="Step|What happens|Where in code" data-w="6%|66%|28%" data-cls="small">
+1 | Route <code>POST</code> with the Livewire update endpoint; sign-in, idle timeout, locale and rate-limit middleware run | MD-00, MD-01 middleware
+2 | The Livewire component validates the input with a form request and builds a DTO | <code>Http/Livewire</code>
+3 | The component calls the action; the action asks the policy for each record; a refusal returns an access error and a security log entry ({{sr-authz}}, {{sr-seclog}}) | <code>Policies</code>
+4 | The action opens a transaction, locks the records, checks the blocking conditions (for example a held integrity case, {{fr-asintegrity}}), and sets the status | <code>Actions</code>
+5 | The audit row and the notification rows are written in the same transaction ({{fr-auditlog}}, {{fr-ntevents}}) | <code>AuditRecorder</code>, <code>Notifier</code>
+6 | After commit the event <code>ResultsVerified (EV-29)</code> is dispatched; a queued listener in MD-08 creates the module achievements | <code>Events</code>, <code>Listeners</code>
+7 | A notification job sends the stored notices by in-app message and email | MD-16 job
+8 | The user sees a toast; the cohort page shows the new statuses and the next step | <code>x-ui.toast</code>
+</script>

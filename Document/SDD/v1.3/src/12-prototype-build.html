@@ -1,0 +1,76 @@
+<h1>12. Release 1 Prototype Build Notes</h1>
+<p>This section records what the Release 1 prototype settled or changed in the design, as of 28 October 2026. The prototype is the Laravel application in <code>app/</code>. It plays the four-act scenario of PRD Section 7 through the screens (flow FL-19), and its tests pass: 324 Pest feature tests, 23 Playwright flows and the four acts. A requirement, module, event or job ID has not changed. Where the prototype stood in for part of the design, the table says what stands in and what the pilot needs. The review of the prototype against the PRD is the document <i>Release1_Review_2026-10-28</i>.</p>
+
+<h2>12.1 How the Release 1 prototype is built</h2>
+<script type="text/tbl" data-h="Area|Design (Sections 2 to 4)|Release 1 prototype|For the pilot" data-w="14%|28%|30%|28%" data-cls="small">
+Framework | Laravel 13 on PHP 8.3, PostgreSQL 16 | Laravel 13.38 on PHP 8.3, PostgreSQL 16 in Docker | As designed
+Modules | Modular monolith, one folder per module with Actions, Policies and Models | 17 folders under <code>app/Modules</code>; a controller and small service classes per module; queries through the database facade, not Eloquent models | Move business rules into Actions and Policies when the team grows (R1 of Section 3)
+User interface | Blade with Livewire 3 and Alpine.js, tokens built with Vite | Server-rendered Blade with plain forms and a little JavaScript; the DESIGN.md tokens are one plain CSS file | Livewire for the data tables and long forms, if the pilot team wants it
+Background work | Queues on Redis with Horizon | The Laravel scheduler runs the daily jobs; the import, the credential batch and reports run inside the request | Redis and Horizon for the 500-credential batch (NFR-08) and the large reports (NFR-04)
+Sign-in | Entra ID by OpenID Connect | Stub sign-in listing test users, with a second step for deciding roles; blocked in production by code and by tests | Entra ID (OI-03)
+Stored files | Stored-files service with scanning (<code>stored_files</code>) | Import files are kept on disk; evidence and decision documents are references typed as text | The stored-files service and the virus scan
+Documents | PDF rendering in queue workers | A4 print pages with the UTeM header and footer, printed or saved as PDF by the browser; CSV for data | A server-side PDF renderer
+Tests | Pest and Playwright | Pest 4 (Laravel 13 needs PHPUnit 12) and Playwright with Edge; one scenario run (<code>npm run test:scenario</code>) for FL-19 | As built
+</script>
+
+<h2>12.2 Decisions the build settled</h2>
+<script type="text/tbl" data-h="ID|Decision|Reason" data-w="12%|50%|38%" data-cls="small">
+AD-09 | Release 1 signs each credential as a VC-JOSE (JWT, alg EdDSA) proof of the Open Badges 3.0 credential, with the same Ed25519 key. The public keys are published at <code>/.well-known/jwks.json</code>; a key is retired, not deleted, when it rotates, so old credentials still verify. The Data Integrity proof <code>eddsa-rdfc-2022</code> stays the target. | The spike found that the PHP JSON-LD library handles JSON-LD 1.0 only and fails on the Verifiable Credentials v2 context, so there is no RDFC-1.0 canonicalisation. This is the fallback that Section 11.5 named.
+AD-17 | Pest 4 replaces Pest 3. | Laravel 13 needs PHPUnit 12, which Pest 3 does not support.
+MD-10 | The QV submission is held on the QV record: <code>submitted_on</code>, <code>submitted_ref</code>, <code>submitted_by</code>. There is no <code>qv_submissions</code> table. | One cycle has one submission. The compressed evidence file waits for the stored-files service.
+MD-10 | "Not verified" returns the record to Preparing and clears the readiness confirmation. Re-verification is a flag on the verified record; the new cycle is started by hand. | The state diagram of Section 5, kept simple.
+MD-11 | The ledger service owns the credit status. It is the only place that moves Available, Provisionally Redeemed, Redeemed and Expired, and the transfer screen calls it. | A second application on the same credit is refused in one place (BR-29).
+MD-12 | The learning-outcome criterion of the equivalence is derived from the outcome-by-outcome comparison and cannot be typed. Approved is refused while any outcome of the course has no match. | FR-203 and BR-30: equal credit or hours never make up for an unmatched outcome.
+MD-13 | A plan's decision is stored as the SRS decision (Suitable to proceed, Suitable with conditions, Not yet suitable, Not suitable); the status shown is Needs review, Suitable or Not yet suitable. Suitable to proceed needs a recorded admission. | The mapping of the note in Section 5 MD-13 is confirmed by the build.
+MD-14 | A CQI action that changes a listed component opens a task for the lecturer to make the change request. The system does not create the request. | The change request needs the lecturer's reason and impact, which the action does not hold.
+MD-15 | Disposal covers only the notification, report-run and integration-call logs. Academic records, credentials and the audit trail are never listed for disposal. | The retention period of academic records is open (OI-07).
+Demo clock | A setting <code>demo.clock_offset_days</code> and a screen (CODL-14) move the date forward for demonstration. It works only in a test environment: it needs the test sign-in and <code>MCMS_DEMO_CLOCK</code>, and it is refused in production. The moved date lasts for one request; the idle timeout always uses the real time. | PRD 7.2 and 7.4: QV and credit expiry must be shown, and the clock must be impossible to enable in production (FR-05).
+</script>
+
+<h2>12.3 Tables that differ from Section 6</h2>
+<p>Tables the prototype added are used by the modules named. Tables of Section 6 that the prototype did not build, or built under another name, are listed with the reason.</p>
+<script type="text/tbl" data-h="Change|Table|Note" data-w="16%|34%|50%" data-cls="small">
+Added | <code>tasks</code> | The task queue of every role (MD-00), with the area, kind and reference of the record
+Added | <code>signing_keys</code>, <code>credential_revisions</code>, <code>credential_issue_failures</code> | Key store for the Ed25519 keys; the full content and signature of each credential revision; the reasons issuing was blocked
+Added | <code>verification_log</code> | The public verification log (replaces <code>verification_logs</code>)
+Added | <code>proposal_readiness</code>, <code>enrolment_status_log</code> | The proposal's readiness checklist; the status history of an enrolment
+Added | <code>cqi_issues</code> | The issue of Appendix C6, with root cause, impact and priority; its actions are in <code>cqi_actions</code>
+Added | <code>equivalence_criteria</code> | The nine criteria of Appendix F7 for a transfer line, beside the outcome-by-outcome <code>equivalence_assessments</code>
+Added | <code>qualification_awards</code> | An award recorded from the programme's records (BR-37)
+Changed | <code>programmes</code> | Adds <code>transfer_limit_percent</code>, <code>non_transferable</code>, <code>curriculum_version</code> and <code>intake</code>; the accreditation is a status text
+Changed | <code>abc_batches</code> | Adds <code>acr_ids</code>, the records a batch exported
+Changed | <code>qv_records</code> | Carries the submission columns; <code>qv_submissions</code> is not built
+Changed | <code>role_assignments</code> | The micro-credential scope is the column <code>scope_ref</code>; <code>role_assignment_micro_credentials</code> is not built
+Not built | <code>stored_files</code>, <code>result_appeals</code>, <code>delegations</code>, <code>proposal_collaborators</code> | Waits for the stored-files service; appeals and delegation are Release 2; collaborators are not needed for the scenario
+Not built | <code>conflict_declarations</code>, <code>credential_events</code>, <code>adapter_configs</code>, <code>integration_jobs</code>, <code>alert_log</code>, <code>job_runs</code>, <code>reference_sequences</code> | The conflict answer is on <code>review_assignments</code>; credential events are <code>credential_revisions</code> and the audit trail; adapters are configured in code and logged in <code>integration_calls</code>; alerts are deduplicated by the notification key; references are made from the row id
+</script>
+
+<h2>12.4 Settings the prototype added</h2>
+<script type="text/tbl" data-h="Key|Default|Use" data-w="36%|14%|50%" data-cls="small">
+<code>approval.route.transfer</code> | deputy dean | Role that decides a credit transfer for the target programme (FR-207)
+<code>approval.route.stackable</code> | deputy dean | Role that approves and publishes a pathway mapping (FR-224)
+<code>approval.route.suspension</code> | deputy dean | Role that decides suspension or termination (FR-251)
+<code>approval.route.disposal</code> | deputy dean | Role that approves disposal after the retention period (FR-262)
+<code>qv.provider_registered</code> | 1 | UTeM is registered and authorised to offer the programme (FR-164)
+<code>quality.target_participation_percent</code> | 80 | Target active participation rate of a cohort (Appendix C2)
+<code>quality.target_completion_percent</code> | 70 | Target completion rate
+<code>quality.target_pass_percent</code> | 70 | Target pass rate
+<code>quality.target_issuance_percent</code> | 95 | Target credential issuance rate among those who completed
+<code>review.interval_months</code> | 24 | Months between periodic reviews of a micro-credential
+<code>review.remind_days</code> | 30 | Days before a review at which the lecturer and PTj are reminded
+<code>retention.notifications_years</code> | 2 | Retention of the notification log
+<code>retention.report_runs_years</code> | 2 | Retention of the report run log
+<code>retention.integration_years</code> | 2 | Retention of the integration call log
+<code>demo.clock_offset_days</code> | 0 | Days the demo clock is ahead of the real date (test environments only)
+</script>
+
+<h2>12.5 Events and jobs not yet built</h2>
+<script type="text/tbl" data-h="ID|What is missing|Where it shows" data-w="14%|52%|34%" data-cls="small">
+EV-08 | A minor change is not added to the CQI record automatically | MD-14
+EV-42 | A QV lapse is not added to the periodic review list; it opens a task for the deputy dean | MD-10, MD-14
+EV-60 | A correction records what was done and notifies the participant; the owning module applies the revision itself | MD-15
+JB-10 | DecisionOverdueRemindersJob | MD-14
+JB-14 | BuildQvPackageJob; the package is a page with an evidence index | MD-10
+JB-15 | GenerateReportJob; reports run inside the request | MD-15
+IR-21 | The authenticated credential API | MD-09
+</script>

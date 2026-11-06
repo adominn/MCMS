@@ -1,0 +1,113 @@
+<!-- ===================== 11. VERIFICATION, TRACEABILITY AND OPEN ITEMS ===================== -->
+<h1>11. Verification, Traceability and Open Items</h1>
+
+<h2>11.1 Test Strategy</h2>
+<p>Every SHALL requirement of the SRS is proved by at least one automated test that names its requirement ID (D-01, AD-17). The levels below run in the pipeline of Section 10; a failure at any level stops the deployment.</p>
+<p class="tcap" data-t="tlevels">Test levels</p>
+<script type="text/tbl" data-h="Level|What it proves|Tool|Run" data-w="18%|46%|18%|18%" data-cls="small">
+Unit | Rules inside actions, policies, enums and calculators: SLT totals, 40 hours per credit, 30% UTeM credit, QV validity of at most 3 years, credit expiry of 10 years, status transitions | Pest | Every commit
+Feature (requirement) | One test per requirement, named after its key, for example <code>it_verifies_results_without_issuing_credentials</code> for {{fr-asverify}}; uses the database and fake adapters | Pest with Laravel testing | Every commit
+Policy matrix | Every role against every academic action: CODL never passes; separation of duties per record | Pest data sets | Every commit
+Adapter contract | Each adapter (Stub, Manual, Live) against the same interface tests: UCreds CSV, payment, SMTP, SSO claims, signing | Pest | Every commit
+End to end | The 26 flows of the approved prototype (UI/UX spec Section 7) and its role hand-off scenario, run against the real application. FL-19 follows the demonstration scenario of PRD Section 7 (D-31); the build follows the PRD increments (D-32) | Playwright | Every merge to main
+Accessibility | Automated WCAG 2.1 AA checks on every screen of the UI/UX spec inventory, plus keyboard walks of the main flows | axe-core with Playwright | Every merge to main
+Security | Static analysis, dependency audit, OWASP ZAP baseline scan of staging, authorisation fuzzing of routes | PHPStan, composer audit, ZAP | Nightly
+Performance | Page, search, verification, import and issuing targets of the NFR at the D-21 sizing | k6 | Before each release
+</script>
+
+<h2>11.2 Traceability</h2>
+<p>{{tab:trace}} links each functional area of the SRS to the module that delivers it, the screens that show it and the end-to-end flows that test it. The per-requirement links are kept in the test suite: each feature test carries its requirement key, and a report generated in the pipeline lists any SHALL requirement without a passing test.</p>
+<p class="tcap" data-t="trace">SRS sections, modules, screens and test flows</p>
+<script type="text/tbl" data-h="SRS section|Module|Screens (UI/UX spec v1.2)|Flows" data-w="24%|16%|38%|22%" data-cls="small">
+3.1 Identity, roles and access | MD-01, MD-00 | CMN sign-in and profile; CODL users, settings, templates, reference data | FL-01, FL-17
+3.2 Category and proposal | MD-02 | LEC new proposal, proposal workspace, proposals | FL-02
+3.3 Review, approval and versioning | MD-03 | LEC review, change request; EXT review; DD proposals, Senate decision, decision pack | FL-03, FL-04, FL-20
+3.4 Offering, catalogue and readiness | MD-04 | LEC create offering, readiness; DD readiness; PUB catalogue and offering | FL-05, FL-22
+3.5 Registration, enrolment and cohorts | MD-05 | ST register, registrations, enrolment; LEC cohorts | FL-06, FL-06b, FL-21
+3.6 Learning platform connection | MD-06 | CODL UCreds exchange; import report; enrolment export | FL-07
+3.7 Assessment and verification | MD-07 | LEC cohort results; DD results, verify | FL-07, FL-08
+3.8 Achievement Record | MD-08 | ST achievement record; DD completion | FL-08
+3.9 Credentials and verification | MD-09 | DD completion, credentials; ST credentials; PUB verify; certificate and credential documents | FL-08, FL-09, FL-10, FL-23
+3.10 Quality Verification | MD-10 | LEC QV evidence; DD quality, QV record; QV package | FL-14
+3.11 ACR and ABC deposit; 3.13 single redemption | MD-11 | ST ledger, ACR; DD ACR, deposit; ABC export | FL-11, FL-12
+3.12 Credit transfer | MD-12 | ST transfer; DD transfer; transfer letter | FL-12
+3.14 Stackable pathway | MD-13 | DD pathways, plans; ST plan; PUB pathways | FL-13
+3.15 Monitoring and CQI | MD-14 | LEC quality review; DD quality review, periodic review, suspension | FL-15, FL-16
+3.16 Records, audit and reporting | MD-15 | DD traceability, reports; CODL audit, reports, retention; report documents | FL-18, FL-24
+3.17 Notifications and integration | MD-16 | Notifications, preferences; CODL adapters, test mailbox | FL-07, FL-17
+</script>
+<div class="note"><b>Note:</b> FL-19 (end-to-end journey of SRS use case A.5) crosses every module and is the Release 1 acceptance walk (PRD Section 7).</div>
+
+<p>{{tab:xcut}} lists requirements that apply across modules and the design element that meets each. {{tab:incr}} gives the build order of the PRD (D-32) with the modules and test flows each increment completes.</p>
+<p class="tcap" data-t="xcut">Cross-cutting requirements and where the design meets them</p>
+<script type="text/tbl" data-h="Requirement|Where the design meets it" data-w="16%|84%" data-cls="small">
+BR-09, BR-12, BR-13 | MD-02 UMC structure checks: a UMC proposal must name an accredited parent course and map module outcomes to its CLOs; badges or modules from different UMCs or parents cannot be combined without an equivalence decision (MD-08 completion check); a module is a credit unit only when the separately recognisable flag is Yes, set by a recorded academic approval.
+BR-10, BR-15 | MD-02 SLT check: under the credit-based model every module must reach the SLT minimum (setting); reaching it gives no credit value or MQF level by itself, which come only from the approval or the QV decision.
+BR-11 | MD-08 and MD-09: module badges and module completion are recorded as badges and module results only; UMC completion is a separate deputy dean confirmation (EV-31).
+BR-14 | MD-10 QV: credit value and MQF level of a SAMC are copied only from the recorded QV decision (D-17).
+IR-05 | Shared Livewire form components (Section 4): validation on entry, error beside the field in plain language, entered data kept after an error.
+IR-08 | DESIGN.md tokens built by Vite; assumption DA-18.
+IR-09 | CMN-08 Help and the context-help panel on each screen; PUB-05 explains the separate recognition stages.
+IR-12 | A4 Blade templates for every printable document (DOC-01 to DOC-16), checked on a standard office printer in the acceptance test.
+NFR-23 | Task page and step counts: the Playwright flows fail if a common task needs more than five steps from the task page.
+NFR-35 | Guide compliance: each BR test cites its Guide clause; the Guide copy is Versi 1.0 (D-03).
+NFR-39 | Credential signing and public verification (AD-09, MD-09).
+NFR-51, NFR-52 | Process items, not code: role training and quick reference cards are part of go-live handover (Section 10).
+</script>
+<p class="tcap" data-t="incr">Build order: PRD increments, modules and test flows</p>
+<script type="text/tbl" data-h="Increment (PRD 5.3)|Modules|Flows that must pass at its end" data-w="26%|38%|36%" data-cls="small">
+1.1 Foundation | MD-00, MD-01, MD-15 (audit trail), MD-16 | FL-00, FL-01, FL-17
+1.2 Curriculum | MD-02, MD-03, MD-04 | FL-02, FL-03, FL-04, FL-05, FL-20, FL-22
+1.3 Delivery and credentials | MD-05, MD-06, MD-07, MD-08, MD-09 | FL-06, FL-06b, FL-07, FL-08, FL-09, FL-10, FL-21, FL-23
+1.4 Credit and quality | MD-10, MD-11, MD-12, MD-13, MD-14, MD-15 (reports) | FL-11, FL-12, FL-13, FL-14, FL-15, FL-16, FL-18, FL-24, and FL-19 (end to end)
+</script>
+<h2>11.3 Design Assumptions</h2>
+<p>These assumptions fill gaps the owner has not yet decided. Each is safe to change: the affected parts are named.</p>
+<script type="text/tbl" data-h="ID|Assumption|Affects|Closes with" data-w="9%|51%|20%|20%" data-cls="small">
+DA-01 | UTeM provides Linux virtual machines in its data centre for staging and production, with outbound HTTPS to Microsoft Entra ID. | Section 10, AD-18 | CODL infrastructure
+DA-02 | PostgreSQL 16 is available; if not, MySQL 8 is used with the same migrations, losing only database-level check constraints (enforced in code instead). | AD-03, Section 5 | OI-02
+DA-03 | The UTeM Microsoft Entra tenant allows an MCMS app registration with OpenID Connect, group claims for staff roles, and Conditional Access requiring MFA for staff. | AD-06, Section 8 | OI-03
+DA-04 | CODL owns the credential signing keys and the public verification domain, and can provide a key vault (HashiCorp Vault or Azure Key Vault). | AD-09, Section 8 | OI-08
+DA-05 | Redis, MinIO and a headless Chromium runtime may be installed on the application servers. | AD-05, AD-10, AD-14 | CODL infrastructure
+DA-06 | Programme admission, completion and withdrawal are recorded manually in MCMS by the deputy dean of the degree's faculty, from programme records, until a student-system link exists. | MD-11, MD-12, MD-13 | OI-10
+DA-07 | UCreds exchanges data by CSV files in the template versions of Section 6 until its connection method is known, and issues module badges itself. | MD-06, AD-08 | OI-04
+DA-08 | The ABC deposit export uses the ACR fields of Guide Appendix F3 in CSV and PDF until ABC publishes its format. | MD-11, Section 6 | OI-11
+DA-09 | Backups follow the SRS targets: recovery point within 24 hours and restore within 8 working hours, by nightly full database backups and archived write-ahead logs kept 35 days. The monitoring system and the secret store are those UTeM ICT provides; until a secret store exists, secrets sit in a file readable only by the application account. | Sections 9 and 10 | UTeM ICT
+DA-14 | Where the SRS state names and the status words of the UI/UX spec (Section 4.8) differ, the database stores the SRS value and the interface shows the UI/UX word (Section 5, status mapping): QV "Not verified" and "Re-verification required" show as Preparing; "Not supported" and "Rejected" show as Not approved, with the stage kept in <code>approval_decisions</code>; the plan decision "Not suitable" shows as Not yet suitable; deposit outcomes Successful, In process and Correction needed map to Deposited, ACR prepared and Correction needed. | MD-03, MD-10, MD-11, MD-13 | UI/UX spec v1.2
+DA-16 | Public verification codes are 10 random Crockford base32 characters, shown in groups for reading; the shorter codes in the prototype's sample data are illustrative only. The host name in examples (<code>mcms.example.my</code>) is a placeholder for the domain CODL assigns. | MD-09, Section 6 | OI-08
+DA-17 | The staff or matric number arrives in an Entra ID token attribute whose name is configured and confirmed with CODL. Rate limits for the public verification page and retry counts are configuration values set at deployment. | MD-01, Section 6, Section 8 | OI-03
+DA-15 | A Digital Badge is issued for each module when its results are verified; the certificate and Digital Credential wait for the separate completion confirmation, after which the system issues them. | MD-07, MD-09 | Matches the approved prototype and D-29
+DA-13 | Release flags: live UCreds, ABC, QVC/MQA and payment connections are Release 2; the student information system link and wallet sharing are Release 3. Each is a configuration switch over an existing adapter interface. | Sections 3 and 10 | PRD release plan review
+DA-10 | A place is counted from Registered, so a registration in Pending payment holds its place until the payment window ends; an unpaid registration ends as Cancelled, and only an Enrolled participant can withdraw. | MD-05, Section 7.4 | OI-12
+DA-11 | Revocation is final. A revocation made in error is put right by issuing a replacement credential, never by reversing the revocation. | MD-09, Section 7.7 | CODL and Senate practice
+DA-12 | Notification recipients the SRS leaves open: a submitted proposal notifies the deputy dean of its PTj; an offering that opens is announced only in the catalogue and to its lecturer. | MD-16 | CODL
+DA-18 | The interface follows DESIGN.md (Carbon with uLearn Navy) as the UTeM corporate identity until UTeM supplies its own guidelines (SRS IR-08, D-33, A-10). | Section 4, UI/UX spec 4 | UTeM identity guidelines
+DA-19 | Laravel 13 is the framework line for the build. If a package of Section 4 does not yet support it at build start, the newest Laravel line that it supports and that is in security support is used (AD-02). | Section 4 | Start of the build
+</script>
+
+<h2>11.4 Open Items Carried into the Design</h2>
+<script type="text/tbl" data-h="Open item|How the design handles it until it closes" data-w="26%|74%" data-cls="small">
+OI-02 Database | PostgreSQL assumed; portable queries keep MySQL possible (DA-02).
+OI-03 SSO and applicants | Entra OIDC assumed (DA-03); outside applicants are recognised by an account attribute or an imported list held in MD-01.
+OI-04 UCreds connection | CSV exchange through the Manual adapter (DA-07); a Live adapter can replace it without module changes.
+OI-07 Retention periods | Retention per record category is a setting with no default disposal; ACR are kept indefinitely; disposal needs approval outside CODL.
+OI-08 Signing keys | CODL ownership assumed (DA-04); key IDs are recorded on every credential so keys can rotate.
+OI-09 Transfer limits | Programme limit is a programme setting; when unset, the transfer screen says no limit is applied and the decision is unaffected.
+OI-10 Admission and completion source | Manual recording by an authorised user (DA-06).
+OI-11 ABC format | Export of Appendix F3 fields (DA-08); the export template is versioned so the format can change.
+OI-12 Fees and refunds | Fee per offering; refunds handled outside MCMS; withdrawal deadline is a setting.
+OI-13 Completion window | Setting <code>umc.completion_window_months</code> (no value until answered) that an offering may override; no reminder is sent while neither is set.
+OI-15 Identity verification for online assessment | Method recorded per assessment component; no system enforcement in Release 1.
+</script>
+
+<h2>11.5 Design Risks</h2>
+<script type="text/tbl" data-h="Risk|Mitigation in the design" data-w="40%|60%" data-cls="small">
+Entra tenant settings differ from DA-03 | Sign-in is one adapter in MD-01; the stub keeps development and tests independent of the tenant.
+Signing key compromise or loss | Keys in a vault, never in the database or code; key ID on each credential; rotation and revocation procedure in Section 8.
+Deputy deans become a bottleneck (PRD RK-10) | Task queue with age and reminders; bulk verification and batch issuing jobs; delegation hook for Release 2.
+Audit table growth | Partitioning by year and archived partitions; the hash chain is verified per partition.
+PDF rendering load at peaks | Rendering in queue workers with back-pressure; documents cached by version and regenerated only on change.
+No mature PHP library for RDFC-1.0 canonicalisation, which the eddsa-rdfc-2022 proof needs | Spike before the build; if no library is fit, sign the same credential as a VC-JOSE (JWT) proof with the same Ed25519 key, which needs no canonicalisation. Only the signing service in MD-09 changes.
+Small team maintaining a large codebase | Modular monolith with module boundaries checked in the pipeline, conventional Laravel structure, and the prototype as an executable reference for behaviour.
+</script>
+</main>

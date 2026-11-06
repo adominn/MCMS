@@ -1,0 +1,93 @@
+<!-- ===================== SECTION 10: ISSUES & GAPS ===================== -->
+<h1>10. System Deficiencies, Gaps & Redundancies Analysis</h1>
+
+<p>This section consolidates all architectural defects, UI/backend discrepancies, redundant screens, missing templates, and security considerations identified during the comprehensive audit.</p>
+
+<!-- ---------------- 10.1 UI vs Backend Discrepancies ---------------- -->
+<h2>10.1 Frontend vs Backend Discrepancies</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Module / Feature</th>
+      <th>Frontend UI Presentation</th>
+      <th>Actual Backend Implementation</th>
+      <th>Impact & Risk</th>
+      <th>Remediation Requirement</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Quality Verification Evidence</b> (MD-10)</td>
+      <td>UI presents file attachment inputs with descriptions for 6 MQA evidence categories.</td>
+      <td>Stores textual file references / URLs in <code>qv_evidence.file_reference</code>; no binary upload or virus scan.</td>
+      <td>Medium. File integrity cannot be cryptographically proven without binary hashing.</td>
+      <td>Implement S3/MinIO enterprise object storage service with ClamAV virus scanning.</td>
+    </tr>
+    <tr>
+      <td><b>Cohort Readiness Evidence</b> (MD-04)</td>
+      <td>Lecturer checklist presents "Attach Evidence" file fields.</td>
+      <td>Backend accepts text notes; does not store binary files in object store.</td>
+      <td>Low. Operational workaround in place for pilot.</td>
+      <td>Connect file upload handler to stored files service upon activation.</td>
+    </tr>
+    <tr>
+      <td><b>UCreds CSV File Import</b> (MD-06)</td>
+      <td>UI allows uploading grades and badge CSV files.</td>
+      <td>Files are stored on local web server filesystem (<code>storage/app/private/ucreds</code>); parsing runs synchronously inside HTTP request.</td>
+      <td>High. Large CSV imports (500+ rows) risk HTTP timeout (504) or server memory exhaustion.</td>
+      <td>Move CSV parsing and row validation to asynchronous queue workers (Redis/Horizon).</td>
+    </tr>
+    <tr>
+      <td><b>Drawer Side Panels</b> (UIUX Spec 4.2)</td>
+      <td>Prototype specifies sliding right-hand drawers for quick record inspection.</td>
+      <td>Drawers are absent in Blade views; interactions navigate to full pages or use inline accordion folds (<code>details.fold</code>).</td>
+      <td>Low (UX Consistency). D-38 permits inline summary-first presentations.</td>
+      <td>Retain current inline fold/tab pattern; drawers are unnecessary overhead for server-rendered Blade.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ---------------- 10.2 Redundancies & Overlapping Screens ---------------- -->
+<h2>10.2 Redundant & Overlapping Pages Analysis</h2>
+<p>Several pages exhibit functional overlap and require architectural decisions regarding whether to retain, merge, or redesign them:</p>
+
+<h3>1. Internal Achievement Record (<code>/my-record</code>) vs Admin Record (<code>/records/{enrolment}</code>)</h3>
+<ul>
+  <li><b>Current Situation:</b> <code>/my-record</code> renders the student's personal internal achievement record, while <code>/records/{enrolment}</code> renders an identical view for administrative review. Both use the <code>records.show</code> / <code>records.mine</code> Blade template.</li>
+  <li><b>Assessment:</b> <b>RETAIN BOTH, MAINTAIN DISTINCT ROUTES.</b> Although the presentation template is identical, the authorization scopes are fundamentally different: <code>/my-record</code> is strictly user-scoped to the signed-in student, whereas <code>/records/{enrolment}</code> enforces faculty PTj authorization for Deputy Deans and CODL staff. Merging them would introduce complex conditional authorization logic into a single endpoint.</li>
+</ul>
+
+<h3>2. Credit Ledger (<code>/my-credit</code>) vs ACR Detail View (<code>/my-credit/{id}</code>)</h3>
+<ul>
+  <li><b>Current Situation:</b> <code>/my-credit</code> displays the balance of banked credits in ABC, while <code>/my-credit/{id}</code> displays the detailed Academic Credit Record and legal consent submission form.</li>
+  <li><b>Assessment:</b> <b>RETAIN AND ENHANCE.</b> In accordance with D-38's <i>Summary-First</i> rule, the ledger provides the high-level credit balance overview, while the detailed legal text, MQA accreditation metadata, and consent buttons are properly isolated on the detail screen.</li>
+</ul>
+
+<h3>3. Printable Proposal View (<code>/proposals/{id}/print</code>) vs Senate Pack (<code>/approvals/{id}/pack</code>)</h3>
+<ul>
+  <li><b>Current Situation:</b> Both pages display an aggregated, non-tabbed representation of a micro-credential proposal.</li>
+  <li><b>Assessment:</b> <b>MERGE INTO STANDARDIZED TEMPLATE.</b> The Printable Proposal view was developed for the authoring lecturer, while the Senate Pack was designed for the Deputy Dean. Both should share a single unified printable Blade component (<code>layouts.print</code>) with a conditional banner for Senate meeting metadata.</li>
+</ul>
+
+<!-- ---------------- 10.3 Missing Pages & Incomplete Templates ---------------- -->
+<h2>10.3 Missing Pages & Technical Gaps</h2>
+<p>The audit identified the following missing templates and incomplete backend services:</p>
+
+<ol>
+  <li><b>Official Senate Credit Transfer Decision Letter (DOC-12):</b>
+    <br/><i>Issue:</i> When a Deputy Dean approves or rejects a credit transfer application, the decision is stored in <code>transfer_decisions</code> and viewable in the web table. However, the formal official Decision Letter (DOC-12) required for the student's academic file and Pejabat Pendaftar admission submission has no printable A4 template.
+    <br/><i>Remediation:</i> Implement <code>transfer.letter</code> Blade view in <code>layouts.print</code>.</li>
+
+  <li><b>Suspension Notice Document Template (DOC-13):</b>
+    <br/><i>Issue:</i> When an offering is suspended, the system dispatches an in-system notification. A formal printable suspension notice template exists in <code>monitoring/suspension-notice.blade.php</code>, but it is not linked from the student's Document Center (<code>/documents</code>).
+    <br/><i>Remediation:</i> Add suspension notices to the document center repository query.</li>
+
+  <li><b>Server-Side PDF Binary Compilation:</b>
+    <br/><i>Issue:</i> Certificates, receipts, ACRs, and reports currently rely on the browser's native print-to-PDF functionality. In automated batch workflows (e.g., emailing a certificate upon graduation or exporting 500 credentials), client-side printing cannot execute.
+    <br/><i>Remediation:</i> Integrate a headless PDF renderer (Playwright Core / Chromium) into the Laravel backend to generate true PDF binaries for downloadable storage.</li>
+
+  <li><b>Full Bahasa Melayu Translation Coverage:</b>
+    <br/><i>Issue:</i> While the top navigation and static page <code>&lt;h1&gt;</code> headers are translated via <code>lang/ms.json</code>, table column headers, form input labels, validation alert messages, and button text remain in English.
+    <br/><i>Remediation:</i> Wrap all UI strings in Blade views with the translation helper <code>__()</code> and expand <code>lang/ms.json</code> to achieve 100% bilingual compliance.</li>
+</ol>

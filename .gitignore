@@ -1,0 +1,55 @@
+# Antigravity & IDE
+.claude/
+.gemini/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+Thumbs.db
+Desktop.ini
+
+# Test dumps & scratch files
+.playwright/
+.playwright-cli/
+test-results/
+playwright-report/
+scratch/
+scratch_*
+screenshot_*
+*.log
+
+# Graphify cache
+graphify-out/cache/
+
+# App dependencies & local environment
+app/.env
+app/.env.backup
+app/.env.production
+app/vendor/
+app/node_modules/
+app/public/build/
+app/public/hot/
+app/public/storage/
+app/.phpunit.result.cache
+app/.phpunit.cache/
+
+# App storage keys, backups, private files, and cache
+app/storage/*.key
+app/storage/pail
+app/storage/app/backups/*
+app/storage/app/private/*
+!app/storage/app/private/.gitignore
+app/storage/framework/cache/*
+app/storage/framework/sessions/*
+app/storage/framework/views/*
+app/storage/framework/testing/*
+app/storage/logs/*
+!app/storage/logs/.gitignore
+!app/storage/framework/cache/.gitignore
+!app/storage/framework/sessions/.gitignore
+!app/storage/framework/views/.gitignore
+!app/storage/framework/testing/.gitignore
+app/test-results/
+app/playwright-report/
+app/scratch/

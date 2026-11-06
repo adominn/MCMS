@@ -1,0 +1,233 @@
+<!-- ===================== SECTION 3: STUDENT ROLE ===================== -->
+<h1>3. Student / Learner Pages & Functionality Analysis</h1>
+
+<p>The Student role (Persona P8) represents enrolled and prospective learners. The student interface prioritizes active coursework, verifiable achievements, Malaysian Qualifications Agency (MQA) credit recognition, and stackable pathways toward formal academic qualifications.</p>
+
+<!-- ---------------- 3.1 Student Home ---------------- -->
+<h2>3.1 Student Home: "My Learning" Dashboard</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Name:</b> Student Home ("My Learning")</li>
+  <li><b>Role:</b> Student (<code>student</code>)</li>
+  <li><b>Exact Route:</b> <code>GET /tasks</code> (redirected internally by <code>TaskController@index</code>)</li>
+  <li><b>Page Type:</b> User Dashboard / Learning Command Center</li>
+  <li><b>Related Database Tables:</b> <code>enrolments</code>, <code>offerings</code>, <code>mc_versions</code>, <code>mc_modules</code>, <code>module_achievements</code>, <code>credentials</code>, <code>acrs</code>, <code>transfer_applications</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Identity\TaskController@student</code>, View: <code>student.home</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Provides an immediate, summary-first overview of the student's academic journey. Features: (1) Urgent action items (pending consent, feedback requests, payment deadlines), (2) In-progress courses with module completion progress bars, (3) Courses waiting for Deputy Dean completion confirmation, (4) Recently achieved credentials, and (5) KPI summary metrics (Achieved Modules, Issued Credentials, Pending ACR Consents, Active Transfer Applications).</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and tested by Playwright flow FL-00. Dynamically calculates module completion percentages by correlating <code>mc_modules</code> with <code>module_achievements</code>. Empty states provide quick links to the public catalogue.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Data aggregation across 8 tables executes efficiently without N+1 query regressions.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Student Lands on Dashboard<br/>/tasks -> student.home"] --> B{"Review Active Section"}
+    B -->|"Click In-Progress Course"| C["Enrolment Details<br/>/enrolments/{id}"]
+    B -->|"Click Pending Consent"| D["ACR & Consent Review<br/>/my-credit/{id}"]
+    B -->|"Click Recent Credential"| E["Credential Details<br/>/my-credentials/{id}"]
+    B -->|"Click Transfer Application"| F["Transfer Status Page<br/>/transfer/{id}"]
+</pre>
+<figcaption>Figure 3.1: Student Dashboard Hub & Quick Navigation Flow</figcaption>
+</figure>
+
+<!-- ---------------- 3.2 Registration Wizard & Payments ---------------- -->
+<h2>3.2 Course Registration Wizard & Payments (MD-05)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Registration Wizard (<code>/register/{offering}</code>), Confirmation (<code>/enrolments/{id}/confirmation</code>), Receipt (<code>/enrolments/{id}/receipt</code>), Withdrawal (<code>POST /enrolments/{id}/withdraw</code>)</li>
+  <li><b>Role:</b> Student (<code>student</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /register/{offering}</code>, <code>POST /register/{offering}/eligibility</code>, <code>POST /register/{offering}/acknowledge</code>, <code>POST /register/{offering}/pay</code>, <code>GET /enrolments/{id}/confirmation</code>, <code>GET /enrolments/{id}/receipt</code></li>
+  <li><b>Page Type:</b> Multi-Step Form & Payment Gateway</li>
+  <li><b>Related Database Tables:</b> <code>enrolments</code>, <code>payments</code>, <code>pdpa_acknowledgements</code>, <code>offerings</code>, <code>enrolment_status_log</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Enrolment\EnrolmentController</code>, Views: <code>student.register</code>, <code>student.confirmation</code>, <code>student.receipt</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Implements a 4-step compliant enrollment workflow (FR-97 to FR-109): (1) <b>Eligibility & Contact:</b> Validates prerequisites and emergency phone number; (2) <b>Recognition & PDPA Acknowledgment:</b> Mandatory acceptance of Personal Data Protection Act notice and official recognition statements; (3) <b>Payment Processing:</b> Idempotent fee handling with payment simulation; (4) <b>Confirmation:</b> Enrolment reference (e.g., <code>E-2026-0590</code>), downloadable receipt, and access instructions.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional and verified in Playwright flows FL-06 and FL-06b. Card details are never stored; payment attempts utilize unique UUID references. The enrollment receipt adheres to the standard A4 print layout (<code>layouts.print</code>).</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Validations, status transitions (<code>pending_payment</code> &rarr; <code>enrolled</code>), capacity counting, and withdrawal deadlines (20 days before cohort completion) are enforced.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Student clicks 'Register'<br/>/public/offering/{id}"] --> B["Step 1: Eligibility Check<br/>/register/{offering}"]
+    B -->|"Submit Phone & Prereq"| C["Save Draft Enrolment<br/>Status: pending_payment"]
+    C --> D["Step 2: PDPA & Recognition<br/>Official Disclosure"]
+    D -->|"Acknowledge"| E["Record pdpa_acknowledgements"]
+    E --> F["Step 3: Payment Gateway<br/>Simulated / Payment Adapter"]
+    F -->|"Submit Card Details"| G["Idempotent Payment Check<br/>Record in payments table"]
+    G -->|"Payment Success"| H["Update Enrolment Status: 'enrolled'<br/>Log in enrolment_status_log"]
+    H --> I["Step 4: Confirmation Page<br/>/enrolments/{id}/confirmation"]
+    I --> J["View/Print Fee Receipt<br/>/enrolments/{id}/receipt"]
+    
+    G -->|"Withdraw Before Deadline"| K["Post /enrolments/{id}/withdraw<br/>Update Status: 'withdrawn'"]
+</pre>
+<figcaption>Figure 3.2: 4-Step Registration, Payment & Withdrawal Lifecycle</figcaption>
+</figure>
+
+<!-- ---------------- 3.3 Results & Achievement Record ---------------- -->
+<h2>3.3 Results & Internal Achievement Record (MD-07, MD-08)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> My Results (<code>/my-results</code>), Internal Achievement Record (<code>/my-record</code>)</li>
+  <li><b>Role:</b> Student (<code>student</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /my-results</code>, <code>GET /my-record</code></li>
+  <li><b>Page Type:</b> Academic Results & Internal Transcript</li>
+  <li><b>Related Database Tables:</b> <code>enrolments</code>, <code>assessment_results</code>, <code>assessment_components</code>, <code>module_achievements</code>, <code>digital_badges</code>, <code>achievement_records</code></li>
+  <li><b>Related Components & Controllers:</b> <code>ResultsController@mine</code>, <code>RecordController@mine</code>, Views: <code>student.results</code>, <code>records.mine</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Displays verified assessment results per cohort and module. <code>/my-results</code> breaks down component marks (quizzes, assignments, exams) and shows earned module badges. <code>/my-record</code> renders the official internal Achievement Record (DOC-05). In accordance with BR-12, the Achievement Record is prominently watermarked and labeled: <i>"Internal Academic Record – Not an Academic Credit Record (ACR)."</i></p>
+
+<h3>C. Current Implementation</h3>
+<p>Strictly enforces that students only see marks that have been formally verified by the Deputy Dean (FR-128); unverified marks entered by lecturers remain hidden. Results under integrity holds display a neutral pending notice.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Tested in Playwright flow FL-08.</p>
+
+<!-- ---------------- 3.4 Credentials Wallet ---------------- -->
+<h2>3.4 Digital Credentials Wallet & Certificate Print (MD-09)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Credentials Wallet (<code>/my-credentials</code>), Credential Detail (<code>/my-credentials/{id}</code>), Certificate (<code>/my-credentials/{id}/certificate</code>), Transcript Sheet (<code>/my-credentials/{id}/sheet</code>), Download (<code>/my-credentials/{id}/download/{as}</code>)</li>
+  <li><b>Role:</b> Student (<code>student</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /my-credentials</code>, <code>GET /my-credentials/{id}</code>, <code>GET /my-credentials/{id}/certificate</code>, <code>GET /my-credentials/{id}/sheet</code>, <code>GET /my-credentials/{id}/download/{as}</code></li>
+  <li><b>Page Type:</b> Credential Wallet / Printable Certificate / File Export</li>
+  <li><b>Related Database Tables:</b> <code>credentials</code>, <code>enrolments</code>, <code>signing_keys</code>, <code>mc_versions</code></li>
+  <li><b>Related Components & Controllers:</b> <code>CredentialController</code>, Views: <code>credentials.wallet</code>, <code>credentials.show</code>, <code>credentials.certificate</code>, <code>credentials.sheet</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>The student's portable credential repository (FR-137 to FR-147). Upon cohort completion confirmed by the Deputy Dean, the system automatically mints a tamper-evident credential. From the wallet, learners can: (1) View verification status, (2) Copy public verification links, (3) Download the VC-JWT / Open Badges 3.0 cryptographic package, (4) Print the official bilingual A4 Certificate with QR code and signatories, and (5) Inspect the academic transcript sheet.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented and aligned with the prototype. The certificate page (<code>layouts.print</code>) renders institutional letterheads, signatory blocks, and dynamic SVG QR codes encoding the public verification URL. Cryptographic downloads provide compliant VC-JWT files signed with Ed25519.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Issuance, certificate formatting, and token downloads validated by FL-09 and FL-10.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Student opens Wallet<br/>/my-credentials"] --> B["Select Issued Credential"]
+    B --> C["Credential View<br/>/my-credentials/{id}"]
+    C --> D{"Selected Action"}
+    D -->|"Print Certificate"| E["Certificate A4 View<br/>/my-credentials/{id}/certificate"]
+    D -->|"Download JSON/JWT"| F["Download Action<br/>/my-credentials/{id}/download/jwt"]
+    D -->|"View Transcript Sheet"| G["Transcript Sheet View<br/>/my-credentials/{id}/sheet"]
+    D -->|"Share Verification Link"| H["Copy Link: /public/verify/{code}"]
+</pre>
+<figcaption>Figure 3.4: Student Credentials Management & Export Flow</figcaption>
+</figure>
+
+<!-- ---------------- 3.5 Credit Ledger & ACR ---------------- -->
+<h2>3.5 Credit Ledger, ACR & National Credit Banking (MD-11)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Credit Ledger (<code>/my-credit</code>), ACR & Consent Review (<code>/my-credit/{id}</code>), Submit Consent (<code>POST /my-credit/{id}/consent</code>)</li>
+  <li><b>Role:</b> Student (<code>student</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /my-credit</code>, <code>GET /my-credit/{id}</code>, <code>POST /my-credit/{id}/consent</code></li>
+  <li><b>Page Type:</b> Financial/Academic Ledger & Legal Consent</li>
+  <li><b>Related Database Tables:</b> <code>acrs</code>, <code>consents</code>, <code>credit_ledger_entries</code>, <code>abc_deposits</code>, <code>redemption_events</code></li>
+  <li><b>Related Components & Controllers:</b> <code>CreditBankController</code>, Views: <code>creditbank.ledger</code>, <code>creditbank.acr</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Empowers students to manage credits banked with the Malaysian Academic Credit Bank (ABC). An Academic Credit Record (ACR) is automatically generated only for accredited UMCs or verified SAMCs (never MCEs). Before credit can be queued or exported to ABC, the student must review the generated ACR and submit legal consent (FR-dp*). Once deposited by the Deputy Dean, credits appear in the ledger with a 10-year validity counter.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented. Consent submission stores channel, timestamp, and version of wording. The ledger clearly distinguishes between <i>Available</i>, <i>Provisionally Redeemed</i> (in transfer evaluation), <i>Redeemed</i>, and <i>Expired</i> credits. Every screen clearly emphasizes that an ABC deposit is secure storage, not an automatic credit transfer.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Tested in Playwright flow FL-11.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Credential Issued<br/>System prepares ACR"] --> B["Student notified<br/>Consent Required"]
+    B --> C["Open ACR Details<br/>/my-credit/{id}"]
+    C --> D{"Student Decision"}
+    D -->|"Give Consent"| E["POST /my-credit/{id}/consent<br/>decision: 'consent_given'"]
+    D -->|"Decline Consent"| F["POST /my-credit/{id}/consent<br/>decision: 'consent_declined'"]
+    
+    E --> G["Record consent in consents table<br/>Status: 'consented'"]
+    G --> H["ACR enters Deputy Dean ABC Queue"]
+    F --> I["Status: 'consent_declined'<br/>Blocked from ABC Queue"]
+    
+    H --> J["Deputy Dean Deposits to ABC"]
+    J --> K["Credit appears in Student Ledger<br/>/my-credit (Status: 'Available')"]
+</pre>
+<figcaption>Figure 3.5: Academic Credit Record (ACR) Consent & ABC Deposit Lifecycle</figcaption>
+</figure>
+
+<!-- ---------------- 3.6 Credit Transfer & Degree Plan ---------------- -->
+<h2>3.6 Credit Transfer Applications & Degree Plan (MD-12, MD-13)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Credit Transfer Listing (<code>/transfer</code>), New Application (<code>/transfer/new</code>), Application Detail (<code>/transfer/{id}</code>), Degree Plan (<code>/my-plan</code>)</li>
+  <li><b>Role:</b> Student (<code>student</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /transfer</code>, <code>GET /transfer/new</code>, <code>POST /transfer</code>, <code>GET /transfer/{id}</code>, <code>GET /my-plan</code></li>
+  <li><b>Page Type:</b> Application Workflow & Interactive Degree Tracking</li>
+  <li><b>Related Database Tables:</b> <code>transfer_applications</code>, <code>transfer_lines</code>, <code>programmes</code>, <code>stackable_plans</code>, <code>plan_requirements</code>, <code>credit_ledger_entries</code></li>
+  <li><b>Related Components & Controllers:</b> <code>TransferController</code>, <code>PathwayController@mine</code>, Views: <code>transfer.index</code>, <code>transfer.create</code>, <code>transfer.show</code>, <code>pathways.mine</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Allows learners holding <i>Available</i> credits to formally apply for credit transfer toward a target UTeM academic degree programme. The application enforces single redemption (BR-26): applied credits are immediately placed on hold as <i>Provisionally Redeemed</i>. <code>/my-plan</code> tracks the student's progress along stackable pathway mappings, calculating the percentage of institutional credit earned against the 30% residency rule.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully functional. Application creation verifies that selected credits are unencumbered. Once submitted, the application enters the faculty Deputy Dean evaluation queue. The student can track evaluation milestones (Validity Check &rarr; Equivalence Review &rarr; Senate Decision). <code>/my-plan</code> visually flags missing programme requirements and residency ratios.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Single redemption locking and status tracking verified in FL-12 and FL-13.</p>
+
+<h3>E. User Flow & Workflow Diagram</h3>
+<figure>
+<pre class="mermaid">
+flowchart TD
+    A["Student on Credit Ledger<br/>Has 'Available' Credit"] --> B["Click 'Apply for Transfer'<br/>/transfer/new"]
+    B --> C["Select Target Degree Programme<br/>Select Credit Lines"]
+    C --> D["Submit Application"]
+    D --> E["Ledger Service locks credits<br/>Status: 'provisionally_redeemed'"]
+    E --> F["Create transfer_applications record<br/>Status: 'submitted'"]
+    F --> G["Enters Deputy Dean Queue<br/>/transfers/{id}"]
+    G --> H["Student tracks progress<br/>/transfer/{id}"]
+</pre>
+<figcaption>Figure 3.6: Student Credit Transfer Application Submission Flow</figcaption>
+</figure>
+
+<!-- ---------------- 3.7 Course Feedback Form ---------------- -->
+<h2>3.7 Course & Cohort Feedback Form (MD-14)</h2>
+<h3>A. Page Information</h3>
+<ul>
+  <li><b>Page Names:</b> Feedback Hub (<code>/feedback</code>), Cohort Feedback Form (<code>/feedback/{enrolment}</code>)</li>
+  <li><b>Role:</b> Student (<code>student</code>)</li>
+  <li><b>Exact Routes:</b> <code>GET /feedback</code>, <code>GET /feedback/{enrolment}</code>, <code>POST /feedback/{enrolment}</code></li>
+  <li><b>Page Type:</b> Survey Form & Learner Evaluation</li>
+  <li><b>Related Database Tables:</b> <code>feedback_responses</code>, <code>enrolments</code>, <code>offerings</code></li>
+  <li><b>Related Components & Controllers:</b> <code>App\Modules\Monitoring\QualityReviewController</code>, Views: <code>monitoring.feedback</code>, <code>monitoring.feedback-form</code></li>
+</ul>
+
+<h3>B. Intended Functionality</h3>
+<p>Collects mandatory quality feedback from participants upon cohort completion or closure (FR-mn*). The evaluation comprises 18 items grouped into 6 quality domains: (1) Learning Outcomes & Content, (2) Delivery & Activities, (3) Assessment & Feedback, (4) Platform & Accessibility, (5) Facilitator Support, and (6) Overall Satisfaction. Responses are completely anonymized to protect participant privacy.</p>
+
+<h3>C. Current Implementation</h3>
+<p>Fully implemented. Enforces one submission per enrollment. The 6 core group ratings are strictly validated as required, while the 12 detailed diagnostic items are optional. Completed surveys feed directly into lecturer CQI aggregate indicators.</p>
+
+<h3>D. Functionality Status</h3>
+<p><b>Status: Fully Working.</b> Verified in unit tests and manual execution.</p>
