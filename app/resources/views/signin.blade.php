@@ -379,7 +379,7 @@
     </div>
 
     <div style="position:relative;z-index:3;color:rgba(255,255,255,0.75);font-size:12px">
-      <img src="{{ asset('images/codl-logo.png') }}" alt="CODL Logo" style="height:50px;width:auto;display:block;margin-bottom:8px">
+      <img src="{{ asset('images/codl-logo.png') }}" alt="CODL Logo" style="height:54px;width:auto;display:block;margin-bottom:12px">
       <div>Centre for Open and Distance Learning (CODL) &middot; UTeM Hang Tuah Jaya, 76100 Melaka</div>
     </div>
   </div>

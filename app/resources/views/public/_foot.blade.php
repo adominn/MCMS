@@ -1,7 +1,7 @@
 <footer class="foot">
   <div>
     <div style="margin-bottom:12px">
-      <img src="{{ asset('images/codl-logo.png') }}" alt="CODL Logo" style="height:50px;width:auto;display:block;margin-bottom:8px">
+      <img src="{{ asset('images/codl-logo.png') }}" alt="CODL Logo" style="height:48px;width:auto;display:block;margin-bottom:12px">
       <b>UTeM Micro-credentials</b>
       <div style="color:#d0d0d0;font-size:13px;line-height:1.4">Centre for Open and Distance Learning (CODL)</div>
     </div>
