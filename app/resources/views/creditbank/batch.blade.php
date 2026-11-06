@@ -21,7 +21,7 @@
 <div class="note ok" style="margin-bottom:16px;font-size:9.5pt">
   <div>
     <strong>{{ __('A deposit is storage of a credit record only. It is not a credit transfer.') }}</strong>
-    {{ __('National ABC storage retains these Academic Credit Records for participant recognition and future credit transfer applications.') }}
+    {{ __('ABC storage retains these Academic Credit Records for participant recognition and future credit transfer applications.') }}
   </div>
 </div>
 

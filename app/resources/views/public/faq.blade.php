@@ -11,7 +11,7 @@ $faqs_en = [
   ],
   'Credit & ACR' => [
     ['What is an ACR?', 'An academic credit record. UTeM issues one after it confirms you achieved the credit-bearing micro-credential. It is a record, not a transfer.'],
-    ['What is ABC and do I have to deposit?', 'The Academic Bank of Credit stores your credit nationally for 10 years. Deposit needs your consent; you can give, decline or postpone it.'],
+    ['What is ABC and do I have to deposit?', 'The Academic Bank of Credit (ABC) stores your credit for 10 years. Deposit needs your consent; you can give, decline or postpone it.'],
     ['Can I use my credit in a degree?', 'You may apply for credit transfer into an admitted programme. The faculty decides course by course, at least 30% of the degree credits must be earned at UTeM, and the same credit cannot be redeemed twice.'],
     ['Will collecting micro-credentials give me a degree?', 'No. Pathways show what may be mapped. You still complete the programme requirements, including residency.'],
   ],
@@ -35,7 +35,7 @@ $faqs_ms = [
   ],
   'Kredit & ACR' => [
     ['Apakah itu ACR?', 'Academic Credit Record (Rekod Kredit Akademik). UTeM mengeluarkannya selepas mengesahkan pencapaian micro-credential berkredit. Ia adalah rekod, bukan pemindahan.'],
-    ['Apakah itu ABC dan adakah saya wajib deposit?', 'Academic Bank of Credit menyimpan kredit anda di peringkat kebangsaan selama 10 tahun. Deposit memerlukan kebenaran anda.'],
+    ['Apakah itu ABC dan adakah saya wajib deposit?', 'Academic Bank of Credit (ABC) menyimpan kredit anda selama 10 tahun. Deposit memerlukan kebenaran anda.'],
     ['Bolehkah saya guna kredit untuk ijazah?', 'Anda boleh memohon pemindahan kredit ke program pengajian yang diterima masuk. Fakulti menilai kursus demi kursus, sekurang-kurangnya 30% kredit mesti diperoleh di UTeM.'],
     ['Adakah mengumpul micro-credential memberi saya ijazah secara automatik?', 'Tidak. Laluan menunjukkan apa yang boleh dipetakan. Anda tetap perlu memenuhi syarat pengijazahan dan residensi.'],
   ],

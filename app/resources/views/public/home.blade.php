@@ -170,7 +170,7 @@
     <div class="stp">
       <div style="font-size:12px;font-weight:700;color:#0f62fe;margin-bottom:2px">04</div>
       <b>{{ $lang === 'ms' ? 'Deposit ABC' : 'ABC Deposit' }}</b>
-      <span>{{ $lang === 'ms' ? 'Penyimpanan kredit kebangsaan dengan persetujuan' : 'National storage with your consent' }}</span>
+      <span>{{ $lang === 'ms' ? 'Penyimpanan bank kredit dengan persetujuan' : 'Credit bank storage with your consent' }}</span>
     </div>
     <div class="stp">
       <div style="font-size:12px;font-weight:700;color:#0f62fe;margin-bottom:2px">05</div>
@@ -250,7 +250,7 @@
       <p style="font-size:13.5px;line-height:1.5;color:#525252;margin:0">
         {{ $lang === 'ms' 
             ? 'Dapatkan jawapan lengkap mengenai perbezaan lencana vs sijil, syarat ACR, pendaftaran pelajar luar, yuran pembelajaran, dan deposit ABC.' 
-            : 'Explore clear answers on badge vs certificate, ACR requirements, external learner enrolment, fees, and national ABC credit deposits.' }}
+            : 'Explore clear answers on badge vs certificate, ACR requirements, external learner enrolment, fees, and ABC credit deposits.' }}
       </p>
       <a class="btn sm" href="{{ route('public.faq') }}" style="margin-top:auto;width:fit-content">
         {{ $lang === 'ms' ? 'Baca Soalan Lazim' : 'Read FAQ' }} &rarr;

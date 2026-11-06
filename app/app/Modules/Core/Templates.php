@@ -35,8 +35,8 @@ final class Templates
             'ms' => [null, 'Menamatkan micro-credential ini, menerima Academic Credit Record, mendepositkan kredit ke Academic Bank of Credit dan memindahkan kredit adalah keputusan yang berasingan.'],
         ],
         'consent.abc_deposit' => [
-            'en' => ['ABC Deposit Consent Statement', 'I consent to the deposit of my Academic Credit Record into the National Academic Credit Bank.'],
-            'ms' => ['Penyata Persetujuan Deposit ABC', 'Saya bersetuju mendepositkan Rekod Kredit Akademik saya ke Akaun Bank Kredit Kebangsaan (ABC).'],
+            'en' => ['ABC Deposit Consent Statement', 'I consent to the deposit of my Academic Credit Record into the Academic Bank of Credit.'],
+            'ms' => ['Penyata Persetujuan Deposit ABC', 'Saya bersetuju mendepositkan Rekod Kredit Akademik saya ke Bank Kredit Akademik (ABC).'],
         ],
     ];
 

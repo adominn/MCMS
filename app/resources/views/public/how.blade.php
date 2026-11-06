@@ -19,7 +19,7 @@
     <div class="stp"><b>1. {{ $lang === 'ms' ? 'Lencana modul' : 'Module badge' }}</b><span>{{ $lang === 'ms' ? 'Lulus modul' : 'Passed module' }}</span></div>
     <div class="stp"><b>2. {{ $lang === 'ms' ? 'Kredensial' : 'Credential' }}</b><span>{{ $lang === 'ms' ? 'Penamatan lengkap' : 'Completion' }}</span></div>
     <div class="stp"><b>3. {{ $lang === 'ms' ? 'ACR' : 'ACR' }}</b><span>{{ $lang === 'ms' ? 'Rekod kredit UTeM' : 'Academic credit record' }}</span></div>
-    <div class="stp"><b>4. {{ $lang === 'ms' ? 'Deposit ABC' : 'ABC deposit' }}</b><span>{{ $lang === 'ms' ? 'Penyimpanan kebangsaan' : 'National storage' }}</span></div>
+    <div class="stp"><b>4. {{ $lang === 'ms' ? 'Deposit ABC' : 'ABC deposit' }}</b><span>{{ $lang === 'ms' ? 'Penyimpanan bank kredit' : 'Credit bank storage' }}</span></div>
     <div class="stp"><b>5. {{ $lang === 'ms' ? 'Pindahan kredit' : 'Credit transfer' }}</b><span>{{ $lang === 'ms' ? 'Keputusan fakulti' : 'Faculty decision' }}</span></div>
   </div>
 
@@ -32,7 +32,7 @@
       ['Module badge', 'A badge for each module you pass, issued after the deputy dean verifies results.', 'It is not a qualification and carries no credit by itself.'],
       ['Certificate or credential', 'A signed, verifiable record that you completed the whole micro-credential. Anyone can check it with its code.', 'It is not proof that credit has been recorded or accepted anywhere.'],
       ['ACR (Academic Credit Record)', 'UTeM confirms the credit you earned. Only UMC and quality-verified SAMC offerings have one.', 'It is not a transfer, and an MCE never has one. Storing is not transferring.'],
-      ['ABC deposit', 'With your consent, the credit is deposited in the national Academic Bank of Credit and stays valid for 10 years.', 'You may decline or postpone. Storing is not transferring, and deposit is not an admission or an exemption.'],
+      ['ABC deposit', 'With your consent, the credit is deposited in the Academic Bank of Credit (ABC) and stays valid for 10 years.', 'You may decline or postpone. Storing is not transferring, and deposit is not an admission or an exemption.'],
       ['Credit transfer', 'You apply to an admitted programme; the faculty compares outcomes and decides course by course.', 'It is not guaranteed, and the credit can be used only once.'],
     ];
 
@@ -40,7 +40,7 @@
       ['Lencana modul', 'Lencana untuk setiap modul yang anda lulus, dikeluarkan selepas timbalan dekan mengesahkan keputusan.', 'Ia bukan kelayakan dan tidak membawa kredit dengan sendirinya.'],
       ['Sijil atau kredensial', 'Rekod yang ditandatangani dan boleh disahkan bahawa anda menamatkan keseluruhan micro-credential.', 'Ia bukan bukti bahawa kredit telah direkodkan atau diterima di mana-mana.'],
       ['ACR (Rekod Kredit Akademik)', 'UTeM mengesahkan kredit yang diperoleh bagi pembelajaran yang layak. MCE tidak mempunyai ACR.', 'Menyimpan bukan memindahkan kredit.'],
-      ['Deposit ABC', 'Dengan kebenaran anda, kredit disimpan di Academic Bank of Credit kebangsaan selama 10 tahun.', 'Menyimpan bukan memindahkan (Storing is not transferring). Anda boleh menolak atau menangguhkan.'],
+      ['Deposit ABC', 'Dengan kebenaran anda, kredit disimpan di Academic Bank of Credit (ABC) selama 10 tahun.', 'Menyimpan bukan memindahkan (Storing is not transferring). Anda boleh menolak atau menangguhkan.'],
       ['Pemindahan kredit', 'Program memutuskan berdasarkan hasil pembelajaran sama ada kredit diambil kira.', 'Ia tidak dijamin dan tertakluk kepada kelulusan fakulti.'],
     ];
 

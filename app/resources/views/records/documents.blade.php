@@ -382,7 +382,7 @@
                   <td><code>{{ $b->reference }}</code></td>
                   <td>
                     <b>ABC deposit export {{ $b->reference }}</b>
-                    <div class="s muted">{{ __('Faculty batch export for national Academic Bank of Credit deposit') }}</div>
+                    <div class="s muted">{{ __('Faculty batch export for Academic Bank of Credit (ABC) deposit') }}</div>
                   </td>
                   <td><span class="tag info">Batch A4 Print</span></td>
                   <td class="num">
