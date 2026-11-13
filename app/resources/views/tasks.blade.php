@@ -60,6 +60,7 @@
           {{ __('Nothing is waiting for you in this group.') }}
         </div>
       @else
+      <div class="table-wrap">
       <table>
         <thead>
           <tr>
@@ -83,7 +84,7 @@
                 <span class="s" style="display:block;color:var(--muted);font-size:12px">{{ $t->subject_ref }}</span>
               @endif
             </td>
-            <td>{{ __($areas[$t->area] ?? ucfirst($t->area)) }}</td>
+            <td>{{ __($areaLabels[$t->area] ?? ucfirst(str_replace('_', ' ', (string) $t->area))) }}</td>
             <td class="num">
               <b>{{ $waited === 0 ? __('Today') : $waited.' '.($waited === 1 ? __('day') : __('days')) }}</b>
               <span class="s" style="display:block;color:var(--muted);font-size:12px">{{ __('since') }} {{ \Carbon\Carbon::parse($t->created_at)->format('d/m/Y') }}</span>
@@ -102,6 +103,7 @@
         @endforeach
         </tbody>
       </table>
+      </div>
       <div class="panel-foot" style="background:transparent;margin:0;padding:0">
         {{ $tasks->links('pagination.simple') }}
       </div>

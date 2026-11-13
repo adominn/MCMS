@@ -39,7 +39,7 @@ final class CredentialController
             ->get();
 
         return view('credentials.wallet', [
-            'rows' => (clone $base)->join('credentials as c', 'c.enrolment_id', '=', 'e.id')->orderByDesc('c.id')->get(['c.id', 'c.number', 'c.public_code', 'c.status', 'c.content', 'c.issued_at']),
+            'rows' => (clone $base)->join('credentials as c', 'c.enrolment_id', '=', 'e.id')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->orderByDesc('c.id')->get(['c.id', 'c.number', 'c.public_code', 'c.status', 'c.content', 'c.issued_at', 'u.name as lecturer_name']),
             'badges' => $badges,
         ]);
     }
@@ -245,7 +245,7 @@ final class CredentialController
         $join = fn ($b) => $b->join('offerings as o', 'o.id', '=', 'e.offering_id')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id');
 
         return view('credentials.admin', [
-            'rows' => $scope($join(DB::table('credentials as c')->join('enrolments as e', 'e.id', '=', 'c.enrolment_id')))->orderByDesc('c.id')->get(['c.id', 'c.number', 'c.public_code', 'c.status', 'c.content', 'c.issued_at']),
+            'rows' => $scope($join(DB::table('credentials as c')->join('enrolments as e', 'e.id', '=', 'c.enrolment_id')))->leftJoin('users as lu', 'lu.id', '=', 'm.owner_id')->orderByDesc('c.id')->get(['c.id', 'c.number', 'c.public_code', 'c.status', 'c.content', 'c.issued_at', 'lu.name as lecturer_name']),
             'failures' => $scope($join(DB::table('credential_issue_failures as f')->join('enrolments as e', 'e.id', '=', 'f.enrolment_id')->join('users as u', 'u.id', '=', 'e.user_id')))->get(['f.enrolment_id', 'f.reasons', 'u.name', 'v.name_en', 'o.cohort_name']),
         ]);
     }
@@ -407,13 +407,14 @@ final class CredentialController
             ->join('offerings as o', 'o.id', '=', 'e.offering_id')
             ->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')
             ->leftJoin('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+            ->leftJoin('users as lu', 'lu.id', '=', 'm.owner_id')
             ->where('e.id', $enrolmentId)
             ->select([
                 'e.id as enrolment_id', 'e.reference as enrolment_ref', 'e.status as enrolment_status', 'e.progress_percent',
                 'u.id as user_id', 'u.name as student_name', 'u.institution_id as matric_no', 'u.email as student_email',
                 'o.id as offering_id', 'o.cohort_name', 'o.start_date', 'o.end_date', 'o.delivery_mode',
                 'v.id as version_id', 'v.name_en as course_name_en', 'v.name_ms as course_name_ms', 'm.code as mc_code', 'm.category as mc_category',
-                'v.proposed_credit', 'v.planned_slt', 'v.proposed_mqf_level'
+                'v.proposed_credit', 'v.planned_slt', 'v.proposed_mqf_level', 'lu.name as lecturer_name'
             ])
             ->first();
 

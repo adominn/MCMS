@@ -3,10 +3,10 @@
 @section('content')
 <div class="ph">
   <div>
-    <div class="crumb">
-      <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-      <span>{{ __('Reference data') }}</span>
-    </div>
+    <x-breadcrumb :crumbs="[
+      'Administration' => null,
+      'Reference data' => null,
+    ]" />
     <h1>{{ __('Reference data') }}</h1>
     <div class="sub">{{ __('PTj, academic programmes, and parent courses. Used across micro-credential proposals, credit transfer matrices, and stackable pathways. Changes are audited.') }}</div>
   </div>

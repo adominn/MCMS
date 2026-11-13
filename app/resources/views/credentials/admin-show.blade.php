@@ -4,14 +4,28 @@
 @php
   $modules = $modules ?? collect();
 @endphp
-<h1>{{ $c->number }}</h1>
-<p style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
-  <span class="tag ok">{{ __(['valid' => 'Valid', 'corrected' => 'Corrected', 'replaced' => 'Replaced', 'revoked' => 'Revoked'][$c->status] ?? $c->status) }}</span>
-  <span class="small muted">{{ __('revision :rev · :name · code', ['rev' => $c->revision, 'name' => $x['name']['en']]) }} <code>{{ $c->public_code }}</code></span>
-  <a class="btn ter sm" href="{{ route('public.verify.show', $c->public_code) }}" target="_blank">{{ __('Public page') }}</a>
-  <a class="btn ter sm" href="{{ route('credentials.admin.sheet', $c->id) }}" target="_blank">{{ __('Printable sheet') }}</a>
-  <a class="btn ghost sm" href="{{ route('credentials.admin') }}">&larr; {{ __('All credentials') }}</a>
-</p>
+<x-breadcrumb :crumbs="[
+  'Credentials' => route('credentials.admin'),
+  $c->number => null,
+]" />
+
+<div class="title">
+  <div>
+    <h1>{{ $c->number }}</h1>
+    <p class="sub">
+      <span class="tag ok">{{ __(['valid' => 'Valid', 'corrected' => 'Corrected', 'replaced' => 'Replaced', 'revoked' => 'Revoked'][$c->status] ?? $c->status) }}</span> &middot;
+      {{ __('revision :rev · :name · code', ['rev' => $c->revision, 'name' => $x['name']['en']]) }} <code>{{ $c->public_code }}</code>
+      @if(!empty($enrolment->lecturer_name))
+        &middot; {{ $enrolment->lecturer_name }}
+      @endif
+    </p>
+  </div>
+  <div class="act" style="display:flex;gap:8px;align-items:center">
+    <a class="btn ter sm" href="{{ route('public.verify.show', $c->public_code) }}" target="_blank">{{ __('Public page') }}</a>
+    <a class="btn ter sm" href="{{ route('credentials.admin.sheet', $c->id) }}" target="_blank">{{ __('Printable sheet') }}</a>
+    <a class="btn ter sm" href="{{ route('credentials.admin') }}">&larr; {{ __('All credentials') }}</a>
+  </div>
+</div>
 @if($newer)<div class="status" role="status">{{ __('Replaced by') }} <a href="{{ route('credentials.admin.show', $newer->id) }}">{{ $newer->number }}</a>.</div>@endif
 @if($c->status === 'revoked')<div class="status error" role="alert">{{ __('Revoked :date: :reason', ['date' => \Carbon\Carbon::parse($c->status_changed_at)->format('d/m/Y'), 'reason' => $c->status_reason]) }}</div>@endif
 <div class="card"><p>{{ __('Recipient on the credential:') }} <b>{{ $x['holder'] }}</b></p>

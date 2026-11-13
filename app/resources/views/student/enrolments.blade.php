@@ -74,6 +74,7 @@
           <td>
             <div style="font-weight:600">{{ $r->name_en }} {{ $r->cohort_name }}</div>
             <div class="s muted">
+              @if(!empty($r->lecturer_name)) {{ $r->lecturer_name }} &middot; @endif
               @if(!empty($r->mc_code)) {{ $r->mc_code }} &middot; @endif
               @if(!empty($r->module_count)) {{ $r->module_count }} {{ __('modules') }} &middot; @endif
               @if(!empty($r->proposed_credit)) {{ $r->proposed_credit }} {{ __('credits') }} @else {{ __('Non-credit') }} @endif

@@ -3,8 +3,23 @@
 @section('content')
 @php($dd = auth()->user()->hasAnyRole('deputy_dean') && ! $isOwner)
 @php($stLabels = ['available' => 'Available', 'not_yet' => 'Not yet', 'na' => 'Not applicable'])
-<h1>{{ __('Quality Verification: :name', ['name' => $m->name_en]) }}</h1>
-<p><a href="{{ route('quality') }}">{{ __('All Quality Verification') }}</a>@if($isOwner) &middot; <a href="{{ route('mcs.show', $m->id) }}">{{ __('Micro-credential') }}</a>@endif</p>
+<x-breadcrumb :crumbs="[
+  (auth()->user()->hasAnyRole('deputy_dean') ? 'Quality Verification' : 'QV evidence') => route('quality'),
+  $m->name_en => null,
+]" />
+
+<div class="title">
+  <div>
+    <h1>{{ __('Quality Verification: :name', ['name' => $m->name_en]) }}</h1>
+    <div class="sub">
+      @if(!empty($m->lecturer_name)){{ $m->lecturer_name }}@if($isOwner) &middot; @endif @endif
+      @if($isOwner)<a href="{{ route('mcs.show', $m->id) }}">{{ __('Micro-credential') }}</a>@endif
+    </div>
+  </div>
+  <div class="act">
+    <a class="btn ter sm" href="{{ route('quality') }}">&larr; {{ __('All Quality Verification') }}</a>
+  </div>
+</div>
 
 @if($standing)
 <div class="card" id="in-force"><h2>{{ __('In force') }}</h2>
@@ -40,20 +55,22 @@
 <form method="post" action="{{ route('quality.evidence', $m->id) }}" class="card" id="evidence">@csrf
   <h3>{{ __('Evidence checklist') }}</h3>
   <p class="muted">{{ __('Evidence that MCMS holds is linked for you. Add a file reference for the rest.') }}</p>
-  <table>
-    <thead><tr><th>{{ __('Item') }}</th><th>{{ __('Status') }}</th><th>{{ __('File reference') }}</th><th>{{ __('Notes') }}</th></tr></thead>
-    <tbody>
-    @foreach(config('qv.checklist') as $k => $label)
-      @php($e = $evidence[$k] ?? null)
-      <tr>
-        <td><label for="st-{{ $k }}"><b>{{ __($label) }}</b></label></td>
-        <td>@if($e?->linked){{ __('Available (linked from MCMS)') }}@elseif($isOwner)<select id="st-{{ $k }}" name="status[{{ $k }}]">@foreach($stLabels as $v => $t)<option value="{{ $v }}" @selected(($e->status ?? 'not_yet') === $v)>{{ __($t) }}</option>@endforeach</select>@else{{ __($stLabels[$e->status ?? 'not_yet']) }}@endif</td>
-        <td>@if($e?->linked){{ $e->file_ref }}@elseif($isOwner)<input type="text" name="file[{{ $k }}]" value="{{ $e->file_ref ?? '' }}" aria-label="File reference for {{ $label }}">@else{{ $e->file_ref ?? '' }}@endif</td>
-        <td>@if($isOwner && ! $e?->linked)<input type="text" name="notes[{{ $k }}]" value="{{ $e->notes ?? '' }}" aria-label="Notes for {{ $label }}">@else{{ $e->notes ?? '' }}@endif</td>
-      </tr>
-    @endforeach
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table style="width:100%;min-width:600px">
+      <thead><tr><th>{{ __('Item') }}</th><th>{{ __('Status') }}</th><th>{{ __('File reference') }}</th><th>{{ __('Notes') }}</th></tr></thead>
+      <tbody>
+      @foreach(config('qv.checklist') as $k => $label)
+        @php($e = $evidence[$k] ?? null)
+        <tr>
+          <td><label for="st-{{ $k }}"><b>{{ __($label) }}</b></label></td>
+          <td>@if($e?->linked){{ __('Available (linked from MCMS)') }}@elseif($isOwner)<select id="st-{{ $k }}" name="status[{{ $k }}]" style="min-width:140px">@foreach($stLabels as $v => $t)<option value="{{ $v }}" @selected(($e->status ?? 'not_yet') === $v)>{{ __($t) }}</option>@endforeach</select>@else{{ __($stLabels[$e->status ?? 'not_yet']) }}@endif</td>
+          <td>@if($e?->linked){{ $e->file_ref }}@elseif($isOwner)<input type="text" name="file[{{ $k }}]" value="{{ $e->file_ref ?? '' }}" aria-label="File reference for {{ $label }}">@else{{ $e->file_ref ?? '' }}@endif</td>
+          <td>@if($isOwner && ! $e?->linked)<input type="text" name="notes[{{ $k }}]" value="{{ $e->notes ?? '' }}" aria-label="Notes for {{ $label }}">@else{{ $e->notes ?? '' }}@endif</td>
+        </tr>
+      @endforeach
+      </tbody>
+    </table>
+  </div>
   @if($isOwner && $rec->status !== 'submitted')<p><button type="submit" class="btn sm">{{ __('Save checklist') }}</button></p>@endif
 </form>
 
@@ -61,45 +78,98 @@
 <form method="post" action="{{ route('quality.review', $m->id) }}" class="card" id="review">@csrf
   <h3>{{ __('Material change review') }}</h3>
   <p class="muted">{{ __('For each component, say whether it changed since the last verification and what the change needs.') }}</p>
-  <table>
-    <thead><tr><th>{{ __('Component') }}</th><th>{{ __('Change') }}</th><th>{{ __('What changed') }}</th></tr></thead>
-    <tbody>
-    @foreach(config('qv.components') as $k => $label)
-      <tr><td><label for="ac-{{ $k }}"><b>{{ __($label) }}</b></label></td>
-        <td>@if($isOwner)<select id="ac-{{ $k }}" name="action[{{ $k }}]">@foreach(config('qv.review_actions') as $v => $t)<option value="{{ $v }}" @selected(($rv[$k]['action'] ?? 'none') === $v)>{{ __($t) }}</option>@endforeach</select>@else{{ __(config('qv.review_actions')[$rv[$k]['action'] ?? 'none']) }}@endif</td>
-        <td>@if($isOwner)<input type="text" name="note[{{ $k }}]" value="{{ $rv[$k]['note'] ?? '' }}" aria-label="What changed in {{ $label }}">@else{{ $rv[$k]['note'] ?? '' }}@endif</td></tr>
-    @endforeach
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table style="width:100%;min-width:550px">
+      <thead><tr><th>{{ __('Component') }}</th><th>{{ __('Change') }}</th><th>{{ __('What changed') }}</th></tr></thead>
+      <tbody>
+      @foreach(config('qv.components') as $k => $label)
+        <tr><td><label for="ac-{{ $k }}"><b>{{ __($label) }}</b></label></td>
+          <td>@if($isOwner)<select id="ac-{{ $k }}" name="action[{{ $k }}]" style="min-width:140px">@foreach(config('qv.review_actions') as $v => $t)<option value="{{ $v }}" @selected(($rv[$k]['action'] ?? 'none') === $v)>{{ __($t) }}</option>@endforeach</select>@else{{ __(config('qv.review_actions')[$rv[$k]['action'] ?? 'none']) }}@endif</td>
+          <td>@if($isOwner)<input type="text" name="note[{{ $k }}]" value="{{ $rv[$k]['note'] ?? '' }}" aria-label="What changed in {{ $label }}">@else{{ $rv[$k]['note'] ?? '' }}@endif</td></tr>
+      @endforeach
+      </tbody>
+    </table>
+  </div>
   @if($isOwner && $rec->status !== 'submitted')<p><button type="submit" class="btn sm">{{ __('Save review') }}</button></p>@endif
 </form>
 
 <div class="card" id="readiness"><h3>{{ __('Readiness decision') }}</h3>
   @if($rec->readiness_decision)
-    <p>{{ __('Recorded:') }} <strong>{{ __(config('qv.readiness')[$rec->readiness_decision]) }}</strong>@if($rec->target_date), {{ __('target date :date', ['date' => \Carbon\Carbon::parse($rec->target_date)->format('d/m/Y')]) }}@endif.@if($rec->readiness_missing) {{ __('Missing: :missing', ['missing' => $rec->readiness_missing]) }}@endif</p>
-    <p>@if($rec->readiness_confirmed_at){{ __('Confirmed by the deputy dean on :date.', ['date' => \Carbon\Carbon::parse($rec->readiness_confirmed_at)->format('d/m/Y')]) }}@else<span class="tag">{{ __('Waiting for the deputy dean to confirm') }}</span>@endif</p>
-  @endif
-  @if($isOwner && $rec->status !== 'submitted')
-  <form method="post" action="{{ route('quality.readiness', $m->id) }}">@csrf
-    <div class="form-grid cols-3">
-      <div class="field">
-        <label for="decision">{{ __('Decision') }}</label>
-        <select id="decision" name="decision">@foreach(config('qv.readiness') as $v => $t)<option value="{{ $v }}">{{ __($t) }}</option>@endforeach</select>
+    <div style="background:var(--surface);border:1px solid var(--hairline);padding:12px;margin-bottom:12px">
+      <div style="margin-bottom:6px">
+        {{ __('Recorded:') }} <strong>{{ __(config('qv.readiness')[$rec->readiness_decision]) }}</strong>
+        @if($rec->target_date)
+          &middot; <span class="muted">{{ __('target date :date', ['date' => \Carbon\Carbon::parse($rec->target_date)->format('d/m/Y')]) }}</span>
+        @endif
+        @if($rec->readiness_missing)
+          <div class="s err" style="margin-top:4px">{{ __('Missing: :missing', ['missing' => $rec->readiness_missing]) }}</div>
+        @endif
       </div>
-      <div class="field">
-        <label for="target_date">{{ __('Target date') }}</label>
-        <input id="target_date" name="target_date" type="date">
-      </div>
-      <div class="field">
-        <label for="missing">{{ __('Missing critical evidence') }}</label>
-        <input id="missing" name="missing" type="text">
+      <div>
+        @if($rec->readiness_confirmed_at)
+          <span class="tag ok" style="font-size:11px">{{ __('Confirmed by the deputy dean on :date.', ['date' => \Carbon\Carbon::parse($rec->readiness_confirmed_at)->format('d/m/Y')]) }}</span>
+        @else
+          <span class="tag info" style="font-size:11px">{{ __('Waiting for the deputy dean to confirm') }}</span>
+        @endif
       </div>
     </div>
-    <button type="submit" class="btn sm">{{ __('Record decision') }}</button>
-  </form>
   @endif
+
+  @if($isOwner && $rec->status !== 'submitted')
+    @if(! $rec->readiness_confirmed_at)
+      <form method="post" action="{{ route('quality.readiness', $m->id) }}">@csrf
+        <div class="form-grid cols-3">
+          <div class="field">
+            <label for="decision">{{ __('Decision') }}</label>
+            <select id="decision" name="decision">
+              @foreach(config('qv.readiness') as $v => $t)
+                <option value="{{ $v }}" @selected($rec->readiness_decision === $v)>{{ __($t) }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="field">
+            <label for="target_date">{{ __('Target date') }}</label>
+            <input id="target_date" name="target_date" type="date" value="{{ $rec->target_date }}">
+          </div>
+          <div class="field">
+            <label for="missing">{{ __('Missing critical evidence') }}</label>
+            <input id="missing" name="missing" type="text" value="{{ $rec->readiness_missing }}">
+          </div>
+        </div>
+        <button type="submit" class="btn sm">{{ __('Record decision') }}</button>
+      </form>
+    @else
+      <details class="fold" style="margin-top:12px">
+        <summary><span class="muted small">{{ __('Revise readiness decision (will require deputy dean re-confirmation)') }}</span></summary>
+        <form method="post" action="{{ route('quality.readiness', $m->id) }}" style="margin-top:12px">@csrf
+          <div class="form-grid cols-3">
+            <div class="field">
+              <label for="decision">{{ __('Decision') }}</label>
+              <select id="decision" name="decision">
+                @foreach(config('qv.readiness') as $v => $t)
+                  <option value="{{ $v }}" @selected($rec->readiness_decision === $v)>{{ __($t) }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div class="field">
+              <label for="target_date">{{ __('Target date') }}</label>
+              <input id="target_date" name="target_date" type="date" value="{{ $rec->target_date }}">
+            </div>
+            <div class="field">
+              <label for="missing">{{ __('Missing critical evidence') }}</label>
+              <input id="missing" name="missing" type="text" value="{{ $rec->readiness_missing }}">
+            </div>
+          </div>
+          <button type="submit" class="btn sm">{{ __('Update decision') }}</button>
+        </form>
+      </details>
+    @endif
+  @endif
+
   @if($dd && $rec->readiness_decision && ! $rec->readiness_confirmed_at)
-  <form method="post" action="{{ route('quality.confirm', $m->id) }}">@csrf<button type="submit" class="btn sm">{{ __('Confirm readiness decision') }}</button></form>
+    <form method="post" action="{{ route('quality.confirm', $m->id) }}" style="margin-top:12px">@csrf
+      <button type="submit" class="btn sm primary">{{ __('Confirm readiness decision') }}</button>
+    </form>
   @endif
 </div>
 

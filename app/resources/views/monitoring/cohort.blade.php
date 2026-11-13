@@ -10,13 +10,10 @@
 @endphp
 
 <!-- Breadcrumbs -->
-<div class="crumb" style="margin-bottom:12px">
-  <a href="{{ route('tasks') }}">{{ __('Home') }}</a>
-  <span>/</span>
-  <a href="{{ route('monitoring') }}">{{ __('Quality review (CQI)') }}</a>
-  <span>/</span>
-  <span>{{ $o->name_en }} ({{ $o->cohort_name }})</span>
-</div>
+<x-breadcrumb :crumbs="[
+  (auth()->user()->hasAnyRole('deputy_dean') ? 'Quality review & suspensions' : 'Quality review (CQI)') => route('monitoring'),
+  $o->name_en . ' (' . $o->cohort_name . ')' => null,
+]" />
 
 <!-- Header & Top Actions -->
 <div class="title" style="margin-bottom:20px">

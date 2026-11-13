@@ -1,18 +1,18 @@
 @extends('layouts.app')
 @section('title', 'Individual stackable plan')
 @section('content')
-<div class="crumb" style="margin-bottom:8px">
-  <a href="{{ route('pathways') }}">Stackable pathways</a>
-  <span>/</span>
-  <span>{{ $s->reference }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  'Stackable pathways' => route('pathways'),
+  'Plan ' . $s->reference => null,
+]" />
 
 <div class="title">
   <div>
     <h1>Plan {{ $s->reference }}</h1>
     <div class="sub">{{ $s->user_name }} &mdash; {{ $s->code }} {{ $s->programme_name }}</div>
   </div>
-  <div class="act" style="align-items:center">
+  <div class="act" style="align-items:center;gap:8px">
+    <a class="btn ter sm" href="{{ route('pathways') }}">&larr; {{ __('All pathways') }}</a>
     <span class="tag {{ $s->status === 'suitable' ? 'ok' : ($s->status === 'not_yet' ? 'warn' : 'info') }}">
       <strong id="plan-status">{{ $planStatus[$s->status] }}</strong>
     </span>

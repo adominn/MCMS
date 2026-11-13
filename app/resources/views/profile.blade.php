@@ -7,15 +7,9 @@
   if (empty($initials)) {
       $initials = mb_substr($u->name, 0, 2);
   }
-  $homeRoute = route('tasks');
+  $homeRoute = $u->homeUrl();
 @endphp
-<div class="crumb" style="margin-bottom:8px">
-  <a href="{{ $homeRoute }}">{{ __('Home') }}</a>
-  <span>/</span>
-  <span>{{ __('My profile') }}</span>
-</div>
-
-<div class="title">
+<div class="ph" style="margin-bottom:16px">
   <div>
     <h1>{{ __('My profile') }}</h1>
     <div class="sub">{{ $u->name }} &middot; {{ $post }}</div>
@@ -66,6 +60,15 @@
                 <option value="en" @selected(app()->getLocale() === 'en')>{{ __('English') }}</option>
                 <option value="ms" @selected(app()->getLocale() === 'ms')>{{ __('Bahasa Melayu') }}</option>
               </select>
+            </div>
+            <div class="field">
+              <label for="pref-theme">{{ __('Interface theme') }}</label>
+              <select id="pref-theme" name="theme" class="input" style="width:100%">
+                <option value="auto" @selected(old('theme', $u->theme_preference ?? 'auto') === 'auto')>{{ __('System (Auto)') }}</option>
+                <option value="light" @selected(old('theme', $u->theme_preference ?? 'auto') === 'light')>{{ __('Light') }}</option>
+                <option value="dark" @selected(old('theme', $u->theme_preference ?? 'auto') === 'dark')>{{ __('Dark') }}</option>
+              </select>
+              <div class="help small muted" style="margin-top:4px;font-size:12px;color:var(--muted)">{{ __('Auto follows your operating system preference.') }}</div>
             </div>
             <div class="field">
               <label for="pref-phone">{{ __('Contact phone') }}</label>

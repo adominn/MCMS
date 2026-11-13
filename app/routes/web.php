@@ -27,14 +27,28 @@ require __DIR__.'/pathways.php';
 require __DIR__.'/monitoring.php';
 require __DIR__.'/records.php';
 
-Route::get('/', [StubSignInController::class, 'home']);
+Route::get('/', [StubSignInController::class, 'home'])->name('home');
 Route::get('/signin', [StubSignInController::class, 'index'])->name('signin');
 Route::post('/signin/stub', [StubSignInController::class, 'store'])->name('signin.stub');
 Route::get('/signin/mfa', [StubSignInController::class, 'mfa'])->name('signin.mfa');
 Route::post('/signin/mfa', [StubSignInController::class, 'mfaCheck']);
 
 Route::post('/language', [\App\Modules\Core\UiLanguage::class, 'switch'])->name('language');
+Route::post('/theme', [\App\Modules\Core\UiTheme::class, 'switch'])->name('theme');
 Route::middleware('auth')->group(function () {
+    Route::post('/role/switch', function (\Illuminate\Http\Request $request) {
+        $role = $request->validate(['role' => 'required|string'])['role'];
+        $user = $request->user();
+        if ($user && $user->activeRoles()->contains(fn (\App\Modules\Identity\Role $r) => $r->value === $role)) {
+            session(['active_role' => $role]);
+        }
+        $prev = url()->previous();
+        if ($user && StubSignInController::canAccessUrl($request, $user, $prev)) {
+            return redirect()->to($prev);
+        }
+
+        return redirect()->to($user ? $user->homeUrl() : route('signin'));
+    })->name('role.switch');
     Route::post('/signout', [StubSignInController::class, 'destroy'])->name('signout');
     Route::get('/search', [SearchController::class, 'search'])->name('search');
     Route::get('/profile', [SearchController::class, 'profile'])->name('profile');

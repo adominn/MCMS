@@ -11,11 +11,10 @@
 @if(!$print)
   <div class="ph">
     <div>
-      <div class="crumb">
-        <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-        <a href="{{ route('reports') }}">{{ __('Reports') }}</a> /
-        <span>{{ $r['title'] }}</span>
-      </div>
+      <x-breadcrumb :crumbs="[
+        'Reports' => route('reports'),
+        $r['title'] => null,
+      ]" />
       <h1>{{ $r['title'] }}</h1>
       <div class="sub">Scope: {{ $r['scope_label'] }} &middot; Generated {{ $r['generated'] }}</div>
     </div>

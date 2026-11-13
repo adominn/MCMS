@@ -347,3 +347,37 @@ it('forbids deleting a draft proposal owned by another lecturer', function () {
     $this->actingAs($other)->delete("/proposals/$id")->assertForbidden();
     expect(DB::table('mc_versions')->where('id', $id)->exists())->toBeTrue();
 });
+
+it('allows a lecturer to upload a custom badge image and revert to standard template', function () {
+    $id = newUmc('AI Cloud Security');
+    $file = \Illuminate\Http\UploadedFile::fake()->image('custom-badge.png', 400, 400);
+
+    $this->actingAs($this->aina)->post("/proposals/$id/credential", [
+        'credential_types' => ['badge', 'certificate'],
+        'achievement_level' => 'module',
+        'badge_image' => $file,
+    ])->assertRedirect();
+
+    $badgePath = DB::table('mc_versions')->where('id', $id)->value('badge_image_path');
+    expect($badgePath)->not->toBeNull()->and($badgePath)->toContain('/uploads/badges/');
+
+    // Check that custom badge artwork is rendered on the credential workspace
+    $this->get("/proposals/$id?tab=credential")->assertOk()->assertSee($badgePath)->assertSee('Custom badge');
+
+    // Revert to standard template
+    $this->post("/proposals/$id/credential", [
+        'credential_types' => ['badge', 'certificate'],
+        'achievement_level' => 'module',
+        'remove_badge_image' => '1',
+    ])->assertRedirect();
+
+    expect(DB::table('mc_versions')->where('id', $id)->value('badge_image_path'))->toBeNull();
+    $this->get("/proposals/$id?tab=credential")->assertOk()->assertSee('Standard UTeM template');
+
+    // When Digital Badge is unticked, badge section is hidden
+    $this->post("/proposals/$id/credential", [
+        'credential_types' => ['certificate'],
+        'achievement_level' => 'whole',
+    ])->assertRedirect();
+    $this->get("/proposals/$id?tab=credential")->assertOk()->assertSee('display:none');
+});

@@ -1,11 +1,10 @@
 @extends('layouts.app')
 @section('title', $v->name_en ?: __('Proposal'))
 @section('content')
-<div class="crumb">
-  <a href="{{ route('proposals') }}">{{ __('Proposals and versions') }}</a>
-  <span>/</span>
-  <span>{{ $v->name_en ?: __('Proposal') }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  'Proposals and versions' => route('proposals'),
+  $v->name_en ?: __('Proposal') => null,
+]" />
 
 <div class="title">
   <div>
@@ -90,7 +89,6 @@
                 <li style="margin-bottom:6px">
                   <span class="tag err">{{ __('Error') }}</span>
                   <a href="{{ route('proposals.show', ['id' => $v->id, 'tab' => $c['tab']]) }}" style="font-weight:500">{{ __($c['msg']) }}</a>
-                  <span class="muted s" style="display:block">{{ $c['fr'] }}</span>
                 </li>
               @endforeach
             </ul>
@@ -279,7 +277,7 @@
           var html = '<div style="margin-bottom:16px"><b><span id="blocking-count">' + checks.blocking.length + '</span> ' + txtBlockingErrors + '</b><ul id="blocking-list" style="margin:8px 0 0;padding-left:18px">';
           checks.blocking.forEach(function (c) {
             var url = proposalBaseUrl + (proposalBaseUrl.indexOf('?') >= 0 ? '&' : '?') + 'tab=' + encodeURIComponent(c.tab);
-            html += '<li style="margin-bottom:6px"><span class="tag err">' + txtError + '</span> <a href="' + url + '" style="font-weight:500">' + escapeHtml(c.msg) + '</a><span class="muted s" style="display:block">' + escapeHtml(c.fr) + '</span></li>';
+            html += '<li style="margin-bottom:6px"><span class="tag err">' + txtError + '</span> <a href="' + url + '" style="font-weight:500">' + escapeHtml(c.msg) + '</a></li>';
           });
           html += '</ul></div>';
           blockBox.innerHTML = html;

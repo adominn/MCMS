@@ -9,15 +9,9 @@
 @if(request()->boolean('print') || request()->has('print'))
   {{-- Printable Individual Record Layout --}}
   <div style="margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:10px">
-    <h1 style="font-size:18pt;margin:0 0 4px">{{ __('Achievement Record') }}</h1>
+    <h1 style="font-size:18pt;margin:0 0 4px">{{ __('Achievement Record') }}: {{ $d['e']->name_en }}</h1>
     <div class="small muted">
-      {{ __('Holder') }}: <b>{{ $d['e']->person }}</b> &middot; {{ __('Learner ID') }}: <b>{{ $d['e']->institution_id ?? '-' }}</b> &middot; {{ __('Generated on') }} {{ now()->format('d/m/Y H:i') }}
-    </div>
-  </div>
-
-  <div class="note warn" style="margin-bottom:16px;font-size:9.5pt">
-    <div>
-      <b>{{ __('Internal record, not an Academic Credit Record.') }}</b> {{ __("This is MCMS's own record of modules and completions. It cannot be deposited in ABC or used for credit transfer.") }}
+      {{ __('Holder') }}: <b>{{ $d['e']->person }}</b> &middot; {{ __('Learner ID') }}: <b>{{ $d['e']->institution_id ?? '-' }}</b> &middot; {{ __('Cohort') }}: <b>{{ $d['e']->cohort_name }}</b> &middot; {{ __('Generated on') }} {{ now()->format('d/m/Y H:i') }}
     </div>
   </div>
 
@@ -38,27 +32,82 @@
 
 @else
   {{-- Carbon Screen Layout --}}
-  <div class="ph">
+  @php
+    $u = auth()->user();
+    $isStudent = $u && $u->hasAnyRole('student');
+    $isLecturer = $u && $u->hasAnyRole('lecturer');
+    $isDeputyDean = $u && $u->hasAnyRole('deputy_dean');
+
+    if ($isStudent) {
+        $crumbs = [
+            __('My learning') => route('home'),
+            __('Achievement records') => route('records.mine'),
+            $d['e']->name_en => null,
+        ];
+        $backUrl = route('records.mine');
+        $backLabel = __('All records');
+        $backBottomLabel = __('Back to all achievement records');
+    } elseif ($isDeputyDean) {
+        $crumbs = [
+            __('Results and completion') => route('results'),
+            ($d['e']->name_en ?? __('Cohort')) . ' ' . ($d['e']->cohort_name ?? '') => route('completion.show', $d['e']->offering_id),
+            __('Achievement record: :name', ['name' => $d['e']->person]) => null,
+        ];
+        $backUrl = route('completion.show', $d['e']->offering_id);
+        $backLabel = __('Back to completion');
+        $backBottomLabel = __('Back to completion checks');
+    } elseif ($isLecturer) {
+        $crumbs = [
+            __('Cohorts and results') => route('offerings'),
+            ($d['e']->name_en ?? __('Cohort')) . ' ' . ($d['e']->cohort_name ?? '') => route('offerings.show', $d['e']->offering_id),
+            __('Participants') => route('offerings.participants', $d['e']->offering_id),
+            __('Record: :name', ['name' => $d['e']->person]) => null,
+        ];
+        $backUrl = route('offerings.participants', $d['e']->offering_id);
+        $backLabel = __('Back to participants');
+        $backBottomLabel = __('Back to cohort participants');
+    } else {
+        $crumbs = [
+            __('Documents') => route('documents'),
+            __('Achievement record: :name', ['name' => $d['e']->person ?? $d['e']->name_en]) => null,
+        ];
+        $backUrl = route('documents');
+        $backLabel = __('Back to documents');
+        $backBottomLabel = __('Back to documents');
+    }
+  @endphp
+
+  <x-breadcrumb :crumbs="$crumbs" :back="$backUrl" />
+
+  <div class="title" style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px">
     <div>
-      <div class="crumb">
-        <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-        <a href="{{ route('documents') }}">{{ __('Documents') }}</a> /
-        <a href="{{ route('records.mine') }}">{{ __('Achievement records') }}</a> /
-        <span>{{ $d['e']->name_en }}</span>
+      <h1><span class="cat">{{ strtoupper($d['e']->category ?? 'MC') }}</span> {{ __('Achievement Record') }}: {{ $d['e']->name_en }}</h1>
+      <div class="sub">
+        @if(!empty($d['e']->ptj_name)){{ $d['e']->ptj_name }} &middot; @endif
+        @if(!empty($d['e']->lecturer_name)){{ $d['e']->lecturer_name }} &middot; @endif
+        {{ $d['e']->cohort_name }} &middot; 
+        {{ __('Reference') }} <code>{{ $d['e']->reference }}</code>
       </div>
-      <a href="{{ route('records.mine') }}" class="btn ghost sm" style="margin-bottom:10px;display:inline-flex;align-items:center;gap:6px">
-        <span class="btn-lbl">&larr; {{ __('Back to all achievement records') }}</span>
+    </div>
+    <div class="act" style="display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn primary sm" href="{{ request()->fullUrlWithQuery(['print' => 1]) }}" target="_blank" title="{{ __('Open official printable A4 sheet') }}">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-right:6px" aria-hidden="true">
+          <path d="M4 6V2h8v4M4 12H2.5A1.5 1.5 0 0 1 1 10.5v-3A1.5 1.5 0 0 1 2.5 6h11A1.5 1.5 0 0 1 15 7.5v3a1.5 1.5 0 0 1-1.5 1.5H12"/>
+          <rect x="4" y="9" width="8" height="5"/>
+        </svg>
+        {{ __('Print record (A4)') }}
       </a>
-      <h1>{{ __('Achievement Record') }}: {{ $d['e']->name_en }}</h1>
-      <div class="sub">{{ $d['e']->cohort_name }} &middot; {{ __('Reference') }} <code>{{ $d['e']->reference }}</code></div>
+      <a href="{{ $backUrl }}" class="btn ghost sm">
+        &larr; {{ $backLabel }}
+      </a>
     </div>
   </div>
 
   @include('records._record', ['d' => $d])
 
   <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center">
-    <a href="{{ route('records.mine') }}" class="btn ghost sm">
-      <span class="btn-lbl">&larr; {{ __('Back to all achievement records') }}</span>
+    <a href="{{ $backUrl }}" class="btn ghost sm">
+      <span class="btn-lbl">&larr; {{ $backBottomLabel }}</span>
     </a>
     <span class="s muted">{{ __('Record identifier: :ref', ['ref' => $d['e']->reference]) }}</span>
   </div>

@@ -7,7 +7,7 @@
   <tbody>
   @forelse($rows as $r)
     @php($s = ($stats[$r->id] ?? collect())->pluck('n', 'status'))
-    <tr><td><a href="{{ route('results.verify', $r->id) }}" style="font-weight:600">{{ $r->name_en }} {{ $r->cohort_name }}</a></td><td><x-pill :s="__(config('offerings.status')[$r->status] ?? $r->status)" /></td><td>{{ $r->results_submitted_at ? \Carbon\Carbon::parse($r->results_submitted_at)->format('d/m/Y') : __('Not yet') }}</td><td>{{ $s['provisional'] ?? 0 }}</td><td>{{ $s['held'] ?? 0 }}</td><td>{{ $s['verified'] ?? 0 }}</td><td class="num"><a class="btn ter sm" href="{{ route('completion.show', $r->id) }}">{{ __('Completion') }} &rarr;</a></td></tr>
+    <tr><td><a href="{{ route('results.verify', $r->id) }}" style="font-weight:600">{{ $r->name_en }} {{ $r->cohort_name }}</a>@if(!empty($r->lecturer_name))<span class="s muted" style="display:block">{{ $r->lecturer_name }}</span>@endif</td><td><x-pill :s="__(config('offerings.status')[$r->status] ?? $r->status)" /></td><td>{{ $r->results_submitted_at ? \Carbon\Carbon::parse($r->results_submitted_at)->format('d/m/Y') : __('Not yet') }}</td><td>{{ $s['provisional'] ?? 0 }}</td><td>{{ $s['held'] ?? 0 }}</td><td>{{ $s['verified'] ?? 0 }}</td><td class="num"><a class="btn ter sm" href="{{ route('completion.show', $r->id) }}">{{ __('Completion') }} &rarr;</a></td></tr>
   @empty
     <tr><td colspan="7" class="muted" style="text-align:center;padding:24px">{{ __('No running or ended cohorts.') }}</td></tr>
   @endforelse

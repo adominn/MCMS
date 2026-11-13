@@ -38,7 +38,7 @@ final class Plans
             'detail' => $programme->mode === 'conventional' ? "Residency planned: {$plan->residency_semesters} semester(s); at least $res required for a conventional programme.".($odl ? ' The delivery method may enter ODL scope and is flagged for review under ODL policy.' : '') : 'Not required for this programme mode.'];
         $c[] = ['key' => 'credit_bearing', 'met' => $items->every(fn ($i) => in_array($i->category, ['umc', 'samc'], true)), 'detail' => 'Every credential counted toward the degree is credit-bearing (UMC or Quality-Verified SAMC). An MCE never counts.'];
         $unmapped = $items->filter(fn ($i) => ! json_decode((string) $i->plo_map, true))->count();
-        $c[] = ['key' => 'plo_mapping', 'met' => $unmapped === 0, 'detail' => $unmapped === 0 ? 'Every credential counted is mapped to programme learning outcomes (BR-36).' : "$unmapped credential(s) are not mapped to any programme learning outcome."];
+        $c[] = ['key' => 'plo_mapping', 'met' => $unmapped === 0, 'detail' => $unmapped === 0 ? 'Every credential counted is mapped to programme learning outcomes.' : "$unmapped credential(s) are not mapped to any programme learning outcome."];
         $rem = json_decode((string) $plan->remaining, true) ?: [];
         $c[] = ['key' => 'remaining', 'met' => $rem !== [], 'detail' => $rem !== [] ? count($rem).' remaining requirement(s) listed.' : 'The remaining programme requirements are not listed.'];
 

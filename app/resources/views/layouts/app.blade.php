@@ -3,20 +3,39 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('title', 'MCMS') - UTeM Micro-Credential Management System</title>
-  <link rel="stylesheet" href="{{ asset('css/mcms.css') }}">
-  <script>try{if(localStorage.getItem('mcms_side_collapsed')==='1'){document.documentElement.classList.add('side-collapsed');}}catch(e){}</script>
+  <link rel="stylesheet" href="{{ asset('css/mcms.css') }}?v={{ filemtime(public_path('css/mcms.css')) }}">
+  <script>
+    (function(){
+      try {
+        if(localStorage.getItem('mcms_side_collapsed')==='1'){document.documentElement.classList.add('side-collapsed');}
+        var saved = localStorage.getItem('mcms_theme');
+        var server = '{{ auth()->user()?->theme_preference ?? session('ui_theme', 'auto') }}';
+        var theme = saved || (server !== 'auto' ? server : null) || 'auto';
+        if (theme === 'dark' || (theme === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch(e){}
+    })();
+  </script>
 </head>
 <body>
 @php
   $u = auth()->user();
-  $admin = $u && $u->hasAnyRole('codl_admin');
+  $activeRoles = $u ? $u->activeRoles() : collect();
+  $currentRoleObj = $u?->currentRole();
+  $activeRole = $currentRoleObj?->value;
+  $roleLabel = $currentRoleObj?->label();
+  $homeUrl = $u ? $u->homeUrl() : route('public.home');
+
   $unread = $u ? \Illuminate\Support\Facades\DB::table('notifications')->where('user_id', $u->id)->where('channel', 'in_system')->whereNull('read_at')->count() : 0;
   $tasksOpen = $u ? app(\App\Modules\Identity\TaskController::class)->visible($u)->whereNull('completed_at')->count() : 0;
-  $searchHint = $u ? ($u->hasAnyRole('codl_admin') ? 'Search users, settings, files' : ($u->hasAnyRole('deputy_dean') ? 'Search micro-credentials, learners, credentials' : ($u->hasAnyRole('lecturer') ? 'Search micro-credentials, cohorts, learners' : null))) : null;
+  $searchHint = $u ? ($activeRole === 'codl_admin' ? 'Search users, settings, files' : ($activeRole === 'deputy_dean' ? 'Search micro-credentials, learners, credentials' : ($activeRole === 'lecturer' ? 'Search micro-credentials, cohorts, learners' : null))) : null;
   $ptjCode = $u ? \Illuminate\Support\Facades\DB::table('role_assignments as ra')->join('ptjs', 'ptjs.id', '=', 'ra.ptj_id')->where('ra.user_id', $u->id)->value('ptjs.code') : null;
   $recent = $u && ! request()->routeIs('public.*') ? \Illuminate\Support\Facades\DB::table('notifications')->where('user_id', $u->id)->where('channel', 'in_system')->orderByDesc('created_at')->limit(5)->get() : collect();
-  $roleLabel =$u ? \App\Modules\Identity\Role::tryFrom((string) session('active_role'))?->label() : null;
   $initials = $u ? collect(explode(' ', preg_replace('/^(Dr\.|Ir\.|Prof\.)\s+/', '', $u->name)))->map(fn ($w) => mb_substr($w, 0, 1))->take(2)->implode('') : '';
   $icons = [
     'home' => '<path d="M2 8l6-5 6 5v6H2z"/>', 'list' => '<path d="M3 4h10M3 8h10M3 12h10"/>', 'cart' => '<path d="M2 3h2l1.5 7h6L13 5H5"/><circle cx="6" cy="13" r="1"/><circle cx="11" cy="13" r="1"/>',
@@ -25,47 +44,91 @@
     'shield' => '<path d="M8 2l5 2v4c0 3-2 5-5 6-3-1-5-3-5-6V4z"/>', 'users' => '<circle cx="6" cy="5" r="2.5"/><path d="M1.5 13c0-3 2-4.5 4.5-4.5S10.5 10 10.5 13M11 4.5a2 2 0 010 4M12 9c1.5.4 2.5 1.7 2.5 4"/>', 'gear' => '<circle cx="8" cy="8" r="2.5"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M12.6 3.4l-1.4 1.4M4.8 11.2l-1.4 1.4"/>',
     'bell' => '<path d="M4 11V7a4 4 0 018 0v4l1 1H3zM6.5 14a1.5 1.5 0 003 0"/>', 'search' => '<circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/>', 'clock' => '<circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/>', 'edit' => '<path d="M2 14l1-4 8-8 3 3-8 8z"/>',
   ];
-  $r = fn (string ...$roles) => $u && $u->hasAnyRole(...$roles);
-  // group, label, route, route patterns that mark it current, visible when, icon
-  $nav = [
-    ['Work', ($u && $u->hasAnyRole('student') && ! $u->hasAnyRole('lecturer', 'deputy_dean', 'codl_admin', 'industry_expert')) ? 'My learning' : 'My tasks', 'tasks', ['tasks*'], true, 'home'],
-    ['Learning', 'Registrations and payments', 'enrolments', ['enrolments*', 'register*'], $r('student'), 'cart'],
-    ['Learning', 'My results', 'results.mine', ['results.mine'], $r('student'), 'check'],
-    ['Learning', 'Find a micro-credential', 'catalogue', ['catalogue*', 'public.catalogue*', 'offering*', 'public.offering*'], $r('student'), 'search'],
-    ['Learning', 'Feedback', 'feedback', ['feedback*'], $r('student'), 'edit'],
-    ['Achievements', 'Credentials', 'credentials.wallet', ['credentials.wallet', 'credentials.show', 'credentials.certificate'], $r('student'), 'award'],
-    ['Achievements', 'Achievement record', 'records.mine', ['records.mine'], $r('student'), 'doc'],
-    ['Credit', 'Credit ledger and ABC', 'credit', ['credit*'], $r('student'), 'bank'],
-    ['Credit', 'Credit transfer', 'transfer', ['transfer', 'transfer.*'], $r('student'), 'swap'],
-    ['Credit', 'My degree plan', 'plan.mine', ['plan.mine'], $r('student'), 'cap'],
-    ['Teaching', 'My proposals', 'proposals', ['proposals*'], $r('lecturer'), 'edit'],
-    ['Teaching', 'My micro-credentials', 'mcs', ['mcs*'], $r('lecturer'), 'list'],
-    ['Teaching', 'Offerings', 'offerings', ['offerings*'], $r('lecturer', 'deputy_dean'), 'cap'],
-    ['Teaching', 'Reviews', 'reviews', ['reviews*'], $r('lecturer', 'industry_expert'), 'check'],
-    ['Quality', 'Quality Verification', 'quality', ['quality*'], $r('lecturer', 'deputy_dean'), 'shield'],
-    ['Quality', 'Quality review', 'monitoring', ['monitoring*', 'cqi*', 'reviews.periodic*', 'suspensions*'], $r('lecturer', 'deputy_dean'), 'chart'],
-    ['Quality', 'Stackable pathways', 'pathways', ['pathways*', 'plans*'], $r('lecturer', 'deputy_dean'), 'cap'],
-    ['Decisions', 'Proposals and approval', 'approvals', ['approvals*'], $r('deputy_dean'), 'edit'],
-    ['Decisions', 'Results and completion', 'results', ['results', 'results.*', 'completion*'], $r('deputy_dean'), 'check'],
-    ['Decisions', 'Credentials', 'credentials.admin', ['credentials.admin*'], $r('deputy_dean'), 'award'],
-    ['Decisions', 'ACR and ABC deposits', 'deposits', ['deposits*'], $r('deputy_dean'), 'bank'],
-    ['Decisions', 'Credit transfer evaluation', 'transfers', ['transfers*'], $r('deputy_dean'), 'swap'],
-    ['Records', 'Reports', 'reports', ['reports*'], $r('lecturer', 'deputy_dean', 'codl_admin'), 'chart'],
-    ['Records', 'Traceability and records', 'trace', ['trace*', 'cohort*', 'discrepancies*', 'records.audit*'], $r('lecturer', 'deputy_dean'), 'search'],
-    ['Records', 'Documents', 'documents', ['documents'], true, 'doc'],
-    ['Administration', 'Users and roles', 'users', ['users*'], $admin, 'users'],
-    ['Administration', 'Settings', 'settings', ['settings*'], $admin, 'gear'],
-    ['Administration', 'Reference data', 'reference', ['reference*'], $admin, 'list', 'ptj'],
-    ['Administration', 'Templates', 'templates', ['templates*'], $admin, 'doc'],
-    ['Administration', 'UCreds exchange', 'ucreds', ['ucreds', 'ucreds.export', 'ucreds.check', 'ucreds.report', 'ucreds.stage', 'ucreds.errors'], $admin, 'swap'],
-    ['Administration', 'UCreds content', 'ucreds.courses', ['ucreds.courses'], $admin, 'list'],
-    ['Administration', 'Adapters', 'adapters', ['adapters'], $admin, 'gear'],
-    ['Administration', 'Notification log', 'notification.log', ['notification.log'], $admin, 'bell'],
-    ['Administration', 'Demo clock', 'demo.clock', ['demo.clock*'], $admin && \App\Modules\Core\DemoClock::enabled(), 'clock'],
-    ['Administration', 'Retention', 'retention', ['retention*'], $admin, 'shield'],
-    ['Administration', 'Audit trail', 'audit', ['audit'], $admin, 'list'],
-    ['Messages', 'Notifications', 'notifications', ['notifications'], true, 'bell'],
-  ];
+
+  $areaCount = fn ($a) => $u && $activeRole === 'deputy_dean' ? app(\App\Modules\Identity\TaskController::class)->visible($u)->whereNull('completed_at')->where('area', $a)->count() : 0;
+  $counts = match ($activeRole) {
+    'deputy_dean' => [
+      'approvals' => $areaCount('proposals'),
+      'offerings' => $areaCount('offerings'),
+      'results' => $areaCount('results'),
+      'deposits' => $areaCount('deposits'),
+      'transfers' => $areaCount('transfers'),
+      'credentials.admin' => $areaCount('credentials'),
+    ],
+    'lecturer' => [
+      'proposals' => \Illuminate\Support\Facades\DB::table('micro_credentials as m')->join('mc_versions as v', 'v.micro_credential_id', '=', 'm.id')->where('m.owner_id', $u->id)->whereIn('v.status', ['draft', 'returned'])->count(),
+      'reviews' => \Illuminate\Support\Facades\DB::table('review_assignments')->where('reviewer_id', $u->id)->whereIn('status', ['invited', 'in_progress'])->count(),
+    ],
+    default => [],
+  };
+
+  $nav = match ($activeRole) {
+    'student' => [
+      ['Learning', 'My learning', 'tasks', ['tasks*'], 'home'],
+      ['Learning', 'Find a micro-credential', 'catalogue', ['catalogue*', 'public.catalogue*', 'offering*', 'public.offering*'], 'search'],
+      ['Learning', 'Registrations and payments', 'enrolments', ['enrolments*', 'register*'], 'cart'],
+      ['Learning', 'My results', 'results.mine', ['results.mine*'], 'check'],
+      ['Learning', 'Feedback', 'feedback', ['feedback*'], 'edit'],
+      ['Achievements', 'Credentials', 'credentials.wallet', ['credentials.wallet*', 'credentials.show*', 'credentials.certificate*', 'credentials.sheet*'], 'award'],
+      ['Achievements', 'Achievement record', 'records.mine', ['records.mine*'], 'doc'],
+      ['Credit', 'Credit ledger and ABC', 'credit', ['credit*'], 'bank'],
+      ['Credit', 'Credit transfer', 'transfer', ['transfer*'], 'swap'],
+      ['Credit', 'My degree plan', 'plan.mine', ['plan.mine*'], 'cap'],
+      ['General', 'Documents', 'documents', ['documents*'], 'doc'],
+      ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
+    ],
+    'lecturer' => [
+      ['Teaching', 'My tasks', 'tasks', ['tasks*'], 'home'],
+      ['Teaching', 'My micro-credentials', 'mcs', ['mcs*'], 'list'],
+      ['Teaching', 'Proposals and versions', 'proposals', ['proposals*', 'comments.respond*'], 'edit'],
+      ['Teaching', 'Cohorts and results', 'offerings', ['offerings*', 'results.cohort*', 'results.save*', 'results.flag*'], 'cap'],
+      ['Teaching', 'Reviews for colleagues', 'reviews', ['reviews*'], 'check'],
+      ['Quality', 'Quality review (CQI)', 'monitoring', ['monitoring*', 'cqi*', 'reviews.periodic*'], 'chart'],
+      ['Quality', 'QV evidence', 'quality', ['quality*'], 'shield'],
+      ['Quality', 'Stackable pathways', 'pathways', ['pathways*', 'plans*'], 'cap'],
+      ['Insight', 'Reports', 'reports', ['reports*'], 'chart'],
+      ['Insight', 'Traceability', 'trace', ['trace*', 'cohort.records*'], 'search'],
+      ['General', 'Documents', 'documents', ['documents*'], 'doc'],
+      ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
+    ],
+    'deputy_dean' => [
+      ['Academic Governance', 'Task queue', 'tasks', ['tasks*'], 'home'],
+      ['Academic Governance', 'Proposals and approval', 'approvals', ['approvals*', 'changes*'], 'edit'],
+      ['Academic Governance', 'Quality Verification', 'quality', ['quality*'], 'shield'],
+      ['Academic Governance', 'Quality review', 'monitoring', ['monitoring*', 'cqi*', 'suspensions*'], 'chart'],
+      ['Academic Governance', 'Stackable pathways', 'pathways', ['pathways*', 'plans*'], 'cap'],
+      ['Cohort Operations', 'Offerings and readiness', 'offerings', ['offerings*'], 'cap'],
+      ['Cohort Operations', 'Results and completion', 'results', ['results*', 'completion*'], 'check'],
+      ['Credit & Certification', 'Credentials', 'credentials.admin', ['credentials.admin*'], 'award'],
+      ['Credit & Certification', 'ACR and ABC deposits', 'deposits', ['deposits*'], 'bank'],
+      ['Credit & Certification', 'Credit transfer', 'transfers', ['transfers*'], 'swap'],
+      ['Insight & Audit', 'Reports', 'reports', ['reports*'], 'chart'],
+      ['Insight & Audit', 'Traceability', 'trace', ['trace*', 'records.audit*', 'discrepancies*'], 'search'],
+      ['General', 'Documents', 'documents', ['documents*'], 'doc'],
+      ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
+    ],
+    'codl_admin' => [
+      ['Administration', 'Users and roles', 'users', ['users*'], 'users'],
+      ['Administration', 'Reference data', 'reference', ['reference*'], 'list', 'ptj'],
+      ['Administration', 'Settings', 'settings', ['settings*'], 'gear'],
+      ['Administration', 'Templates', 'templates', ['templates*'], 'doc'],
+      ...(\App\Modules\Core\DemoClock::enabled() ? [['Administration', 'Demo clock', 'demo.clock', ['demo.clock*'], 'clock']] : []),
+      ['Data exchange', 'UCreds exchange', 'ucreds', ['ucreds', 'ucreds.export*', 'ucreds.check*', 'ucreds.report*', 'ucreds.stage*', 'ucreds.errors*'], 'swap'],
+      ['Data exchange', 'UCreds content', 'ucreds.courses', ['ucreds.courses*'], 'list'],
+      ['Data exchange', 'Adapter status', 'adapters', ['adapters*'], 'gear'],
+      ['Data exchange', 'Notification log', 'notification.log', ['notification.log*'], 'bell'],
+      ['Records', 'Audit trail', 'audit', ['audit*'], 'list'],
+      ['Records', 'Reports', 'reports', ['reports*'], 'chart'],
+      ['Records', 'Retention', 'retention', ['retention*'], 'shield'],
+      ['General', 'Documents', 'documents', ['documents*'], 'doc'],
+      ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
+    ],
+    'industry_expert' => [
+      ['Invitations', 'My review invitations', 'reviews', ['reviews*'], 'check'],
+      ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
+    ],
+    default => [],
+  };
 @endphp
 @php $isPublicRoute = request()->routeIs('public.*', 'verify*'); @endphp
 <div class="app">
@@ -79,7 +142,7 @@
       </button>
       @endif
     @endauth
-    <a class="brand" href="{{ $isPublicRoute ? route('public.home') : ($u ? route('tasks') : route('public.home')) }}"><b>UTeM MCMS</b><span>{{ $isPublicRoute ? __('Public Verification & Credential Portal') : __('Micro-Credential Management') }}</span></a>
+    <a class="brand" href="{{ $isPublicRoute ? route('public.home') : $homeUrl }}"><b>UTeM MCMS</b><span>{{ $isPublicRoute ? __('Public Verification & Credential Portal') : __('Micro-Credential Management') }}</span></a>
     @if($u && $searchHint && !$isPublicRoute)
       <form class="search" role="search" method="get" action="{{ route('search') }}" style="margin-left:24px"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">{!! $icons['search'] !!}</svg><input type="search" name="q" value="{{ request()->routeIs('search') ? request('q') : '' }}" placeholder="{{ __($searchHint) }}" aria-label="Search"></form>
     @endif
@@ -87,38 +150,86 @@
       @guest
         <a class="btn sm" href="{{ route('signin') }}">{{ __('Sign in') }}</a>
         <form method="post" action="{{ route('language') }}" class="lang" aria-label="Language" style="margin-left:8px">@csrf<button type="submit" name="lang" value="en" class="{{ app()->getLocale() === 'en' ? 'on' : 'off' }}">EN</button><button type="submit" name="lang" value="ms" class="{{ app()->getLocale() === 'ms' ? 'on' : 'off' }}">BM</button></form>
+        <button type="button" class="theme-toggle" id="theme-toggle" title="{{ __('Toggle theme (Auto / Light / Dark)') }}" aria-label="{{ __('Toggle theme') }}"><svg class="theme-icon-light" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="3.5"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/></svg><svg class="theme-icon-dark" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 9.5A6 6 0 116.5 2.5a4.8 4.8 0 007 7z"/></svg></button>
       @endguest
       @auth
-        <form method="post" action="{{ route('language') }}" class="lang" style="margin-right:8px" aria-label="Language">@csrf<button type="submit" name="lang" value="en" class="{{ app()->getLocale() === 'en' ? 'on' : 'off' }}" aria-pressed="{{ app()->getLocale() === 'en' ? 'true' : 'false' }}">EN</button><button type="submit" name="lang" value="ms" class="{{ app()->getLocale() === 'ms' ? 'on' : 'off' }}" aria-pressed="{{ app()->getLocale() === 'ms' ? 'true' : 'false' }}">BM</button></form>
+        <form method="post" action="{{ route('language') }}" class="lang" style="margin-right:4px" aria-label="Language">@csrf<button type="submit" name="lang" value="en" class="{{ app()->getLocale() === 'en' ? 'on' : 'off' }}" aria-pressed="{{ app()->getLocale() === 'en' ? 'true' : 'false' }}">EN</button><button type="submit" name="lang" value="ms" class="{{ app()->getLocale() === 'ms' ? 'on' : 'off' }}" aria-pressed="{{ app()->getLocale() === 'ms' ? 'true' : 'false' }}">BM</button></form>
+        <button type="button" class="theme-toggle" id="theme-toggle" style="margin-right:4px" title="{{ __('Toggle theme (Auto / Light / Dark)') }}" aria-label="{{ __('Toggle theme') }}"><svg class="theme-icon-light" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="3.5"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/></svg><svg class="theme-icon-dark" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 9.5A6 6 0 116.5 2.5a4.8 4.8 0 007 7z"/></svg></button>
         @if(!$isPublicRoute)
         <a class="iconbtn" href="{{ route('help') }}" title="Help" aria-label="Help"><svg viewBox="0 0 16 16" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M6 6.2a2 2 0 013.9.6c0 1.3-1.9 1.6-1.9 2.8M8 11.6v.1"/></svg></a>
         <div class="anchor">
           <button type="button" class="iconbtn" data-menu="pop-notices" aria-haspopup="true" aria-expanded="false" aria-label="Notices: {{ $unread }} unread"><svg viewBox="0 0 16 16" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{!! $icons['bell'] !!}</svg>@if($unread)<span class="badge">{{ $unread }}</span>@endif</button>
           <div class="pop notif" id="pop-notices" hidden>
-            <div class="ph"><b>{{ __('Notices') }}</b> <span class="small muted">{{ __(':count unread', ['count' => $unread]) }}</span></div>
-            @forelse($recent as $n)
-              <a class="ni {{ $n->read_at ? '' : 'unread' }}" href="{{ route('notifications.open', $n->id) }}" style="color:var(--ink)"><div><div class="t">{{ $n->subject }}</div><div class="s">{{ \Carbon\Carbon::parse($n->created_at)->format('d/m/Y H:i') }}</div></div></a>
-            @empty
-              <div class="ni muted">{{ __('No notices yet.') }}</div>
-            @endforelse
-            <a class="mi" href="{{ route('notifications') }}" style="color:var(--primary)">{{ __('See all notices') }}</a>
+            <div class="ph" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <div>
+                <b>{{ __('Notices') }}</b>
+                <span class="small muted" style="margin-left:4px">{{ __(':count unread', ['count' => $unread]) }}</span>
+              </div>
+              @if($unread > 0)
+                <form method="post" action="{{ route('notifications.readall') }}" style="margin:0">
+                  @csrf
+                  <button type="submit" class="btn ghost sm notif-markall-btn" title="{{ __('Mark all notices as read') }}">
+                    {{ __('Mark all as read') }}
+                  </button>
+                </form>
+              @endif
+            </div>
+            <div class="notif-list" style="max-height:360px;overflow-y:auto">
+              @forelse($recent as $n)
+                <div class="ni {{ $n->read_at ? '' : 'unread' }}">
+                  <a class="ni-link" href="{{ route('notifications.open', $n->id) }}">
+                    <div class="t">{{ $n->subject }}</div>
+                    <div class="s">{{ \Carbon\Carbon::parse($n->created_at)->format('d/m/Y H:i') }}</div>
+                  </a>
+                  @if(!$n->read_at)
+                    <form method="post" action="{{ route('notifications.read', $n->id) }}" style="margin:0;flex-shrink:0">
+                      @csrf
+                      <button type="submit" class="notif-read-btn" title="{{ __('Mark as read') }}" aria-label="{{ __('Mark as read') }}">
+                        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="margin-right:2px"><path d="M2.5 8.5l3.5 3.5 7.5-7.5"/></svg>
+                        <span>{{ __('Mark read') }}</span>
+                      </button>
+                    </form>
+                  @endif
+                </div>
+              @empty
+                <div class="ni muted" style="padding:16px;text-align:center">{{ __('No notices yet.') }}</div>
+              @endforelse
+            </div>
+            <a class="notif-all-link" href="{{ route('notifications') }}">{{ __('See all notices') }} &rarr;</a>
           </div>
         </div>
         <div class="anchor">
           <button type="button" class="who-btn menu-btn" data-menu="pop-user" aria-haspopup="true" aria-expanded="false"><span class="avatar" aria-hidden="true">{{ $initials }}</span><span>{{ $u->name }}<small>{{ $roleLabel }}@if($ptjCode), {{ $ptjCode }}@endif</small></span><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></button>
           <div class="pop" id="pop-user" hidden style="width:280px">
             <div class="ph"><div style="font-weight:600">{{ $u->name }}</div><div class="small muted">{{ $u->email }}</div><div class="small muted">{{ $roleLabel }}@if($ptjCode), {{ $ptjCode }}@endif</div></div>
+            @if($activeRoles->count() > 1)
+              <div class="role-switcher">
+                <span class="role-lbl">{{ __('Switch workspace') }}</span>
+                <div class="role-btns">
+                  @foreach($activeRoles as $r)
+                    <form method="post" action="{{ route('role.switch') }}" style="display:inline">
+                      @csrf
+                      <button type="submit" name="role" value="{{ $r->value }}" class="role-btn {{ $activeRole === $r->value ? 'on' : '' }}">
+                        {{ $r->label() }}
+                      </button>
+                    </form>
+                  @endforeach
+                </div>
+              </div>
+            @endif
             <a class="mi" href="{{ route('profile') }}">{{ __('My profile') }}</a>
             <a class="mi" href="{{ route('profile') }}#notifications">{{ __('Notification preferences') }}</a>
             <a class="mi" href="{{ route('profile') }}#sessions">{{ __('Sign-in and sessions') }}</a>
-            <a class="mi" href="{{ route('documents') }}">{{ __('My documents') }}</a>
+            @if($u->hasAnyRole('student', 'lecturer', 'deputy_dean', 'codl_admin'))
+              <a class="mi" href="{{ route('documents') }}">{{ __('My documents') }}</a>
+            @endif
             <a class="mi" href="{{ route('help') }}">{{ __('Help and guides') }}</a>
             <div class="sep"></div>
             <form method="post" action="{{ route('signout') }}">@csrf <button type="submit" class="mi" style="width:100%;background:none;color:var(--ink);height:auto;border:0">{{ __('Sign out') }}</button></form>
           </div>
         </div>
         @else
-          <a class="btn sm" href="{{ route('tasks') }}" style="margin-left:8px">{{ __('Return to portal') }} &rarr;</a>
+          <a class="btn sm" href="{{ $homeUrl }}" style="margin-left:8px">{{ __('Return to portal') }} &rarr;</a>
         @endif
       @endauth
     </div>
@@ -127,37 +238,10 @@
     @auth
     @if(!$isPublicRoute)
     <nav class="side" aria-label="Main">
-      @php
-        $lecOnly = $u && $u->hasAnyRole('lecturer') && ! $u->hasAnyRole('deputy_dean', 'codl_admin');
-        $ddOnly = $u && $u->hasAnyRole('deputy_dean') && ! $u->hasAnyRole('codl_admin');
-        $ddLabels = ['My tasks' => 'Task queue', 'Offerings' => 'Offerings and readiness', 'Credit transfer evaluation' => 'Credit transfer', 'Traceability and records' => 'Traceability'];
-        $ddOrder = ['Task queue', 'Proposals and approval', 'Offerings and readiness', 'Results and completion', 'Credentials', 'Quality Verification', 'Quality review', 'ACR and ABC deposits', 'Credit transfer', 'Stackable pathways', 'Reports', 'Traceability', 'Documents', 'Notifications'];
-        $codlOnly = $u && $u->hasAnyRole('codl_admin') && ! $u->hasAnyRole('deputy_dean', 'lecturer');
-        $codlGroups = ['Users and roles' => 'Administration', 'Reference data' => 'Administration', 'Settings' => 'Administration', 'Templates' => 'Administration', 'Demo clock' => 'Administration',
-          'UCreds exchange' => 'Data exchange', 'UCreds content' => 'Data exchange', 'Adapter status' => 'Data exchange', 'Test mailbox' => 'Data exchange', 'Audit trail' => 'Records', 'Reports' => 'Records', 'Retention' => 'Records'];
-        $codlOrder = array_merge(['My tasks'], array_keys($codlGroups), ['Documents', 'Notifications']);
-        $extOnly = $u && $u->hasAnyRole('industry_expert') && ! $u->hasAnyRole('student', 'lecturer', 'deputy_dean', 'codl_admin');
-        $labels = ['My proposals' => 'Proposals and versions', 'Reviews' => 'Reviews for colleagues', 'Offerings' => 'Cohorts and results', 'Quality Verification' => 'QV evidence', 'Quality review' => 'Quality review (CQI)'];
-        $areaCount = fn ($a) => $ddOnly ? app(\App\Modules\Identity\TaskController::class)->visible($u)->whereNull('completed_at')->where('area', $a)->count() : 0;
-        $counts = $ddOnly ? ['approvals' => $areaCount('proposals'), 'offerings' => $areaCount('offerings'), 'results' => $areaCount('results'), 'deposits' => $areaCount('deposits'), 'transfers' => $areaCount('transfers'), 'credentials.admin' => $areaCount('credentials')] : ($lecOnly ? [
-          'proposals' => \Illuminate\Support\Facades\DB::table('micro_credentials as m')->join('mc_versions as v', 'v.micro_credential_id', '=', 'm.id')->where('m.owner_id', $u->id)->whereIn('v.status', ['draft', 'returned'])->count(),
-          'reviews' => \Illuminate\Support\Facades\DB::table('review_assignments')->where('reviewer_id', $u->id)->whereIn('status', ['invited', 'in_progress'])->count(),
-        ] : []);
-        $shown = collect($nav)->filter(fn ($i) => $i[4] && ! ($extOnly && $i[2] === 'tasks'))->map(function ($i) use ($extOnly, $lecOnly, $labels, $ddOnly, $ddLabels, $codlOnly, $codlGroups) {
-          if ($extOnly && $i[2] === 'reviews') { $i[1] = 'My review invitations'; $i[0] = 'Invitations'; }
-          if ($codlOnly) { $i[1] = ['Adapters' => 'Adapter status', 'Notification log' => 'Test mailbox'][$i[1]] ?? $i[1]; $i[0] = $codlGroups[$i[1]] ?? $i[0]; }
-          if ($ddOnly) {
-            $i[1] = $ddLabels[$i[1]] ?? $i[1];
-            $i[0] = in_array($i[1], ['Reports', 'Traceability and records', 'Traceability']) ? 'Insight' : (in_array($i[1], ['Documents', 'Notifications']) ? $i[0] : 'Work');
-          }
-          if ($lecOnly) { $i[1] = $labels[$i[1]] ?? $i[1]; if (in_array($i[1], ['Reports', 'Traceability and records', 'Traceability'])) { $i[0] = 'Insight'; } }
-          return $i;
-        })->when($codlOnly, fn ($c) => $c->sortBy(fn ($i) => array_search($i[1], $codlOrder) === false ? 99 : array_search($i[1], $codlOrder))->values())->when($ddOnly, fn ($c) => $c->sortBy(fn ($i) => array_search($i[1], $ddOrder) === false ? 99 : array_search($i[1], $ddOrder))->values());
-      @endphp
-      @foreach($shown->groupBy(0) as $group => $items)
-        @if($group !== 'Work' && $group !== 'Messages')<div class="grp">{{ __($group) }}</div>@endif
+      @foreach(collect($nav)->groupBy(0) as $group => $items)
+        @if($group !== 'General' && $group !== 'Messages')<div class="grp">{{ __($group) }}</div>@endif
         @foreach($items as $i)
-          <a href="{{ isset($i[6]) ? route($i[2], $i[6]) : route($i[2]) }}" @if(request()->routeIs(...$i[3])) aria-current="page" @endif title="{{ __($i[1]) }}"><svg viewBox="0 0 16 16" aria-hidden="true">{!! $icons[$i[5]] !!}</svg><span class="lbl">{{ __($i[1]) }}</span>@if($i[1] === 'Notifications' && $unread)<span class="c">{{ $unread }}</span>@elseif($i[2] === 'tasks' && $tasksOpen)<span class="c">{{ $tasksOpen }}</span>@elseif(($counts[$i[2]] ?? 0) > 0)<span class="c">{{ $counts[$i[2]] }}</span>@endif</a>
+          <a href="{{ isset($i[5]) ? route($i[2], $i[5]) : route($i[2]) }}" @if(request()->routeIs(...$i[3])) aria-current="page" @endif title="{{ __($i[1]) }}"><svg viewBox="0 0 16 16" aria-hidden="true">{!! $icons[$i[4]] !!}</svg><span class="lbl">{{ __($i[1]) }}</span>@if($i[1] === 'Notifications' && $unread)<span class="c">{{ $unread }}</span>@elseif($i[2] === 'tasks' && $tasksOpen)<span class="c">{{ $tasksOpen }}</span>@elseif(($counts[$i[2]] ?? 0) > 0)<span class="c">{{ $counts[$i[2]] }}</span>@endif</a>
         @endforeach
       @endforeach
       <div class="side-foot" style="margin-top:auto;padding-top:12px;border-top:1px solid var(--blue-60)">
@@ -172,6 +256,7 @@
         </button>
       </div>
     </nav>
+    <div class="side-backdrop" id="side-backdrop"></div>
     @endif
     @endauth
     <main>

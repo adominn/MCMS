@@ -26,8 +26,8 @@
   </div>
 
   <!-- Search Card pushed to more right -->
-  <form method="get" action="{{ route('public.catalogue') }}" role="search" class="card" style="width:380px;margin-left:auto;background:#ffffff;padding:24px;color:#161616;box-shadow:0 12px 32px rgba(0,0,0,0.25);border-radius:0;border:none;flex-shrink:0">
-    <div style="font-size:16px;font-weight:700;color:#1e2a6e;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+  <form method="get" action="{{ route('public.catalogue') }}" role="search" class="card" style="width:380px;margin-left:auto;background:var(--card-bg);padding:24px;color:var(--ink);box-shadow:0 12px 32px rgba(0,0,0,0.25);border-radius:0;border:1px solid var(--hairline);flex-shrink:0">
+    <div style="font-size:16px;font-weight:700;color:var(--primary);margin-bottom:12px;display:flex;align-items:center;gap:8px">
       <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
         <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
       </svg>
@@ -75,58 +75,58 @@
 
   <div class="grid3">
     <!-- UMC Card -->
-    <div class="card cat-umc" style="border:1px solid #e0e0e0;border-top:4px solid #1e2a6e;padding:20px;display:flex;flex-direction:column;gap:10px;background:#ffffff">
+    <div class="card cat-umc" style="border:1px solid var(--hairline);border-top:4px solid #1e2a6e;padding:20px;display:flex;flex-direction:column;gap:10px;background:var(--card-bg)">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <span class="tag" style="background:#1e2a6e;color:#fff;font-weight:700;font-size:12px;padding:3px 8px">UMC</span>
         <span style="font-size:12px;color:#24a148;font-weight:600;display:flex;align-items:center;gap:4px">
           &#10003; {{ $lang === 'ms' ? 'Berkredit Kursus' : 'Direct Credit' }}
         </span>
       </div>
-      <h3 style="font-size:18px;font-weight:700;margin:0;color:#161616">UMC &ndash; Unbundled Micro-Credential</h3>
-      <p style="font-size:13px;line-height:1.6;color:#525252;margin:0">
+      <h3 style="font-size:18px;font-weight:700;margin:0;color:var(--ink)">UMC &ndash; Unbundled Micro-Credential</h3>
+      <p style="font-size:13px;line-height:1.6;color:var(--muted);margin:0">
         {{ $lang === 'ms' 
             ? 'Dipecahkan terus daripada kursus berkredit dalam program akademik UTeM sedia ada yang telah diakreditasi. Lengkapkan semua modul untuk dianugerahkan kredit kursus induk melalui ACR.' 
             : 'Unbundled directly from a parent credit course of an accredited UTeM programme. Completing all modules grants the academic credit of the parent course via an ACR.' }}
       </p>
-      <div style="margin-top:auto;padding-top:12px;border-top:1px solid #f4f4f4;font-size:12px;color:#6f6f6f">
+      <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--hairline);font-size:12px;color:var(--subtle)">
         <b>{{ $lang === 'ms' ? 'Status Kredit:' : 'Credit Status:' }}</b> {{ $lang === 'ms' ? 'Ya, melalui rekod ACR rasmi' : 'Yes, via official ACR record' }}
       </div>
     </div>
 
     <!-- SAMC Card -->
-    <div class="card cat-samc" style="border:1px solid #e0e0e0;border-top:4px solid #24a148;padding:20px;display:flex;flex-direction:column;gap:10px;background:#ffffff">
+    <div class="card cat-samc" style="border:1px solid var(--hairline);border-top:4px solid #24a148;padding:20px;display:flex;flex-direction:column;gap:10px;background:var(--card-bg)">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <span class="tag" style="background:#24a148;color:#fff;font-weight:700;font-size:12px;padding:3px 8px">SAMC</span>
         <span style="font-size:12px;color:#0f62fe;font-weight:600;display:flex;align-items:center;gap:4px">
           &#9873; {{ $lang === 'ms' ? 'Tertakluk QV' : 'QV Verified' }}
         </span>
       </div>
-      <h3 style="font-size:18px;font-weight:700;margin:0;color:#161616">SAMC &ndash; Standalone Micro-Credential</h3>
-      <p style="font-size:13px;line-height:1.6;color:#525252;margin:0">
+      <h3 style="font-size:18px;font-weight:700;margin:0;color:var(--ink)">SAMC &ndash; Standalone Micro-Credential</h3>
+      <p style="font-size:13px;line-height:1.6;color:var(--muted);margin:0">
         {{ $lang === 'ms' 
             ? 'Kursus bebas sekurang-kurangnya 40 jam pembelajaran nosional (SLT). Membawa kredit pemindahan hanya selepas lulus audit Quality Verification (QV) oleh Jawatankuasa Kurikulum.' 
             : 'An independent course with minimum 40 Student Learning Hours. Articulates credit only after formal Quality Verification (QV) audit approval by curriculum authorities.' }}
       </p>
-      <div style="margin-top:auto;padding-top:12px;border-top:1px solid #f4f4f4;font-size:12px;color:#6f6f6f">
+      <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--hairline);font-size:12px;color:var(--subtle)">
         <b>{{ $lang === 'ms' ? 'Status Kredit:' : 'Credit Status:' }}</b> {{ $lang === 'ms' ? 'Hanya dengan kelulusan QV yang sah' : 'Only with valid Quality Verification' }}
       </div>
     </div>
 
     <!-- MCE Card -->
-    <div class="card cat-mce" style="border:1px solid #e0e0e0;border-top:4px solid #f1c21b;padding:20px;display:flex;flex-direction:column;gap:10px;background:#ffffff">
+    <div class="card cat-mce" style="border:1px solid var(--hairline);border-top:4px solid #f1c21b;padding:20px;display:flex;flex-direction:column;gap:10px;background:var(--card-bg)">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <span class="tag" style="background:#f1c21b;color:#161616;font-weight:700;font-size:12px;padding:3px 8px">MCE</span>
-        <span style="font-size:12px;color:#8d8d8d;font-weight:600">
+        <span style="font-size:12px;color:var(--subtle);font-weight:600">
           {{ $lang === 'ms' ? 'Bukan Kredit' : 'Non-Credit' }}
         </span>
       </div>
-      <h3 style="font-size:18px;font-weight:700;margin:0;color:#161616">MCE &ndash; Micro-Credential Eksekutif</h3>
-      <p style="font-size:13px;line-height:1.6;color:#525252;margin:0">
+      <h3 style="font-size:18px;font-weight:700;margin:0;color:var(--ink)">MCE &ndash; Micro-Credential Eksekutif</h3>
+      <p style="font-size:13px;line-height:1.6;color:var(--muted);margin:0">
         {{ $lang === 'ms' 
             ? 'Kursus pendek pantas tanpa kredit eksekutif yang direka untuk peningkatan kemahiran kepimpinan, latihan profesional, dan pensijilan industri berterusan.' 
             : 'Executive, non-credit learning designed for workforce upskilling, executive leadership, and verifiable competence badges.' }}
       </p>
-      <div style="margin-top:auto;padding-top:12px;border-top:1px solid #f4f4f4;font-size:12px;color:#6f6f6f">
+      <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--hairline);font-size:12px;color:var(--subtle)">
         <b>{{ $lang === 'ms' ? 'Status Kredit:' : 'Credit Status:' }}</b> {{ $lang === 'ms' ? 'Tiada (Kredensial Sijil Kemahiran)' : 'None (Certificate of Competency)' }}
       </div>
     </div>
@@ -200,9 +200,9 @@
   <div class="grid4">
     @foreach($faculties as $fac)
       @php $facCount = $cohorts->where('ptj', $fac->code)->count(); @endphp
-      <div class="card" style="cursor:pointer;background:#ffffff;border:1px solid #e0e0e0;padding:16px;transition:border-color .15s ease" onclick="location.href='{{ route('public.catalogue', ['ptj' => $fac->code]) }}'">
+      <div class="card" style="cursor:pointer;padding:16px;transition:border-color .15s ease" onclick="location.href='{{ route('public.catalogue', ['ptj' => $fac->code]) }}'">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-          <b style="font-size:16px;color:#1e2a6e">{{ $fac->code }}</b>
+          <b style="font-size:16px;color:var(--accent, #0f62fe)">{{ $fac->code }}</b>
           <span class="tag" style="font-size:10.5px;padding:1px 6px">{{ $facCount }} {{ $lang === 'ms' ? 'kohort' : 'cohorts' }}</span>
         </div>
         <span class="small muted" style="display:block;line-height:1.4">{{ $fac->name }}</span>
@@ -214,10 +214,10 @@
 <!-- Three Key Action Pillars (Pathways, Verification, FAQ) -->
 <div class="pub-sec" style="margin-bottom:24px">
   <div class="grid3">
-    <div class="card" style="border:1px solid #e0e0e0;padding:24px;display:flex;flex-direction:column;gap:12px;background:#ffffff">
-      <div style="font-size:24px;color:#1e2a6e">&#9776;</div>
+    <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:24px;color:var(--accent, #0f62fe)">&#9776;</div>
       <h3 style="font-size:18px;font-weight:700;margin:0;color:var(--text)">{{ $t('pathways') }}</h3>
-      <p style="font-size:13.5px;line-height:1.5;color:#525252;margin:0">
+      <p style="font-size:13.5px;line-height:1.5;color:var(--muted);margin:0">
         {{ $lang === 'ms' 
             ? 'Ketahui pelan artikulasi rasmi yang menghubungkan himpunan micro-credential ke peringkat ijazah sarjana muda. Muat turun spesifikasi pemetaan yang diluluskan Senat.' 
             : 'See which micro-credentials map to courses in a UTeM programme, and download Senate-approved degree pathway specifications.' }}
@@ -227,12 +227,12 @@
       </a>
     </div>
 
-    <div class="card" style="border:1px solid #e0e0e0;padding:24px;display:flex;flex-direction:column;gap:12px;background:#ffffff">
-      <div style="font-size:24px;color:#0f62fe">&#10003;</div>
+    <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:24px;color:var(--accent, #0f62fe)">&#10003;</div>
       <h3 style="font-size:18px;font-weight:700;margin:0;color:var(--text)">
         {{ $lang === 'ms' ? 'Semak Kredensial' : 'Verify a credential' }}
       </h3>
-      <p style="font-size:13.5px;line-height:1.5;color:#525252;margin:0">
+      <p style="font-size:13.5px;line-height:1.5;color:var(--muted);margin:0">
         {{ $lang === 'ms' 
             ? 'Pusat semakan terbuka untuk majikan dan institusi pendidikan mengesahkan kesahihan sijil dan lencana UTeM menggunakan kod pengesahan unik.' 
             : 'Employers and institutions can check a credential with the unique cryptographic code printed on it. Instant verification without login.' }}
@@ -242,12 +242,12 @@
       </a>
     </div>
 
-    <div class="card" style="border:1px solid #e0e0e0;padding:24px;display:flex;flex-direction:column;gap:12px;background:#ffffff">
+    <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:12px">
       <div style="font-size:24px;color:#24a148">&#63;</div>
       <h3 style="font-size:18px;font-weight:700;margin:0;color:var(--text)">
         {{ $lang === 'ms' ? 'Soalan Lazim & Panduan' : 'Questions & FAQ' }}
       </h3>
-      <p style="font-size:13.5px;line-height:1.5;color:#525252;margin:0">
+      <p style="font-size:13.5px;line-height:1.5;color:var(--muted);margin:0">
         {{ $lang === 'ms' 
             ? 'Dapatkan jawapan lengkap mengenai perbezaan lencana vs sijil, syarat ACR, pendaftaran pelajar luar, yuran pembelajaran, dan deposit ABC.' 
             : 'Explore clear answers on badge vs certificate, ACR requirements, external learner enrolment, fees, and ABC credit deposits.' }}
@@ -258,9 +258,9 @@
     </div>
   </div>
 
-  <div class="card" style="margin-top:16px;background:#edf5ff;border:1px solid #d0e2ff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between">
-    <span style="font-size:13px;color:#0043ce">
-      <b>{{ __('UTeM Academic & Administrative Staff:') }}</b> {{ __('Access the full management portal to manage offerings, grades, and quality reviews.') }}
+  <div class="card note info" style="margin-top:16px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between">
+    <span style="font-size:13px;color:var(--ink)">
+      <b style="color:var(--accent, #0f62fe)">{{ __('UTeM Academic & Administrative Staff:') }}</b> {{ __('Access the full management portal to manage offerings, grades, and quality reviews.') }}
     </span>
     <a class="btn primary sm" href="{{ route('signin') }}">
       {{ __('Staff Sign In') }} &rarr;

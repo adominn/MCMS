@@ -1,9 +1,20 @@
 @extends('layouts.app')
 @section('title', 'Suspension or termination')
 @section('content')
-<h1>{{ __('Suspension or termination') }}</h1>
-<p><a href="{{ route('monitoring') }}">Quality review</a></p>
-<p class="muted">{{ __('A suspension or termination protects current participants. Achievements, credentials and Academic Credit Records already earned stay valid, and every related record is kept.') }}</p>
+<x-breadcrumb :crumbs="[
+  'Quality review & suspensions' => route('monitoring'),
+  'Suspension or termination' => null,
+]" />
+
+<div class="title">
+  <div>
+    <h1>{{ __('Suspension or termination') }}</h1>
+    <div class="sub">{{ __('A suspension or termination protects current participants. Achievements, credentials and Academic Credit Records already earned stay valid, and every related record is kept.') }}</div>
+  </div>
+  <div class="act">
+    <a class="btn ter sm" href="{{ route('monitoring') }}">&larr; {{ __('Back to quality review') }}</a>
+  </div>
+</div>
 
 <form method="get" action="{{ route('suspensions') }}" class="card">
   <label for="mc">{{ __('Micro-credential') }}</label>

@@ -1,18 +1,19 @@
 @extends('layouts.app')
 @section('title', __('Record Senate decision'))
 @section('content')
-<div class="crumb">
-  <a href="{{ route('approvals') }}">{{ __('Proposals and approval') }}</a>
-  <span>/</span>
-  <a href="{{ route('approvals.show', $v->id) }}">{{ $v->name_en }}</a>
-  <span>/</span>
-  <span>{{ __('Record Senate decision') }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  'Proposals and approval' => route('approvals'),
+  $v->name_en => route('approvals.show', $v->id),
+  'Record Senate decision' => null,
+]" />
 
 <div class="title">
   <div>
     <h1>{{ __('Record Senate decision') }}</h1>
     <div class="sub"><b>{{ $v->name_en }}</b> &middot; <x-pill :s="__($labels[$v->status] ?? ucfirst($v->status))" /></div>
+  </div>
+  <div class="act">
+    <a class="btn ter sm" href="{{ route('approvals.show', $v->id) }}">&larr; {{ __('Back to the proposal') }}</a>
   </div>
 </div>
 

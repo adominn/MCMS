@@ -17,6 +17,7 @@ final class ProposalController
 
     public function index(Request $request)
     {
+        abort_if($request->user()->hasRole('deputy_dean'), 403, 'A Deputy Dean cannot author micro-credential proposals due to Separation of Duties (D-52).');
         $f = $request->query('f', 'all');
         $base = DB::table('mc_versions as v')
             ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
@@ -52,6 +53,7 @@ final class ProposalController
     // The wizard: three questions, then the proposed category with its reason, then the create form.
     public function wizard(Request $request)
     {
+        abort_if($request->user()->hasRole('deputy_dean'), 403, 'A Deputy Dean cannot author micro-credential proposals due to Separation of Duties (D-52).');
         $origin = in_array($request->query('origin'), ['unbundled', 'own'], true) ? $request->query('origin') : null;
         $slt = is_numeric($request->query('slt')) ? max(0, (int) $request->query('slt')) : null;
         $credit = $request->query('credit') === 'yes';
@@ -68,6 +70,7 @@ final class ProposalController
 
     public function create(Request $request)
     {
+        abort_if($request->user()->hasRole('deputy_dean'), 403, 'A Deputy Dean cannot author micro-credential proposals due to Separation of Duties (D-52).');
         $d = $request->validate([
             'origin' => 'required|in:unbundled,own', 'slt' => 'nullable|integer|min:0|max:5000', 'credit' => 'nullable|in:yes,no',
             'ptj_id' => 'required|exists:ptjs,id', 'proposal_type' => 'required|in:new', // Revision and Re-offer start from an approved version, which arrives with approval
@@ -263,6 +266,7 @@ final class ProposalController
 
     private function own(Request $request, int $id): object
     {
+        abort_if($request->user()->hasRole('deputy_dean'), 403, 'A Deputy Dean cannot author micro-credential proposals due to Separation of Duties (D-52).');
         $v = DB::table('mc_versions as v')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->where('v.id', $id)
             ->first(['v.*', 'm.category', 'm.category_status', 'm.qv_planned', 'm.ptj_id', 'm.owner_id', 'm.origin']) ?? abort(404);
         abort_unless($v->owner_id === $request->user()->id, 403, 'This proposal belongs to another lecturer.');
@@ -365,7 +369,8 @@ final class ProposalController
         $category = DB::table('mc_versions as v')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->where('v.id', $id)->value('m.category');
         $credit = $request->input('proposed_credit');
         $mqf = $request->input('proposed_mqf_level');
-        DB::table('mc_versions')->where('id', $id)->update([
+
+        $data = [
             'credential_types' => json_encode(array_values(array_intersect((array) $request->input('credential_types'), array_keys(config('proposals.credential_types'))))),
             'achievement_level' => in_array($request->input('achievement_level'), ['module', 'whole'], true) ? $request->input('achievement_level') : null,
             'qv_status' => array_key_exists((string) $request->input('qv_status'), config('proposals.qv_status')) ? $request->input('qv_status') : null,
@@ -373,7 +378,24 @@ final class ProposalController
             'proposed_credit' => is_numeric($credit) ? max(0, min(99, (float) $credit)) : null,
             'proposed_mqf_level' => is_numeric($mqf) ? max(1, min(8, (int) $mqf)) : null,
             'updated_by' => $request->user()->id, 'updated_at' => now(),
-        ]);
+        ];
+
+        if ($request->hasFile('badge_image')) {
+            $file = $request->file('badge_image');
+            if ($file->isValid() && in_array(strtolower($file->getClientOriginalExtension()), ['png', 'jpg', 'jpeg', 'svg', 'webp'], true)) {
+                $dir = public_path('uploads/badges');
+                if (! file_exists($dir)) {
+                    mkdir($dir, 0755, true);
+                }
+                $filename = 'badge-'.$id.'-'.time().'.'.$file->getClientOriginalExtension();
+                $file->move($dir, $filename);
+                $data['badge_image_path'] = '/uploads/badges/'.$filename;
+            }
+        } elseif ($request->boolean('remove_badge_image')) {
+            $data['badge_image_path'] = null;
+        }
+
+        DB::table('mc_versions')->where('id', $id)->update($data);
     }
 
     private function readiness(int $id, Request $request): void

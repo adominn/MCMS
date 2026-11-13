@@ -8,13 +8,10 @@
 @endphp
 
 <!-- Breadcrumbs -->
-<div class="crumb" style="margin-bottom:12px">
-  <a href="{{ route('tasks') }}">{{ __('My learning') }}</a>
-  <span>/</span>
-  <a href="{{ route('results.mine') }}">{{ __('My results') }}</a>
-  <span>/</span>
-  <span>{{ $e->name_en }} ({{ $e->cohort_name ?? $e->reference }})</span>
-</div>
+<x-breadcrumb :crumbs="[
+  'My results' => route('results.mine'),
+  $e->name_en . ($e->cohort_name ? ' (' . $e->cohort_name . ')' : '') => null,
+]" />
 
 <!-- Page Title & Top Actions -->
 <div class="title" style="margin-bottom:20px">
@@ -68,7 +65,7 @@
     <div>
       <div class="small muted">{{ __('Academic PTj & Examiner') }}</div>
       <div style="font-weight:600;color:var(--ink)">{{ $e->ptj_code ?? 'FTMK' }} &middot; {{ $e->ptj_name ?? 'Faculty' }}</div>
-      <div class="s">{{ $e->facilitators ?? __('Faculty Examiner') }}</div>
+      <div class="s">{{ $e->facilitators ?: ($e->lecturer_name ?: __('Faculty Examiner')) }}</div>
     </div>
     <div>
       <div class="small muted">{{ __('Credits & Total SLT') }}</div>

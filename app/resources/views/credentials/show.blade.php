@@ -9,7 +9,10 @@
   $notes = ['issued' => 'Issued after completion was confirmed', 'corrected' => 'Earlier revision stays viewable and marked', 'replaced' => 'Replaced by a newer credential', 'revoked' => 'Revoked'];
   $modules = $modules ?? collect();
 @endphp
-<div class="crumb"><a href="{{ route('credentials.wallet') }}">{{ __('Credentials') }}</a><span>/</span><span>{{ $c->number }}</span></div>
+<x-breadcrumb :crumbs="[
+  'Credentials' => route('credentials.wallet'),
+  $c->number => null,
+]" />
 <div class="title">
   <div style="display:flex;align-items:center;gap:16px">
     <x-badge :category="$content['category'] ?? 'samc'" :size="64" />
@@ -17,13 +20,17 @@
       <h1>{{ $content['name']['en'] }}</h1>
       <div class="sub">
         {{ $c->number }} &middot; {{ __('issued') }} {{ $issued }} &middot; {{ strtoupper($content['category'] ?? 'UMC') }}
+        @if(!empty($enrolment->lecturer_name))
+          &middot; {{ $enrolment->lecturer_name }}
+        @endif
         @if(!empty($enrolment->matric_no))
           &middot; {{ __('Matric:') }} {{ $enrolment->matric_no }}
         @endif
       </div>
     </div>
   </div>
-  <div class="act" style="align-items:center">
+  <div class="act" style="align-items:center;gap:8px">
+    <a class="btn ter sm" href="{{ route('credentials.wallet') }}">&larr; {{ __('All credentials') }}</a>
     <span class="tag {{ $live ? 'ok' : 'err' }}">{{ __($label) }}</span>
     @if($live)
       <a class="btn" href="{{ route('credentials.certificate', $c->id) }}">{{ __('Download certificate (PDF)') }}</a>
@@ -53,8 +60,7 @@
   </div>
 @endif
 
-<div class="cols" style="grid-template-columns:minmax(0,1fr) 360px">
-  <div>
+<div style="display:flex;flex-direction:column;gap:20px">
     <!-- Sharing & Verification -->
     @if($live)
     <div class="panel">
@@ -65,11 +71,11 @@
         <div style="flex:1;min-width:260px">
           <label for="share" style="margin-top:0;font-weight:600">{{ __('Public Verification Link') }}</label>
           <div style="display:flex;gap:8px;margin-bottom:8px">
-            <input type="text" id="share" readonly value="{{ $url }}" aria-label="Share link" style="font-family:var(--mono);font-size:12px;background:#f4f4f4">
+            <input type="text" id="share" readonly value="{{ $url }}" aria-label="Share link" style="font-family:var(--mono);font-size:12px;background:var(--surface);color:var(--ink);border:1px solid var(--hairline)">
             <button type="button" id="copy-btn" class="btn sm" onclick="navigator.clipboard.writeText(document.getElementById('share').value).then(() => { this.innerHTML = '&#10003; Copied'; setTimeout(() => this.textContent = '{{ __('Copy link') }}', 2500); })" style="white-space:nowrap">{{ __('Copy link') }}</button>
           </div>
           <p class="small muted" style="margin:4px 0 16px;line-height:1.4">
-            {{ __('Anyone with this link or verification code can verify that your credential was authentically issued by UTeM. No login or account required.') }}
+            {{ __('Anyone with this link or verification code can verify that your credential was authentically issued by UTeM. No login or account required. This link shows an employer only your name, the credential, the issuer, the date and its status. Marks, credit and ABC details are not shown.') }}
           </p>
 
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
@@ -85,19 +91,19 @@
             @endif
           </div>
 
-          <div style="padding-top:12px;border-top:1px solid var(--rule, #e0e0e0);font-size:12px;color:var(--ink-muted, #525252)">
-            {{ __('Official Verification Code') }}: <code style="font-size:13px;font-weight:700;color:var(--primary, #0f62fe)">{{ $c->public_code }}</code>
+          <div style="padding-top:12px;border-top:1px solid var(--rule, #e0e0e0);font-size:12px;color:var(--muted)">
+            {{ __('Official Verification Code') }}: <code class="vc" style="font-size:13px;font-weight:700">{{ $c->public_code }}</code>
             <span style="margin:0 8px">&middot;</span>
             {{ __('Certificate No') }}: <span style="font-family:var(--mono)">{{ $c->number }}</span>
           </div>
         </div>
 
         <!-- QR Code Block with Direct Downloads -->
-        <div style="flex:none;text-align:center;background:#ffffff;padding:16px;border:1px solid var(--rule, #e0e0e0);border-radius:2px">
-          <div id="qr-container" aria-label="QR code that opens the verification page" role="img" style="display:inline-block">
+        <div style="flex:none;text-align:center;background:var(--surface);padding:16px;border:1px solid var(--hairline);border-radius:2px">
+          <div id="qr-container" aria-label="QR code that opens the verification page" role="img" style="display:inline-block;background:#ffffff;padding:8px;border-radius:2px">
             {!! $qr !!}
           </div>
-          <div style="font-size:11px;color:var(--ink-muted, #6f6f6f);margin:8px 0">
+          <div style="font-size:11px;color:var(--muted);margin:8px 0">
             {{ __('Scan with camera or phone to verify') }}
           </div>
           <div style="display:flex;gap:6px;justify-content:center">
@@ -129,11 +135,11 @@
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
           <!-- Option 1: Signed Token (.jwt) -->
-          <div style="border:1px solid var(--rule, #e0e0e0);padding:14px;background:#fafafa">
+          <div style="border:1px solid var(--hairline);padding:14px;background:var(--surface)">
             <div style="margin-bottom:6px">
               <strong style="font-size:13px">{{ __('Signed token (.jwt)') }}</strong>
             </div>
-            <p style="font-size:12px;color:var(--ink-muted, #525252);margin:0 0 12px;line-height:1.4">
+            <p style="font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.4">
               {{ __('Compact cryptographic token signed with UTeM\'s private Ed25519 key. Used for automated machine-to-machine verification, API integrations, and digital identity wallets.') }}
             </p>
             <a class="btn secondary sm" href="{{ route('credentials.download', [$c->id, 'jwt']) }}" style="width:100%;justify-content:center">
@@ -143,11 +149,11 @@
           </div>
 
           <!-- Option 2: Verifiable Credential (.json) -->
-          <div style="border:1px solid var(--rule, #e0e0e0);padding:14px;background:#fafafa">
+          <div style="border:1px solid var(--hairline);padding:14px;background:var(--surface)">
             <div style="margin-bottom:6px">
               <strong style="font-size:13px">{{ __('Verifiable Credential (.json)') }}</strong>
             </div>
-            <p style="font-size:12px;color:var(--ink-muted, #525252);margin:0 0 12px;line-height:1.4">
+            <p style="font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.4">
               {{ __('Human-readable JSON document adhering to the W3C Verifiable Credentials Data Model with embedded cryptographic proof. Best for HR archives and offline auditing.') }}
             </p>
             <a class="btn secondary sm" href="{{ route('credentials.download', [$c->id, 'json']) }}" style="width:100%;justify-content:center">
@@ -173,7 +179,7 @@
         <h2>{{ __('Completed Modules & Earned Badges') }}</h2>
       </div>
       <div class="bd" style="padding:0">
-        <div style="padding:12px 16px;background:var(--bg-subtle, #f4f4f4);border-bottom:1px solid var(--rule);font-size:12px;color:var(--ink-muted);line-height:1.4">
+        <div style="padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--hairline);font-size:12px;color:var(--muted);line-height:1.4">
           <i class="bi bi-info-circle" style="margin-right:4px"></i>
           {{ __('This micro-credential consists of the modules below. Digital badges are awarded for each module upon achieving assessment mastery, contributing to this full certificate.') }}
         </div>
@@ -191,7 +197,13 @@
             @foreach($modules as $m)
               <tr>
                 <td>
-                  <strong>{{ $m->seq }}. {{ $m->name_en }}</strong>
+                  @if(!empty($m->badge_code))
+                    <a href="{{ route('verify.show', $m->badge_code) }}" target="_blank" style="font-weight:700;color:var(--ink);text-decoration:none" title="{{ __('View module badge and verification details') }}">
+                      <span style="color:var(--primary);text-decoration:underline">{{ $m->seq }}. {{ $m->name_en }}</span> <span style="font-size:11px;color:var(--muted)">&nearr;</span>
+                    </a>
+                  @else
+                    <strong>{{ $m->seq }}. {{ $m->name_en }}</strong>
+                  @endif
                   @if(!empty($m->name_ms))
                     <div class="s muted">{{ $m->name_ms }}</div>
                   @endif
@@ -200,7 +212,13 @@
                 <td>
                   @if(!empty($m->badge_id))
                     <div style="display:flex;align-items:center;gap:8px">
-                      <x-badge :category="$content['category'] ?? 'samc'" :size="28" />
+                      @if(!empty($m->badge_code))
+                        <a href="{{ route('verify.show', $m->badge_code) }}" target="_blank" title="{{ __('View module badge and verification details') }}" style="display:inline-flex;align-items:center;text-decoration:none">
+                          <x-badge :category="$content['category'] ?? 'samc'" :size="32" />
+                        </a>
+                      @else
+                        <x-badge :category="$content['category'] ?? 'samc'" :size="32" />
+                      @endif
                         <div>
                           <a href="{{ route('verify.show', $m->badge_code) }}" target="_blank" style="font-weight:600;font-size:12px" title="{{ __('Verify this badge on public verification portal') }}">
                             {{ $m->badge_code }} <i class="bi bi-box-arrow-up-right" style="font-size:10px"></i>
@@ -259,6 +277,11 @@
         <p>{{ $content['statement']['en'] }}</p>
         @if(!empty($content['stages']))<p>{{ $content['stages']['en'] }}</p>@endif
         <p class="muted small" style="margin-bottom:8px">{{ __('Learning time') }} {{ $content['slt_hours'] }} h &middot; {{ __('signed by') }} {{ $content['signatory'] }}.</p>
+        @if(!empty($content['claims']['credit']))
+          <p class="muted small" style="margin-bottom:8px">
+            {{ __('Recognition claim:') }} {{ __('Credit') }} {{ $content['claims']['credit'] }}@if(!empty($content['claims']['mqf'])), {{ __('MQF level') }} {{ $content['claims']['mqf'] }}@endif @if(!empty($content['claims']['qv_until'])) ({{ __('Quality Verification valid until') }} {{ $content['claims']['qv_until'] }})@endif, {{ __('as at issue.') }}
+          </p>
+        @endif
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <span class="small muted">{{ __('Cryptographic formats & verification') }}:</span>
           <a class="btn ter sm" href="{{ route('credentials.certificate', [$c->id, 'lang' => 'ms']) }}">{{ __('Sijil (Bahasa Melayu)') }}</a>
@@ -268,38 +291,6 @@
         </div>
       </div>
     </details>
-  </div>
-
-  <!-- Right Column -->
-  <div>
-    <div class="panel">
-      <div class="hd"><h2>{{ __('What an employer sees') }}</h2></div>
-      <div class="bd">
-        @foreach([['Your name', $content['holder']], ['The credential', $content['name']['en']], ['Issuer', $content['issuer']], ['Date issued', $issued], ['Status', $sees]] as [$k, $v])
-          <div class="item" style="padding:10px 0"><span class="dot" style="background:{{ $live ? 'var(--success)' : 'var(--error)' }}"></span><div class="grow">{{ __($k) }}<span class="s">{{ __($v) }}</span></div></div>
-        @endforeach
-        <p class="small muted" style="margin:12px 0 0">{{ __('This link shows an employer only your name, the credential, the issuer, the date and its status. Marks, credit and ABC details are not shown.') }}</p>
-      </div>
-    </div>
-
-    @if(!empty($content['claims']['credit']))
-      <div class="panel">
-        <div class="hd"><h2>{{ __('Recognition claim') }}</h2></div>
-        <div class="bd">
-          <p style="margin:0">
-            {{ __('Credit') }} {{ $content['claims']['credit'] }}@if(!empty($content['claims']['mqf'])), {{ __('MQF level') }} {{ $content['claims']['mqf'] }}@endif @if(!empty($content['claims']['qv_until'])) ({{ __('Quality Verification valid until') }} {{ $content['claims']['qv_until'] }})@endif, {{ __('as at issue.') }}
-          </p>
-        </div>
-      </div>
-    @endif
-
-    <div class="panel">
-      <div class="hd"><h2>{{ __('Credit') }}</h2></div>
-      <div class="bd">
-        <p class="small" style="margin:0">{{ __('Academic credit, if any, is a separate record. See the') }} <a href="{{ route('credit') }}">{{ __('credit ledger') }}</a>.</p>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script>

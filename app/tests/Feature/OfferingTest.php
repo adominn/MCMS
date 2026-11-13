@@ -340,3 +340,48 @@ it('serves the public pages without login, with the stages explained', function 
     $this->get('/public/pathways')->assertOk()->assertSee('leads to a degree automatically');
     $this->get('/public/offering/9999')->assertNotFound();
 });
+
+it('displays the lecturer name across catalogue, student portal, and staff views even when facilitators is null', function () {
+    [$o, $v1, $mc] = openCohort(['facilitators' => null, 'fee' => '0']);
+    $amir = User::where('name', 'Amir Hakimi')->first();
+
+    $this->get('/public/catalogue')->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->get('/public/catalogue?q=Aina')->assertOk()->assertSee('Software Testing');
+    $this->get("/public/offering/$o")->assertOk()->assertSee('Lecturer')->assertSee('Dr. Aina Zulkifli');
+
+    $this->actingAs($amir)->get('/catalogue')->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($amir)->get('/catalogue?q=Aina')->assertOk()->assertSee('Software Testing');
+    $this->actingAs($amir)->get("/offering/$o")->assertOk()->assertSee('Lecturer')->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($amir)->get("/register/$o")->assertOk()->assertSee('Dr. Aina Zulkifli');
+
+    $this->actingAs($amir)->post("/register/$o/eligibility", ['phone' => '012-3456789', 'prerequisites_ok' => 1])->assertSessionHasNoErrors();
+    $this->actingAs($amir)->post("/register/$o/acknowledge", ['ack_statement' => 1, 'pdpa' => 1])->assertSessionHasNoErrors();
+    $eId = (int) DB::table('enrolments')->where('offering_id', $o)->where('user_id', $amir->id)->value('id');
+
+    $this->actingAs($amir)->get('/enrolments')->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($amir)->get("/enrolments/$eId")->assertOk()->assertSee('Dr. Aina Zulkifli');
+
+    DB::table('offerings')->where('id', $o)->update(['status' => 'running']);
+    $this->actingAs($amir)->get('/tasks')->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($amir)->get('/my-results')->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($amir)->get("/my-results/$eId")->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($amir)->get('/my-record')->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($amir)->get("/records/$eId")->assertOk()->assertSee('Dr. Aina Zulkifli');
+
+    $this->actingAs($this->aina)->get('/offerings')->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($this->aina)->get("/offerings/$o")->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($this->aina)->get('/micro-credentials')->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($this->aina)->get("/micro-credentials/$mc")->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($this->aina)->get('/search?q=Aina')->assertOk()->assertSee('Software Testing');
+
+    DB::table('offerings')->where('id', $o)->update([
+        'reg_opens_on' => today()->subDays(10)->toDateString(),
+        'reg_closes_on' => today()->subDays(2)->toDateString(),
+        'start_date' => today()->subDay()->toDateString(),
+        'status' => 'running',
+    ]);
+    $this->actingAs($this->aina)->get("/offerings/$o/results")->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($this->hakim)->get('/results')->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($this->hakim)->get("/results/$o")->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($this->hakim)->get("/completion/$o")->assertOk()->assertSee('Dr. Aina Zulkifli');
+});

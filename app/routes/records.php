@@ -5,7 +5,7 @@ use App\Modules\Records\RecordsController;
 use App\Modules\Records\RetentionController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth')->get('/documents', [RecordsController::class, 'documents'])->name('documents');
+Route::middleware(['auth', 'role:student,lecturer,deputy_dean,codl_admin'])->get('/documents', [RecordsController::class, 'documents'])->name('documents');
 
 Route::middleware(['auth', 'role:lecturer,deputy_dean,codl_admin'])->prefix('records')->group(function () {
     Route::get('/reports', [RecordsController::class, 'reports'])->name('reports');

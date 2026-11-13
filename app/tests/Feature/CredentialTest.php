@@ -301,7 +301,18 @@ it('verifies a module digital badge on the public verification page', function (
     $this->get('/public/verify/'.$b->code)->assertOk()
         ->assertSee('Valid (Digital Badge)')
         ->assertSee($b->code)
-        ->assertSee('Open Badges 3.0');
+        ->assertSee('Open Badges 3.0')
+        ->assertSee('Dr. Aina Zulkifli');
     $json = $this->getJson('/public/verify/'.$b->code)->assertOk()->json();
     expect($json['status'])->toBe('valid')->and($json['type'])->toBe('digital_badge')->and($json['badge_code'])->toBe($b->code);
+});
+
+it('displays the lecturer name on credential wallet, admin list, and verification pages', function () {
+    [$o, , $c] = issued();
+
+    $this->actingAs($this->amir)->get('/my-credentials')->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($this->amir)->get("/my-credentials/{$c->id}")->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($this->hakim)->get('/credentials')->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($this->hakim)->get("/credentials/{$c->id}")->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->get('/public/verify/'.$c->public_code)->assertOk()->assertSee('Dr. Aina Zulkifli');
 });

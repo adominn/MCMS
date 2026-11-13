@@ -15,11 +15,10 @@
 @if(!$isPrint)
   <div class="ph">
     <div>
-      <div class="crumb">
-        <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-        <a href="{{ route('ucreds') }}">{{ __('UCreds exchange') }}</a> /
-        <span>{{ __('Import report') }} #{{ $f->id }}</span>
-      </div>
+      <x-breadcrumb :crumbs="[
+        'UCreds exchange' => route('ucreds'),
+        __('Import report') . ' #' . $f->id => null,
+      ]" />
       <h1>{{ __('Import report') }}</h1>
       <div class="sub">
         <b>{{ $f->original_name }}</b> &middot;

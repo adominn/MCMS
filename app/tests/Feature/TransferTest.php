@@ -255,3 +255,14 @@ it('flags an application for review when its credit expires (EV-48)', function (
     app(CreditLedger::class)->expire();
     expect((bool) DB::table('transfer_lines')->find($line)->reevaluate)->toBeTrue();
 });
+
+it('renders credit selection & mapping with wrapped table and fully visible course requested dropdown', function () {
+    $dep = deposited();
+    $res = $this->actingAs($this->amir)->get('/transfer/new');
+    $res->assertOk()
+        ->assertSee('class="table-wrap"', false)
+        ->assertSee('id="credits"', false)
+        ->assertSee('Course requested')
+        ->assertSee('Credits requested')
+        ->assertSee('min-width:240px', false);
+});

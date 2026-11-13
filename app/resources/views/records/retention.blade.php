@@ -3,10 +3,10 @@
 @section('content')
 <div class="ph">
   <div>
-    <div class="crumb">
-      <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-      <span>{{ __('Retention and disposal') }}</span>
-    </div>
+    <x-breadcrumb :crumbs="[
+      'Records' => null,
+      'Retention and disposal' => null,
+    ]" />
     <h1>{{ __('Retention and disposal') }}</h1>
     <div class="sub">{{ __('How long non-academic logs and operational records are kept before disposal. Academic records, credentials, and the audit trail are permanent and never disposed of.') }}</div>
   </div>

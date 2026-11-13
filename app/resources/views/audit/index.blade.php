@@ -3,10 +3,10 @@
 @section('content')
 <div class="ph">
   <div>
-    <div class="crumb">
-      <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-      <span>{{ __('Audit trail') }}</span>
-    </div>
+    <x-breadcrumb :crumbs="[
+      'Records' => null,
+      'Audit trail' => null,
+    ]" />
     <h1>{{ __('Audit trail') }}</h1>
     <div class="sub">{{ __('Append-only: nobody can edit or delete an entry, including CODL administrators. Each entry is cryptographically chained to the previous one with SHA-256.') }}</div>
   </div>

@@ -260,11 +260,11 @@
 </style>
 
 <div class="vr-wrap">
-  <div class="crumb" style="margin-bottom:12px">
-    <a href="{{ auth()->check() ? route('tasks') : route('public.home') }}">{{ auth()->check() ? (auth()->user()->hasAnyRole('student') ? __('My learning') : __('Dashboard')) : $t('home') }}</a> <span>/</span>
-    <a href="{{ route('public.verify') }}">{{ $lang === 'ms' ? 'Semak kredensial' : 'Verify a credential' }}</a> <span>/</span>
-    <span>{{ $r['code'] ?? 'Result' }}</span>
-  </div>
+  <x-breadcrumb :crumbs="[
+    (auth()->check() ? (auth()->user()->hasAnyRole('student') ? 'My learning' : 'Dashboard') : $t('home')) => (auth()->check() ? auth()->user()->homeUrl() : route('public.home')),
+    ($lang === 'ms' ? 'Semak kredensial' : 'Verify a credential') => route('public.verify'),
+    ($r['code'] ?? 'Result') => null,
+  ]" />
 
   <div class="vr-header">
     <div>
@@ -365,23 +365,28 @@
       <div class="vr-body">
         @if(($r['type'] ?? '') === 'badge')
           <!-- Module Digital Badge Body -->
-          <div class="vr-credential-title">
-            {{ $lang === 'ms' ? ($p['module_name_ms'] ?? $p['credential']) : ($p['module_name_en'] ?? $p['credential']) }}
-          </div>
+          <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap">
+            <x-badge :category="$p['category'] ?? 'umc'" :size="84" />
+            <div style="flex:1;min-width:240px">
+              <div class="vr-credential-title" style="margin-bottom:6px">
+                {{ $lang === 'ms' ? ($p['module_name_ms'] ?? $p['credential']) : ($p['module_name_en'] ?? $p['credential']) }}
+              </div>
 
-          <div class="vr-meta-pills">
-            <span class="vr-pill primary">{{ __('Module Digital Badge') }}</span>
-            <span class="vr-pill">Open Badges 3.0</span>
-            @if(!empty($p['slt_hours']))
-              <span class="vr-pill">{{ $p['slt_hours'] }} {{ __('hours SLT') }}</span>
-            @endif
+              <div class="vr-meta-pills">
+                <span class="vr-pill primary">{{ __('Module Digital Badge') }}</span>
+                <span class="vr-pill">Open Badges 3.0</span>
+                @if(!empty($p['slt_hours']))
+                  <span class="vr-pill">{{ $p['slt_hours'] }} {{ __('hours SLT') }}</span>
+                @endif
+              </div>
+            </div>
           </div>
 
           <div class="vr-grid">
             @isset($p['recipient'])
               <div class="vr-field">
                 <span class="vr-label">{{ $lang === 'ms' ? 'Nama Penerima' : 'Recipient Name' }}</span>
-                <span class="vr-val bold">{{ $p['recipient'] }}</span>
+                <span class="vr-val bold" role="cell">{{ $p['recipient'] }}</span>
               </div>
             @endisset
 
@@ -394,6 +399,13 @@
               <div class="vr-field">
                 <span class="vr-label">{{ $lang === 'ms' ? 'Fakulti (PTj)' : 'Faculty (PTj)' }}</span>
                 <span class="vr-val">{{ $p['faculty'] }}</span>
+              </div>
+            @endif
+
+            @if(!empty($d['lecturer']))
+              <div class="vr-field">
+                <span class="vr-label">{{ $lang === 'ms' ? 'Pensyarah' : 'Lecturer' }}</span>
+                <span class="vr-val">{{ $d['lecturer'] }}</span>
               </div>
             @endif
 
@@ -448,7 +460,7 @@
             @isset($p['recipient'])
               <div class="vr-field">
                 <span class="vr-label">{{ $lang === 'ms' ? 'Nama Penerima' : 'Recipient Name' }}</span>
-                <span class="vr-val bold" style="font-size:16px">{{ $p['recipient'] }}</span>
+                <span class="vr-val bold" role="cell" style="font-size:16px">{{ $p['recipient'] }}</span>
               </div>
             @endisset
 
@@ -470,6 +482,13 @@
               <div class="vr-field">
                 <span class="vr-label">{{ $lang === 'ms' ? 'Fakulti / PTj' : 'Faculty / Academic PTj' }}</span>
                 <span class="vr-val">{{ $d['faculty'] }}</span>
+              </div>
+            @endif
+
+            @if(!empty($d['lecturer']))
+              <div class="vr-field">
+                <span class="vr-label">{{ $lang === 'ms' ? 'Pensyarah' : 'Lecturer' }}</span>
+                <span class="vr-val">{{ $d['lecturer'] }}</span>
               </div>
             @endif
 
@@ -497,7 +516,7 @@
             @if($o === 'replaced' && isset($p['replaced_by']))
               <div class="vr-field">
                 <span class="vr-label">{{ $lang === 'ms' ? 'Digantikan oleh' : 'Replaced By' }}</span>
-                <span class="vr-val"><a href="{{ route('public.verify.show', $p['replaced_by']) }}">{{ $p['replaced_by'] }}</a></span>
+                <span class="vr-val"><a href="{{ route('public.verify.show', $p['replaced_by']) }}" aria-label="{{ __('View replacement record') }}">{{ $p['replaced_by'] }}</a></span>
               </div>
             @endif
           </div>

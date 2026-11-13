@@ -18,6 +18,11 @@ $files = [string[]](Get-ChildItem $Src -Filter *.html | ForEach-Object FullName)
 [Array]::Sort($files, [StringComparer]::Ordinal)  # culture sort ignores hyphens and misorders 03b- before 03-
 $content = ($files | ForEach-Object { Get-Content $_ -Raw -Encoding utf8 }) -join "`n"
 $html = (Get-Content (Join-Path $PSScriptRoot 'template.html') -Raw -Encoding utf8).Replace('<!--CONTENT-->', $content)
+$imgDir = Join-Path $Src 'img'
+if (Test-Path $imgDir) {
+  $imgUri = ([System.Uri]($imgDir + [IO.Path]::DirectorySeparatorChar)).AbsoluteUri
+  $html = $html.Replace('src="./img/', "src=`"$imgUri")
+}
 $page = Join-Path $tmp "$name.html"
 [IO.File]::WriteAllText($page, $html, [Text.UTF8Encoding]::new($false))
 

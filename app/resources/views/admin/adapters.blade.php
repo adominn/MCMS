@@ -3,10 +3,10 @@
 @section('content')
 <div class="ph">
   <div>
-    <div class="crumb">
-      <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-      <span>{{ __('Adapters') }}</span>
-    </div>
+    <x-breadcrumb :crumbs="[
+      'Data exchange' => null,
+      'Adapter status' => null,
+    ]" />
     <h1>{{ __('Adapter status') }}</h1>
     <div class="sub">{{ __('Each outside connection runs in one of three modes: stub (test double), manual (a person moves files), or live.') }}</div>
   </div>

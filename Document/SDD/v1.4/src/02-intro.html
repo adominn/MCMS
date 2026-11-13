@@ -1,0 +1,81 @@
+<!-- ===================== 1. INTRODUCTION ===================== -->
+<h1>1. Introduction</h1>
+
+<h2>1.1 Purpose</h2>
+<p>This Software Design Description (SDD) describes how the UTeM Micro-Credential Management System (MCMS) is built: its architecture, technology, modules, data, interfaces, processes, security, quality attributes and deployment. Updated for Version 1.4 (next iteration, 11 November 2026), it reflects both the verified Release 1 Laravel implementation and the pilot/staging operational targets so developers, reviewers and CODL maintainers share one accurate specification.</p>
+<p>The SRS states <i>what</i> the system shall do, the PRD <i>what to build first and why</i>, and the UI/UX Design Specification <i>how it looks and behaves</i>. This SDD states <i>how it is made</i>. Where this SDD and the SRS differ on a requirement, the SRS prevails. Where this SDD and the UI/UX Design Specification differ on a screen's look or behaviour, the UI/UX Design Specification prevails. Where they differ on a term or decision, the Glossary and Decision Log prevails.</p>
+
+<h2>1.2 Scope</h2>
+<p>The design covers the complete Release 1 system: every requirement of the SRS marked SHALL (Section 11.2 gives the module for each area and the cross-cutting table gives the rest), every Release 1 feature of the PRD, and every screen and document of the UI/UX Design Specification v1.5. It shows where Release 2 and 3 capabilities (SHOULD and MAY) will attach, without designing them in detail, so that they can be added without rework (D-24).</p>
+<p>In this SDD "the prototype" or "Release 1 application" means the Laravel application in <code>app/</code> designed and built here. The earlier clickable HTML prototype of the UI/UX Design Specification is called the design prototype (D-31, D-38).</p>
+<p>MCMS is a new standalone web application with its own database, which reaches other systems only through adapters (D-06). Learning content stays on UCreds. The external Academic Bank of Credits (ABC) platform and the QVC/MQA procedures are outside the system; MCMS prepares and records, and UTeM staff submit (D-14).</p>
+
+<h2>1.3 Document Conventions</h2>
+<script type="text/tbl" data-h="Convention|Meaning" data-w="22%|78%">
+AD-XX | Architecture decision of this SDD (Section 1.6). Every design element cites the decisions it follows.
+DA-XX | Design assumption of this SDD, made where the owner has not yet decided (Section 11.3).
+MD-XX | Module of the modular monolith (Section 2.3). MD-00 is the shared platform kernel.
+EV-XX / JB-XX | Domain event / background job (Section 4.19).
+FR-XX, BR-XX, IR-XX, DR-XX, NFR-XX, SR-XX | Requirement IDs of the SRS v1.4, exactly as published there.
+D-XX, A-XX, OI-XX | Decisions, assumptions and open items of the Glossary and Decision Log v1.0.
+Screen IDs (DD-12, ST-03 …) | Screens of the UI/UX Design Specification v1.5, Section 6.6.
+<code>code</code> | Class, table, column, route or configuration names.
+</script>
+
+<h2>1.4 Intended Audience</h2>
+<script type="text/tbl" data-h="Reader|Use of this document|Read first" data-w="28%|47%|25%">
+Supervisor and CODL | Check that the design is sound, buildable by a small team and safe for UTeM's records. | Sections 1, 2, 8, 11
+Developers and AI development agents | Build and maintain the modules, data, interfaces and jobs consistently. | Sections 2 to 7, 12
+Testers | Derive integration and end-to-end tests from the processes, events and traceability. | Sections 7, 11, 12
+System administrators (CODL) | Install, configure, operate, back up and monitor the system. | Sections 9, 10
+Security reviewers | Check authentication, authorisation, key handling, audit integrity and privacy. | Section 8
+</script>
+
+<h2>1.5 References</h2>
+<ol>
+  <li>Glossary and Decision Log for the UTeM MCMS, version 1.0, 11 November 2026 (MCMS_FND_V1.0_Nov_2026).</li>
+  <li>Software Requirements Specification, UTeM MCMS, version 1.4, 11 November 2026 (MCMS_SRS_V1.4_Nov_2026).</li>
+  <li>Product Requirements Document, UTeM MCMS, version 1.3, 11 November 2026 (MCMS_PRD_V1.3_Nov_2026).</li>
+  <li>UI/UX Design Specification, UTeM MCMS, version 1.5, 11 November 2026 (MCMS_UIUX_V1.5_Nov_2026), and the live Laravel interface captured in <code>app/</code> (legacy design prototype in <code>UIUX/v2/prototype</code>).</li>
+  <li>Garis Panduan Micro-Credential UTeM, Versi 1.0, 18 September 2026 (the Guide).</li>
+  <li>IEEE 1016-2009, Standard for Information Technology: Systems Design, Software Design Descriptions (structure guidance).</li>
+  <li>1EdTech Open Badges 3.0; W3C Verifiable Credentials Data Model 2.0; W3C Data Integrity EdDSA Cryptosuites.</li>
+  <li>OWASP Application Security Verification Standard 4.0; WCAG 2.1; Personal Data Protection Act 2010 (Act 709).</li>
+  <li>Laravel 13, MySQL 8.4 LTS, PostgreSQL 16 and Microsoft Entra ID (OpenID Connect) documentation.</li>
+</ol>
+
+<h2>1.6 Architecture Decisions</h2>
+<p>{{tab:ad}} lists the decisions that shape the whole design. Each later section cites them. Decisions marked Assumed rest on an open item of the Glossary and Decision Log; if the open item closes differently, only the parts that cite that decision change.</p>
+<p class="tcap" data-t="ad">Architecture decisions</p>
+<script type="text/tbl" data-h="ID|Decision|Basis|Status" data-w="9%|61%|16%|14%" data-cls="small">
+AD-01 | Modular monolith: one Laravel application with code split into 17 modules under <code>app/Modules/&lt;Module&gt;</code>. A module owns its tables; other modules use its public service interface or its domain events, never its tables. | D-07 | Decided (Release 1)
+AD-02 | Laravel 13 on PHP 8.3 (Laravel 11 left security support on 12 March 2026; Laravel 12 security fixes end on 24 February 2027). | D-08 | Decided
+AD-03 | MySQL 8.4 LTS as the primary database engine with native BEFORE UPDATE / BEFORE DELETE audit immutability triggers (D-39, closing OI-02). Queries go through Eloquent, query builder and the portable <code>db_like()</code> helper, preserving PostgreSQL 16 compatibility. | D-09, D-39 | Decided (D-39)
+AD-04 | Server-rendered user interface: Blade templates styled with one plain stylesheet (<code>public/css/mcms.css</code>) implementing <code>DESIGN.md</code> CSS custom properties, enhanced by vanilla JavaScript (<code>public/js/mcms.js</code> for client sorting, filtering, pagination opt-out <code>data-no-paginate</code> and collapsible sidebar <code>#nav-toggle</code>) with no Livewire, Alpine.js or Vite build step in Release 1 (D-49). | UI/UX spec 3–4, D-49 | Decided for Release 1
+AD-05 | Release 1 runs timed alerts via the Laravel scheduler and executes imports, credential batches and reports synchronously in request/scheduler handlers (<code>QUEUE_CONNECTION=sync</code>). Redis queues supervised by Laravel Horizon remain the staging/Release 2 target for 500-credential batch scale (NFR-08). | NFR queue, D-49 | Decided for Release 1; Horizon target pilot
+AD-06 | Sign-in with Microsoft Entra ID through OpenID Connect. Staff MFA is enforced by Entra Conditional Access and checked through the <code>amr</code> claim. A stub identity provider exists only outside production and validates standard UTeM/O365 email formats. | D-10, D-44, OI-03 | Assumed (pilot SSO); Stub in Release 1
+AD-07 | Authorisation by role assignment with scope, checked per record by policies and middleware for role, scope and separation of duties. Lecturers (P1) are strictly scoped to exactly one home PTj (D-51). Deputy Dean (P2) and Lecturer (P1) roles are mutually exclusive; Deputy Deans cannot hold lecturer roles or author proposals, reserving their accounts strictly for academic governance, verification, and decisions (D-52). No super-user bypass for academic actions; CODL roles never pass an academic policy, and post-sign-in home routing respects role landing routes (<code>Role::homeRouteName()</code>, D-46). | D-11, D-12, D-28, D-46, D-51, D-52 | Decided
+AD-08 | Each external system is an interface with Stub, Manual and Live adapters, chosen by configuration. An integration hub logs and retries calls. | D-06, D-14 | Decided
+AD-09 | Credentials as Open Badges 3.0 / W3C Verifiable Credentials, signed with Ed25519. The target proof is Data Integrity eddsa-rdfc-2022; for Release 1 the proof is a VC-JOSE (JWT, alg EdDSA) with the same key, because the spike of 28 October 2026 found no PHP library that canonicalises a Verifiable Credentials v2 document (RDFC-1.0). Public keys are published at <code>/.well-known/jwks.json</code> and keys rotate by retiring the old one. Keys are held in a key vault owned by CODL. Public verification is by random code, link, QR, JSON-LD download (<code>.json</code>) or JWT download (<code>.jwt</code>). | D-19, D-41, D-42, OI-08 | Assumed; Release 1 proof decided
+AD-10 | Printable documents are Blade A4 print-layout views rendered via browser print or headless Chromium in production/workers; templates are bilingual and versioned. | UI/UX spec 8 | Decided
+AD-11 | Append-only audit table with a SHA-256 hash chain, written in the same transaction as the change and guarded at database level by MySQL 8.4 LTS triggers (or PostgreSQL rules/triggers). Audit writes are serialised through a chain-head row lock across MySQL and PostgreSQL (Section 9). | D-20, D-39 | Decided
+AD-12 | Settings versioned with effective dates; each decision stores the setting version it used. | D-16 | Decided
+AD-13 | Interface strings in Laravel language files (ms, en); user-facing content stored in both languages; locale per user. | D-02 | Decided
+AD-14 | Files stored on Laravel configurable filesystem disk (local/private disk in Release 1 dev/test; S3-compatible MinIO object storage and ClamAV malware scanning for pilot/production staging), served through authorised download endpoints or short-lived signed URLs. | SRS uploads | Decided (local Release 1; MinIO/ClamAV pilot)
+AD-15 | Notification records persisted in the database first and viewable by CODL administrators on the Notification log screen (CODL-09, <code>/admin/notification-log</code>); delivered externally via SMTP relay or log/stub transport outside production. | SRS SMTP | Decided
+AD-16 | Role-scoped search implemented in <code>SearchController</code> using portable case-insensitive <code>db_like()</code> queries across MySQL 8.4 LTS and PostgreSQL 16 (D-48: <code>codl_admin</code> searches people, settings and import files; academic roles search micro-credentials, cohorts and people). | NFR search, D-48 | Decided
+AD-17 | Pest 4 feature tests named after the SRS requirement they prove (377 tests, 5,368 assertions across 25 test files), plus Playwright end-to-end tests across 2 spec files (<code>flows.spec.ts</code>: 23 flow tests passing; <code>scenario.spec.ts</code>: 4 serial acts requiring fixture/selector alignment after UCreds reference seeding). | D-01, D-49 | Decided
+AD-18 | Hosting on Linux virtual machines in the UTeM data centre: Nginx with PHP 8.3 PHP-FPM, MySQL 8.4 LTS primary database (with Redis and MinIO added for pilot workers and object storage); environments dev, test, staging and production. Production never runs the stub identity provider or <code>MCMS_DEMO_CLOCK</code>; the payment stub and the Manual adapters (UCreds, ABC, QVC/MQA) are the Release 1 modes. | A-09, D-21, D-14, D-39 | Assumed (hosting); Decided modes
+AD-19 | Three database roles: <code>mcms_app</code> for the application, without UPDATE or DELETE on append-only tables; <code>mcms_migrator</code> for schema changes; and <code>mcms_disposal</code>, used only by the approved disposal procedure. | D-20, OI-07 | Proposed
+</script>
+
+<h2>1.7 Design Principles</h2>
+<p>The design applies the principles of the UI/UX Design Specification (Section 2.1) to the code:</p>
+<ul>
+  <li><b>One stage, one record.</b> Each recognition stage is its own table, its own action and its own event (D-15). No action changes two stages. Verifying results and confirming completion are separate actions; the system issues credentials only from a completion confirmation (D-29).</li>
+  <li><b>Authority in the policy layer.</b> Who may decide is enforced in policies on the server for every request, not only by hiding buttons (D-11, D-12).</li>
+  <li><b>Generated recognition text.</b> Credit, MQF level and QV wording is computed from verified records and templates, never stored as free text (D-17).</li>
+  <li><b>Nothing is erased.</b> Corrections add revisions and events; the audit trail is append-only (D-20).</li>
+  <li><b>Rules are settings.</b> Thresholds and approving roles are versioned settings, and decisions record the version in force (D-16).</li>
+  <li><b>Adapters at the edge.</b> Every external system can run as a stub, manual exchange or live connection without changing the modules (D-06, D-14).</li>
+</ul>

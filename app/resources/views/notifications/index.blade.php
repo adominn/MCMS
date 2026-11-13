@@ -5,9 +5,19 @@
   $unread = $all->whereNull('read_at')->count();
   $list = $show === 'unread' ? $all->whereNull('read_at') : ($show === 'read' ? $all->whereNotNull('read_at') : $all);
 @endphp
-<div class="crumb" style="margin-bottom:8px"><a href="{{ route('tasks') }}">Home</a> <span>/</span> <span>{{ __('Notifications') }}</span></div>
-<div class="title"><div><h1>{{ __('Notifications') }}</h1><div class="sub">{{ __(':count unread', ['count' => $unread]) }}</div></div>
-  <div class="act"><form method="post" action="{{ route('notifications.readall') }}">@csrf<button type="submit" class="ter" @disabled(!$unread)>{{ __('Mark all read') }}</button></form><a class="btn ter" href="{{ route('profile') }}#notifications">{{ __('Preferences') }}</a></div></div>
+<div class="title" style="margin-bottom:20px">
+  <div>
+    <h1>{{ __('Notifications') }}</h1>
+    <div class="sub">{{ __(':count unread', ['count' => $unread]) }}</div>
+  </div>
+  <div class="act" style="display:inline-flex;align-items:center;gap:8px">
+    <form method="post" action="{{ route('notifications.readall') }}" style="display:inline-flex;margin:0">
+      @csrf
+      <button type="submit" class="btn ter sm" @disabled(!$unread)>{{ __('Mark all read') }}</button>
+    </form>
+    <a class="btn ter sm" href="{{ route('profile') }}#notifications">{{ __('Preferences') }}</a>
+  </div>
+</div>
 <nav class="tabs" aria-label="Notifications">
   <a href="{{ route('notifications') }}" @if($show === 'all') aria-current="page" @endif>{{ __('All') }} <span class="muted">{{ $all->count() }}</span></a>
   <a href="{{ route('notifications', ['show' => 'unread']) }}" @if($show === 'unread') aria-current="page" @endif>{{ __('Unread') }} <span class="muted">{{ $unread }}</span></a>

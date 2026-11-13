@@ -60,7 +60,7 @@
   </tbody>
 </table>
 
-<div style="margin-top:20px;border-top:1px solid #e0e0e0;padding-top:12px;font-size:8.5pt;color:var(--muted);line-height:1.4">
+<div style="margin-top:20px;border-top:1px solid var(--border, #161616);padding-top:12px;font-size:8.5pt;color:var(--muted);line-height:1.4">
   <b>{{ __('Academic Governance & Regulatory Notice:') }}</b>
   {{ __('No micro-credential leads to a degree automatically, however many are accumulated. Credit exemption is subject to faculty approval, valid Academic Bank of Credit (ABC) deposits within 10 years of completion, and compliance with the 30% UTeM minimum home-credit requirement.') }}
 </div>

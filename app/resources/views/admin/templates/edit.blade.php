@@ -3,16 +3,15 @@
 @section('content')
 <div class="ph">
   <div>
-    <div class="crumb">
-      <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-      <a href="{{ route('templates') }}">{{ __('Templates') }}</a> /
-      <span>{{ $t->description }}</span>
-    </div>
+    <x-breadcrumb :crumbs="[
+      'Templates' => route('templates'),
+      $t->description => null,
+    ]" />
     <h1>{{ $t->description }}</h1>
     <div class="sub">
       <code>{{ $t->key }}</code> &middot;
       {{ ucfirst($t->kind) }} &middot;
-      {{ $t->kind === 'notification' ? ($t->mandatory ? __('Mandatory notice (FR-267)') : __('Optional notice')) : __('System document template') }}
+      {{ $t->kind === 'notification' ? ($t->mandatory ? __('Mandatory notice') : __('Optional notice')) : __('System document template') }}
     </div>
   </div>
   <div class="act">

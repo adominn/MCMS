@@ -32,7 +32,7 @@ return [
     'retention.integration_years' => ['type' => 'int', 'unit' => 'years', 'value' => 2, 'en' => 'Retention of the integration call log', 'ref' => 'FR-retention, OI-07'],
     'demo.clock_offset_days' => ['type' => 'int', 'unit' => 'days', 'value' => 0, 'en' => 'Days the demo clock is ahead of the real date (test environments only)', 'ref' => 'PRD 7.2'],
     'approval.route.senate' => ['type' => 'role', 'unit' => null, 'value' => 'deputy_dean', 'en' => 'Role that records the Senate decision', 'ref' => 'FR-16, D-11'],
-    'enrolment.withdrawal_days_before_end' => ['type' => 'int', 'unit' => 'days', 'value' => 20, 'en' => 'A participant can withdraw until this many days before the cohort ends (assumption UA-05, OI-12)', 'ref' => 'FR-105, OI-12'],
+    'enrolment.withdrawal_days_before_end' => ['type' => 'int', 'unit' => 'days', 'value' => 20, 'en' => 'A participant can withdraw until this many days before the cohort ends', 'ref' => 'FR-105, OI-12'],
     'enrolment.payment_window_hours' => ['type' => 'int', 'unit' => 'hours', 'value' => 48, 'en' => 'A registration not paid within this time is cancelled and the place released', 'ref' => 'FR-101, JB-20'],
     'auth.idle_timeout_minutes' => ['type' => 'int', 'unit' => 'minutes', 'value' => 30, 'en' => 'Idle session timeout', 'ref' => 'FR-06'],
     'verification.public_fields' => ['type' => 'text_list', 'unit' => null, 'value' => ['Name', 'Credential', 'Issuer', 'Date', 'Status'], 'en' => 'Fields shown on the public verification page', 'ref' => 'FR-154'],

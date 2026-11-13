@@ -1,8 +1,16 @@
 @extends('layouts.app')
 @section('title', __('Demo clock'))
 @section('content')
-<h1>{{ __('Demo clock') }}</h1>
-<p class="muted">{{ __('Test environments only. The demo clock moves the date forward so that registration, cohort dates, Quality Verification and credit expiry can be shown. It cannot be switched on in production.') }}</p>
+<div class="ph">
+  <div>
+    <x-breadcrumb :crumbs="[
+      'System Administration' => null,
+      'Demo clock' => null,
+    ]" />
+    <h1>{{ __('Demo clock') }}</h1>
+    <div class="sub">{{ __('Test environments only. The demo clock moves the date forward so that registration, cohort dates, Quality Verification and credit expiry can be shown. It cannot be switched on in production.') }}</div>
+  </div>
+</div>
 <p id="clock">{{ __('Date in MCMS:') }} <strong>{{ $today->format('d/m/Y') }}</strong> ({{ __(':days day(s) ahead of the real date.', ['days' => $offset]) }}).</p>
 <form method="post" action="{{ route('demo.clock.move') }}" class="card">@csrf
   <label for="days">{{ __('Move forward by (days)') }}</label><input id="days" name="days" type="number" min="0" max="4000" value="30" required>

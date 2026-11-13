@@ -28,10 +28,12 @@
       <div class="hd"><h2 id="h-progress">{{ __('In progress') }}</h2></div>
       @forelse($inProgress as $e)
         <div class="item"><div class="grow">
-          <b>{{ $e->name_en }}</b> <span class="muted">{{ __('Cohort') }} {{ $e->cohort_name }}</span> <span class="s" style="display:inline;float:right">{{ __('Ends') }} {{ \Carbon\Carbon::parse($e->end_date)->format('d/m/Y') }}</span>
+          <a href="{{ route('enrolments.show', $e->id) }}" style="font-weight:600">{{ $e->name_en }}</a> <span class="muted">{{ __('Cohort') }} {{ $e->cohort_name }}@if(!empty($e->lecturer_name)) &middot; {{ $e->lecturer_name }}@endif</span> <span class="s" style="display:inline;float:right">{{ __('Ends') }} {{ \Carbon\Carbon::parse($e->end_date)->format('d/m/Y') }}</span>
           <div class="bar" role="progressbar" aria-valuenow="{{ $e->percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="Progress in {{ $e->name_en }}"><i style="width:{{ $e->percent }}%"></i></div>
           <span class="s">{{ $e->achieved }} of {{ $e->modules }} {{ __('modules achieved') }} &middot; {{ $e->percent }}% {{ __('done') }}</span>
-          <a href="{{ route('enrolments.show', $e->id) }}">{{ __('Registration and payment') }}</a>
+          <div style="margin-top:4px">
+            <a href="{{ route('enrolments.show', $e->id) }}" class="s" style="font-weight:500">{{ __('View course & modules') }} &rarr;</a>
+          </div>
         </div></div>
       @empty
         <div class="bd muted" style="padding:20px">{{ __('You are not taking a micro-credential now.') }}</div>
@@ -42,8 +44,19 @@
     <section class="panel" id="waiting" aria-labelledby="h-waiting">
       <div class="hd"><h2 id="h-waiting">{{ __('Waiting for verification') }}</h2></div>
       @foreach($waiting as $e)
-        <div class="item"><span class="dot" aria-hidden="true"></span><div class="grow"><b>{{ $e->name_en }}</b> <span class="muted">{{ __('Cohort') }} {{ $e->cohort_name }}</span>
-          <span class="s">{{ __('Your results are verified. The deputy dean now confirms completion. Your certificate is issued after that.') }}</span></div><x-pill s="Waiting for completion to be confirmed" /></div>
+        <div class="item">
+          <span class="dot warn" aria-hidden="true"></span>
+          <div class="grow">
+            <a href="{{ route('records.show', $e->id) }}" style="font-weight:600">{{ $e->name_en }}</a> <span class="muted">{{ __('Cohort') }} {{ $e->cohort_name }}@if(!empty($e->lecturer_name)) &middot; {{ $e->lecturer_name }}@endif</span>
+            <span class="s" style="display:block;margin-top:2px">{{ __('Your results are verified. The deputy dean now confirms completion. Your certificate is issued after that.') }}</span>
+            <div style="margin-top:4px">
+              <a href="{{ route('records.show', $e->id) }}" class="s" style="font-weight:500">{{ __('View achievement record') }} &rarr;</a>
+              <span class="muted">&middot;</span>
+              <a href="{{ route('enrolments.show', $e->id) }}" class="s muted">{{ __('Registration details') }}</a>
+            </div>
+          </div>
+          <x-pill s="Waiting for completion to be confirmed" />
+        </div>
       @endforeach
     </section>
     @endif
@@ -63,7 +76,7 @@
                     <x-cat :c="$c->category" />
                     <a href="{{ route('credentials.show', $c->id) }}" style="font-weight:600">{{ $c->name }}</a>
                   </div>
-                  <span class="s" style="margin-top:2px;display:block">{{ $c->number }}</span>
+                  <span class="s" style="margin-top:2px;display:block">@if(!empty($c->lecturer_name)){{ $c->lecturer_name }} &middot; @endif{{ $c->number }}</span>
                 </div>
               </div>
             </td>
@@ -83,8 +96,13 @@
     <section class="panel" id="upcoming" aria-labelledby="h-upcoming">
       <div class="hd"><h2 id="h-upcoming">{{ __('Upcoming registrations') }}</h2></div>
       @forelse($upcoming as $e)
-        <div class="item"><div class="grow">{{ $e->name_en }}<span class="s">{{ __('Cohort') }} {{ $e->cohort_name }} {{ __('starts') }} {{ \Carbon\Carbon::parse($e->start_date)->format('d/m/Y') }}</span></div>
-          <x-pill :s="$e->status === 'pending_payment' ? 'Pending payment' : ($e->status === 'registered' ? 'Registered' : 'Enrolled')" /></div>
+        <div class="item">
+          <div class="grow">
+            <a href="{{ route('enrolments.show', $e->id) }}" style="font-weight:600">{{ $e->name_en }}</a>
+            <span class="s" style="display:block;margin-top:2px">{{ __('Cohort') }} {{ $e->cohort_name }}@if(!empty($e->lecturer_name)) &middot; {{ $e->lecturer_name }}@endif &middot; {{ __('starts') }} {{ \Carbon\Carbon::parse($e->start_date)->format('d/m/Y') }}</span>
+          </div>
+          <x-pill :s="$e->status === 'pending_payment' ? 'Pending payment' : ($e->status === 'registered' ? 'Registered' : 'Enrolled')" />
+        </div>
       @empty
         <div class="bd muted" style="padding:20px">{{ __('None.') }}</div>
       @endforelse

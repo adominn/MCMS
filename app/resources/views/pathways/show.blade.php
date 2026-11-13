@@ -1,11 +1,10 @@
 @extends('layouts.app')
 @section('title', 'Pathway mapping')
 @section('content')
-<div class="crumb" style="margin-bottom:8px">
-  <a href="{{ route('pathways') }}">Stackable pathways</a>
-  <span>/</span>
-  <span>{{ $w->reference }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  'Stackable pathways' => route('pathways'),
+  'Pathway ' . $w->reference => null,
+]" />
 
 <div class="title" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
   <div>
@@ -13,6 +12,7 @@
     <div class="sub">{{ $w->programme }} &mdash; {{ $w->programme_name }}</div>
   </div>
   <div class="act" style="display:flex;align-items:center;gap:10px">
+    <a class="btn ter sm" href="{{ route('pathways') }}">&larr; {{ __('All pathways') }}</a>
     <span class="tag {{ $w->status === 'published' ? 'ok' : ($w->status === 'approved' ? 'info' : 'warn') }}">
       <strong id="pw-status">{{ $status[$w->status] ?? ucfirst(str_replace('_', ' ', $w->status)) }}</strong>
     </span>
@@ -99,23 +99,23 @@
   <div class="bd">
     {{-- 4-Metric Carbon Summary Grid --}}
     <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));gap:12px;margin-bottom:16px">
-      <div style="background:var(--surface-1, #f4f4f4);padding:12px 14px;border:1px solid var(--hairline)">
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--ink-muted);letter-spacing:0.5px">{{ __('Total Degree Requirement') }}</div>
+      <div style="background:var(--surface);padding:12px 14px;border:1px solid var(--hairline)">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px">{{ __('Total Degree Requirement') }}</div>
         <div style="font-size:20px;font-weight:600;color:var(--ink);margin-top:4px">{{ $totalCredits }} <span style="font-size:13px;font-weight:400">{{ __('credits') }}</span></div>
         <div class="muted small" style="margin-top:2px">{{ __('100% Graduating curriculum') }}</div>
       </div>
-      <div style="background:var(--surface-1, #f4f4f4);padding:12px 14px;border:1px solid var(--hairline)">
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--primary, #1e2a6e);letter-spacing:0.5px">{{ __('Articulated via MCs') }}</div>
-        <div style="font-size:20px;font-weight:600;color:var(--primary, #1e2a6e);margin-top:4px">{{ $mappedCredits }} <span style="font-size:13px;font-weight:400">{{ __('credits') }}</span></div>
+      <div style="background:var(--surface);padding:12px 14px;border:1px solid var(--hairline)">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--primary);letter-spacing:0.5px">{{ __('Articulated via MCs') }}</div>
+        <div style="font-size:20px;font-weight:600;color:var(--primary);margin-top:4px">{{ $mappedCredits }} <span style="font-size:13px;font-weight:400">{{ __('credits') }}</span></div>
         <div class="muted small" style="margin-top:2px">{{ count($items) }} {{ __('degree courses mapped') }} ({{ $pct }}%)</div>
       </div>
-      <div style="background:var(--surface-1, #f4f4f4);padding:12px 14px;border:1px solid var(--hairline)">
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--ink-muted);letter-spacing:0.5px">{{ __('Max Articulation Ceiling') }}</div>
+      <div style="background:var(--surface);padding:12px 14px;border:1px solid var(--hairline)">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px">{{ __('Max Articulation Ceiling') }}</div>
         <div style="font-size:20px;font-weight:600;color:var(--ink);margin-top:4px">&le; {{ $maxTransferCredits }} <span style="font-size:13px;font-weight:400">{{ __('credits') }}</span></div>
         <div class="muted small" style="margin-top:2px">{{ __('Up to 70% allowable from micro-credentials') }}</div>
       </div>
-      <div style="background:var(--surface-1, #f4f4f4);padding:12px 14px;border:1px solid var(--hairline)">
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--ink-muted);letter-spacing:0.5px">{{ __('Mandatory UTeM Direct Study') }}</div>
+      <div style="background:var(--surface);padding:12px 14px;border:1px solid var(--hairline)">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px">{{ __('Mandatory UTeM Direct Study') }}</div>
         <div style="font-size:20px;font-weight:600;color:var(--ink);margin-top:4px">&ge; {{ $minHomeCredits }} <span style="font-size:13px;font-weight:400">{{ __('credits') }}</span></div>
         <div class="muted small" style="margin-top:2px">{{ __('Minimum 30% direct home institution study') }}</div>
       </div>
@@ -123,9 +123,9 @@
 
     {{-- Flat Multi-Segment Carbon Articulation Bar --}}
     <div style="margin-bottom:8px">
-      <div style="display:flex;height:12px;background:var(--surface-2, #e0e0e0);border-radius:2px;overflow:hidden">
+      <div style="display:flex;height:12px;background:var(--s2);border-radius:2px;overflow:hidden">
         {{-- Mapped credits in uLearn navy --}}
-        <div style="background:var(--primary, #1e2a6e);width:{{ $articulationPct }}%;height:100%" title="{{ __('Mapped Micro-Credentials') }}: {{ $mappedCredits }} cr ({{ $pct }}%)"></div>
+        <div style="background:var(--primary);width:{{ $articulationPct }}%;height:100%" title="{{ __('Mapped Micro-Credentials') }}: {{ $mappedCredits }} cr ({{ $pct }}%)"></div>
         {{-- Available articulation headroom up to 70% in light blue --}}
         @if($headroomPct > 0)
           <div style="background:#8ab4f8;width:{{ $headroomPct }}%;height:100%" title="{{ __('Allowable Articulation Headroom') }}: {{ max(0, round($maxTransferCredits - $mappedCredits, 1)) }} cr ({{ round($headroomPct, 1) }}%)"></div>
@@ -152,7 +152,7 @@
     </div>
 
     {{-- Institutional Articulation Compliance Notes --}}
-    <div style="background:var(--surface-1, #f4f4f4);border-left:3px solid var(--primary, #1e2a6e);padding:10px 14px;font-size:12px;color:var(--ink-muted);display:flex;flex-direction:column;gap:6px">
+    <div style="background:var(--surface);border-left:3px solid var(--primary);padding:10px 14px;font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:6px">
       <div>
         @if($mappedCredits <= $maxTransferCredits)
           <span style="color:var(--semantic-success, #24a148);font-weight:600">&check; {{ __('Home institution quota compliant') }}:</span>
@@ -293,11 +293,11 @@
     </div>
 
     @if($plos)
-      <fieldset style="border:1px solid var(--hairline);padding:14px 16px;background:var(--surface-1, #f4f4f4);margin-bottom:16px">
+      <fieldset style="border:1px solid var(--hairline);padding:14px 16px;background:var(--surface);margin-bottom:16px">
         <legend style="font-weight:600;font-size:13px;padding:0 6px;color:var(--ink)">{{ __('Programme learning outcomes this credential supports') }}</legend>
         <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:10px">
           @foreach($plos as $p)
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;background:#ffffff;padding:8px 12px;border:1px solid var(--hairline)">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card-bg);padding:8px 12px;border:1px solid var(--hairline)">
               <label style="display:inline-flex;gap:6px;align-items:center;cursor:pointer;font-weight:600;margin:0;font-size:13px">
                 <input type="checkbox" name="plo[]" value="{{ $p }}"> {{ $p }}
               </label>
@@ -313,11 +313,11 @@
     @endif
 
     @if($bok)
-      <fieldset style="border:1px solid var(--hairline);padding:14px 16px;background:var(--surface-1, #f4f4f4);margin-bottom:16px">
+      <fieldset style="border:1px solid var(--hairline);padding:14px 16px;background:var(--surface);margin-bottom:16px">
         <legend style="font-weight:600;font-size:13px;padding:0 6px;color:var(--ink)">{{ __('Body of Knowledge domains') }}</legend>
         <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));gap:10px">
           @foreach($bok as $b)
-            <label style="display:inline-flex;gap:8px;align-items:center;margin:0;cursor:pointer;background:#ffffff;padding:8px 12px;border:1px solid var(--hairline);font-size:13px">
+            <label style="display:inline-flex;gap:8px;align-items:center;margin:0;cursor:pointer;background:var(--card-bg);padding:8px 12px;border:1px solid var(--hairline);font-size:13px">
               <input type="checkbox" name="bok[]" value="{{ $b }}"> <span>{{ $b }}</span>
             </label>
           @endforeach

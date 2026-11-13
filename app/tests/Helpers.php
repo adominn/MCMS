@@ -12,35 +12,42 @@ use Illuminate\Support\Str;
 if (! function_exists('userAina')) {
     function userAina(): User
     {
-        return test()->aina ?? User::where('name', 'Dr. Aina Zulkifli')->first() ?? User::first();
+        return (property_exists(test(), 'aina') ? test()->aina : null) ?? User::where('name', 'Dr. Aina Zulkifli')->first() ?? User::first();
     }
 }
 
 if (! function_exists('userHakim')) {
     function userHakim(): User
     {
-        return test()->hakim ?? User::where('name', 'Hakim Rahman')->first() ?? User::first();
+        return (property_exists(test(), 'hakim') ? test()->hakim : null) ?? User::where('name', 'Hakim Rahman')->first() ?? User::first();
     }
 }
 
 if (! function_exists('userAmir')) {
     function userAmir(): User
     {
-        return test()->amir ?? User::where('name', 'Amir Hakimi')->first() ?? User::first();
+        return (property_exists(test(), 'amir') ? test()->amir : null) ?? User::where('name', 'Amir Hakimi')->first() ?? User::first();
     }
 }
 
 if (! function_exists('userFarid')) {
     function userFarid(): User
     {
-        return test()->farid ?? User::where('name', 'Farid Hashim')->first() ?? User::first();
+        return (property_exists(test(), 'farid') ? test()->farid : null) ?? User::where('name', 'Farid Hashim')->first() ?? User::first();
     }
 }
 
 if (! function_exists('userLim')) {
     function userLim(): User
     {
-        return test()->lim ?? User::where('name', 'Dr. Lim Wei Jie')->first() ?? User::create(['name' => 'Dr. Lim Wei Jie', 'email' => 'lim_' . uniqid() . '@utem.example.test']);
+        $u = (property_exists(test(), 'lim') ? test()->lim : null) ?? User::where('name', 'Dr. Lim Wei Jie')->first();
+        if (! $u) {
+            $u = User::create(['name' => 'Dr. Lim Wei Jie', 'email' => 'lim_'.uniqid().'@utem.example.test']);
+            $ftmkId = DB::table('ptjs')->where('code', 'FTMK')->value('id');
+            $u->roleAssignments()->create(['role' => 'lecturer', 'scope_type' => 'ptj', 'ptj_id' => $ftmkId]);
+        }
+
+        return $u;
     }
 }
 

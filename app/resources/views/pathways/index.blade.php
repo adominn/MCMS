@@ -28,7 +28,7 @@
 
   {{-- ==================== TAB 1: FACULTY PATHWAY MAPPINGS ==================== --}}
   <div data-pane="pathways">
-    <div class="note info" style="margin-bottom:20px;padding:12px 16px;background:var(--surface-1, #f4f4f4);border-left:4px solid var(--primary, #1e2a6e);font-size:13px;display:flex;gap:12px;align-items:flex-start">
+    <div class="note info" style="margin-bottom:20px;padding:12px 16px;font-size:13px;display:flex;gap:12px;align-items:flex-start">
       <div>
         <strong>{{ __('Institutional Curriculum Roadmaps:') }}</strong>
         {{ __('Faculty-level articulation roadmaps define which degree parent courses can be articulated using eligible credit-bearing micro-credentials (UMC and Quality-Verified SAMC). Mappings require formal Senate approval before publication.') }}
@@ -79,7 +79,7 @@
     </div>
 
     {{-- Carbon Structured Pathway Definition Card --}}
-    <div class="card" style="margin-top:24px;padding:16px 20px;border:1px solid var(--hairline);background:var(--surface-1, #f4f4f4);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+    <div class="card" style="margin-top:24px;padding:16px 20px;border:1px solid var(--hairline);background:var(--card-bg);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:12px">
         <div>
           <div style="font-size:15px;font-weight:600;color:var(--ink)">
@@ -100,12 +100,12 @@
 
     {{-- Carbon Modal Popup: Define New Degree Articulation Roadmap --}}
     <div class="scrim" id="modal-define-mapping" hidden style="display:none;position:fixed;inset:0;background:rgba(22,22,22,.5);z-index:70;align-items:center;justify-content:center;backdrop-filter:blur(2px)">
-      <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="modal-define-title" style="max-width:760px;width:92%;max-height:88vh;display:flex;flex-direction:column;background:#ffffff;border:1px solid var(--hairline);border-radius:2px;box-shadow:0 12px 40px rgba(0,0,0,.25)">
+      <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="modal-define-title" style="max-width:760px;width:92%;max-height:88vh;display:flex;flex-direction:column;background:var(--card-bg);border:1px solid var(--hairline);border-radius:2px;box-shadow:0 12px 40px rgba(0,0,0,.25)">
         
         <!-- Modal Header -->
-        <div class="mh" style="padding:18px 24px;border-bottom:1px solid var(--hairline);display:flex;align-items:flex-start;justify-content:space-between;background:#ffffff">
+        <div class="mh" style="padding:18px 24px;border-bottom:1px solid var(--hairline);display:flex;align-items:flex-start;justify-content:space-between;background:var(--card-bg)">
           <div>
-            <div style="font-size:12px;font-weight:600;color:var(--primary, #1e2a6e);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">
+            <div style="font-size:12px;font-weight:600;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">
               {{ __('Degree Articulation Roadmap') }} &bull; {{ __('Step 1 of 3') }}
             </div>
             <h2 id="modal-define-title" style="margin:0;font-size:18px;font-weight:600;color:var(--ink)">
@@ -124,7 +124,7 @@
         <form method="post" action="{{ route('pathways.store') }}" id="form-define-mapping" style="display:flex;flex-direction:column;flex:1;overflow:hidden;margin:0">
           @csrf
           <div class="mb" style="padding:24px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:20px">
-            <div class="note info" style="margin:0;padding:12px 16px;background:var(--surface-1, #f4f4f4);border-left:4px solid var(--primary, #1e2a6e);font-size:13px;line-height:1.5">
+            <div class="note info" style="margin:0;padding:12px 16px;font-size:13px;line-height:1.5">
               <b>{{ __('How it works:') }}</b> {{ __('Select a degree programme to build an official articulation roadmap. In the next step, you will pair specific micro-credentials to the degree’s parent courses to fulfill PLOs and Body of Knowledge requirements.') }}
             </div>
 
@@ -132,7 +132,7 @@
               <label for="programme_id" style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;color:var(--ink)">
                 1. {{ __('Target degree programme') }}
               </label>
-              <select id="programme_id" name="programme_id" style="width:100%;height:40px;padding:8px 12px;background:#f4f4f4;border:1px solid var(--hairline);border-radius:2px;font-size:13.5px;color:var(--ink)" onchange="updateProgSummary(this)">
+              <select id="programme_id" name="programme_id" style="width:100%;height:40px;padding:8px 12px;background:var(--surface);border:1px solid var(--hairline);border-radius:2px;font-size:13.5px;color:var(--ink)" onchange="updateProgSummary(this)">
                 @foreach($programmes as $p)
                   <option value="{{ $p->id }}" data-credits="{{ $p->total_credits }}" data-code="{{ $p->code }}" data-mqf="{{ $p->mqf_level }}">
                     {{ $p->code }} - {{ $p->name }} (MQF {{ $p->mqf_level }}, {{ $p->total_credits }} credits)
@@ -181,13 +181,13 @@
           </div>
 
           <!-- Modal Footer -->
-          <div class="mf" style="padding:14px 24px;border-top:1px solid var(--hairline);background:var(--surface-1, #f4f4f4);display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div class="mf" style="padding:14px 24px;border-top:1px solid var(--hairline);background:var(--surface);display:flex;align-items:center;justify-content:space-between;gap:12px">
             <button type="button" class="btn ter" onclick="closeDefineMappingModal()" style="border-radius:2px;padding:8px 16px">
               {{ __('Cancel') }}
             </button>
             <div style="display:flex;align-items:center;gap:12px">
               <span class="muted small">{{ __('Next: Pair micro-credentials with degree courses') }}</span>
-              <button type="submit" class="btn primary" style="border-radius:2px;padding:8px 18px;background:var(--primary, #1e2a6e);color:#ffffff;display:inline-flex;align-items:center;gap:6px">
+              <button type="submit" class="btn primary" style="border-radius:2px;padding:8px 18px;display:inline-flex;align-items:center;gap:6px">
                 {{ __('Start draft mapping') }} &rarr;
               </button>
             </div>
@@ -263,7 +263,7 @@
 
   {{-- ==================== TAB 2: INDIVIDUAL STUDENT PLANS ==================== --}}
   <div data-pane="plans">
-    <div class="note info" style="margin-bottom:20px;padding:12px 16px;background:var(--surface-1, #f4f4f4);border-left:4px solid var(--primary, #1e2a6e);font-size:13px;display:flex;gap:12px;align-items:flex-start">
+    <div class="note info" style="margin-bottom:20px;padding:12px 16px;font-size:13px;display:flex;gap:12px;align-items:flex-start">
       <div>
         <strong>{{ __('Personalized Degree Study Plans:') }}</strong>
         {{ __('Individual student plans provide faculty academic guidance on how a student’s accumulated credentials articulate toward graduation. The plan enforces the mandatory 30% direct UTeM home study rule and tracks remaining curriculum requirements.') }}
@@ -275,7 +275,7 @@
         <h2>{{ __('Individual stackable plans') }}</h2>
         <div style="display:inline-flex;align-items:center;gap:8px">
           <span class="s muted">{{ count($plans) }} {{ __('plans') }}</span>
-          <a class="btn sm" href="{{ route('plans.new') }}">+ {{ __('New individual plan') }}</a>
+          <a class="btn sm" href="{{ route('plans.new') }}" aria-label="{{ __('Create individual plan') }}">+ {{ __('New individual plan') }}</a>
         </div>
       </div>
       <table id="plans">

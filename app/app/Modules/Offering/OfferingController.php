@@ -22,7 +22,7 @@ final class OfferingController
     public function index(Request $request)
     {
         $this->status->refresh();
-        $rows = $this->scoped($request)->orderByDesc('o.start_date')->get(['o.id', 'o.cohort_name', 'o.status', 'o.readiness_state', 'o.start_date', 'o.reg_opens_on', 'v.name_en', 'v.version_no']);
+        $rows = $this->scoped($request)->orderByDesc('o.start_date')->get(['o.id', 'o.cohort_name', 'o.status', 'o.readiness_state', 'o.start_date', 'o.reg_opens_on', 'v.name_en', 'v.version_no', 'u.name as lecturer_name']);
 
         return view('offerings.index', ['rows' => $rows, 'labels' => config('offerings.status'), 'dean' => $request->user()->hasAnyRole('deputy_dean')]);
     }
@@ -226,7 +226,7 @@ final class OfferingController
         $user = $request->user();
         $ptjs = $user->scopedPtjIds('deputy_dean');
 
-        return DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+        return DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
             ->where(function ($q) use ($user, $ptjs) {
                 $q->where('m.owner_id', $user->id);
                 if ($user->hasAnyRole('deputy_dean')) {
@@ -237,6 +237,6 @@ final class OfferingController
 
     private function find(Request $request, int $id): object
     {
-        return $this->scoped($request)->where('o.id', $id)->first(['o.*', 'v.name_en', 'v.version_no', 'm.ptj_id', 'm.owner_id', 'm.category']) ?? abort(404);
+        return $this->scoped($request)->where('o.id', $id)->first(['o.*', 'v.name_en', 'v.version_no', 'm.ptj_id', 'm.owner_id', 'm.category', 'u.name as lecturer_name']) ?? abort(404);
     }
 }

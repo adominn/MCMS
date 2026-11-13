@@ -3,11 +3,10 @@
 @section('content')
 <div class="ph">
   <div>
-    <div class="crumb">
-      <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-      <a href="{{ route('documents') }}">{{ __('Documents') }}</a> /
-      <span>{{ __('Reports') }}</span>
-    </div>
+    <x-breadcrumb :crumbs="[
+      'Document archive' => route('documents'),
+      'System reports' => null,
+    ]" />
     <h1>{{ __('University Standard Reports') }}</h1>
     <div class="sub">{{ __('Each report is limited to your role scope. Reports show references, not personal names. Open any report to view it, print or save as A4 PDF, or export as CSV for spreadsheet analysis.') }}</div>
   </div>
@@ -37,9 +36,10 @@
             </td>
             <td><span class="s muted">Standard</span></td>
             <td class="num">
-              <a href="{{ route('reports.print', $k) }}" class="btn sm ter">{{ __('Print') }}</a>
-              &middot;
-              <a href="{{ route('reports.csv', $k) }}" class="btn sm ghost">{{ __('CSV') }}</a>
+              <div style="display:inline-flex;gap:6px;align-items:center;justify-content:flex-end">
+                <a href="{{ route('reports.print', $k) }}" class="btn sm ter">{{ __('Print') }}</a>
+                <a href="{{ route('reports.csv', $k) }}" class="btn sm ghost">{{ __('CSV') }}</a>
+              </div>
             </td>
           </tr>
         @endforeach

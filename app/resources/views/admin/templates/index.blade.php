@@ -3,10 +3,6 @@
 @section('content')
 <div class="ph">
   <div>
-    <div class="crumb">
-      <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-      <span>{{ __('Templates') }}</span>
-    </div>
     <h1>{{ __('Templates') }}</h1>
     <div class="sub">{{ __('Notices, certificates, credential pages, and recognition statements. Configured in both Bahasa Melayu and English. Every change produces a new version.') }}</div>
   </div>
@@ -30,7 +26,7 @@
   </div>
   <div class="kpi">
     <div class="l">{{ __('Notice rules') }}</div>
-    <div class="v">FR-267</div>
+    <div class="v">{{ __('Enforced') }}</div>
     <div class="s">{{ __('Mandatory notice enforcement') }}</div>
   </div>
 </div>

@@ -178,6 +178,7 @@ final class VerifyController
             ->leftJoin('enrolments as e', 'e.id', '=', 'c.enrolment_id')
             ->leftJoin('mc_versions as v', 'v.id', '=', 'e.mc_version_id')
             ->leftJoin('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+            ->leftJoin('users as lu', 'lu.id', '=', 'm.owner_id')
             ->leftJoin('ptjs as p', 'p.id', '=', 'm.ptj_id')
             ->where(function ($q) use ($clean, $formatted, $raw) {
                 $q->where('c.public_code', $clean)
@@ -199,6 +200,7 @@ final class VerifyController
                 'v.qv_valid_until',
                 'm.category as mc_category',
                 'p.name as ptj_name',
+                'lu.name as lecturer_name',
             ])
             ->first();
 
@@ -255,6 +257,7 @@ final class VerifyController
                 'slt_hours' => $x['slt_hours'] ?? null,
                 'course' => ['en' => $c->course_name_en, 'ms' => $c->course_name_ms],
                 'faculty' => $c->ptj_name,
+                'lecturer' => $c->lecturer_name,
                 'outcomes' => $x['outcomes'] ?? null,
                 'signatory' => $x['signatory'] ?? null,
                 'crypto_verified' => $cryptoOk,
@@ -303,6 +306,7 @@ final class VerifyController
             ->join('mc_modules as m', 'm.id', '=', 'a.mc_module_id')
             ->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')
             ->leftJoin('micro_credentials as mc', 'mc.id', '=', 'v.micro_credential_id')
+            ->leftJoin('users as lu', 'lu.id', '=', 'mc.owner_id')
             ->leftJoin('ptjs as p', 'p.id', '=', 'mc.ptj_id')
             ->where('b.code', $clean)
             ->orWhere('b.code', strtoupper($clean))
@@ -312,7 +316,7 @@ final class VerifyController
                 'a.achieved_at', 'u.name as recipient_name', 'm.seq',
                 'm.name_en as module_name_en', 'm.name_ms as module_name_ms', 'm.slt_hours',
                 'v.name_en as course_name_en', 'v.name_ms as course_name_ms',
-                'mc.category as mc_category', 'p.name as ptj_name',
+                'mc.category as mc_category', 'p.name as ptj_name', 'lu.name as lecturer_name',
             ])
             ->first();
 
@@ -339,12 +343,13 @@ final class VerifyController
                     'issuer' => 'Universiti Teknikal Malaysia Melaka',
                     'faculty' => $badge->ptj_name,
                     'issued' => $issuedDate,
+                    'category' => $badge->mc_category ?? 'umc',
                     'external_id' => $badge->external_id,
                     'external_url' => $badge->external_url,
                     'slt_hours' => $badge->slt_hours,
                     'standard' => 'Open Badges 3.0 (1EdTech) / W3C Verifiable Credentials',
                 ],
-                'details' => [],
+                'details' => ['lecturer' => $badge->lecturer_name],
                 'show' => fn (string $f) => true,
                 'code' => $badge->code,
             ];

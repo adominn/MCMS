@@ -237,7 +237,7 @@ final class QvController
     /** @return \Illuminate\Support\Collection<int, object> confirmed SAMCs the user may see */
     private function visible(Request $request)
     {
-        $q = DB::table('micro_credentials as m')->where('m.category', 'samc')->where('m.category_status', 'confirmed')->whereExists(fn ($w) => $w->select(DB::raw(1))->from('mc_versions as v')->whereColumn('v.micro_credential_id', 'm.id')->whereIn('v.status', ['approved', 'superseded']));
+        $q = DB::table('micro_credentials as m')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->where('m.category', 'samc')->where('m.category_status', 'confirmed')->whereExists(fn ($w) => $w->select(DB::raw(1))->from('mc_versions as v')->whereColumn('v.micro_credential_id', 'm.id')->whereIn('v.status', ['approved', 'superseded']));
         $u = $request->user();
         if ($u->hasAnyRole('deputy_dean') && ! $u->hasAnyRole('lecturer')) {
             $ids = $u->scopedPtjIds('deputy_dean');
@@ -246,7 +246,7 @@ final class QvController
             $q->where('m.owner_id', $u->id);
         }
 
-        return $q->get(['m.*'])->each(fn ($m) => $m->name_en = (string) DB::table('mc_versions')->where('micro_credential_id', $m->id)->orderByDesc('version_no')->value('name_en'));
+        return $q->get(['m.*', 'u.name as lecturer_name'])->each(fn ($m) => $m->name_en = (string) DB::table('mc_versions')->where('micro_credential_id', $m->id)->orderByDesc('version_no')->value('name_en'));
     }
 
     private function mc(Request $request, int $id): object

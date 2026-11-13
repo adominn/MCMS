@@ -3,7 +3,6 @@
 @section('content')
 <div class="ph">
   <div>
-    <div class="crumb"><a href="{{ route('tasks') }}">{{ __('Home') }}</a> / <span>{{ __('Users and roles') }}</span></div>
     <h1>{{ __('Users and roles') }}</h1>
     <div class="sub">{{ $users->total() }} {{ __('accounts from UTeM single sign-on. Accounts are never deleted; deactivating keeps every record.') }}</div>
   </div>
@@ -27,7 +26,7 @@
   </div>
   <div class="kpi">
     <div class="l">{{ __('Governance') }}</div>
-    <div class="v">D-12</div>
+    <div class="v">{{ __('Enforced') }}</div>
     <div class="s">{{ __('Separation of duties') }}</div>
   </div>
 </div>
@@ -103,7 +102,7 @@
 
 <div class="note" style="margin-top:16px">
   <div>
-    <b>{{ __('Separation of responsibilities (D-12)') }}:</b>
+    <b>{{ __('Separation of responsibilities') }}:</b>
     {{ __('CODL assigns who can act. It does not make academic decisions: the deputy dean approves, verifies and confirms; roles listed here only decide who may see and do those things.') }}
   </div>
 </div>

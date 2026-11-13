@@ -35,9 +35,14 @@
         <td>
           <div style="display:flex;align-items:center;gap:10px">
             <x-badge :category="$r->category" :size="32" />
-            <a href="{{ route('mcs.show', $r->id) }}" style="font-weight:600">
-              {{ $r->name_en ?: __('Untitled') }}
-            </a>
+            <div>
+              <a href="{{ route('mcs.show', $r->id) }}" style="font-weight:600">
+                {{ $r->name_en ?: __('Untitled') }}
+              </a>
+              @if(!empty($r->lecturer_name))
+                <span class="s muted" style="display:block">{{ $r->lecturer_name }}</span>
+              @endif
+            </div>
           </div>
         </td>
         <td>

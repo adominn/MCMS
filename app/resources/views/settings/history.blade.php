@@ -3,15 +3,13 @@
 @section('content')
 <div class="ph">
   <div>
-    <div class="crumb">
-      <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-      <a href="{{ route('settings') }}">{{ __('Settings') }}</a> /
-      <span>{{ __('History') }}</span>
-    </div>
+    <x-breadcrumb :crumbs="[
+      'Settings' => route('settings'),
+      $key => null,
+    ]" />
     <h1>{{ $def['en'] }}</h1>
     <div class="sub">
       <code>{{ $key }}</code> &middot;
-      {{ $def['ref'] ?? '' }} &middot;
       {{ __('Decisions use the value in force on the day they were taken; changes never rewrite earlier decisions.') }}
     </div>
   </div>

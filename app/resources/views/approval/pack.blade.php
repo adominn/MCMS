@@ -12,11 +12,11 @@
 @if(!$isPrint)
   <div class="ph">
     <div>
-      <div class="crumb">
-        <a href="{{ route('approvals') }}">{{ __('Proposals and approval') }}</a> /
-        <a href="{{ route('approvals.show', $v->id) }}">{{ $v->name_en }}</a> /
-        <span>{{ __('Decision pack') }}</span>
-      </div>
+      <x-breadcrumb :crumbs="[
+        'Proposals and approval' => route('approvals'),
+        $v->name_en => route('approvals.show', $v->id),
+        'Decision pack' => null,
+      ]" />
       <h1>{{ __('Decision pack: :name', ['name' => $v->name_en]) }}</h1>
       <div class="sub">{{ __('Version :num · Decision pack for Senate submission', ['num' => $v->version_no]) }}</div>
     </div>

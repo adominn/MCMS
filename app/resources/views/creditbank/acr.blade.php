@@ -10,11 +10,10 @@
 @endphp
 
 @if(!$isPrint)
-  <div class="crumb" style="margin-bottom:8px">
-    <a href="{{ $mine ? route('credit') : route('deposits') }}">{{ $mine ? __('Credit ledger and ABC') : __('ACR and ABC deposits') }}</a>
-    <span>/</span>
-    <span>{{ $a->reference }}</span>
-  </div>
+  <x-breadcrumb :crumbs="[
+    ($mine ? 'Credit ledger and ABC' : 'ACR and ABC deposits') => ($mine ? route('credit') : route('deposits')),
+    $a->reference => null,
+  ]" />
 
   <div class="title">
     <div>
@@ -240,7 +239,7 @@
         <div class="bd">
           <p class="small" style="margin:0 0 12px">{{ __("An Academic Credit Record (ACR) is a separate record from your certificate and Digital Credential. Its fields are generated from verified records and cannot be edited.") }}</p>
           <p class="small" style="margin:0 0 12px">{{ __("Depositing in the Academic Bank of Credit (ABC) is storage of your record, not a credit transfer. No programme accepts credit automatically; each transfer is decided case by case by the receiving faculty.") }}</p>
-          @if($a->credit_status === 'available')
+          @if($mine && $a->credit_status === 'available')
             <p class="small" style="margin:0"><a class="btn sm" href="{{ route('transfer.create') }}">{{ __("Apply for credit transfer") }}</a></p>
           @endif
         </div>

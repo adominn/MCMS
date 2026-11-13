@@ -3,10 +3,6 @@
 @section('content')
 <div class="ph">
   <div>
-    <div class="crumb">
-      <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-      <span>{{ __('UCreds exchange') }}</span>
-    </div>
     <h1>{{ __('UCreds exchange') }}</h1>
     <div class="sub">{{ __('The learning platform connection is manual in Release 1: MCMS exports the enrolment list and imports result and badge files. Template version v3.') }}</div>
   </div>
@@ -59,8 +55,10 @@
             <td><b>{{ $o->name_en }} {{ $o->cohort_name }}</b></td>
             <td><span class="tag info">{{ config('offerings.status')[$o->status] ?? $o->status }}</span></td>
             <td class="num">
-              <a href="{{ route('ucreds.export.manifest', $o->id) }}" target="_blank" class="btn sm ghost">{{ __('Manifest') }}</a>
-              <a href="{{ route('ucreds.export', $o->id) }}" class="btn sm ter">Download enrol-O-{{ str_pad((string) $o->id, 4, '0', STR_PAD_LEFT) }}.csv</a>
+              <div style="display:inline-flex;gap:6px;align-items:center;justify-content:flex-end">
+                <a href="{{ route('ucreds.export.manifest', $o->id) }}" target="_blank" class="btn sm ghost">{{ __('Manifest') }}</a>
+                <a href="{{ route('ucreds.export', $o->id) }}" class="btn sm ter">Download enrol-O-{{ str_pad((string) $o->id, 4, '0', STR_PAD_LEFT) }}.csv</a>
+              </div>
             </td>
           </tr>
         @empty

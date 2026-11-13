@@ -1,10 +1,144 @@
 <!doctype html>
-<html lang="{{ app()->getLocale() }}">
+<html lang="{{ app()->getLocale() }}" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
   <title>@yield('title', 'Document') - UTeM MCMS</title>
-  <link rel="stylesheet" href="{{ asset('css/mcms.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/mcms.css') }}?v={{ filemtime(public_path('css/mcms.css')) }}">
+  <style>
+    :root, html, body {
+      color-scheme: light !important;
+      background: #e0e0e0 !important;
+      color: #161616 !important;
+      --border: #161616 !important;
+      --hairline: #161616 !important;
+      --hairline-strong: #161616 !important;
+      --rule: #161616 !important;
+      --hair: #161616 !important;
+      --text: #161616 !important;
+      --ink: #161616 !important;
+    }
+    .doc-wrap {
+      background: #e0e0e0 !important;
+    }
+    .doc-bar {
+      background: #161616 !important;
+      color: #ffffff !important;
+    }
+    .a4, .a4 * {
+      color-scheme: light !important;
+      --border: #161616 !important;
+      --hairline: #161616 !important;
+      --hairline-strong: #161616 !important;
+      --rule: #161616 !important;
+      --hair: #161616 !important;
+      --text: #161616 !important;
+      --ink: #161616 !important;
+    }
+    .a4 {
+      background: #ffffff !important;
+      color: #161616 !important;
+    }
+    .a4 table {
+      background: #ffffff !important;
+      color: #161616 !important;
+      border-collapse: collapse !important;
+      width: 100% !important;
+    }
+    .a4 thead th, .a4 table thead th {
+      background: #f4f4f4 !important;
+      color: #161616 !important;
+      border-bottom: 2px solid #161616 !important;
+      font-weight: 600 !important;
+    }
+    .a4 tbody th, .a4 table tbody th {
+      background: transparent !important;
+      color: #161616 !important;
+      border-bottom: 1px solid #161616 !important;
+      font-weight: 600 !important;
+    }
+    .a4 th, .a4 table th {
+      color: #161616 !important;
+      border-bottom: 1px solid #161616 !important;
+      font-weight: 600 !important;
+    }
+    .a4 td, .a4 table td {
+      background: #ffffff !important;
+      color: #161616 !important;
+      border-bottom: 1px solid #161616 !important;
+    }
+    .a4 tfoot td, .a4 tfoot th,
+    .a4 table tfoot td, .a4 table tfoot th {
+      border-top: 2px solid #161616 !important;
+      border-bottom: 1px solid #161616 !important;
+      font-weight: 600 !important;
+    }
+    .a4 tr:hover td {
+      background: #ffffff !important;
+      color: #161616 !important;
+    }
+    .a4 .panel, .a4 .card {
+      background: #ffffff !important;
+      border: 1px solid #161616 !important;
+      color: #161616 !important;
+    }
+    .a4 .panel > .hd, .a4 .card > .hd,
+    .a4 .panel .hd, .a4 .card .hd {
+      border-bottom: 1px solid #161616 !important;
+      color: #161616 !important;
+    }
+    .a4 .doc-foot {
+      border-top: 1px solid #161616 !important;
+    }
+    .a4 #summary, .a4 .bd, .a4 .hd, .a4 p {
+      color: #161616 !important;
+    }
+    .a4 .muted, .a4 .bm, .a4 .small, .a4 .s {
+      color: #525252 !important;
+    }
+    .a4 .doc-head b, .a4 h1, .a4 h2, .a4 h3, .a4 b, .a4 strong {
+      color: #161616 !important;
+    }
+    .a4 code, .a4 code.vc {
+      background: #f0f0f0 !important;
+      color: #161616 !important;
+      border: none !important;
+    }
+    .a4 .tag {
+      background: #e8e8e8 !important;
+      color: #161616 !important;
+    }
+    @media print {
+      body, .doc-wrap, .a4 {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .a4 table {
+        border-color: #000000 !important;
+      }
+      .a4 thead th {
+        border-bottom: 2px solid #000000 !important;
+      }
+      .a4 th, .a4 td {
+        border-bottom: 1px solid #000000 !important;
+      }
+      .a4 tfoot td, .a4 tfoot th {
+        border-top: 2px solid #000000 !important;
+        border-bottom: 1px solid #000000 !important;
+      }
+      .a4 .panel, .a4 .card {
+        border: 1px solid #000000 !important;
+      }
+      .a4 .panel > .hd, .a4 .card > .hd,
+      .a4 .panel .hd, .a4 .card .hd {
+        border-bottom: 1px solid #000000 !important;
+      }
+      .a4 .doc-foot {
+        border-top: 1px solid #000000 !important;
+      }
+    }
+  </style>
   @hasSection('land')<style>@page { size: A4 landscape; margin: 0; }</style>@endif
 </head>
 <body style="background:#e0e0e0;padding:0">

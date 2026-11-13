@@ -5,7 +5,7 @@
 
 <div class="pub-sec">
   <div class="crumb" style="margin-bottom:8px">
-    <a href="{{ auth()->check() ? route('tasks') : route('public.home') }}">{{ auth()->check() ? (auth()->user()->hasAnyRole('student') ? __('My learning') : __('Dashboard')) : $t('home') }}</a> <span>/</span> <span>{{ $lang === 'ms' ? 'Semak kredensial' : 'Verify a credential' }}</span>
+    <a href="{{ auth()->check() ? auth()->user()->homeUrl() : route('public.home') }}">{{ auth()->check() ? (auth()->user()->hasAnyRole('student') ? __('My learning') : __('Dashboard')) : $t('home') }}</a> <span>/</span> <span>{{ $lang === 'ms' ? 'Semak kredensial' : 'Verify a credential' }}</span>
   </div>
 
   <div class="title" style="margin-bottom:24px">
@@ -17,8 +17,8 @@
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:20px;margin-bottom:24px">
     <!-- Method 1: Verification by Public Code -->
-    <div class="card" style="background:#ffffff;border:1px solid #e0e0e0;border-top:3px solid #1e2a6e;padding:24px;margin:0">
-      <div style="font-weight:700;font-size:16px;color:#1e2a6e;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+    <div class="card" style="background:var(--card-bg);border:1px solid var(--hairline);border-top:3px solid var(--accent, #0f62fe);padding:24px;margin:0">
+      <div style="font-weight:700;font-size:16px;color:var(--accent, #0f62fe);margin-bottom:6px;display:flex;align-items:center;gap:8px">
         <i class="bi bi-qr-code-scan"></i>
         <span>{{ $lang === 'ms' ? 'Kaedah 1: Semak Guna Kod' : 'Method 1: Verify by Code' }}</span>
       </div>
@@ -29,19 +29,19 @@
       <form method="get" action="" id="vform" onsubmit="event.preventDefault(); var c = document.getElementById('code').value.trim(); if (c) location.href = '{{ url('/public/verify') }}/' + encodeURIComponent(c.toUpperCase());">
         <div style="margin-bottom:12px">
           <label for="code" style="font-weight:600;font-size:13px;display:block;margin-bottom:6px">
-            {{ $lang === 'ms' ? 'Kod Kredensial / Lencana' : 'Credential / Badge Code' }}
+            {{ $lang === 'ms' ? 'Kod Kredensial' : 'Credential code' }}
           </label>
-          <input type="text" id="code" name="code" autocomplete="off" placeholder="e.g. CND01-7K9MJ" style="width:100%;font-size:16px;font-family:monospace;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;padding:10px 12px;border:1px solid #8d8d8d;border-radius:0;outline:none" required onfocus="this.style.borderColor='#1e2a6e'" onblur="this.style.borderColor='#8d8d8d'">
+          <input type="text" id="code" name="code" aria-label="{{ $lang === 'ms' ? 'Kod Kredensial' : 'Credential code' }}" autocomplete="off" placeholder="e.g. CND01-7K9MJ" style="width:100%;font-size:16px;font-family:monospace;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;padding:10px 12px;background:var(--surface);color:var(--ink);border:1px solid var(--hairline);border-radius:0;outline:none" required onfocus="this.style.borderColor='var(--accent, #0f62fe)'" onblur="this.style.borderColor='var(--hairline)'">
         </div>
-        <button type="submit" class="btn primary" style="width:100%;padding:10px;font-size:14px;font-weight:600;background:#1e2a6e;display:flex;align-items:center;justify-content:center;gap:8px">
-          <span>{{ $lang === 'ms' ? 'Semak Kredensial' : 'Verify Credential' }}</span>
+        <button type="submit" class="btn primary" style="width:100%;padding:10px;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px">
+          <span>{{ $lang === 'ms' ? 'Sahkan' : 'Verify' }}</span>
           <i class="bi bi-arrow-right"></i>
         </button>
       </form>
     </div>
 
     <!-- Method 2: Cryptographic File Verification (.json / .jwt) -->
-    <div class="card" style="background:#ffffff;border:1px solid #e0e0e0;border-top:3px solid #24a148;padding:24px;margin:0">
+    <div class="card" style="background:var(--card-bg);border:1px solid var(--hairline);border-top:3px solid #24a148;padding:24px;margin:0">
       <div style="font-weight:700;font-size:16px;color:#24a148;margin-bottom:6px;display:flex;align-items:center;gap:8px">
         <i class="bi bi-shield-check"></i>
         <span>{{ $lang === 'ms' ? 'Kaedah 2: Sahkan Fail Kriptografi' : 'Method 2: Cryptographic File Verification' }}</span>

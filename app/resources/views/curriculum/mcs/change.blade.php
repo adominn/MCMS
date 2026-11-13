@@ -2,24 +2,33 @@
 @section('title', __('Request a change'))
 @section('content')
 @if(!$current)
-  <div class="crumb"><a href="{{ route('mcs') }}">{{ __('My micro-credentials') }}</a> <span>/</span> <span>{{ __('Request a change') }}</span></div>
-  <div class="title"><div><h1>{{ __('Request a change') }}</h1></div></div>
+  <x-breadcrumb :crumbs="[
+    'My micro-credentials' => route('mcs'),
+    'Request a change' => null,
+  ]" />
+  <div class="ph"><div><h1>{{ __('Request a change') }}</h1></div></div>
   <div class="note warn" role="alert"><p>{{ __('Only an approved version can be changed.') }}</p></div>
 @elseif($blocked)
-  <div class="crumb"><a href="{{ route('mcs') }}">{{ __('My micro-credentials') }}</a> <span>/</span> <span>{{ __('Request a change') }}</span></div>
-  <div class="title"><div><h1>{{ __('Request a change') }}</h1></div></div>
+  <x-breadcrumb :crumbs="[
+    'My micro-credentials' => route('mcs'),
+    'Request a change' => null,
+  ]" />
+  <div class="ph"><div><h1>{{ __('Request a change') }}</h1></div></div>
   <div class="note info" role="status"><p>{{ __('Version :num is still in progress. Wait until it is decided.', ['num' => $blocked->version_no]) }}</p></div>
 @else
-<div class="crumb">
-  <a href="{{ route('mcs') }}">{{ __('My micro-credentials') }}</a> <span>/</span>
-  <a href="{{ route('mcs.show', $mc) }}">{{ $current->name_en }}</a> <span>/</span>
-  <span>{{ __('Request a change') }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  'My micro-credentials' => route('mcs'),
+  $current->name_en => route('mcs.show', $mc),
+  'Request a change' => null,
+]" />
 
 <div class="title">
   <div>
     <h1>{{ __('Request a change to :name', ['name' => $current->name_en]) }}</h1>
     <div class="sub">{{ __('Current approved version: v:num', ['num' => $current->version_no]) }}</div>
+  </div>
+  <div class="act">
+    <a class="btn ter sm" href="{{ route('mcs.show', $mc) }}">&larr; {{ __('Back to micro-credential') }}</a>
   </div>
 </div>
 

@@ -1,13 +1,7 @@
 @extends('layouts.app')
 @section('title', __('My degree plan'))
 @section('content')
-<div class="crumb" style="margin-bottom:8px">
-  <a href="{{ route('tasks') }}">{{ __('My learning') }}</a>
-  <span>/</span>
-  <span>{{ __('My degree plan') }}</span>
-</div>
-
-<div class="title">
+<div class="ph" style="margin-bottom:16px">
   <div>
     <h1>{{ __('My degree plan') }}</h1>
     <div class="sub">{{ __('Your plan is faculty advice on how your micro-credentials could count toward a degree programme.') }}</div>

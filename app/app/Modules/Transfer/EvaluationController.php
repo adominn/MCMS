@@ -22,10 +22,14 @@ final class EvaluationController
     public function index(Request $request)
     {
         $rows = $this->scoped($request)->orderByDesc('t.id')->get();
+        $ptjs = $request->user()->scopedPtjIds('deputy_dean');
         $inUse = DB::table('transfer_lines as l')->join('transfer_applications as t', 't.id', '=', 'l.transfer_application_id')->join('abc_deposits as d', 'd.id', '=', 'l.abc_deposit_id')->join('programmes as p', 'p.id', '=', 't.programme_id')->join('users as u', 'u.id', '=', 't.user_id')
-            ->where('d.credit_status', 'provisional')->when($request->user()->scopedPtjIds('deputy_dean') !== null, fn ($q) => $q->whereIn('p.ptj_id', $request->user()->scopedPtjIds('deputy_dean')))->get(['l.id', 't.reference', 'u.name', 'l.credits_approved', 'p.code as programme']);
+            ->where('d.credit_status', 'provisional')->when($ptjs !== null, fn ($q) => $q->whereIn('p.ptj_id', $ptjs))->get(['l.id', 't.reference', 'u.name', 'l.credits_approved', 'p.code as programme']);
+        $admissions = DB::table('admissions as a')->join('users as u', 'u.id', '=', 'a.user_id')->join('programmes as p', 'p.id', '=', 'a.programme_id')
+            ->when($ptjs !== null, fn ($q) => $q->whereIn('p.ptj_id', $ptjs))
+            ->orderByDesc('a.id')->limit(10)->get(['a.*', 'u.name', 'p.code']);
 
-        return view('transfer.queue', ['rows' => $rows, 'inUse' => $inUse, 'status' => config('transfer.status'), 'admissions' => DB::table('admissions as a')->join('users as u', 'u.id', '=', 'a.user_id')->join('programmes as p', 'p.id', '=', 'a.programme_id')->orderByDesc('a.id')->limit(10)->get(['a.*', 'u.name', 'p.code'])]);
+        return view('transfer.queue', ['rows' => $rows, 'inUse' => $inUse, 'status' => config('transfer.status'), 'admissions' => $admissions]);
     }
 
     public function show(Request $request, int $id)
@@ -36,6 +40,20 @@ final class EvaluationController
 
         return view('transfer.decide', ['a' => $a, 'lines' => $lines, 'decision' => DB::table('transfer_decisions')->where('transfer_application_id', $id)->orderByDesc('id')->first(), 'warnings' => Transfers::warnings($a, $lines, $req), 'validity' => json_decode($a->validity ?? 'null', true),
             'status' => config('transfer.status'), 'admitted' => DB::table('admissions')->where('user_id', $a->user_id)->where('programme_id', $a->programme_id)->first()]);
+    }
+
+    public function letter(Request $request, int $id)
+    {
+        $a = $this->scoped($request)->where('t.id', $id)->first() ?? abort(404);
+        $lines = Transfers::lines($id);
+        $decision = DB::table('transfer_decisions')->where('transfer_application_id', $id)->orderByDesc('id')->first();
+
+        return view('transfer.show', [
+            'a' => $a,
+            'lines' => $lines,
+            'decision' => $decision,
+            'status' => config('transfer.status'),
+        ]);
     }
 
     /** FR-ctvalidity. A failed check ends in Not approved, and changes nothing about the credit (BR-33). */

@@ -3,11 +3,10 @@
 @section('content')
 <div class="ph">
   <div>
-    <div class="crumb">
-      <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-      <a href="{{ route('ucreds') }}">{{ __('UCreds exchange') }}</a> /
-      <span>{{ __('UCreds content') }}</span>
-    </div>
+    <x-breadcrumb :crumbs="[
+      'UCreds exchange' => route('ucreds'),
+      'UCreds content' => null,
+    ]" />
     <h1>{{ __('UCreds content') }}</h1>
     <div class="sub">{{ __('What the UCreds learning platform offers. Reference data only: offerings link to course references here.') }}</div>
   </div>
@@ -39,7 +38,7 @@
 
     <div id="ucreds-results">
       <div class="table-wrap">
-        <table id="ucreds-courses">
+        <table id="ucreds-courses" data-no-paginate>
           <thead>
             <tr>
               <th style="width:110px">{{ __('Course ID') }}</th>

@@ -1,14 +1,12 @@
 @extends('layouts.app')
 @section('title', 'New offering')
 @section('content')
-<div class="crumb">
-  <a href="{{ route('offerings') }}">{{ __('Offerings and readiness') }}</a>
-  <span>/</span>
-  <span>{{ __('New offering') }}</span>
-</div>
-
-<div class="title">
+<div class="ph">
   <div>
+    <x-breadcrumb :crumbs="[
+      'Offerings & cohorts' => route('offerings'),
+      'New offering' => null,
+    ]" />
     <h1>{{ __('Create an offering') }}</h1>
     <div class="sub">{{ __('Schedule a cohort of an approved micro-credential version.') }}</div>
   </div>

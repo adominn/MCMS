@@ -17,11 +17,15 @@ Route::prefix('public')->group(function () {
     Route::get('/accessibility', [CatalogueController::class, 'accessibility'])->name('public.accessibility');
 });
 
-// Clean top-level URLs for authenticated and direct portal usage
-Route::get('/catalogue', [CatalogueController::class, 'catalogue'])->name('catalogue');
-Route::get('/offering/{id}', [CatalogueController::class, 'offering'])->whereNumber('id')->name('offering');
-Route::get('/how', [CatalogueController::class, 'how'])->name('how');
-Route::get('/faq', [CatalogueController::class, 'faq'])->name('faq');
+// Authenticated top-level portal URLs (students browse within the secured portal; guests & other roles use /public/*)
+Route::middleware(['auth', 'role:student'])->group(function () {
+    Route::get('/catalogue', [CatalogueController::class, 'catalogue'])->name('catalogue');
+    Route::get('/offering/{id}', [CatalogueController::class, 'offering'])->whereNumber('id')->name('offering');
+});
+Route::middleware('auth')->group(function () {
+    Route::get('/how', [CatalogueController::class, 'how'])->name('how');
+    Route::get('/faq', [CatalogueController::class, 'faq'])->name('faq');
+});
 Route::get('/lang/{lang}', [CatalogueController::class, 'lang'])->name('lang');
 
 Route::middleware(['auth', 'role:lecturer,deputy_dean'])->prefix('offerings')->group(function () {

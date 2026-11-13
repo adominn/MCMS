@@ -113,6 +113,11 @@ it('verifies deputy dean role route access and restrictions', function () {
     $this->actingAs($dean)->get('/my-credit')->assertForbidden();
     $this->actingAs($dean)->get('/transfer')->assertForbidden();
 
+    // Forbidden lecturer proposal authoring pages (403) - Separation of Duties (D-52)
+    $this->actingAs($dean)->get('/proposals')->assertForbidden();
+    $this->actingAs($dean)->get('/proposals/new')->assertForbidden();
+    $this->actingAs($dean)->get('/micro-credentials')->assertForbidden();
+
     // Forbidden administrator pages (403)
     $this->actingAs($dean)->get('/admin/users')->assertForbidden();
     $this->actingAs($dean)->get('/admin/settings')->assertForbidden();
@@ -356,4 +361,396 @@ it('prevents cross-role unintended redirects to forbidden pages upon persona sig
 
     $lecLoginResponse = $this->post('/signin/stub', ['user' => $lecturer->id]);
     $lecLoginResponse->assertRedirect('http://localhost/pathways/5');
+});
+
+test('CODL admin and industry expert role home URLs route brand, error recovery, and task areas properly', function () {
+    $this->seed(\Database\Seeders\DatabaseSeeder::class);
+
+    $admin = who('Farid Hashim');
+    $expert = User::whereHas('roleAssignments', fn ($q) => $q->where('role', 'industry_expert'))->firstOrFail();
+
+    expect($admin->homeUrl())->toBe(route('users'));
+    expect($expert->homeUrl())->toBe(route('reviews'));
+
+    $this->actingAs($admin)->get('/')->assertRedirect(route('users'));
+
+    $this->actingAs($admin)->get(route('users'))
+        ->assertOk()
+        ->assertSee('href="' . route('users') . '"', false);
+
+    $this->actingAs($admin)->get('/quality/2')
+        ->assertForbidden()
+        ->assertSee('Go to my work')
+        ->assertSee('href="' . route('users') . '"', false);
+
+    // Non-academic CODL view hides zero academic tabs and renders human-readable area labels
+    $this->actingAs($admin)->get('/tasks')
+        ->assertOk()
+        ->assertDontSee('Proposals (0)')
+        ->assertDontSee('Qv_monitoring');
+
+    $lecturer = who('Dr. Aina Zulkifli');
+    $ftmkId = \Illuminate\Support\Facades\DB::table('ptjs')->where('code', 'FTMK')->value('id');
+    \Illuminate\Support\Facades\DB::table('tasks')->insert([
+        'assignee_role' => 'lecturer',
+        'user_id' => $lecturer->id,
+        'ptj_id' => $ftmkId,
+        'area' => 'qv_monitoring',
+        'kind' => 'qv_renew',
+        'link' => '/quality/2',
+        'subject_ref' => 'QV-TEST-001',
+        'title' => 'Prepare Quality Verification Renewal Test',
+        'created_at' => now(),
+    ]);
+
+    $this->actingAs($lecturer)->get('/tasks')
+        ->assertOk()
+        ->assertSee('Quality Verification')
+        ->assertDontSee('Qv_monitoring');
+});
+
+it('keeps authenticated students inside the secured portal when browsing offerings', function () {
+    $student = who('Amir Hakimi');
+    $lecturer = who('Dr. Aina Zulkifli');
+    $dean = who('Hakim Rahman');
+    $admin = who('Farid Hashim');
+    $expert = who('Ir. Siti Aminah');
+    $ftmkId = DB::table('ptjs')->where('code', 'FTMK')->value('id');
+
+    $mcId = DB::table('micro_credentials')->insertGetId([
+        'category' => 'umc',
+        'origin' => 'unbundled',
+        'ptj_id' => $ftmkId,
+        'owner_id' => $lecturer->id,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $verId = DB::table('mc_versions')->insertGetId([
+        'micro_credential_id' => $mcId,
+        'version_no' => 1,
+        'proposal_type' => 'new',
+        'status' => 'approved',
+        'name_en' => 'Portal Security Cloud Micro-Credential',
+        'name_ms' => 'Mikro-Kredensial Awan Selamat',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $offId = DB::table('offerings')->insertGetId([
+        'mc_version_id' => $verId,
+        'cohort_name' => '2026/SEC',
+        'start_date' => today()->addDays(14)->toDateString(),
+        'end_date' => today()->addDays(44)->toDateString(),
+        'delivery_mode' => 'Online',
+        'capacity' => 30,
+        'reg_opens_on' => today()->subDays(2)->toDateString(),
+        'reg_closes_on' => today()->addDays(10)->toDateString(),
+        'fee' => 150,
+        'status' => 'open',
+        'readiness_state' => 'ready',
+        'created_by' => $lecturer->id,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Unauthenticated visitors are redirected away from authenticated portal catalogue/info routes
+    $this->get('/catalogue')->assertRedirect('/signin');
+    $this->get('/offering/' . $offId)->assertRedirect('/signin');
+    $this->get('/how')->assertRedirect('/signin');
+    $this->get('/faq')->assertRedirect('/signin');
+
+    // Non-students cannot access student portal catalogue/offering routes
+    foreach ([$lecturer, $dean, $admin, $expert] as $staff) {
+        $this->actingAs($staff)->get('/catalogue')->assertForbidden();
+        $this->actingAs($staff)->get('/offering/' . $offId)->assertForbidden();
+    }
+
+    // Authenticated student browsing /catalogue stays inside /offering/{id} (never leaking to /public/offering/{id})
+    $this->actingAs($student)->get('/catalogue')
+        ->assertOk()
+        ->assertSee('Portal Security Cloud Micro-Credential')
+        ->assertSee('href="' . route('offering', $offId) . '"', false)
+        ->assertDontSee('/public/offering/' . $offId);
+
+    $this->actingAs($student)->get('/offering/' . $offId)
+        ->assertOk()
+        ->assertSee('Micro-Credential Management')
+        ->assertSee('href="' . route('catalogue') . '"', false)
+        ->assertSee('href="' . route('register', $offId) . '"', false)
+        ->assertDontSee('Public Verification & Credential Portal')
+        ->assertDontSee('Return to portal');
+
+    // Guests on /public/offering/{id} stay in /public/catalogue breadcrumbs and see Register
+    $this->get('/public/offering/' . $offId)
+        ->assertOk()
+        ->assertSee('href="' . route('public.catalogue') . '"', false)
+        ->assertSee('href="' . route('register', $offId) . '"', false);
+
+    // Non-student staff previewing /public/offering/{id} do not get a broken Register link to a 403 endpoint
+    $this->actingAs($lecturer)->get('/public/offering/' . $offId)
+        ->assertOk()
+        ->assertDontSee('href="' . route('register', $offId) . '"', false);
+});
+
+it('enforces active_role switches across RBAC middleware and task queues', function () {
+    // Multi-role switching is supported between compatible roles (e.g. Student and Lecturer).
+    // Deputy Dean and Lecturer roles are strictly mutually exclusive under Separation of Duties (D-52).
+    $dual = who('Amir Hakimi');
+    $ftmkId = DB::table('ptjs')->where('code', 'FTMK')->value('id');
+    DB::table('role_assignments')->insertOrIgnore([
+        'user_id' => $dual->id,
+        'role' => 'lecturer',
+        'scope_type' => 'ptj',
+        'ptj_id' => $ftmkId,
+        'created_at' => now(),
+    ]);
+
+    DB::table('tasks')->insert([
+        [
+            'assignee_role' => 'student',
+            'user_id' => $dual->id,
+            'ptj_id' => null,
+            'area' => 'enrolment',
+            'kind' => 'payment',
+            'link' => '/enrolments',
+            'subject_ref' => 'STU-ONLY-01',
+            'title' => 'Student Enrolment Queue Task',
+            'created_at' => now()->subYear(),
+        ],
+        [
+            'assignee_role' => 'lecturer',
+            'user_id' => $dual->id,
+            'ptj_id' => $ftmkId,
+            'area' => 'qv_monitoring',
+            'kind' => 'qv_renew',
+            'link' => null,
+            'subject_ref' => 'LEC-ONLY-01',
+            'title' => 'Lecturer QV Renewal Task',
+            'created_at' => now()->subYear(),
+        ],
+    ]);
+
+    // Switching from a student-only page to lecturer redirects cleanly to homeUrl() and blocks student routes
+    $this->actingAs($dual)
+        ->from('/enrolments')
+        ->post('/role/switch', ['role' => 'lecturer'])
+        ->assertRedirect('/tasks');
+
+    $this->actingAs($dual)->withSession(['active_role' => 'lecturer'])
+        ->get('/enrolments')->assertForbidden();
+    $this->actingAs($dual)->withSession(['active_role' => 'lecturer'])
+        ->get('/transfer')->assertForbidden();
+    $this->actingAs($dual)->withSession(['active_role' => 'lecturer'])
+        ->get('/proposals')->assertOk();
+
+    // Tasks queue only exposes tasks belonging to the currently active role
+    $this->actingAs($dual)->withSession(['active_role' => 'lecturer'])
+        ->get('/tasks')
+        ->assertOk()
+        ->assertSee('Lecturer QV Renewal Task')
+        ->assertDontSee('Student Enrolment Queue Task');
+
+    // Opening a task whose area is only in AREA_LABELS (e.g. qv_monitoring) renders safely without key error
+    $qvTaskId = DB::table('tasks')->where('subject_ref', 'LEC-ONLY-01')->value('id');
+    $this->actingAs($dual)->withSession(['active_role' => 'lecturer'])
+        ->get('/tasks/' . $qvTaskId)
+        ->assertOk()
+        ->assertSee('Quality Verification');
+
+    // Switching back to student restores student access and hides lecturer-only tasks
+    $this->actingAs($dual)->withSession(['active_role' => 'student'])
+        ->get('/enrolments')->assertOk();
+    $this->actingAs($dual)->withSession(['active_role' => 'student'])
+        ->get('/proposals')->assertForbidden();
+    $this->actingAs($dual)->withSession(['active_role' => 'student'])
+        ->get('/tasks')
+        ->assertOk()
+        ->assertSee('Student Enrolment Queue Task')
+        ->assertDontSee('Lecturer QV Renewal Task');
+
+    // If all roles are revoked, no tasks leak through empty where groups
+    DB::table('role_assignments')->where('user_id', $dual->id)->delete();
+    $this->actingAs($dual)->get('/tasks')
+        ->assertOk()
+        ->assertDontSee('Student Enrolment Queue Task')
+        ->assertDontSee('Lecturer QV Renewal Task');
+});
+
+it('enforces documents role access and PTj/owner scoping on documents, admissions, and lecturer audit', function () {
+    $student = who('Amir Hakimi');
+    $expert = who('Ir. Siti Aminah');
+    $deanFtmk = who('Hakim Rahman');
+    $lecOne = who('Dr. Aina Zulkifli');
+
+    $ftmkId = DB::table('ptjs')->where('code', 'FTMK')->value('id');
+    $ftkeId = DB::table('ptjs')->where('code', 'FTKE')->value('id');
+
+    // Industry experts cannot access /documents and do not see "My documents" in header dropdown
+    $this->actingAs($expert)->get('/documents')->assertForbidden();
+    $this->actingAs($expert)->get('/reviews')->assertOk()->assertDontSee(route('documents'));
+
+    // Second FTMK lecturer for horizontal owner-level audit scoping
+    $lecTwoId = DB::table('users')->insertGetId([
+        'name' => 'Dr. Peer FTMK Lecturer',
+        'email' => 'peer.lecturer@utem.example.test',
+        'institution_id' => 'UTEM-LEC-PEER',
+        'status' => 'active',
+        'locale' => 'en',
+        'password' => bcrypt('secret'),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $lecTwo = User::findOrFail($lecTwoId);
+    DB::table('role_assignments')->insert([
+        'user_id' => $lecTwo->id,
+        'role' => 'lecturer',
+        'scope_type' => 'ptj',
+        'ptj_id' => $ftmkId,
+        'created_at' => now(),
+    ]);
+
+    // PTj scoping on /documents (abc_batches & suspensions) and /transfers (admissions)
+    $ftkeProgId = DB::table('programmes')->insertGetId([
+        'code' => 'BEKG',
+        'name' => 'Bachelor of Electrical Engineering',
+        'mqf_level' => 6,
+        'mode' => 'conventional',
+        'accreditation_status' => 'accredited',
+        'total_credits' => 120,
+        'ptj_id' => $ftkeId,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $ftmkProgId = DB::table('programmes')->where('ptj_id', $ftmkId)->value('id');
+
+    DB::table('abc_batches')->insert([
+        ['reference' => 'ABC-FTMK-SEC-01', 'ptj_id' => $ftmkId, 'format_version' => 'csv-draft-1', 'row_count' => 1, 'prepared_by' => $deanFtmk->id, 'created_at' => now()],
+        ['reference' => 'ABC-FTKE-SEC-99', 'ptj_id' => $ftkeId, 'format_version' => 'csv-draft-1', 'row_count' => 1, 'prepared_by' => $deanFtmk->id, 'created_at' => now()],
+    ]);
+
+    $mcFtmk1 = DB::table('micro_credentials')->insertGetId([
+        'category' => 'samc', 'origin' => 'own', 'ptj_id' => $ftmkId, 'owner_id' => $lecOne->id, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    $vFtmk1 = DB::table('mc_versions')->insertGetId([
+        'micro_credential_id' => $mcFtmk1, 'version_no' => 1, 'proposal_type' => 'new', 'status' => 'approved', 'name_en' => 'Own Lecturer MC One', 'created_at' => now(), 'updated_at' => now(),
+    ]);
+
+    $mcFtmk2 = DB::table('micro_credentials')->insertGetId([
+        'category' => 'samc', 'origin' => 'own', 'ptj_id' => $ftmkId, 'owner_id' => $lecTwo->id, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    $vFtmk2 = DB::table('mc_versions')->insertGetId([
+        'micro_credential_id' => $mcFtmk2, 'version_no' => 1, 'proposal_type' => 'new', 'status' => 'approved', 'name_en' => 'Peer Lecturer MC Two', 'created_at' => now(), 'updated_at' => now(),
+    ]);
+
+    $mcFtke = DB::table('micro_credentials')->insertGetId([
+        'category' => 'samc', 'origin' => 'own', 'ptj_id' => $ftkeId, 'owner_id' => $lecOne->id, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    DB::table('mc_versions')->insert([
+        'micro_credential_id' => $mcFtke, 'version_no' => 1, 'proposal_type' => 'new', 'status' => 'approved', 'name_en' => 'Other Faculty FTKE MC', 'created_at' => now(), 'updated_at' => now(),
+    ]);
+
+    DB::table('suspensions')->insert([
+        ['micro_credential_id' => $mcFtmk1, 'kind' => 'suspension', 'reason' => 'FTMK hold', 'effective_from' => today()->toDateString(), 'offering_ids' => '[]', 'authority' => 'dean', 'decided_by' => $deanFtmk->id, 'created_at' => now(), 'updated_at' => now()],
+        ['micro_credential_id' => $mcFtke, 'kind' => 'suspension', 'reason' => 'FTKE secret hold', 'effective_from' => today()->toDateString(), 'offering_ids' => '[]', 'authority' => 'dean', 'decided_by' => $deanFtmk->id, 'created_at' => now(), 'updated_at' => now()],
+    ]);
+
+    DB::table('admissions')->insert([
+        ['user_id' => $student->id, 'programme_id' => $ftmkProgId, 'intake' => '2026/FTMK-ADM', 'recorded_by' => $deanFtmk->id, 'recorded_at' => now()],
+        ['user_id' => $student->id, 'programme_id' => $ftkeProgId, 'intake' => '2026/FTKE-ADM', 'recorded_by' => $deanFtmk->id, 'recorded_at' => now()],
+    ]);
+
+    $this->actingAs($deanFtmk)->get('/documents')
+        ->assertOk()
+        ->assertSee('ABC-FTMK-SEC-01')
+        ->assertDontSee('ABC-FTKE-SEC-99')
+        ->assertSee('Own Lecturer MC One')
+        ->assertDontSee('Other Faculty FTKE MC');
+
+    $this->actingAs($deanFtmk)->get('/transfers')
+        ->assertOk()
+        ->assertSee('2026/FTMK-ADM')
+        ->assertDontSee('2026/FTKE-ADM');
+
+    // Lecturer only sees audit events for micro-credentials they own, while FTMK deputy dean sees both FTMK events
+    $audit = app(\App\Modules\Records\AuditRecorder::class);
+    $audit->record('proposal.submitted.own', ['type' => 'McVersion', 'id' => (string) $vFtmk1], actorId: $lecOne->id);
+    $audit->record('proposal.submitted.peer', ['type' => 'McVersion', 'id' => (string) $vFtmk2], actorId: $lecTwo->id);
+
+    $this->actingAs($lecOne)->get('/records/audit')
+        ->assertOk()
+        ->assertSee('proposal.submitted.own')
+        ->assertDontSee('proposal.submitted.peer');
+
+    $this->actingAs($deanFtmk)->get('/records/audit')
+        ->assertOk()
+        ->assertSee('proposal.submitted.own')
+        ->assertSee('proposal.submitted.peer');
+});
+
+it('provides role-appropriate back links and breadcrumbs on achievement record view for lecturers and students', function () {
+    [$o, , , $people] = runningCohort();
+    $lecturer = who('Dr. Aina Zulkifli');
+    $student = who('Amir Hakimi');
+
+    $enrolmentId = DB::table('enrolments')
+        ->where('offering_id', $o)
+        ->where('user_id', $student->id)
+        ->value('id');
+
+    expect($enrolmentId)->not->toBeNull();
+
+    // Lecturer viewing student record has back links to participants list, not student /my-record
+    $this->actingAs($lecturer)->get("/records/{$enrolmentId}")
+        ->assertOk()
+        ->assertSee(route('offerings.participants', $o))
+        ->assertDontSee(route('records.mine'));
+
+    // Student viewing their own record has back links to /my-record
+    $this->actingAs($student)->get("/records/{$enrolmentId}")
+        ->assertOk()
+        ->assertSee(route('records.mine'));
+});
+
+it('prevents higher roles auditing student data from being exposed to student-only routes', function () {
+    $lecturer = who('Dr. Aina Zulkifli');
+    $dean = who('Hakim Rahman');
+    $student = who('Amir Hakimi');
+
+    // 1. Notification link routing respects staff vs student roles
+    expect(\App\Modules\Notifications\Notifier::linkFor('results.verified', $lecturer))
+        ->toBe(route('offerings', [], false))
+        ->and(\App\Modules\Notifications\Notifier::linkFor('results.verified', $student))
+        ->toBe(route('results.mine', [], false));
+
+    expect(\App\Modules\Notifications\Notifier::linkFor('credential.issued', $dean))
+        ->toBe(route('credentials.admin', [], false))
+        ->and(\App\Modules\Notifications\Notifier::linkFor('credential.issued', $student))
+        ->toBe(route('credentials.wallet', [], false));
+
+    expect(\App\Modules\Notifications\Notifier::linkFor('enrolment.confirmed', $lecturer))
+        ->toBe(route('offerings', [], false))
+        ->and(\App\Modules\Notifications\Notifier::linkFor('enrolment.confirmed', $student))
+        ->toBe(route('enrolments', [], false));
+
+    // 2. Deputy dean viewing transfer decision letter has back links to /transfers, not student /transfer
+    $ftmkId = DB::table('ptjs')->where('code', 'FTMK')->value('id');
+    $progId = DB::table('programmes')->where('ptj_id', $ftmkId)->value('id');
+    $tId = DB::table('transfer_applications')->insertGetId([
+        'reference' => 'TRF-TEST-RBAC-01',
+        'user_id' => $student->id,
+        'applied_by' => $student->id,
+        'programme_id' => $progId,
+        'status' => 'approved',
+        'applied_at' => now(),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $this->actingAs($dean)->get("/transfers/{$tId}/letter")
+        ->assertOk()
+        ->assertSee(route('transfers'))
+        ->assertDontSee('href="'.route('transfer').'"', false);
+
+    $this->actingAs($student)->get("/transfer/{$tId}")
+        ->assertOk()
+        ->assertSee('href="'.route('transfer').'"', false);
 });

@@ -11,15 +11,23 @@
 @endphp
 
 @if(!$isPrint)
-  <div class="ph">
+  <div class="ph" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px">
     <div>
-      <div class="crumb">
-        <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-        <a href="{{ route('documents') }}">{{ __('Documents') }}</a> /
-        <span>{{ __('Achievement record') }}</span>
-      </div>
+      <x-breadcrumb :crumbs="[
+        (auth()->check() && auth()->user()->hasAnyRole('student') ? 'My learning' : 'Documents') => (auth()->check() && auth()->user()->hasAnyRole('student') ? route('home') : route('documents')),
+        'Achievement record' => null,
+      ]" />
       <h1>{{ __('Achievement record') }}</h1>
       <div class="sub">{{ __('What you achieved in each micro-credential. It is an internal record, not an Academic Credit Record.') }}</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <a class="btn primary sm" href="{{ request()->fullUrlWithQuery(['print' => 1]) }}" target="_blank" title="{{ __('Print official summary of achievement records') }}">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-right:6px" aria-hidden="true">
+          <path d="M4 6V2h8v4M4 12H2.5A1.5 1.5 0 0 1 1 10.5v-3A1.5 1.5 0 0 1 2.5 6h11A1.5 1.5 0 0 1 15 7.5v3a1.5 1.5 0 0 1-1.5 1.5H12"/>
+          <rect x="4" y="9" width="8" height="5"/>
+        </svg>
+        {{ __('Print summary (A4)') }}
+      </a>
     </div>
   </div>
 
@@ -96,6 +104,7 @@
                 {{ $d['e']->name_en }}
               </a>
               <div class="s muted" style="margin-top:2px">
+                @if(!empty($d['e']->lecturer_name))<span>{{ $d['e']->lecturer_name }}</span> &middot; @endif
                 <span>{{ __('Version') }} {{ $d['e']->version_no }}</span>
               </div>
             </td>
@@ -105,23 +114,33 @@
             </td>
             <td>
               @if($nAch > 0)
-                <span class="tag ok" style="font-size:11px">
-                  {{ $nAch }} / {{ $nTot }} {{ __('Achieved') }}
-                </span>
-                @if($achievedBadges->isNotEmpty())
-                  <div class="s muted" style="font-size:11px;margin-top:2px">
-                    {{ $achievedBadges->implode(', ') }}
+                <div style="display:flex;align-items:center;gap:8px">
+                  <x-badge :category="$d['e']->category" :size="28" :image="$d['e']->badge_image_path ?? null" />
+                  <div>
+                    <span class="tag ok" style="font-size:11px">
+                      {{ $nAch }} / {{ $nTot }} {{ __('Achieved') }}
+                    </span>
+                    @if($achievedBadges->isNotEmpty())
+                      <div class="s muted" style="font-size:11px;margin-top:2px">
+                        {{ $achievedBadges->implode(', ') }}
+                      </div>
+                    @endif
                   </div>
-                @endif
+                </div>
               @else
-                <span class="tag muted" style="font-size:11px">
-                  0 / {{ $nTot }} {{ __('Achieved') }}
-                </span>
+                <div style="display:flex;align-items:center;gap:8px;opacity:0.4">
+                  <div style="filter:grayscale(100%)">
+                    <x-badge :category="$d['e']->category" :size="28" :image="$d['e']->badge_image_path ?? null" />
+                  </div>
+                  <span class="tag muted" style="font-size:11px">
+                    0 / {{ $nTot }} {{ __('Achieved') }}
+                  </span>
+                </div>
               @endif
             </td>
             <td class="num">
               @if($d['final'])
-                <div style="font-weight:700;color:var(--ink)">{{ $d['final']['weighted_percent'] }}%</div>
+                <div style="font-weight:700;color:var(--ink)">{{ __('Final result:') }} {{ $d['final']['weighted_percent'] }}%</div>
                 <div class="s muted">{{ $d['final']['grade'] ?? '' }}</div>
               @else
                 <span class="muted">&ndash;</span>
@@ -129,14 +148,14 @@
             </td>
             <td>
               @if($d['state'] === 'complete')
-                <span class="tag ok" style="font-size:11px">{{ __('Complete') }}</span>
+                <div>{{ __('Completion:') }} <span class="tag ok" style="font-size:11px">{{ __('Complete') }}</span></div>
                 @if($d['rec']->completion_status)
                   <div class="s muted" style="font-size:10px;margin-top:2px">{{ \Carbon\Carbon::parse($d['rec']->completed_on)->format('d/m/Y') }}</div>
                 @endif
               @elseif($d['state'] === 'in_progress')
-                <span class="tag info" style="font-size:11px">{{ __('In progress') }}</span>
+                <div>{{ __('Completion:') }} <span class="tag info" style="font-size:11px">{{ __('In progress') }}</span></div>
               @else
-                <span class="tag muted" style="font-size:11px">{{ __('Not started') }}</span>
+                <div>{{ __('Completion:') }} <span class="tag muted" style="font-size:11px">{{ __('Not started') }}</span></div>
               @endif
             </td>
             <td>

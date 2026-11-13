@@ -1,16 +1,16 @@
 @extends('layouts.app')
 @section('title', __('Verify results'))
 @section('content')
-<div class="crumb">
-  <a href="{{ route('results') }}">{{ __('Results and completion') }}</a>
-  <span>/</span>
-  <span>{{ $o->name_en }} {{ $o->cohort_name }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  'Results and completion' => route('results'),
+  $o->name_en . ' ' . $o->cohort_name => null,
+]" />
 
 <div class="title">
   <div>
     <h1>{{ __('Verify results: :name :cohort', ['name' => $o->name_en, 'cohort' => $o->cohort_name]) }}</h1>
     <div class="sub">
+      @if(!empty($o->lecturer_name)){{ $o->lecturer_name }} &middot; @endif
       {{ $o->results_submitted_at ? __('Submitted :date', ['date' => \Carbon\Carbon::parse($o->results_submitted_at)->format('d/m/Y H:i')]) : __('Not submitted by the lecturer yet') }}
     </div>
   </div>

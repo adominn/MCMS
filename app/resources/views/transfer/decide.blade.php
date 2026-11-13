@@ -1,18 +1,18 @@
 @extends('layouts.app')
 @section('title', 'Transfer decision')
 @section('content')
-<div class="crumb" style="margin-bottom:8px">
-  <a href="{{ route('transfers') }}">Credit transfer evaluation</a>
-  <span>/</span>
-  <span>{{ $a->reference }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  'Credit transfer' => route('transfers'),
+  $a->reference => null,
+]" />
 
 <div class="title">
   <div>
     <h1>Transfer decision {{ $a->reference }}</h1>
     <div class="sub">{{ $a->user_name }} ({{ $a->institution_id }}) &middot; {{ $a->programme }} {{ $a->programme_name }}</div>
   </div>
-  <div class="act" style="align-items:center">
+  <div class="act" style="align-items:center;gap:8px">
+    <a class="btn ter sm" href="{{ route('transfers') }}">&larr; {{ __('All evaluations') }}</a>
     <span class="tag {{ in_array($a->status, ['approved', 'partly']) ? 'ok' : ($a->status === 'not_approved' ? 'err' : 'warn') }}">
       <strong id="app-status">{{ $status[$a->status] }}</strong>
     </span>
@@ -112,74 +112,78 @@
     <form method="post" action="{{ route('transfers.evaluate', [$a->id, $l->id]) }}">
       @csrf
       <h3 style="margin:16px 0 8px;font-size:14px">{{ __('Learning outcomes, one by one') }}</h3>
-      <table style="margin-bottom:16px">
-        <thead>
-          <tr>
-            <th>{{ __('Outcome of the course') }}</th>
-            <th>{{ __('Micro-credential outcome that meets it') }}</th>
-            <th>{{ __('Match') }}</th>
-            <th>{{ __('Note') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-        @foreach($l->targets as $i => $t)
-          @php($as = $l->assessments[$t] ?? null)
-          <tr>
-            <td><b>{{ $t }}</b></td>
-            <td>
-              <select name="source[{{ $i }}]" aria-label="Outcome meeting: {{ $t }}" style="width:100%;max-width:260px">
-                <option value="">{{ __('None') }}</option>
-                @foreach($l->outcomes as $o)
-                  <option value="{{ $o->id }}" @selected(($as->source_outcome_id ?? null) == $o->id)>{{ $o->code }} {{ $o->text_en }}</option>
-                @endforeach
-              </select>
-            </td>
-            <td>
-              <select name="match[{{ $i }}]" aria-label="Match for: {{ $t }}">
-                <option value="">{{ __('Choose') }}</option>
-                @foreach(config('transfer.match') as $v => $tt)
-                  <option value="{{ $v }}" @selected(($as->match ?? null) === $v)>{{ __($tt) }}</option>
-                @endforeach
-              </select>
-            </td>
-            <td>
-              <input type="text" name="note[{{ $i }}]" value="{{ $as->note ?? '' }}" aria-label="Note for: {{ $t }}" placeholder="{{ __('Evaluation note') }}" style="width:100%">
-            </td>
-          </tr>
-        @endforeach
-        </tbody>
-      </table>
+      <div class="table-wrap">
+        <table style="margin-bottom:16px; min-width:650px">
+          <thead>
+            <tr>
+              <th style="min-width:160px">{{ __('Outcome of the course') }}</th>
+              <th style="min-width:240px">{{ __('Micro-credential outcome that meets it') }}</th>
+              <th style="width:130px">{{ __('Match') }}</th>
+              <th style="min-width:180px">{{ __('Note') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+          @foreach($l->targets as $i => $t)
+            @php($as = $l->assessments[$t] ?? null)
+            <tr>
+              <td><b>{{ $t }}</b></td>
+              <td>
+                <select name="source[{{ $i }}]" aria-label="Outcome meeting: {{ $t }}" style="width:100%;min-width:220px;max-width:320px">
+                  <option value="">{{ __('None') }}</option>
+                  @foreach($l->outcomes as $o)
+                    <option value="{{ $o->id }}" @selected(($as->source_outcome_id ?? null) == $o->id)>{{ $o->code }} {{ $o->text_en }}</option>
+                  @endforeach
+                </select>
+              </td>
+              <td>
+                <select name="match[{{ $i }}]" aria-label="Match for: {{ $t }}" style="width:100%;min-width:110px">
+                  <option value="">{{ __('Choose') }}</option>
+                  @foreach(config('transfer.match') as $v => $tt)
+                    <option value="{{ $v }}" @selected(($as->match ?? null) === $v)>{{ __($tt) }}</option>
+                  @endforeach
+                </select>
+              </td>
+              <td>
+                <input type="text" name="note[{{ $i }}]" value="{{ $as->note ?? '' }}" aria-label="Note for: {{ $t }}" placeholder="{{ __('Evaluation note') }}" style="width:100%">
+              </td>
+            </tr>
+          @endforeach
+          </tbody>
+        </table>
+      </div>
 
       <h3 style="margin:16px 0 8px;font-size:14px">{{ __('Other criteria') }}</h3>
-      <table style="margin-bottom:16px">
-        <thead>
-          <tr>
-            <th>{{ __('Criterion') }}</th>
-            <th>{{ __('Finding') }}</th>
-            <th>{{ __('Result') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-        @foreach(config('transfer.criteria') as $k => $label)
-          @continue($k === 'outcomes')
-          @php($cr = $l->criteria[$k] ?? null)
-          <tr>
-            <td>{{ __($label) }}</td>
-            <td>
-              <input type="text" name="finding[{{ $k }}]" value="{{ $cr->finding ?? '' }}" aria-label="Finding for {{ $label }}" placeholder="{{ __('Evidence checked') }}" style="width:100%;max-width:320px">
-            </td>
-            <td>
-              <select name="result[{{ $k }}]" aria-label="Result for {{ $label }}">
-                <option value="">{{ __('Choose') }}</option>
-                @foreach(config('transfer.results') as $v => $tt)
-                  <option value="{{ $v }}" @selected(($cr->result ?? null) === $v)>{{ __($tt) }}</option>
-                @endforeach
-              </select>
-            </td>
-          </tr>
-        @endforeach
-        </tbody>
-      </table>
+      <div class="table-wrap">
+        <table style="margin-bottom:16px; min-width:550px">
+          <thead>
+            <tr>
+              <th style="min-width:160px">{{ __('Criterion') }}</th>
+              <th style="min-width:240px">{{ __('Finding') }}</th>
+              <th style="width:130px">{{ __('Result') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+          @foreach(config('transfer.criteria') as $k => $label)
+            @continue($k === 'outcomes')
+            @php($cr = $l->criteria[$k] ?? null)
+            <tr>
+              <td>{{ __($label) }}</td>
+              <td>
+                <input type="text" name="finding[{{ $k }}]" value="{{ $cr->finding ?? '' }}" aria-label="Finding for {{ $label }}" placeholder="{{ __('Evidence checked') }}" style="width:100%;max-width:320px">
+              </td>
+              <td>
+                <select name="result[{{ $k }}]" aria-label="Result for {{ $label }}" style="width:100%;min-width:110px">
+                  <option value="">{{ __('Choose') }}</option>
+                  @foreach(config('transfer.results') as $v => $tt)
+                    <option value="{{ $v }}" @selected(($cr->result ?? null) === $v)>{{ __($tt) }}</option>
+                  @endforeach
+                </select>
+              </td>
+            </tr>
+          @endforeach
+          </tbody>
+        </table>
+      </div>
       <button type="submit" class="btn ter sm">{{ __('Save evaluation') }}</button>
     </form>
     @else
@@ -213,24 +217,26 @@
   <div class="hd"><h2>{{ __('3. Decision') }}</h2></div>
   <div class="bd">
     @csrf
-    <table style="margin-bottom:16px">
-      <thead>
-        <tr>
-          <th>{{ __('Course') }}</th>
-          <th>{{ __('Credits approved (0 to requested)') }}</th>
-        </tr>
-      </thead>
-      <tbody>
-      @foreach($lines as $l)
-        <tr>
-          <td><b>{{ $l->course_code }}</b> {{ $l->course_name }}</td>
-          <td>
-            <input type="number" step="0.5" min="0" max="{{ $l->credits_requested }}" name="credits[{{ $l->id }}]" value="{{ $l->credits_requested }}" aria-label="Credits approved for {{ $l->course_code }}" style="width:120px">
-          </td>
-        </tr>
-      @endforeach
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table style="margin-bottom:16px; min-width:480px">
+        <thead>
+          <tr>
+            <th>{{ __('Course') }}</th>
+            <th style="width:240px">{{ __('Credits approved (0 to requested)') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+        @foreach($lines as $l)
+          <tr>
+            <td><b>{{ $l->course_code }}</b> {{ $l->course_name }}</td>
+            <td>
+              <input type="number" step="0.5" min="0" max="{{ $l->credits_requested }}" name="credits[{{ $l->id }}]" value="{{ $l->credits_requested }}" aria-label="Credits approved for {{ $l->course_code }}" style="width:120px">
+            </td>
+          </tr>
+        @endforeach
+        </tbody>
+      </table>
+    </div>
 
     <div class="form-grid cols-3">
       <div class="field">

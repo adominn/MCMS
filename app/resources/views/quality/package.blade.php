@@ -12,12 +12,11 @@
 @if(!$isPrint)
   <div class="ph">
     <div>
-      <div class="crumb">
-        <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-        <a href="{{ route('quality') }}">{{ __('Quality Verification') }}</a> /
-        <a href="{{ route('quality.show', $m->id) }}">{{ $v->name_en }}</a> /
-        <span>{{ __('Submission package') }}</span>
-      </div>
+      <x-breadcrumb :crumbs="[
+        'Quality Verification' => route('quality'),
+        $v->name_en => route('quality.show', $m->id),
+        'Submission package' => null,
+      ]" />
       <h1>Submission package: {{ $v->name_en }}</h1>
       <div class="sub">
         Cycle {{ $rec->cycle_no }} &middot;

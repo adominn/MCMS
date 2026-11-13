@@ -1,18 +1,17 @@
 @extends('layouts.app')
 @section('title', __('Confirm completion'))
 @section('content')
-<div class="crumb">
-  <a href="{{ route('results') }}">{{ __('Results and completion') }}</a>
-  <span>/</span>
-  <a href="{{ route('results.verify', $o->id) }}">{{ $o->name_en }} {{ $o->cohort_name }}</a>
-  <span>/</span>
-  <span>{{ __('Confirm completion') }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  'Results and completion' => route('results'),
+  $o->name_en . ' ' . $o->cohort_name => route('results.verify', $o->id),
+  'Confirm completion' => null,
+]" />
 
 <div class="title">
   <div>
     <h1>{{ __('Confirm completion: :name :cohort', ['name' => $o->name_en, 'cohort' => $o->cohort_name]) }}</h1>
     <div class="sub">
+      @if(!empty($o->lecturer_name)){{ $o->lecturer_name }} &middot; @endif
       {{ __('Pre-issue completion checks and batch certificate issuance') }}
     </div>
   </div>

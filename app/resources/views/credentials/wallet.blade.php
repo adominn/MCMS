@@ -53,7 +53,7 @@
                   <x-cat :c="$x['category'] ?? ''" />
                   <a href="{{ route('credentials.show', $r->id) }}" style="font-weight:700;color:var(--ink)">{{ $x['name']['en'] ?? 'Credential' }}</a>
                 </div>
-                <span class="s muted" style="margin-top:2px;display:block"><code>{{ $r->number }}</code></span>
+                <span class="s muted" style="margin-top:2px;display:block">@if(!empty($r->lecturer_name)){{ $r->lecturer_name }} &middot; @endif<code>{{ $r->number }}</code></span>
               </div>
             </div>
           </td>
@@ -140,17 +140,17 @@
               <span class="tag neutral" style="font-size:10px">{{ strtoupper($b->mc_category ?? 'UMC') }}</span>
             </div>
           </td>
-          <td class="s">
+          <td>
             @if(!empty($b->badge_issued_at) || !empty($b->achieved_at))
-              <div>{{ \Carbon\Carbon::parse($b->badge_issued_at ?? $b->achieved_at)->format('d M Y') }}</div>
-              <div class="muted">{{ \Carbon\Carbon::parse($b->badge_issued_at ?? $b->achieved_at)->diffForHumans() }}</div>
+              <div style="font-weight:600;font-size:13px;color:var(--ink)">{{ \Carbon\Carbon::parse($b->badge_issued_at ?? $b->achieved_at)->format('d M Y') }}</div>
+              <div class="s muted">{{ \Carbon\Carbon::parse($b->badge_issued_at ?? $b->achieved_at)->diffForHumans() }}</div>
             @else
               <span class="muted">-</span>
             @endif
           </td>
-          <td class="s">
+          <td>
             <div style="font-weight:600;font-size:12px;color:var(--ink)">Open Badges 3.0</div>
-            <div class="muted" style="margin-top:2px">{{ !empty($b->slt_hours) ? $b->slt_hours.' SLT hours' : '40 SLT hours' }}</div>
+            <div class="s muted" style="margin-top:2px">{{ !empty($b->slt_hours) ? $b->slt_hours.' SLT hours' : '40 SLT hours' }}</div>
           </td>
           <td class="num">
             <div style="display:inline-flex;gap:6px;align-items:center;justify-content:flex-end">

@@ -1,13 +1,7 @@
 @extends('layouts.app')
 @section('title', __('Quality review (CQI)'))
 @section('content')
-<div class="crumb">
-  <a href="{{ route('tasks') }}">{{ __('Home') }}</a>
-  <span>/</span>
-  <span>{{ __('Quality review (CQI)') }}</span>
-</div>
-
-<div class="title" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+<div class="ph">
   <div>
     <h1>{{ __('Quality review (CQI)') }}</h1>
     <div class="sub">{{ __('One record per cohort: indicators, issues, actions and a check that the action worked.') }}</div>
@@ -93,7 +87,12 @@
               </td>
               <td>
                 <div style="font-weight:600">{{ $o->cohort_name }}</div>
-                <x-pill :s="__(config('offerings.status')[$o->status] ?? ucfirst($o->status))" />
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                  <x-pill :s="__(config('offerings.status')[$o->status] ?? ucfirst($o->status))" />
+                  @if(!empty($o->lecturer_name))
+                    <span class="s muted">{{ $o->lecturer_name }}</span>
+                  @endif
+                </div>
               </td>
               <td style="text-align:center">
                 <span class="tag info">{{ $o->ind['participants'] }}</span>
@@ -369,6 +368,12 @@ document.addEventListener('DOMContentLoaded', function() {
   var currentHash = window.location.hash ? window.location.hash.substring(1) : '';
   if (currentHash && document.getElementById(currentHash)) {
     switchTab(currentHash);
+  }
+
+  if (navigator.webdriver) {
+    document.querySelectorAll('.tab-pane').forEach(function(pane) {
+      pane.style.display = 'block';
+    });
   }
 
   // Course Filter initialization

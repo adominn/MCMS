@@ -1,8 +1,20 @@
 @extends('layouts.app')
 @section('title', 'Trace a participant')
 @section('content')
-<h1>Trace: {{ $user->name }}, {{ $version->name_en }}</h1>
-<p><a href="{{ route('trace') }}">Traceability</a> &middot; {{ $enrolment->reference }} &middot; cohort {{ $offering->cohort_name }}</p>
+<x-breadcrumb :crumbs="[
+  'Traceability' => route('trace'),
+  'Trace: ' . $user->name => null,
+]" />
+
+<div class="title">
+  <div>
+    <h1>Trace: {{ $user->name }}, {{ $version->name_en }}</h1>
+    <div class="sub">{{ $enrolment->reference }} &middot; cohort {{ $offering->cohort_name }}</div>
+  </div>
+  <div class="act">
+    <a class="btn ter sm" href="{{ route('trace') }}">&larr; {{ __('Back to traceability') }}</a>
+  </div>
+</div>
 <p class="muted">{{ __('From development to monitoring, with what is on record at each stage. A stage that is empty has not happened yet, or its record is missing.') }}</p>
 <ol id="chain" class="chain">
 @foreach($stages as $s)

@@ -22,7 +22,7 @@ final class VersionController
     {
         return view('curriculum.mcs.index', ['rows' => DB::table('micro_credentials as m')->join('mc_versions as v', function ($j) {
             $j->on('v.micro_credential_id', '=', 'm.id')->whereRaw('v.version_no = (select max(version_no) from mc_versions where micro_credential_id = m.id)');
-        })->where('m.owner_id', $request->user()->id)->orderByDesc('v.updated_at')->get(['m.id', 'm.category', 'v.name_en', 'v.version_no', 'v.status'])]);
+        })->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->where('m.owner_id', $request->user()->id)->orderByDesc('v.updated_at')->get(['m.id', 'm.category', 'v.name_en', 'v.version_no', 'v.status', 'u.name as lecturer_name'])]);
     }
 
     public function show(Request $request, int $mc)
@@ -129,7 +129,7 @@ final class VersionController
 
     private function mine(Request $request, int $mc): object
     {
-        $m = DB::table('micro_credentials')->find($mc) ?? abort(404);
+        $m = DB::table('micro_credentials as m')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->where('m.id', $mc)->first(['m.*', 'u.name as lecturer_name']) ?? abort(404);
         abort_unless($m->owner_id === $request->user()->id, 403, 'This micro-credential belongs to another lecturer.');
 
         return $m;

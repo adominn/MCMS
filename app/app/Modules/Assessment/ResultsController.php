@@ -130,8 +130,8 @@ final class ResultsController
     public function index(Request $request)
     {
         $ids = $request->user()->scopedPtjIds('deputy_dean');
-        $rows = DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
-            ->when($ids !== null, fn ($b) => $b->whereIn('m.ptj_id', $ids))->whereIn('o.status', ['running', 'ended'])->orderByDesc('o.start_date')->get(['o.id', 'o.cohort_name', 'o.status', 'o.results_submitted_at', 'v.name_en']);
+        $rows = DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
+            ->when($ids !== null, fn ($b) => $b->whereIn('m.ptj_id', $ids))->whereIn('o.status', ['running', 'ended'])->orderByDesc('o.start_date')->get(['o.id', 'o.cohort_name', 'o.status', 'o.results_submitted_at', 'v.name_en', 'u.name as lecturer_name']);
         $stats = DB::table('assessment_results as r')->join('enrolments as e', 'e.id', '=', 'r.enrolment_id')->whereIn('e.offering_id', $rows->pluck('id'))
             ->selectRaw('e.offering_id, r.status, count(*) n')->groupBy('e.offering_id', 'r.status')->get()->groupBy('offering_id');
 
@@ -227,6 +227,7 @@ final class ResultsController
             ->join('offerings as o', 'o.id', '=', 'e.offering_id')
             ->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')
             ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+            ->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
             ->leftJoin('ptjs as p', 'p.id', '=', 'm.ptj_id')
             ->where('e.user_id', $request->user()->id)
             ->whereIn('e.status', ['enrolled', 'completed', 'not_completed'])
@@ -237,6 +238,7 @@ final class ResultsController
                 'v.id as version_id', 'v.name_en', 'v.name_ms', 'v.discipline', 'v.planned_slt', 'v.proposed_credit', 'v.proposed_mqf_level', 'v.credential_types',
                 'm.code as mc_code', 'm.category as mc_category',
                 'p.code as ptj_code', 'p.name as ptj_name',
+                'u.name as lecturer_name',
             ]);
 
         $data = $rows->map(fn ($e) => $this->formatEnrolmentData($e));
@@ -265,6 +267,7 @@ final class ResultsController
             ->join('offerings as o', 'o.id', '=', 'e.offering_id')
             ->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')
             ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+            ->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
             ->leftJoin('ptjs as p', 'p.id', '=', 'm.ptj_id')
             ->where('e.id', $id)
             ->where('e.user_id', $request->user()->id)
@@ -275,6 +278,7 @@ final class ResultsController
                 'v.id as version_id', 'v.name_en', 'v.name_ms', 'v.discipline', 'v.planned_slt', 'v.proposed_credit', 'v.proposed_mqf_level', 'v.credential_types',
                 'm.code as mc_code', 'm.category as mc_category',
                 'p.code as ptj_code', 'p.name as ptj_name',
+                'u.name as lecturer_name',
             ]) ?? abort(404);
 
         $d = $this->formatEnrolmentData($e);
@@ -422,8 +426,8 @@ final class ResultsController
     private function offering(Request $request, int $id, bool $lecturer = false): object
     {
         $user = $request->user();
-        $o = DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->where('o.id', $id)
-            ->first(['o.*', 'v.name_en', 'm.ptj_id', 'm.owner_id']) ?? abort(404);
+        $o = DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->where('o.id', $id)
+            ->first(['o.*', 'v.name_en', 'm.ptj_id', 'm.owner_id', 'u.name as lecturer_name']) ?? abort(404);
         if ($lecturer) {
             abort_unless($o->owner_id === $user->id, 403, 'These are the results of another lecturer\'s cohort.');
         } else {

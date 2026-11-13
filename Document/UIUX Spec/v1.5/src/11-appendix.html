@@ -1,0 +1,13 @@
+<!-- ===================== APPENDIX A ===================== -->
+<h1>Appendix A. Running the Live Application &amp; Captures</h1>
+<p>In Version next iteration (v1.5), MCMS runs as a working Laravel 13.38 / PHP 8.3 application backed by MySQL 8.4 LTS:</p>
+<script type="text/tbl" data-h="Task|How" data-w="30%|70%">
+Start the database &amp; app | Run MySQL 8.4 LTS (port 3306) and <code>cd app; php artisan serve --port=8110</code>, then open <code>http://localhost:8110</code>
+Sign in as any role | The Sign-in page (<code>/signin</code>, CMN-02) offers the Office 365 login box plus the non-production Test persona selector (CMN-01) covering Student, Lecturer, Deputy Dean, CODL Admin, and Industry Expert
+Browse public site | Public pages (<code>/public</code>, <code>/public/catalogue</code>, <code>/verify</code>) are accessible without authentication
+Open printable documents | Any print/export link opens a print-ready A4 view (<code>?print=1</code>), also collected in <code>/documents</code> (DOC-17)
+Verify automatically | Run <code>php vendor/bin/pest</code> (377 feature tests, 5,368 assertions) and <code>npx playwright test</code> (<code>flows.spec.ts</code>: 23 flow tests passing; <code>scenario.spec.ts</code>: 4 serial acts queued for UCreds fixture/selector alignment)
+</script>
+<figure data-f="signinmain"><img src="./img/signin-main.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Centralized UTeM Sign-in screen (CMN-02, <code>/signin</code>) with Office 365 credential format guidance and CODL identity.</figcaption></figure>
+<figure data-f="personas"><img src="./img/personas.png" style="width:100%;border:1px solid #c6c6c6"><figcaption>Live Test persona selector (CMN-01, <code>/signin</code>) used in non-production verification across all roles.</figcaption></figure>
+<p>Appendices B (170 live screen, tab, dialog, and menu captures) and C (17 live printable A4 document captures) are generated directly from the running Laravel application using Playwright Chromium captures and laid out consistently by manifest.</p>

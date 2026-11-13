@@ -45,13 +45,51 @@ class User extends Authenticatable
         return $a->contains(fn ($x) => in_array($x->scope_type, [null, 'university'], true)) ? null : $a->where('scope_type', 'ptj')->pluck('ptj_id')->filter()->all();
     }
 
+    /** Active roles scoped to the session's active role when acting in a switched role context. @return \Illuminate\Support\Collection<int, Role> */
+    public function effectiveRoles(): \Illuminate\Support\Collection
+    {
+        $activeRoles = $this->activeRoles();
+
+        if (auth()->check() && (int) auth()->id() === (int) $this->id && session()->has('active_role')) {
+            $sessionRole = (string) session('active_role');
+            $matched = $activeRoles->first(fn (Role $r) => $r->value === $sessionRole);
+            if ($matched) {
+                return collect([$matched]);
+            }
+        }
+
+        return $activeRoles;
+    }
+
     public function hasAnyRole(string ...$roles): bool
     {
-        return $this->activeRoles()->contains(fn (Role $r) => in_array($r->value, $roles, true));
+        return $this->effectiveRoles()->contains(fn (Role $r) => in_array($r->value, $roles, true));
     }
 
     public function hasRole(string $role): bool
     {
         return $this->hasAnyRole($role);
+    }
+
+    /** Currently active role for this session, falling back to the primary active role. */
+    public function currentRole(): ?Role
+    {
+        $activeRoles = $this->activeRoles();
+        $sessionRole = (string) session('active_role');
+
+        if ($sessionRole !== '') {
+            $matched = $activeRoles->first(fn (Role $r) => $r->value === $sessionRole);
+            if ($matched) {
+                return $matched;
+            }
+        }
+
+        return $activeRoles->first();
+    }
+
+    /** Role-appropriate home URL for logos, error actions, and portal return links. */
+    public function homeUrl(): string
+    {
+        return route($this->currentRole()?->homeRouteName() ?? 'tasks');
     }
 }

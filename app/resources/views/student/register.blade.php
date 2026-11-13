@@ -1,11 +1,14 @@
 @extends('layouts.app')
 @section('title', __('Register'))
 @section('content')
-<div class="crumb"><a href="{{ route('catalogue') }}">{{ __('Find a micro-credential') }}</a> <span>/</span> <span>{{ __('Register') }}: {{ $o->name_en }} {{ $o->cohort_name }}</span></div>
+<x-breadcrumb :crumbs="[
+  'Find a micro-credential' => route('catalogue'),
+  __('Register: :name :cohort', ['name' => $o->name_en, 'cohort' => $o->cohort_name]) => null,
+]" />
 <div class="title">
   <div>
     <h1>{{ __('Register') }}: {{ $o->name_en }} {{ $o->cohort_name }}</h1>
-    <div class="sub">{{ $o->cohort_name }} &middot; {{ \Carbon\Carbon::parse($o->start_date)->format('d/m/Y') }} {{ __('to') }} {{ \Carbon\Carbon::parse($o->end_date)->format('d/m/Y') }}</div>
+    <div class="sub">{{ $o->cohort_name }} @if(!empty($o->lecturer_name))&middot; {{ $o->lecturer_name }} @endif&middot; {{ \Carbon\Carbon::parse($o->start_date)->format('d/m/Y') }} {{ __('to') }} {{ \Carbon\Carbon::parse($o->end_date)->format('d/m/Y') }}</div>
   </div>
 </div>
 
@@ -295,6 +298,10 @@
         <dl class="dl">
           <dt>{{ __('Micro-credential') }}</dt>
           <dd><b>{{ $o->name_en }}</b></dd>
+          @if(!empty($o->lecturer_name))
+            <dt>{{ __('Lecturer') }}</dt>
+            <dd>{{ $o->lecturer_name }}</dd>
+          @endif
           <dt>{{ __('Cohort') }}</dt>
           <dd>{{ $o->cohort_name }}</dd>
           <dt>{{ __('Dates') }}</dt>

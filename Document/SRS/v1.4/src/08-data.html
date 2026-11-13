@@ -1,0 +1,218 @@
+<!-- ===================== 6. DATA REQUIREMENTS ===================== -->
+<h1>6. Data Requirements</h1>
+<p>This section describes the information MCMS must hold, as a conceptual model. It names the main entities and their relationships so that reviewers can check that every record required by the Guide exists, and so that the SDD can derive the physical database design. Table names, column types and indexes belong to the SDD.</p>
+
+<h2>6.1 Conceptual Data Model</h2>
+<p>The model is shown in three parts. The most important property is visible in all three: each recognition stage is its own entity (approval decision, Digital Badge, credential, QV record, ACR, ABC deposit, transfer decision, redemption event), never a status field on another entity (D-15).</p>
+
+<h3>6.1.1 Curriculum and Approval</h3>
+<figure data-f="ercurriculum">
+<pre class="mermaid">
+erDiagram
+  PTJ ||--o{ MICRO_CREDENTIAL : owns
+  MICRO_CREDENTIAL ||--|{ MC_VERSION : "has versions"
+  PROGRAMME ||--|{ PARENT_COURSE : includes
+  PARENT_COURSE ||--o{ MC_VERSION : "unbundled into (UMC)"
+  MC_VERSION ||--|{ LEARNING_OUTCOME : defines
+  MC_VERSION ||--o{ MODULE : "structured in"
+  MODULE ||--|{ ASSESSMENT_COMPONENT : "assessed by"
+  LEARNING_OUTCOME }o--o{ ASSESSMENT_COMPONENT : "aligned with"
+  MC_VERSION ||--o{ REVIEW : "reviewed in"
+  MC_VERSION ||--o{ APPROVAL_DECISION : "decided by"
+  MC_VERSION ||--o{ CHANGE_REQUEST : "changed through"
+  MICRO_CREDENTIAL ||--o{ QV_RECORD : "verified by (SAMC)"
+  QV_RECORD ||--o{ QV_EVIDENCE : contains
+  MICRO_CREDENTIAL {
+    uuid id
+    string code
+    enum confirmed_category
+    uuid ptj_id
+  }
+  MC_VERSION {
+    int version_no
+    enum state
+    int total_slt_hours
+    decimal approved_credit
+    date effective_date
+  }
+  APPROVAL_DECISION {
+    enum stage
+    enum decision
+    uuid decided_by
+    string external_ref
+    datetime decided_at
+  }
+  QV_RECORD {
+    enum status
+    string qv_reference
+    decimal verified_credit
+    string verified_mqf_level
+    date valid_from
+    date valid_until
+  }
+</pre>
+<figcaption>Conceptual model of curriculum, versions, approval and Quality Verification. Only a few key attributes are shown.</figcaption>
+</figure>
+
+<h3>6.1.2 Delivery, Achievement and Credentials</h3>
+<figure data-f="erdelivery">
+<pre class="mermaid">
+erDiagram
+  MC_VERSION ||--o{ OFFERING : "offered as"
+  OFFERING ||--o{ READINESS_CHECK : "confirmed by"
+  OFFERING ||--o{ ENROLMENT : has
+  USER ||--o{ ENROLMENT : makes
+  ENROLMENT ||--o{ MODULE_ENROLMENT : "tracks modules"
+  ENROLMENT ||--o{ ASSESSMENT_RESULT : earns
+  ENROLMENT ||--o| PAYMENT : "paid by"
+  ENROLMENT ||--|| ACHIEVEMENT_RECORD : "summarised in"
+  MODULE_ENROLMENT ||--o| DIGITAL_BADGE : "proved by"
+  ACHIEVEMENT_RECORD ||--o{ CREDENTIAL : "certified by"
+  CREDENTIAL ||--o{ CREDENTIAL_EVENT : "history of"
+  CREDENTIAL ||--o{ VERIFICATION_LOG : "checked in"
+  OFFERING ||--o{ CQI_RECORD : "improved through"
+  CQI_RECORD ||--o{ CQI_ACTION : plans
+  ASSESSMENT_RESULT {
+    decimal score
+    enum state
+    uuid verified_by
+    datetime verified_at
+  }
+  ACHIEVEMENT_RECORD {
+    enum completion_status
+    date completed_on
+    uuid confirmed_by
+  }
+  CREDENTIAL {
+    uuid credential_id
+    enum type
+    enum status
+    json signed_payload
+    date issued_on
+  }
+  CREDENTIAL_EVENT {
+    enum action
+    string reason
+    uuid actor
+    datetime at
+  }
+</pre>
+<figcaption>Conceptual model of offerings, enrolment, results, the Achievement Record and credentials.</figcaption>
+</figure>
+
+<h3>6.1.3 Credit, Transfer and Stackable Pathway</h3>
+<figure data-f="ercredit">
+<pre class="mermaid">
+erDiagram
+  ACHIEVEMENT_RECORD ||--o| ACR : "may produce"
+  USER ||--o{ ACR : owns
+  ACR ||--o{ CONSENT : "authorised by"
+  ACR ||--o| ABC_DEPOSIT : "deposited as"
+  ABC_DEPOSIT ||--o{ REDEMPTION_EVENT : "status history"
+  USER ||--o{ TRANSFER_APPLICATION : submits
+  TRANSFER_APPLICATION }o--|{ ACR : uses
+  TRANSFER_APPLICATION ||--o| EQUIVALENCE_ASSESSMENT : "evaluated in"
+  TRANSFER_APPLICATION ||--o| TRANSFER_DECISION : "decided by"
+  PROGRAMME ||--o{ PATHWAY_MAPPING : "has"
+  PATHWAY_MAPPING ||--|{ PATHWAY_ITEM : lists
+  USER ||--o{ STACKABLE_PLAN : "follows"
+  STACKABLE_PLAN }o--|| PATHWAY_MAPPING : "based on"
+  STACKABLE_PLAN }o--o{ ACR : "stacks"
+  ACR {
+    string acr_reference
+    decimal credit
+    string mqf_level
+    date completion_date
+    uuid verified_by
+  }
+  ABC_DEPOSIT {
+    string abc_reference
+    date deposit_date
+    date credit_expiry
+    enum deposit_status
+    enum credit_status
+  }
+  TRANSFER_DECISION {
+    enum decision
+    decimal credits_approved
+    string authority
+    date decided_on
+  }
+  STACKABLE_PLAN {
+    decimal utem_credit_percent
+    enum residency_status
+    enum decision
+  }
+</pre>
+<figcaption>Conceptual model of ACR, ABC deposit, redemption, credit transfer and stackable plans.</figcaption>
+</figure>
+
+<p class="tcap" data-t="entities">Main entities and their purpose</p>
+<script type="text/tbl" data-h="Entity|Purpose|Owner (App H4)|Main requirements" data-w="20%|46%|14%|20%" data-cls="small">
+PTJ, PROGRAMME, PARENT_COURSE | Reference data for owners, target programmes and parent courses with accreditation status, credits, SLT and CLOs | S1 | {{fr-refdata}}
+MICRO_CREDENTIAL, MC_VERSION | A micro-credential and its immutable approved versions | P1 / P2 | {{fr-verhistory}}
+LEARNING_OUTCOME, MODULE, ASSESSMENT_COMPONENT | Learning design and alignment | P1 | {{fr-proplo}}, {{fr-umcmodel}}
+REVIEW, APPROVAL_DECISION, CHANGE_REQUEST | Review results, decisions per stage, minor and material changes | P1 / P2 (records Senate decisions) | {{fr-wfrecord}}, {{fr-chgclassify}}
+QV_RECORD, QV_EVIDENCE | QV cycles, evidence checklist, verified credit and MQF, validity | P1 / P2 | {{fr-qvresult}}
+OFFERING, READINESS_CHECK | Cohorts and their readiness confirmation | P2 | {{fr-offcreate}}, {{fr-offconfirm}}
+USER, ROLE_ASSIGNMENT | People, roles and scopes | S1 | {{fr-scope}}
+ENROLMENT, MODULE_ENROLMENT, PAYMENT | Registration, module progress and fee status | PTj (P2); CODL operates the data | {{fr-regstatus}}, {{fr-regmodule}}
+ASSESSMENT_RESULT | Provisional and verified results | P1 / P2 | {{fr-asverify}}
+ACHIEVEMENT_RECORD | Internal record of modules, badges and completion; not an ACR | P1 / P2 | {{fr-arkeep}}
+DIGITAL_BADGE, CREDENTIAL, CREDENTIAL_EVENT | Proofs of achievement and their history | P2 (issued by the system) | {{fr-crdc}}, {{fr-crcorrect}}
+ACR, CONSENT, ABC_DEPOSIT, REDEMPTION_EVENT | Academic credit records, consent, deposit and credit status history | P2 (ACR generated by the system) | {{fr-acrprep}}, {{fr-dprecord}}, {{fr-rdprov}}
+TRANSFER_APPLICATION, EQUIVALENCE_ASSESSMENT, TRANSFER_DECISION | Credit transfer cases | P2 of the degree faculty | {{fr-ctapply}}, {{fr-ctdecision}}
+PATHWAY_MAPPING, PATHWAY_ITEM, STACKABLE_PLAN | Programme pathway mappings and individual plans | P1 / P2; Senate approval recorded by P2 | {{fr-spmap}}, {{fr-spplan}}
+CQI_RECORD, CQI_ACTION | Monitoring findings and improvement actions | P1 / P2 | {{fr-cqiaction}}
+AUDIT_LOG, SETTING, NOTIFICATION, INTEGRATION_JOB | Audit trail, configuration, messages and adapter jobs | System | {{fr-auditlog}}, {{fr-settings}}
+</script>
+
+<h2>6.2 Data Integrity Rules</h2>
+<script type="text/req" data-p="DR">
+dr-separate | Each recognition stage SHALL be stored in its own entity with its own decision fields. No single status field SHALL represent more than one stage. | D-15
+dr-versionref | Offerings, enrolments, results, credentials, ACR and equivalence evaluations SHALL reference the exact MC version they belong to. | G 13.8, 18.8
+dr-immutable | Approved versions, issued credential payloads, verified results, decisions and audit entries SHALL NOT be updated in place. A change SHALL create a new record linked to the previous one. | D-20, G 18.10
+dr-nodelete | Records SHALL NOT be physically deleted except by the approved disposal process after their retention period. | G 18.12
+dr-derived | Credit value, MQF level and QV status shown anywhere SHALL be derived from the approval or QV record, with a reference to that record. | D-17
+dr-asof | Each decision SHALL store the settings values it used (for example the credit validity period), so that later setting changes do not alter past decisions. | D-16
+dr-publicid | Records exposed outside the staff portal (credentials, verification links) SHALL use random, non-sequential identifiers. |
+dr-time | All timestamps SHALL be stored in UTC with time zone. |
+dr-refint | Relationships SHALL be enforced by the database (foreign keys and constraints), not only by application code. | D-09
+dr-bilingual | Text that participants see (titles, outcomes, recognition statements) SHALL be stored in both Bahasa Melayu and English. | D-02
+</script>
+
+<h2>6.3 Data Retention and Ownership</h2>
+<p>The Guide requires retention according to UTeM's records policy and, for ACR and ABC data, the ABC rules [G 18.12]. The periods below are placeholders (A-08, OI-07); only the ACR rule is fixed by the Guide.</p>
+<p class="tcap" data-t="retention">Record categories, owners and retention (placeholders)</p>
+<script type="text/tbl" data-h="Record category|Owner / custodian|Retention|Source" data-w="34%|24%|24%|18%" data-cls="small">
+Development and approval documents, versions | PTj / designated party | TBD (UTeM records policy); versions linked to participants kept while those records are kept | G 18.2, 18.8
+Learning materials and versions | PTj / academic owner | TBD | App H4
+Assessment instruments, rubrics and results | PTj / academic party | TBD | App H4
+Registration records | PTj (P2) | TBD | App H4
+Achievement Record | PTj (P2) | TBD | G 18.3
+Badges, Certificates, Digital Credentials and their history | PTj (P2); issued by the system | TBD; verification remains possible for the life of the credential | App E6, H4
+QA, monitoring and CQI records | PTj (P2) | TBD | G 18.9
+QV documents and decisions (SAMC) | PTj (P2) | At least the QV validity period plus records requirement | App H4
+Academic Credit Record (ACR) | PTj (P2); generated by the system | Indefinite, unless the owner or a recognised authority directs otherwise | G 12.8
+ABC deposit records | PTj (P2) | Per ABC rules | App H4
+Credit transfer decisions | Academic / records party | TBD (academic regulations) | App H4
+Stackable mapping matrices | Programme / PTj | Programme lifetime plus review period | App H4
+Audit trail | System (CODL) | At least as long as the longest linked record | G 15.7
+Verification request logs | System (CODL) | TBD | App E6
+</script>
+
+<h2>6.4 Data Migration and Reference Data</h2>
+<script type="text/req" data-p="DR">
+dr-refimport | The system SHALL import reference data for PTj, programmes and parent courses from CSV files supplied by the responsible offices. |
+dr-legacy | The system SHOULD import existing micro-credential records kept in spreadsheets (offerings, participants, completions) as historical records, marked as migrated and not re-verified. |
+dr-nolegacycred | Migrated records SHALL NOT produce ACR or credit claims unless their eligibility is verified under Section 3.11. | G 12.1, D-17
+</script>
+
+<h2>6.5 Data Classification</h2>
+<p class="tcap" data-t="classification">Data classification</p>
+<script type="text/tbl" data-h="Class|Examples|Handling" data-w="16%|44%|40%" data-cls="small">
+Public | Catalogue entries, public verification fields, issuer public key | May be shown without login
+Internal | Proposals, reviews, decisions, CQI records, reports | Staff within scope only
+Confidential | Participant identity (name, identity card or passport number, matric number, contact details), results, ACR, consent, transfer cases | Role and scope controlled; encrypted at rest; minimum exposure
+Restricted | Credential signing keys, system secrets, audit integrity data | Administrators of the key store only; never shown in the interface
+</script>

@@ -1,7 +1,20 @@
 @extends('layouts.app')
 @section('title', __('Change'))
 @section('content')
-<h1>{{ __('Minor change: :name', ['name' => $v->name_en]) }}</h1>
+<x-breadcrumb :crumbs="[
+  'Proposals and approval' => route('approvals'),
+  __('Minor change: :name', ['name' => $v->name_en]) => null,
+]" />
+
+<div class="title">
+  <div>
+    <h1>{{ __('Minor change: :name', ['name' => $v->name_en]) }}</h1>
+    <div class="sub">{{ __('Version :num · requested by :owner on :date', ['num' => $v->version_no, 'owner' => $v->owner, 'date' => \Carbon\Carbon::parse($cr->created_at)->format('d/m/Y')]) }}</div>
+  </div>
+  <div class="act">
+    <a class="btn ter sm" href="{{ route('approvals') }}">&larr; {{ __('Back to proposals and approval') }}</a>
+  </div>
+</div>
 <div class="card">
   <p>{{ __('Version :num · requested by :owner on :date', ['num' => $v->version_no, 'owner' => $v->owner, 'date' => \Carbon\Carbon::parse($cr->created_at)->format('d/m/Y')]) }}</p>
   <p><b>{{ __('Change:') }}</b> {{ $cr->reason }}</p>

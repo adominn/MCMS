@@ -1,13 +1,7 @@
 @extends('layouts.app')
 @section('title', __('Help and guides'))
 @section('content')
-<div class="crumb" style="margin-bottom:8px">
-  <a href="{{ route('tasks') }}">{{ __('Home') }}</a>
-  <span>/</span>
-  <span>{{ __('Help and guides') }}</span>
-</div>
-
-<div class="title">
+<div class="ph" style="margin-bottom:16px">
   <div>
     <h1>{{ __('Help and guides') }}</h1>
     <div class="sub">{{ __('Plain-language answers about each recognition stage, and a quick guide for your role') }}</div>

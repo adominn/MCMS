@@ -1,11 +1,10 @@
 @extends('layouts.app')
 @section('title', __('Readiness'))
 @section('content')
-<div class="crumb">
-  <a href="{{ route('offerings') }}">{{ __('Offerings and readiness') }}</a>
-  <span>/</span>
-  <span>{{ $o->name_en }} {{ $o->cohort_name }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  ($dean ? 'Offerings and readiness' : 'Cohorts and results') => route('offerings'),
+  $o->name_en . ' ' . $o->cohort_name => null,
+]" />
 
 <div class="title">
   <div style="display:flex;align-items:center;gap:16px">
@@ -13,6 +12,7 @@
     <div>
       <h1>{{ $o->name_en }} {{ $o->cohort_name }}</h1>
       <div class="sub">
+        @if(!empty($o->lecturer_name)){{ $o->lecturer_name }} &middot; @endif
         {{ __('Starts :date', ['date' => \Carbon\Carbon::parse($o->start_date)->format('d/m/Y')]) }} &middot;
         {{ __('registration :start to :end', ['start' => \Carbon\Carbon::parse($o->reg_opens_on)->format('d/m/Y'), 'end' => \Carbon\Carbon::parse($o->reg_closes_on)->format('d/m/Y')]) }} &middot;
         {{ __(':count places', ['count' => $o->capacity]) }} &middot; RM {{ number_format($o->fee, 2) }}
@@ -20,6 +20,7 @@
     </div>
   </div>
   <div class="act" style="gap:8px;align-items:center">
+    <a class="btn ter sm" href="{{ route('offerings') }}">&larr; {{ __('All offerings') }}</a>
     <x-pill :s="__($labels[$o->status] ?? ucfirst($o->status))" />
     <a class="btn ter sm" href="{{ route('offerings.participants', $o->id) }}">{{ __('Participants') }}</a>
     @if(!$dean)

@@ -3,17 +3,11 @@
 @section('content')
 
 {{-- ===================== BREADCRUMB & HEADER ===================== --}}
-<div class="crumb">
-  <a href="{{ route('monitoring') }}">{{ __('Quality review') }}</a>
-  <span>/</span>
-  @if(!empty($offering))
-    <span>{{ $offering->name_en }}</span>
-    <span>/</span>
-    <span>{{ $offering->cohort_name }}</span>
-    <span>/</span>
-  @endif
-  <span>{{ $r->reference }}</span>
-</div>
+<x-breadcrumb :crumbs="array_filter([
+  (auth()->user()->hasAnyRole('deputy_dean') ? 'Quality review & suspensions' : 'Quality review (CQI)') => route('monitoring'),
+  !empty($offering) ? ($offering->name_en . ' ' . $offering->cohort_name) : null => null,
+  __('Quality review :ref', ['ref' => $r->reference]) => null,
+])" />
 
 <div class="title" style="margin-bottom:20px">
   <div>
@@ -23,6 +17,7 @@
     </div>
   </div>
   <div class="act" style="display:inline-flex;align-items:center;gap:10px">
+    <a class="btn ter sm" href="{{ route('monitoring') }}">&larr; {{ __('All quality reviews') }}</a>
     <x-pill :s="__(['draft' => 'Draft', 'submitted' => 'Submitted to the deputy dean', 'confirmed' => 'Confirmed'][$r->status] ?? $r->status)" id="cqi-status" />
     <a class="btn ter sm" href="{{ route('monitoring') }}">{{ __('All quality reviews') }}</a>
   </div>

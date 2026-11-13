@@ -86,21 +86,40 @@ final class Trace
         if (! $type || ! $id || ! ctype_digit($id)) {
             return null;
         }
-        $mcPtj = fn ($q) => $q->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->value('m.ptj_id');
         $ptj = match ($type) {
-            'McVersion' => $mcPtj(DB::table('mc_versions as v')->where('v.id', $id)),
-            'Offering' => $mcPtj(DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->where('o.id', $id)),
-            'Enrolment' => $mcPtj(DB::table('enrolments as e')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->where('e.id', $id)),
-            'Credential' => $mcPtj(DB::table('credentials as c')->join('enrolments as e', 'e.id', '=', 'c.enrolment_id')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->where('c.id', $id)),
-            'Acr' => $mcPtj(DB::table('acrs as a')->join('mc_versions as v', 'v.id', '=', 'a.mc_version_id')->where('a.id', $id)),
-            'AbcDeposit' => $mcPtj(DB::table('abc_deposits as d')->join('acrs as a', 'a.id', '=', 'd.acr_id')->join('mc_versions as v', 'v.id', '=', 'a.mc_version_id')->where('d.id', $id)),
             'TransferApplication' => DB::table('transfer_applications as t')->join('programmes as p', 'p.id', '=', 't.programme_id')->where('t.id', $id)->value('p.ptj_id'),
-            'CqiRecord' => $mcPtj(DB::table('cqi_records as r')->join('offerings as o', 'o.id', '=', 'r.offering_id')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->where('r.id', $id)),
-            'QvRecord' => DB::table('qv_records as q')->join('micro_credentials as m', 'm.id', '=', 'q.micro_credential_id')->where('q.id', $id)->value('m.ptj_id'),
             'StackablePlan' => DB::table('stackable_plans as s')->join('programmes as p', 'p.id', '=', 's.programme_id')->where('s.id', $id)->value('p.ptj_id'),
-            default => null,
+            default => self::mcColumnOf($type, $id, 'm.ptj_id'),
         };
 
         return $ptj ? (int) $ptj : null;
+    }
+
+    /** The lecturer owner of a subject's micro-credential, so lecturers only see audit events for their own micro-credentials. */
+    public static function ownerOf(?string $type, ?string $id): ?int
+    {
+        if (! $type || ! $id || ! ctype_digit($id)) {
+            return null;
+        }
+
+        return self::mcColumnOf($type, $id, 'm.owner_id');
+    }
+
+    private static function mcColumnOf(string $type, string $id, string $column): ?int
+    {
+        $mcVal = fn ($q) => $q->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->value($column);
+        $val = match ($type) {
+            'McVersion' => $mcVal(DB::table('mc_versions as v')->where('v.id', $id)),
+            'Offering' => $mcVal(DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->where('o.id', $id)),
+            'Enrolment' => $mcVal(DB::table('enrolments as e')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->where('e.id', $id)),
+            'Credential' => $mcVal(DB::table('credentials as c')->join('enrolments as e', 'e.id', '=', 'c.enrolment_id')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->where('c.id', $id)),
+            'Acr' => $mcVal(DB::table('acrs as a')->join('mc_versions as v', 'v.id', '=', 'a.mc_version_id')->where('a.id', $id)),
+            'AbcDeposit' => $mcVal(DB::table('abc_deposits as d')->join('acrs as a', 'a.id', '=', 'd.acr_id')->join('mc_versions as v', 'v.id', '=', 'a.mc_version_id')->where('d.id', $id)),
+            'CqiRecord' => $mcVal(DB::table('cqi_records as r')->join('offerings as o', 'o.id', '=', 'r.offering_id')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->where('r.id', $id)),
+            'QvRecord' => DB::table('qv_records as q')->join('micro_credentials as m', 'm.id', '=', 'q.micro_credential_id')->where('q.id', $id)->value($column),
+            default => null,
+        };
+
+        return $val ? (int) $val : null;
     }
 }

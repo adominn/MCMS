@@ -3,10 +3,10 @@
 @section('content')
 <div class="ph">
   <div>
-    <div class="crumb">
-      <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-      <span>{{ __('Notification log') }}</span>
-    </div>
+    <x-breadcrumb :crumbs="[
+      'Data exchange' => null,
+      'Notification log' => null,
+    ]" />
     <h1>{{ __('Notification log') }}</h1>
     <div class="sub">{{ __('Every email and in-system notice MCMS sent or tried to send, recorded in the recipient language.') }}</div>
   </div>

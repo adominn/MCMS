@@ -4,8 +4,9 @@
 @guest @include('public._nav') @endguest
 
 <div class="pub-sec">
+  @php $isPublic = request()->routeIs('public.*'); @endphp
   <div class="crumb" style="margin-bottom:8px">
-    <a href="{{ auth()->check() ? route('tasks') : route('public.home') }}">{{ auth()->check() ? (auth()->user()->hasAnyRole('student') ? __('My learning') : __('Dashboard')) : $t('home') }}</a> <span>/</span> <span>{{ $t('how') }}</span>
+    <a href="{{ !$isPublic && auth()->check() ? auth()->user()->homeUrl() : route('public.home') }}">{{ !$isPublic && auth()->check() ? (auth()->user()->hasAnyRole('student') ? __('My learning') : __('Dashboard')) : $t('home') }}</a> <span>/</span> <span>{{ $t('how') }}</span>
   </div>
 
   <div class="title">
@@ -77,7 +78,7 @@
         </p>
       </div>
       <div class="row" style="gap:8px;margin-top:12px">
-        <a href="{{ route('public.catalogue') }}" class="btn sm">{{ $lang === 'ms' ? 'Cari tawaran' : 'Browse offerings' }}</a>
+        <a href="{{ !$isPublic && auth()->check() && auth()->user()->hasAnyRole('student') ? route('catalogue') : route('public.catalogue') }}" class="btn sm">{{ $lang === 'ms' ? 'Cari tawaran' : 'Browse offerings' }}</a>
         <a href="{{ route('public.pathways') }}" class="btn ter sm">{{ $lang === 'ms' ? 'Laluan' : 'Pathways' }} &rarr;</a>
       </div>
     </div>
@@ -89,5 +90,5 @@
   </div>
 </div>
 
-@include('public._foot')
+@if($isPublic) @include('public._foot') @endif
 @endsection

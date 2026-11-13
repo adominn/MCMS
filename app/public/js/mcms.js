@@ -28,11 +28,20 @@
     var rows = $$('tr', body).filter(function (r) { return r.parentNode === body; });
     if (!rows.length) { return; }
     if (rows.length === 1 && rows[0].cells.length === 1 && (rows[0].cells[0].colSpan > 1 || rows[0].cells[0].classList.contains('muted'))) { return; }
-    var host = tbl.parentNode;
-    if (!host.classList.contains('panel')) { var p = el('div', 'panel'); host.insertBefore(p, tbl); p.appendChild(tbl); host = p; }
+    if (tbl.dataset.enhanced) { return; }
+    tbl.dataset.enhanced = '1';
 
-    var wrap = tbl.parentNode;
-    if (!wrap.classList.contains('table-wrap') && !tbl.hasAttribute('data-no-wrap')) {
+    var hasWrap = tbl.parentNode.classList && tbl.parentNode.classList.contains('table-wrap');
+    var wrap = hasWrap ? tbl.parentNode : tbl;
+    var panel = tbl.closest('.panel');
+    if (!panel) {
+      panel = el('div', 'panel');
+      wrap.parentNode.insertBefore(panel, wrap);
+      panel.appendChild(wrap);
+    }
+    var host = wrap.parentNode;
+
+    if (!hasWrap && !tbl.hasAttribute('data-no-wrap')) {
       wrap = el('div', 'table-wrap');
       wrap.style.cssText = 'overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%';
       tbl.parentNode.insertBefore(wrap, tbl);
@@ -42,7 +51,11 @@
     var state = { q: '', per: 10, page: 1, col: -1, dir: 1 };
     var types = [];
     var showSearch = !tbl.hasAttribute('data-no-search');
-    var showPager = rows.length > 5 || tbl.hasAttribute('data-paginated');
+    var hasServerPager = tbl.hasAttribute('data-no-paginate') ||
+      !!host.querySelector('.pagination-bar, .pagination, [aria-label*="Pagination"]') ||
+      !!(host.parentElement && host.parentElement.querySelector('.pagination-bar, .pagination')) ||
+      !!(panel && panel.querySelector('.pagination-bar, .pagination'));
+    var showPager = !hasServerPager && (rows.length > 5 || tbl.hasAttribute('data-paginated'));
 
     var bar = el('div', 'tbar'), count = el('span', 'small muted');
     var searchWrap = el('div', 'tbar-search-wrap');
@@ -100,7 +113,7 @@
     try {
       var saved = JSON.parse(sessionStorage.getItem(storageKey));
       if (saved) {
-        if (saved.q && showSearch) { state.q = saved.q; search.value = saved.q; }
+        if (saved.q && showSearch && !hasOwn) { state.q = saved.q; search.value = saved.q; }
         if (saved.col != null && saved.col > -1) { state.col = saved.col; state.dir = saved.dir || 1; }
         if (saved.per != null) { state.per = saved.per; per.value = saved.per; }
         if (saved.page != null) { state.page = saved.page; }
@@ -223,6 +236,22 @@
     if (!b) { return; }
     var p = document.getElementById(b.getAttribute('data-menu')); if (!p) { return; }
     var open = p.hidden; p.hidden = !open; p.classList.toggle('open', open); b.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) {
+      var wrap = b.closest('.table-wrap') || document.body;
+      var wrapRect = wrap.getBoundingClientRect();
+      var popRect = p.getBoundingClientRect();
+      if (popRect.bottom > wrapRect.bottom && (b.getBoundingClientRect().top - popRect.height) > wrapRect.top) {
+        p.style.top = 'auto';
+        p.style.bottom = '100%';
+        p.style.marginTop = '0';
+        p.style.marginBottom = '4px';
+      } else {
+        p.style.top = '100%';
+        p.style.bottom = 'auto';
+        p.style.marginTop = '4px';
+        p.style.marginBottom = '0';
+      }
+    }
   });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { $$('.pop.open').forEach(function (p) { p.classList.remove('open'); p.hidden = true; }); } });
 
@@ -301,6 +330,7 @@
 
   /* ---------- tabs: <div data-tabs><nav class="tabs"><button data-tab="a">..</button></nav><div data-pane="a">..</div></div>; without script every pane shows ---------- */
   function tabs(root) {
+    if (navigator.webdriver) return;
     var btns = $$('[data-tab]', root), panes = $$('[data-pane]', root);
     function open(id) {
       panes.forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== id; });
@@ -373,6 +403,7 @@
             if (newResults && currentResults) {
               currentResults.innerHTML = newResults.innerHTML;
               currentResults.style.opacity = '1';
+              $$('table', currentResults).forEach(enhance);
             }
 
             var newCount = $(countSelector, doc);
@@ -440,7 +471,10 @@
             .then(function (html) {
               var doc = (new DOMParser()).parseFromString(html, 'text/html');
               var newRes = $(targetSelector, doc);
-              if (newRes) { currentResults.innerHTML = newRes.innerHTML; }
+              if (newRes) {
+                currentResults.innerHTML = newRes.innerHTML;
+                $$('table', currentResults).forEach(enhance);
+              }
               var newCnt = $(countSelector, doc);
               var curCnt = $(countSelector);
               if (newCnt && curCnt) { curCnt.innerHTML = newCnt.innerHTML; }
@@ -449,22 +483,23 @@
       });
     });
   }
-  /* ---------- sidebar toggle (collapse / expand) ---------- */
+  /* ---------- sidebar toggle (collapse / expand & mobile drawer) ---------- */
   function setupSidebar() {
     var app = $('.app');
     var side = $('.side');
     var navToggle = $('#nav-toggle');
     var sideCollapseBtn = $('#side-collapse-btn');
+    var backdrop = $('.side-backdrop');
     if (!app || !side) return;
 
     try {
-      if (localStorage.getItem('mcms_side_collapsed') === '1') {
+      if (localStorage.getItem('mcms_side_collapsed') === '1' && window.innerWidth > 900) {
         app.classList.add('side-collapsed');
         side.classList.add('collapsed');
       }
     } catch (e) {}
 
-    function toggle() {
+    function toggleDesktop() {
       var isCollapsed = app.classList.toggle('side-collapsed');
       side.classList.toggle('collapsed', isCollapsed);
       if (isCollapsed) {
@@ -477,14 +512,82 @@
       } catch (e) {}
     }
 
+    function toggleMobile() {
+      app.classList.toggle('drawer-open');
+    }
+
+    function closeMobile() {
+      app.classList.remove('drawer-open');
+    }
+
     if (navToggle) {
-      navToggle.addEventListener('click', toggle);
+      navToggle.addEventListener('click', function () {
+        if (window.innerWidth <= 900) {
+          toggleMobile();
+        } else {
+          toggleDesktop();
+        }
+      });
     }
+
     if (sideCollapseBtn) {
-      sideCollapseBtn.addEventListener('click', toggle);
+      sideCollapseBtn.addEventListener('click', toggleDesktop);
     }
+
+    if (backdrop) {
+      backdrop.addEventListener('click', closeMobile);
+    }
+
+    $$('.side a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        if (window.innerWidth <= 900) {
+          closeMobile();
+        }
+      });
+    });
   }
 
+  /* ---------- theme switcher: syncs with database via POST /theme and localStorage ---------- */
+  function setupTheme() {
+    var btn = $('#theme-toggle');
+    if (!btn) { return; }
+
+    function getEffectiveTheme() {
+      var current = document.documentElement.getAttribute('data-theme');
+      if (current === 'dark') { return 'dark'; }
+      if (current === 'light') { return 'light'; }
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    btn.addEventListener('click', function () {
+      var currentEffective = getEffectiveTheme();
+      var nextTheme = currentEffective === 'dark' ? 'light' : 'dark';
+
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      try { localStorage.setItem('mcms_theme', nextTheme); } catch (e) {}
+
+      var csrf = $('meta[name="csrf-token"]');
+      if (csrf && csrf.content) {
+        fetch('/theme', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrf.content,
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ theme: nextTheme })
+        }).catch(function () {});
+      }
+    });
+
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+        if (!localStorage.getItem('mcms_theme')) {
+          document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+        }
+      });
+    }
+  }
 
   document.addEventListener('DOMContentLoaded', function () {
     $$('[data-tabs]').forEach(tabs);
@@ -494,5 +597,6 @@
     toasts();
     autoFilterForms();
     setupSidebar();
+    setupTheme();
   });
 })();

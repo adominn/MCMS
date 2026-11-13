@@ -8,21 +8,24 @@
 @endphp
 
 <div class="pub-sec">
-  <div class="crumb" style="margin-bottom:8px">
-    <a href="{{ auth()->check() ? route('tasks') : route('public.home') }}">{{ auth()->check() ? (auth()->user()->hasAnyRole('student') ? __('My learning') : __('Dashboard')) : $t('home') }}</a> <span>/</span>
-    <a href="{{ route('catalogue') }}">{{ $t('catalogue') }}</a> <span>/</span>
-    <span>{{ $pick($o->name_en, $o->name_ms) }} {{ $o->cohort_name }}</span>
-  </div>
+  @php $isPublic = request()->routeIs('public.*'); @endphp
+  <x-breadcrumb :crumbs="[
+    (!$isPublic && auth()->check() ? (auth()->user()->hasAnyRole('student') ? 'My learning' : 'Dashboard') : 'Home') => (!$isPublic && auth()->check() ? auth()->user()->homeUrl() : route('public.home')),
+    $t('catalogue') => route($isPublic ? 'public.catalogue' : 'catalogue'),
+    ($pick($o->name_en, $o->name_ms) . ' ' . $o->cohort_name) => null,
+  ]" />
 
   <div class="title" style="margin-bottom:20px">
     <div>
       <h1><span class="cat">{{ strtoupper($o->category) }}</span> {{ $pick($o->name_en, $o->name_ms) }} {{ $o->cohort_name }}</h1>
-      <div class="sub">{{ $o->ptj_name }} &middot; {{ $modeLabel }} &middot; {{ $o->delivery_language }}</div>
+      <div class="sub">{{ $o->ptj_name }} &middot; @if(!empty($o->lecturer_name)){{ $o->lecturer_name }} &middot; @endif{{ $modeLabel }} &middot; {{ $o->delivery_language }}</div>
     </div>
     <div class="act">
-      @if(isset($mine[$o->id]))
+      @if(isset($mine[$o->id]) && auth()->check() && auth()->user()->hasAnyRole('student') && ! auth()->user()->hasAnyRole('lecturer', 'deputy_dean', 'codl_admin'))
         <a class="btn ter" href="{{ route('enrolments.show', $mine[$o->id]) }}">View your registration</a>
-      @elseif($o->status === 'open')
+      @elseif(auth()->check() && auth()->user()->hasAnyRole('lecturer', 'deputy_dean'))
+        <a class="btn ter" href="{{ route('offerings.show', $o->id) }}">{{ __('View cohort') }}</a>
+      @elseif($o->status === 'open' && (!auth()->check() || auth()->user()->hasAnyRole('student')))
         <a class="btn" href="{{ route('register', $o->id) }}">{{ $t('register') }}</a>
       @endif
     </div>
@@ -134,6 +137,12 @@
 
       <dl class="dl" style="grid-template-columns:110px 1fr;gap:8px;font-size:13px;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);padding:12px 0;margin:0">
         <dt>{{ $lang === 'ms' ? 'Institusi' : 'Institution' }}</dt><dd>UTeM (CODL)</dd>
+        @if(!empty($o->lecturer_name))
+          <dt>{{ $lang === 'ms' ? 'Pensyarah' : 'Lecturer' }}</dt><dd>{{ $o->lecturer_name }}</dd>
+        @endif
+        @if(!empty($o->facilitators) && trim((string) $o->facilitators) !== trim((string) ($o->lecturer_name ?? '')))
+          <dt>{{ $lang === 'ms' ? 'Fasilitator' : 'Facilitators' }}</dt><dd>{{ $o->facilitators }}</dd>
+        @endif
         <dt>{{ $t('mode') }}</dt><dd>{{ $modeLabel }}</dd>
         <dt>{{ $t('language') }}</dt><dd>{{ $o->delivery_language }}</dd>
         <dt>{{ $t('start') }}</dt><dd>{{ \Carbon\Carbon::parse($o->start_date)->format('d/m/Y') }}</dd>
@@ -144,8 +153,10 @@
       </dl>
 
       <div>
-        @if(isset($mine[$o->id]))
+        @if(isset($mine[$o->id]) && auth()->check() && auth()->user()->hasAnyRole('student') && ! auth()->user()->hasAnyRole('lecturer', 'deputy_dean', 'codl_admin'))
           <a class="btn ter" href="{{ route('enrolments.show', $mine[$o->id]) }}" style="width:100%;text-align:center">View your registration</a>
+        @elseif(auth()->check() && auth()->user()->hasAnyRole('lecturer', 'deputy_dean'))
+          <a class="btn ter" href="{{ route('offerings.show', $o->id) }}" style="width:100%;text-align:center">{{ __('View cohort') }}</a>
         @elseif($o->status !== 'open')
           <span class="btn dis" style="width:100%;text-align:center">{{ $t('closed') }}</span>
         @endif
@@ -157,5 +168,5 @@
   </div>
 </div>
 
-@include('public._foot')
+@if($isPublic) @include('public._foot') @endif
 @endsection

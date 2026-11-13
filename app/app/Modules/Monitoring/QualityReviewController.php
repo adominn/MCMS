@@ -26,7 +26,7 @@ final class QualityReviewController
     {
         $this->reviews->ensure();
         $mcs = $this->mcs($request);
-        $offerings = DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->whereIn('v.micro_credential_id', $mcs->pluck('id'))->whereIn('o.status', ['running', 'ended', 'open'])->orderByDesc('o.id')->get(['o.id', 'o.cohort_name', 'o.status', 'v.name_en', 'v.micro_credential_id'])
+        $offerings = DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->whereIn('v.micro_credential_id', $mcs->pluck('id'))->whereIn('o.status', ['running', 'ended', 'open'])->orderByDesc('o.id')->get(['o.id', 'o.cohort_name', 'o.status', 'v.name_en', 'v.micro_credential_id', 'u.name as lecturer_name'])
             ->map(function ($o) {
                 $ind = $this->indicators->for($o->id);
                 $o->ind = $ind;

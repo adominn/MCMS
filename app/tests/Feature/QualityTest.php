@@ -204,3 +204,12 @@ it('flags a verified record for re-verification after a material change (FR-78)'
     requestChange($mc, ['outcomes'])->assertSessionHasNoErrors();
     expect((bool) Qv::standing($mc)->reverification)->toBeTrue();
 });
+
+it('displays the lecturer name on quality verification pages', function () {
+    [$mc] = samcCompleted();
+
+    $this->actingAs($this->aina)->get('/quality')->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($this->aina)->get("/quality/$mc")->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($this->hakim)->get('/quality')->assertOk()->assertSee('Dr. Aina Zulkifli');
+    $this->actingAs($this->hakim)->get("/quality/$mc")->assertOk()->assertSee('Dr. Aina Zulkifli');
+});

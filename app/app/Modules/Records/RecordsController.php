@@ -145,13 +145,18 @@ final class RecordsController
 
     private function auditRows(Request $request)
     {
-        [$ptj] = $this->scope($request->user());
+        [$ptj, $owner] = $this->scope($request->user());
         $q = trim((string) $request->query('q'));
         $rows = DB::table('audit_events as e')->leftJoin('users as u', 'u.id', '=', 'e.actor_id')->when($q !== '', fn ($b) => $b->where(fn ($w) => $w->where('e.action', db_like(), "%$q%")->orWhere('e.subject_type', db_like(), "%$q%")->orWhere('e.subject_id', $q)))
             ->orderByDesc('e.seq')->limit(600)->get(['e.seq', 'e.occurred_at', 'u.name as actor', 'e.actor_role', 'e.action', 'e.subject_type', 'e.subject_id', 'e.reason']);
 
-        // A deputy dean or lecturer sees the events of records inside the scope; events that belong to no record (technical events) stay with CODL.
-        return $ptj === null ? $rows->take(100) : $rows->filter(fn ($r) => ($p = Trace::ptjOf($r->subject_type, $r->subject_id)) !== null && in_array($p, $ptj, true))->take(100)->values();
+        // A deputy dean sees events inside their PTj; a lecturer sees only events for micro-credentials they own; technical events stay with CODL.
+        return $ptj === null
+            ? $rows->take(100)
+            : $rows->filter(fn ($r) => ($p = Trace::ptjOf($r->subject_type, $r->subject_id)) !== null
+                && in_array($p, $ptj, true)
+                && ($owner === null || Trace::ownerOf($r->subject_type, $r->subject_id) === $owner))
+                ->take(100)->values();
     }
 
     // ---- documents hub (FL-24)
@@ -159,14 +164,20 @@ final class RecordsController
     public function documents(Request $request)
     {
         $u = $request->user();
+        [$ptjs, $owner] = $this->scope($u);
         $mine = $u->hasAnyRole('student') ? [
             'receipts' => DB::table('enrolments as e')->join('payments as p', 'p.enrolment_id', '=', 'e.id')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->where('e.user_id', $u->id)->where('p.status', 'succeeded')->get(['e.id', 'e.reference', 'v.name_en', 'p.created_at', 'p.amount', 'p.reference as payment_ref']),
             'credentials' => DB::table('credentials as c')->join('enrolments as e', 'e.id', '=', 'c.enrolment_id')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->where('e.user_id', $u->id)->get(['c.id', 'c.number', 'c.status', 'v.name_en', 'c.issued_at']),
             'acrs' => DB::table('acrs as a')->join('mc_versions as v', 'v.id', '=', 'a.mc_version_id')->where('a.user_id', $u->id)->get(['a.id', 'a.reference', 'v.name_en', 'a.credits', 'a.status', 'a.created_at']),
         ] : null;
-        $batches = $u->hasAnyRole('deputy_dean') ? DB::table('abc_batches')->orderByDesc('id')->limit(10)->get() : collect();
-        $suspensions = $u->hasAnyRole('deputy_dean') ? DB::table('suspensions as s')->join('micro_credentials as m', 'm.id', '=', 's.micro_credential_id')->join('mc_versions as v', fn ($j) => $j->on('v.micro_credential_id', '=', 'm.id')->whereRaw('v.version_no = (select max(version_no) from mc_versions where micro_credential_id = m.id)'))->orderByDesc('s.id')->limit(5)->get(['s.*', 'v.name_en']) : collect();
-        [$ptjs, $owner] = $this->scope($u);
+        $batches = $u->hasAnyRole('deputy_dean') ? DB::table('abc_batches')
+            ->when($ptjs !== null, fn ($b) => $b->whereIn('ptj_id', $ptjs))
+            ->orderByDesc('id')->limit(10)->get() : collect();
+        $suspensions = $u->hasAnyRole('deputy_dean') ? DB::table('suspensions as s')
+            ->join('micro_credentials as m', 'm.id', '=', 's.micro_credential_id')
+            ->join('mc_versions as v', fn ($j) => $j->on('v.micro_credential_id', '=', 'm.id')->whereRaw('v.version_no = (select max(version_no) from mc_versions where micro_credential_id = m.id)'))
+            ->when($ptjs !== null, fn ($b) => $b->whereIn('m.ptj_id', $ptjs))
+            ->orderByDesc('s.id')->limit(5)->get(['s.*', 'v.name_en']) : collect();
         $proposals = $u->hasAnyRole('lecturer', 'deputy_dean') ? DB::table('mc_versions as v')
             ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
             ->when($ptjs !== null, fn ($b) => $b->whereIn('m.ptj_id', $ptjs))

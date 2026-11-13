@@ -1,0 +1,92 @@
+<!-- ===================== 3. USERS AND PERSONAS ===================== -->
+<h1>3. Users and Personas</h1>
+
+<h2>3.1 Users and Stakeholder Map</h2>
+<p>MCMS has six kinds of user (SRS Section 2.5, decision D-28): <b>students</b>, <b>lecturers</b>, <b>deputy deans</b> of the PTj, the <b>Senate</b> (which approves but does not log in), <b>CODL</b> as system administrator and technical operator only, and <b>employers or the public</b> who verify credentials. The <b>system</b> itself issues credentials and generates ACR automatically after the deputy dean verifies (D-29). {{fig:stakeholders}} places the users by how often they use MCMS and how much their work depends on it.</p>
+<figure data-f="stakeholders">
+<pre class="mermaid">
+quadrantChart
+  title Use frequency vs dependence on MCMS
+  x-axis Occasional use --> Daily use
+  y-axis Low dependence --> High dependence
+  quadrant-1 Core daily users
+  quadrant-2 Key decision makers
+  quadrant-3 Light touch
+  quadrant-4 Operators
+  Student P8: [0.72, 0.85]
+  Lecturer P1: [0.82, 0.78]
+  Deputy dean P2: [0.62, 0.90]
+  Senate P3 via P2: [0.12, 0.72]
+  CODL S1 and P5: [0.58, 0.32]
+  Employer X3: [0.12, 0.28]
+  Industry expert X2: [0.20, 0.15]
+</pre>
+<figcaption>Stakeholder map (illustrative positions). The deputy dean is the busiest decision maker; the Senate decides rarely and only through decisions recorded by the deputy dean.</figcaption>
+</figure>
+
+<h2>3.2 Personas</h2>
+<p>The personas below are fictional. Each represents one kind of user and its most important needs. Feature and story priorities in Sections 5 and 6 are checked against them.</p>
+
+<h4>Persona 1 — Dr. Aina, lecturer (P1)</h4>
+<script type="text/tbl" data-h="Aspect|Description" data-w="22%|78%">
+Context | Senior lecturer at a faculty. Wants to offer a UMC unbundled from a 3-credit, 120-hour course, and later a SAMC for industry. Teaches and assesses the students, and reviews colleagues' proposals when asked.
+Goals | Get a proposal approved without being sent back for avoidable errors; run cohorts with little admin; record improvements and QV evidence as part of normal work.
+Frustrations | Long Appendix A documents; finding out at review that SLT does not match the parent course; rebuilding the same evidence for QV.
+What MCMS must do | Guided proposal with live checks (category, SLT, alignment); visible review comments; one place for cohorts, results, quality review and QV evidence.
+Key stories | Epics E2, E3, E4, E6 and E10.
+</script>
+
+<h4>Persona 2 — Hakim, PTj deputy dean (P2)</h4>
+<script type="text/tbl" data-h="Aspect|Description" data-w="22%|78%">
+Context | Owns all micro-credentials of the faculty in MCMS. Endorses proposals and takes them to the Senate, then records the Senate's decision. Confirms readiness, verifies results and completion (which makes the system issue the credentials), confirms quality reviews and QV evidence, corrects or revokes credentials, confirms ACR and records ABC deposits.
+Goals | See what needs a decision today; trust that what reaches them is complete; never sign something that breaks the Guide; spend no time typing certificates.
+Frustrations | Decisions scattered across email; unclear category claims; certificates prepared by hand; no overview of QV status.
+What MCMS must do | A single task queue; category verification; decision pack for the Senate; bulk result verification that triggers automatic credentials; simple correction with history; a deposit queue with consent already checked.
+Key stories | Epics E2, E3, E4, E5, E6, E7 and E10.
+</script>
+
+<h4>Persona 3 — Prof. Lim, deputy dean of the faculty that owns a degree (P2)</h4>
+<script type="text/tbl" data-h="Aspect|Description" data-w="22%|78%">
+Context | Same role as Persona 2, but acting for the faculty that runs the Bachelor of Computer Science. Decides credit transfer applications into that degree and prepares stackable pathway mappings for the Senate.
+Goals | Decide equivalence on learning outcomes with all evidence in one view; respect transfer limits; never accept the same credit twice.
+Frustrations | Applications arrive as loose attachments; no reliable way to know whether credit was already used elsewhere.
+What MCMS must do | Equivalence form with linked ACR, outcomes and QV evidence; limit checks; single redemption status.
+Key stories | Epics E8 and E9.
+</script>
+
+<h4>Persona 4 — Amir, working professional and student (P8)</h4>
+<script type="text/tbl" data-h="Aspect|Description" data-w="22%|78%">
+Context | Engineer in industry, studying modules part-time on a phone. Hopes the credits will count toward a degree later.
+Goals | Know exactly what they will get before enrolling; see progress across modules taken months apart; share a credential with an employer; understand what their credit can and cannot do.
+Frustrations | Marketing that implies credits "will transfer"; losing track of modules; not knowing where credit is stored.
+What MCMS must do | Honest catalogue wording; module progress; shareable credentials; consent control for ABC; a ledger that separates deposit from transfer.
+Key stories | Epics E3, E5, E7, E8 and E9.
+</script>
+
+<h4>Persona 5 — Farid, CODL system administrator (S1, P5)</h4>
+<script type="text/tbl" data-h="Aspect|Description" data-w="22%|78%">
+Context | Runs MCMS for the University: user accounts and roles, settings, templates, reference data, and the data exchange with UCreds. Takes no academic decision.
+Goals | Change roles, rules and templates without a developer; move data to and from UCreds safely; see quickly when an adapter fails.
+What MCMS must do | Role and scope management; settings with history; CSV templates with validation; adapter status page. No screens that let CODL approve, verify or issue anything.
+Key stories | Epics E1 and E4.
+</script>
+
+<h4>Persona 6 — Tan, HR manager verifying a credential (X3)</h4>
+<script type="text/tbl" data-h="Aspect|Description" data-w="22%|78%">
+Context | Receives a candidate's credential link during hiring.
+Goals | Confirm in seconds that the credential is genuine, current and issued by UTeM.
+What MCMS must do | A public verification page with no login, minimum information and a clear status.
+Key stories | Epic E5.
+</script>
+
+<h2>3.3 Needs by User</h2>
+<p class="tcap" data-t="needs">Top needs by user</p>
+<script type="text/tbl" data-h="User|Top need|Feature that answers it" data-w="24%|46%|30%">
+Student (P8) | Honesty and control over their record | {{f-catalogue}} Catalogue, {{f-achrec}} Achievement Record, {{f-issue}} Credentials, {{f-ledger}} Credit ledger
+Lecturer (P1) | Get proposals right the first time; little admin when running cohorts | {{f-proposal}} Guided proposal, {{f-umc}} UMC checks, {{f-verify}} Result entry, {{f-cqi}} Quality review
+Deputy dean (P2) | Know what to decide and trust the input; no manual certificates | {{f-approval}} Review and approval, {{f-readiness}} Readiness, {{f-verify}} Verification, {{f-issue}} Automatic credentials, {{f-deposit}} Deposit queue
+Deputy dean of a degree's faculty (P2) | Evidence-based equivalence, no double use | {{f-transfer}} Credit transfer, {{f-redeem}} Single redemption, {{f-stackmap}} Pathway mapping
+Senate (P3, via P2) | Short decision packs; decisions recorded with meeting references | {{f-approval}} Decision packs and recording
+CODL (S1, P5) | Change rules and roles without developers; safe UCreds exchange | {{f-roles}} Roles, {{f-settings}} Settings, {{f-csv}} UCreds exchange
+Employer (X3) | Instant, trustworthy verification | {{f-public}} Public verification
+</script>

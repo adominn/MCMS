@@ -78,6 +78,9 @@
               <x-cat :c="$x['category'] ?? ''" />
               <span>{{ $x['name']['en'] ?? 'Credential' }}</span>
             </div>
+            @if(!empty($r->lecturer_name))
+              <span class="s muted" style="display:block;margin-top:2px">{{ $r->lecturer_name }}</span>
+            @endif
           </td>
           <td>{{ \Carbon\Carbon::parse($r->issued_at)->format('d/m/Y') }}</td>
           <td>

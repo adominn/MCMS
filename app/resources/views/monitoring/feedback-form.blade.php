@@ -1,8 +1,19 @@
 @extends('layouts.app')
 @section('title', 'Feedback')
 @section('content')
-<div class="crumb" style="margin-bottom:8px"><a href="{{ route('feedback') }}">{{ __('Feedback') }}</a> <span>/</span> <span>{{ $e->name_en }} {{ $e->cohort_name }}</span></div>
-<div class="title"><div><h1>{{ $e->name_en }} {{ $e->cohort_name }}</h1><div class="sub">{{ $e->reference }} &middot; {{ \Carbon\Carbon::parse($e->start_date)->format('d/m/Y') }} to {{ \Carbon\Carbon::parse($e->end_date)->format('d/m/Y') }} &middot; @if($e->given)<span class="tag ok">{{ __("Given") }}</span>@else<span class="tag warn">{{ __("Not given yet") }}</span>@endif</div></div></div>
+<x-breadcrumb :crumbs="[
+  'Feedback' => route('feedback'),
+  $e->name_en . ' ' . $e->cohort_name => null,
+]" />
+<div class="title">
+  <div>
+    <h1>{{ $e->name_en }} {{ $e->cohort_name }}</h1>
+    <div class="sub">{{ $e->reference }} &middot; {{ \Carbon\Carbon::parse($e->start_date)->format('d/m/Y') }} to {{ \Carbon\Carbon::parse($e->end_date)->format('d/m/Y') }} &middot; @if($e->given)<span class="tag ok">{{ __("Given") }}</span>@else<span class="tag warn">{{ __("Not given yet") }}</span>@endif</div>
+  </div>
+  <div class="act">
+    <a class="btn ter sm" href="{{ route('feedback') }}">&larr; {{ __('Back to feedback list') }}</a>
+  </div>
+</div>
 @if($e->given)
   <div class="note ok" style="margin-bottom:16px">Thank you, your feedback is recorded. It cannot be changed.</div>
 @else

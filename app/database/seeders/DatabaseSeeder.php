@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
                 continue;
             }
             $id = DB::table('settings')->insertGetId(['key' => $key, 'value_type' => $d['type'], 'unit' => $d['unit'], 'description_en' => $d['en'], 'source_ref' => $d['ref']]);
-            DB::table('setting_versions')->insert(['setting_id' => $id, 'value' => json_encode($d['value']), 'effective_from' => now(), 'reason' => 'Initial value from the Guide and the Glossary']);
+            DB::table('setting_versions')->insert(['setting_id' => $id, 'value' => json_encode($d['value']), 'effective_from' => now(), 'reason' => 'Initial system default']);
             $audit->record('setting.seeded', ['type' => 'Setting', 'id' => $key], after: ['value' => $d['value']], reason: 'Initial value');
         }
 
@@ -115,7 +115,7 @@ class DatabaseSeeder extends Seeder
             ['statement.catalogue.samc', 'statement', false, 'Catalogue statement for a SAMC without valid Quality Verification', null, 'This is a Standalone Micro-Credential (SAMC). It carries no credit value and no MQF level unless it is Quality-Verified and the verification is valid.', null, 'Ini ialah Standalone Micro-Credential (SAMC). Ia tidak membawa nilai kredit atau tahap MQF melainkan telah disahkan melalui Quality Verification dan pengesahan itu masih sah.'],
             ['statement.catalogue.samc_qv', 'statement', false, 'Catalogue statement for a Quality-Verified SAMC', null, 'This SAMC is Quality-Verified. Credit {credit}, MQF level {mqf}, valid until {until}.', null, 'SAMC ini telah disahkan melalui Quality Verification. Kredit {credit}, tahap MQF {mqf}, sah hingga {until}.'],
             ['statement.catalogue.mce', 'statement', false, 'Catalogue statement for an MCE', null, 'This is an Executive Micro-Credential (MCE). It earns no academic credit, no Academic Credit Record and no deposit to the Academic Bank of Credit.', null, 'Ini ialah Micro-Credential Eksekutif (MCE). Ia tidak memberi kredit akademik, Academic Credit Record atau deposit ke Academic Bank of Credit.'],
-            ['statement.separate_stages', 'statement', false, 'Notice shown with every offering and credential (D-15)', null, 'Completing this micro-credential, receiving an Academic Credit Record, depositing credit to the Academic Bank of Credit and transferring credit are separate decisions.', null, 'Menamatkan micro-credential ini, menerima Academic Credit Record, mendepositkan kredit ke Academic Bank of Credit dan memindahkan kredit adalah keputusan yang berasingan.'],
+            ['statement.separate_stages', 'statement', false, 'Notice shown with every offering and credential', null, 'Completing this micro-credential, receiving an Academic Credit Record, depositing credit to the Academic Bank of Credit and transferring credit are separate decisions.', null, 'Menamatkan micro-credential ini, menerima Academic Credit Record, mendepositkan kredit ke Academic Bank of Credit dan memindahkan kredit adalah keputusan yang berasingan.'],
         ];
         foreach ($defs as [$key, $kind, $mand, $desc, $sEn, $bEn, $sMs, $bMs]) {
             if (DB::table('templates')->where('key', $key)->exists()) {

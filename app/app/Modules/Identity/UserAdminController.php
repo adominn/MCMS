@@ -10,6 +10,7 @@ use App\Modules\Records\AuditRecorder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 // FR-13 (roles and scope), FR-23 (user list). Only the System Administrator reaches these routes.
 final class UserAdminController
@@ -45,6 +46,46 @@ final class UserAdminController
             'valid_from' => ['required', 'date'],
             'reason' => ['required', 'string', 'min:5', 'max:500'],
         ]);
+
+        // D-51: A lecturer is strictly affiliated with exactly one home PTj.
+        if ($d['role'] === Role::Lecturer->value && $d['scope_type'] === 'ptj' && !empty($d['ptj_id'])) {
+            $existing = $user->roleAssignments()
+                ->where('role', Role::Lecturer->value)
+                ->where('scope_type', 'ptj')
+                ->where(fn ($q) => $q->whereNull('valid_to')->orWhere('valid_to', '>=', today()))
+                ->where('ptj_id', '!=', $d['ptj_id'])
+                ->exists();
+            if ($existing) {
+                throw ValidationException::withMessages([
+                    'ptj_id' => __('A lecturer must belong strictly to one home faculty (PTj). Revoke or terminate the existing faculty assignment before assigning a new one.'),
+                ]);
+            }
+        }
+
+        // D-52: Separation of Duties (SoD) - Deputy Dean and Lecturer roles are strictly mutually exclusive.
+        if ($d['role'] === Role::Lecturer->value) {
+            $hasActiveDd = $user->roleAssignments()
+                ->where('role', Role::DeputyDean->value)
+                ->where(fn ($q) => $q->whereNull('valid_to')->orWhere('valid_to', '>=', today()))
+                ->exists();
+            if ($hasActiveDd) {
+                throw ValidationException::withMessages([
+                    'role' => __('A Deputy Dean cannot hold a lecturer role. Academic approval and proposal authoring roles are mutually exclusive (D-52).'),
+                ]);
+            }
+        }
+
+        if ($d['role'] === Role::DeputyDean->value) {
+            $hasActiveLecturer = $user->roleAssignments()
+                ->where('role', Role::Lecturer->value)
+                ->where(fn ($q) => $q->whereNull('valid_to')->orWhere('valid_to', '>=', today()))
+                ->exists();
+            if ($hasActiveLecturer) {
+                throw ValidationException::withMessages([
+                    'role' => __('A lecturer cannot be assigned a Deputy Dean role while holding an active lecturer appointment. Revoke or terminate the lecturer role first (D-52).'),
+                ]);
+            }
+        }
         $a = DB::transaction(function () use ($d, $user, $request) {
             $a = $user->roleAssignments()->create([
                 'role' => $d['role'], 'scope_type' => $d['scope_type'],

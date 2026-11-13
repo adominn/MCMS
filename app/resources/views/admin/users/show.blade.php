@@ -3,11 +3,11 @@
 @section('content')
 <div class="ph">
   <div>
-    <div class="crumb">
-      <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-      <a href="{{ route('users') }}">{{ __('Users and roles') }}</a> /
-      <span>{{ $person->name }}</span>
-    </div>
+    <x-breadcrumb :crumbs="[
+      'Users and roles' => route('users'),
+      $person->name => null,
+    ]" />
+
     <h1>{{ $person->name }}</h1>
     <div class="sub">
       <code>{{ $person->institution_id ?? 'S'.str_pad((string)$person->id, 5, '0', STR_PAD_LEFT) }}</code> &middot;
@@ -15,7 +15,8 @@
       {{ __('Member since') }} {{ $person->created_at?->format('d M Y') ?? '—' }}
     </div>
   </div>
-  <div class="act">
+  <div class="act" style="display:flex;gap:8px;align-items:center">
+    <a class="btn ter sm" href="{{ route('users') }}">&larr; {{ __('All users') }}</a>
     <span class="tag {{ $person->status === 'active' ? 'ok' : 'warn' }}" style="font-size:13px;padding:4px 10px">
       {{ $person->status === 'active' ? __('Active') : __('Deactivated') }}
     </span>

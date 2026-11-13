@@ -5,6 +5,7 @@
 @section('doc_ref', $b->reference)
 @section('doc_file', 'abc-export-'.$b->reference.'.pdf')
 @section('doc_actions')
+  <a class="btn ter sm" href="{{ route('deposits') }}">&larr; {{ __('Back to deposits') }}</a>
   <a class="btn ter sm" href="{{ route('deposits.batch.csv', $b->id) }}">{{ __('Download .csv') }}</a>
 @endsection
 @section('content')

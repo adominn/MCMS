@@ -1,8 +1,24 @@
 @extends('layouts.app')
 @section('title', __('Participants'))
 @section('content')
-<h1>{{ __('Participants: :name :cohort', ['name' => $o->name_en, 'cohort' => $o->cohort_name]) }}</h1>
-<p><a href="{{ route('offerings.show', $o->id) }}">{{ __('Back to the cohort') }}</a> &middot; <a href="{{ route('offerings.participants', ['id' => $o->id, 'status' => $status, 'export' => 'csv']) }}">{{ __('Export CSV') }}</a> &middot; {{ __(':taken of :cap places taken', ['taken' => $taken, 'cap' => $o->capacity]) }}</p>
+<x-breadcrumb :crumbs="[
+  (auth()->user()->hasAnyRole('deputy_dean') ? 'Offerings and readiness' : 'Cohorts and results') => route('offerings'),
+  $o->name_en . ' ' . $o->cohort_name => route('offerings.show', $o->id),
+  'Participants' => null,
+]" />
+
+<div class="title">
+  <div>
+    <h1>{{ __('Participants: :name :cohort', ['name' => $o->name_en, 'cohort' => $o->cohort_name]) }}</h1>
+    <div class="sub">
+      {{ __(':taken of :cap places taken', ['taken' => $taken, 'cap' => $o->capacity]) }}
+    </div>
+  </div>
+  <div class="act">
+    <a class="btn ter sm" href="{{ route('offerings.participants', ['id' => $o->id, 'status' => $status, 'export' => 'csv']) }}">{{ __('Export CSV') }}</a>
+    <a class="btn ter sm" href="{{ route('offerings.show', $o->id) }}">&larr; {{ __('Back to the cohort') }}</a>
+  </div>
+</div>
 <nav class="tabs" aria-label="Status">
   <a href="{{ route('offerings.participants', $o->id) }}" @if(!$status) aria-current="page" class="on" @endif>{{ __('All') }}</a>
   @foreach($labels as $k => $l)<a href="{{ route('offerings.participants', ['id' => $o->id, 'status' => $k]) }}" @if($status === $k) aria-current="page" class="on" @endif>{{ __($l) }} ({{ $counts[$k] ?? 0 }})</a>@endforeach

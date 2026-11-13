@@ -2,11 +2,10 @@
 @section('title', $v->name_en)
 @section('content')
 @php($inReview = $v->status === 'in_review')
-<div class="crumb">
-  <a href="{{ route('approvals') }}">{{ __('Proposals and approval') }}</a>
-  <span>/</span>
-  <span>{{ $v->name_en }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  'Proposals and approval' => route('approvals'),
+  $v->name_en => null,
+]" />
 
 <div class="title">
   <div>
@@ -19,6 +18,7 @@
     </div>
   </div>
   <div class="act" style="gap:8px">
+    <a class="btn ter sm" href="{{ route('approvals') }}">&larr; {{ __('All proposals') }}</a>
     <a class="btn ter sm" href="{{ route('proposals.print', $v->id) }}" target="_blank">{{ __('Print proposal') }}</a>
     <a class="btn ter sm" href="{{ route('approvals.pack', $v->id) }}">{{ __('Decision pack') }}</a>
     @if($v->status === 'endorsed')

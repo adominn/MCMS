@@ -1,13 +1,7 @@
 @extends('layouts.app')
 @section('title', __('Documents'))
 @section('content')
-<div class="crumb" style="margin-bottom:8px">
-  <a href="{{ route('tasks') }}">{{ __('Home') }}</a>
-  <span>/</span>
-  <span>{{ __('Documents') }}</span>
-</div>
-
-<div class="title" style="margin-bottom:16px">
+<div class="ph" style="margin-bottom:16px">
   <div>
     <h1>{{ __('Official Documents & Exports') }}</h1>
     <div class="sub">{{ __('Every official document opens as a standard A4 page ready to print or save as PDF. Machine-readable formats are provided alongside human-readable certificates. Documents leaving UTeM omit personal identity numbers, emails, and raw scores.') }}</div>
@@ -56,10 +50,10 @@
             <thead>
               <tr>
                 <th style="min-width:220px">{{ __('Micro-credential') }}</th>
-                <th>{{ __('Credential Number') }}</th>
-                <th>{{ __('Available Formats') }}</th>
+                <th style="white-space:nowrap;min-width:160px">{{ __('Credential Number') }}</th>
+                <th style="white-space:nowrap">{{ __('Available Formats') }}</th>
                 <th>{{ __('Status') }}</th>
-                <th class="num" style="min-width:280px">{{ __('Open & Download') }}</th>
+                <th class="num" style="min-width:180px;text-align:right">{{ __('Actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -71,8 +65,8 @@
                     <div class="s muted">{{ __('Issued on') }} {{ \Carbon\Carbon::parse($c->issued_at)->format('d/m/Y') }}</div>
                   @endif
                 </td>
-                <td><code>{{ $c->number }}</code></td>
-                <td class="s muted">
+                <td style="white-space:nowrap"><code style="white-space:nowrap">{{ $c->number }}</code></td>
+                <td class="s muted" style="white-space:nowrap">
                   PDF &middot; JSON &middot; JWT
                 </td>
                 <td>
@@ -80,20 +74,32 @@
                     {{ ucfirst($c->status === 'issued' ? 'valid' : $c->status) }}
                   </span>
                 </td>
-                <td class="num">
-                  <div style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
-                    <a href="{{ route('credentials.certificate', $c->id) }}" target="_blank" class="btn sm ter" title="{{ __('Print official certificate') }}">
+                <td class="num" style="white-space:nowrap">
+                  <div style="display:inline-flex;gap:6px;align-items:center;justify-content:flex-end;position:relative">
+                    <a href="{{ route('credentials.certificate', $c->id) }}" class="btn sm ter" title="{{ __('Print official certificate') }}">
                       <span class="btn-lbl">{{ __('Certificate') }}</span> ↗
                     </a>
-                    <a href="{{ route('credentials.sheet', $c->id) }}" target="_blank" class="btn sm ter" title="{{ __('Print specification sheet') }}">
-                      <span class="btn-lbl">{{ __('Printable Sheet') }}</span> ↗
-                    </a>
-                    <a href="{{ route('credentials.download', [$c->id, 'json']) }}" class="btn sm sec" title="{{ __('Download W3C Verifiable Credential JSON with cryptographic proof') }}">
-                      <span class="btn-lbl">{{ __('Digital Credential (JSON)') }}</span> ⤓
-                    </a>
-                    <a href="{{ route('credentials.download', [$c->id, 'jwt']) }}" class="btn sm ghost" title="{{ __('Download raw signed Ed25519 JWT token') }}">
-                      <span class="btn-lbl">{{ __('JWT') }}</span> ⤓
-                    </a>
+                    <button type="button" class="btn sm sec" data-menu="pop-cred-{{ $c->id }}" aria-haspopup="true" aria-expanded="false" title="{{ __('Download formats and exports') }}" style="padding:0 10px;gap:4px">
+                      <span class="btn-lbl">{{ __('Download') }}</span> <span style="font-size:10px">▼</span>
+                    </button>
+                    <div class="pop" id="pop-cred-{{ $c->id }}" hidden style="right:0;top:100%;margin-top:4px;text-align:left;min-width:230px;z-index:60;box-shadow:0 6px 20px rgba(0,0,0,0.2)">
+                      <div class="ph" style="padding:8px 14px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">
+                        {{ __('Official Formats') }}
+                      </div>
+                      <a class="mi" href="{{ route('credentials.sheet', $c->id) }}" target="_blank" style="justify-content:space-between">
+                        <span>{{ __('Printable Sheet (PDF)') }}</span> <span>&nearr;</span>
+                      </a>
+                      <a class="mi" href="{{ route('credentials.download', [$c->id, 'json']) }}" download style="justify-content:space-between">
+                        <span>{{ __('Digital Credential (JSON)') }}</span> <span>&darr;</span>
+                      </a>
+                      <a class="mi" href="{{ route('credentials.download', [$c->id, 'jwt']) }}" download style="justify-content:space-between">
+                        <span>{{ __('Signed Token (JWT)') }}</span> <span>&darr;</span>
+                      </a>
+                      <div class="sep"></div>
+                      <a class="mi" href="{{ route('credentials.show', $c->id) }}" style="color:var(--primary);font-weight:600;justify-content:space-between">
+                        <span>{{ __('View details & QR code') }}</span> <span>&rarr;</span>
+                      </a>
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -183,7 +189,7 @@
             @forelse($mine['receipts'] as $r)
               <tr data-href="{{ route('enrolments.receipt', $r->id) }}">
                 <td>
-                  <b>Receipt for {{ $r->name_en }} ({{ $r->reference }})</b>
+                  <a href="{{ route('enrolments.receipt', $r->id) }}" style="font-weight:700">Receipt for {{ $r->name_en }} ({{ $r->reference }})</a>
                   @if(!empty($r->payment_ref))
                     <div class="s muted">{{ __('Transaction Ref:') }} {{ $r->payment_ref }}</div>
                   @endif
@@ -195,10 +201,10 @@
                 <td class="num" data-v="{{ $r->created_at }}">{{ \Carbon\Carbon::parse($r->created_at)->format('d/m/Y') }}</td>
                 <td class="num">
                   <div style="display:inline-flex;gap:6px;align-items:center;justify-content:flex-end">
-                    <a href="{{ route('enrolments.receipt', $r->id) }}" target="_blank" class="btn sm ter">
+                    <a href="{{ route('enrolments.receipt', $r->id) }}" class="btn sm ter">
                       <span class="btn-lbl">{{ __('Receipt (A4)') }}</span> ↗
                     </a>
-                    <a href="{{ route('enrolments.confirmation', $r->id) }}" target="_blank" class="btn sm ghost">
+                    <a href="{{ route('enrolments.confirmation', $r->id) }}" class="btn sm ghost">
                       <span class="btn-lbl">{{ __('Confirmation letter') }}</span> ↗
                     </a>
                   </div>
@@ -264,8 +270,8 @@
                     A4 &middot; CSV
                   </td>
                   <td>
-                    <a href="{{ route('reports.print', $k) }}" target="_blank" class="btn sm ter">
-                      <span class="btn-lbl">{{ __('Report') }} (A4)</span> ↗
+                    <a href="{{ route('reports.print', $k) }}" class="btn sm ter" title="{{ __('Print') }}">
+                      <span class="btn-lbl">{{ __('Print') }} (A4)</span> ↗
                     </a>
                   </td>
                   <td class="num">
@@ -426,7 +432,7 @@
                     <td><span class="tag neutral">{{ $t->programme_code }}</span></td>
                     <td><span class="tag {{ $t->status === 'approved' ? 'ok' : ($t->status === 'partly' ? 'warn' : 'err') }}">{{ ucfirst($t->status) }}</span></td>
                     <td class="num">
-                      <a href="{{ route('transfer.show', $t->id) }}?print=1" target="_blank" class="btn sm ter">
+                      <a href="{{ route('transfers.letter', $t->id) }}?print=1" target="_blank" class="btn sm ter">
                         <span class="btn-lbl">{{ __('Letter (A4)') }}</span> ↗
                       </a>
                     </td>
@@ -515,7 +521,7 @@
   </div>
 @endif
 
-<!-- Document Authenticity & PDPA Privacy Card (D-38) -->
+<!-- Document Authenticity & PDPA Privacy Card -->
 <div class="panel" style="margin-top:24px;background:#ffffff;border-left:4px solid var(--accent, #1e2a6e)">
   <div class="bd" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:18px 24px">
     <div style="display:flex;align-items:center;gap:14px;min-width:280px;flex:1">

@@ -1,16 +1,18 @@
 @extends('layouts.app')
 @section('title', __('New proposal'))
 @section('content')
-<div class="crumb">
-  <a href="{{ route('proposals') }}">{{ __('Proposals and versions') }}</a>
-  <span>/</span>
-  <span>{{ __('New proposal') }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  'Proposals and versions' => route('proposals'),
+  'New proposal' => null,
+]" />
 
 <div class="title">
   <div>
     <h1>{{ __('New proposal') }}</h1>
     <div class="sub">{{ __('Answer three questions. The system suggests a category and says why.') }}</div>
+  </div>
+  <div class="act">
+    <a class="btn ter sm" href="{{ route('proposals') }}">&larr; {{ __('Back to proposals') }}</a>
   </div>
 </div>
 

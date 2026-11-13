@@ -55,6 +55,18 @@ it('has no second-step page without a pending sign-in', function () {
     $this->get('/signin/mfa')->assertNotFound();
 });
 
+it('redirects authenticated users away from signin and mfa pages and ignores signin/mfa as intended url', function () {
+    $farid = who('Farid Hashim');
+    $this->actingAs($farid)->get('/signin/mfa')->assertRedirect('/tasks');
+    $this->actingAs($farid)->get('/signin')->assertRedirect('/tasks');
+
+    $this->post('/signout');
+    $this->withSession(['url.intended' => 'http://localhost:8110/signin/mfa'])
+        ->post('/signin/stub', ['user' => $farid->id])
+        ->assertRedirect('/signin/mfa');
+    $this->post('/signin/mfa', ['code' => '123456'])->assertRedirect('/tasks');
+});
+
 it('ends an idle session after the idle timeout setting and records it (FR-06)', function () {
     $amir = who('Amir Hakimi');
     $this->actingAs($amir)->withSession(['last_activity' => now()->subMinutes(29)->timestamp])->get('/tasks')->assertOk();
@@ -88,6 +100,47 @@ it('rejects a role without its scope value or reason, and from anyone but the ad
     $this->actingAs(who('Farid Hashim'))->post("/admin/users/{$aina->id}/roles", ['role' => 'reviewer', 'scope_type' => 'ptj', 'valid_from' => today()->toDateString(), 'reason' => 'x'])
         ->assertSessionHasErrors(['ptj_id', 'reason']);
     $this->actingAs(who('Hakim Rahman'))->post("/admin/users/{$aina->id}/roles", ['role' => 'reviewer', 'scope_type' => 'university', 'valid_from' => today()->toDateString(), 'reason' => 'Not allowed'])->assertForbidden();
+});
+
+it('enforces single PTj scoping for lecturers and prevents assigning multiple active PTjs (D-51)', function () {
+    $aina = who('Dr. Aina Zulkifli');
+    $admin = who('Farid Hashim');
+    $ftke = DB::table('ptjs')->where('code', 'FTKE')->firstOrFail();
+
+    // Dr. Aina already has an active lecturer role in FTMK (ptj_id: 1).
+    // Attempting to assign her another active lecturer role in FTKE must be rejected.
+    $this->actingAs($admin)->post("/admin/users/{$aina->id}/roles", [
+        'role' => 'lecturer',
+        'scope_type' => 'ptj',
+        'ptj_id' => $ftke->id,
+        'valid_from' => today()->toDateString(),
+        'reason' => 'Attempting cross-faculty assignment',
+    ])->assertSessionHasErrors('ptj_id');
+});
+
+it('enforces separation of duties and mutual exclusivity between Deputy Dean and Lecturer roles (D-52)', function () {
+    $hakim = who('Hakim Rahman'); // Deputy Dean
+    $aina = who('Dr. Aina Zulkifli'); // Lecturer
+    $admin = who('Farid Hashim');
+    $ftmk = DB::table('ptjs')->where('code', 'FTMK')->firstOrFail();
+
+    // Assigning Lecturer to an active Deputy Dean must fail
+    $this->actingAs($admin)->post("/admin/users/{$hakim->id}/roles", [
+        'role' => 'lecturer',
+        'scope_type' => 'ptj',
+        'ptj_id' => $ftmk->id,
+        'valid_from' => today()->toDateString(),
+        'reason' => 'Assigning lecturer role to deputy dean',
+    ])->assertSessionHasErrors('role');
+
+    // Assigning Deputy Dean to an active Lecturer must fail
+    $this->actingAs($admin)->post("/admin/users/{$aina->id}/roles", [
+        'role' => 'deputy_dean',
+        'scope_type' => 'ptj',
+        'ptj_id' => $ftmk->id,
+        'valid_from' => today()->toDateString(),
+        'reason' => 'Assigning deputy dean role to active lecturer',
+    ])->assertSessionHasErrors('role');
 });
 
 it('starts a role on its effective date and keeps the row when it is revoked', function () {

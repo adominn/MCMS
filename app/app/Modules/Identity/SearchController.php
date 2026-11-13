@@ -16,21 +16,34 @@ class SearchController
         abort_unless($request->user()->hasAnyRole('lecturer', 'deputy_dean', 'codl_admin'), 403);
         $q = trim((string) $request->query('q'));
         $like = '%'.$q.'%';
-        $mcs = $cohorts = $people = collect();
+        $mcs = $cohorts = $people = $settings = $files = collect();
         if (mb_strlen($q) >= 2) {
-            $mcs = DB::table('micro_credentials as m')->join('mc_versions as v', 'v.micro_credential_id', '=', 'm.id')
+            $mcs = DB::table('micro_credentials as m')->join('mc_versions as v', 'v.micro_credential_id', '=', 'm.id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
                 ->whereRaw('v.version_no = (select max(version_no) from mc_versions where micro_credential_id = m.id)')
-                ->where(fn ($w) => $w->where('v.name_en', db_like(), $like)->orWhere('m.code', db_like(), $like))
-                ->orderBy('v.name_en')->limit(50)->get(['m.id', 'm.code', 'm.category', 'v.name_en', 'v.status']);
-            $cohorts = DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
-                ->where(fn ($w) => $w->where('o.cohort_name', db_like(), $like)->orWhere('v.name_en', db_like(), $like))
-                ->orderBy('o.start_date')->limit(50)->get(['o.id', 'o.cohort_name', 'o.status', 'v.name_en']);
+                ->where(fn ($w) => $w->where('v.name_en', db_like(), $like)->orWhere('m.code', db_like(), $like)->orWhere('u.name', db_like(), $like))
+                ->orderBy('v.name_en')->limit(50)->get(['m.id', 'm.code', 'm.category', 'v.name_en', 'v.status', 'u.name as lecturer_name']);
+            $cohorts = DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
+                ->where(fn ($w) => $w->where('o.cohort_name', db_like(), $like)->orWhere('v.name_en', db_like(), $like)->orWhere('u.name', db_like(), $like))
+                ->orderBy('o.start_date')->limit(50)->get(['o.id', 'o.cohort_name', 'o.status', 'v.name_en', 'u.name as lecturer_name']);
             if ($request->user()->hasAnyRole('deputy_dean', 'codl_admin')) {
                 $people = DB::table('users')->where(fn ($w) => $w->where('name', db_like(), $like)->orWhere('email', db_like(), $like))->orderBy('name')->limit(50)->get(['id', 'name', 'email']);
             }
+            if ($request->user()->hasAnyRole('codl_admin')) {
+                $ql = mb_strtolower($q);
+                $settings = collect(config('settings-defaults', []))
+                    ->filter(fn ($d, $key) => str_contains(mb_strtolower($key), $ql) || str_contains(mb_strtolower($d['en'] ?? ''), $ql) || str_contains(mb_strtolower(__($d['en'] ?? '')), $ql))
+                    ->map(fn ($d, $key) => (object) ['key' => $key, 'description' => $d['en'] ?? $key])
+                    ->take(50)
+                    ->values();
+                $files = DB::table('import_files')
+                    ->where(fn ($w) => $w->where('original_name', db_like(), $like)->orWhere('kind', db_like(), $like)->orWhere('status', db_like(), $like))
+                    ->orderByDesc('id')
+                    ->limit(50)
+                    ->get(['id', 'original_name', 'kind', 'status']);
+            }
         }
 
-        return view('search', compact('q', 'mcs', 'cohorts', 'people'));
+        return view('search', compact('q', 'mcs', 'cohorts', 'people', 'settings', 'files'));
     }
 
     public function profile(Request $request, Settings $settings)
@@ -92,13 +105,16 @@ class SearchController
     {
         $data = $request->validate([
             'locale' => ['required', 'in:en,ms'],
+            'theme' => ['nullable', 'in:auto,light,dark'],
             'phone' => ['nullable', 'string', 'max:30'],
             'name_on_certificate' => ['nullable', 'string', 'max:120'],
         ]);
 
         $u = $request->user();
+        $theme = $data['theme'] ?? 'auto';
         DB::table('users')->where('id', $u->id)->update([
             'locale' => $data['locale'],
+            'theme_preference' => $theme,
             'phone' => $data['phone'] ?? null,
             'name_on_certificate' => $data['name_on_certificate'] ?? null,
             'updated_at' => now(),
@@ -107,6 +123,7 @@ class SearchController
         session([
             'ui_lang' => $data['locale'],
             'lang' => $data['locale'],
+            'ui_theme' => $theme,
         ]);
         app()->setLocale($data['locale']);
 

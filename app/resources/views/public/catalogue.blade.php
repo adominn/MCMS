@@ -5,7 +5,8 @@
 
 <div class="pub-sec">
   <div class="crumb" style="margin-bottom:8px">
-    <a href="{{ auth()->check() ? route('tasks') : route('public.home') }}">{{ auth()->check() ? (auth()->user()->hasAnyRole('student') ? __('My learning') : __('Dashboard')) : $t('home') }}</a> <span>/</span> <span>{{ $t('catalogue') }}</span>
+    @php $isPublic = request()->routeIs('public.*'); $catalogueRoute = $isPublic ? 'public.catalogue' : 'catalogue'; $offeringRoute = $isPublic ? 'public.offering' : 'offering'; @endphp
+<a href="{{ !$isPublic && auth()->check() ? auth()->user()->homeUrl() : route('public.home') }}">{{ !$isPublic && auth()->check() ? (auth()->user()->hasAnyRole('student') ? __('My learning') : __('Dashboard')) : $t('home') }}</a> <span>/</span> <span>{{ $t('catalogue') }}</span>
   </div>
   <div class="title">
     <div>
@@ -15,7 +16,7 @@
   </div>
 
   <div class="row" style="gap:32px;align-items:flex-start">
-    <form method="get" action="{{ route('public.catalogue') }}" data-auto-filter data-target="#catalogue-results" data-count="#catalogue-count" role="search" aria-label="{{ $t('filters') }}" class="card col" style="width:280px;flex-shrink:0;gap:12px">
+    <form method="get" action="{{ route($catalogueRoute) }}" data-auto-filter data-target="#catalogue-results" data-count="#catalogue-count" role="search" aria-label="{{ $t('filters') }}" class="card col" style="width:280px;flex-shrink:0;gap:12px">
       <div style="font-weight:600;font-size:16px;border-bottom:1px solid var(--hairline);padding-bottom:8px">{{ $t('filters') }}</div>
       
       <div>
@@ -82,7 +83,7 @@
 
       <div class="row" style="gap:8px;margin-top:4px">
         <button type="submit" class="btn sm">{{ $t('search') }}</button>
-        <a href="{{ route('public.catalogue') }}" class="btn ter sm">{{ $lang === 'ms' ? 'Kosongkan' : 'Clear filters' }}</a>
+        <a href="{{ route($catalogueRoute) }}" class="btn ter sm">{{ $lang === 'ms' ? 'Kosongkan' : 'Clear filters' }}</a>
       </div>
     </form>
 
@@ -90,14 +91,14 @@
       <div class="small muted">{{ $rows->total() }} {{ $rows->total() === 1 ? 'offering' : 'offerings' }}{{ !empty($f['q']) ? ' for "'.e($f['q']).'"' : '' }}</div>
 
       @forelse($rows as $r)
-        <div class="card" style="padding:20px;gap:12px;cursor:pointer" onclick="if(!event.target.closest('a')) location.href='{{ route('public.offering', $r->id) }}'">
+        <div class="card" style="padding:20px;gap:12px;cursor:pointer" onclick="if(!event.target.closest('a')) location.href='{{ route($offeringRoute, $r->id) }}'">
           <div class="row" style="align-items:flex-start;justify-content:space-between;gap:16px">
             <div style="flex:1">
               <div style="margin-bottom:6px">
                 <span class="cat">{{ strtoupper($r->category) }}</span>
-                <a href="{{ route('public.offering', $r->id) }}" style="font-size:18px;font-weight:600;color:var(--ink)">{{ $pick($r->name_en, $r->name_ms) }} {{ $r->cohort_name }}</a>
+                <a href="{{ route($offeringRoute, $r->id) }}" style="font-size:18px;font-weight:600;color:var(--ink)">{{ $pick($r->name_en, $r->name_ms) }} {{ $r->cohort_name }}</a>
               </div>
-              <div class="small muted">{{ $r->ptj }} &middot; {{ $modes[$r->delivery_mode] ?? $r->delivery_mode }} &middot; {{ $r->delivery_language }}</div>
+              <div class="small muted">{{ $r->ptj }} &middot; @if(!empty($r->lecturer_name)){{ $r->lecturer_name }} &middot; @endif{{ $modes[$r->delivery_mode] ?? $r->delivery_mode }} &middot; {{ $r->delivery_language }}</div>
             </div>
             <div style="text-align:right">
               <b style="font-size:18px;display:block;color:var(--ink)">{{ $r->fee > 0 ? 'RM '.number_format($r->fee, 2) : ($lang === 'ms' ? 'Percuma' : 'Free') }}</b>
@@ -112,13 +113,13 @@
           </div>
           <div class="row" style="border-top:1px solid var(--hairline);padding-top:10px;margin-top:4px;font-size:13px;color:var(--muted);justify-content:space-between;align-items:center">
             <div>{{ $t('start') }}: {{ \Carbon\Carbon::parse($r->start_date)->format('d/m/Y') }} &middot; {{ $t('end') }}: {{ \Carbon\Carbon::parse($r->end_date)->format('d/m/Y') }}</div>
-            <div><a class="btn ter sm" href="{{ route('public.offering', $r->id) }}">{{ $lang === 'ms' ? 'Lihat butiran' : 'View offering' }} &rarr;</a></div>
+            <div><a class="btn ter sm" href="{{ route($offeringRoute, $r->id) }}">{{ $lang === 'ms' ? 'Lihat butiran' : 'View offering' }} &rarr;</a></div>
           </div>
         </div>
       @empty
         <div class="card muted" style="padding:24px;text-align:center">
           <p style="margin:0 0 8px">{{ $t('none') }}</p>
-          <a href="{{ route('public.catalogue') }}" class="btn ter sm">{{ $lang === 'ms' ? 'Kosongkan penapis' : 'Clear all filters' }}</a>
+          <a href="{{ route($catalogueRoute) }}" class="btn ter sm">{{ $lang === 'ms' ? 'Kosongkan penapis' : 'Clear all filters' }}</a>
         </div>
       @endforelse
 
@@ -131,5 +132,5 @@
   </div>
 </div>
 
-@include('public._foot')
+@if($isPublic) @include('public._foot') @endif
 @endsection

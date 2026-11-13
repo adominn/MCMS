@@ -1,16 +1,18 @@
 @extends('layouts.app')
 @section('title', __('New transfer application'))
 @section('content')
-<div class="crumb" style="margin-bottom:8px">
-  <a href="{{ route('transfer') }}">{{ __('Credit transfer') }}</a>
-  <span>/</span>
-  <span>{{ __('New application') }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  'Credit transfer' => route('transfer'),
+  'New transfer application' => null,
+]" />
 
 <div class="title">
   <div>
     <h1>{{ __('New transfer application') }}</h1>
     <div class="sub">{{ __('Applications to have deposited credit counted towards a UTeM programme') }}</div>
+  </div>
+  <div class="act">
+    <a class="btn ter sm" href="{{ route('transfer') }}">&larr; {{ __('Back to applications') }}</a>
   </div>
 </div>
 
@@ -51,46 +53,48 @@
         <div class="bd">
           <p class="small muted" style="margin-top:0;margin-bottom:14px">{{ __('Only credit that is Available can be chosen. Expired credit can be chosen but is flagged so the evaluator judges the currency of knowledge again. Credit already in another application, or held for a programme, cannot be chosen again.') }}</p>
 
-          <table id="credits" style="margin:0 0 16px">
-            <thead>
-              <tr>
-                <th style="width:40px"></th>
-                <th>{{ __('Credit') }}</th>
-                <th>{{ __('Course requested') }}</th>
-                <th style="width:140px">{{ __('Credits requested') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @forelse($deposits as $d)
+          <div class="table-wrap">
+            <table id="credits" style="margin:0 0 16px; width:100%">
+              <thead>
                 <tr>
-                  <td>
-                    <input type="checkbox" name="deposits[]" value="{{ $d->id }}" aria-label="Use {{ $d->name_en }}" @disabled(! $d->selectable)>
-                  </td>
-                  <td>
-                    <b>{{ $d->name_en }}</b><br>
-                    <span class="muted small">{{ $d->acr_reference }} &middot; {{ __(':count credits', ['count' => rtrim(rtrim((string) $d->credits, '0'), '.')]) }}</span>
-                    @if($d->why)
-                      <br><span class="tag {{ $d->selectable ? '' : 'err' }}">{{ $d->selectable ? __('Expired: needs re-evaluation') : __($d->why) }}</span>
-                    @endif
-                  </td>
-                  <td>
-                    <select name="course[{{ $d->id }}]" aria-label="Course for {{ $d->name_en }}" style="max-width:280px">
-                      @foreach($courses as $c)
-                        <option value="{{ $c->id }}" data-programme="{{ $c->programme_id }}" {{ (old("course.{$d->id}") == $c->id || (!old("course.{$d->id}") && ($c->name === $d->name_en || str_contains($c->name, $d->name_en) || str_contains($d->name_en, $c->name)))) ? 'selected' : '' }}>{{ $c->code }} {{ $c->name }} ({{ __(':count credit', ['count' => $c->credit]) }})</option>
-                      @endforeach
-                    </select>
-                  </td>
-                  <td>
-                    <input type="number" name="credits[{{ $d->id }}]" step="0.5" min="0.5" max="{{ $d->credits }}" value="{{ $d->credits }}" aria-label="Credits requested for {{ $d->name_en }}" style="max-width:110px">
-                  </td>
+                  <th style="width:40px"></th>
+                  <th style="min-width:180px; width:35%">{{ __('Credit') }}</th>
+                  <th style="min-width:260px; width:45%">{{ __('Course requested') }}</th>
+                  <th style="width:130px; text-align:right">{{ __('Credits requested') }}</th>
                 </tr>
-              @empty
-                <tr>
-                  <td colspan="4" class="muted" style="padding:16px">{{ __('You have no deposited credit. Give consent to deposit an Academic Credit Record first.') }}</td>
-                </tr>
-              @endforelse
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                @forelse($deposits as $d)
+                  <tr>
+                    <td style="vertical-align:middle; width:40px">
+                      <input type="checkbox" name="deposits[]" value="{{ $d->id }}" aria-label="Use {{ $d->name_en }}" @disabled(! $d->selectable)>
+                    </td>
+                    <td style="vertical-align:middle">
+                      <b>{{ $d->name_en }}</b><br>
+                      <span class="muted small">{{ $d->acr_reference }} &middot; {{ __(':count credits', ['count' => rtrim(rtrim((string) $d->credits, '0'), '.')]) }}</span>
+                      @if($d->why)
+                        <br><span class="tag {{ $d->selectable ? '' : 'err' }}">{{ $d->selectable ? __('Expired: needs re-evaluation') : __($d->why) }}</span>
+                      @endif
+                    </td>
+                    <td style="vertical-align:middle">
+                      <select name="course[{{ $d->id }}]" aria-label="Course for {{ $d->name_en }}" style="width:100%; min-width:240px; max-width:340px">
+                        @foreach($courses as $c)
+                          <option value="{{ $c->id }}" data-programme="{{ $c->programme_id }}" {{ (old("course.{$d->id}") == $c->id || (!old("course.{$d->id}") && ($c->name === $d->name_en || str_contains($c->name, $d->name_en) || str_contains($d->name_en, $c->name)))) ? 'selected' : '' }}>{{ $c->code }} {{ $c->name }} ({{ __(':count credit', ['count' => $c->credit]) }})</option>
+                        @endforeach
+                      </select>
+                    </td>
+                    <td style="vertical-align:middle; text-align:right">
+                      <input type="number" name="credits[{{ $d->id }}]" step="0.5" min="0.5" max="{{ $d->credits }}" value="{{ $d->credits }}" aria-label="Credits requested for {{ $d->name_en }}" style="width:90px; text-align:right">
+                    </td>
+                  </tr>
+                @empty
+                  <tr>
+                    <td colspan="4" class="muted" style="padding:16px">{{ __('You have no deposited credit. Give consent to deposit an Academic Credit Record first.') }}</td>
+                  </tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

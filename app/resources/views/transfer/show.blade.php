@@ -14,14 +14,16 @@
     default => 4
   };
   $decided = in_array($a->status, ['approved', 'partly', 'not_approved'], true);
+  $isStudent = auth()->user()->hasAnyRole('student') && ! auth()->user()->hasAnyRole('deputy_dean', 'codl_admin');
+  $backUrl = $isStudent ? route('transfer') : route('transfers');
+  $backLabel = $isStudent ? __('All applications') : __('Credit transfer queue');
 @endphp
 
 @if(!$isPrint)
-  <div class="crumb" style="margin-bottom:8px">
-    <a href="{{ route('transfer') }}">{{ __('Credit transfer') }}</a>
-    <span>/</span>
-    <span>{{ $a->reference }}</span>
-  </div>
+  <x-breadcrumb :crumbs="[
+    ($isStudent ? 'Credit transfer' : 'Credit transfer evaluation') => $backUrl,
+    $a->reference => null,
+  ]" />
 
   <div class="title">
     <div>
@@ -29,6 +31,7 @@
       <div class="sub">{{ $a->programme }} {{ $a->programme_name }} &middot; applied {{ \Carbon\Carbon::parse($a->applied_at)->format('d/m/Y') }}</div>
     </div>
     <div class="act" style="align-items:center;display:flex;gap:8px">
+      <a class="btn ter sm" href="{{ $backUrl }}">&larr; {{ $backLabel }}</a>
       <span class="tag {{ $a->status === 'approved' ? 'ok' : (in_array($a->status, ['submitted', 'under_eval'], true) ? 'info' : ($a->status === 'partly' ? 'warn' : 'err')) }}" id="app-status">
         {{ $status[$a->status] ?? ucfirst($a->status) }}
       </span>
@@ -90,34 +93,36 @@
       <div class="panel" style="margin-bottom:20px">
         <div class="hd"><h2>{{ __("Transfer lines") }}</h2></div>
         <div class="bd" style="padding:0">
-          <table id="lines" style="margin:0">
-            <thead>
-              <tr>
-                <th>{{ __("Credit used") }}</th>
-                <th>{{ __("Course requested") }}</th>
-                <th class="num" style="width:100px">{{ __("Requested") }}</th>
-                <th class="num" style="width:100px">{{ __("Approved") }}</th>
-                <th style="width:160px">{{ __("Credit status") }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @foreach($lines as $l)
+          <div class="table-wrap">
+            <table id="lines" style="margin:0; width:100%">
+              <thead>
                 <tr>
-                  <td>
-                    <b>{{ $l->source_name }}</b><br>
-                    <span class="muted small">{{ $l->acr_reference }}</span>
-                  </td>
-                  <td>{{ $l->course_code }} {{ $l->course_name }}</td>
-                  <td class="num">{{ rtrim(rtrim((string) $l->credits_requested, '0'), '.') }}</td>
-                  <td class="num">{{ $l->credits_approved !== null ? (rtrim(rtrim((string) $l->credits_approved, '0'), '.') ?: '0') : '—' }}</td>
-                  <td>
-                    {{ ['available' => __('Available'), 'provisional' => __('Provisionally redeemed'), 'redeemed' => __('Redeemed'), 'expired' => __('Expired')][$l->credit_status] ?? '' }}
-                    @if($l->reevaluate)<br><span class="tag warn">{{ __("Needs re-evaluation") }}</span>@endif
-                  </td>
+                  <th>{{ __("Credit used") }}</th>
+                  <th>{{ __("Course requested") }}</th>
+                  <th class="num" style="width:100px">{{ __("Requested") }}</th>
+                  <th class="num" style="width:100px">{{ __("Approved") }}</th>
+                  <th style="width:160px">{{ __("Credit status") }}</th>
                 </tr>
-              @endforeach
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                @foreach($lines as $l)
+                  <tr>
+                    <td>
+                      <b>{{ $l->source_name }}</b><br>
+                      <span class="muted small">{{ $l->acr_reference }}</span>
+                    </td>
+                    <td>{{ $l->course_code }} {{ $l->course_name }}</td>
+                    <td class="num">{{ rtrim(rtrim((string) $l->credits_requested, '0'), '.') }}</td>
+                    <td class="num">{{ $l->credits_approved !== null ? (rtrim(rtrim((string) $l->credits_approved, '0'), '.') ?: '0') : '—' }}</td>
+                    <td>
+                      {{ ['available' => __('Available'), 'provisional' => __('Provisionally redeemed'), 'redeemed' => __('Redeemed'), 'expired' => __('Expired')][$l->credit_status] ?? '' }}
+                      @if($l->reevaluate)<br><span class="tag warn">{{ __("Needs re-evaluation") }}</span>@endif
+                    </td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -141,7 +146,7 @@
       </div>
 
       <div style="margin-top:12px">
-        <a class="btn ghost sm" href="{{ route('transfer') }}">&larr; {{ __('Back to credit transfer') }}</a>
+        <a class="btn ghost sm" href="{{ $backUrl }}">&larr; {{ $isStudent ? __('Back to credit transfer') : __('Back to credit transfer queue') }}</a>
       </div>
     </div>
   </div>
@@ -200,7 +205,7 @@
                 <span class="tag {{ $isOk ? 'ok' : 'err' }}">{{ $l->decision ? ucfirst($l->decision) : 'Pending' }}</span>
               </td>
               <td class="num">{{ $l->credits_approved !== null ? rtrim(rtrim((string) $l->credits_approved, '0'), '.') : '0' }}</td>
-              <td class="small">{{ $l->conditions ?: ($isOk ? "Subject to admission to {$a->programme}; approval does not imply admission" : 'None') }}</td>
+              <td class="small">{{ ($l->conditions ?? $decision?->conditions) ?: ($isOk ? "Subject to admission to {$a->programme}; approval does not imply admission" : 'None') }}</td>
             </tr>
           @endforeach
         </tbody>

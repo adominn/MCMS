@@ -26,13 +26,14 @@ final class EnrolmentController
             ->join('offerings as o', 'o.id', '=', 'e.offering_id')
             ->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')
             ->leftJoin('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+            ->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
             ->where('e.user_id', $userId)
             ->orderByDesc('e.id')
             ->select([
                 'e.id', 'e.reference', 'e.status', 'e.fee_amount', 'e.created_at as registered_at', 'e.progress_percent',
                 'o.id as offering_id', 'o.cohort_name', 'o.start_date', 'o.end_date', 'o.delivery_mode',
                 'v.id as mc_version_id', 'v.name_en', 'v.name_ms', 'm.code as mc_code', 'v.proposed_credit', 'v.planned_slt',
-                'm.category as mc_category',
+                'm.category as mc_category', 'u.name as lecturer_name',
             ])
             ->get();
 
@@ -322,7 +323,7 @@ final class EnrolmentController
 
     private function offering(int $id): object
     {
-        return DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->where('o.id', $id)
-            ->first(['o.*', 'v.name_en', 'v.name_ms', 'm.category']) ?? abort(404);
+        return DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->where('o.id', $id)
+            ->first(['o.*', 'v.name_en', 'v.name_ms', 'm.category', 'u.name as lecturer_name']) ?? abort(404);
     }
 }

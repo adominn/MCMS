@@ -14,6 +14,7 @@ Route::middleware(['auth', 'role:student'])->prefix('transfer')->group(function 
 Route::middleware(['auth', 'role:deputy_dean'])->prefix('transfers')->group(function () {
     Route::get('/', [EvaluationController::class, 'index'])->name('transfers');
     Route::get('/{id}', [EvaluationController::class, 'show'])->whereNumber('id')->name('transfers.show');
+    Route::get('/{id}/letter', [EvaluationController::class, 'letter'])->whereNumber('id')->name('transfers.letter');
     Route::post('/{id}/validity', [EvaluationController::class, 'validity'])->whereNumber('id')->name('transfers.validity');
     Route::post('/{id}/lines/{line}', [EvaluationController::class, 'evaluate'])->whereNumber(['id', 'line'])->name('transfers.evaluate');
     Route::post('/{id}/more-evidence', [EvaluationController::class, 'moreEvidence'])->whereNumber('id')->name('transfers.more');

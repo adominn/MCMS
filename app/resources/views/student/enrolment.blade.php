@@ -1,26 +1,30 @@
 @extends('layouts.app')
 @section('title', __('Registration'))
 @section('content')
-<div class="crumb" style="margin-bottom:8px">
-  <a href="{{ route('enrolments') }}">{{ __('Registrations and payments') }}</a> <span>/</span> <span>{{ $e->reference }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  'My learning' => route('home'),
+  'Registrations and payments' => route('enrolments'),
+  ($o->name_en . ' ' . $o->cohort_name) => null,
+]" />
 
 <div class="title">
   <div>
     <h1>{{ $o->name_en }} {{ $o->cohort_name }}</h1>
     <div class="sub">
       {{ $e->reference }} &middot; 
+      @if(!empty($o->lecturer_name)) {{ $o->lecturer_name }} &middot; @endif
       @if(!empty($o->start_date) && !empty($o->end_date))
         {{ \Carbon\Carbon::parse($o->start_date)->format('d/m/Y') }} {{ __('to') }} {{ \Carbon\Carbon::parse($o->end_date)->format('d/m/Y') }} &middot;
       @endif
       <x-pill :s="$labels[$e->status]" />
     </div>
   </div>
-  @if($e->status === 'completed')
-    <div class="act">
+  <div class="act" style="gap:8px">
+    <a class="btn ter sm" href="{{ route('enrolments') }}">&larr; {{ __('All registrations') }}</a>
+    @if($e->status === 'completed')
       <a class="btn ter sm" href="{{ route('feedback.show', $e->id) }}">{{ __('Give feedback') }}</a>
-    </div>
-  @endif
+    @endif
+  </div>
 </div>
 
 @if($e->status === 'withdrawn')

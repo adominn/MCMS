@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias(['role' => EnsureRole::class]);
         $middleware->appendToGroup('web', IdleTimeout::class); // after the session starts
         $middleware->appendToGroup('web', \App\Modules\Core\UiLanguage::class);
+        $middleware->appendToGroup('web', \App\Modules\Core\UiTheme::class);
         $middleware->appendToGroup('web', \App\Modules\Core\DemoClock::class); // after the idle check, which uses the real time
         $middleware->redirectGuestsTo(fn () => route('signin'));
     })

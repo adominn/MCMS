@@ -1,11 +1,10 @@
 @extends('layouts.app')
 @section('title', __('Review'))
 @section('content')
-<div class="crumb">
-  <a href="{{ route('reviews') }}">{{ auth()->user()->hasAnyRole('lecturer') ? __('Reviews for colleagues') : __('My review invitations') }}</a>
-  <span>/</span>
-  <span>{{ $v->name_en }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  (auth()->user()->hasAnyRole('lecturer') ? 'Reviews for colleagues' : 'My review invitations') => route('reviews'),
+  $v->name_en => null,
+]" />
 
 <div class="title">
   <div>

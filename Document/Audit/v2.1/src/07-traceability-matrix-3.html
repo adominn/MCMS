@@ -1,0 +1,357 @@
+<main>
+<h1>6. Requirement Traceability Matrix (Domains 9 to 11)</h1>
+
+<h2>6.1 Domain 9: Credit Accumulation, Academic Credit Record (ACR) &amp; Academic Bank of Credit (ABC)</h2>
+<p>Covers Garis Panduan Bab 12 (Pengumpulan Kredit, pp. 44–48), Rajah 14, 15, and Lampiran F1–F5.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-80</td>
+      <td class="c-src">Bab 12.1.1<br>p. 45</td>
+      <td>Eligible sources for ACR and ABC deposit: Completed UMC from accredited program or Quality-Verified SAMC. MCE strictly prohibited.</td>
+      <td><code>CreditBank</code><br><code>Acr.php</code></td>
+      <td><code>Acr::prepare()</code> runs 7 recorded checks (<code>acr_checks</code>). Blocks non-accredited UMC, unverified SAMC, and all MCEs with explicit reasons.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-81</td>
+      <td class="c-src">Bab 12.2–12.3<br>p. 45</td>
+      <td>Modular accumulation: Individual UMC module badges do not grant credit; ACR issued only upon full MC completion.</td>
+      <td><code>CreditBank</code><br><code>Acr.php</code></td>
+      <td>ACR is triggered exclusively by <code>CompletionConfirmed</code> event when entire MC structure is fulfilled. Individual module badges never trigger ACR.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-82</td>
+      <td class="c-src">Bab 12.4.1<br>p. 46</td>
+      <td>ACR preparation is fully automated based on verified completion; manual typing of credits is prohibited.</td>
+      <td><code>CreditBank</code><br><code>Acr.php</code></td>
+      <td>All ACR fields (student name, IC, program, credits, MQF level, SLT, gred) are derived programmatically from database records.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-83</td>
+      <td class="c-src">Bab 12.4.2<br>p. 46</td>
+      <td>ACR data integrity and distinction from internal achievement record.</td>
+      <td><code>CreditBank</code><br><code>/creditbank/acr/{id}</code></td>
+      <td>Official printable ACR (DOC-06) rendered in A4 format with formal UTeM header, verification QR, and Deputy Dean signature block.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Rendered in <code>DocumentsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-84</td>
+      <td class="c-src">Bab 12.5<br>p. 47</td>
+      <td>Mandatory participant consent capture prior to ABC queueing or export.</td>
+      <td><code>CreditBank</code><br><code>consents</code></td>
+      <td>Participants must explicitly submit consent (Consented, Declined, Postponed) with recorded timestamp and versioned wording. Unconsented ACRs cannot be exported.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code> (FR-dpconsent).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-85</td>
+      <td class="c-src">Bab 12.5<br>p. 47</td>
+      <td>ABC deposit queue, batch CSV export, and deposit recording with central ABC reference.</td>
+      <td><code>CreditBank</code><br><code>/creditbank/queue</code></td>
+      <td>Consented ACRs grouped into batches (<code>abc_batches</code>), exported as CSV, and deposit confirmed with ABC reference and date.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code> (FR-dpexport, FR-dprecord).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-86</td>
+      <td class="c-src">Bab 12.5<br>p. 47</td>
+      <td>Direct machine-to-machine API integration with national MQA/MoHE Academic Bank of Credit.</td>
+      <td><code>CreditBank</code></td>
+      <td>System implements manual CSV batch export workflow because the national central ABC API specification is not yet standardized by MQA (OI-11).</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Implement automated REST/JSON adapter once MQA national ABC API endpoint is published.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-87</td>
+      <td class="c-src">Bab 12.5<br>p. 47</td>
+      <td>Transparent deposit disclaimer: "Deposit in ABC constitutes secure academic storage and does not guarantee automatic credit transfer."</td>
+      <td><code>CreditBank</code><br><code>/creditbank/mine</code></td>
+      <td>Prominently rendered on student credit ledger, deposit queues, and printable ABC export sheets (DOC-10).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-88</td>
+      <td class="c-src">Bab 12.8<br>p. 48</td>
+      <td>Credit validity duration: Credits deposited in ABC carry 10-year validity from deposit date.</td>
+      <td><code>CreditBank</code><br><code>CreditLedger.php</code></td>
+      <td>Ledger sets expiration to exactly 10 years based on setting <code>credit.abc_validity_years</code> (default 10). Expiration alerts sent at 90, 60, 30 days.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-89</td>
+      <td class="c-src">Bab 12.8<br>p. 48</td>
+      <td>Permanent ACR retention: Expiration of ABC credit validity does not delete or destroy the underlying ACR (retained in perpetuity).</td>
+      <td><code>CreditBank</code><br><code>CreditLedger.php</code></td>
+      <td>When credit expires, ledger status marks entry as <i>Expired</i>; the underlying ACR record and credentials remain permanent and intact.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-90</td>
+      <td class="c-src">Bab 12.9<br>Rajah 14, p. 51</td>
+      <td>Single Redemption Principle (Prinsip Penebusan Tunggal): Credits redeemed for a degree cannot be redeemed again.</td>
+      <td><code>CreditBank</code><br><code>CreditLedger.php</code></td>
+      <td><code>CreditLedger::hold()</code> locks credit as <i>Provisionally Redeemed</i>. Second application on same credit is strictly refused.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>CreditBankTest.php</code> (BR-29) and <code>TransferTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-91</td>
+      <td class="c-src">Bab 12.7<br>p. 47</td>
+      <td>Direct intake of external credit records from other accredited universities via national ABC network.</td>
+      <td><code>CreditBank</code></td>
+      <td>Currently, credit bank records derive from UTeM completed micro-credentials. Ingestion of third-party institutional ACRs is slated for Release 2.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Build external ACR ingestion portal in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>6.2 Domain 10: Credit Transfer, Equivalence Assessment &amp; Single Redemption</h2>
+<p>Covers Garis Panduan Bab 13 (Pemindahan Kredit, pp. 49–52), Rajah 15, and Lampiran F6–F11.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-92</td>
+      <td class="c-src">Bab 13.1–13.2<br>p. 49–50</td>
+      <td>Transfer sources: Only Available credits from UMC or Quality-Verified SAMC. MCE and unverified SAMC strictly barred.</td>
+      <td><code>Transfer</code><br><code>Transfers.php</code></td>
+      <td>Transfer application wizard displays only eligible credits in <i>Available</i> status. MCE is blocked with clear explanation.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-93</td>
+      <td class="c-src">Bab 13.3<br>p. 50</td>
+      <td>Academic Equivalence: Course equivalence cannot be assumed based solely on equal credits or SLT; requires outcome &amp; content proof.</td>
+      <td><code>Transfer</code><br><code>EvaluationController</code></td>
+      <td>System requires side-by-side learning outcome comparison and evaluation across 9 criteria matching Lampiran F7.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-94</td>
+      <td class="c-src">Bab 13.3<br>Lampiran F7, p. 107</td>
+      <td>Mandatory &ge;80% Learning Outcome Equivalence: Approval is blocked if learning outcome match is below 80%.</td>
+      <td><code>Transfer</code><br><code>EvaluationController</code></td>
+      <td>Evaluator maps applicant CLOs to course CLOs. System computes percentage match; <b>approval is strictly blocked if match &lt; 80%</b>.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code> (FR-ctloequiv).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-95</td>
+      <td class="c-src">Bab 13.4<br>Rajah 15, p. 52</td>
+      <td>4-stage transfer process: Application &rarr; Validity check &rarr; Equivalence review &rarr; Academic authority decision.</td>
+      <td><code>Transfer</code><br><code>/transfer/{id}/evaluate</code></td>
+      <td>Workflow progresses through formal verification, 9 criteria rating, outcome comparison, and final decision recording.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-96</td>
+      <td class="c-src">Bab 13.5<br>p. 50</td>
+      <td>Compliance with university transfer limits and exclusion of non-transferable courses (e.g. FYP, Industrial Training).</td>
+      <td><code>Transfer</code><br><code>EvaluationController</code></td>
+      <td>Program transfer limit checked (default 30% / 50%); warnings displayed and recorded if course is on non-transferable list.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code> (FR-ctlimits).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-97</td>
+      <td class="c-src">Bab 13.6<br>p. 50–51</td>
+      <td>Structured transfer outcomes: Approved, Partly Approved, Not Approved, or More Evidence Needed.</td>
+      <td><code>Transfer</code><br><code>transfer_decisions</code></td>
+      <td>Supports all 4 official decisions with recorded rationale, authority, meeting date, and conditions.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-98</td>
+      <td class="c-src">Bab 13.6<br>Lampiran F10, p. 109</td>
+      <td>Official printable Credit Transfer Decision Letter (Surat Keputusan Pemindahan Kredit).</td>
+      <td><code>Transfer</code><br><code>/transfer/{id}/letter</code></td>
+      <td>Printable letter (DOC-12) includes target degree code, courses exempted, credit counts, conditions, and Dean signature block.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Rendered in <code>DocumentsTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-99</td>
+      <td class="c-src">Bab 13.7<br>p. 52</td>
+      <td>Authority scoping: Decision must be made strictly by the Deputy Dean of the faculty owning the target program.</td>
+      <td><code>Transfer</code><br><code>TransferController</code></td>
+      <td>Enforces PTj scoping. Deputy Dean from another faculty or CODL administrator cannot decide on transfer applications.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code> (FR-ctauth).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-100</td>
+      <td class="c-src">Bab 13.7<br>p. 52</td>
+      <td>Credit ledger synchronization: Provisional redemption on approval; final redemption upon degree completion; release upon non-completion.</td>
+      <td><code>CreditBank</code><br><code>CreditLedger.php</code></td>
+      <td>Approval triggers <code>CreditLedger::hold()</code>; manual completion recording triggers <code>redeem()</code>; rejection or withdrawal triggers <code>release()</code>.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-101</td>
+      <td class="c-src">Bab 13.8<br>p. 52</td>
+      <td>Currency of knowledge and curriculum version flagging. Re-evaluation required if course syllabus changed.</td>
+      <td><code>Transfer</code><br><code>Transfers.php</code></td>
+      <td>When micro-credential or target course version is superseded, active transfer line is flagged for academic re-evaluation.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>TransferTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-102</td>
+      <td class="c-src">Bab 13.3<br>p. 50</td>
+      <td>Institutional Precedent Library (Perpustakaan Preseden Pemindahan Kredit) for reusable articulation precedents.</td>
+      <td><code>Transfer</code></td>
+      <td>Each application currently evaluated individually. Precedent library allowing 1-click reuse of past approved equivalences is deferred to Release 2.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Build articulation precedent repository in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>6.3 Domain 11: Stackable Degree Pathways, Residency &amp; Individual Study Plans</h2>
+<p>Covers Garis Panduan Bab 14 (Stackable Degree, pp. 53–58), Rajah 16, 17, 18, and Lampiran G1–G11.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-src">Guide Ref</th>
+      <th>Requirement / Expected Behaviour</th>
+      <th>MCMS Module &amp; Route</th>
+      <th>Implementation Details &amp; Evidence</th>
+      <th class="c-x">Status</th>
+      <th>Gaps / Discrepancies &amp; Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id">G-103</td>
+      <td class="c-src">Bab 14.1–14.2<br>p. 53–54</td>
+      <td>Stackable degree pathway composed exclusively of credit-bearing micro-credentials (UMC or Quality-Verified SAMC). MCE prohibited.</td>
+      <td><code>Pathways</code><br><code>PathwayController</code></td>
+      <td>Pathway builder rejects MCE. SAMC must have valid Quality Verification to be mapped to degree courses.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-104</td>
+      <td class="c-src">Bab 14.4<br>p. 54</td>
+      <td>Admission requirement: Micro-credential accumulation does not grant automatic admission. Admission is a separate recorded fact.</td>
+      <td><code>Pathways</code>, <code>Transfer</code><br><code>admissions</code></td>
+      <td><code>admissions</code> table records formal admission letter and date. Study plan cannot reach <i>Suitable to Proceed</i> without recorded admission.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code> (BR-05).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-105</td>
+      <td class="c-src">Bab 14.5.1<br>p. 56</td>
+      <td>Mandatory Home Institution Credit: At least 30% (&ge;30%) of graduation credits must be earned directly from UTeM.</td>
+      <td><code>Pathways</code><br><code>Plans.php</code></td>
+      <td>Study plan calculates UTeM home credit percentage against setting <code>stackable.min_home_credit_percent</code> (default 30%). Below 30% marked <i>Not Suitable</i>.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-106</td>
+      <td class="c-src">Bab 14.5.2<br>Lampiran G4–G5</td>
+      <td>PLO and Body of Knowledge (BoK) coverage mapping: Stacked credentials must cover designated PLOs and core knowledge domains.</td>
+      <td><code>Pathways</code><br><code>tabs/_mapping.blade</code></td>
+      <td>Pathway mapping captures PLO coverage tags and BoK domains, highlighting curriculum coverage gaps.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-107</td>
+      <td class="c-src">Bab 14.5.3<br>p. 56</td>
+      <td>Mandatory Conventional Residency: Minimum ONE (1) semester residency at UTeM for conventional (non-ODL) degree programs.</td>
+      <td><code>Pathways</code><br><code>Plans.php</code></td>
+      <td>Plan evaluator checks conventional program residency requirement (<code>stackable.residency_semesters</code>, default 1). Plan flagged if residency unmet.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-108</td>
+      <td class="c-src">Bab 14.5.4<br>p. 56–57</td>
+      <td>Alignment with program delivery ecosystem: Online delivery cannot covertly alter conventional program mode without MQA ODL approval.</td>
+      <td><code>Pathways</code><br><code>Plans.php</code></td>
+      <td>Evaluator flags ODL delivery components when applied toward conventional programs, requiring formal faculty compliance verification.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-109</td>
+      <td class="c-src">Bab 14.7<br>Rajah 18, p. 58</td>
+      <td>Senate approval of official stackable pathways prior to public publication.</td>
+      <td><code>Pathways</code><br><code>PathwayController</code></td>
+      <td>Pathway status remains Draft/Review until Senate approval reference is recorded. Only approved pathways display on public directory.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-110</td>
+      <td class="c-src">Lampiran G8<br>p. 113</td>
+      <td>Individual Study Plan builder (Pelan Pengajian Individu) compiling remaining graduation requirements and gap analysis.</td>
+      <td><code>Pathways</code><br><code>/pathways/{id}/plan</code></td>
+      <td>Plan generator aggregates earned credits, checks prerequisites, lists remaining courses, and computes suitability verdict (DOC-15).</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code>.</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-111</td>
+      <td class="c-src">Bab 14.10<br>p. 58</td>
+      <td>Degree qualification award is granted exclusively by University Senate, never automatically by MCMS software.</td>
+      <td><code>Pathways</code><br><code>qualification_awards</code></td>
+      <td>MCMS records Senate graduation decisions (date, reference) for stackable tracking; system never autonomously mints degrees.</td>
+      <td class="c-x"><span class="badge badge-pass">PASS</span></td>
+      <td>None. Verified in <code>PathwayTest.php</code> (BR-37).</td>
+    </tr>
+    <tr>
+      <td class="c-id">G-112</td>
+      <td class="c-src">Bab 14.8<br>p. 58</td>
+      <td>Automated re-evaluation workflow when a target degree curriculum undergoes substantive revision.</td>
+      <td><code>Pathways</code><br><code>pathways</code></td>
+      <td>When degree curriculum changes, pathway mappings are marked as <i>Needs Review</i>; automated task dispatch to faculty board is partial.</td>
+      <td class="c-x"><span class="badge badge-partial">PARTIAL</span></td>
+      <td>Enhance automated task dispatch for pathway curriculum reviews in Release 2.</td>
+    </tr>
+  </tbody>
+</table>
+</main>

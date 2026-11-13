@@ -1,6 +1,10 @@
 @extends('layouts.app')
 @section('title', $t->title)
 @section('content')
+<x-breadcrumb :crumbs="[
+  'My tasks' => route('tasks'),
+  $t->title => null,
+]" />
 <h1>{{ $t->title }}</h1>
 <div class="card">
   <p>{{ __('Area: :area · Reference: :ref', ['area' => __($area), 'ref' => $t->subject_ref]) }}</p>

@@ -1,11 +1,9 @@
 @extends('layouts.app')
 @section('title', __('Traceability and records'))
 @section('content')
-<div class="crumb" style="margin-bottom:8px">
-  <a href="{{ route('tasks') }}">{{ auth()->user()->hasAnyRole('student') ? __('My learning') : __('Dashboard') }}</a>
-  <span>/</span>
-  <span>{{ __('Traceability and records') }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  'Traceability' => null,
+]" />
 
 <div class="title" style="margin-bottom:16px">
   <div>

@@ -11,11 +11,10 @@
 @if(!$print)
   <div class="ph">
     <div>
-      <div class="crumb">
-        <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-        <a href="{{ route('trace') }}">{{ __('Traceability') }}</a> /
-        <span>{{ __('Audit trail') }}</span>
-      </div>
+      <x-breadcrumb :crumbs="[
+        'Traceability ledger' => route('trace'),
+        'Audit trail' => null,
+      ]" />
       <h1>{{ __('Audit trail') }}</h1>
       <div class="sub">{{ __('Immutable SHA-256 hash-chained log of administrative and academic events in your role scope.') }}</div>
     </div>

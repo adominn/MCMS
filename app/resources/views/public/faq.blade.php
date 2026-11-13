@@ -55,8 +55,9 @@ $groups = $lang === 'ms' ? $faqs_ms : $faqs_en;
 @endphp
 
 <div class="pub-sec">
+  @php $isPublic = request()->routeIs('public.*'); @endphp
   <div class="crumb" style="margin-bottom:8px">
-    <a href="{{ auth()->check() ? route('tasks') : route('public.home') }}">{{ auth()->check() ? (auth()->user()->hasAnyRole('student') ? __('My learning') : __('Dashboard')) : $t('home') }}</a> <span>/</span> <span>FAQ</span>
+    <a href="{{ !$isPublic && auth()->check() ? auth()->user()->homeUrl() : route('public.home') }}">{{ !$isPublic && auth()->check() ? (auth()->user()->hasAnyRole('student') ? __('My learning') : __('Dashboard')) : $t('home') }}</a> <span>/</span> <span>FAQ</span>
   </div>
   <div class="title">
     <div>
@@ -95,5 +96,5 @@ $groups = $lang === 'ms' ? $faqs_ms : $faqs_en;
   </div>
 </div>
 
-@include('public._foot')
+@if($isPublic) @include('public._foot') @endif
 @endsection

@@ -1,16 +1,18 @@
 @extends('layouts.app')
 @section('title', 'New individual plan')
 @section('content')
-<div class="crumb" style="margin-bottom:8px">
-  <a href="{{ route('pathways') }}">Stackable pathways</a>
-  <span>/</span>
-  <span>{{ __('New individual plan') }}</span>
-</div>
+<x-breadcrumb :crumbs="[
+  'Stackable pathways' => route('pathways'),
+  'New individual plan' => null,
+]" />
 
 <div class="title" style="margin-bottom:16px">
   <div>
     <h1>{{ __('New individual stackable plan') }}</h1>
     <div class="sub">{{ __('A plan is advice. It is not admission, a credit transfer or an award. At least the required share of graduating credit must be earned directly at UTeM.') }}</div>
+  </div>
+  <div class="act">
+    <a class="btn ter sm" href="{{ route('pathways') }}">&larr; {{ __('All pathways') }}</a>
   </div>
 </div>
 
@@ -38,7 +40,7 @@
       <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:8px">
         @foreach($pathways as $w)
           @foreach($w->items as $i)
-            <label style="display:flex;align-items:center;gap:8px;background:#ffffff;padding:8px 12px;border:1px solid var(--hairline);cursor:pointer;font-size:13px;margin:0">
+            <label style="display:flex;align-items:center;gap:8px;background:var(--s1);padding:8px 12px;border:1px solid var(--hairline);cursor:pointer;font-size:13px;margin:0;color:var(--ink)">
               <input type="checkbox" name="items[]" value="{{ $i->id }}">
               <span><b>{{ $w->reference }}:</b> {{ $i->name_en }} ({{ $i->course_code }} &middot; {{ rtrim(rtrim((string) $i->credits, '0'), '.') }} cr)</span>
             </label>

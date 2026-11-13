@@ -37,6 +37,9 @@
           <a href="{{ route('offerings.show', $r->id) }}" style="font-weight:600">
             {{ $r->name_en }} {{ $r->cohort_name }}
           </a>
+          @if(!empty($r->lecturer_name))
+            <span class="s muted" style="display:block">{{ $r->lecturer_name }}</span>
+          @endif
         </td>
         <td>
           v{{ $r->version_no }}

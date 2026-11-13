@@ -25,7 +25,7 @@ final class CatalogueController
     {
         $this->status->refresh();
 
-        $cohorts = $this->listed()->orderBy('o.start_date')->get(['o.id', 'o.cohort_name', 'o.start_date', 'o.end_date', 'o.fee', 'o.delivery_mode', 'o.status', 'o.capacity', 'v.name_en', 'v.name_ms', 'v.discipline', 'v.delivery_language', 'v.proposed_credit', 'm.category', 'p.code as ptj', 'p.name as ptj_name']);
+        $cohorts = $this->listed()->orderBy('o.start_date')->get(['o.id', 'o.cohort_name', 'o.start_date', 'o.end_date', 'o.fee', 'o.delivery_mode', 'o.status', 'o.capacity', 'v.name_en', 'v.name_ms', 'v.discipline', 'v.delivery_language', 'v.proposed_credit', 'm.category', 'p.code as ptj', 'p.name as ptj_name', 'u.name as lecturer_name']);
 
         return view('public.home', $this->base() + ['count' => $cohorts->count(), 'cohorts' => $cohorts, 'faculties' => DB::table('ptjs')->orderBy('code')->get()]);
     }
@@ -35,7 +35,7 @@ final class CatalogueController
         $this->status->refresh();
         $f = $request->only(['q', 'category', 'ptj', 'field', 'mode', 'language', 'starts', 'fee_max']) + ['free' => $request->boolean('free')];
         $q = $this->listed()
-            ->when(filled($f['q'] ?? null), fn ($b) => $b->where(fn ($w) => $w->where('v.name_en', db_like(), '%'.$f['q'].'%')->orWhere('v.name_ms', db_like(), '%'.$f['q'].'%')->orWhere('v.discipline', db_like(), '%'.$f['q'].'%')))
+            ->when(filled($f['q'] ?? null), fn ($b) => $b->where(fn ($w) => $w->where('v.name_en', db_like(), '%'.$f['q'].'%')->orWhere('v.name_ms', db_like(), '%'.$f['q'].'%')->orWhere('v.discipline', db_like(), '%'.$f['q'].'%')->orWhere('u.name', db_like(), '%'.$f['q'].'%')->orWhere('o.facilitators', db_like(), '%'.$f['q'].'%')))
             ->when(in_array($f['category'] ?? null, ['umc', 'samc', 'mce'], true), fn ($b) => $b->where('m.category', $f['category']))
             ->when(filled($f['ptj'] ?? null), fn ($b) => $b->where('p.code', $f['ptj']))
             ->when(filled($f['field'] ?? null), fn ($b) => $b->where('v.discipline', db_like(), '%'.$f['field'].'%'))
@@ -46,7 +46,7 @@ final class CatalogueController
             ->when(is_numeric($f['fee_max'] ?? null), fn ($b) => $b->where('o.fee', '<=', $f['fee_max']));
 
         return view('public.catalogue', $this->base() + [
-            'rows' => $q->orderBy('o.start_date')->paginate(5, ['o.id', 'o.cohort_name', 'o.start_date', 'o.end_date', 'o.fee', 'o.delivery_mode', 'o.status', 'o.reg_opens_on', 'v.name_en', 'v.name_ms', 'v.discipline', 'v.delivery_language', 'm.category', 'p.code as ptj'])->withQueryString(),
+            'rows' => $q->orderBy('o.start_date')->paginate(5, ['o.id', 'o.cohort_name', 'o.start_date', 'o.end_date', 'o.fee', 'o.delivery_mode', 'o.status', 'o.reg_opens_on', 'o.facilitators', 'v.name_en', 'v.name_ms', 'v.discipline', 'v.delivery_language', 'm.category', 'p.code as ptj', 'u.name as lecturer_name'])->withQueryString(),
             'f' => $f, 'ptjs' => DB::table('ptjs')->orderBy('code')->get(), 'modes' => config('proposals.delivery_modes'),
         ]);
     }
@@ -54,7 +54,7 @@ final class CatalogueController
     public function offering(int $id)
     {
         $this->status->refresh();
-        $o = $this->listed()->where('o.id', $id)->first(['o.*', 'v.name_en', 'v.name_ms', 'v.discipline', 'v.delivery_language', 'v.credential_types', 'v.assessment_standard', 'v.credit_model', 'v.parent_course_id', 'v.qv_status', 'v.qv_valid_until', 'v.proposed_credit', 'v.proposed_mqf_level', 'v.id as version_id', 'm.category', 'p.name as ptj_name', 'p.code as ptj'])
+        $o = $this->listed()->where('o.id', $id)->first(['o.*', 'v.name_en', 'v.name_ms', 'v.discipline', 'v.delivery_language', 'v.credential_types', 'v.assessment_standard', 'v.credit_model', 'v.parent_course_id', 'v.qv_status', 'v.qv_valid_until', 'v.proposed_credit', 'v.proposed_mqf_level', 'v.id as version_id', 'm.category', 'p.name as ptj_name', 'p.code as ptj', 'u.name as lecturer_name'])
             ?? abort(404); // not ready, held, cancelled and ended cohorts are not public (BR-17)
         $lang = session('lang', 'en');
         $course = $o->parent_course_id ? DB::table('parent_courses')->find($o->parent_course_id) : null;
@@ -167,7 +167,7 @@ final class CatalogueController
     /** Open or upcoming cohorts of approved versions whose readiness the PTj confirmed (FR-90, BR-17). */
     private function listed()
     {
-        return DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->join('ptjs as p', 'p.id', '=', 'm.ptj_id')
+        return DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->join('ptjs as p', 'p.id', '=', 'm.ptj_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
             ->whereIn('o.status', ['open', 'ready']);
     }
 }

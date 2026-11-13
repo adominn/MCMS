@@ -6,7 +6,13 @@
 <div class="pub-sec">
   <div class="crumb" style="margin-bottom:12px">
     @auth
-      <a href="{{ route('tasks') }}">{{ auth()->user()->hasAnyRole('student') && ! auth()->user()->hasAnyRole('lecturer', 'deputy_dean', 'codl_admin') ? __('My learning') : __('Dashboard') }}</a> <span>/</span> <a href="{{ route('plan.mine') }}">{{ __('My degree plan') }}</a> <span>/</span> <span>{{ $t('pathways') }}</span>
+      <a href="{{ auth()->user()->homeUrl() }}">{{ auth()->user()->hasAnyRole('student') && ! auth()->user()->hasAnyRole('lecturer', 'deputy_dean', 'codl_admin') ? __('My learning') : __('Dashboard') }}</a> <span>/</span>
+      @if(auth()->user()->hasAnyRole('student'))
+        <a href="{{ route('plan.mine') }}">{{ __('My degree plan') }}</a>
+      @else
+        <a href="{{ route('pathways') }}">{{ __('Stackable pathways') }}</a>
+      @endif
+      <span>/</span> <span>{{ $t('pathways') }}</span>
     @else
       <a href="{{ route('public.home') }}">{{ $t('home') }}</a> <span>/</span> <span>{{ $t('pathways') }}</span>
     @endauth
@@ -21,11 +27,11 @@
     </div>
   </div>
 
-  <div class="card" id="pathway-notes" style="background:#edf5ff;border-left:4px solid #0f62fe;padding:16px 20px;margin-bottom:24px">
-    <div style="font-weight:600;font-size:14px;color:#0043ce;margin-bottom:4px">
+  <div class="note info" id="pathway-notes" style="margin-bottom:24px;padding:16px 20px">
+    <div style="font-weight:600;font-size:14px;color:var(--accent, #0f62fe);margin-bottom:4px">
       {{ $lang === 'ms' ? 'Pemberitahuan Peraturan Akademik' : 'Academic Regulatory Notice' }}
     </div>
-    <div style="font-size:13px;line-height:1.6;color:#161616">
+    <div style="font-size:13px;line-height:1.6;color:var(--ink)">
       {{ $lang === 'ms' 
           ? 'Laluan artikulasi yang diluluskan tidak memindahkan kredit (transfers no credit) secara automatik: setiap kredit dinilai secara individu melalui permohonan pemindahan kredit rasmi selepas kemasukan. Tiada micro-credential membawa kepada ijazah secara automatik (no micro-credential leads to a degree automatically), walau berapa banyak yang dikumpul. Sekurang-kurangnya '.$min.'% kredit pengijazahan perlu diperoleh terus di UTeM di bawah syarat residensi.' 
           : 'An approved pathway transfers no credit: each credit goes through credit transfer evaluation by the receiving programme upon formal admission. No micro-credential leads to a degree automatically, however many are collected. At least '.$min.'% of the graduating credit must be earned directly at UTeM under residency regulations.' }}
@@ -85,13 +91,13 @@
     @endforelse
   </div>
 
-  <div class="pub-sec alt" style="padding:28px 24px;border:1px solid #e0e0e0;background:#f4f4f4">
+  <div class="pub-sec alt" style="padding:28px 24px;border:1px solid var(--hairline);background:var(--s1)">
     <h2 style="font-size:20px;font-weight:600;margin:0 0 16px;color:var(--text)">
       {{ $lang === 'ms' ? 'Prinsip & Syarat Artikulasi Akademik' : 'Academic Articulation Principles & Regulations' }}
     </h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px">
-      <div class="card" style="padding:16px;background:#ffffff;border:1px solid #e0e0e0">
-        <div style="font-weight:600;font-size:14px;color:var(--primary);margin-bottom:6px">
+      <div class="card" style="padding:16px;background:var(--card-bg);border:1px solid var(--hairline)">
+        <div style="font-weight:600;font-size:14px;color:var(--accent, #0f62fe);margin-bottom:6px">
           {{ $lang === 'ms' ? 'Sekurang-kurangnya '.$min.'% kredit di UTeM' : 'At least '.$min.'% of degree credits at UTeM' }}
         </div>
         <p class="muted small" style="margin:0;font-size:12.5px;line-height:1.5">
@@ -99,8 +105,8 @@
         </p>
       </div>
 
-      <div class="card" style="padding:16px;background:#ffffff;border:1px solid #e0e0e0">
-        <div style="font-weight:600;font-size:14px;color:var(--primary);margin-bottom:6px">
+      <div class="card" style="padding:16px;background:var(--card-bg);border:1px solid var(--hairline)">
+        <div style="font-weight:600;font-size:14px;color:var(--accent, #0f62fe);margin-bottom:6px">
           {{ $lang === 'ms' ? 'Syarat Residensi Kampus' : 'Campus Residency Requirement' }}
         </div>
         <p class="muted small" style="margin:0;font-size:12.5px;line-height:1.5">
@@ -108,8 +114,8 @@
         </p>
       </div>
 
-      <div class="card" style="padding:16px;background:#ffffff;border:1px solid #e0e0e0">
-        <div style="font-weight:600;font-size:14px;color:var(--primary);margin-bottom:6px">
+      <div class="card" style="padding:16px;background:var(--card-bg);border:1px solid var(--hairline)">
+        <div style="font-weight:600;font-size:14px;color:var(--accent, #0f62fe);margin-bottom:6px">
           {{ $lang === 'ms' ? 'Kemasukan & Pendaftaran Rasmi' : 'Admission & Matriculation Separate' }}
         </div>
         <p class="muted small" style="margin:0;font-size:12.5px;line-height:1.5">
@@ -117,8 +123,8 @@
         </p>
       </div>
 
-      <div class="card" style="padding:16px;background:#ffffff;border:1px solid #e0e0e0">
-        <div style="font-weight:600;font-size:14px;color:var(--primary);margin-bottom:6px">
+      <div class="card" style="padding:16px;background:var(--card-bg);border:1px solid var(--hairline)">
+        <div style="font-weight:600;font-size:14px;color:var(--accent, #0f62fe);margin-bottom:6px">
           {{ $lang === 'ms' ? 'Tempoh Hayat Kredit 10 Tahun' : '10-Year Credit Expiry' }}
         </div>
         <p class="muted small" style="margin:0;font-size:12.5px;line-height:1.5">

@@ -36,12 +36,20 @@ final class NotificationController
     {
         DB::table('notifications')->where('user_id', $request->user()->id)->where('channel', 'in_system')->whereNull('read_at')->update(['read_at' => now()]);
 
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true]);
+        }
+
         return back()->with('status', 'All notices are marked as read.');
     }
 
     public function read(Request $request, int $id)
     {
         DB::table('notifications')->where('id', $id)->where('user_id', $request->user()->id)->whereNull('read_at')->update(['read_at' => now()]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true]);
+        }
 
         return back();
     }

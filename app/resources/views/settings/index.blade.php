@@ -3,10 +3,10 @@
 @section('content')
 <div class="ph">
   <div>
-    <div class="crumb">
-      <a href="{{ route('tasks') }}">{{ __('Home') }}</a> /
-      <span>{{ __('Settings') }}</span>
-    </div>
+    <x-breadcrumb :crumbs="[
+      'Administration' => null,
+      'Settings' => null,
+    ]" />
     <h1>{{ __('System Settings') }}</h1>
     <div class="sub">{{ __('Values the business rules read. Every change requires an audit reason and an effective date. Earlier decisions keep the value that applied on their date.') }}</div>
   </div>
@@ -35,9 +35,6 @@
             <div style="font-weight:600;color:var(--ink)">{{ $r['en'] }}</div>
             <div style="margin-top:2px">
               <code>{{ $r['key'] }}</code>
-              @if($r['ref'])
-                <span class="tag muted" style="margin-left:4px">{{ $r['ref'] }}</span>
-              @endif
             </div>
           </td>
           <td>

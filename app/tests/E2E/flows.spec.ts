@@ -630,7 +630,7 @@ test.describe('Quality Verification', () => {
     await page.getByRole('button', { name: 'Start a Quality Verification cycle' }).click();
     await expect(page.locator('#evidence')).toContainText('Available (linked from MCMS)');
     await page.locator('#st-quality_cqi').selectOption('available');
-    await page.getByLabel('File reference for Quality assurance and CQI: feedback and improvement records (D6)').fill('cqi-2026-1.pdf');
+    await page.getByLabel('File reference for Quality assurance and CQI: feedback and improvement records').fill('cqi-2026-1.pdf');
     await page.getByRole('button', { name: 'Save checklist' }).click();
     await expect(page.getByRole('status')).toContainText('Evidence checklist saved');
     await page.locator('#decision').selectOption('ready');

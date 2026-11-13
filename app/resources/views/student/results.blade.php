@@ -58,6 +58,7 @@
       <span class="s muted">{{ __(':count courses', ['count' => $data->count()]) }}</span>
     </span>
   </div>
+  <div class="table-wrap">
   <table class="table-results-summary" id="my-results-table">
     <thead>
       <tr>
@@ -88,6 +89,10 @@
               {{ $e->name_en }}
             </a>
             <div class="s muted" style="margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              @if(!empty($e->lecturer_name))
+                <span>{{ $e->lecturer_name }}</span>
+                &middot;
+              @endif
               <span>{{ $e->mc_code ?? ('MC-'.str_pad((string)($e->version_id ?? 1), 4, '0', STR_PAD_LEFT)) }}</span>
               &middot;
               <span class="tag neutral" style="font-size:10px;padding:1px 6px">{{ strtoupper($e->mc_category ?? 'UMC') }}</span>
@@ -152,7 +157,7 @@
               <span class="tag ok" style="font-weight:600;font-size:11px">
                 <i class="bi bi-award" style="margin-right:3px"></i> {{ $badges->count() }} {{ __('earned') }}
               </span>
-              @php($ucreds = $badges->whereNotNull('external_id')->pluck('external_id')->all())
+              @php $ucreds = $badges->whereNotNull('external_id')->pluck('external_id')->all(); @endphp
               @if(!empty($ucreds))
                 <div class="s muted" style="font-size:11px;margin-top:2px">
                   UCreds {{ implode(', ', $ucreds) }}
@@ -175,6 +180,7 @@
       @endforeach
     </tbody>
   </table>
+  </div>
 </div>
 @endif
 @endsection

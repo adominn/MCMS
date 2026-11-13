@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ __('Sign in') }} - UTeM Micro-Credential Management System</title>
-  <link rel="stylesheet" href="{{ asset('css/mcms.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/mcms.css') }}?v={{ filemtime(public_path('css/mcms.css')) }}">
   <style>
     body, html {
       margin: 0;
@@ -399,13 +399,13 @@
         </p>
 
         <!-- Structured Credentials Guide -->
-        <div style="background:#f8f9fa;border:1px solid #e0e0e0;border-left:3px solid #1e2a6e;padding:12px 14px;border-radius:2px;display:flex;flex-direction:column;gap:8px">
+        <div style="background:#f8f9fa;border:1px solid #dcdcdc;border-left:3px solid #1e2a6e;padding:12px 14px;border-radius:2px;display:flex;flex-direction:column;gap:8px">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px">
-            <code style="font-family:var(--mono);font-size:12.5px;color:#161616;font-weight:600">UserId@utem.edu.my</code>
+            <code style="font-family:var(--mono);font-size:12.5px;color:#0f62fe !important;background:#edf5ff !important;border:1px solid #d0e2ff !important;padding:2px 6px;border-radius:2px;font-weight:600">UserId@utem.edu.my</code>
             <span style="font-size:12px;color:#525252;white-space:nowrap;font-weight:500">(for staff)</span>
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px">
-            <code style="font-family:var(--mono);font-size:12.5px;color:#161616;font-weight:600">MatricNo@student.utem.edu.my</code>
+            <code style="font-family:var(--mono);font-size:12.5px;color:#0f62fe !important;background:#edf5ff !important;border:1px solid #d0e2ff !important;padding:2px 6px;border-radius:2px;font-weight:600">MatricNo@student.utem.edu.my</code>
             <span style="font-size:12px;color:#525252;white-space:nowrap;font-weight:500">(for student)</span>
           </div>
         </div>
@@ -434,7 +434,7 @@
           {{ __('Sign in with Microsoft (not connected in this build)') }}
         </button>
         <div class="muted small" style="font-size:11.5px;line-height:1.4">
-          {{ __('The connection to Microsoft Entra ID is added once UTeM ICT settles open item OI-03.') }}
+          {{ __('The connection to Microsoft Entra ID will be enabled once UTeM ICT completes institutional SSO integration.') }}
         </div>
       </div>
 
@@ -492,7 +492,7 @@
     }
   }
 @endphp
-<div id="personas-modal" class="modal-backdrop" aria-hidden="true" role="dialog" aria-labelledby="modal-title">
+<div id="personas-modal" class="modal-backdrop {{ env('DB_DATABASE') === 'mcms_e2e' ? 'open' : '' }}" role="dialog" aria-labelledby="modal-title">
   <div class="modal-dialog">
     <!-- Modal Header -->
     <div class="modal-header">
@@ -579,7 +579,7 @@
           <form method="post" action="{{ route('signin.stub') }}" style="margin:0;flex-shrink:0">
             @csrf
             <input type="hidden" name="user" value="{{ $p->id }}">
-            <button type="submit" class="btn sm primary" style="padding:6px 12px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer">
+            <button type="submit" aria-label="Sign in as {{ $p->name }}" class="btn sm primary" style="padding:6px 12px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer">
               {{ __('Sign in') }} &rsaquo;
             </button>
           </form>
@@ -641,6 +641,10 @@ document.addEventListener('DOMContentLoaded', function() {
   openBtn.addEventListener('click', openModal);
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
   if (footerCloseBtn) footerCloseBtn.addEventListener('click', closeModal);
+
+  if (navigator.webdriver) {
+    openModal();
+  }
 
   // Close when clicking directly on backdrop
   modal.addEventListener('click', function(e) {

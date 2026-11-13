@@ -35,6 +35,9 @@
           <a href="{{ route('quality.show', $m->id) }}" style="font-weight:600">
             {{ $m->name_en }}
           </a>
+          @if(!empty($m->lecturer_name))
+            <span class="s muted" style="display:block">{{ $m->lecturer_name }}</span>
+          @endif
         </td>
         <td>
           @if($m->standing)

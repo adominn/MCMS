@@ -31,4 +31,14 @@ enum Role: string
     {
         return in_array($this, [self::DeputyDean, self::CodlAdmin], true);
     }
+
+    /** Primary landing route name for this role. */
+    public function homeRouteName(): string
+    {
+        return match ($this) {
+            self::CodlAdmin => 'users',
+            self::IndustryExpert => 'reviews',
+            default => 'tasks',
+        };
+    }
 }

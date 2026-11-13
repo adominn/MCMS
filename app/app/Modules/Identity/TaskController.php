@@ -13,6 +13,18 @@ final class TaskController
 {
     public const AREAS = ['proposals' => 'Proposals', 'offerings' => 'Offerings', 'results' => 'Results', 'credentials' => 'Credentials', 'deposits' => 'Deposits', 'transfers' => 'Transfers'];
 
+    public const AREA_LABELS = self::AREAS + [
+        'approval' => 'Approval',
+        'review' => 'Review',
+        'review_comments' => 'Review comments',
+        'qv_monitoring' => 'Quality Verification',
+        'cqi' => 'Quality review',
+        'acr' => 'Academic Credit Record',
+        'transfer' => 'Credit transfer',
+        'pathway' => 'Stackable pathways',
+        'records' => 'Records and audit',
+    ];
+
     public function __construct(private Settings $settings) {}
 
     public function index(Request $request)
@@ -24,16 +36,19 @@ final class TaskController
         if ($user->hasAnyRole('industry_expert') && ! $user->hasAnyRole('student', 'lecturer', 'deputy_dean', 'codl_admin')) {
             return redirect()->route('reviews'); // the expert's home is the list of invitations (prototype: My review invitations)
         }
-        $roles = $user->activeRoles();
+        $roles = $user->effectiveRoles();
         $q = trim((string) $request->query('q'));
-        $area = array_key_exists((string) $request->query('area'), self::AREAS) ? $request->query('area') : null;
         $base = fn () => $this->visible($user)->whereNull('completed_at')
             ->when($q !== '', fn ($b) => $b->where('title', db_like(), "%$q%"));
         $counts = $base()->selectRaw('area, count(*) as n')->groupBy('area')->pluck('n', 'area');
+        $areas = $user->hasAnyRole('lecturer', 'deputy_dean')
+            ? self::AREAS
+            : array_intersect_key(self::AREAS, $counts->filter(fn ($n) => $n > 0)->all());
+        $area = array_key_exists((string) $request->query('area'), $areas) ? $request->query('area') : null;
         $days = (int) $this->settings->get('alerts.decision_overdue_days');
 
         return view('tasks', [
-            'roles' => $roles, 'q' => $q, 'area' => $area, 'counts' => $counts, 'areas' => self::AREAS, 'total' => $counts->sum(),
+            'roles' => $roles, 'q' => $q, 'area' => $area, 'counts' => $counts, 'areas' => $areas, 'areaLabels' => self::AREA_LABELS, 'total' => $counts->sum(),
             'tasks' => $base()->when($area, fn ($b) => $b->where('area', $area))->orderBy('created_at')->paginate(10)->withQueryString(),
             'overdueBefore' => now()->subDays($days), 'days' => $days,
             'kpis' => $user->hasAnyRole('lecturer') && ! $user->hasAnyRole('deputy_dean', 'codl_admin') ? $this->lecturerKpis($user) : null,
@@ -59,17 +74,18 @@ final class TaskController
     /** The participant's home: what needs them, what is running, what waits, what they have achieved (the prototype's "My learning"). */
     private function student(\App\Models\User $user)
     {
-        $mine = fn () => DB::table('enrolments as e')->join('offerings as o', 'o.id', '=', 'e.offering_id')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->where('e.user_id', $user->id)
-            ->select('e.id', 'e.status', 'e.mc_version_id', 'e.offering_id', 'o.cohort_name', 'o.start_date', 'o.end_date', 'v.name_en', 'e.progress_percent', 'e.fee_amount', 'o.fee', 'e.created_at', 'e.updated_at');
+        $mine = fn () => DB::table('enrolments as e')->join('offerings as o', 'o.id', '=', 'e.offering_id')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->where('e.user_id', $user->id)
+            ->select('e.id', 'e.status', 'e.mc_version_id', 'e.offering_id', 'o.cohort_name', 'o.start_date', 'o.end_date', 'v.name_en', 'e.progress_percent', 'e.fee_amount', 'o.fee', 'e.created_at', 'e.updated_at', 'u.name as lecturer_name');
+        $waiting = $mine()->where('e.status', 'enrolled')->get()->filter(fn ($e) => \App\Modules\Achievement\Completion::check($e->id)['met'])->values();
+        $waitingIds = $waiting->pluck('id')->all();
         $inProgress = $mine()->where('e.status', 'enrolled')->where('o.start_date', '<=', today())->where('o.end_date', '>=', today())->get()->map(function ($e) {
             $e->modules = (int) DB::table('mc_modules')->where('mc_version_id', $e->mc_version_id)->count();
             $e->achieved = (int) DB::table('module_achievements')->where('enrolment_id', $e->id)->count();
             $e->percent = $e->progress_percent !== null ? (int) $e->progress_percent : ($e->modules > 0 ? (int) round($e->achieved / $e->modules * 100) : 0);
 
             return $e;
-        });
-        $waiting = $mine()->where('e.status', 'enrolled')->get()->filter(fn ($e) => \App\Modules\Achievement\Completion::check($e->id)['met'])->values();
-        $achieved = DB::table('credentials as c')->join('enrolments as e', 'e.id', '=', 'c.enrolment_id')->where('e.user_id', $user->id)->orderByDesc('c.id')->get(['c.id', 'c.number', 'c.public_code', 'c.status', 'c.issued_at', 'c.content'])
+        })->reject(fn ($e) => in_array($e->id, $waitingIds, true) || $e->percent >= 100)->values();
+        $achieved = DB::table('credentials as c')->join('enrolments as e', 'e.id', '=', 'c.enrolment_id')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->where('e.user_id', $user->id)->orderByDesc('c.id')->get(['c.id', 'c.number', 'c.public_code', 'c.status', 'c.issued_at', 'c.content', 'u.name as lecturer_name'])
             ->map(function ($c) {
                 $x = json_decode($c->content, true) ?: [];
                 $c->name = $x['name']['en'] ?? 'Credential';
@@ -196,9 +212,16 @@ final class TaskController
     // Tasks of the user's roles, inside the PTj scope of each role (FR-12).
     public function visible(\App\Models\User $user)
     {
-        return DB::table('tasks')->where(function ($q) use ($user) {
-            $q->orWhere('user_id', $user->id); // a task for me by name
-            foreach ($user->activeRoles() as $r) {
+        $effectiveRoles = $user->effectiveRoles();
+        $roleValues = $effectiveRoles->map(fn (Role $r) => $r->value)->all();
+        if ($roleValues === []) {
+            return DB::table('tasks')->whereRaw('1 = 0');
+        }
+
+        return DB::table('tasks')->where(function ($q) use ($user, $effectiveRoles, $roleValues) {
+            $q->orWhere(fn ($w) => $w->where('user_id', $user->id)
+                ->where(fn ($x) => $x->whereNull('assignee_role')->orWhereIn('assignee_role', $roleValues))); // a task for me in an active/effective role
+            foreach ($effectiveRoles as $r) {
                 $ids = $user->scopedPtjIds($r->value);
                 $q->orWhere(fn ($w) => $w->where('assignee_role', $r->value)->whereNull('user_id')->when($ids !== null, fn ($x) => $x->where(fn ($y) => $y->whereNull('ptj_id')->orWhereIn('ptj_id', $ids))));
             }
@@ -213,6 +236,6 @@ final class TaskController
             return redirect($t->link);
         }
 
-        return view('tasks-show', ['t' => $t, 'area' => self::AREAS[$t->area]]);
+        return view('tasks-show', ['t' => $t, 'area' => self::AREA_LABELS[$t->area] ?? ucfirst(str_replace('_', ' ', (string) $t->area))]);
     }
 }

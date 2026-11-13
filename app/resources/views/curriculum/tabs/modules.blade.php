@@ -14,7 +14,7 @@
             <div style="font-size:11px;font-weight:700;color:#0043ce;text-transform:uppercase;letter-spacing:0.5px">
               {{ __('Parent Course Reference') }} &middot; {{ $course->programme }}
             </div>
-            <div style="font-size:15px;font-weight:700;color:#161616;margin-top:2px">
+            <div style="font-size:15px;font-weight:700;color:var(--ink);margin-top:2px">
               {{ $course->code }} {{ $course->name }}
             </div>
           </div>
@@ -36,102 +36,106 @@
     {{-- 3 Official Unbundling Models (Garis Panduan Micro-Credential UTeM Section 6.3.1.1) --}}
     <div style="margin-bottom:22px">
       <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
-        <label style="font-size:14px;font-weight:700;color:#161616;margin:0">
-          {{ __('Model Penyahhimpunan UMC (Unbundling Model)') }} <span style="color:#da1e28">*</span>
-        </label>
+        <span style="font-size:14px;font-weight:700;color:var(--ink);margin:0">
+          {{ __('Model Penyahhimpunan UMC') }} <span style="color:#da1e28">*</span>
+        </span>
         <span class="muted small" style="font-size:11.5px">
-          {{ __('Garis Panduan Micro-Credential UTeM Seksyen 6.3.1.1 & Rajah 2') }}
+          {{ __('Pilih satu model struktur penyahhimpunan modul UMC') }}
         </span>
       </div>
 
       <div class="unbundling-cards-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:14px;margin-bottom:12px">
         
         {{-- (a) Model Penyahhimpunan Berasaskan Kredit --}}
-        <label class="unbundling-card {{ $activeModel === 'credit_based' ? 'active' : '' }}" style="border:2px solid {{ $activeModel === 'credit_based' ? '#0f62fe' : '#e0e0e0' }};background:{{ $activeModel === 'credit_based' ? '#fbfdff' : '#ffffff' }};padding:14px 16px;border-radius:3px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:10px;transition:all 0.15s ease;position:relative">
+        <div class="unbundling-card {{ $activeModel === 'credit_based' ? 'active' : '' }}" style="border:2px solid {{ $activeModel === 'credit_based' ? '#0f62fe' : 'var(--hairline)' }};background:{{ $activeModel === 'credit_based' ? 'var(--info-bg)' : 'var(--card-bg)' }};padding:14px 16px;border-radius:3px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:10px;transition:all 0.15s ease;position:relative">
           <div>
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
               <span style="display:inline-flex;align-items:center;gap:6px">
-                <input type="radio" name="credit_model" value="credit_based" @checked($activeModel === 'credit_based') class="model-radio" style="margin:0">
-                <b style="font-size:13px;color:#161616">{{ __('(a) Model Penyahhimpunan Berasaskan Kredit') }}</b>
+                <input type="radio" id="model_radio_a" value="credit_based" @checked($activeModel === 'credit_based') class="model-radio" style="margin:0">
+                <label for="model_radio_a" style="margin:0;cursor:pointer"><b style="font-size:13px;color:var(--ink)">{{ __('(a) Model Berasaskan Kredit') }}</b></label>
               </span>
               <span class="tag" style="background:#edf5ff;color:#0043ce;border:1px solid #d0e2ff;font-size:11px;font-weight:600">
                 &ge; 40h SLT / Modul
               </span>
             </div>
             <div style="font-size:12px;font-weight:600;color:#0f62fe;margin-bottom:4px">
-              {{ __('Credit-Based Unbundling Model') }}
+              {{ __('Credit-Based Unbundling') }}
             </div>
-            <p style="font-size:12px;color:#525252;line-height:1.45;margin:0 0 6px">
+            <p style="font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 6px">
               {{ __('Setiap modul mempunyai sekurang-kurangnya 40 jam SLT dan merangkumi pembelajaran, aktiviti dan pentaksiran.') }}
             </p>
           </div>
-          <div style="font-size:11px;color:#6f6f6f;border-top:1px dashed #e0e0e0;padding-top:8px">
+          <div style="font-size:11px;color:var(--muted);border-top:1px dashed var(--hairline);padding-top:8px">
             <b>{{ __('Syarat:') }}</b> {{ __('SLT setiap modul &ge; 40 jam (1 kredit). Pentaksiran kendiri di dalam setiap modul.') }}
           </div>
-        </label>
+        </div>
 
         {{-- (b) Model Penyahhimpunan Berasaskan Topik --}}
-        <label class="unbundling-card {{ $activeModel === 'topic_based' ? 'active' : '' }}" style="border:2px solid {{ $activeModel === 'topic_based' ? '#0f62fe' : '#e0e0e0' }};background:{{ $activeModel === 'topic_based' ? '#fbfdff' : '#ffffff' }};padding:14px 16px;border-radius:3px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:10px;transition:all 0.15s ease;position:relative">
+        <div class="unbundling-card {{ $activeModel === 'topic_based' ? 'active' : '' }}" style="border:2px solid {{ $activeModel === 'topic_based' ? '#0f62fe' : 'var(--hairline)' }};background:{{ $activeModel === 'topic_based' ? 'var(--info-bg)' : 'var(--card-bg)' }};padding:14px 16px;border-radius:3px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:10px;transition:all 0.15s ease;position:relative">
           <div>
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
               <span style="display:inline-flex;align-items:center;gap:6px">
-                <input type="radio" name="credit_model" value="topic_based" @checked($activeModel === 'topic_based') class="model-radio" style="margin:0">
-                <b style="font-size:13px;color:#161616">{{ __('(b) Model Penyahhimpunan Berasaskan Topik') }}</b>
+                <input type="radio" id="model_radio_b" value="topic_based" @checked($activeModel === 'topic_based') class="model-radio" style="margin:0">
+                <label for="model_radio_b" style="margin:0;cursor:pointer"><b style="font-size:13px;color:var(--ink)">{{ __('(b) Model Berasaskan Topik') }}</b></label>
               </span>
               <span class="tag" style="background:#e5f6f6;color:#005d5d;border:1px solid #9ef0f0;font-size:11px;font-weight:600">
                 {{ __('SLT Berbeza') }}
               </span>
             </div>
             <div style="font-size:12px;font-weight:600;color:#005d5d;margin-bottom:4px">
-              {{ __('Topic-Based Unbundling Model') }}
+              {{ __('Topic-Based Unbundling') }}
             </div>
-            <p style="font-size:12px;color:#525252;line-height:1.45;margin:0 0 6px">
+            <p style="font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 6px">
               {{ __('Modul dibentuk berdasarkan topik atau kelompok pembelajaran dan SLT setiap modul boleh berbeza, dengan jumlah keseluruhan SLT bersamaan SLT kursus induk.') }}
             </p>
           </div>
-          <div style="font-size:11px;color:#6f6f6f;border-top:1px dashed #e0e0e0;padding-top:8px">
-            <b>{{ __('Syarat:') }}</b> {{ __('SLT modul fleksibel (< 40j dibenarkan). Cth. Rajah 6: 120j = 30j + 25j + 25j + 20j + 20j.') }}
+          <div style="font-size:11px;color:var(--muted);border-top:1px dashed var(--hairline);padding-top:8px">
+            <b>{{ __('Syarat:') }}</b> {{ __('SLT modul fleksibel (< 40j dibenarkan). Contoh: 120j = 30j + 25j + 25j + 20j + 20j.') }}
           </div>
-        </label>
+        </div>
 
         {{-- (c) Model Penyahhimpunan Pembelajaran dan Pentaksiran Berasingan --}}
-        <label class="unbundling-card {{ $activeModel === 'separate_assessment' ? 'active' : '' }}" style="border:2px solid {{ $activeModel === 'separate_assessment' ? '#0f62fe' : '#e0e0e0' }};background:{{ $activeModel === 'separate_assessment' ? '#fbfdff' : '#ffffff' }};padding:14px 16px;border-radius:3px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:10px;transition:all 0.15s ease;position:relative">
+        <div class="unbundling-card {{ $activeModel === 'separate_assessment' ? 'active' : '' }}" style="border:2px solid {{ $activeModel === 'separate_assessment' ? '#0f62fe' : 'var(--hairline)' }};background:{{ $activeModel === 'separate_assessment' ? 'var(--info-bg)' : 'var(--card-bg)' }};padding:14px 16px;border-radius:3px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:10px;transition:all 0.15s ease;position:relative">
           <div>
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
               <span style="display:inline-flex;align-items:center;gap:6px">
-                <input type="radio" name="credit_model" value="separate_assessment" @checked($activeModel === 'separate_assessment') class="model-radio" style="margin:0">
-                <b style="font-size:13px;color:#161616">{{ __('(c) Pembelajaran & Pentaksiran Berasingan') }}</b>
+                <input type="radio" id="model_radio_c" value="separate_assessment" @checked($activeModel === 'separate_assessment') class="model-radio" style="margin:0">
+                <label for="model_radio_c" style="margin:0;cursor:pointer"><b style="font-size:13px;color:var(--ink)">{{ __('(c) Pembelajaran & Pentaksiran Berasingan') }}</b></label>
               </span>
               <span class="tag" style="background:#f6f2ff;color:#6929c4;border:1px solid #e8daff;font-size:11px;font-weight:600">
                 {{ __('Pentaksiran Bersepadu') }}
               </span>
             </div>
             <div style="font-size:12px;font-weight:600;color:#6929c4;margin-bottom:4px">
-              {{ __('Separate Learning and Assessment Model') }}
+              {{ __('Separate Learning & Assessment') }}
             </div>
-            <p style="font-size:12px;color:#525252;line-height:1.45;margin:0 0 6px">
+            <p style="font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 6px">
               {{ __('Komponen pembelajaran distrukturkan dalam beberapa modul manakala pentaksiran bersepadu ditempatkan dalam modul pentaksiran yang berasingan.') }}
             </p>
           </div>
-          <div style="font-size:11px;color:#6f6f6f;border-top:1px dashed #e0e0e0;padding-top:8px">
+          <div style="font-size:11px;color:var(--muted);border-top:1px dashed var(--hairline);padding-top:8px">
             <b>{{ __('Syarat:') }}</b> {{ __('Modul pembelajaran (kandungan & aktiviti) + tepat satu Modul Pentaksiran Bersepadu.') }}
           </div>
-        </label>
+        </div>
       </div>
 
-      {{-- Hidden select kept in sync for form submission compatibility --}}
-      <select id="credit_model" name="credit_model_hidden" style="display:none">
-        <option value="credit_based" @selected($activeModel === 'credit_based')>Credit-based</option>
-        <option value="topic_based" @selected($activeModel === 'topic_based')>Topic-based</option>
-        <option value="separate_assessment" @selected($activeModel === 'separate_assessment')>Separate assessment</option>
-      </select>
+      <div style="margin-top:14px;margin-bottom:8px">
+        <label for="credit_model" style="font-size:12px;font-weight:600;color:#525252;display:block;margin-bottom:4px">
+          {{ __('Unbundling model') }}
+        </label>
+        <select id="credit_model" name="credit_model" aria-label="{{ __('Unbundling model') }}" style="max-width:360px;padding:6px 10px;font-size:13px;border:1px solid #8d8d8d;background:#ffffff">
+          <option value="credit_based" @selected($activeModel === 'credit_based')>Credit-based</option>
+          <option value="topic_based" @selected($activeModel === 'topic_based')>Topic-based</option>
+          <option value="separate_assessment" @selected($activeModel === 'separate_assessment')>Separate assessment</option>
+        </select>
+      </div>
     </div>
   @endif
 
   {{-- Modules Structure Table --}}
   <div style="margin-top:16px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
-      <h2 style="font-size:16px;font-weight:700;color:#161616;margin:0">
+      <h2 style="font-size:16px;font-weight:700;color:var(--ink);margin:0">
         {{ __('Module Structure & Student Learning Time (SLT)') }}
       </h2>
       <div id="model-status-indicator" class="small muted" style="font-size:12px"></div>
@@ -188,13 +192,13 @@
       @endforelse
       </tbody>
       <tfoot>
-        <tr style="background:#f8f9fa;font-weight:700;border-top:2px solid #e0e0e0">
+        <tr style="background:var(--s1);font-weight:700;border-top:2px solid var(--hairline)">
           <td></td>
           <td colspan="2">
             <span style="font-size:13px">{{ __('Total Student Learning Time (SLT)') }}</span>
           </td>
           <td>
-            <span id="slt-sum-display" style="font-family:var(--mono);font-size:14px;color:#161616">
+            <span id="slt-sum-display" style="font-family:var(--mono);font-size:14px;color:var(--ink)">
               {{ $modules->sum('slt_hours') }} h
             </span>
           </td>
@@ -365,6 +369,12 @@ document.addEventListener('DOMContentLoaded', function() {
       updateModelUI(this.value);
     });
   });
+
+  if (hiddenSelect) {
+    hiddenSelect.addEventListener('change', function() {
+      updateModelUI(this.value);
+    });
+  }
 
   sltInputs.forEach(input => {
     input.addEventListener('input', recalcSLT);

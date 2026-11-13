@@ -16,11 +16,15 @@ final class StubSignInController
 
     public function home(Request $request)
     {
-        return $request->user() ? redirect()->route('tasks') : redirect()->route('signin');
+        return $request->user() ? redirect()->to($request->user()->homeUrl()) : redirect()->route('signin');
     }
 
     public function index()
     {
+        if (Auth::check()) {
+            return redirect()->route('tasks');
+        }
+
         return view('signin', [
             'stub' => config('mcms.stub_idp'),
             'people' => config('mcms.stub_idp') ? User::with('roleAssignments')->orderBy('name')->get() : collect(),
@@ -47,6 +51,10 @@ final class StubSignInController
 
     public function mfa(Request $request)
     {
+        if (Auth::check()) {
+            return redirect()->route('tasks');
+        }
+
         abort_unless($request->session()->has('mfa_pending'), 404);
 
         return view('mfa');
@@ -71,14 +79,14 @@ final class StubSignInController
         $this->audit->record('auth.signed_in', $user, context: ['method' => $method], actorId: $user->id);
 
         $intended = $request->session()->pull('url.intended');
-        if ($intended && $this->canAccessIntendedUrl($request, $user, $intended)) {
+        if ($intended && self::canAccessUrl($request, $user, $intended)) {
             return redirect()->to($intended);
         }
 
         return redirect()->route('tasks');
     }
 
-    private function canAccessIntendedUrl(Request $request, User $user, string $url): bool
+    public static function canAccessUrl(Request $request, User $user, string $url): bool
     {
         try {
             $host = parse_url($url, PHP_URL_HOST);
@@ -87,7 +95,7 @@ final class StubSignInController
             }
 
             $path = parse_url($url, PHP_URL_PATH);
-            if (! $path || in_array($path, ['/signin', '/signout', '/mfa'], true)) {
+            if (! $path || in_array($path, ['/signin', '/signout', '/mfa', '/signin/mfa'], true)) {
                 return false;
             }
 

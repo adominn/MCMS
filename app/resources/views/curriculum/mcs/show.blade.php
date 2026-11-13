@@ -2,7 +2,10 @@
 @section('title', __('Micro-credential'))
 @section('content')
 @php($head = $current ?? $versions->first())
-<div class="crumb" style="margin-bottom:8px"><a href="{{ route('mcs') }}">{{ __('My micro-credentials') }}</a> <span>/</span> <span>{{ $versions->first()->name_en }}</span></div>
+<x-breadcrumb :crumbs="[
+  'My micro-credentials' => route('mcs'),
+  $versions->first()->name_en => null,
+]" />
 <div class="title">
   <div style="display:flex;align-items:center;gap:16px">
     <x-badge :category="$m->category" :size="52" />
@@ -11,7 +14,8 @@
       <div class="sub">{{ __('version :num', ['num' => $head->version_no]) }}@if($head->planned_slt) &middot; {{ $head->planned_slt }} h {{ __('learning time') }} @endif &middot; <x-pill :s="__($statusLabels[$head->status] ?? ucfirst($head->status))" /></div>
     </div>
   </div>
-  <div class="act">
+  <div class="act" style="gap:8px;display:flex;align-items:center">
+    <a class="btn ter sm" href="{{ route('mcs') }}">&larr; {{ __('All micro-credentials') }}</a>
     @if($current && !$open)<a class="btn ter" href="{{ route('mcs.change', $m->id) }}">{{ __('Request a change') }}</a>@endif
   </div>
 </div>
@@ -19,6 +23,7 @@
 
 <div class="panel"><div class="bd"><dl class="dl">
   <dt>{{ __('Category') }}</dt><dd><span class="cat">{{ strtoupper($m->category) }}</span> {{ __(['umc' => 'Unbundled Micro-Credential', 'samc' => 'Standalone Micro-Credential', 'mce' => 'Micro-Credential Eksekutif'][$m->category] ?? '') }}</dd>
+  @if(!empty($m->lecturer_name))<dt>{{ __('Lecturer') }}</dt><dd>{{ $m->lecturer_name }}</dd>@endif
   <dt>{{ __('Parent course') }}</dt><dd>{{ $m->code ?: __('None, own offering') }}</dd>
   <dt>{{ __('Modules') }}</dt><dd>@forelse($modules as $x){{ $x->seq }}. {{ $x->name_en }} ({{ $x->slt_hours }} h)@if(!$loop->last); @endif @empty<span class="muted">{{ __('No approved version yet.') }}</span>@endforelse</dd>
 </dl></div></div>
