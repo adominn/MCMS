@@ -677,17 +677,13 @@ input.bad, select.bad, textarea.bad { outline-color: var(--err); }
 .scrim textarea.input { width: 100%; height: 88px; padding: 10px 16px; border: 0; border-bottom: 1px solid var(--control); font: inherit; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .tbar select, .tbar input[type=search], .tbar input[type=text] { width: auto; min-width: 0; height: 32px; } .tbar details .field input { width: 180px; }
-/* button variants of the design prototype */
-.btn.sec, button.sec { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
-.btn.sec:hover, button.sec:hover { background: var(--surface); color: var(--ink); text-decoration: none; }
-.btn.ter, button.ter { background: var(--card-bg, #fff); color: var(--primary); border: 1px solid var(--primary); }
-.btn.ter:hover, button.ter:hover { background: var(--info-bg, #e8eaf6); text-decoration: none; }
-/* theme toggle button */
-.theme-toggle { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: transparent; border: 1px solid var(--hairline); color: var(--ink); cursor: pointer; padding: 0; border-radius: 0; transition: background 0.15s, color 0.15s, border-color 0.15s; }
-.theme-toggle:hover { background: var(--surface); }
-.theme-toggle svg { width: 16px; height: 16px; }
-:root:not(:root:not(.btn.ghost, button.ghost { background: transparent; color: var(--primary); padding: 0 8px; border: 1px solid transparent; }
-.btn.ghost:hover, button.ghost:hover { background: var(--s1); text-decoration: none; }
+/* button variants (v3 linear-precision) */
+.btn.sec, button.sec { background: var(--color-surface-contrast); color: var(--color-ink-inverse); border: 1px solid var(--color-surface-contrast); }
+.btn.sec:hover, button.sec:hover { background: #1e293b; border-color: #1e293b; color: var(--color-ink-inverse); text-decoration: none; }
+.btn.ter, button.ter { background: var(--color-canvas); color: var(--color-ink); border: 1px solid var(--color-line-strong); }
+.btn.ter:hover, button.ter:hover { background: var(--color-primary-tint); border-color: var(--color-primary); color: var(--color-primary); text-decoration: none; }
+.btn.ghost, button.ghost { background: transparent; color: var(--color-primary); padding: 0 10px; border: 1px solid transparent; }
+.btn.ghost:hover, button.ghost:hover { background: var(--color-primary-tint); text-decoration: none; }
 .btn.danger, button.danger,
 .btn.danger.ter, button.danger.ter,
 .btn.danger.sec, button.danger.sec {
@@ -1249,6 +1245,269 @@ footer.foot a:hover, .pub-foot a:hover { color: #fff; }
   margin: 8px 0;
   background: #f9f9f9;
 }
+/* ==========================================================================
+   Phase 3: v3 Linear-Precision Shared Components (Zero Markup Changes)
+   ========================================================================== */
+
+/* Global Typography & Ultra-Slim Scrollbar */
+body {
+  font-family: var(--font-primary);
+  color: var(--color-ink);
+  background: var(--color-canvas);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+h1 { font-size: 24px; line-height: 1.25; font-weight: 700; letter-spacing: -0.02em; color: var(--color-ink); }
+h2 { font-size: 17px; line-height: 1.35; font-weight: 600; letter-spacing: -0.01em; color: var(--color-ink); }
+h3 { font-size: 14.5px; line-height: 1.4; font-weight: 600; color: var(--color-ink); }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.24); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.42); }
+
+/* Buttons (4px controlled micro-radius, Electric Cobalt primary) */
+button, .btn {
+  border-radius: var(--radius-sm);
+  font-family: var(--font-primary);
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease, box-shadow 0.14s ease;
+}
+button:active:not(:disabled), .btn:active:not(:disabled) {
+  background: var(--color-primary-pressed);
+}
+button:focus-visible, .btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.btn.sm, button.sm { height: 34px; padding: 0 12px; font-size: 13px; }
+
+/* Form Inputs, Selects & Textareas (v3 crisp bordered fields) */
+label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: 0;
+}
+input[type=text], input[type=date], input[type=number], input[type=search],
+input[type=email], input[type=password], input[type=tel], input[type=url],
+select, textarea {
+  border: 1px solid var(--color-ink-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-size: 14px;
+  padding: 0 12px;
+  min-height: 38px;
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
+}
+textarea { padding: 10px 12px; min-height: 88px; }
+input[type=text]:hover, input[type=date]:hover, input[type=number]:hover,
+input[type=search]:hover, input[type=email]:hover, input[type=password]:hover,
+select:hover, textarea:hover {
+  border-color: var(--color-line-strong);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
+}
+input:disabled, select:disabled, textarea:disabled {
+  background: var(--color-surface-1);
+  color: var(--color-ink-muted);
+  border-color: var(--color-line-hairline);
+}
+fieldset {
+  border: 1px solid var(--color-line-hairline);
+  border-radius: var(--radius-md);
+}
+
+/* Cards, Panels & Bento KPIs (1px crisp stark black outline #090a0f + 6px micro-radius) */
+.card, .panel, .section-card, .fold, .kpis, .lifecycle-tracker {
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  background: var(--color-canvas);
+}
+.panel, .kpis, .lifecycle-tracker { overflow: hidden; }
+.panel > .hd {
+  background: var(--color-canvas-subtle);
+  border-bottom: 1px solid var(--color-line-hairline);
+  padding: 14px 20px;
+}
+.panel > .hd h2 {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--color-ink);
+  letter-spacing: -0.01em;
+}
+.panel .toolbar, .tbar {
+  background: var(--color-canvas);
+  border-bottom: 1px solid var(--color-line-hairline);
+}
+.kpis { display: flex; background: var(--color-canvas); }
+.kpi { border-left: 1px solid var(--color-line-hairline); }
+.kpi .l { font-size: 12px; font-weight: 600; color: var(--color-ink-muted); }
+.kpi .v { font-weight: 700; color: var(--color-ink); letter-spacing: -0.02em; }
+.band {
+  background: var(--color-canvas-subtle);
+  border: 1px solid var(--color-line-hairline);
+  border-radius: var(--radius-md);
+}
+details.fold > summary {
+  cursor: pointer;
+  padding: 12px 16px;
+  background: var(--color-canvas-subtle);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+}
+details.fold[open] > summary {
+  border-bottom: 1px solid var(--color-line-hairline);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Tables (High-precision slate-50 header, stark 1px bottom rule, ice-blue row wash) */
+th {
+  background: var(--color-canvas-subtle);
+  color: var(--color-ink-muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--color-line-strong);
+  height: 38px;
+}
+td {
+  border-bottom: 1px solid var(--color-line-hairline);
+  color: var(--color-ink);
+  font-size: 13.5px;
+}
+tbody tr:hover td, tr[data-go]:hover td {
+  background: var(--color-primary-tint);
+}
+th.sorted { background: var(--color-surface-1); color: var(--color-ink); }
+.pager { border-top: 1px solid var(--color-line-hairline); }
+.pager .pb { border-radius: 0; border-left: 1px solid var(--color-line-hairline); color: var(--color-ink); }
+.pager .pb:hover { background: var(--color-primary-tint); color: var(--color-primary); }
+
+/* Tags, Status Pills & Category Chips (2px micro-radius, semantic border, zero brackets) */
+.tag {
+  border-radius: var(--radius-xs);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  height: auto;
+  min-height: 22px;
+  border: 1px solid var(--color-line-hairline);
+  background: var(--color-surface-1);
+  color: var(--color-ink-muted);
+}
+.tag.ok { background: var(--color-success-tint); color: #0e6027; border-color: var(--color-success-border); }
+.tag.warn { background: var(--color-warning-tint); color: #735700; border-color: var(--color-warning-border); }
+.tag.err, .tag.overdue { background: var(--color-error-tint); color: #a2191f; border-color: var(--color-error-border); }
+.tag.info { background: var(--color-info-tint); color: var(--color-primary); border-color: var(--color-info-border); }
+.cat {
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--color-line-strong);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+}
+.role-tag {
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--color-info-border);
+  background: var(--color-info-tint);
+  color: var(--color-primary);
+}
+code, code.vc {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--color-surface-1);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line-hairline);
+  border-radius: var(--radius-xs);
+  padding: 1px 5px;
+}
+
+/* Tabs (Electric Cobalt active bar) */
+.tabs {
+  border-bottom: 1px solid var(--color-line-hairline);
+  gap: 4px;
+}
+.tabs button, .tabs a {
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--color-ink-muted);
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+}
+.tabs button:hover, .tabs a:hover {
+  color: var(--color-ink);
+  background: var(--color-canvas-subtle);
+}
+.tabs button[aria-selected="true"], .tabs button.on, .tabs a.on {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  background: transparent;
+}
+
+/* Notices & Alerts (4px radius, 3px semantic bar) */
+.status, .alert, .note {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-line-hairline);
+  border-left-width: 3px;
+}
+.status { border-color: var(--color-success-border); border-left-color: var(--color-success); background: var(--color-success-tint); }
+.status.error, .alert, .note.err { border-color: var(--color-error-border); border-left-color: var(--color-error); background: var(--color-error-tint); }
+.note.warn { border-color: var(--color-warning-border); border-left-color: var(--color-warning); background: var(--color-warning-tint); }
+.note.info { border-color: var(--color-info-border); border-left-color: var(--color-info); background: var(--color-info-tint); }
+.note.ok { border-color: var(--color-success-border); border-left-color: var(--color-success); background: var(--color-success-tint); }
+
+/* Modals, Popovers & Notifications */
+.pop {
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-dropdown);
+  background: var(--color-canvas);
+}
+.modal {
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  background: var(--color-canvas);
+}
+.notif .ni.unread {
+  background: var(--color-primary-tint);
+  border-left: 3px solid var(--color-primary);
+}
+.notif-markall-btn, .notif-read-btn { border-radius: var(--radius-xs); }
+
+/* Breadcrumb Back Button */
+.btn-breadcrumb-back {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-line-strong);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.btn-breadcrumb-back:hover {
+  background: var(--color-primary-tint);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Print / A4 Isolation Override (always crisp flat 0px corners) */
+.a4 .card, .a4 .panel, .a4 .tag, .doc-wrap .a4 .card, .doc-wrap .a4 .panel {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
 @media print {
   .print-sec {
     page-break-inside: avoid;
