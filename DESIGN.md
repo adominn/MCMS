@@ -1,7 +1,7 @@
 ---
 version: 3.0
 name: utem-linear-precision
-authority: UIUX/v3/css/tokens.css & design-samples/linear-precision/DESIGN.md (v2.4)
+authority: design-samples/linear-precision/DESIGN.md (v2.4) & design-samples/linear-precision/preview.html
 theme: light-only
 description: "UTeM MCMS v3 Linear-Precision Design System: light-only pure white canvas (#ffffff), Jet Black typography (#090a0f), Electric Cobalt primary accent (#0052ff), Deep Cobalt Navy left navigation drawer (#0b1a3d) with 28px right-side contours and protruding white pull-tab latch, Plus Jakarta Sans typography, controlled micro-radii (2px–8px), and crisp 1px stark black card outlines (#090a0f)."
 ---
