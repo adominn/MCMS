@@ -174,6 +174,65 @@ it('verifies industry expert role access and restrictions', function () {
     $this->actingAs($expert)->get('/admin/users')->assertForbidden();
 });
 
+it('verifies academic authority (P3 / Senate) role route access and restrictions', function () {
+    $academic = findUser('Prof. Dr. Zulkifli Ahmad');
+
+    // Accessible academic authority pages
+    $this->actingAs($academic)->get('/approvals')->assertOk();
+    $this->actingAs($academic)->get('/pathways')->assertOk();
+    $this->actingAs($academic)->get('/transfers')->assertOk();
+    $this->actingAs($academic)->get('/quality')->assertOk();
+    $this->actingAs($academic)->get('/monitoring')->assertOk();
+
+    // Forbidden administrative and proposal creation pages (403)
+    $this->actingAs($academic)->get('/admin/users')->assertForbidden();
+    $this->actingAs($academic)->get('/admin/settings')->assertForbidden();
+    $this->actingAs($academic)->get('/deposits')->assertForbidden();
+    $this->actingAs($academic)->get('/proposals/new')->assertForbidden();
+    $this->actingAs($academic)->get('/my-results')->assertForbidden();
+});
+
+it('verifies quality assurance authority (P4 / PBK) role route access and restrictions', function () {
+    $qa = findUser('Dr. Norazlina Mohd');
+
+    // Accessible QA pages
+    $this->actingAs($qa)->get('/monitoring')->assertOk();
+    $this->actingAs($qa)->get('/quality')->assertOk();
+    $this->actingAs($qa)->get('/approvals')->assertOk(); // QA audit review of approvals
+
+    // Forbidden deposit and proposal authoring pages (403)
+    $this->actingAs($qa)->get('/deposits')->assertForbidden();
+    $this->actingAs($qa)->get('/admin/users')->assertForbidden();
+    $this->actingAs($qa)->get('/admin/settings')->assertForbidden();
+    $this->actingAs($qa)->get('/proposals/new')->assertForbidden();
+});
+
+it('verifies records custodian (P6 / Registry) role route access and separation of duties (Note H)', function () {
+    $registry = findUser('Hasnah Abu Bakar');
+
+    // Accessible registry & credentials pages
+    $this->actingAs($registry)->get('/credentials')->assertOk();
+    $this->actingAs($registry)->get('/records/reports')->assertOk();
+    $this->actingAs($registry)->get('/results')->assertOk();
+
+    // Forbidden ABC deposit page per Note H separation of duties (403)
+    $this->actingAs($registry)->get('/deposits')->assertForbidden();
+    $this->actingAs($registry)->get('/admin/users')->assertForbidden();
+    $this->actingAs($registry)->get('/proposals/new')->assertForbidden();
+});
+
+it('verifies authorized ABC depositor (P7) role route access and separation of duties (Note H)', function () {
+    $depositor = findUser('Nurul Izzah');
+
+    // Accessible deposit pages
+    $this->actingAs($depositor)->get('/deposits')->assertOk();
+
+    // Forbidden administrative and proposal creation pages
+    $this->actingAs($depositor)->get('/admin/users')->assertForbidden();
+    $this->actingAs($depositor)->get('/admin/settings')->assertForbidden();
+    $this->actingAs($depositor)->get('/proposals/new')->assertForbidden();
+});
+
 it('verifies unauthenticated guests are redirected to signin for protected routes', function () {
     // Protected routes redirect to signin
     $this->get('/tasks')->assertRedirect('/signin');

@@ -541,13 +541,13 @@
           {{ __('All') }} ({{ $people->count() }})
         </button>
         <button type="button" class="role-pill" data-role="student">
-          {{ __('Student (P8)') }} ({{ $roleCounts['student'] }})
+          {{ __('Participant (P8)') }} ({{ $roleCounts['student'] }})
         </button>
         <button type="button" class="role-pill" data-role="lecturer">
-          {{ __('Lecturer (P1)') }} ({{ $roleCounts['lecturer'] }})
+          {{ __('MC Coordinator (P1)') }} ({{ $roleCounts['lecturer'] }})
         </button>
         <button type="button" class="role-pill" data-role="deputy_dean">
-          {{ __('Deputy Dean (P2)') }} ({{ $roleCounts['deputy_dean'] + ($roleCounts['ptj_authority'] ?? 0) }})
+          {{ __('PTj / Faculty Authority (P2)') }} ({{ $roleCounts['deputy_dean'] + ($roleCounts['ptj_authority'] ?? 0) }})
         </button>
         @if(($roleCounts['academic_authority'] ?? 0) > 0)
         <button type="button" class="role-pill" data-role="academic_authority">
@@ -556,24 +556,24 @@
         @endif
         @if(($roleCounts['qa_officer'] ?? 0) > 0)
         <button type="button" class="role-pill" data-role="qa_officer">
-          {{ __('QA Officer (P4)') }} ({{ $roleCounts['qa_officer'] }})
+          {{ __('Quality Assurance Authority (P4)') }} ({{ $roleCounts['qa_officer'] }})
         </button>
         @endif
         <button type="button" class="role-pill" data-role="codl_admin">
-          {{ __('CODL Admin (P5)') }} ({{ $roleCounts['codl_admin'] }})
+          {{ __('Platform & Technical Support (P5)') }} ({{ $roleCounts['codl_admin'] }})
         </button>
         @if(($roleCounts['records_custodian'] ?? 0) > 0 || ($roleCounts['records_depositor'] ?? 0) > 0)
         <button type="button" class="role-pill" data-role="records_custodian">
-          {{ __('Records Custodian (P6)') }} ({{ $roleCounts['records_custodian'] + ($roleCounts['records_depositor'] ?? 0) }})
+          {{ __('Records & Credential Custodian (P6)') }} ({{ $roleCounts['records_custodian'] + ($roleCounts['records_depositor'] ?? 0) }})
         </button>
         @endif
         @if(($roleCounts['abc_depositor'] ?? 0) > 0 || ($roleCounts['records_depositor'] ?? 0) > 0)
         <button type="button" class="role-pill" data-role="abc_depositor">
-          {{ __('ABC Depositor (P7)') }} ({{ $roleCounts['abc_depositor'] + ($roleCounts['records_depositor'] ?? 0) }})
+          {{ __('Authorized ABC Depositor (P7)') }} ({{ $roleCounts['abc_depositor'] + ($roleCounts['records_depositor'] ?? 0) }})
         </button>
         @endif
         <button type="button" class="role-pill" data-role="industry_expert">
-          {{ __('Industry Expert') }} ({{ $roleCounts['industry_expert'] }})
+          {{ __('Industry Expert / SME') }} ({{ $roleCounts['industry_expert'] }})
         </button>
       </div>
     </div>

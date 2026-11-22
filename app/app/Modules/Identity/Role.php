@@ -26,18 +26,35 @@ enum Role: string
         $isMs = str_starts_with($locale, 'ms');
 
         return match ($this) {
-            self::Student => $isMs ? 'Pelajar / Peserta (P8)' : 'Student / Participant (P8)',
-            self::Lecturer => $isMs ? 'Penyelaras MC / Pensyarah (P1)' : 'MC Coordinator / Lecturer (P1)',
-            self::Reviewer => $isMs ? 'Pemeriksa Kandungan Akademik' : 'Academic Reviewer',
+            self::Student => $isMs ? 'Peserta (P8)' : 'Participant (P8)',
+            self::Lecturer => $isMs ? 'Penyelaras MC / Pemilik Akademik (P1)' : 'MC Coordinator / Academic Owner (P1)',
+            self::Reviewer => $isMs ? 'Penilai / Penyemak Kandungan' : 'Academic Content Reviewer',
             self::DeputyDean, self::PtjAuthority => $isMs ? 'Pihak Berkuasa PTj / Fakulti (P2)' : 'PTj / Faculty Authority (P2)',
-            self::AcademicAuthority => $isMs ? 'Pihak Berkuasa Akademik / Senat (P3)' : 'Academic Authority / Senate (P3)',
-            self::QaOfficer => $isMs ? 'Pegawai Jaminan Kualiti / QA (P4)' : 'Quality Assurance Officer (P4)',
-            self::CodlAdmin => $isMs ? 'Pentadbir Platform CODL (P5)' : 'CODL Platform Administrator (P5)',
-            self::RecordsCustodian => $isMs ? 'Unit Rekod / Pengeluar Kredensial (P6)' : 'Records & Credential Custodian (P6)',
-            self::AbcDepositor => $isMs ? 'Pihak Depositor ABC Diberi Kuasa (P7)' : 'Authorized ABC Depositor (P7)',
+            self::AcademicAuthority => $isMs ? 'Pihak Berkuasa Akademik (P3)' : 'Academic Authority (P3)',
+            self::QaOfficer => $isMs ? 'Pihak Jaminan Kualiti (P4)' : 'Quality Assurance Authority (P4)',
+            self::CodlAdmin => $isMs ? 'Pihak Platform / Sokongan Teknikal (P5)' : 'Platform & Technical Support (P5)',
+            self::RecordsCustodian => $isMs ? 'Pihak Rekod / Credential (P6)' : 'Records & Credential Custodian (P6)',
+            self::AbcDepositor => $isMs ? 'Pihak ABC / Depositor Diberi Kuasa (P7)' : 'Authorized ABC Depositor (P7)',
             self::RecordsDepositor => $isMs ? 'Pegawai Rekod & ABC (P6/P7)' : 'Records & ABC Officer (P6/P7)',
-            self::IndustryExpert => $isMs ? 'Pakar Bidang Industri' : 'Industry Subject-Matter Expert',
+            self::IndustryExpert => $isMs ? 'Pakar Luar / Industri (SME)' : 'Industry Expert / SME',
         };
+    }
+
+    /** Roles that administrators can explicitly assign in user management per Appendix H. */
+    public static function assignableCases(): array
+    {
+        return [
+            self::Student,
+            self::Lecturer,
+            self::PtjAuthority,
+            self::AcademicAuthority,
+            self::QaOfficer,
+            self::CodlAdmin,
+            self::RecordsCustodian,
+            self::AbcDepositor,
+            self::IndustryExpert,
+            self::Reviewer,
+        ];
     }
 
     /** Guide Appendix H2 role code (P1 to P8). */

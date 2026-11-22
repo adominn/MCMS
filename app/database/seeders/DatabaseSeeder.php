@@ -60,6 +60,12 @@ class DatabaseSeeder extends Seeder
             $u->roleAssignments()->firstOrCreate(['role' => $role], ['scope_type' => $scopeType, 'ptj_id' => $code ? $ptj($code) : null, 'reason' => 'Seed data']);
         }
 
+        // Nurul Izzah holds both P6 (records_custodian) and P7 (abc_depositor) per her dual portfolio
+        $nurul = User::where('email', 'nurul.izzah@utem.example.test')->first();
+        if ($nurul) {
+            $nurul->roleAssignments()->firstOrCreate(['role' => 'records_custodian'], ['scope_type' => 'university', 'reason' => 'Seed data']);
+        }
+
         $this->call(UcredsReferenceSeeder::class);
 
         $this->tasks();

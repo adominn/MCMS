@@ -180,7 +180,7 @@ final class RecordsController
             'credentials' => DB::table('credentials as c')->join('enrolments as e', 'e.id', '=', 'c.enrolment_id')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->where('e.user_id', $u->id)->get(['c.id', 'c.number', 'c.status', 'v.name_en', 'c.issued_at']),
             'acrs' => DB::table('acrs as a')->join('mc_versions as v', 'v.id', '=', 'a.mc_version_id')->where('a.user_id', $u->id)->get(['a.id', 'a.reference', 'v.name_en', 'a.credits', 'a.status', 'a.created_at']),
         ] : null;
-        $batches = $u->hasAnyRole('records_depositor') ? DB::table('abc_batches')
+        $batches = $u->hasAnyRole('abc_depositor', 'records_depositor') ? DB::table('abc_batches')
             ->when($ptjs !== null, fn ($b) => $b->whereIn('ptj_id', $ptjs))
             ->orderByDesc('id')->limit(10)->get() : collect();
         $suspensions = $u->hasAnyRole('deputy_dean') ? DB::table('suspensions as s')
@@ -210,9 +210,9 @@ final class RecordsController
             'proposals' => $proposals,
             'transfers' => $transfers,
             'kinds' => Reports::KINDS,
-            'reports' => $u->hasAnyRole('lecturer', 'deputy_dean', 'records_depositor', 'codl_admin'),
+            'reports' => $u->hasAnyRole('lecturer', 'deputy_dean', 'records_custodian', 'abc_depositor', 'records_depositor', 'codl_admin'),
             'dean' => $u->hasAnyRole('deputy_dean'),
-            'depositor' => $u->hasAnyRole('records_depositor'),
+            'depositor' => $u->hasAnyRole('abc_depositor', 'records_depositor'),
             'codl' => $codl,
             'ucredsImports' => $ucredsImports,
             'ucredsOfferings' => $ucredsOfferings,
@@ -227,8 +227,8 @@ final class RecordsController
         if ($u->hasAnyRole('codl_admin')) {
             return [null, null];
         }
-        if ($u->hasAnyRole('records_depositor')) {
-            return [$u->scopedPtjIds('records_depositor'), null];
+        if ($u->hasAnyRole('abc_depositor', 'records_custodian', 'records_depositor')) {
+            return [$u->scopedPtjIds('records_depositor') ?? $u->scopedPtjIds('abc_depositor') ?? $u->scopedPtjIds('records_custodian'), null];
         }
         if ($u->hasAnyRole('deputy_dean')) {
             return [$u->scopedPtjIds('deputy_dean'), null];

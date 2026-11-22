@@ -32,7 +32,7 @@ final class UserAdminController
             'person' => $user,
             'assignments' => $user->roleAssignments()->orderByDesc('id')->get(),
             'ptjs' => DB::table('ptjs')->orderBy('code')->get(),
-            'roles' => Role::cases(),
+            'roles' => Role::assignableCases(),
         ]);
     }
 

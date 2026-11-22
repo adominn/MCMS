@@ -90,9 +90,6 @@ class User extends Authenticatable
                 $targetRoles[] = 'ptj_authority';
             } elseif ($r === 'ptj_authority') {
                 $targetRoles[] = 'deputy_dean';
-            } elseif ($r === 'records_depositor') {
-                $targetRoles[] = 'records_custodian';
-                $targetRoles[] = 'abc_depositor';
             }
         }
 
