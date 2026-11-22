@@ -114,7 +114,7 @@
       ['Cohort Operations', 'Offerings and readiness', 'offerings', ['offerings*'], 'cap'],
       ['Cohort Operations', 'Results and completion', 'results', ['results*', 'completion*'], 'check'],
       ['Credit & Certification', 'Credentials', 'credentials.admin', ['credentials.admin*'], 'award'],
-      ['Credit & Certification', 'Transfer monitor', 'transfers', ['transfers*'], 'swap'],
+      ['Credit & Certification', 'Credit transfer', 'transfers', ['transfers*'], 'swap'],
       ['Insight & Audit', 'Reports', 'reports', ['reports*'], 'chart'],
       ['Insight & Audit', 'Traceability', 'trace', ['trace*', 'records.audit*', 'discrepancies*'], 'search'],
       ['General', 'Documents', 'documents', ['documents*'], 'doc'],
@@ -144,7 +144,7 @@
     ],
     'records_custodian' => [
       ['Registry & Credentials', 'Task queue', 'tasks', ['tasks*'], 'home'],
-      ['Registry & Credentials', 'Credentials management', 'credentials.admin', ['credentials.admin*'], 'award'],
+      ['Registry & Credentials', 'Credentials', 'credentials.admin', ['credentials.admin*'], 'award'],
       ['Registry & Credentials', 'Results & completion', 'results', ['results*', 'completion*'], 'check'],
       ['Registry & Credentials', 'Discrepancies & corrections', 'discrepancies', ['discrepancies*'], 'check'],
       ['Insight & Audit', 'Cohort records', 'trace', ['trace*', 'cohort.records*'], 'search'],
@@ -156,7 +156,6 @@
     'abc_depositor' => [
       ['Credit Bank & ABC', 'Task queue', 'tasks', ['tasks*'], 'home'],
       ['Credit Bank & ABC', 'ACR & ABC deposits', 'deposits', ['deposits*'], 'bank'],
-      ['Credit Bank & ABC', 'Credit transfer redemptions', 'transfers', ['transfers*'], 'swap'],
       ['Credit Bank & ABC', 'Discrepancies & corrections', 'discrepancies', ['discrepancies*'], 'check'],
       ['Insight & Audit', 'Traceability', 'trace', ['trace*'], 'search'],
       ['Insight & Audit', 'Audit trail', 'records.audit', ['records.audit*'], 'list'],

@@ -10,8 +10,9 @@
   $okResults = ['equivalent', 'adequate', 'matched', 'aligned', 'valid', 'current', 'met', 'pass', 'suitable', 'sufficient'];
   $warnResults = ['partly', 'needs_review'];
   $lifeStage = $decided ? 8 : 7;
-  $isDd = auth()->user()->hasAnyRole('deputy_dean', 'ptj_authority') && !auth()->user()->hasAnyRole('codl_admin');
-  $canDecide = auth()->user()->hasAnyRole('codl_admin', 'academic_authority');
+  $authRole = (string) app(\App\Modules\Core\Settings::class)->get('approval.route.transfer');
+  $canDecide = auth()->user()->hasAnyRole($authRole ?: 'deputy_dean', 'codl_admin', 'academic_authority', 'deputy_dean', 'ptj_authority');
+  $isDd = false;
 
   [$whereTxt, $nextTxt, $whoTxt, $roleCode] = match ($a->status) {
     'submitted' => [

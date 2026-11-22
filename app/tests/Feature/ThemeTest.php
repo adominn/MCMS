@@ -57,14 +57,12 @@ it('updates theme preference via profile preferences form', function () {
     expect(session('ui_theme'))->toBe('dark');
 });
 
-it('renders theme toggle in the header and profile selector', function () {
+it('renders application locked to light mode per DESIGN.md v3 linear precision', function () {
     $amir = User::where('name', 'Amir Hakimi')->firstOrFail();
 
     $this->actingAs($amir)->get('/tasks')
         ->assertOk()
-        ->assertSee('id="theme-toggle"', false)
-        ->assertSee('theme-icon-light', false)
-        ->assertSee('theme-icon-dark', false);
+        ->assertSee('data-theme="light"', false);
 
     $this->actingAs($amir)->get('/profile')
         ->assertOk()
@@ -89,8 +87,8 @@ it('renders signin page locked to light mode with high-contrast credentials guid
     $res->assertOk()
         ->assertSee('data-theme="light"', false)
         ->assertSee('UserId@utem.edu.my', false)
-        ->assertSee('color:#0f62fe !important', false)
-        ->assertSee('background:#edf5ff !important', false);
+        ->assertSee('color:#0052ff !important', false)
+        ->assertSee('background:#edf4ff !important', false);
 });
 
 it('renders public pathways notice with accessible semantic tokens without black text on dark ground', function () {
@@ -142,10 +140,8 @@ it('renders printable documents with solid black hairline table and panel border
 
     $response = $this->actingAs($lecturer)->get('/records/reports/offerings/print');
     $response->assertOk()
-        ->assertSee('--border: #161616 !important', false)
-        ->assertSee('--hairline-strong: #161616 !important', false)
-        ->assertSee('border-bottom: 1px solid #161616 !important', false)
-        ->assertSee('border: 1px solid #161616 !important', false)
+        ->assertSee('--border: #090a0f !important', false)
+        ->assertSee('border: 1px solid #090a0f !important', false)
         ->assertDontSee('border-bottom: 1px solid #e0e0e0 !important', false);
 });
 

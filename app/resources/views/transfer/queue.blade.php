@@ -3,7 +3,7 @@
 @section('content')
 @php
   $pendingCount = $rows->whereIn('status', ['submitted', 'under_eval'])->count();
-  $isDd = auth()->user()->hasAnyRole('deputy_dean', 'ptj_authority') && !auth()->user()->hasAnyRole('codl_admin');
+  $isDd = false;
 @endphp
 
 <div class="title">

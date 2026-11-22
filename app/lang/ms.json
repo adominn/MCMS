@@ -4172,5 +4172,20 @@
   "semester(s)": "semester",
   "submissions": "penghantaran",
   "to close": "untuk ditutup",
-  "transactions": "transaksi"
+  "transactions": "transaksi",
+  "The Senate does not use MCMS directly. As CODL administrator, you record its formal decision from meeting minutes. Endorsed by faculty on :date.": "Senat tidak menggunakan MCMS secara langsung. Sebagai pentadbir CODL, anda merekodkan keputusan rasminya daripada minit mesyuarat. Diperakui oleh fakulti pada :date.",
+  "Student (P8)": "Pelajar (P8)",
+  "Lecturer (P1)": "Pensyarah (P1)",
+  "Deputy Dean (P2)": "Timbalan Dekan (P2)",
+  "CODL Admin (P5)": "Pentadbir CODL (P5)",
+  "Stage 07: Under CODL equivalence evaluation and Senate decision review": "Peringkat 07: Di bawah penilaian kesetaraan CODL dan semakan keputusan Senat",
+  "Complete outcome-by-outcome mapping and all 9 equivalence criteria for each course line, then record the official Senate decision.": "Lengkapkan pemetaan hasil pembelajaran demi hasil dan kesemua 9 kriteria kesetaraan untuk setiap baris kursus, kemudian rekodkan keputusan rasmi Senat.",
+  "Faculty Programme Transfer Monitor (Read-Only):": "Pemantau Pindahan Kredit Program Fakulti (Baca Sahaja):",
+  "This application is evaluated by CODL and approved by Senate. You are monitoring credit transfers into your faculty programmes.": "Permohonan ini dinilai oleh CODL dan diluluskan oleh Senat. Anda sedang memantau pindahan kredit ke dalam program fakulti anda.",
+  "Pending Step 1 validity check by CODL": "Menunggu semakan kesahan Langkah 1 oleh CODL",
+  "Pending final Senate decision recorded by CODL Administrator": "Menunggu keputusan akhir Senat direkodkan oleh Pentadbir CODL",
+  "Credit Transfer Monitor": "Pemantau Pindahan Kredit",
+  "Faculty Programme Overview · Read-only monitor of credit transfers evaluated by CODL and approved by Senate for your faculty programmes.": "Gambaran Keseluruhan Program Fakulti · Pemantau baca sahaja untuk pindahan kredit yang dinilai oleh CODL dan diluluskan oleh Senat bagi program fakulti anda.",
+  "Credit Transfer Evaluation & Decisions": "Penilaian & Keputusan Pindahan Kredit",
+  "CODL & Senate Academic Authority Workspace · Evaluate learning outcome equivalence, check ACR validity, and record Senate transfer decisions.": "Ruang Kerja Pihak Berkuasa Akademik CODL & Senat · Nilai kesetaraan hasil pembelajaran, semak kesahan ACR, dan rekod keputusan pindahan Senat."
 }

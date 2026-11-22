@@ -58,7 +58,9 @@ it('redirects authenticated users away from signin and mfa pages and ignores sig
     $this->actingAs($farid)->get('/signin')->assertRedirect('/tasks');
 
     $this->post('/signout');
-    $this->post('/signin/stub', ['user' => $farid->id])->assertRedirect('/users');
+    $this->withSession(['url.intended' => 'http://localhost:8110/signin/mfa'])
+        ->post('/signin/stub', ['user' => $farid->id])
+        ->assertRedirect('/tasks');
     $this->assertAuthenticatedAs($farid);
 });
 
@@ -300,10 +302,9 @@ it('shows each adapter with its mode, last run and the notification log (FR-25, 
 
 it('lists only the tasks of the signed-in roles, filtered by area and search, 10 to a page', function () {
     $hakim = who('Hakim Rahman');
-    $nurul = who('Nurul Izzah');
-    $this->actingAs($hakim)->get('/tasks')->assertOk()->assertSee('All (20)')->assertSee('Results (4)')->assertDontSee('Answer review comments')->assertDontSee('Record ABC deposit');
+    $this->actingAs($hakim)->get('/tasks')->assertOk()->assertSee('All (24)')->assertSee('Results (4)')->assertDontSee('Answer review comments');
     $this->actingAs($hakim)->get('/tasks?area=results')->assertSee('Verify results')->assertDontSee('Record ABC deposit');
-    $this->actingAs($nurul)->get('/tasks?q=deposit')->assertOk()->assertSee('All (4)')->assertSee('Record ABC deposit');
+    $this->actingAs($hakim)->get('/tasks?q=deposit')->assertSee('All (4)')->assertSee('Record ABC deposit');
     // paging, sorting and search of the list run in the browser (UI/UX 4.5); the Playwright flow FL-00 covers them
     $this->actingAs(who('Dr. Aina Zulkifli'))->get('/tasks')->assertSee('Answer review comments')->assertDontSee('Verify results');
 });

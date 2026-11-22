@@ -22,7 +22,7 @@ Route::middleware(['auth', 'role:lecturer'])->group(function () {
     Route::post('/results/{result}/change', [ResultsController::class, 'requestChange'])->whereNumber('result')->name('results.change');
 });
 
-Route::middleware(['auth', 'role:deputy_dean,ptj_authority,records_custodian,records_depositor'])->prefix('results')->group(function () {
+Route::middleware(['auth', 'role:deputy_dean,ptj_authority,records_custodian'])->prefix('results')->group(function () {
     Route::get('/', [ResultsController::class, 'index'])->name('results');
     Route::get('/{id}', [ResultsController::class, 'verifyPage'])->whereNumber('id')->name('results.verify');
 });

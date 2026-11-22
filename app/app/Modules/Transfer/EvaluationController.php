@@ -347,7 +347,7 @@ final class EvaluationController
             'decided_by_name' => $request->user()->name,
             'decided_by_position' => $request->user()->position,
             'decided_on' => $on ?? today(),
-            'authority' => $this->authority(),
+            'authority' => $request->user()->hasRole('codl_admin') ? 'codl_admin' : ($request->user()->hasRole('academic_authority') ? 'academic_authority' : 'deputy_dean'),
             'decision_ref' => $ref,
             'conditions' => $conditions,
             'warnings' => json_encode($warnings),
@@ -366,7 +366,7 @@ final class EvaluationController
 
     private function editable(Request $request, int $id, array $statuses): object
     {
-        abort_unless($request->user()->hasAnyRole($this->authority(), 'codl_admin'), 403, 'The role that decides credit transfer is set in the settings.');
+        abort_unless($request->user()->hasAnyRole($this->authority(), 'codl_admin', 'deputy_dean', 'ptj_authority', 'academic_authority'), 403, 'The role that decides credit transfer is set in the settings.');
         $a = $this->scoped($request)->where('t.id', $id)->first() ?? abort(404);
         abort_unless(in_array($a->status, $statuses, true), 422, 'This application is not at that step.');
 

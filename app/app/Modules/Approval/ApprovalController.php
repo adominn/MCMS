@@ -189,7 +189,7 @@ final class ApprovalController
     public function senate(Request $request, int $id)
     {
         $v = $this->version($request, $id);
-        abort_unless($request->user()->hasAnyRole($this->route('approval.route.senate'), 'codl_admin'), 403, 'The role that records the decision is set in the settings.');
+        abort_unless($request->user()->hasAnyRole($this->route('approval.route.senate')), 403, 'The role that records the decision is set in the settings.');
         abort_unless($v->status === 'endorsed', 403, 'The Senate decision is recorded after endorsement.');
         $check = $this->checker->check($id);
         abort_if(! empty($check['blocking']), 422, 'Cannot record Senate decision: the proposal has unresolved blocking curriculum errors.');

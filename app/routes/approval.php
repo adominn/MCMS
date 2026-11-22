@@ -4,7 +4,7 @@ use App\Modules\Approval\ApprovalController;
 use App\Modules\Approval\ReviewController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'role:lecturer,industry_expert'])->prefix('reviews')->group(function () {
+Route::middleware(['auth', 'role:lecturer,reviewer,industry_expert'])->prefix('reviews')->group(function () {
     Route::get('/', [ReviewController::class, 'index'])->name('reviews');
     Route::get('/{assignment}', [ReviewController::class, 'show'])->whereNumber('assignment')->name('reviews.show');
     Route::post('/{assignment}/coi', [ReviewController::class, 'coi'])->whereNumber('assignment')->name('reviews.coi');
@@ -14,7 +14,7 @@ Route::middleware(['auth', 'role:lecturer,industry_expert'])->prefix('reviews')-
 
 Route::middleware(['auth', 'role:lecturer'])->post('/proposals/{id}/comments/{comment}/respond', [ReviewController::class, 'respond'])->whereNumber(['id', 'comment'])->name('comments.respond');
 
-Route::middleware(['auth', 'role:deputy_dean,ptj_authority,academic_authority,qa_officer,codl_admin'])->prefix('approvals')->group(function () {
+Route::middleware(['auth', 'role:deputy_dean,ptj_authority,academic_authority,qa_officer'])->prefix('approvals')->group(function () {
     Route::get('/', [ApprovalController::class, 'index'])->name('approvals');
     Route::get('/{id}', [ApprovalController::class, 'show'])->whereNumber('id')->name('approvals.show');
     Route::get('/{id}/pack', [ApprovalController::class, 'pack'])->whereNumber('id')->name('approvals.pack');

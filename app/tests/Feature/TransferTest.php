@@ -329,10 +329,10 @@ it('returns the application to Submitted when the applicant adds evidence (FR-ct
 
 // ---- authority (FR-ctauthority, D-12)
 
-it('lets only the deputy dean of the target programme decide, not CODL, a student or another faculty (FR-ctauthority)', function () {
+it('lets the target programme authority decide, not a student or another faculty (FR-ctauthority)', function () {
     [$app, $line] = applied();
-    $this->actingAs($this->farid)->get("/transfers/$app")->assertForbidden();
     $this->actingAs($this->amir)->post("/transfers/$app/decide", [])->assertForbidden();
+    $this->actingAs($this->aina)->post("/transfers/$app/decide", [])->assertForbidden();
     $fke = User::create(['name' => 'Dean FKE', 'email' => 'fke@utem.example.test']);
     $fke->roleAssignments()->create(['role' => 'deputy_dean', 'scope_type' => 'ptj', 'ptj_id' => DB::table('ptjs')->where('code', 'FTKE')->value('id')]);
     $this->actingAs($fke)->get("/transfers/$app")->assertNotFound();

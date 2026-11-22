@@ -47,17 +47,17 @@ class DatabaseSeeder extends Seeder
             ['Amir Hakimi', 'amir.hakimi@learner.example.test', 'student', null, 'en', 'Participant', 'Peserta'],
             ['Dr. Aina Zulkifli', 'aina.zulkifli@utem.example.test', 'lecturer', 'FTMK', 'en', 'Course Coordinator / Senior Lecturer, FTMK', 'Penyelaras Kursus / Pensyarah Kanan, FTMK'],
             ['Hakim Rahman', 'hakim.rahman@utem.example.test', 'deputy_dean', 'FTMK', 'en', 'Deputy Dean (Academic), FTMK', 'Timbalan Dekan (Akademik), FTMK'],
-            ['Nurul Izzah', 'nurul.izzah@utem.example.test', 'abc_depositor', null, 'en', 'Authorized ABC Depositor (P7), Registry / CODL', 'Pendeposit ABC Diberi Kuasa (P7), Pejabat Pendaftar / CODL'],
+            ['Prof. Dr. Zulkifli Ahmad', 'zulkifli.ahmad@utem.example.test', 'academic_authority', null, 'en', 'Senate Academic Representative / PBA (P3)', 'Wakil Senat / Pihak Berkuasa Akademik (P3)'],
+            ['Dr. Norazlina Mohd', 'norazlina.mohd@utem.example.test', 'qa_officer', null, 'en', 'Quality Assurance Officer, PKA (P4)', 'Pegawai Jaminan Kualiti, PKA (P4)'],
             ['Farid Hashim', 'farid.hashim@utem.example.test', 'codl_admin', null, 'en', 'Administrator, CODL', 'Pentadbir, CODL'],
+            ['Hasnah Abu Bakar', 'hasnah.bakar@utem.example.test', 'records_custodian', null, 'en', 'Senior Assistant Registrar, Records Unit (P6)', 'Penolong Pendaftar Kanan, Unit Rekod (P6)'],
+            ['Nurul Izzah', 'nurul.izzah@utem.example.test', 'abc_depositor', null, 'en', 'Authorized Records & ABC Depositor Officer (P6/P7)', 'Pegawai Rekod & Depositor ABC Diberi Kuasa (P6/P7)'],
             ['Ir. Siti Aminah', 'siti.aminah@industry.example.test', 'industry_expert', null, 'ms', 'Industry Subject-Matter Expert', 'Pakar Bidang Industri'],
         ] as [$name, $email, $role, $code, $locale, $posEn, $posMs]) {
             $u = User::firstOrCreate(['email' => $email], ['name' => $name, 'upn' => $email, 'locale' => $locale, 'position' => $posEn, 'position_ms' => $posMs, 'participant_group' => $role === 'student' ? 'working professional' : null, 'institution_id' => $role === 'student' ? 'B032410001' : null]);
             $u->forceFill(['position' => $posEn, 'position_ms' => $posMs])->save();
-            $scopeType = $code ? 'ptj' : (in_array($role, ['codl_admin', 'records_depositor', 'abc_depositor', 'records_custodian'], true) ? 'university' : null);
+            $scopeType = $code ? 'ptj' : (in_array($role, ['codl_admin', 'academic_authority', 'qa_officer', 'records_depositor', 'abc_depositor', 'records_custodian'], true) ? 'university' : null);
             $u->roleAssignments()->firstOrCreate(['role' => $role], ['scope_type' => $scopeType, 'ptj_id' => $code ? $ptj($code) : null, 'reason' => 'Seed data']);
-            if ($email === 'nurul.izzah@utem.example.test') {
-                $u->roleAssignments()->firstOrCreate(['role' => 'records_custodian'], ['scope_type' => 'university', 'reason' => 'Seed dual-role P6 Records Custodian']);
-            }
         }
 
         $this->call(UcredsReferenceSeeder::class);

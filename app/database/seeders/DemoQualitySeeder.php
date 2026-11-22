@@ -12,15 +12,23 @@ class DemoQualitySeeder extends DemoOfferingsSeeder
     public function run(): void
     {
         parent::run();
+        app(\App\Modules\Monitoring\PeriodicReviews::class)->ensure();
+        $lss = DB::table('mc_versions')->where('name_en', 'Lean Six Sigma Yellow Belt')->first();
+        if ($lss) {
+            DB::table('micro_credentials')->where('id', $lss->micro_credential_id)->update(['category' => 'samc', 'category_status' => 'confirmed']);
+            DB::table('mc_versions')->where('id', $lss->id)->update(['proposed_credit' => null, 'proposed_mqf_level' => null, 'credit_sought' => 0]);
+        }
         $v = DB::table('mc_versions')->where('name_en', 'Cloud Native Development')->first();
+        if ($v) {
+            DB::table('micro_credentials')->where('id', $v->micro_credential_id)->update(['category' => 'samc', 'category_status' => 'confirmed']);
+            DB::table('mc_versions')->where('id', $v->id)->update(['proposed_credit' => 2, 'proposed_mqf_level' => 4, 'qv_status' => 'verified', 'qv_valid_until' => today()->addDays(41)]);
+        }
         if (! $v || DB::table('qv_records')->where('micro_credential_id', $v->micro_credential_id)->exists()) {
             return;
         }
         $mc = $v->micro_credential_id;
         $aina = User::where('name', 'Dr. Aina Zulkifli')->firstOrFail();
         $amir = User::where('name', 'Amir Hakimi')->firstOrFail();
-        DB::table('mc_versions')->where('id', $v->id)->update(['proposed_credit' => 2, 'proposed_mqf_level' => 4, 'qv_status' => 'verified', 'qv_valid_until' => today()->addDays(41)]);
-        DB::table('mc_versions')->where('name_en', 'Lean Six Sigma Yellow Belt')->update(['proposed_credit' => null, 'proposed_mqf_level' => null, 'credit_sought' => 0]);
         $o = DB::table('offerings')->insertGetId([
             'mc_version_id' => $v->id, 'cohort_name' => '2026/1', 'start_date' => today()->subDays(150), 'end_date' => today()->subDays(60), 'delivery_mode' => 'online', 'capacity' => 30,
             'reg_opens_on' => today()->subDays(180), 'reg_closes_on' => today()->subDays(155), 'fee' => 150, 'status' => 'ended', 'readiness_state' => 'ready', 'created_by' => $aina->id, 'created_at' => now(), 'updated_at' => now(),
@@ -28,7 +36,22 @@ class DemoQualitySeeder extends DemoOfferingsSeeder
         $e = DB::table('enrolments')->insertGetId(['reference' => 'E-QV-0001', 'user_id' => $amir->id, 'offering_id' => $o, 'mc_version_id' => $v->id, 'status' => 'completed', 'fee_amount' => 150, 'ack_text' => 'x', 'ack_versions' => '{}', 'status_changed_at' => now(), 'created_at' => now(), 'updated_at' => now()]);
         $hakim = User::where('name', 'Hakim Rahman')->first();
         DB::table('achievement_records')->insert(['enrolment_id' => $e, 'mc_version_id' => $v->id, 'completion_status' => 'complete', 'completed_on' => today()->subDays(55), 'final_result' => '{}', 'coordinator_signed_by' => $aina->id, 'coordinator_signed_at' => now()->subDay(), 'coordinator_remarks' => 'Verified by Course Coordinator.', 'confirmed_by' => $hakim?->id ?? $aina->id, 'confirmed_at' => now(), 'created_at' => now()]);
+        $comp = DB::table('assessment_components')->where('mc_version_id', $v->id)->first();
+        $compId = $comp ? $comp->id : DB::table('assessment_components')->insertGetId(['mc_version_id' => $v->id, 'name_en' => 'Practical assessment', 'weight_percent' => 100, 'pass_mark' => 50, 'max_mark' => 100]);
+        DB::table('assessment_results')->insert([
+            'enrolment_id' => $e,
+            'assessment_component_id' => $compId,
+            'score' => 85.0,
+            'status' => 'verified',
+            'source' => 'manual',
+            'verified_by' => $hakim?->id ?? $aina->id,
+            'verified_at' => now()->subDays(55),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
         DB::table('qv_records')->insert(['micro_credential_id' => $mc, 'cycle_no' => 1, 'status' => 'verified', 'submitted_on' => today()->subYears(3)->addDays(20), 'submitted_ref' => 'MQA/QV/2023/051', 'qv_reference' => 'QV/2023/051', 'verified_credit' => 2, 'verified_mqf_level' => 4,
             'valid_from' => today()->subYears(3)->addDays(41), 'valid_until' => today()->addDays(41), 'decision_document' => 'qv-2023-051.pdf', 'created_at' => now(), 'updated_at' => now()]);
+
+        app(\App\Modules\Monitoring\PeriodicReviews::class)->ensure();
     }
 }

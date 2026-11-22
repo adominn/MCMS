@@ -82,19 +82,6 @@ return new class extends Migration
                 ]
             );
         }
-
-        // Also ensure Nurul Izzah has records_custodian role if needed for compatibility
-        $nurul = User::where('email', 'nurul.izzah@utem.example.test')->first();
-        if ($nurul) {
-            $nurul->roleAssignments()->firstOrCreate(
-                ['role' => 'records_custodian'],
-                [
-                    'scope_type' => 'university',
-                    'reason' => 'Appendix H P6 dual-assignment for demonstration',
-                    'valid_from' => '2026-01-01',
-                ]
-            );
-        }
     }
 
     public function down(): void

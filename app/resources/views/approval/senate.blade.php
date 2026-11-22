@@ -33,7 +33,11 @@
         <div class="hd"><h2>{{ __('Senate meeting details') }}</h2></div>
         <div class="bd">
           <p class="muted s" style="margin-top:0">
-            {{ __('The Senate does not use MCMS directly. As CODL administrator, you record its formal decision from meeting minutes. Endorsed by faculty on :date.', ['date' => \Carbon\Carbon::parse($endorsedOn)->format('d/m/Y')]) }}
+            @if(auth()->user()?->hasRole('codl_admin'))
+              {{ __('The Senate does not use MCMS directly. As CODL administrator, you record its formal decision from meeting minutes. Endorsed by faculty on :date.', ['date' => \Carbon\Carbon::parse($endorsedOn)->format('d/m/Y')]) }}
+            @else
+              {{ __('The Senate does not use MCMS directly. As deputy dean, you record its formal decision from meeting minutes. Endorsed by faculty on :date.', ['date' => \Carbon\Carbon::parse($endorsedOn)->format('d/m/Y')]) }}
+            @endif
           </p>
 
           <div class="field" style="margin-bottom:16px;max-width:320px">
