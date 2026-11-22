@@ -547,46 +547,9 @@
     });
   }
 
-  /* ---------- theme switcher: syncs with database via POST /theme and localStorage ---------- */
+  /* ---------- light theme enforcement (v3 linear-precision, Decision D1) ---------- */
   function setupTheme() {
-    var btn = $('#theme-toggle');
-    if (!btn) { return; }
-
-    function getEffectiveTheme() {
-      var current = document.documentElement.getAttribute('data-theme');
-      if (current === 'dark') { return 'dark'; }
-      if (current === 'light') { return 'light'; }
-      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-
-    btn.addEventListener('click', function () {
-      var currentEffective = getEffectiveTheme();
-      var nextTheme = currentEffective === 'dark' ? 'light' : 'dark';
-
-      document.documentElement.setAttribute('data-theme', nextTheme);
-      try { localStorage.setItem('mcms_theme', nextTheme); } catch (e) {}
-
-      var csrf = $('meta[name="csrf-token"]');
-      if (csrf && csrf.content) {
-        fetch('/theme', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrf.content,
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({ theme: nextTheme })
-        }).catch(function () {});
-      }
-    });
-
-    if (window.matchMedia) {
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
-        if (!localStorage.getItem('mcms_theme')) {
-          document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
-        }
-      });
-    }
+    document.documentElement.setAttribute('data-theme', 'light');
   }
 
   document.addEventListener('DOMContentLoaded', function () {

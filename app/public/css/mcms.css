@@ -1784,7 +1784,28 @@ main {
   color: var(--color-ink-inverse);
 }
 
+/* Keep status tags crisp on one line in tables (prevent "Overdu / e" splits) */
+td .tag.overdue, td .tag.ok, td .tag.warn, td .tag.err, td .tag.info {
+  white-space: nowrap !important;
+  word-break: normal !important;
+}
+
+/* Empty & Error State Polish (Phase 6) */
+.empty-state, [data-empty] .empty {
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--color-ink-muted);
+  background: var(--color-canvas-subtle);
+  border: 1px dashed var(--color-ink-subtle);
+  border-radius: var(--radius-md);
+}
+
 @media print {
+  .top, .side, .side-backdrop, .btn-breadcrumb-back, .lang, .iconbtn, .who-btn {
+    display: none !important;
+  }
+  main { padding: 0 !important; background: #ffffff !important; }
+  .card, .panel, .kpis { border-radius: 0 !important; box-shadow: none !important; break-inside: avoid; }
   .print-sec {
     page-break-inside: avoid;
   }
