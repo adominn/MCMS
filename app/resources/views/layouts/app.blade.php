@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,14 +10,6 @@
     (function(){
       try {
         if(localStorage.getItem('mcms_side_collapsed')==='1'){document.documentElement.classList.add('side-collapsed');}
-        var saved = localStorage.getItem('mcms_theme');
-        var server = '{{ auth()->user()?->theme_preference ?? session('ui_theme', 'auto') }}';
-        var theme = saved || (server !== 'auto' ? server : null) || 'auto';
-        if (theme === 'dark' || (theme === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          document.documentElement.setAttribute('data-theme', 'dark');
-        } else {
-          document.documentElement.setAttribute('data-theme', 'light');
-        }
       } catch(e){}
     })();
   </script>
@@ -220,7 +212,12 @@
       </button>
       @endif
     @endauth
-    <a class="brand" href="{{ $isPublicRoute ? route('public.home') : $homeUrl }}"><b>UTeM MCMS</b><span>{{ $isPublicRoute ? __('Public Verification & Credential Portal') : __('Micro-Credential Management') }}</span></a>
+    <a class="brand" href="{{ $isPublicRoute ? route('public.home') : $homeUrl }}">
+      <img src="{{ asset('images/LogoJawiUTeM_blue-01.png') }}" alt="UTeM" class="brand-logo">
+      <span class="brand-sep" aria-hidden="true"></span>
+      <b>UTeM MCMS</b>
+      <span class="brand-sub">{{ $isPublicRoute ? __('Public Verification & Credential Portal') : __('Micro-Credential Management') }}</span>
+    </a>
     @if($u && $searchHint && !$isPublicRoute)
       <form class="search" role="search" method="get" action="{{ route('search') }}" style="margin-left:24px"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">{!! $icons['search'] !!}</svg><input type="search" name="q" value="{{ request()->routeIs('search') ? request('q') : '' }}" placeholder="{{ __($searchHint) }}" aria-label="Search"></form>
     @endif
@@ -228,11 +225,9 @@
       @guest
         <a class="btn sm" href="{{ route('signin') }}">{{ __('Sign in') }}</a>
         <form method="post" action="{{ route('language') }}" class="lang" aria-label="Language" style="margin-left:8px">@csrf<button type="submit" name="lang" value="en" class="{{ app()->getLocale() === 'en' ? 'on' : 'off' }}">EN</button><button type="submit" name="lang" value="ms" class="{{ app()->getLocale() === 'ms' ? 'on' : 'off' }}">BM</button></form>
-        <button type="button" class="theme-toggle" id="theme-toggle" title="{{ __('Toggle theme (Auto / Light / Dark)') }}" aria-label="{{ __('Toggle theme') }}"><svg class="theme-icon-light" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="3.5"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/></svg><svg class="theme-icon-dark" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 9.5A6 6 0 116.5 2.5a4.8 4.8 0 007 7z"/></svg></button>
       @endguest
       @auth
         <form method="post" action="{{ route('language') }}" class="lang" style="margin-right:4px" aria-label="Language">@csrf<button type="submit" name="lang" value="en" class="{{ app()->getLocale() === 'en' ? 'on' : 'off' }}" aria-pressed="{{ app()->getLocale() === 'en' ? 'true' : 'false' }}">EN</button><button type="submit" name="lang" value="ms" class="{{ app()->getLocale() === 'ms' ? 'on' : 'off' }}" aria-pressed="{{ app()->getLocale() === 'ms' ? 'true' : 'false' }}">BM</button></form>
-        <button type="button" class="theme-toggle" id="theme-toggle" style="margin-right:4px" title="{{ __('Toggle theme (Auto / Light / Dark)') }}" aria-label="{{ __('Toggle theme') }}"><svg class="theme-icon-light" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="3.5"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/></svg><svg class="theme-icon-dark" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 9.5A6 6 0 116.5 2.5a4.8 4.8 0 007 7z"/></svg></button>
         @if(!$isPublicRoute)
         <a class="iconbtn" href="{{ route('help') }}" title="Help" aria-label="Help"><svg viewBox="0 0 16 16" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M6 6.2a2 2 0 013.9.6c0 1.3-1.9 1.6-1.9 2.8M8 11.6v.1"/></svg></a>
         <div class="anchor">
