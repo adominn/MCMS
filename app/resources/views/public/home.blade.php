@@ -4,7 +4,7 @@
 @guest @include('public._nav') @endguest
 
 <!-- Hero Section with uLearn Navy theme and UTeM Campus Background with blue hue -->
-<div class="pub-hero" style="position:relative;background:linear-gradient(135deg, rgba(30, 42, 110, 0.90) 0%, rgba(17, 26, 71, 0.94) 100%), url('{{ asset('images/utem.jpeg') }}') center center / cover no-repeat;color:#ffffff;padding:56px 40px;margin:0 -40px 0 -40px;border-bottom:3px solid #0f62fe;display:flex;justify-content:space-between;align-items:center;gap:40px;flex-wrap:wrap">
+<div class="pub-hero" style="position:relative;background:linear-gradient(135deg, rgba(30, 42, 110, 0.90) 0%, rgba(17, 26, 71, 0.94) 100%), url('{{ asset('images/utem.jpeg') }}') center center / cover no-repeat;color:#ffffff;padding:56px 40px;margin:0 -40px 0 -40px;border-bottom:3px solid #0052ff;display:flex;justify-content:space-between;align-items:center;gap:40px;flex-wrap:wrap">
   <div style="flex:1;max-width:640px">
     <div style="display:inline-block;background:rgba(255,255,255,0.15);padding:4px 12px;font-size:12px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:16px;color:#ffffff;backdrop-filter:blur(4px)">Universiti Teknikal Malaysia Melaka</div>
     
@@ -62,7 +62,7 @@
 <!-- Three Kinds of Micro-Credentials -->
 <div class="pub-sec" style="margin-top:24px">
   <div style="margin-bottom:8px">
-    <div style="font-size:12px;font-weight:700;color:#0f62fe;text-transform:uppercase;letter-spacing:0.5px">
+    <div style="font-size:12px;font-weight:700;color:#0052ff;text-transform:uppercase;letter-spacing:0.5px">
       {{ $lang === 'ms' ? 'Kerangka Kelayakan' : 'Credential Framework' }}
     </div>
     <h2 style="font-weight:700;font-size:24px;line-height:32px;margin:4px 0 6px;color:var(--text)">
@@ -75,9 +75,9 @@
 
   <div class="grid3">
     <!-- UMC Card -->
-    <div class="card cat-umc" style="border:1px solid var(--hairline);border-top:4px solid #1e2a6e;padding:20px;display:flex;flex-direction:column;gap:10px;background:var(--card-bg)">
+    <div class="card cat-umc" style="border:1px solid var(--hairline);border-top:4px solid #0b1a3d;padding:20px;display:flex;flex-direction:column;gap:10px;background:var(--card-bg)">
       <div style="display:flex;align-items:center;justify-content:space-between">
-        <span class="tag" style="background:#1e2a6e;color:#fff;font-weight:700;font-size:12px;padding:3px 8px">UMC</span>
+        <span class="tag" style="background:#0b1a3d;color:#fff;font-weight:700;font-size:12px;padding:3px 8px">UMC</span>
         <span style="font-size:12px;color:#24a148;font-weight:600;display:flex;align-items:center;gap:4px">
           &#10003; {{ $lang === 'ms' ? 'Berkredit Kursus' : 'Direct Credit' }}
         </span>
@@ -97,7 +97,7 @@
     <div class="card cat-samc" style="border:1px solid var(--hairline);border-top:4px solid #24a148;padding:20px;display:flex;flex-direction:column;gap:10px;background:var(--card-bg)">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <span class="tag" style="background:#24a148;color:#fff;font-weight:700;font-size:12px;padding:3px 8px">SAMC</span>
-        <span style="font-size:12px;color:#0f62fe;font-weight:600;display:flex;align-items:center;gap:4px">
+        <span style="font-size:12px;color:#0052ff;font-weight:600;display:flex;align-items:center;gap:4px">
           &#9873; {{ $lang === 'ms' ? 'Tertakluk QV' : 'QV Verified' }}
         </span>
       </div>
@@ -115,7 +115,7 @@
     <!-- MCE Card -->
     <div class="card cat-mce" style="border:1px solid var(--hairline);border-top:4px solid #f1c21b;padding:20px;display:flex;flex-direction:column;gap:10px;background:var(--card-bg)">
       <div style="display:flex;align-items:center;justify-content:space-between">
-        <span class="tag" style="background:#f1c21b;color:#161616;font-weight:700;font-size:12px;padding:3px 8px">MCE</span>
+        <span class="tag" style="background:#f1c21b;color:#090a0f;font-weight:700;font-size:12px;padding:3px 8px">MCE</span>
         <span style="font-size:12px;color:var(--subtle);font-weight:600">
           {{ $lang === 'ms' ? 'Bukan Kredit' : 'Non-Credit' }}
         </span>
@@ -138,7 +138,7 @@
 <!-- Five Steps Track / How It Works -->
 <div class="pub-sec">
   <div style="margin-bottom:8px">
-    <div style="font-size:12px;font-weight:700;color:#0f62fe;text-transform:uppercase;letter-spacing:0.5px">
+    <div style="font-size:12px;font-weight:700;color:#0052ff;text-transform:uppercase;letter-spacing:0.5px">
       {{ $lang === 'ms' ? 'Laluan Kemajuan Pembelajaran' : 'Academic Progression Model' }}
     </div>
     <h2 style="font-weight:700;font-size:24px;line-height:32px;margin:4px 0 4px;color:var(--text)">
@@ -153,27 +153,27 @@
 
   <div class="track" style="margin:16px 0;background:var(--card-bg);border:1px solid var(--hairline);padding:20px">
     <div class="stp">
-      <div style="font-size:12px;font-weight:700;color:#0f62fe;margin-bottom:2px">01</div>
+      <div style="font-size:12px;font-weight:700;color:#0052ff;margin-bottom:2px">01</div>
       <b>{{ $lang === 'ms' ? 'Lencana Modul' : 'Module badge' }}</b>
       <span>{{ $lang === 'ms' ? 'Dianugerahkan bagi setiap modul yang diselesaikan' : 'Awarded for each module passed' }}</span>
     </div>
     <div class="stp">
-      <div style="font-size:12px;font-weight:700;color:#0f62fe;margin-bottom:2px">02</div>
+      <div style="font-size:12px;font-weight:700;color:#0052ff;margin-bottom:2px">02</div>
       <b>{{ $lang === 'ms' ? 'Sijil Pencapaian' : 'Certificate' }}</b>
       <span>{{ $lang === 'ms' ? 'Dikeluarkan rasmi apabila gred disahkan fakulti' : 'Issued when results are verified' }}</span>
     </div>
     <div class="stp">
-      <div style="font-size:12px;font-weight:700;color:#0f62fe;margin-bottom:2px">03</div>
+      <div style="font-size:12px;font-weight:700;color:#0052ff;margin-bottom:2px">03</div>
       <b>{{ $lang === 'ms' ? 'Rekod ACR' : 'Academic Credit Record' }}</b>
       <span>{{ $lang === 'ms' ? 'Penyata kredit akademik bagi kursus berkredit' : 'Academic credit record for credit offerings' }}</span>
     </div>
     <div class="stp">
-      <div style="font-size:12px;font-weight:700;color:#0f62fe;margin-bottom:2px">04</div>
+      <div style="font-size:12px;font-weight:700;color:#0052ff;margin-bottom:2px">04</div>
       <b>{{ $lang === 'ms' ? 'Deposit ABC' : 'ABC Deposit' }}</b>
       <span>{{ $lang === 'ms' ? 'Penyimpanan bank kredit dengan persetujuan' : 'Credit bank storage with your consent' }}</span>
     </div>
     <div class="stp">
-      <div style="font-size:12px;font-weight:700;color:#0f62fe;margin-bottom:2px">05</div>
+      <div style="font-size:12px;font-weight:700;color:#0052ff;margin-bottom:2px">05</div>
       <b>{{ $lang === 'ms' ? 'Pindahan Kredit' : 'Credit Transfer' }}</b>
       <span>{{ $lang === 'ms' ? 'Penilaian rasmi oleh program ijazah sasaran' : 'Decided by receiving university' }}</span>
     </div>
@@ -189,7 +189,7 @@
 <!-- Faculties Grid -->
 <div class="pub-sec alt" style="background:var(--surface);margin:24px -40px;padding:36px 40px">
   <div style="margin-bottom:16px">
-    <div style="font-size:12px;font-weight:700;color:#0f62fe;text-transform:uppercase;letter-spacing:0.5px">
+    <div style="font-size:12px;font-weight:700;color:#0052ff;text-transform:uppercase;letter-spacing:0.5px">
       {{ $lang === 'ms' ? 'Pusat Tanggungjawab' : 'Academic Centres' }}
     </div>
     <h2 style="font-weight:700;font-size:24px;line-height:32px;margin:4px 0 0;color:var(--text)">
@@ -202,7 +202,7 @@
       @php $facCount = $cohorts->where('ptj', $fac->code)->count(); @endphp
       <div class="card" style="cursor:pointer;padding:16px;transition:border-color .15s ease" onclick="location.href='{{ route('public.catalogue', ['ptj' => $fac->code]) }}'">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-          <b style="font-size:16px;color:var(--accent, #0f62fe)">{{ $fac->code }}</b>
+          <b style="font-size:16px;color:var(--accent, #0052ff)">{{ $fac->code }}</b>
           <span class="tag" style="font-size:10.5px;padding:1px 6px">{{ $facCount }} {{ $lang === 'ms' ? 'kohort' : 'cohorts' }}</span>
         </div>
         <span class="small muted" style="display:block;line-height:1.4">{{ $fac->name }}</span>
@@ -215,7 +215,7 @@
 <div class="pub-sec" style="margin-bottom:24px">
   <div class="grid3">
     <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:12px">
-      <div style="font-size:24px;color:var(--accent, #0f62fe)">&#9776;</div>
+      <div style="font-size:24px;color:var(--accent, #0052ff)">&#9776;</div>
       <h3 style="font-size:18px;font-weight:700;margin:0;color:var(--text)">{{ $t('pathways') }}</h3>
       <p style="font-size:13.5px;line-height:1.5;color:var(--muted);margin:0">
         {{ $lang === 'ms' 
@@ -228,7 +228,7 @@
     </div>
 
     <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:12px">
-      <div style="font-size:24px;color:var(--accent, #0f62fe)">&#10003;</div>
+      <div style="font-size:24px;color:var(--accent, #0052ff)">&#10003;</div>
       <h3 style="font-size:18px;font-weight:700;margin:0;color:var(--text)">
         {{ $lang === 'ms' ? 'Semak Kredensial' : 'Verify a credential' }}
       </h3>
@@ -260,7 +260,7 @@
 
   <div class="card note info" style="margin-top:16px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between">
     <span style="font-size:13px;color:var(--ink)">
-      <b style="color:var(--accent, #0f62fe)">{{ __('UTeM Academic & Administrative Staff:') }}</b> {{ __('Access the full management portal to manage offerings, grades, and quality reviews.') }}
+      <b style="color:var(--accent, #0052ff)">{{ __('UTeM Academic & Administrative Staff:') }}</b> {{ __('Access the full management portal to manage offerings, grades, and quality reviews.') }}
     </span>
     <a class="btn primary sm" href="{{ route('signin') }}">
       {{ __('Staff Sign In') }} &rarr;

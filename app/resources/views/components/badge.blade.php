@@ -3,7 +3,7 @@
   $cat = strtolower((string) $category);
   $catLabel = strtoupper($cat ?: 'MC');
   $accentColor = match($cat) {
-    'umc' => '#0f62fe',
+    'umc' => '#0052ff',
     'samc' => '#24a148',
     'mce' => '#f1c21b',
     default => '#f1c21b'
@@ -13,7 +13,7 @@
   <div class="digital-badge custom-badge" style="width:{{ $size }}px;height:{{ $size }}px;flex-shrink:0;display:inline-block;vertical-align:middle;position:relative" title="{{ $catLabel }} Digital Badge &middot; Open Badges 3.0">
     <img src="{{ asset($image) }}" alt="{{ $catLabel }} Digital Badge" style="width:{{ $size }}px;height:{{ $size }}px;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.18));border-radius:4px" />
     @if(!empty($seq))
-      <span style="position:absolute;bottom:-2px;right:-2px;background:#1e2a6e;color:#fbd65c;border:1px solid #fbd65c;border-radius:3px;font-size:{{ max(8, round($size * 0.22)) }}px;font-weight:800;padding:0 3px;line-height:{{ max(10, round($size * 0.28)) }}px;box-shadow:0 1px 3px rgba(0,0,0,0.4)">M{{ $seq }}</span>
+      <span style="position:absolute;bottom:-2px;right:-2px;background:#0b1a3d;color:#fbd65c;border:1px solid #fbd65c;border-radius:3px;font-size:{{ max(8, round($size * 0.22)) }}px;font-weight:800;padding:0 3px;line-height:{{ max(10, round($size * 0.28)) }}px;box-shadow:0 1px 3px rgba(0,0,0,0.4)">M{{ $seq }}</span>
     @endif
   </div>
 @else
@@ -21,7 +21,7 @@
     <svg viewBox="0 0 100 100" width="{{ $size }}" height="{{ $size }}" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.15))">
       <defs>
         <linearGradient id="badge-bg-{{ $cat }}-{{ $size }}" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#1e2a6e" />
+          <stop offset="0%" stop-color="#0b1a3d" />
           <stop offset="100%" stop-color="#0e1742" />
         </linearGradient>
         <linearGradient id="gold-rim-{{ $size }}" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -47,7 +47,7 @@
       @if(!empty($seq))
         <!-- Module Sequence Tag in Badge Base -->
         <rect x="34" y="60" width="32" height="13" rx="3" fill="#fbd65c" stroke="#c49a2a" stroke-width="0.8" />
-        <text x="50" y="70" font-family="'IBM Plex Sans', -apple-system, sans-serif" font-size="8" font-weight="800" fill="#121a45" text-anchor="middle" letter-spacing="0.5">MOD {{ $seq }}</text>
+        <text x="50" y="70" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-size="8" font-weight="800" fill="#121a45" text-anchor="middle" letter-spacing="0.5">MOD {{ $seq }}</text>
       @else
         <!-- Stars for Verification -->
         <polygon points="50,62 51.5,65.5 55,66 52.5,68.5 53,72 50,70 47,72 47.5,68.5 45,66 48.5,65.5" fill="#fbd65c" />
@@ -57,7 +57,7 @@
 
       <!-- Category Ribbon at Top/Bottom -->
       <rect x="30" y="20" width="40" height="11" rx="2" fill="{{ $accentColor }}" />
-      <text x="50" y="28" font-family="'IBM Plex Sans', -apple-system, sans-serif" font-size="7.5" font-weight="800" fill="{{ $cat === 'mce' ? '#161616' : '#ffffff' }}" text-anchor="middle" letter-spacing="0.5">UTeM {{ $catLabel }}</text>
+      <text x="50" y="28" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-size="7.5" font-weight="800" fill="{{ $cat === 'mce' ? '#090a0f' : '#ffffff' }}" text-anchor="middle" letter-spacing="0.5">UTeM {{ $catLabel }}</text>
     </svg>
   </div>
 @endif

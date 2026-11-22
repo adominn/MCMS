@@ -9,103 +9,103 @@
   <style>
     :root, html, body {
       color-scheme: light !important;
-      background: #e0e0e0 !important;
-      color: #161616 !important;
-      --border: #161616 !important;
-      --hairline: #161616 !important;
-      --hairline-strong: #161616 !important;
-      --rule: #161616 !important;
-      --hair: #161616 !important;
-      --text: #161616 !important;
-      --ink: #161616 !important;
+      background: #e2e8f0 !important;
+      color: #090a0f !important;
+      --border: #090a0f !important;
+      --hairline: #090a0f !important;
+      --hairline-strong: #090a0f !important;
+      --rule: #090a0f !important;
+      --hair: #090a0f !important;
+      --text: #090a0f !important;
+      --ink: #090a0f !important;
     }
     .doc-wrap {
-      background: #e0e0e0 !important;
+      background: #e2e8f0 !important;
     }
     .doc-bar {
-      background: #161616 !important;
+      background: #090a0f !important;
       color: #ffffff !important;
     }
     .a4, .a4 * {
       color-scheme: light !important;
-      --border: #161616 !important;
-      --hairline: #161616 !important;
-      --hairline-strong: #161616 !important;
-      --rule: #161616 !important;
-      --hair: #161616 !important;
-      --text: #161616 !important;
-      --ink: #161616 !important;
+      --border: #090a0f !important;
+      --hairline: #090a0f !important;
+      --hairline-strong: #090a0f !important;
+      --rule: #090a0f !important;
+      --hair: #090a0f !important;
+      --text: #090a0f !important;
+      --ink: #090a0f !important;
     }
     .a4 {
       background: #ffffff !important;
-      color: #161616 !important;
+      color: #090a0f !important;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
     .a4 table {
       background: #ffffff !important;
-      color: #161616 !important;
+      color: #090a0f !important;
       border-collapse: collapse !important;
       width: 100% !important;
     }
     .a4 thead th, .a4 table thead th {
-      background: #f4f4f4 !important;
-      color: #161616 !important;
-      border-bottom: 2px solid #161616 !important;
+      background: #f1f5f9 !important;
+      color: #090a0f !important;
+      border-bottom: 2px solid #090a0f !important;
       font-weight: 600 !important;
     }
     .a4 tbody th, .a4 table tbody th {
       background: #f4f5f8 !important;
-      color: #525252 !important;
+      color: #475569 !important;
       border-bottom: 1px solid #c6c6c6 !important;
       font-weight: 600 !important;
     }
     .a4 th, .a4 table th {
-      color: #161616 !important;
+      color: #090a0f !important;
       border-bottom: 1px solid #c6c6c6 !important;
       font-weight: 600 !important;
     }
     .a4 td, .a4 table td {
       background: #ffffff !important;
-      color: #161616 !important;
+      color: #090a0f !important;
       border-bottom: 1px solid #d0d0d0 !important;
     }
     .a4 tfoot td, .a4 tfoot th,
     .a4 table tfoot td, .a4 table tfoot th {
       background: #f4f5f8 !important;
-      border-top: 1.5px solid #161616 !important;
-      border-bottom: 1.5px solid #161616 !important;
+      border-top: 1.5px solid #090a0f !important;
+      border-bottom: 1.5px solid #090a0f !important;
       font-weight: 600 !important;
     }
     .a4 tr:hover td {
       background: #ffffff !important;
-      color: #161616 !important;
+      color: #090a0f !important;
     }
     .a4 .panel, .a4 .card {
       background: #ffffff !important;
-      border: 1px solid #161616 !important;
-      color: #161616 !important;
+      border: 1px solid #090a0f !important;
+      color: #090a0f !important;
     }
     .a4 .panel > .hd, .a4 .card > .hd,
     .a4 .panel .hd, .a4 .card .hd {
-      border-bottom: 1px solid #161616 !important;
-      color: #161616 !important;
+      border-bottom: 1px solid #090a0f !important;
+      color: #090a0f !important;
     }
     .a4 .doc-foot {
       border-top: 1px solid #c6c6c6 !important;
     }
     .a4 #summary, .a4 .bd, .a4 .hd, .a4 p {
-      color: #161616 !important;
+      color: #090a0f !important;
     }
     .a4 .muted, .a4 .bm, .a4 .small, .a4 .s {
-      color: #525252 !important;
+      color: #475569 !important;
     }
     .a4 .doc-head b, .a4 h1, .a4 h2, .a4 h3, .a4 b, .a4 strong {
-      color: #161616 !important;
+      color: #090a0f !important;
     }
     .a4 code, .a4 code.vc {
       background: #eef0f6 !important;
-      color: #1e2a6e !important;
+      color: #0b1a3d !important;
       border: 1px solid #d0d5e8 !important;
       padding: 1px 5px !important;
       font-size: 8pt !important;
@@ -113,7 +113,7 @@
     }
     .a4 .tag {
       background: #e8e8e8 !important;
-      color: #161616 !important;
+      color: #090a0f !important;
     }
 
     /* Redesigned Official A4 Compliance Document System (Carbon Print Hierarchy) */
@@ -121,7 +121,7 @@
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       border: 1px solid #c6c6c6;
-      border-left: 4px solid #1e2a6e;
+      border-left: 4px solid #0b1a3d;
       background: #f4f5f8 !important;
       margin: 0 0 14px;
     }
@@ -137,18 +137,18 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.45px;
-      color: #525252 !important;
+      color: #475569 !important;
       margin-bottom: 2px;
     }
     .a4 .print-kpi-val {
       font-size: 9.2pt;
       font-weight: 600;
-      color: #161616 !important;
+      color: #090a0f !important;
       line-height: 1.25;
     }
     .a4 .print-kpi-sub {
       font-size: 7.2pt;
-      color: #525252 !important;
+      color: #475569 !important;
       margin-top: 1px;
     }
 
@@ -159,19 +159,19 @@
     .a4 .print-sec-title {
       font-size: 9.5pt;
       font-weight: 600;
-      color: #161616 !important;
+      color: #090a0f !important;
       margin: 0 0 6px;
       padding-bottom: 4px;
-      border-bottom: 1.5px solid #1e2a6e;
+      border-bottom: 1.5px solid #0b1a3d;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
     }
     .a4 .print-sec-title .f-code {
-      background: #1e2a6e !important;
+      background: #0b1a3d !important;
       color: #ffffff !important;
-      border: 1px solid #1e2a6e !important;
+      border: 1px solid #0b1a3d !important;
       padding: 1px 6px !important;
       font-size: 7.6pt !important;
       margin-right: 7px !important;
@@ -181,7 +181,7 @@
       font-weight: 400;
       font-size: 7.6pt;
       font-style: italic;
-      color: #525252 !important;
+      color: #475569 !important;
     }
 
     /* Key-Value Field Tables (F1, F3, F4, F6): unmistakable separation of Field Label vs Filled Info */
@@ -217,7 +217,7 @@
     }
     .a4 table.print-kv-table tbody td {
       background: #ffffff !important;
-      color: #161616 !important;
+      color: #090a0f !important;
       font-size: 8.9pt !important;
       font-weight: 500 !important;
       line-height: 1.38 !important;
@@ -227,13 +227,13 @@
     }
     .a4 table.print-kv-table tbody td .val-strong {
       font-weight: 600;
-      color: #161616 !important;
+      color: #090a0f !important;
     }
     .a4 table.print-kv-table tbody td .val-sub {
       display: block;
       font-size: 7.6pt;
       font-weight: 400;
-      color: #525252 !important;
+      color: #475569 !important;
       margin-top: 2px;
     }
 
@@ -248,18 +248,18 @@
     }
     .a4 table.print-audit-table thead th {
       background: #eef0f6 !important;
-      color: #1e2a6e !important;
+      color: #0b1a3d !important;
       font-size: 7.4pt !important;
       font-weight: 600 !important;
       letter-spacing: 0.15px;
       padding: 6px 7px !important;
       border: 1px solid #c6cbd6 !important;
-      border-bottom: 1.5px solid #1e2a6e !important;
+      border-bottom: 1.5px solid #0b1a3d !important;
       vertical-align: bottom !important;
     }
     .a4 table.print-audit-table tbody td {
       background: #ffffff !important;
-      color: #161616 !important;
+      color: #090a0f !important;
       padding: 5.5px 7px !important;
       border: 1px solid #d4d7de !important;
       vertical-align: top !important;
@@ -270,12 +270,12 @@
     .a4 table.print-audit-table tfoot th,
     .a4 table.print-audit-table tfoot td {
       background: #f2f4f8 !important;
-      color: #161616 !important;
+      color: #090a0f !important;
       font-size: 8.2pt !important;
       font-weight: 600 !important;
       padding: 6px 7px !important;
       border: 1px solid #b8bec9 !important;
-      border-top: 1.5px solid #161616 !important;
+      border-top: 1.5px solid #090a0f !important;
     }
 
     /* Crisp Print Checkboxes & Status Pills */
@@ -285,7 +285,7 @@
       justify-content: center;
       width: 11px;
       height: 11px;
-      border: 1px solid #6f6f6f;
+      border: 1px solid #475569;
       font-family: var(--mono);
       font-size: 7.5pt;
       line-height: 1;
@@ -293,11 +293,11 @@
       margin-right: 4px;
       vertical-align: -1px;
       background: #ffffff !important;
-      color: #161616 !important;
+      color: #090a0f !important;
     }
     .a4 .print-check.checked {
-      background: #1e2a6e !important;
-      border-color: #1e2a6e !important;
+      background: #0b1a3d !important;
+      border-color: #0b1a3d !important;
       color: #ffffff !important;
     }
     .a4 .print-check.checked::after {
@@ -310,8 +310,8 @@
       font-weight: 600;
       padding: 1px 6px;
       border: 1px solid #8d8d8d;
-      background: #f4f4f4 !important;
-      color: #161616 !important;
+      background: #f1f5f9 !important;
+      color: #090a0f !important;
     }
     .a4 .print-badge.ok {
       background: #e6f4ea !important;
@@ -320,17 +320,17 @@
     }
     .a4 .print-badge.info {
       background: #eef0f6 !important;
-      border-color: #1e2a6e !important;
-      color: #1e2a6e !important;
+      border-color: #0b1a3d !important;
+      color: #0b1a3d !important;
     }
     .a4 .not-recorded {
-      color: #6f6f6f !important;
+      color: #475569 !important;
       font-style: italic;
       font-weight: 400 !important;
     }
     .a4 .print-note-box {
       border: 1px solid #c6cbd6 !important;
-      border-left: 3px solid #1e2a6e !important;
+      border-left: 3px solid #0b1a3d !important;
       padding: 7px 10px !important;
       font-size: 8pt !important;
       line-height: 1.4 !important;
@@ -356,7 +356,7 @@
   </style>
   @hasSection('land')<style>@page { size: A4 landscape; margin: 0; }</style>@endif
 </head>
-<body style="background:#e0e0e0;padding:0">
+<body style="background:#e2e8f0;padding:0">
 {{-- The document frame of the design prototype: a dark bar (not printed), an A4 sheet with the university letterhead and a footer line --}}
 <div class="doc-bar">
   <button type="button" class="btn ter sm" onclick="goDocBack()" style="cursor:pointer">{{ __('Back') }}</button>

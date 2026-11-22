@@ -28,7 +28,7 @@
   </div>
 
   <div class="note info" id="pathway-notes" style="margin-bottom:24px;padding:16px 20px">
-    <div style="font-weight:600;font-size:14px;color:var(--accent, #0f62fe);margin-bottom:4px">
+    <div style="font-weight:600;font-size:14px;color:var(--accent, #0052ff);margin-bottom:4px">
       {{ $lang === 'ms' ? 'Pemberitahuan Peraturan Akademik' : 'Academic Regulatory Notice' }}
     </div>
     <div style="font-size:13px;line-height:1.6;color:var(--ink)">
@@ -43,11 +43,11 @@
       @php
         $totCredits = $w->items->sum('credits');
       @endphp
-      <div class="panel pathway" style="border:1px solid #e0e0e0;border-radius:0;box-shadow:none;transition:border-color .15s ease">
+      <div class="panel pathway" style="border:1px solid #e2e8f0;border-radius:0;box-shadow:none;transition:border-color .15s ease">
         <div style="padding:20px;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px">
           <div style="flex:1;min-width:280px">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-              <span class="tag" style="background:#0f62fe;color:#fff;font-weight:600;padding:2px 8px;font-size:11px">
+              <span class="tag" style="background:#0052ff;color:#fff;font-weight:600;padding:2px 8px;font-size:11px">
                 {{ $w->code }}
               </span>
               <span class="muted" style="font-size:12px">
@@ -97,7 +97,7 @@
     </h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px">
       <div class="card" style="padding:16px;background:var(--card-bg);border:1px solid var(--hairline)">
-        <div style="font-weight:600;font-size:14px;color:var(--accent, #0f62fe);margin-bottom:6px">
+        <div style="font-weight:600;font-size:14px;color:var(--accent, #0052ff);margin-bottom:6px">
           {{ $lang === 'ms' ? 'Sekurang-kurangnya '.$min.'% kredit di UTeM' : 'At least '.$min.'% of degree credits at UTeM' }}
         </div>
         <p class="muted small" style="margin:0;font-size:12.5px;line-height:1.5">
@@ -106,7 +106,7 @@
       </div>
 
       <div class="card" style="padding:16px;background:var(--card-bg);border:1px solid var(--hairline)">
-        <div style="font-weight:600;font-size:14px;color:var(--accent, #0f62fe);margin-bottom:6px">
+        <div style="font-weight:600;font-size:14px;color:var(--accent, #0052ff);margin-bottom:6px">
           {{ $lang === 'ms' ? 'Syarat Residensi Kampus' : 'Campus Residency Requirement' }}
         </div>
         <p class="muted small" style="margin:0;font-size:12.5px;line-height:1.5">
@@ -115,7 +115,7 @@
       </div>
 
       <div class="card" style="padding:16px;background:var(--card-bg);border:1px solid var(--hairline)">
-        <div style="font-weight:600;font-size:14px;color:var(--accent, #0f62fe);margin-bottom:6px">
+        <div style="font-weight:600;font-size:14px;color:var(--accent, #0052ff);margin-bottom:6px">
           {{ $lang === 'ms' ? 'Kemasukan & Pendaftaran Rasmi' : 'Admission & Matriculation Separate' }}
         </div>
         <p class="muted small" style="margin:0;font-size:12.5px;line-height:1.5">
@@ -124,7 +124,7 @@
       </div>
 
       <div class="card" style="padding:16px;background:var(--card-bg);border:1px solid var(--hairline)">
-        <div style="font-weight:600;font-size:14px;color:var(--accent, #0f62fe);margin-bottom:6px">
+        <div style="font-weight:600;font-size:14px;color:var(--accent, #0052ff);margin-bottom:6px">
           {{ $lang === 'ms' ? 'Tempoh Hayat Kredit 10 Tahun' : '10-Year Credit Expiry' }}
         </div>
         <p class="muted small" style="margin:0;font-size:12.5px;line-height:1.5">

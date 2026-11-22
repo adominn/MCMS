@@ -58,7 +58,7 @@
           <b style="font-size:17px;color:var(--ink);display:block;margin-bottom:10px">{{ $idx + 1 }}. {{ $name }}</b>
           
           <div style="margin-bottom:12px;font-size:14px;line-height:1.5">
-            <div style="font-size:12px;font-weight:600;color:var(--primary, #1e2a6e);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">{{ $lang === 'ms' ? 'Apa yang diberi' : 'What it is' }}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--primary, #0b1a3d);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">{{ $lang === 'ms' ? 'Apa yang diberi' : 'What it is' }}</div>
             <div style="color:var(--ink);margin-top:4px">{{ $whatIs }}</div>
           </div>
         </div>
@@ -71,7 +71,7 @@
 
     <div class="card" style="padding:22px;gap:12px;background:var(--s1);display:flex;flex-direction:column;justify-content:space-between">
       <div>
-        <div style="font-size:12px;font-weight:600;color:var(--primary, #1e2a6e);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">{{ __('Summary') }}</div>
+        <div style="font-size:12px;font-weight:600;color:var(--primary, #0b1a3d);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">{{ __('Summary') }}</div>
         <b style="font-size:17px;color:var(--ink);display:block;margin:8px 0 6px">{{ $lang === 'ms' ? 'Keputusan Bebas' : 'Independent Decisions' }}</b>
         <p class="muted small" style="margin:0;line-height:1.5">
           {{ $lang === 'ms' ? 'Setiap langkah memerlukan kelulusan dan pengesahan berasingan. Anda bebas berhenti pada bila-bila masa.' : 'Each step is an independent decision with its own governance. You may pause or stop at any milestone.' }}

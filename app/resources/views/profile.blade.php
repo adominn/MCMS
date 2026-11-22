@@ -30,7 +30,7 @@
       <div class="panel grow" style="flex:1">
         <div class="bd col">
           <div class="row" style="display:flex;gap:16px;align-items:center">
-            <span class="avatar" style="width:56px;height:56px;border-radius:28px;font-size:18px;display:inline-flex;align-items:center;justify-content:center;background:#0f62fe;color:#fff;font-weight:600">{{ $initials }}</span>
+            <span class="avatar" style="width:56px;height:56px;border-radius:28px;font-size:18px;display:inline-flex;align-items:center;justify-content:center;background:#0052ff;color:#fff;font-weight:600">{{ $initials }}</span>
             <div>
               <div style="font-size:20px;line-height:28px">{{ $u->name }}</div>
               <div class="muted">{{ $post }}</div>

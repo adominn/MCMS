@@ -44,7 +44,7 @@
 </div>
 
 <!-- Academic Course Context Bar -->
-<div class="panel" style="margin-bottom:20px;border-left:4px solid var(--accent, #1e2a6e)">
+<div class="panel" style="margin-bottom:20px;border-left:4px solid var(--accent, #0b1a3d)">
   <div class="bd" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;align-items:center">
     <div>
       <div class="small muted">{{ __('Course & Code') }}</div>
@@ -104,7 +104,7 @@
   <div>
     <!-- Overall Academic Performance Card (when results exist) -->
     @if($overall)
-      <div class="panel" style="margin-bottom:20px;border-left:4px solid var(--accent, #1e2a6e)">
+      <div class="panel" style="margin-bottom:20px;border-left:4px solid var(--accent, #0b1a3d)">
         <div class="hd">
           <h2>{{ __('Academic Performance Summary') }}</h2>
           <span class="r">
@@ -114,22 +114,22 @@
           </span>
         </div>
         <div class="bd" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:16px;text-align:center;padding:16px 20px">
-          <div style="padding:12px;background:var(--bg-subtle, #f4f4f4);border-radius:0px">
+          <div style="padding:12px;background:var(--bg-subtle, #f1f5f9);border-radius:0px">
             <div class="small muted">{{ __('Weighted Score') }}</div>
             <div style="font-size:24px;font-weight:700;color:var(--ink)">{{ number_format($overall['total_weighted'], 1) }}%</div>
             <div class="s muted">{{ $overall['complete'] ? __('Overall out of 100%') : __('Provisional (:earned% of :wt% graded)', ['earned' => number_format($overall['earned_weighted'], 1), 'wt' => (int) $overall['verified_weight']]) }}</div>
           </div>
-          <div style="padding:12px;background:var(--bg-subtle, #f4f4f4);border-radius:0px">
+          <div style="padding:12px;background:var(--bg-subtle, #f1f5f9);border-radius:0px">
             <div class="small muted">{{ __('Letter Grade') }}</div>
-            <div style="font-size:24px;font-weight:700;color:var(--accent, #1e2a6e)">{{ $overall['grade'] }}</div>
+            <div style="font-size:24px;font-weight:700;color:var(--accent, #0b1a3d)">{{ $overall['grade'] }}</div>
             <div class="s muted">{{ $overall['grade_desc'] }}</div>
           </div>
-          <div style="padding:12px;background:var(--bg-subtle, #f4f4f4);border-radius:0px">
+          <div style="padding:12px;background:var(--bg-subtle, #f1f5f9);border-radius:0px">
             <div class="small muted">{{ __('Grade Points') }}</div>
             <div style="font-size:24px;font-weight:700;color:var(--ink)">{{ number_format($overall['point'], 2) }}</div>
             <div class="s muted">{{ __('4.00 Scale') }}</div>
           </div>
-          <div style="padding:12px;background:var(--bg-subtle, #f4f4f4);border-radius:0px">
+          <div style="padding:12px;background:var(--bg-subtle, #f1f5f9);border-radius:0px">
             <div class="small muted">{{ __('Status') }}</div>
             <div style="font-size:18px;font-weight:700;margin-top:4px" class="{{ $overall['point'] >= 2.0 ? 'ok-text' : 'warn-text' }}">
               {{ $overall['point'] >= 2.0 ? __('Passed') : __('Below Target') }}
@@ -268,7 +268,7 @@
         <span class="r">{{ $badges->count() }}</span>
       </div>
       <div class="bd" style="padding:0">
-        <div style="padding:12px 16px;background:var(--bg-subtle, #f4f4f4);border-bottom:1px solid var(--rule);font-size:12px;color:var(--ink-muted);line-height:1.4">
+        <div style="padding:12px 16px;background:var(--bg-subtle, #f1f5f9);border-bottom:1px solid var(--rule);font-size:12px;color:var(--ink-muted);line-height:1.4">
           <i class="bi bi-info-circle" style="margin-right:4px"></i>
           {{ __('In MCMS, digital badges are awarded per module upon meeting assessment standards. The overall course awards the Micro-Credential Certificate.') }}
         </div>
@@ -283,7 +283,7 @@
                   <i class="bi bi-award" style="font-size:18px;opacity:0.4"></i>
                 </div>
               @else
-                <div style="width:44px;height:44px;border-radius:0px;background:var(--bg-subtle, #f4f4f4);display:flex;align-items:center;justify-content:center;color:var(--ink-muted);flex-shrink:0" title="{{ __('Integrated course unit') }}">
+                <div style="width:44px;height:44px;border-radius:0px;background:var(--bg-subtle, #f1f5f9);display:flex;align-items:center;justify-content:center;color:var(--ink-muted);flex-shrink:0" title="{{ __('Integrated course unit') }}">
                   <i class="bi bi-journal-text" style="font-size:16px;opacity:0.4"></i>
                 </div>
               @endif
@@ -314,7 +314,7 @@
                       </span>
                     @endif
                     @if(!empty($m->code))
-                      <a href="{{ route('verify.show', $m->code) }}" target="_blank" class="s" style="font-weight:600;color:var(--accent, #1e2a6e)" title="{{ __('Verify badge authenticity') }}">
+                      <a href="{{ route('verify.show', $m->code) }}" target="_blank" class="s" style="font-weight:600;color:var(--accent, #0b1a3d)" title="{{ __('Verify badge authenticity') }}">
                         {{ __('Verify badge') }} &rarr;
                       </a>
                     @endif

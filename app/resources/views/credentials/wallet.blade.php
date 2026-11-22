@@ -10,7 +10,7 @@
 
 <!-- Carbon Tabs for Clean Organization -->
 <div class="tabs" style="margin-bottom:20px;border-bottom:1px solid var(--rule);display:flex;gap:24px" role="tablist">
-  <button type="button" class="tab-btn active" data-tab="tab-credentials" style="padding:10px 4px;font-weight:600;font-size:14px;background:none;border:none;border-bottom:2px solid var(--accent, #1e2a6e);color:var(--accent, #1e2a6e);cursor:pointer">
+  <button type="button" class="tab-btn active" data-tab="tab-credentials" style="padding:10px 4px;font-weight:600;font-size:14px;background:none;border:none;border-bottom:2px solid var(--accent, #0b1a3d);color:var(--accent, #0b1a3d);cursor:pointer">
     {{ __('Micro-Credential Certificates') }} ({{ $rows->count() }})
   </button>
   <button type="button" class="tab-btn" data-tab="tab-badges" style="padding:10px 4px;font-weight:600;font-size:14px;background:none;border:none;border-bottom:2px solid transparent;color:var(--ink-muted);cursor:pointer">
@@ -88,9 +88,9 @@
 
 <!-- Tab 2: Module Digital Badges (Searchable, Sortable Data Table) -->
 <div id="tab-badges" class="tab-pane" style="display:none">
-  <div class="panel" style="margin-bottom:16px;background:var(--bg-subtle, #f4f4f4)">
+  <div class="panel" style="margin-bottom:16px;background:var(--bg-subtle, #f1f5f9)">
     <div class="bd" style="padding:14px 18px;font-size:13px;line-height:1.5;color:var(--ink-muted)">
-      <i class="bi bi-info-circle" style="margin-right:6px;color:var(--accent, #1e2a6e)"></i>
+      <i class="bi bi-info-circle" style="margin-right:6px;color:var(--accent, #0b1a3d)"></i>
       {{ __('A Digital Badge certifies modular achievement upon passing individual assessments. It allows you to share verified skills on professional networks even before completing the full course.') }}
     </div>
   </div>
@@ -190,8 +190,8 @@ document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
       
       this.classList.add('active');
-      this.style.borderBottomColor = 'var(--accent, #1e2a6e)';
-      this.style.color = 'var(--accent, #1e2a6e)';
+      this.style.borderBottomColor = 'var(--accent, #0b1a3d)';
+      this.style.color = 'var(--accent, #0b1a3d)';
       const target = document.getElementById(this.getAttribute('data-tab'));
       if (target) target.style.display = 'block';
     });

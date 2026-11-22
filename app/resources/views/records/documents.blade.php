@@ -20,10 +20,10 @@
     <!-- Pane 1: Credentials & Achievement Record -->
     <div data-pane="credentials">
       <!-- Master Achievement Transcript Feature Banner -->
-      <div class="panel" style="margin-bottom:20px;border-left:4px solid var(--accent, #1e2a6e);background:var(--card-bg, #ffffff)">
+      <div class="panel" style="margin-bottom:20px;border-left:4px solid var(--accent, #0b1a3d);background:var(--card-bg, #ffffff)">
         <div class="bd" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:20px">
           <div>
-            <div style="font-size:12px;font-weight:600;color:var(--primary, #1e2a6e);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">
+            <div style="font-size:12px;font-weight:600;color:var(--primary, #0b1a3d);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">
               {{ __('Official Transcript') }} &bull; {{ __('A4 Verifiable') }}
             </div>
             <h2 style="margin:0 0 4px;font-size:16px;color:var(--ink)">{{ __('Achievement record') }}</h2>
@@ -111,12 +111,12 @@
             </tbody>
           </table>
         </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--bg-subtle, #f4f4f4);border-top:1px solid var(--rule);font-size:12px;color:var(--ink-muted);flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--bg-subtle, #f1f5f9);border-top:1px solid var(--rule);font-size:12px;color:var(--ink-muted);flex-wrap:wrap;gap:8px">
           <span>
-            <strong style="color:var(--accent, #1e2a6e)">✓ {{ __('Verifiable Cryptographic Proofs') }}:</strong>
+            <strong style="color:var(--accent, #0b1a3d)">✓ {{ __('Verifiable Cryptographic Proofs') }}:</strong>
             {{ __('Digital Credential (.json) and Signed Token (.jwt) conform to W3C Verifiable Credentials and 1EdTech Open Badges 3.0.') }}
           </span>
-          <a href="{{ route('verify') }}" target="_blank" style="font-weight:600;color:var(--accent, #1e2a6e)">
+          <a href="{{ route('verify') }}" target="_blank" style="font-weight:600;color:var(--accent, #0b1a3d)">
             {{ __('Open Public Cryptographic Verifier') }} &rarr;
           </a>
         </div>
@@ -503,7 +503,7 @@
             <h2 style="margin:0;font-size:15px">{{ __('Audit & external exchange exports') }}</h2>
           </div>
           <div class="bd" style="padding:20px">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;background:var(--bg-subtle, #f4f4f4);padding:18px;border:1px solid var(--rule);margin-bottom:16px">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;background:var(--bg-subtle, #f1f5f9);padding:18px;border:1px solid var(--rule);margin-bottom:16px">
               <div>
                 <h3 style="margin:0 0 4px;font-size:16px"><a href="{{ route('records.audit.print') }}"><b>{{ __('Audit trail export') }}</b></a></h3>
                 <p class="small muted" style="margin:0;line-height:1.5;max-width:580px">
@@ -524,10 +524,10 @@
 @endif
 
 <!-- Document Authenticity & PDPA Privacy Card -->
-<div class="panel" style="margin-top:24px;background:var(--card-bg, #ffffff);border-left:4px solid var(--accent, #1e2a6e)">
+<div class="panel" style="margin-top:24px;background:var(--card-bg, #ffffff);border-left:4px solid var(--accent, #0b1a3d)">
   <div class="bd" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:18px 24px">
     <div style="display:flex;align-items:center;gap:14px;min-width:280px;flex:1">
-      <div style="width:40px;height:40px;background:var(--bg-subtle, #f4f4f4);border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;color:var(--accent, #1e2a6e);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.5px;flex-shrink:0">
+      <div style="width:40px;height:40px;background:var(--bg-subtle, #f1f5f9);border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;color:var(--accent, #0b1a3d);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.5px;flex-shrink:0">
         VER
       </div>
       <div>

@@ -91,7 +91,7 @@
             @endif
           </div>
 
-          <div style="padding-top:12px;border-top:1px solid var(--rule, #e0e0e0);font-size:12px;color:var(--muted)">
+          <div style="padding-top:12px;border-top:1px solid var(--rule, #e2e8f0);font-size:12px;color:var(--muted)">
             {{ __('Official Verification Code') }}: <code class="vc" style="font-size:13px;font-weight:700">{{ $c->public_code }}</code>
             <span style="margin:0 8px">&middot;</span>
             {{ __('Certificate No') }}: <span style="font-family:var(--mono)">{{ $c->number }}</span>
@@ -163,7 +163,7 @@
           </div>
         </div>
 
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--rule, #e0e0e0);font-size:12px">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--rule, #e2e8f0);font-size:12px">
           <span class="muted">{{ __('Print & Alternate Versions:') }}</span>
           <a class="btn ter sm" href="{{ route('credentials.certificate', $c->id) }}" target="_blank">{{ __('Print Certificate (English)') }}</a>
           <a class="btn ter sm" href="{{ route('credentials.certificate', [$c->id, 'lang' => 'ms']) }}" target="_blank">{{ __('Sijil (Bahasa Melayu)') }}</a>

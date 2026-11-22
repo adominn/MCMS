@@ -696,8 +696,8 @@
        Strict zero-fabrication: every actor, position, date from real DB rows.
        Single-language output driven strictly by system locale toggle (EN / BM).
      ========================================================================= --}}
-  <div style="margin-bottom:10px;border-bottom:2px solid #1e2a6e;padding-bottom:8px">
-    <h1 style="font-size:15pt;font-weight:400;margin:0 0 2px;color:#161616">{{ __('Academic Credit Record (ACR)') }}</h1>
+  <div style="margin-bottom:10px;border-bottom:2px solid #0b1a3d;padding-bottom:8px">
+    <h1 style="font-size:15pt;font-weight:400;margin:0 0 2px;color:#090a0f">{{ __('Academic Credit Record (ACR)') }}</h1>
     <div style="font-size:8.6pt;color:#393939">{{ __('Official Academic Credit Record issued by Universiti Teknikal Malaysia Melaka.') }}</div>
   </div>
 
@@ -710,7 +710,7 @@
     </div>
     <div class="print-kpi-cell">
       <div class="print-kpi-lbl">{{ __('ACR Reference') }}</div>
-      <div class="print-kpi-val" style="font-family:var(--mono);color:#1e2a6e !important">{{ $a->reference }}</div>
+      <div class="print-kpi-val" style="font-family:var(--mono);color:#0b1a3d !important">{{ $a->reference }}</div>
       <div class="print-kpi-sub">{{ $catCode }} &middot; MQF {{ $a->mqf_level ?? '—' }}</div>
     </div>
     <div class="print-kpi-cell">
@@ -815,7 +815,7 @@
       @forelse($checks as $idx => $c)
         @php $res = $c->result ?? (! $c->passed ? 'no' : (str_starts_with((string) $c->detail, 'Not applicable') ? 'na' : 'yes')); @endphp
         <tr>
-          <td style="font-family:var(--mono);color:#525252">{{ $idx + 1 }}</td>
+          <td style="font-family:var(--mono);color:#475569">{{ $idx + 1 }}</td>
           <td>{{ __(\App\Modules\CreditBank\Acr::CHECKS[$c->check_key] ?? $c->check_key) }}</td>
           <td style="white-space:nowrap">
             <span class="print-check {{ $res === 'yes' ? 'checked' : '' }}"></span>{{ __('Yes') }}

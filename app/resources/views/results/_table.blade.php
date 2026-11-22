@@ -25,7 +25,7 @@
     padding: 8px 12px;
   }
   .gradebook-table thead tr.sub-row th {
-    background: var(--canvas, #161616);
+    background: var(--canvas, #090a0f);
     border-bottom: 1px solid var(--hairline, #393939);
     font-weight: 500;
   }
@@ -66,7 +66,7 @@
         @endphp
         <th colspan="{{ $groupItems->count() }}" class="gradebook-col-mod" style="text-align:left;border-right:1px solid var(--hairline, #393939);min-width:{{ max(180, $groupItems->count() * 160) }}px">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;white-space:nowrap">
-            <span style="font-weight:600;color:var(--ink, #f4f4f4);overflow:hidden;text-overflow:ellipsis">
+            <span style="font-weight:600;color:var(--ink, #f1f5f9);overflow:hidden;text-overflow:ellipsis">
               @if($isMod)
                 {{ __('Module :seq: :name', ['seq' => $first->module_seq, 'name' => $first->module_name ?: __('Module')]) }}
               @else
@@ -89,7 +89,7 @@
       @foreach($groupedComps as $groupKey => $groupItems)
         @foreach($groupItems as $c)
           <th class="gradebook-col-mod" style="min-width:160px;vertical-align:top">
-            <div style="color:var(--ink, #f4f4f4);font-size:13px;line-height:1.3">{{ $c->name_en }}</div>
+            <div style="color:var(--ink, #f1f5f9);font-size:13px;line-height:1.3">{{ $c->name_en }}</div>
             <div class="muted s" style="margin-top:4px;display:flex;align-items:center;gap:6px">
               <span class="tag" style="font-size:10px;padding:0 4px">{{ mcms_num($c->weight_percent) }}%</span>
               <span>{{ __('Pass') }}: {{ mcms_num($c->pass_mark) }}/{{ mcms_num($c->max_mark) }}</span>
@@ -127,7 +127,7 @@
     @endphp
     <tr>
       <td style="position:sticky;left:0;z-index:2;background:var(--table-bg, #1e1e1e);border-right:1px solid var(--hairline, #393939)">
-        <div style="font-weight:600;color:var(--ink, #f4f4f4)">{{ $e->name }}</div>
+        <div style="font-weight:600;color:var(--ink, #f1f5f9)">{{ $e->name }}</div>
         <div class="muted s" style="margin-top:2px">{{ $e->institution_id }}</div>
         @if($isHeld)
           <div style="margin-top:4px"><span class="tag overdue">{{ __('Integrity case open') }}</span></div>
@@ -161,7 +161,7 @@
                          data-max="{{ $c->max_mark }}"
                          data-pass="{{ $c->pass_mark }}"
                          data-key="{{ $keys[$c->id] }}"
-                         style="width:68px;height:32px;text-align:right;@if(!$hasScore) border:1px dashed var(--warn-dark, #b28600);background:var(--warn-bg, #fcf4d6); @endif"
+                         style="width:68px;height:32px;text-align:right;@if(!$hasScore) border:1px dashed var(--warn-dark, #b28600);background:var(--warn-bg, #fefdf0); @endif"
                          aria-label="{{ $keys[$c->id] }} for {{ $e->name }}">
                   @if($r)
                     <span class="tag {{ $r->status === 'held' ? 'err' : 'warn' }}">{{ $r->status === 'held' ? __('Held') : __('Provisional') }}</span>

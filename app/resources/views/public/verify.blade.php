@@ -17,8 +17,8 @@
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:20px;margin-bottom:24px">
     <!-- Method 1: Verification by Public Code -->
-    <div class="card" style="background:var(--card-bg);border:1px solid var(--hairline);border-top:3px solid var(--accent, #0f62fe);padding:24px;margin:0">
-      <div style="font-weight:700;font-size:16px;color:var(--accent, #0f62fe);margin-bottom:6px;display:flex;align-items:center;gap:8px">
+    <div class="card" style="background:var(--card-bg);border:1px solid var(--hairline);border-top:3px solid var(--accent, #0052ff);padding:24px;margin:0">
+      <div style="font-weight:700;font-size:16px;color:var(--accent, #0052ff);margin-bottom:6px;display:flex;align-items:center;gap:8px">
         <i class="bi bi-qr-code-scan"></i>
         <span>{{ $lang === 'ms' ? 'Kaedah 1: Semak Guna Kod' : 'Method 1: Verify by Code' }}</span>
       </div>
@@ -31,7 +31,7 @@
           <label for="code" style="font-weight:600;font-size:13px;display:block;margin-bottom:6px">
             {{ $lang === 'ms' ? 'Kod Kredensial' : 'Credential code' }}
           </label>
-          <input type="text" id="code" name="code" aria-label="{{ $lang === 'ms' ? 'Kod Kredensial' : 'Credential code' }}" autocomplete="off" placeholder="e.g. CND01-7K9MJ" style="width:100%;font-size:16px;font-family:monospace;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;padding:10px 12px;background:var(--surface);color:var(--ink);border:1px solid var(--hairline);border-radius:0;outline:none" required onfocus="this.style.borderColor='var(--accent, #0f62fe)'" onblur="this.style.borderColor='var(--hairline)'">
+          <input type="text" id="code" name="code" aria-label="{{ $lang === 'ms' ? 'Kod Kredensial' : 'Credential code' }}" autocomplete="off" placeholder="e.g. CND01-7K9MJ" style="width:100%;font-size:16px;font-family:monospace;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;padding:10px 12px;background:var(--surface);color:var(--ink);border:1px solid var(--hairline);border-radius:0;outline:none" required onfocus="this.style.borderColor='var(--accent, #0052ff)'" onblur="this.style.borderColor='var(--hairline)'">
         </div>
         <button type="submit" class="btn primary" style="width:100%;padding:10px;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px">
           <span>{{ $lang === 'ms' ? 'Sahkan' : 'Verify' }}</span>
@@ -89,7 +89,7 @@
 
           @if(!empty($file['payload']['vc']))
             @php($vc = $file['payload']['vc'])
-            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;background:var(--bg-subtle, #f4f4f4);padding:14px;border-radius:4px;margin-bottom:16px">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;background:var(--bg-subtle, #f1f5f9);padding:14px;border-radius:4px;margin-bottom:16px">
               <div>
                 <div class="small muted">{{ __('Credential Name') }}</div>
                 <div style="font-weight:700">{{ $vc['name'] ?? '-' }}</div>

@@ -7,7 +7,7 @@
       'Records' => null,
       'Retention and governance' => null,
     ]" />
-    <div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0f62fe;margin-bottom:2px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0052ff;margin-bottom:2px">
       {{ __('Appendix H / Lampiran H') }} &bull; {{ __('Governance, Roles & Record Ownership Matrix') }}
     </div>
     <h1>{{ __('Retention, Record Ownership & Governance') }}</h1>
@@ -22,7 +22,7 @@
 <div class="panel" style="margin-bottom:24px">
   <div class="hd" style="display:flex;align-items:center;justify-content:space-between">
     <div>
-      <div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0f62fe">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0052ff">
         {{ __('Appendix H4 / Lampiran H4') }}
       </div>
       <h2 style="margin:2px 0 0 0">{{ __('Record Ownership Matrix (12 Record Classes)') }}</h2>
@@ -44,9 +44,9 @@
       <tbody>
         @foreach($matrix as $m)
           <tr>
-            <td style="color:#6f6f6f;font-weight:600">{{ $m['no'] }}</td>
+            <td style="color:#475569;font-weight:600">{{ $m['no'] }}</td>
             <td>
-              <div style="font-weight:600;color:#161616">{{ __($m['class_en']) }}</div>
+              <div style="font-weight:600;color:#090a0f">{{ __($m['class_en']) }}</div>
               @if(!empty($m['class_ms']) && app()->getLocale() !== 'ms')
                 <div class="small muted" style="font-style:italic">{{ $m['class_ms'] }}</div>
               @endif
@@ -55,20 +55,20 @@
               <span class="tag info" style="font-size:11px">{{ $m['owner'] }}</span>
             </td>
             <td>
-              <span class="small" style="color:#525252">{{ $m['creator'] }}</span>
+              <span class="small" style="color:#475569">{{ $m['creator'] }}</span>
             </td>
             <td>
-              <div style="font-size:12px;font-weight:600;color:#161616">{{ $m['retention'] }}</div>
+              <div style="font-size:12px;font-weight:600;color:#090a0f">{{ $m['retention'] }}</div>
             </td>
             <td>
-              <span class="tag" style="background:#e0e0e0;color:#161616;font-size:11px">{{ $m['access'] }}</span>
+              <span class="tag" style="background:#e2e8f0;color:#090a0f;font-size:11px">{{ $m['access'] }}</span>
             </td>
           </tr>
         @endforeach
       </tbody>
     </table>
   </div>
-  <div class="foot" style="background:#f4f4f4;padding:12px 16px;border-top:1px solid #e0e0e0;font-size:12px;color:#525252">
+  <div class="foot" style="background:#f1f5f9;padding:12px 16px;border-top:1px solid #e2e8f0;font-size:12px;color:#475569">
     <b>{{ __('Nota Penting H (Garis Panduan m/s 119):') }}</b> {{ __('Penyimpanan rekod pencapaian dalaman, pengeluaran kredensial/lencana digital, penyediaan ACR, dan pendepositan kredit ke dalam ABC adalah empat peringkat berbeza yang TIDAK BOLEH dicampuradukkan. Rekod akademik, kredensial, ACR, dan log audit adalah KEKAL dan tidak boleh dilupuskan sama sekali.') }}
   </div>
 </div>
@@ -77,7 +77,7 @@
 <div class="panel" style="margin-bottom:24px">
   <div class="hd" style="display:flex;align-items:center;justify-content:space-between">
     <div>
-      <div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0f62fe">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0052ff">
         {{ __('Appendix H8 / Lampiran H8') }}
       </div>
       <h2 style="margin:2px 0 0 0">{{ __('Governance Action Register (Daftar Tindakan Tadbir Urus)') }}</h2>
@@ -100,7 +100,7 @@
         @foreach($governanceActions as $ga)
           <tr>
             <td><code>{{ $ga->reference }}</code></td>
-            <td style="font-weight:600;color:#161616">{{ $ga->item }}</td>
+            <td style="font-weight:600;color:#090a0f">{{ $ga->item }}</td>
             <td>
               <span class="tag info" style="font-size:11px">{{ $ga->responsible_role }}</span>
             </td>
@@ -126,24 +126,24 @@
 <div class="panel" style="margin-bottom:24px;background:#fbfbfb">
   <div class="hd">
     <div>
-      <div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0f62fe">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0052ff">
         {{ __('Appendix H9 / Lampiran H9') }}
       </div>
       <h2 style="margin:2px 0 0 0">{{ __('Governance Matrix Confirmation (Pengesahan Matriks Tadbir Urus)') }}</h2>
     </div>
   </div>
   <div class="bd" style="padding:16px">
-    <p style="font-size:13px;line-height:1.6;margin:0 0 16px 0;color:#161616">
+    <p style="font-size:13px;line-height:1.6;margin:0 0 16px 0;color:#090a0f">
       <i>{{ __('"Kami mengesahkan bahawa pengurusan rekod, kawalan capaian, pemisahan tugas (SoD), dan pemilikan rekod bagi penawaran micro-credential ini telah dilaksanakan sepenuhnya selaras dengan Garis Panduan Micro-Credential UTeM (Lampiran H)."') }}</i>
     </p>
 
     <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:16px">
       <!-- Role 1: Academic Owner / Coordinator (P1) -->
-      <div style="background:#ffffff;border:1px solid #e0e0e0;padding:12px 14px">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6f6f6f;margin-bottom:4px">
+      <div style="background:#ffffff;border:1px solid #e2e8f0;padding:12px 14px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#475569;margin-bottom:4px">
           {{ __('1. Academic Owner (P1)') }}
         </div>
-        <div style="font-weight:600;color:#161616">Dr. Aina Zulkifli</div>
+        <div style="font-weight:600;color:#090a0f">Dr. Aina Zulkifli</div>
         <div class="small muted">{{ __('Course Coordinator / Senior Lecturer, FTMK') }}</div>
         <div style="margin-top:8px;font-size:11px;color:#0e6027;font-weight:600">
           &#10003; {{ __('Confirmed & Signed') }} ({{ now()->format('d/m/Y') }})
@@ -151,11 +151,11 @@
       </div>
 
       <!-- Role 2: PTj Authority / Dean (P2) -->
-      <div style="background:#ffffff;border:1px solid #e0e0e0;padding:12px 14px">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6f6f6f;margin-bottom:4px">
+      <div style="background:#ffffff;border:1px solid #e2e8f0;padding:12px 14px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#475569;margin-bottom:4px">
           {{ __('2. PTj Authority (P2)') }}
         </div>
-        <div style="font-weight:600;color:#161616">Hakim Rahman</div>
+        <div style="font-weight:600;color:#090a0f">Hakim Rahman</div>
         <div class="small muted">{{ __('Deputy Dean (Academic), FTMK') }}</div>
         <div style="margin-top:8px;font-size:11px;color:#0e6027;font-weight:600">
           &#10003; {{ __('Confirmed & Signed') }} ({{ now()->format('d/m/Y') }})
@@ -163,11 +163,11 @@
       </div>
 
       <!-- Role 3: Academic Authority / Registry (P3 / P6) -->
-      <div style="background:#ffffff;border:1px solid #e0e0e0;padding:12px 14px">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6f6f6f;margin-bottom:4px">
+      <div style="background:#ffffff;border:1px solid #e2e8f0;padding:12px 14px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#475569;margin-bottom:4px">
           {{ __('3. Academic Authority / Senate (P3)') }}
         </div>
-        <div style="font-weight:600;color:#161616">Prof. Dr. Zulkifli Ahmad</div>
+        <div style="font-weight:600;color:#090a0f">Prof. Dr. Zulkifli Ahmad</div>
         <div class="small muted">{{ __('Senate Academic Representative / PBA (P3)') }}</div>
         <div style="margin-top:8px;font-size:11px;color:#0e6027;font-weight:600">
           &#10003; {{ __('Confirmed & Signed') }} ({{ now()->format('d/m/Y') }})

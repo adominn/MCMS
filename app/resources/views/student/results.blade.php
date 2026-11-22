@@ -125,7 +125,7 @@
           </td>
           <td>
             @if($overall)
-              <strong style="font-size:14px;color:var(--accent, #1e2a6e)">{{ $overall['grade'] }}</strong>
+              <strong style="font-size:14px;color:var(--accent, #0b1a3d)">{{ $overall['grade'] }}</strong>
               <span class="s muted" style="font-weight:600;margin-left:4px">({{ number_format($overall['point'], 2) }})</span>
             @else
               <span class="muted">&mdash;</span>

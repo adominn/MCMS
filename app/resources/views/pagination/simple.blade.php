@@ -7,7 +7,7 @@
   <div class="p-center">
     @if(method_exists($paginator, 'total'))
       <span>{{ $paginator->firstItem() ?? 0 }}–{{ $paginator->lastItem() ?? 0 }} of {{ $paginator->total() }} {{ __('items') }}</span>
-      <span style="margin-left:8px;font-size:12px;color:var(--text-muted, #525252)">{{ __('Page') }} {{ $paginator->currentPage() }} {{ __('of') }} {{ $paginator->lastPage() }}</span>
+      <span style="margin-left:8px;font-size:12px;color:var(--text-muted, #475569)">{{ __('Page') }} {{ $paginator->currentPage() }} {{ __('of') }} {{ $paginator->lastPage() }}</span>
     @else
       <span>{{ __('Page') }} {{ $paginator->currentPage() }}</span>
     @endif

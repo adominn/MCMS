@@ -76,8 +76,8 @@
         @endphp
         @if(!empty($renderSections))
           @foreach($renderSections as $secKey => $sec)
-            <tr style="background:#f4f4f4">
-              <th colspan="4" style="text-align:left;padding:8px 12px;font-size:10pt;color:#161616;border-top:2px solid var(--border)">
+            <tr style="background:#f1f5f9">
+              <th colspan="4" style="text-align:left;padding:8px 12px;font-size:10pt;color:#090a0f;border-top:2px solid var(--border)">
                 <b>{{ $sec['code'] }}. {{ __($sec['title_ms']) }}</b> &middot; <span class="muted" style="font-weight:normal">{{ __($sec['title_en']) }}</span>
               </th>
             </tr>

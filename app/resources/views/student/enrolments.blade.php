@@ -40,7 +40,7 @@
 
 <!-- Carbon Tabs for Clean Separation of Registration vs Payment Information -->
 <div class="tabs" style="margin-top:20px;border-bottom:1px solid var(--rule);display:flex;gap:24px" role="tablist">
-  <button type="button" class="tab-btn active" data-tab="tab-registrations" style="padding:10px 4px;font-weight:600;font-size:14px;background:none;border:none;border-bottom:2px solid var(--accent, #1e2a6e);color:var(--accent, #1e2a6e);cursor:pointer">
+  <button type="button" class="tab-btn active" data-tab="tab-registrations" style="padding:10px 4px;font-weight:600;font-size:14px;background:none;border:none;border-bottom:2px solid var(--accent, #0b1a3d);color:var(--accent, #0b1a3d);cursor:pointer">
     {{ __('Registrations') }} ({{ $rows->count() }})
   </button>
   <button type="button" class="tab-btn" data-tab="tab-payments" style="padding:10px 4px;font-weight:600;font-size:14px;background:none;border:none;border-bottom:2px solid transparent;color:var(--ink-muted);cursor:pointer">
@@ -219,8 +219,8 @@ document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
       
       this.classList.add('active');
-      this.style.borderBottomColor = 'var(--accent, #1e2a6e)';
-      this.style.color = 'var(--accent, #1e2a6e)';
+      this.style.borderBottomColor = 'var(--accent, #0b1a3d)';
+      this.style.color = 'var(--accent, #0b1a3d)';
       const target = document.getElementById(this.getAttribute('data-tab'));
       if (target) target.style.display = 'block';
     });

@@ -14,12 +14,12 @@
 @endphp
 
 @if($isPrint)
-  <div style="margin-bottom:16px;border-bottom:2px solid #161616;padding-bottom:10px">
+  <div style="margin-bottom:16px;border-bottom:2px solid #090a0f;padding-bottom:10px">
     <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Universiti Teknikal Malaysia Melaka (UTeM)</div>
     <h1 style="font-size:14pt;font-weight:700;text-transform:uppercase;margin:4px 0 2px">
       Lampiran F5: Penyata Pengumpulan Kredit Akademik (ABC)
     </h1>
-    <div style="font-size:9.5pt;color:#525252">
+    <div style="font-size:9.5pt;color:#475569">
       Nama Pelajar: <b>{{ auth()->user()->name }}</b> &middot; No. Matrik: <b>{{ auth()->user()->institution_id ?? '-' }}</b> &middot;
       {{ __('Dijana pada') }} {{ now()->format('d/m/Y') }}
     </div>

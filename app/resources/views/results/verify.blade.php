@@ -70,7 +70,7 @@
     <div class="bd" style="padding:0">
       <table id="summary" style="width:100%;border-collapse:collapse;font-size:13px">
         <thead>
-          <tr style="background:var(--table-header-bg, #f4f4f4);border-bottom:2px solid var(--rule, #e0e0e0)">
+          <tr style="background:var(--table-header-bg, #f1f5f9);border-bottom:2px solid var(--rule, #e2e8f0)">
             <th style="padding:10px 14px;text-align:left;font-weight:600">{{ __('Assessment Component') }}</th>
             <th style="padding:10px 14px;text-align:center;width:90px;font-weight:600">{{ __('Weight') }}</th>
             <th style="padding:10px 14px;text-align:center;width:110px;font-weight:600">{{ __('Pass mark') }}</th>
@@ -84,7 +84,7 @@
         <tbody>
         @foreach($summary->groupBy(fn($item) => $item['c']->mc_module_id ?? 'whole') as $modKey => $items)
           @php($mod = $modKey === 'whole' ? null : $modules->firstWhere('id', $modKey))
-          <tr style="background:var(--bg-subtle, #f4f4f4);border-top:1px solid var(--rule, #e0e0e0);border-bottom:1px solid var(--rule, #e0e0e0)">
+          <tr style="background:var(--bg-subtle, #f1f5f9);border-top:1px solid var(--rule, #e2e8f0);border-bottom:1px solid var(--rule, #e2e8f0)">
             <td colspan="8" style="padding:8px 14px;font-size:12.5px;font-weight:700">
               @if($modKey === 'whole')
                 <span class="tag muted" style="font-size:10.5px;text-transform:uppercase;padding:2px 6px">{{ __('Whole MC') }}</span>
@@ -161,7 +161,7 @@
       </div>
       <div class="bd">
         @foreach($cases as $c)
-          <div class="panel" style="margin-bottom:12px;background:var(--surface, #ffffff);border:1px solid var(--rule, #e0e0e0)">
+          <div class="panel" style="margin-bottom:12px;background:var(--surface, #ffffff);border:1px solid var(--rule, #e2e8f0)">
             <div class="bd" style="padding:14px 16px">
               <div style="margin-bottom:10px;font-size:13.5px">
                 <b>{{ $c->name }}</b>: <span style="color:var(--text-secondary)">{{ $c->reason }}</span>
@@ -192,7 +192,7 @@
       </div>
       <div class="bd">
         @foreach($changes as $q)
-          <div class="panel" style="margin-bottom:12px;background:var(--surface, #ffffff);border:1px solid var(--rule, #e0e0e0)">
+          <div class="panel" style="margin-bottom:12px;background:var(--surface, #ffffff);border:1px solid var(--rule, #e2e8f0)">
             <div class="bd" style="padding:14px 16px">
               <div style="margin-bottom:10px;font-size:13.5px">
                 <b>{{ $q->name }}</b> &mdash; <span>{{ $q->component }}</span>: 
@@ -229,7 +229,7 @@
   <div data-pane="verify">
     <form method="post" action="{{ route('results.verify.do', $o->id) }}">
       @csrf
-      <div class="panel" style="border-top:3px solid var(--primary, #0f62fe)">
+      <div class="panel" style="border-top:3px solid var(--primary, #0052ff)">
         <div class="hd" style="display:flex;align-items:center;justify-content:space-between">
           <div>
             <h2 style="margin:0">{{ __('Statutory Verification & Badge Confirmation') }}</h2>
@@ -249,7 +249,7 @@
             <div style="display:flex;flex-direction:column;gap:10px">
               @foreach($modules as $m)
                 @php($mPending = $summary->filter(fn($s) => ($s['c']->mc_module_id == $m->id))->sum('provisional'))
-                <label style="display:flex;align-items:center;gap:16px;padding:12px 18px;background:var(--card-bg, #ffffff);border:1px solid var(--rule, #e0e0e0);border-radius:2px;cursor:{{ $mPending > 0 ? 'pointer' : 'default' }};transition:border-color 0.15s, box-shadow 0.15s">
+                <label style="display:flex;align-items:center;gap:16px;padding:12px 18px;background:var(--card-bg, #ffffff);border:1px solid var(--rule, #e2e8f0);border-radius:2px;cursor:{{ $mPending > 0 ? 'pointer' : 'default' }};transition:border-color 0.15s, box-shadow 0.15s">
                   <input type="checkbox" name="scopes[]" value="m{{ $m->id }}" @disabled($mPending === 0) style="margin:0;width:18px;height:18px;cursor:{{ $mPending > 0 ? 'pointer' : 'default' }}">
                   
                   <div style="flex-shrink:0" title="Module {{ $m->seq }} {{ __('Digital Badge') }}">
@@ -266,7 +266,7 @@
                       @endif
                     </div>
                     <div class="s muted" style="margin-top:2px;display:flex;align-items:center;gap:6px;font-size:12px">
-                      <i class="bi bi-award" style="color:var(--accent, #0f62fe)"></i>
+                      <i class="bi bi-award" style="color:var(--accent, #0052ff)"></i>
                       <span>{{ __('Mints Open Badges 3.0 on verification') }}</span>
                     </div>
                   </div>
@@ -287,7 +287,7 @@
 
               @if($hasWhole)
                 @php($mcPending = $summary->filter(fn($s) => empty($s['c']->mc_module_id))->sum('provisional'))
-                <label style="display:flex;align-items:center;gap:16px;padding:12px 18px;background:var(--card-bg, #ffffff);border:1px solid var(--rule, #e0e0e0);border-radius:2px;cursor:{{ $mcPending > 0 ? 'pointer' : 'default' }};transition:border-color 0.15s, box-shadow 0.15s">
+                <label style="display:flex;align-items:center;gap:16px;padding:12px 18px;background:var(--card-bg, #ffffff);border:1px solid var(--rule, #e2e8f0);border-radius:2px;cursor:{{ $mcPending > 0 ? 'pointer' : 'default' }};transition:border-color 0.15s, box-shadow 0.15s">
                   <input type="checkbox" name="scopes[]" value="mc" @disabled($mcPending === 0) style="margin:0;width:18px;height:18px;cursor:{{ $mcPending > 0 ? 'pointer' : 'default' }}">
                   
                   <div style="flex:1;min-width:0">
@@ -299,7 +299,7 @@
                       <span class="tag muted" style="font-size:10.5px;padding:1px 6px">{{ __('No modular badge') }}</span>
                     </div>
                     <div class="s muted" style="margin-top:2px;display:flex;align-items:center;gap:6px;font-size:12px">
-                      <i class="bi bi-mortarboard" style="color:var(--accent, #0f62fe)"></i>
+                      <i class="bi bi-mortarboard" style="color:var(--accent, #0052ff)"></i>
                       <span>{{ __('Integrated Capstone project · Required for certificate and academic credits') }}</span>
                     </div>
                   </div>
@@ -322,7 +322,7 @@
 
           {{-- Collapsible Participant-Level Filter --}}
           @php($participantsList = $enrol ?? collect())
-          <details style="margin-bottom:24px;border:1px solid var(--rule, #e0e0e0);border-radius:4px;background:var(--surface, #ffffff)">
+          <details style="margin-bottom:24px;border:1px solid var(--rule, #e2e8f0);border-radius:4px;background:var(--surface, #ffffff)">
             <summary style="padding:10px 14px;font-weight:600;font-size:13px;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between">
               <span>
                 {{ __('Filter specific participants (optional)') }}
@@ -330,7 +330,7 @@
               </span>
               <span class="tag info" style="font-size:11px">{{ __('Click to collapse / expand') }}</span>
             </summary>
-            <div style="padding:14px;border-top:1px solid var(--rule, #e0e0e0);background:var(--bg-subtle, #fbfbfb)">
+            <div style="padding:14px;border-top:1px solid var(--rule, #e2e8f0);background:var(--bg-subtle, #fbfbfb)">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
                 <span style="font-size:12px;color:var(--text-secondary)">
                   {{ __('Untick any participant you wish to exclude from this verification run.') }}
@@ -342,7 +342,7 @@
               </div>
               <div class="row" style="gap:10px;flex-wrap:wrap">
                 @foreach($participantsList as $p)
-                  <label style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;background:var(--card-bg, #ffffff);padding:6px 12px;border:1px solid var(--rule, #e0e0e0);border-radius:2px;cursor:pointer">
+                  <label style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;background:var(--card-bg, #ffffff);padding:6px 12px;border:1px solid var(--rule, #e2e8f0);border-radius:2px;cursor:pointer">
                     <input type="checkbox" name="enrolments[]" value="{{ $p->id }}" class="student-checkbox" checked>
                     <span>
                       <b>{{ $p->name }}</b>

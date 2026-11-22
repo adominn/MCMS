@@ -17,24 +17,24 @@
   ];
   $statusColor = match($o) {
     'valid' => 'var(--success, #24a148)',
-    'corrected' => 'var(--primary, #1e2a6e)',
+    'corrected' => 'var(--primary, #0b1a3d)',
     'replaced', 'expired' => 'var(--warn, #f1c21b)',
     'revoked', 'invalid_signature' => 'var(--error, #da1e28)',
-    default => 'var(--primary, #1e2a6e)',
+    default => 'var(--primary, #0b1a3d)',
   };
   $statusBg = match($o) {
-    'valid' => 'var(--ok-bg, #defbe6)',
-    'corrected' => 'var(--info-bg, #e8eaf6)',
-    'replaced', 'expired' => 'var(--warn-bg, #fcf4d6)',
+    'valid' => 'var(--ok-bg, #edfcf0)',
+    'corrected' => 'var(--info-bg, #edf4ff)',
+    'replaced', 'expired' => 'var(--warn-bg, #fefdf0)',
     'revoked', 'invalid_signature' => 'var(--err-bg, #fff1f1)',
-    default => 'var(--info-bg, #e8eaf6)',
+    default => 'var(--info-bg, #edf4ff)',
   };
   $statusInk = match($o) {
     'valid' => 'var(--ok-ink, #0e6027)',
-    'corrected' => 'var(--accent, #0f62fe)',
+    'corrected' => 'var(--accent, #0052ff)',
     'replaced', 'expired' => 'var(--warn-ink, #684e00)',
     'revoked', 'invalid_signature' => 'var(--err-ink, #a2191f)',
-    default => 'var(--accent, #0f62fe)',
+    default => 'var(--accent, #0052ff)',
   };
 @endphp
 
@@ -122,7 +122,7 @@
     border: 0;
     padding: 2px 4px;
     cursor: pointer;
-    color: var(--accent, #0f62fe);
+    color: var(--accent, #0052ff);
     font-size: 11px;
     font-weight: 600;
     display: inline-flex;
@@ -253,7 +253,7 @@
       padding: 0 !important;
     }
     .vr-card {
-      border: 1px solid #161616 !important;
+      border: 1px solid #090a0f !important;
       box-shadow: none !important;
     }
   }

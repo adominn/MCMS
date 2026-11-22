@@ -14,7 +14,7 @@
   <div style="font-size:24pt;font-weight:300;line-height:1.1"><b>{{ $x['holder'] }}</b></div>
   <div style="font-size:10pt">{{ $lang === 'ms' ? 'telah menamatkan' : 'has completed' }}</div>
   <div style="font-size:16pt"><b>{{ $x['name'][$lang] }}</b> <span class="muted">({{ $x['category'] }})</span></div>
-  <div style="font-size:10pt;color:#525252">
+  <div style="font-size:10pt;color:#475569">
     <b>{{ $lang === 'ms' ? 'Kohort' : 'Cohort' }}:</b> {{ $x['cohort'] ?? '2027/1' }} &middot;
     <b>{{ $lang === 'ms' ? 'Jumlah Pembelajaran' : 'Learning Time' }}:</b> {{ $x['slt_hours'] ?? 40 }} {{ $lang === 'ms' ? 'jam SLT' : 'hours SLT' }}
   </div>
@@ -31,7 +31,7 @@
     <div style="width:75mm;border-top:1px solid var(--ink);padding-top:4px">
       <b>{{ $x['signatory'] ?? 'Prof. Dr. Timbalan Dekan' }}</b>
       <div>{{ $lang === 'ms' ? 'Penandatangan' : 'Signed by' }} &middot; {{ $lang === 'ms' ? ($x['signatory_position_ms'] ?? ($x['signatory_position'] ?? 'Timbalan Dekan (Akademik)')) : ($x['signatory_position'] ?? 'Deputy Dean (Academic)') }}</div>
-      <div style="font-size:8pt;color:#525252">{{ $x['ptj'] ?? 'Fakulti Teknologi Maklumat dan Komunikasi' }}</div>
+      <div style="font-size:8pt;color:#475569">{{ $x['ptj'] ?? 'Fakulti Teknologi Maklumat dan Komunikasi' }}</div>
     </div>
     <div style="display:flex;gap:8px;align-items:flex-end"><div role="img" aria-label="QR code to verify this certificate" style="width:24mm">{!! $qr !!}</div><div style="max-width:60mm;word-break:break-all"><b>{{ $lang === 'ms' ? 'Kod pengesahan' : 'Verification code' }}</b><div>{{ $url }}</div></div></div>
   </div>

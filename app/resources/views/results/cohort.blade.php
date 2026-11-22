@@ -130,7 +130,7 @@
         if (v === '' || isNaN(v)) {
           hasMissing = true;
           input.style.border = '1px dashed var(--warn-dark, #b28600)';
-          input.style.background = 'var(--warn-bg, #fcf4d6)';
+          input.style.background = 'var(--warn-bg, #fefdf0)';
         } else {
           const num = parseFloat(v);
           if (num < 0 || num > max) {
