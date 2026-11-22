@@ -11,7 +11,7 @@
       padding: 0;
       height: 100%;
       width: 100%;
-      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: #0b1335;
       overflow-x: hidden;
     }
@@ -104,8 +104,9 @@
       max-height: 88vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
-      border: 1px solid #d0d0d0;
+      box-shadow: 0 16px 40px rgba(9, 10, 15, 0.28);
+      border: 1px solid #090a0f;
+      border-radius: 8px;
       overflow: hidden;
       animation: modalFadeIn 0.2s cubic-bezier(0, 0, 0.2, 1);
     }
@@ -114,13 +115,13 @@
       to { transform: translateY(0); opacity: 1; }
     }
     .modal-header {
-      background: #1e2a6e;
+      background: #0b1a3d;
       color: #ffffff;
       padding: 18px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 2px solid #0f62fe;
+      border-bottom: 2px solid #0052ff;
     }
     .modal-close-btn {
       background: transparent;
@@ -142,7 +143,7 @@
     .modal-controls {
       padding: 14px 24px;
       background: #ffffff;
-      border-bottom: 1px solid #e0e0e0;
+      border-bottom: 1px solid #e2e8f0;
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -157,8 +158,8 @@
       transition: border-color 0.15s ease;
     }
     .search-input-box:focus-within {
-      border-color: #0f62fe;
-      outline: 2px solid #0f62fe;
+      border-color: #0052ff;
+      outline: 2px solid #0052ff;
       outline-offset: -2px;
     }
     .search-input-box input {
@@ -167,7 +168,7 @@
       width: 100%;
       font-size: 13.5px;
       font-family: inherit;
-      color: #161616;
+      color: #090a0f;
       background: transparent;
     }
     .role-pills {
@@ -176,12 +177,13 @@
       flex-wrap: wrap;
     }
     .role-pill {
-      background: #f4f4f4;
-      border: 1px solid #dcdcdc;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
       padding: 6px 12px;
       font-size: 12px;
       font-weight: 600;
-      color: #393939;
+      color: #475569;
       cursor: pointer;
       transition: all 0.15s ease;
       display: inline-flex;
@@ -189,18 +191,19 @@
       gap: 4px;
     }
     .role-pill:hover {
-      background: #e8e8e8;
-      border-color: #c6c6c6;
+      background: #edf4ff;
+      border-color: #0052ff;
+      color: #0052ff;
     }
     .role-pill.active {
-      background: #1e2a6e;
+      background: #0052ff;
       color: #ffffff;
-      border-color: #1e2a6e;
+      border-color: #0052ff;
     }
     .modal-body {
       padding: 18px 24px;
       overflow-y: auto;
-      background: #f4f4f4;
+      background: #f8fafc;
       flex: 1;
       min-height: 320px;
       max-height: calc(88vh - 240px);
@@ -211,7 +214,8 @@
     }
     .persona-modal-card {
       background: #ffffff;
-      border: 1px solid #e0e0e0;
+      border: 1px solid #090a0f;
+      border-radius: 6px;
       padding: 12px 14px;
       display: flex;
       align-items: center;
@@ -220,9 +224,9 @@
       transition: all 0.15s ease;
     }
     .persona-modal-card:hover {
-      border-color: #0f62fe;
-      box-shadow: 0 2px 8px rgba(15, 98, 254, 0.12);
-      background: #fbfdff;
+      border-color: #0052ff;
+      box-shadow: 0 2px 8px rgba(0, 82, 255, 0.14);
+      background: #edf4ff;
     }
     .persona-info-left {
       display: flex;
@@ -242,9 +246,9 @@
       justify-content: center;
       flex-shrink: 0;
     }
-    .persona-avatar.role-student { background: #0f62fe; }
+    .persona-avatar.role-student { background: #0052ff; }
     .persona-avatar.role-lecturer { background: #8a3ffc; }
-    .persona-avatar.role-deputy_dean, .persona-avatar.role-ptj_authority { background: #1e2a6e; }
+    .persona-avatar.role-deputy_dean, .persona-avatar.role-ptj_authority { background: #0b1a3d; }
     .persona-avatar.role-academic_authority { background: #6929c4; }
     .persona-avatar.role-qa_officer { background: #0072c3; }
     .persona-avatar.role-codl_admin { background: #005d5d; }
@@ -252,7 +256,7 @@
     .persona-avatar.role-abc_depositor { background: #009d9a; }
     .persona-avatar.role-records_depositor { background: #0e6027; }
     .persona-avatar.role-industry_expert, .persona-avatar.role-reviewer { background: #ba4e00; }
-    .persona-avatar.role-default { background: #525252; }
+    .persona-avatar.role-default { background: #475569; }
 
     .persona-text-details {
       min-width: 0;
@@ -267,7 +271,7 @@
     .persona-name {
       font-size: 13.5px;
       font-weight: 600;
-      color: #161616;
+      color: #090a0f;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -286,10 +290,10 @@
       border-radius: 2px;
       display: inline-block;
     }
-    .role-badge.role-tag-student { background: #edf5ff; color: #0043ce; border: 1px solid #d0e2ff; }
+    .role-badge.role-tag-student { background: #edf4ff; color: #0043ce; border: 1px solid #d0e2ff; }
     .role-badge.role-tag-lecturer { background: #f6f2ff; color: #6929c4; border: 1px solid #e8daff; }
-    .role-badge.role-tag-deputy_dean { background: #e8ecfb; color: #1e2a6e; border: 1px solid #c7d2f8; }
-    .role-badge.role-tag-records_depositor { background: #defbe6; color: #0e6027; border: 1px solid #a7f0ba; }
+    .role-badge.role-tag-deputy_dean { background: #e8ecfb; color: #0b1a3d; border: 1px solid #c7d2f8; }
+    .role-badge.role-tag-records_depositor { background: #edfcf0; color: #0e6027; border: 1px solid #a7f0ba; }
     .role-badge.role-tag-codl_admin { background: #e5f6f6; color: #005d5d; border: 1px solid #9ef0f0; }
     .role-badge.role-tag-industry_expert { background: #fff2e8; color: #ba4e00; border: 1px solid #ffd8bd; }
 
@@ -297,14 +301,14 @@
       font-size: 10.5px;
       font-weight: 700;
       color: #393939;
-      background: #e0e0e0;
+      background: #e2e8f0;
       padding: 1px 5px;
       border-radius: 2px;
       letter-spacing: 0.3px;
     }
     .persona-email {
       font-size: 11px;
-      color: #6f6f6f;
+      color: #475569;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -312,7 +316,7 @@
     .modal-footer {
       padding: 12px 24px;
       background: #ffffff;
-      border-top: 1px solid #e0e0e0;
+      border-top: 1px solid #e2e8f0;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -394,25 +398,25 @@
   <div class="signin-panel">
     <div style="width:100%;max-width:420px;margin:auto 0;display:flex;flex-direction:column;justify-content:center">
       <div style="margin-bottom:20px">
-        <div style="font-size:12px;font-weight:700;color:#0f62fe;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">
+        <div style="font-size:12px;font-weight:700;color:#0052ff;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">
           MCMS Authentication
         </div>
-        <h2 style="font-size:24px;font-weight:700;color:#1e2a6e;margin:0 0 8px;line-height:1.25">
+        <h2 style="font-size:24px;font-weight:700;color:#0b1a3d;margin:0 0 8px;line-height:1.25">
           {{ __('UTeM Single Sign-On') }}
         </h2>
-        <p style="font-size:13.5px;color:#525252;margin:0 0 12px;line-height:1.45">
+        <p style="font-size:13.5px;color:#475569;margin:0 0 12px;line-height:1.45">
           {{ __("Please log in using your UTeM's Office 365 email credentials:") }}
         </p>
 
         <!-- Structured Credentials Guide -->
-        <div style="background:#f8f9fa;border:1px solid #dcdcdc;border-left:3px solid #1e2a6e;padding:12px 14px;border-radius:2px;display:flex;flex-direction:column;gap:8px">
+        <div style="background:#f8f9fa;border:1px solid #dcdcdc;border-left:3px solid #0b1a3d;padding:12px 14px;border-radius:2px;display:flex;flex-direction:column;gap:8px">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px">
-            <code style="font-family:var(--mono);font-size:12.5px;color:#0f62fe !important;background:#edf5ff !important;border:1px solid #d0e2ff !important;padding:2px 6px;border-radius:2px;font-weight:600">UserId@utem.edu.my</code>
-            <span style="font-size:12px;color:#525252;white-space:nowrap;font-weight:500">(for staff)</span>
+            <code style="font-family:var(--mono);font-size:12.5px;color:#0052ff !important;background:#edf4ff !important;border:1px solid #d0e2ff !important;padding:2px 6px;border-radius:2px;font-weight:600">UserId@utem.edu.my</code>
+            <span style="font-size:12px;color:#475569;white-space:nowrap;font-weight:500">(for staff)</span>
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px">
-            <code style="font-family:var(--mono);font-size:12.5px;color:#0f62fe !important;background:#edf5ff !important;border:1px solid #d0e2ff !important;padding:2px 6px;border-radius:2px;font-weight:600">MatricNo@student.utem.edu.my</code>
-            <span style="font-size:12px;color:#525252;white-space:nowrap;font-weight:500">(for student)</span>
+            <code style="font-family:var(--mono);font-size:12.5px;color:#0052ff !important;background:#edf4ff !important;border:1px solid #d0e2ff !important;padding:2px 6px;border-radius:2px;font-weight:600">MatricNo@student.utem.edu.my</code>
+            <span style="font-size:12px;color:#475569;white-space:nowrap;font-weight:500">(for student)</span>
           </div>
         </div>
       </div>
@@ -429,8 +433,8 @@
       @endif
 
       <!-- Official SSO Action -->
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid #e0e0e0">
-        <button type="button" disabled class="btn" style="width:100%;padding:11px 16px;display:flex;align-items:center;justify-content:center;gap:10px;background:#f4f4f4;color:#8d8d8d;border:1px solid #dcdcdc;cursor:not-allowed;font-size:13.5px;font-weight:600">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid #e2e8f0">
+        <button type="button" disabled class="btn" style="width:100%;padding:11px 16px;display:flex;align-items:center;justify-content:center;gap:10px;background:#f1f5f9;color:#8d8d8d;border:1px solid #dcdcdc;cursor:not-allowed;font-size:13.5px;font-weight:600">
           <svg width="18" height="18" viewBox="0 0 21 21">
             <path fill="#f25022" d="M1 1h9v9H1z"/>
             <path fill="#00a4ef" d="M1 11h9v9H1z"/>
@@ -448,10 +452,10 @@
       @if($stub)
         <div style="padding-top:2px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-            <h2 style="font-size:15px;font-weight:700;color:#161616;margin:0">
+            <h2 style="font-size:15px;font-weight:700;color:#090a0f;margin:0">
               {{ __('Test sign-in') }}
             </h2>
-            <span class="tag" style="background:#e0e0e0;color:#393939;font-size:11px;padding:2px 6px">
+            <span class="tag" style="background:#e2e8f0;color:#393939;font-size:11px;padding:2px 6px">
               Prototype
             </span>
           </div>
@@ -460,7 +464,7 @@
           </p>
 
           <!-- Pop up button -->
-          <button type="button" id="open-personas-modal" class="btn primary" style="width:100%;padding:11px 16px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:13.5px;font-weight:600;background:#1e2a6e;color:#ffffff;border:none;cursor:pointer;transition:all 0.15s ease">
+          <button type="button" id="open-personas-modal" class="btn primary" style="width:100%;padding:11px 16px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:13.5px;font-weight:600;background:#0052ff;color:#ffffff;border:none;border-radius:4px;cursor:pointer;transition:all 0.15s ease">
             <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
               <path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/>
@@ -471,7 +475,7 @@
         </div>
       @endif
 
-      <div style="margin-top:20px;padding-top:14px;border-top:1px solid #f4f4f4;display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:#8d8d8d">
+      <div style="margin-top:20px;padding-top:14px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:#8d8d8d">
         <span>UTeM MCMS v1.2</span>
         <span>Secured Session</span>
       </div>
@@ -525,11 +529,11 @@
     <!-- Modal Controls: Search & Role Filter Tabs -->
     <div class="modal-controls">
       <div class="search-input-box">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="#525252">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="#475569">
           <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
         </svg>
         <input type="text" id="persona-search" placeholder="{{ __('Search by name, email, role, or faculty (e.g. Amir, FTMK, Dean)...') }}" autocomplete="off">
-        <button type="button" id="persona-search-clear" style="display:none;background:none;border:none;color:#525252;cursor:pointer;font-size:18px;line-height:1;padding:0 4px" title="{{ __('Clear search') }}">&times;</button>
+        <button type="button" id="persona-search-clear" style="display:none;background:none;border:none;color:#475569;cursor:pointer;font-size:18px;line-height:1;padding:0 4px" title="{{ __('Clear search') }}">&times;</button>
       </div>
 
       <div class="role-pills">
@@ -619,20 +623,20 @@
         </div>
       @endforeach
 
-      <div id="no-personas-found" style="display:none;grid-column:1/-1;text-align:center;padding:48px 20px;color:#6f6f6f">
+      <div id="no-personas-found" style="display:none;grid-column:1/-1;text-align:center;padding:48px 20px;color:#475569">
         <svg width="36" height="36" viewBox="0 0 16 16" fill="#8d8d8d" style="margin-bottom:8px">
           <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
           <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
         </svg>
-        <p style="margin:0;font-weight:600;font-size:14px;color:#161616">{{ __('No matching test personas found') }}</p>
-        <p style="margin:4px 0 0;font-size:12px;color:#6f6f6f">{{ __('Try searching for a different keyword or select another role filter.') }}</p>
+        <p style="margin:0;font-weight:600;font-size:14px;color:#090a0f">{{ __('No matching test personas found') }}</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#475569">{{ __('Try searching for a different keyword or select another role filter.') }}</p>
       </div>
     </div>
 
     <!-- Modal Footer -->
     <div class="modal-footer">
-      <span style="font-size:12px;color:#6f6f6f">
-        <kbd style="background:#e0e0e0;padding:2px 6px;font-size:11px;border:1px solid #ccc;font-family:inherit;border-radius:2px">Esc</kbd> {{ __('to close') }} &middot; {{ __('Signing in simulates authenticated session with active role.') }}
+      <span style="font-size:12px;color:#475569">
+        <kbd style="background:#e2e8f0;padding:2px 6px;font-size:11px;border:1px solid #ccc;font-family:inherit;border-radius:2px">Esc</kbd> {{ __('to close') }} &middot; {{ __('Signing in simulates authenticated session with active role.') }}
       </span>
       <button type="button" id="close-personas-btn" class="btn secondary sm" style="padding:6px 14px;font-weight:600">
         {{ __('Close') }}
