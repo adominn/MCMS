@@ -544,3 +544,40 @@ it('takes the mark column, maximum and pass mark from the proposal and blocks a 
     $row = DB::table('assessment_components')->find($c);
     expect($row->csv_key)->toBeNull()->and((float) $row->pass_mark)->toBe(80.0)->and(Template::key($row))->toBe('project_mark'); // the pass mark is held at the maximum; the key is made from the name
 });
+
+it('revokes module achievement and badge when score lowered below pass mark and notifies learner', function () {
+    [$o, , , $people] = runningCohort();
+    submittedResults($o, $people);
+    verifyAll($o);
+
+    $bee = DB::table('enrolments')->where('user_id', $people[1]->id)->where('offering_id', $o)->value('id');
+    expect(DB::table('module_achievements')->where('enrolment_id', $bee)->count())->toBe(2);
+
+    $comp1 = DB::table('assessment_components')->where('csv_key', 'module1_mark')->value('id');
+    $res1 = DB::table('assessment_results')->where('enrolment_id', $bee)->where('assessment_component_id', $comp1)->first();
+
+    // Lecturer requests lowering score below pass mark (e.g. to 30)
+    $this->actingAs($this->aina)->post("/results/{$res1->id}/change", ['new_score' => '30', 'reason' => 'Plagiarism found after re-check'])
+        ->assertSessionHasNoErrors();
+    $q = DB::table('result_change_requests')->where('assessment_result_id', $res1->id)->orderByDesc('id')->first();
+
+    // Deputy dean approves change
+    $this->actingAs($this->hakim)->post("/results/$o/changes/{$q->id}", ['decision' => 'approve', 'note' => 'Penalty confirmed'])
+        ->assertSessionHasNoErrors();
+
+    // Module 1 achievement and badge revoked
+    expect(DB::table('module_achievements')->where('enrolment_id', $bee)->count())->toBe(1)
+        ->and(DB::table('audit_events')->where('action', 'achievement.revoked')->exists())->toBeTrue()
+        ->and(DB::table('notifications')->where('user_id', $people[1]->id)->whereIn('template_key', ['results.changed', 'results.verified'])->exists())->toBeTrue();
+});
+
+it('displays Not passed on student results view when verified score is below pass mark', function () {
+    [$o, , , $people] = runningCohort();
+    $student = $people[0];
+    submittedResults($o, $people, [$student->id => ['module1_mark' => '25', 'module2_mark' => '30', 'exam_mark' => '20']]);
+    verifyAll($o);
+
+    $this->actingAs($student)->get('/my-results')
+        ->assertSee('Not passed')
+        ->assertDontSee('>Passed<', false);
+});

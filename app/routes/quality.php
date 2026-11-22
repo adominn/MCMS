@@ -3,10 +3,11 @@
 use App\Modules\Quality\QvController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'role:lecturer,deputy_dean'])->prefix('quality')->group(function () {
+Route::middleware(['auth', 'role:lecturer,deputy_dean,ptj_authority,qa_officer,academic_authority'])->prefix('quality')->group(function () {
     Route::get('/', [QvController::class, 'index'])->name('quality');
     Route::get('/{mc}', [QvController::class, 'show'])->whereNumber('mc')->name('quality.show');
     Route::get('/{mc}/package', [QvController::class, 'package'])->whereNumber('mc')->name('quality.package');
+    Route::post('/{mc}/signoff', [QvController::class, 'signoff'])->whereNumber('mc')->name('quality.signoff');
 });
 Route::middleware(['auth', 'role:lecturer'])->prefix('quality/{mc}')->whereNumber('mc')->group(function () {
     Route::post('/start', [QvController::class, 'start'])->name('quality.start');
@@ -14,7 +15,7 @@ Route::middleware(['auth', 'role:lecturer'])->prefix('quality/{mc}')->whereNumbe
     Route::post('/review', [QvController::class, 'review'])->name('quality.review');
     Route::post('/readiness', [QvController::class, 'readiness'])->name('quality.readiness');
 });
-Route::middleware(['auth', 'role:deputy_dean'])->prefix('quality/{mc}')->whereNumber('mc')->group(function () {
+Route::middleware(['auth', 'role:deputy_dean,ptj_authority,qa_officer'])->prefix('quality/{mc}')->whereNumber('mc')->group(function () {
     Route::post('/confirm', [QvController::class, 'confirm'])->name('quality.confirm');
     Route::post('/submit', [QvController::class, 'submit'])->name('quality.submit');
     Route::post('/result', [QvController::class, 'result'])->name('quality.result');

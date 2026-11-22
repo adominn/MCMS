@@ -29,12 +29,16 @@ Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/my-credentials/{id}/download/{as}', [CredentialController::class, 'download'])->whereNumber('id')->name('credentials.download');
 });
 
-Route::middleware(['auth', 'role:deputy_dean'])->prefix('credentials')->group(function () {
+Route::middleware(['auth', 'role:records_custodian,records_depositor,deputy_dean,ptj_authority'])->prefix('credentials')->group(function () {
     Route::get('/', [CredentialController::class, 'index'])->name('credentials.admin');
-    Route::post('/retry/{enrolment}', [CredentialController::class, 'retry'])->whereNumber('enrolment')->name('credentials.retry');
     Route::get('/{id}', [CredentialController::class, 'adminShow'])->whereNumber('id')->name('credentials.admin.show');
     Route::get('/{id}/sheet', [CredentialController::class, 'sheet'])->whereNumber('id')->name('credentials.admin.sheet');
-    Route::post('/{id}/correct', [CredentialController::class, 'correct'])->whereNumber('id')->name('credentials.correct');
-    Route::post('/{id}/replace', [CredentialController::class, 'replace'])->whereNumber('id')->name('credentials.replace');
-    Route::post('/{id}/revoke', [CredentialController::class, 'revoke'])->whereNumber('id')->name('credentials.revoke');
+
+    // Mutations restricted to P6 Records Custodian (Appendix H3 RACI)
+    Route::middleware('role:records_custodian,records_depositor')->group(function () {
+        Route::post('/retry/{enrolment}', [CredentialController::class, 'retry'])->whereNumber('enrolment')->name('credentials.retry');
+        Route::post('/{id}/correct', [CredentialController::class, 'correct'])->whereNumber('id')->name('credentials.correct');
+        Route::post('/{id}/replace', [CredentialController::class, 'replace'])->whereNumber('id')->name('credentials.replace');
+        Route::post('/{id}/revoke', [CredentialController::class, 'revoke'])->whereNumber('id')->name('credentials.revoke');
+    });
 });

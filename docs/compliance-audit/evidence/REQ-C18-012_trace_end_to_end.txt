@@ -1,0 +1,72 @@
+URL: http://127.0.0.1:8110/records/trace/1
+FINAL: http://127.0.0.1:8110/records/trace/1
+STATUS: 200
+TITLE: Trace a participant - UTeM Micro-Credential Management System
+H1: Trace: Amir Hakimi, Cloud Native Development
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+2
+AZ
+Dr. Aina Zulkifli
+Lecturer, FTMK
+TEACHING
+My tasks
+3
+My micro-credentials
+Proposals and versions
+1
+Cohorts and results
+Reviews for colleagues
+1
+QUALITY
+Quality review (CQI)
+QV evidence
+Stackable pathways
+INSIGHT
+Reports
+Traceability
+Documents
+Notifications
+2
+Collapse sidebar
+←
+Back
+Traceability
+Trace: Amir Hakimi
+Trace: Amir Hakimi, Cloud Native Development
+ENR-2026-0001 · cohort 2026/1
+← Back to traceability
+
+From development to monitoring, with what is on record at each stage. A stage that is empty has not happened yet, or its record is missing.
+
+Development: On record. Version 1 of Cloud Native Development submitted on 04/04/2026 Open
+Approval: On record. Endorsement: endorsed (JKKP-FTMK-2025/10); Senate: approved (Senate 2/2026) Open
+Offering: On record. Cohort 2026/1, ended, 07/06/2026 to 05/09/2026 Open
+Learning: On record. Enrolment ENR-2026-0001, status completed
+Assessment: On record. 2 of 2 results verified Open
+Achievement: On record. Completion confirmed on 05/09/2026 by Hakim Rahman Open
+Credential: On record. UTEM-MC-2026-0001 (valid) Open
+ACR and ABC: On record. ACR-2026-0001 (deposited), ABC reference ABC-MYS-2026-098471, credit redeemed Open
+Transfer and use of credit: On record. TR-2026-0001 (approved), approved 2 Open
+Monitoring and CQI: On record. CQI-2026-001 (confirmed) Open
+Audit trail of these records
+4 rows
+Seq
+	Time
+	Action
+	Record
+	By
+
+9	17/11/2026 01:36	offering.opened
+Opened registration for Cloud Native Development 2026/1	offering 1	Dr. Aina Zulkifli
+11	17/11/2026 01:36	enrolment.completed
+Confirmed completion for Amir Hakimi (ENR-2026-0001)	enrolment 1	Hakim Rahman
+16	17/11/2026 01:36	credential.issued
+Issued Ed25519 VC-JWT credential to Amir Hakimi	credential 1	Hakim Rahman
+23	17/11/2026 01:36	acr.confirmed
+Confirmed Academic Credit Record ACR-2026-0001	acr 1	Hakim Rahman
+
+Minimum records of this cohort

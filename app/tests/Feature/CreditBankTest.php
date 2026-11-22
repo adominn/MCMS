@@ -14,6 +14,7 @@ beforeEach(function () {
     $this->hakim = User::where('name', 'Hakim Rahman')->first();
     $this->amir = User::where('name', 'Amir Hakimi')->first();
     $this->farid = User::where('name', 'Farid Hashim')->first();
+    $this->nurul = User::where('name', 'Nurul Izzah')->first();
     $this->lim = User::create(['name' => 'Dr. Lim Wei Jie', 'email' => 'lim@utem.example.test']);
     $this->lim->roleAssignments()->create(['role' => 'lecturer', 'scope_type' => 'ptj', 'ptj_id' => DB::table('ptjs')->where('code', 'FTMK')->value('id')]);
 });
@@ -86,6 +87,7 @@ it('never prepares an ACR for an MCE, and a failing check blocks with the reason
     [$o, $people] = issued();
     $cee = (int) eid($o, $people[2]);
     $gone = DB::table('acrs')->where('user_id', $people[2]->id)->pluck('id');
+    DB::table('acr_verifications')->whereIn('acr_id', $gone)->delete();
     DB::table('acr_checks')->whereIn('acr_id', $gone)->delete();
     DB::table('acrs')->whereIn('id', $gone)->delete();
     DB::table('micro_credentials')->update(['category' => 'mce']);
@@ -107,13 +109,14 @@ it('prepares a SAMC ACR only when Quality Verification was valid on the completi
 
 // ---- confirm (FR-acrverify)
 
-it('lets the deputy dean confirm, asks the participant for consent, and refuses everyone else (D-12)', function () {
+it('lets the records depositor confirm, asks the participant for consent, and refuses everyone else (Guide App H3)', function () {
     $a = amirAcr();
-    $this->actingAs($this->farid)->post("/deposits/{$a->id}/confirm")->assertForbidden(); // CODL takes no academic decision
+    $this->actingAs($this->farid)->post("/deposits/{$a->id}/confirm")->assertForbidden(); // CODL admin does not confirm ACRs
+    $this->actingAs($this->hakim)->post("/deposits/{$a->id}/confirm")->assertForbidden(); // Deputy Dean separated from P6/P7 clerical custody
     $this->actingAs($this->amir)->post("/deposits/{$a->id}/confirm")->assertForbidden();
-    $this->actingAs($this->hakim)->get("/deposits/{$a->id}")->assertOk()->assertSee('cannot be edited');
+    $this->actingAs($this->nurul)->get("/deposits/{$a->id}")->assertOk()->assertSee('cannot be edited');
     $this->post("/deposits/{$a->id}/confirm")->assertSessionHasNoErrors();
-    expect(DB::table('acrs')->where('id', $a->id)->value('status'))->toBe('verified')->and(DB::table('acrs')->where('id', $a->id)->value('confirmed_by'))->toBe($this->hakim->id)
+    expect(DB::table('acrs')->where('id', $a->id)->value('status'))->toBe('verified')->and(DB::table('acrs')->where('id', $a->id)->value('confirmed_by'))->toBe($this->nurul->id)
         ->and(DB::table('tasks')->where('kind', 'acr_consent')->where('user_id', $this->amir->id)->whereNull('completed_at')->exists())->toBeTrue()
         ->and(DB::table('notifications')->where('user_id', $this->amir->id)->where('template_key', 'acr.confirmed')->exists())->toBeTrue();
     $this->post("/deposits/{$a->id}/confirm")->assertStatus(422);
@@ -124,15 +127,15 @@ it('lets the deputy dean confirm, asks the participant for consent, and refuses 
 it('keeps the ACR out of the deposit queue until the participant consents, and records the wording version (FR-dpconsent)', function () {
     $a = amirAcr();
     $this->actingAs($this->amir)->post("/my-credit/{$a->id}/consent", ['decision' => 'given'])->assertStatus(422); // not confirmed yet
-    $this->actingAs($this->hakim)->post("/deposits/{$a->id}/confirm");
+    $this->actingAs($this->nurul)->post("/deposits/{$a->id}/confirm");
     depositOf($a)->assertStatus(422); // no consent, no deposit
-    $this->post('/deposits/export', ['acrs' => [$a->id]])->assertStatus(422);
+    $this->actingAs($this->nurul)->post('/deposits/export', ['acrs' => [$a->id]])->assertStatus(422);
     $this->actingAs($this->amir)->post("/my-credit/{$a->id}/consent", ['decision' => 'given'])->assertSessionHasNoErrors();
     $c = DB::table('consents')->where('acr_id', $a->id)->first();
     expect($c->decision)->toBe('given')->and($c->channel)->toBe('web')->and($c->wording)->toContain('not a credit transfer')->and(json_decode($c->template_versions, true))->toHaveKeys(['en', 'ms'])
         ->and(DB::table('acrs')->where('id', $a->id)->value('status'))->toBe('consent_given')
         ->and(DB::table('tasks')->where('kind', 'abc_deposit')->whereNull('completed_at')->exists())->toBeTrue()->and(DB::table('tasks')->where('kind', 'acr_consent')->whereNull('completed_at')->exists())->toBeFalse();
-    $this->actingAs($this->hakim)->get('/deposits')->assertSee('Record deposit');
+    $this->actingAs($this->nurul)->get('/deposits')->assertSee('Record deposit');
 });
 
 it('keeps the ACR when the participant declines or postpones, and lets them consent later (FR-dpdecline)', function () {
@@ -155,7 +158,7 @@ it('lets a participant see only their own ACR', function () {
 
 it('exports only consented and confirmed records (FR-dpexport)', function () {
     $a = consentedAcr();
-    $r = $this->actingAs($this->hakim)->post('/deposits/export', ['acrs' => [$a->id]]);
+    $r = $this->actingAs($this->nurul)->post('/deposits/export', ['acrs' => [$a->id]]);
     $r->assertOk();
     expect($r->headers->get('Content-Type'))->toContain('text/csv')->and($r->getContent())->toContain($a->reference)->and(DB::table('abc_batches')->count())->toBe(1);
     $cee = DB::table('acrs')->where('id', '!=', $a->id)->first();
@@ -172,7 +175,7 @@ it('records the deposit, sets the expiry from the setting, and stores the settin
     expect(DB::table('acrs')->where('id', $a->id)->value('status'))->toBe('correction');
     depositOf($a)->assertSessionHasNoErrors()->assertSessionHas('status', fn ($s) => str_contains($s, 'not a credit transfer'));
     $d = DB::table('abc_deposits')->where('acr_id', $a->id)->first();
-    expect($d->credit_status)->toBe('available')->and($d->credit_expiry)->toBe(today()->addYears(10)->toDateString())->and($d->setting_version_id)->not->toBeNull()->and($d->recorded_by)->toBe($this->hakim->id)
+    expect($d->credit_status)->toBe('available')->and($d->credit_expiry)->toBe(today()->addYears(10)->toDateString())->and($d->setting_version_id)->not->toBeNull()->and($d->recorded_by)->toBe($this->nurul->id)
         ->and(DB::table('acrs')->where('id', $a->id)->value('status'))->toBe('deposited')->and(DB::table('abc_deposits')->where('acr_id', $a->id)->count())->toBe(1)
         ->and(DB::table('credit_ledger_entries')->where('abc_deposit_id', $d->id)->where('event', 'deposit')->count())->toBe(1)
         ->and(DB::table('tasks')->where('kind', 'abc_deposit')->whereNull('completed_at')->exists())->toBeFalse()
@@ -184,6 +187,7 @@ it('shows the credit ledger with the total and the note that credits are not aut
     deposited();
     $this->actingAs($this->amir)->get('/my-credit')->assertOk()->assertSee('Available')->assertSee('not automatically accepted by any programme')->assertSee('storage only');
     $this->actingAs($this->amir)->get('/my-credit')->assertSeeInOrder(['id="total"', '3']);
+    $this->actingAs($this->amir)->get('/my-credit?print=1')->assertOk()->assertSee('Lampiran F5: Penyata Pengumpulan Kredit Akademik (ABC)')->assertSee('Amir Hakimi');
     $this->actingAs($this->amir)->post('/deposits/1/record', [])->assertForbidden();
 });
 

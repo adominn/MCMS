@@ -42,7 +42,7 @@
           @foreach($w->items as $i)
             <label style="display:flex;align-items:center;gap:8px;background:var(--s1);padding:8px 12px;border:1px solid var(--hairline);cursor:pointer;font-size:13px;margin:0;color:var(--ink)">
               <input type="checkbox" name="items[]" value="{{ $i->id }}">
-              <span><b>{{ $w->reference }}:</b> {{ $i->name_en }} ({{ $i->course_code }} &middot; {{ rtrim(rtrim((string) $i->credits, '0'), '.') }} cr)</span>
+              <span><b>{{ $w->reference }}:</b> {{ $i->name_en }} ({{ $i->course_code }} &middot; {{ mcms_num($i->credits) }} cr)</span>
             </label>
           @endforeach
         @endforeach

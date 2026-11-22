@@ -244,9 +244,14 @@
     }
     .persona-avatar.role-student { background: #0f62fe; }
     .persona-avatar.role-lecturer { background: #8a3ffc; }
-    .persona-avatar.role-deputy_dean { background: #1e2a6e; }
+    .persona-avatar.role-deputy_dean, .persona-avatar.role-ptj_authority { background: #1e2a6e; }
+    .persona-avatar.role-academic_authority { background: #6929c4; }
+    .persona-avatar.role-qa_officer { background: #0072c3; }
     .persona-avatar.role-codl_admin { background: #005d5d; }
-    .persona-avatar.role-industry_expert { background: #ba4e00; }
+    .persona-avatar.role-records_custodian { background: #0e6027; }
+    .persona-avatar.role-abc_depositor { background: #009d9a; }
+    .persona-avatar.role-records_depositor { background: #0e6027; }
+    .persona-avatar.role-industry_expert, .persona-avatar.role-reviewer { background: #ba4e00; }
     .persona-avatar.role-default { background: #525252; }
 
     .persona-text-details {
@@ -284,6 +289,7 @@
     .role-badge.role-tag-student { background: #edf5ff; color: #0043ce; border: 1px solid #d0e2ff; }
     .role-badge.role-tag-lecturer { background: #f6f2ff; color: #6929c4; border: 1px solid #e8daff; }
     .role-badge.role-tag-deputy_dean { background: #e8ecfb; color: #1e2a6e; border: 1px solid #c7d2f8; }
+    .role-badge.role-tag-records_depositor { background: #defbe6; color: #0e6027; border: 1px solid #a7f0ba; }
     .role-badge.role-tag-codl_admin { background: #e5f6f6; color: #005d5d; border: 1px solid #9ef0f0; }
     .role-badge.role-tag-industry_expert { background: #fff2e8; color: #ba4e00; border: 1px solid #ffd8bd; }
 
@@ -450,7 +456,7 @@
             </span>
           </div>
           <p class="muted small" style="margin:0 0 14px;font-size:12px;line-height:1.4">
-            {{ __('For development and demonstration only. Select from :count test personas across all 5 roles.', ['count' => $people->count()]) }}
+            {{ __('For development and demonstration only. Select from :count test personas across all 6 roles.', ['count' => $people->count()]) }}
           </p>
 
           <!-- Pop up button -->
@@ -481,8 +487,15 @@
     'student' => 0,
     'lecturer' => 0,
     'deputy_dean' => 0,
+    'ptj_authority' => 0,
+    'academic_authority' => 0,
+    'qa_officer' => 0,
+    'records_custodian' => 0,
+    'abc_depositor' => 0,
+    'records_depositor' => 0,
     'codl_admin' => 0,
     'industry_expert' => 0,
+    'reviewer' => 0,
   ];
   foreach ($people as $p) {
     foreach ($p->activeRoles() as $r) {
@@ -524,17 +537,37 @@
           {{ __('All') }} ({{ $people->count() }})
         </button>
         <button type="button" class="role-pill" data-role="student">
-          {{ __('Student') }} ({{ $roleCounts['student'] }})
+          {{ __('Student (P8)') }} ({{ $roleCounts['student'] }})
         </button>
         <button type="button" class="role-pill" data-role="lecturer">
-          {{ __('Lecturer') }} ({{ $roleCounts['lecturer'] }})
+          {{ __('Lecturer (P1)') }} ({{ $roleCounts['lecturer'] }})
         </button>
         <button type="button" class="role-pill" data-role="deputy_dean">
-          {{ __('Deputy Dean') }} ({{ $roleCounts['deputy_dean'] }})
+          {{ __('Deputy Dean (P2)') }} ({{ $roleCounts['deputy_dean'] + ($roleCounts['ptj_authority'] ?? 0) }})
         </button>
+        @if(($roleCounts['academic_authority'] ?? 0) > 0)
+        <button type="button" class="role-pill" data-role="academic_authority">
+          {{ __('Academic Authority (P3)') }} ({{ $roleCounts['academic_authority'] }})
+        </button>
+        @endif
+        @if(($roleCounts['qa_officer'] ?? 0) > 0)
+        <button type="button" class="role-pill" data-role="qa_officer">
+          {{ __('QA Officer (P4)') }} ({{ $roleCounts['qa_officer'] }})
+        </button>
+        @endif
         <button type="button" class="role-pill" data-role="codl_admin">
-          {{ __('CODL Admin') }} ({{ $roleCounts['codl_admin'] }})
+          {{ __('CODL Admin (P5)') }} ({{ $roleCounts['codl_admin'] }})
         </button>
+        @if(($roleCounts['records_custodian'] ?? 0) > 0 || ($roleCounts['records_depositor'] ?? 0) > 0)
+        <button type="button" class="role-pill" data-role="records_custodian">
+          {{ __('Records Custodian (P6)') }} ({{ $roleCounts['records_custodian'] + ($roleCounts['records_depositor'] ?? 0) }})
+        </button>
+        @endif
+        @if(($roleCounts['abc_depositor'] ?? 0) > 0 || ($roleCounts['records_depositor'] ?? 0) > 0)
+        <button type="button" class="role-pill" data-role="abc_depositor">
+          {{ __('ABC Depositor (P7)') }} ({{ $roleCounts['abc_depositor'] + ($roleCounts['records_depositor'] ?? 0) }})
+        </button>
+        @endif
         <button type="button" class="role-pill" data-role="industry_expert">
           {{ __('Industry Expert') }} ({{ $roleCounts['industry_expert'] }})
         </button>
@@ -672,7 +705,11 @@ document.addEventListener('DOMContentLoaded', function() {
       var roles = card.getAttribute('data-roles') || '';
       var activeRoles = (card.getAttribute('data-active-roles') || '').split(' ');
 
-      var matchesRole = (currentRole === 'all') || activeRoles.indexOf(currentRole) !== -1;
+      var matchesRole = (currentRole === 'all') ||
+                        activeRoles.indexOf(currentRole) !== -1 ||
+                        (currentRole === 'deputy_dean' && activeRoles.indexOf('ptj_authority') !== -1) ||
+                        (currentRole === 'records_custodian' && activeRoles.indexOf('records_depositor') !== -1) ||
+                        (currentRole === 'abc_depositor' && activeRoles.indexOf('records_depositor') !== -1);
       var matchesQuery = !query || name.indexOf(query) !== -1 || email.indexOf(query) !== -1 || roles.indexOf(query) !== -1;
 
       if (matchesRole && matchesQuery) {

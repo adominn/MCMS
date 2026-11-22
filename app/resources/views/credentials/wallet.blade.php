@@ -47,7 +47,7 @@
         <tr data-href="{{ route('credentials.show', $r->id) }}">
           <td>
             <div style="display:flex;align-items:center;gap:12px">
-              <x-badge :category="$x['category'] ?? ''" :size="36" />
+              <x-badge :category="$x['category'] ?? ''" :size="36" :image="$r->badge_image_path ?? null" />
               <div>
                 <div style="display:flex;align-items:center;gap:6px">
                   <x-cat :c="$x['category'] ?? ''" />
@@ -120,7 +120,7 @@
         <tr data-href="{{ route('verify.show', $b->code) }}">
           <td>
             <div style="display:flex;align-items:center;gap:12px">
-              <x-badge :category="$b->mc_category ?? 'umc'" :size="38" />
+              <x-badge :category="$b->mc_category ?? 'umc'" :size="38" :image="$b->badge_image_path ?? null" :seq="$b->seq ?? null" />
               <div>
                 <a href="{{ route('verify.show', $b->code) }}" target="_blank" style="font-weight:700;color:var(--ink)">
                   {{ __('Module :seq: :name', ['seq' => $b->seq, 'name' => $b->name_en]) }}

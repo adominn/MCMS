@@ -312,7 +312,7 @@
               @foreach($d['results'] as $r)
                 <tr>
                   <td>{{ $r->name_en }}</td>
-                  <td class="num">{{ rtrim(rtrim((string) $r->score, '0'), '.') }} / {{ rtrim(rtrim((string) $r->max_mark, '0'), '.') }}</td>
+                  <td class="num">{{ mcms_num($r->score) }} / {{ mcms_num($r->max_mark) }}</td>
                   <td>
                     <span class="tag {{ (float) $r->score >= (float) $r->pass_mark ? 'ok' : 'err' }}">
                       {{ (float) $r->score >= (float) $r->pass_mark ? __('Met') : __('Not met') }}
@@ -330,13 +330,12 @@
   <div style="display:flex;gap:40px;margin-top:auto;padding-top:20px;border-top:1px solid var(--border)">
     <div style="flex:1;text-align:center">
       <div style="height:36px;border-bottom:1px solid var(--text)"></div>
-      <div style="font-weight:600;margin-top:4px">Registrar's Office / CODL</div>
-      <div class="bm small">Pejabat Pendaftar / CODL</div>
+      <div style="font-weight:600;margin-top:4px">{{ __("Registrar's Office / CODL") }}</div>
     </div>
     <div style="flex:1;text-align:center">
       <div style="height:36px;border-bottom:1px solid var(--text)"></div>
       <div style="font-weight:600;margin-top:4px">{{ now()->format('d/m/Y') }}</div>
-      <div class="bm small">Tarikh</div>
+      <div class="bm small">{{ __('Date') }}</div>
     </div>
   </div>
 @endif

@@ -1,0 +1,178 @@
+URL: http://127.0.0.1:8110/my-record
+FINAL: http://127.0.0.1:8110/my-record
+STATUS: 200
+TITLE: Achievement record - UTeM Micro-Credential Management System
+H1: Achievement record
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+8
+AH
+Amir Hakimi
+Student
+LEARNING
+My learning
+Find a micro-credential
+Registrations and payments
+My results
+Feedback
+ACHIEVEMENTS
+Credentials
+Achievement record
+CREDIT
+Credit ledger and ABC
+Credit transfer
+My degree plan
+Documents
+Notifications
+8
+Collapse sidebar
+←
+Back
+My learning
+Achievement record
+Achievement record
+What you achieved in each micro-credential. It is an internal record, not an Academic Credit Record.
+Print summary (A4)
+Internal record, not an Academic Credit Record. This is MCMS's own record of modules and completions. It cannot be deposited in ABC or used for credit transfer.
+Registrations
+6
+Total enrolled
+Modules achieved
+10
+Passed module assessments
+Completions
+5
+Confirmed by Deputy Dean
+Credentials awarded
+5
+Full micro-credentials
+Achievement Records Summary
+Select a record row or click View record to inspect verified assessments, modules, and credentials.
+6 records
+6 rows
+Micro-credential / Course
+	Cohort & Registration
+	Modules Achieved
+	Final Result
+	Completion Status
+	Credentials
+	Action
+
+Full-Stack Web & API Engineering
+Dr. Aina Zulkifli · Version 1
+	
+2026/S1-FULLSTACK
+ENR-2026-FS001
+	
+3 / 3 Achieved
+B-2026-0015, B-2026-0019, B-2026-0024
+	
+Final result: 87.7%
+	
+Completion: Complete
+18/11/2026
+	
+MCMS-C-2026-000013
+	
+View record →
+
+Object-Oriented Software Construction
+Dr. Aina Zulkifli · Version 1
+	
+2026/1-OOP
+ENR-2026-0017
+	
+UTeM UMC
+0 / 2 Achieved
+	
+Final result: 89%
+	
+Completion: Complete
+30/09/2026
+	
+UTEM-MC-2026-0010
+	
+View record →
+
+Secure Software Development Lifecycle (SSDLC)
+Dr. Lim Wei Jie · Version 1
+	
+2026/1-SSDLC
+ENR-2026-0013
+	
+UTeM SAMC
+2 / 2 Achieved
+BADGE-SSDLC-M1-01, BADGE-SSDLC-M2-01
+	
+Final result: 90%
+	
+Completion: Complete
+20/10/2026
+	
+UTEM-MC-2026-0007
+	
+View record →
+
+Data Structures
+Dr. Aina Zulkifli · Version 1
+	
+2026/1-DS
+ENR-2026-0009
+	
+UTeM UMC
+2 / 2 Achieved
+BADGE-DS-M1-02, BADGE-DS-M2-02
+	
+Final result: 88.9%
+	
+Completion: Complete
+20/08/2026
+	
+UTEM-MC-2026-0003
+	
+View record →
+
+Data Structures
+Dr. Aina Zulkifli · Version 1
+	
+2026/2
+ENR-2026-0003
+	
+UTeM UMC
+1 / 2 Achieved
+BADGE-DS-M1-01
+	–	
+Completion: In progress
+	–	
+View record →
+
+Cloud Native Development
+Dr. Aina Zulkifli · Version 1
+	
+2026/1
+ENR-2026-0001
+	
+UTeM SAMC
+2 / 2 Achieved
+BADGE-CND-M1-01, BADGE-CND-M2-01
+	
+Final result: 90%
+	
+Completion: Complete
+05/09/2026
+	
+UTEM-MC-2026-0001
+	
+View record →
+Rows per page
+5
+10
+25
+50
+1–6 of 6
+Page 1 of 1
+‹
+›

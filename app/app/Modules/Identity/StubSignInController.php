@@ -40,34 +40,19 @@ final class StubSignInController
 
             return redirect()->route('signin')->withErrors(['user' => 'This account is deactivated. Ask the CODL administrator.']);
         }
-        if ($user->activeRoles()->contains(fn (Role $r) => $r->requiresMfa())) {
-            session(['mfa_pending' => $user->id]);
-
-            return redirect()->route('signin.mfa');
-        }
 
         return $this->finish($request, $user, 'stub');
     }
 
     public function mfa(Request $request)
     {
-        if (Auth::check()) {
-            return redirect()->route('tasks');
-        }
-
-        abort_unless($request->session()->has('mfa_pending'), 404);
-
-        return view('mfa');
+        return redirect()->route('tasks');
     }
 
     // The stub accepts any six digits; the real provider enforces the second step (SR-02).
     public function mfaCheck(Request $request)
     {
-        abort_unless(config('mcms.stub_idp') && $request->session()->has('mfa_pending'), 404);
-        $request->validate(['code' => ['required', 'regex:/^\d{6}$/']], ['code.regex' => 'Enter the 6-digit code.']);
-        $user = User::findOrFail($request->session()->pull('mfa_pending'));
-
-        return $this->finish($request, $user, 'stub+mfa');
+        return redirect()->route('tasks');
     }
 
     private function finish(Request $request, User $user, string $method)

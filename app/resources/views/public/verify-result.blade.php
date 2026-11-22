@@ -31,10 +31,10 @@
   };
   $statusInk = match($o) {
     'valid' => 'var(--ok-ink, #0e6027)',
-    'corrected' => 'var(--primary, #1e2a6e)',
+    'corrected' => 'var(--accent, #0f62fe)',
     'replaced', 'expired' => 'var(--warn-ink, #684e00)',
     'revoked', 'invalid_signature' => 'var(--err-ink, #a2191f)',
-    default => 'var(--primary, #1e2a6e)',
+    default => 'var(--accent, #0f62fe)',
   };
 @endphp
 
@@ -65,7 +65,7 @@
     line-height: 1.4;
   }
   .vr-card {
-    background: #ffffff;
+    background: var(--card-bg, #ffffff);
     border: 1px solid var(--hairline);
     border-top: 4px solid {{ $statusColor }};
     margin-bottom: 24px;
@@ -109,7 +109,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #ffffff;
+    background: var(--surface, #ffffff);
     border: 1px solid var(--hairline);
     padding: 6px 12px;
     font-family: var(--mono);
@@ -122,7 +122,7 @@
     border: 0;
     padding: 2px 4px;
     cursor: pointer;
-    color: var(--primary);
+    color: var(--accent, #0f62fe);
     font-size: 11px;
     font-weight: 600;
     display: inline-flex;
@@ -221,7 +221,7 @@
     align-items: flex-start;
     gap: 12px;
     padding: 14px 18px;
-    background: #ffffff;
+    background: var(--surface, #ffffff);
     border: 1px solid var(--hairline);
     font-size: 12px;
     color: var(--muted);
@@ -229,7 +229,7 @@
     margin-bottom: 24px;
   }
   .vr-search-box {
-    background: #ffffff;
+    background: var(--card-bg, #ffffff);
     border: 1px solid var(--hairline);
     padding: 20px 24px;
   }
@@ -366,7 +366,7 @@
         @if(($r['type'] ?? '') === 'badge')
           <!-- Module Digital Badge Body -->
           <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap">
-            <x-badge :category="$p['category'] ?? 'umc'" :size="84" />
+            <x-badge :category="$p['category'] ?? 'umc'" :size="84" :image="$p['image'] ?? null" :seq="$p['module_seq'] ?? null" />
             <div style="flex:1;min-width:240px">
               <div class="vr-credential-title" style="margin-bottom:6px">
                 {{ $lang === 'ms' ? ($p['module_name_ms'] ?? $p['credential']) : ($p['module_name_en'] ?? $p['credential']) }}
@@ -443,13 +443,22 @@
 
           <div class="vr-meta-pills">
             @if(!empty($d['category']))
-              <span class="vr-pill primary">{{ $d['category'] === 'umc' || $d['category'] === 'UMC' ? __('Unbundled Micro-Credential (UMC)') : __('Stand-Alone Micro-Credential (SAMC)') }}</span>
+              @php
+                $catUpper = strtoupper($d['category']);
+                $catLabel = match($catUpper) {
+                  'UMC' => __('Unbundled Micro-Credential (UMC)'),
+                  'SAMC' => __('Stand-Alone Micro-Credential (SAMC)'),
+                  'MCE' => __('Micro-Credential Eksekutif (MCE)'),
+                  default => $d['category'],
+                };
+              @endphp
+              <span class="vr-pill primary">{{ $catLabel }}</span>
             @endif
             @if(!empty($d['credits']))
-              <span class="vr-pill"><b>{{ $d['credits'] }}</b> {{ __('graduating credits') }}</span>
+              <span class="vr-pill"><b>{{ mcms_num($d['credits']) }}</b> {{ __('credits') }}</span>
             @endif
             @if(!empty($d['slt_hours']))
-              <span class="vr-pill"><b>{{ $d['slt_hours'] }}h</b> {{ __('Student Learning Time (SLT)') }}</span>
+              <span class="vr-pill"><b>{{ mcms_num($d['slt_hours']) }}h</b> {{ __('Student Learning Time (SLT)') }}</span>
             @endif
             @if(!empty($d['mqf_level']))
               <span class="vr-pill">{{ __('MQF Level') }} <b>{{ $d['mqf_level'] }}</b></span>
@@ -560,14 +569,30 @@
       <!-- Cryptographic Trust & Downloads Footer -->
       <div class="vr-crypto-footer">
         <div class="vr-crypto-meta">
-          <div style="display:flex;align-items:center;gap:6px">
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="var(--success, #24a148)"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm3.78 6.28l-4.5 4.5a.75.75 0 01-1.06 0l-2-2a.75.75 0 011.06-1.06L6.75 9.19l3.97-3.97a.75.75 0 011.06 1.06z"/></svg>
-            <b>{{ __('Cryptographic Integrity Verified') }}</b> &middot; Ed25519 (W3C VC 2.0 / Open Badges 3.0)
-          </div>
-          <div style="font-size:11px;margin-top:2px">
-            {{ __('Public keys discoverable via UTeM standard JWKS endpoint at') }}
-            <a href="{{ route('jwks') }}" target="_blank" style="font-family:var(--mono)">/.well-known/jwks.json</a>
-          </div>
+          @if(($d['crypto_verified'] ?? false) && in_array($o, ['valid', 'corrected'], true))
+            <div style="display:flex;align-items:center;gap:6px">
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="var(--success, #24a148)"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm3.78 6.28l-4.5 4.5a.75.75 0 01-1.06 0l-2-2a.75.75 0 011.06-1.06L6.75 9.19l3.97-3.97a.75.75 0 011.06 1.06z"/></svg>
+              <b>{{ __('Cryptographic Integrity Verified') }}</b> &middot; Ed25519 (W3C VC 2.0 / Open Badges 3.0)
+            </div>
+            <div style="font-size:11px;margin-top:2px">
+              {{ __('Public keys discoverable via UTeM standard JWKS endpoint at') }}
+              <a href="{{ route('jwks') }}" target="_blank" style="font-family:var(--mono)">/.well-known/jwks.json</a>
+            </div>
+          @elseif($o === 'revoked')
+            <div style="display:flex;align-items:center;gap:6px">
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="var(--error, #da1e28)"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+              <b style="color:var(--error, #da1e28)">{{ __('Credential Revoked') }}</b> &middot; {{ __('Public cryptographic assertion withdrawn') }}
+            </div>
+          @elseif($o === 'invalid_signature')
+            <div style="display:flex;align-items:center;gap:6px">
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="var(--error, #da1e28)"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/></svg>
+              <b style="color:var(--error, #da1e28)">{{ __('Cryptographic Signature Invalid') }}</b> &middot; {{ __('Verification failed against public key') }}
+            </div>
+          @else
+            <div style="display:flex;align-items:center;gap:6px">
+              <b>{{ __('Status') }}: {{ $statusLabels[$o] ?? ucfirst($o) }}</b>
+            </div>
+          @endif
         </div>
 
         @if($cred && $o !== 'revoked')

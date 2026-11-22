@@ -18,7 +18,7 @@ final class Discrepancies
     {
         $n = 0;
         $log = function (string $kind, string $key, string $type, string|int $id, ?int $user, ?int $ptj, string $text) use (&$n) {
-            if (DB::table('discrepancies')->where('key', $key)->exists()) {
+            if (DB::table('discrepancies')->where('key', $key)->where('status', 'open')->exists()) {
                 return;
             }
             DB::table('discrepancies')->insert(['kind' => $kind, 'key' => $key, 'user_id' => $user, 'ptj_id' => $ptj, 'subject_type' => $type, 'subject_id' => (string) $id, 'description' => $text, 'found_at' => now()]);
@@ -57,8 +57,31 @@ final class Discrepancies
             $d = DB::table('discrepancies')->where('id', $id)->lockForUpdate()->first();
             abort_unless($d && $d->status === 'open', 422, 'This discrepancy is already resolved.');
             $original = ['discrepancy' => $d->description, 'subject' => "{$d->subject_type} {$d->subject_id}", 'found_at' => $d->found_at];
-            $cid = DB::table('corrections')->insertGetId(['discrepancy_id' => $id, 'record_type' => $d->subject_type, 'record_ref' => $d->subject_id, 'original' => json_encode($original), 'reason' => $reason, 'action' => $action,
-                'source_checked' => $sourceChecked, 'approver_id' => $by->id, 'corrected_on' => today(), 'participant_notified' => (bool) $d->user_id, 'created_at' => now()]);
+            $acrId = match ($d->subject_type) {
+                'Acr' => is_numeric($d->subject_id) ? (int) $d->subject_id : null,
+                'AbcDeposit' => is_numeric($d->subject_id) ? DB::table('abc_deposits')->where('id', (int) $d->subject_id)->value('acr_id') : null,
+                default => null,
+            };
+            $recordRef = match ($d->subject_type) {
+                'AbcDeposit' => is_numeric($d->subject_id) ? (string) (DB::table('abc_deposits')->where('id', (int) $d->subject_id)->value('abc_reference') ?: $d->subject_id) : (string) $d->subject_id,
+                'Credential' => is_numeric($d->subject_id) ? (string) (DB::table('credentials')->where('id', (int) $d->subject_id)->value('number') ?: $d->subject_id) : (string) $d->subject_id,
+                'Acr' => is_numeric($d->subject_id) ? (string) (DB::table('acrs')->where('id', (int) $d->subject_id)->value('reference') ?: $d->subject_id) : (string) $d->subject_id,
+                default => (string) $d->subject_id,
+            };
+            $cid = DB::table('corrections')->insertGetId([
+                'discrepancy_id' => $id,
+                'acr_id' => $acrId,
+                'record_type' => $d->subject_type,
+                'record_ref' => $recordRef,
+                'original' => json_encode($original),
+                'reason' => $reason,
+                'action' => $action,
+                'source_checked' => $sourceChecked,
+                'approver_id' => $by->id,
+                'corrected_on' => today(),
+                'participant_notified' => (bool) $d->user_id,
+                'created_at' => now(),
+            ]);
             DB::table('discrepancies')->where('id', $id)->update(['status' => 'resolved', 'resolved_at' => now(), 'resolved_by' => $by->id]);
             $this->audit->record('correction.recorded', ['type' => 'Correction', 'id' => $cid], before: $original, after: ['action' => $action], reason: $reason, actorId: $by->id); // EV-60
             if ($d->user_id && ($u = User::find($d->user_id))) { // a credential, ACR, deposit or credit may be affected, so the participant is told

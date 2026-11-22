@@ -1,0 +1,84 @@
+URL: http://127.0.0.1:8110/public/pathways
+FINAL: http://127.0.0.1:8110/public/pathways
+STATUS: 200
+TITLE: Pathways to a degree - UTeM Micro-Credential Management System
+H1: Pathways to a degree
+---
+UTeM MCMS
+Public Verification & Credential Portal
+Sign in
+EN
+BM
+Home
+Catalogue
+Pathways to a degree
+How recognition works
+FAQ
+Verify a credential
+Home
+/
+Pathways to a degree
+Pathways to a degree
+Senate-approved official degree articulation roadmaps for credit transfer into UTeM degree programmes
+Academic Regulatory Notice
+An approved pathway transfers no credit: each credit goes through credit transfer evaluation by the receiving programme upon formal admission. No micro-credential leads to a degree automatically, however many are collected. At least 30% of the graduating credit must be earned directly at UTeM under residency regulations.
+BITS
+MQF Level 6 · 120 Graduating Credits · Conventional
+Bachelor of Computer Science (Software Development) with Honours
+4 Mapped micro-credentials
+•
+1 Max articulable credits
+•
+Senate Ref: Senate 7/2026
+Download Pathway Specification (PDF)
+MBA
+MQF Level 7 · 40 Graduating Credits · Odl
+Master of Business Administration
+1 Mapped micro-credentials
+•
+3 Max articulable credits
+•
+Senate Ref: Senate 6/2026
+Download Pathway Specification (PDF)
+MTDL
+MQF Level 7 · 40 Graduating Credits · Odl
+Master of Technology in Data Science and Analytics
+2 Mapped micro-credentials
+•
+5 Max articulable credits
+•
+Senate Ref: Senate 6/2026
+Download Pathway Specification (PDF)
+Academic Articulation Principles & Regulations
+At least 30% of degree credits at UTeM
+
+At least 30% of graduating credits must be completed directly as a registered UTeM student; transferred credits cannot exceed this threshold.
+
+Campus Residency Requirement
+
+Conventional degree programmes require at least one registered semester in physical campus residency before degree conferment.
+
+Admission & Matriculation Separate
+
+Credit transfer requires an admitted student. Admission is an independent evaluation conducted by the Admissions Office (Pejabat Pendaftar).
+
+10-Year Credit Expiry
+
+Earned micro-credential credits are valid for transfer consideration up to 10 years from their deposit date in the Academic Bank of Credit (ABC).
+
+UTeM Micro-credentials
+Centre for Open and Distance Learning (CODL)
+UTeM, Hang Tuah Jaya, 76100 Durian Tunggal, Melaka
+Learn
+All micro-credentials
+Degree pathways
+Recognition stages
+Help
+FAQ
+Verify a credential
+codl@utem.edu.my
+Policies
+Privacy notice (PDPA)
+Terms of use
+Accessibility
+UTeM Micro-Credential Management System (MCMS). Compliant with MQA & MoHE Good Practice Standards.

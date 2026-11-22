@@ -64,7 +64,7 @@
               </td>
               <td>{{ $c->domain }}</td>
               <td>{{ $c->level }}</td>
-              <td class="num">{{ $c->hours !== null ? rtrim(rtrim(number_format((float) $c->hours, 2), '0'), '.') : '—' }}</td>
+              <td class="num">{{ $c->hours !== null ? mcms_num($c->hours) : '—' }}</td>
               <td class="num">
                 @if($c->fee === null)
                   —

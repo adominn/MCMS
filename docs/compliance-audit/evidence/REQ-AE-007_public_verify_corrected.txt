@@ -1,0 +1,86 @@
+URL: http://127.0.0.1:8110/public/verify/CND02-8M3NP
+FINAL: http://127.0.0.1:8110/public/verify/CND02-8M3NP
+STATUS: 200
+TITLE: Verification Result - UTeM Micro-Credential Management System
+H1: Verification result
+---
+UTeM MCMS
+Public Verification & Credential Portal
+Sign in
+EN
+BM
+Home
+Catalogue
+Pathways to a degree
+How recognition works
+FAQ
+Verify a credential
+←
+Back
+Home
+Verify a credential
+CND02-8M3NP
+Verification result
+Integrity and registration verification result from UTeM
+Print verification record
+Status: Valid, corrected
+Valid. Corrected after issue (2026-10-15); the details below are the current revision.
+CODE:
+CND02-8M3NP
+Copy
+Cloud Native Development
+Stand-Alone Micro-Credential (SAMC)
+2
+graduating credits
+80h
+Student Learning Time (SLT)
+MQF Level
+4
+RECIPIENT NAME
+Bee Tan
+ISSUING INSTITUTION
+Universiti Teknikal Malaysia Melaka
+FACULTY / ACADEMIC PTJ
+Fakulti Teknologi Maklumat Dan Komunikasi
+LECTURER
+Dr. Aina Zulkifli
+DATE AWARDED
+15/09/2026
+AUTHORIZED SIGNATORY
+Hakim Rahman
+CORRECTION DATE
+2026-10-15
+EARNED COMPONENT MODULES & BADGES
+Module 1: Containerization with Docker · 40h SLT
+BADGE-CND-M1-02
+Verify →
+Module 2: Kubernetes Orchestration & CI/CD · 40h SLT
+BADGE-CND-M2-02
+Verify →
+Cryptographic Integrity Verified
+· Ed25519 (W3C VC 2.0 / Open Badges 3.0)
+Public keys discoverable via UTeM standard JWKS endpoint at /.well-known/jwks.json
+Download Credential (.json)
+Download Signed Token (.jwt)
+Personal Data Protection Act (PDPA 2010) Compliance Notice: Only name, credential, issuer, issue date and status are shown. Results, marks, matric numbers and personal email addresses are never public.
+Check another credential or badge
+
+Enter any official UTeM micro-credential code or badge identifier:
+
+Verify
+UTeM Micro-credentials
+Centre for Open and Distance Learning (CODL)
+UTeM, Hang Tuah Jaya, 76100 Durian Tunggal, Melaka
+Learn
+All micro-credentials
+Degree pathways
+Recognition stages
+Help
+FAQ
+Verify a credential
+codl@utem.edu.my
+Policies
+Privacy notice (PDPA)
+Terms of use
+Accessibility
+UTeM Micro-Credential Management System (MCMS). Compliant with MQA & MoHE Good Practice Standards.

@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catalogue - UTeM Micro-Credential Management System</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+</head>
+<body>
+  
+  <header class="brand-header">
+    <div class="container brand-header-inner">
+      <a href="../public/home.html" class="brand-identity" aria-label="UTeM Micro-Credential Management System Home">
+        <img src="../assets/LogoJawiUTeM_blue-01.png" alt="Universiti Teknikal Malaysia Melaka" class="brand-logo-img">
+        <div class="brand-titles">
+          <span class="brand-sys-title">UTeM MCMS</span>
+        </div>
+      </a>
+      
+      <nav class="header-nav" aria-label="Public Navigation">
+        <ul class="header-nav-list">
+          <li><a href="../public/home.html" class="header-nav-link ">Home</a></li>
+          <li><a href="../public/catalogue.html" class="header-nav-link active">Catalogue</a></li>
+          <li><a href="../public/pathways.html" class="header-nav-link ">Pathways</a></li>
+          <li><a href="../public/how-it-works.html" class="header-nav-link ">Recognition Stages</a></li>
+          <li><a href="../public/faq.html" class="header-nav-link ">FAQ</a></li>
+          <li><a href="../public/verify.html" class="header-nav-link ">Verify</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="../auth/signin-default.html" class="btn btn-primary btn-sm">Sign In</a>
+      </div>
+    </div>
+  </header>
+  
+  
+  <main class="main-content">
+    
+<div class="container">
+
+
+  <div class="flex items-center justify-between" style="margin-bottom:20px">
+    <div>
+      <div class="breadcrumbs">
+        <a href="home.html">Home</a>
+        <span class="breadcrumbs-sep">/</span>
+        <span>Catalogue</span>
+      </div>
+      <h1>Micro-Credential Catalogue</h1>
+      <p style="margin-top:4px">Browse and filter accredited micro-credential offerings across all UTeM faculties.</p>
+    </div>
+    <div>
+      <span class="tag tag-primary">Showing 4 Offerings</span>
+    </div>
+  </div>
+
+  <div class="catalogue-layout">
+    <!-- Filter Sidebar -->
+    <aside class="catalogue-sidebar">
+      <form action="catalogue.html" method="get" class="card">
+        <div class="flex items-center justify-between" style="margin-bottom:14px">
+          
+          <a href="catalogue.html" style="font-size:12px;color:var(--color-primary)">Clear All</a>
+        </div>
+
+        <div class="form-group">
+          <label for="filter-q" class="form-label">Keyword Search</label>
+          <input type="search" id="filter-q" name="q" placeholder="Name, code, or faculty..." class="input" value="">
+        </div>
+
+        <div class="form-group">
+          <label for="filter-category" class="form-label">Category</label>
+          <select id="filter-category" name="category" class="select">
+            <option value="">All Categories</option>
+            <option value="umc">UMC &ndash; Unbundled (Degree Credit)</option>
+            <option value="samc">SAMC &ndash; Standalone</option>
+            <option value="mce">MCE &ndash; Executive</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="filter-ptj" class="form-label">Faculty / PTj</label>
+          <select id="filter-ptj" name="ptj" class="select">
+            <option value="">All Faculties</option>
+            <option value="FTMK">FTMK &ndash; Computing & Information Tech</option>
+            <option value="FKE">FKE &ndash; Electrical Engineering</option>
+            <option value="FKP">FKP &ndash; Manufacturing Engineering</option>
+            <option value="FKM">FKM &ndash; Mechanical Engineering</option>
+            <option value="FTKEE">FTKEE &ndash; Electronics & Computer Tech</option>
+            <option value="FTKIP">FTKIP &ndash; Industrial Tech</option>
+            <option value="FPTT">FPTT &ndash; Technology Management</option>
+            <option value="CODL">CODL &ndash; Open & Distance Learning</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="filter-mode" class="form-label">Delivery Mode</label>
+          <select id="filter-mode" name="mode" class="select">
+            <option value="">All Delivery Modes</option>
+            <option value="online">Online (ODL)</option>
+            <option value="blended">Blended Learning</option>
+            <option value="conventional">Conventional (Face-to-Face)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="filter-starts" class="form-label">Earliest Start Date</label>
+          <input type="date" id="filter-starts" name="starts" class="input">
+        </div>
+
+        <div class="form-group">
+          <label for="filter-fee" class="form-label">Maximum Fee (RM)</label>
+          <input type="number" id="filter-fee" name="fee_max" placeholder="e.g. 500" class="input">
+        </div>
+
+        <div class="form-group" style="margin-bottom:18px">
+          <label class="checkbox-label">
+            <input type="checkbox" name="free" value="1">
+            <span>Free Offerings Only</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Apply Filters</button>
+      </form>
+    </aside>
+
+    <!-- Results List -->
+    <section class="catalogue-results">
+      <!-- Item 1 -->
+      <div class="card offering-card">
+        <div>
+          <div class="offering-card-header">
+            <div>
+              <div class="flex items-center gap-xs" style="margin-bottom:6px">
+                <span class="tag tag-primary">UMC</span>
+                <span class="tag">FTMK</span>
+                <span class="tag">MQF 6</span>
+                <span class="tag tag-success">ACR Available</span>
+              </div>
+              <h2 style="font-size:18px;margin:4px 0"><a href="offering.html">Cloud Native Application Development & Microservices</a></h2>
+              <div style="font-family:var(--font-mono);font-size:11.5px;color:var(--color-ink-muted)">Code: UMC-BITD-2401 &middot; Cohort: CND-2027A</div>
+            </div>
+            <div style="text-align:right">
+              <span style="font-size:18px;font-weight:700;color:var(--color-primary)">RM 450.00</span>
+            </div>
+          </div>
+          <p style="font-size:13.5px;line-height:1.5;margin-bottom:12px">
+            Covers modern microservices architecture, containerization with Docker, Kubernetes cluster orchestration, and automated CI/CD deployment workflows.
+          </p>
+        </div>
+        <div class="offering-card-meta">
+          <span><b>Credits:</b> 3 Credits</span>
+          <span><b>SLT:</b> 120 Hours</span>
+          <span><b>Mode:</b> Online (ODL)</span>
+          <span><b>Language:</b> English</span>
+          <span><b>Starts:</b> 15 Jan 2027</span>
+          <a href="offering.html" class="btn btn-primary btn-sm" style="margin-left:auto">Details & Enroll</a>
+        </div>
+      </div>
+
+      <!-- Item 2 -->
+      <div class="card offering-card">
+        <div>
+          <div class="offering-card-header">
+            <div>
+              <div class="flex items-center gap-xs" style="margin-bottom:6px">
+                <span class="tag tag-primary">SAMC</span>
+                <span class="tag">FTKEE</span>
+                <span class="tag">MQF 6</span>
+                <span class="tag tag-warning">QV Valid until 2028</span>
+              </div>
+              <h2 style="font-size:18px;margin:4px 0"><a href="offering.html">Industrial IoT Sensors & Edge Computing Gateway</a></h2>
+              <div style="font-family:var(--font-mono);font-size:11.5px;color:var(--color-ink-muted)">Code: SAMC-BTE-3302 &middot; Cohort: IIOT-2027B</div>
+            </div>
+            <div style="text-align:right">
+              <span style="font-size:18px;font-weight:700;color:var(--color-primary)">RM 380.00</span>
+            </div>
+          </div>
+          <p style="font-size:13.5px;line-height:1.5;margin-bottom:12px">
+            Design and configuration of industrial sensors, microcontroller interfacing, MQTT broker protocols, and localized edge data processing.
+          </p>
+        </div>
+        <div class="offering-card-meta">
+          <span><b>Credits:</b> 2 Credits</span>
+          <span><b>SLT:</b> 80 Hours</span>
+          <span><b>Mode:</b> Blended</span>
+          <span><b>Language:</b> English</span>
+          <span><b>Starts:</b> 01 Feb 2027</span>
+          <a href="offering.html" class="btn btn-primary btn-sm" style="margin-left:auto">Details & Enroll</a>
+        </div>
+      </div>
+
+      <!-- Item 3 -->
+      <div class="card offering-card">
+        <div>
+          <div class="offering-card-header">
+            <div>
+              <div class="flex items-center gap-xs" style="margin-bottom:6px">
+                <span class="tag tag-primary">UMC</span>
+                <span class="tag">FPTT</span>
+                <span class="tag">MQF 7</span>
+                <span class="tag tag-success">ACR Available</span>
+              </div>
+              <h2 style="font-size:18px;margin:4px 0"><a href="offering.html">Applied Data Analytics for Strategic Management</a></h2>
+              <div style="font-family:var(--font-mono);font-size:11.5px;color:var(--color-ink-muted)">Code: UMC-MBA-7104 &middot; Cohort: ADA-2027A</div>
+            </div>
+            <div style="text-align:right">
+              <span style="font-size:18px;font-weight:700;color:var(--color-primary)">RM 600.00</span>
+            </div>
+          </div>
+          <p style="font-size:13.5px;line-height:1.5;margin-bottom:12px">
+            Executive quantitative analytics, business intelligence dashboards, predictive modeling, and strategic data-driven corporate decision-making.
+          </p>
+        </div>
+        <div class="offering-card-meta">
+          <span><b>Credits:</b> 3 Credits</span>
+          <span><b>SLT:</b> 120 Hours</span>
+          <span><b>Mode:</b> Online (ODL)</span>
+          <span><b>Language:</b> English</span>
+          <span><b>Starts:</b> 10 Feb 2027</span>
+          <a href="offering.html" class="btn btn-primary btn-sm" style="margin-left:auto">Details & Enroll</a>
+        </div>
+      </div>
+
+      <!-- Item 4 -->
+      <div class="card offering-card">
+        <div>
+          <div class="offering-card-header">
+            <div>
+              <div class="flex items-center gap-xs" style="margin-bottom:6px">
+                <span class="tag tag-primary">MCE</span>
+                <span class="tag">CODL</span>
+                <span class="tag">Competency</span>
+              </div>
+              <h2 style="font-size:18px;margin:4px 0"><a href="offering.html">Cybersecurity Threat Modeling & DevSecOps Practice</a></h2>
+              <div style="font-family:var(--font-mono);font-size:11.5px;color:var(--color-ink-muted)">Code: MCE-SEC-1010 &middot; Cohort: CTM-2027C</div>
+            </div>
+            <div style="text-align:right">
+              <span style="font-size:18px;font-weight:700;color:var(--color-primary)">RM 520.00</span>
+            </div>
+          </div>
+          <p style="font-size:13.5px;line-height:1.5;margin-bottom:12px">
+            Practical STRIDE threat modeling, vulnerability assessment, secret management, and automated security scanning in software development life cycles.
+          </p>
+        </div>
+        <div class="offering-card-meta">
+          <span><b>Credits:</b> 0 Credits (Non-Credit Bearing)</span>
+          <span><b>SLT:</b> 40 Hours</span>
+          <span><b>Mode:</b> Online (ODL)</span>
+          <span><b>Language:</b> English</span>
+          <span><b>Starts:</b> 01 Mar 2027</span>
+          <a href="offering.html" class="btn btn-primary btn-sm" style="margin-left:auto">Details & Enroll</a>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex items-center justify-between" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--color-line-hairline)">
+        <span style="font-size:12.5px;color:var(--color-ink-muted)">Showing page 1 of 1 (4 total items)</span>
+        <div class="flex items-center gap-xs">
+          <button class="btn btn-secondary btn-sm" disabled>&lt; Previous</button>
+          <button class="btn btn-primary btn-sm">1</button>
+          <button class="btn btn-secondary btn-sm" disabled>Next &gt;</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+  </main>
+
+  
+  <footer class="public-footer">
+    <div class="container">
+      <div class="grid grid-cols-4 gap-lg">
+        <div>
+          <img src="../assets/CODL_logo.png" alt="Centre for Open and Distance Learning" style="height:60px;width:auto;display:block;margin-bottom:14px">
+          <div class="footer-heading">UTeM Micro-credentials</div>
+          <p style="color:#94a3b8;font-size:12.5px;line-height:1.5">
+            Centre for Open and Distance Learning (CODL)<br>
+            Universiti Teknikal Malaysia Melaka<br>
+            Hang Tuah Jaya, 76100 Durian Tunggal, Melaka
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-heading">Learn</div>
+          <a href="../public/catalogue.html">All Micro-Credentials</a>
+          <a href="../public/pathways.html">Degree Pathways</a>
+          <a href="../public/how-it-works.html">Recognition Stages</a>
+        </div>
+
+        <div>
+          <div class="footer-heading">Help & Verification</div>
+          <a href="../public/faq.html">Frequently Asked Questions</a>
+          <a href="../public/verify.html">Verify a Credential</a>
+          <a href="mailto:codl@utem.edu.my">Contact CODL: codl@utem.edu.my</a>
+        </div>
+
+        <div>
+          <div class="footer-heading">Policies & Governance</div>
+          <a href="../public/policy-privacy.html">Privacy Notice (PDPA)</a>
+          <a href="../public/policy-terms.html">Terms of Use</a>
+          <a href="../public/policy-accessibility.html">Accessibility Statement</a>
+        </div>
+      </div>
+
+      <div class="footer-legal">
+        Micro-credentials issued under the UTeM Micro-Credential Framework compliant with MQA Code of Practice for Programme Accreditation and Malaysian Qualifications Framework (MQF) 2nd Edition. Micro-credentials do not automatically grant university admission.
+      </div>
+    </div>
+  </footer>
+  
+
+  <script src="../js/ui.js"></script>
+</body>
+</html>

@@ -26,7 +26,7 @@
     <!-- Digital Badge Preview Card for Lecturer -->
     <div class="card" style="border:1px solid var(--hairline);border-left:4px solid var(--accent, #0f62fe);padding:18px 20px;background:var(--card-bg);margin-bottom:16px">
       <div style="font-size:11px;font-weight:700;color:var(--accent, #0f62fe);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">
-        {{ __('Open Badges 3.0 &middot; Digital Badge Specification') }}
+        {{ __('Open Badges 3.0 · Digital Badge Specification') }}
       </div>
       <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
         <x-badge :category="$v->category" :size="72" :image="$v->badge_image_path ?? null" />
@@ -100,7 +100,9 @@
         <select id="qv_status" name="qv_status">
           <option value="">-</option>
           @foreach($cfg['qv_status'] as $k => $l)
-            <option value="{{ $k }}" @selected($v->qv_status === $k)>{{ __($l) }}</option>
+            @if($k !== 'verified' || $v->qv_status === 'verified')
+              <option value="{{ $k }}" @selected($v->qv_status === $k)>{{ __($l) }}</option>
+            @endif
           @endforeach
         </select>
       </div>
@@ -115,7 +117,7 @@
     <div class="form-grid cols-2" style="max-width:560px">
       <div class="field">
         <label for="proposed_credit">{{ __('Proposed credit') }}</label>
-        <input type="text" inputmode="decimal" id="proposed_credit" name="proposed_credit" value="{{ $v->proposed_credit !== null ? rtrim(rtrim((string) $v->proposed_credit, '0'), '.') : '' }}" placeholder="e.g. 3.0">
+        <input type="text" inputmode="decimal" id="proposed_credit" name="proposed_credit" value="{{ $v->proposed_credit !== null ? mcms_num($v->proposed_credit) : '' }}" placeholder="e.g. 3.0">
       </div>
       <div class="field">
         <label for="proposed_mqf_level">{{ __('Proposed MQF level (1 to 8)') }}</label>

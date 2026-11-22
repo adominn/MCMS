@@ -90,7 +90,13 @@ final class RecordsController
     public function discrepancies(Request $request)
     {
         [$ptj] = $this->scope($request->user());
-        $q = DB::table('discrepancies as d')->leftJoin('corrections as c', 'c.discrepancy_id', '=', 'd.id')->when($ptj !== null, fn ($b) => $b->whereIn('d.ptj_id', $ptj))->orderBy('d.status')->orderByDesc('d.id')->get(['d.*', 'c.reason', 'c.action', 'c.corrected_on']);
+        $q = DB::table('discrepancies as d')
+            ->leftJoin('corrections as c', 'c.discrepancy_id', '=', 'd.id')
+            ->leftJoin('users as au', 'au.id', '=', 'c.approver_id')
+            ->when($ptj !== null, fn ($b) => $b->whereIn('d.ptj_id', $ptj))
+            ->orderBy('d.status')
+            ->orderByDesc('d.id')
+            ->get(['d.*', 'c.reason', 'c.action', 'c.corrected_on', 'c.source_checked', 'c.participant_notified', 'au.name as approver_name', 'au.position as approver_position']);
 
         return view('records.discrepancies', ['rows' => $q]);
     }
@@ -147,16 +153,20 @@ final class RecordsController
     {
         [$ptj, $owner] = $this->scope($request->user());
         $q = trim((string) $request->query('q'));
-        $rows = DB::table('audit_events as e')->leftJoin('users as u', 'u.id', '=', 'e.actor_id')->when($q !== '', fn ($b) => $b->where(fn ($w) => $w->where('e.action', db_like(), "%$q%")->orWhere('e.subject_type', db_like(), "%$q%")->orWhere('e.subject_id', $q)))
-            ->orderByDesc('e.seq')->limit(600)->get(['e.seq', 'e.occurred_at', 'u.name as actor', 'e.actor_role', 'e.action', 'e.subject_type', 'e.subject_id', 'e.reason']);
+        $query = DB::table('audit_events as e')->leftJoin('users as u', 'u.id', '=', 'e.actor_id')
+            ->when($q !== '', fn ($b) => $b->where(fn ($w) => $w->where('e.action', db_like(), "%$q%")->orWhere('e.subject_type', db_like(), "%$q%")->orWhere('e.subject_id', $q)))
+            ->orderByDesc('e.seq');
 
-        // A deputy dean sees events inside their PTj; a lecturer sees only events for micro-credentials they own; technical events stay with CODL.
-        return $ptj === null
-            ? $rows->take(100)
-            : $rows->filter(fn ($r) => ($p = Trace::ptjOf($r->subject_type, $r->subject_id)) !== null
+        if ($ptj !== null) {
+            $rows = $query->limit(2000)->get(['e.seq', 'e.occurred_at', 'u.name as actor', 'e.actor_role', 'e.action', 'e.subject_type', 'e.subject_id', 'e.reason', 'e.before', 'e.after', 'e.context']);
+
+            return $rows->filter(fn ($r) => ($p = Trace::ptjOf($r->subject_type, $r->subject_id)) !== null
                 && in_array($p, $ptj, true)
                 && ($owner === null || Trace::ownerOf($r->subject_type, $r->subject_id) === $owner))
                 ->take(100)->values();
+        }
+
+        return $query->limit(100)->get(['e.seq', 'e.occurred_at', 'u.name as actor', 'e.actor_role', 'e.action', 'e.subject_type', 'e.subject_id', 'e.reason', 'e.before', 'e.after', 'e.context']);
     }
 
     // ---- documents hub (FL-24)
@@ -170,7 +180,7 @@ final class RecordsController
             'credentials' => DB::table('credentials as c')->join('enrolments as e', 'e.id', '=', 'c.enrolment_id')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->where('e.user_id', $u->id)->get(['c.id', 'c.number', 'c.status', 'v.name_en', 'c.issued_at']),
             'acrs' => DB::table('acrs as a')->join('mc_versions as v', 'v.id', '=', 'a.mc_version_id')->where('a.user_id', $u->id)->get(['a.id', 'a.reference', 'v.name_en', 'a.credits', 'a.status', 'a.created_at']),
         ] : null;
-        $batches = $u->hasAnyRole('deputy_dean') ? DB::table('abc_batches')
+        $batches = $u->hasAnyRole('records_depositor') ? DB::table('abc_batches')
             ->when($ptjs !== null, fn ($b) => $b->whereIn('ptj_id', $ptjs))
             ->orderByDesc('id')->limit(10)->get() : collect();
         $suspensions = $u->hasAnyRole('deputy_dean') ? DB::table('suspensions as s')
@@ -200,8 +210,9 @@ final class RecordsController
             'proposals' => $proposals,
             'transfers' => $transfers,
             'kinds' => Reports::KINDS,
-            'reports' => $u->hasAnyRole('lecturer', 'deputy_dean', 'codl_admin'),
+            'reports' => $u->hasAnyRole('lecturer', 'deputy_dean', 'records_depositor', 'codl_admin'),
             'dean' => $u->hasAnyRole('deputy_dean'),
+            'depositor' => $u->hasAnyRole('records_depositor'),
             'codl' => $codl,
             'ucredsImports' => $ucredsImports,
             'ucredsOfferings' => $ucredsOfferings,
@@ -215,6 +226,9 @@ final class RecordsController
     {
         if ($u->hasAnyRole('codl_admin')) {
             return [null, null];
+        }
+        if ($u->hasAnyRole('records_depositor')) {
+            return [$u->scopedPtjIds('records_depositor'), null];
         }
         if ($u->hasAnyRole('deputy_dean')) {
             return [$u->scopedPtjIds('deputy_dean'), null];

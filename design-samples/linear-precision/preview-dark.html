@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linear Precision &mdash; Dark Theme Preview (Rounded Blue Sidebar with White Line &amp; Pull-Tab)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --canvas: #07090e;
+    --canvas-subtle: #0b0f17;
+    --surface-1: #101522;
+    --surface-2: #182030;
+    --surface-contrast: #ffffff;
+
+    /* DEEP COBALT BLUE SIDEBAR */
+    --sidebar-bg: #07122a;
+    --sidebar-border: #ffffff;
+    --sidebar-text: #c2d3ed;
+    --sidebar-text-muted: #738eb5;
+    --sidebar-text-active: #ffffff;
+    --sidebar-hover-bg: rgba(56, 128, 255, 0.15);
+    --sidebar-active-bg: #2563eb;
+    --sidebar-active-glow: rgba(37, 99, 235, 0.5);
+    --sidebar-hairline: rgba(255, 255, 255, 0.08);
+    --sidebar-search-bg: rgba(0, 0, 0, 0.35);
+    --sidebar-search-border: rgba(56, 128, 255, 0.25);
+
+    --primary: #3880ff;
+    --primary-hover: #5492ff;
+    --primary-pressed: #2468e8;
+    --primary-deep: #0f1c36;
+    --primary-tint: rgba(56, 128, 255, 0.14);
+    --primary-tint-hover: rgba(56, 128, 255, 0.22);
+    --primary-line: rgba(56, 128, 255, 0.38);
+    --primary-glow: rgba(56, 128, 255, 0.25);
+
+    --ink: #f8fafc;
+    --ink-dark: #ffffff;
+    --ink-muted: #94a3b8;
+    --ink-subtle: #64748b;
+    --on-primary: #ffffff;
+    --on-ink: #07090e;
+
+    --line-hairline: #1c2436;
+    --line-strong: #334155;
+    --line-accent: #3880ff;
+    --line-subtle: rgba(28, 36, 54, 0.85);
+    --grid-crosshair: #475569;
+    --grid-line-color: rgba(28, 36, 54, 0.55);
+
+    --semantic-success: #10b981;
+    --semantic-success-tint: rgba(16, 185, 129, 0.14);
+    --semantic-success-line: rgba(16, 185, 129, 0.4);
+    --semantic-warning: #f59e0b;
+    --semantic-warning-tint: rgba(245, 158, 11, 0.14);
+    --semantic-warning-line: rgba(245, 158, 11, 0.4);
+    --semantic-error: #f43f5e;
+    --semantic-error-tint: rgba(244, 63, 94, 0.14);
+    --semantic-error-line: rgba(244, 63, 94, 0.4);
+
+    --radius-none: 0px;
+    --radius-xs: 2px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-pill: 9999px;
+
+    --theme-radius: 4px;
+    --theme-card-radius: 6px;
+
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 68px;
+    --sidebar-radius: 28px;
+    --sidebar-right-space: 14px;
+    --topbar-height: 56px;
+
+    --sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    background: var(--canvas);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* =========================================================
+     GLOBAL SLEEK SCROLLBARS (DARK OBSIDIAN / SUBTLE)
+     ========================================================= */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    background: transparent;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.28);
+  }
+
+  .grid-bg {
+    background-size: 40px 40px;
+    background-image: 
+      linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
+  }
+
+  .app-frame { display: flex; min-height: 100vh; position: relative; }
+
+  /* =========================================================
+     BLUE SIDEBAR: ZERO TOP & BOTTOM GAP, ROUNDED RIGHT CORNERS
+     ========================================================= */
+  .app-sidebar {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+    background: var(--sidebar-bg);
+    position: sticky;
+    top: 0;                      /* NO TOP GAP - FLUSH TO TOP */
+    height: 100vh;               /* NO BOTTOM GAP - FULL HEIGHT */
+    margin: 0 var(--sidebar-right-space) 0 0; /* Only right gap/channel */
+    z-index: 95;
+    transition: width 0.25s cubic-bezier(0.2, 0, 0, 1);
+    
+    border-top-right-radius: var(--sidebar-radius);
+    border-bottom-right-radius: var(--sidebar-radius);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+
+    /* Clean dark navy edge without white border */
+    border-right: none;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+    overflow: visible;
+  }
+
+  /* Internal White Accent Line - Hidden to match exact mockup */
+  .sidebar-right-white-line {
+    display: none;
+  }
+
+  /* Protruding Pure White Pull-Tab Handle in the middle of the right edge */
+  .sidebar-pull-tab {
+    position: absolute;
+    top: 50%;
+    right: -18px;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 52px;
+    background: #ffffff;
+    border: none;
+    border-radius: 0 24px 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0b1a3d;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 3px 0 14px rgba(0, 0, 0, 0.4);
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+    padding: 0;
+    outline: none;
+  }
+  .sidebar-pull-tab:hover {
+    background: #ffffff;
+    width: 34px;
+    right: -22px;
+    box-shadow: 5px 0 20px rgba(0, 0, 0, 0.5);
+  }
+  .pull-tab-icon {
+    font-size: 13px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0b1a3d;
+  }
+
+  /* Internal scrollable content container with ultra-subtle, hard-to-see scrollbar */
+  .sidebar-inner {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    border-top-right-radius: var(--sidebar-radius);
+    border-bottom-right-radius: var(--sidebar-radius);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 16px;
+
+    /* Firefox subtle scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+  }
+  .sidebar-inner:hover {
+    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  }
+
+  /* WebKit (Chrome, Edge, Safari) - Ultra-slim (4px), transparent track, faint thumb */
+  .sidebar-inner::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+    background: transparent;
+  }
+  .sidebar-inner::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 6px 0;
+  }
+  .sidebar-inner::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  .sidebar-inner::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.06); /* Blends into deep navy, very hard to see */
+    border-radius: 9999px;
+    transition: background 0.2s ease;
+  }
+  .sidebar-inner:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18); /* Gentle visibility on hover */
+  }
+  .sidebar-inner::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.32); /* Drag feedback */
+  }
+
+  /* COLLAPSED STATE STYLES */
+  .app-sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+  }
+  .app-sidebar.collapsed .hide-on-collapse {
+    display: none !important;
+  }
+  .app-sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 12px 6px;
+    height: 64px;
+  }
+  .app-sidebar.collapsed .sidebar-logo-img {
+    display: none !important;
+  }
+  .app-sidebar.collapsed .sidebar-logo-icon {
+    display: block !important;
+  }
+  .app-sidebar.collapsed .nav-tab-item a {
+    justify-content: center;
+    padding: 10px 0;
+    position: relative;
+  }
+  .app-sidebar.collapsed .nav-tab-left {
+    gap: 0;
+  }
+  .app-sidebar.collapsed .nav-tab-icon {
+    font-size: 16px;
+  }
+
+  /* Tooltip on Collapsed Navigation Items */
+  .app-sidebar.collapsed .nav-tab-item {
+    position: relative;
+  }
+  .app-sidebar.collapsed .nav-tab-item:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 80px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #101522;
+    color: #ffffff;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: var(--theme-radius);
+    white-space: nowrap;
+    z-index: 1000;
+    border: 1px solid rgba(56, 128, 255, 0.4);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    pointer-events: none;
+    letter-spacing: 0.02em;
+  }
+
+  /* Sidebar Header: ALL WHITE BACKGROUND, 28PX CURVED TOP-RIGHT, NO BLUE BORDER */
+  .sidebar-header {
+    background: #ffffff;                 /* ALL WHITE BG */
+    width: 100%;
+    height: 112px;
+    padding: 14px 18px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top-right-radius: var(--sidebar-radius);
+    border-top-left-radius: 0;
+    border-bottom: none;
+    margin-bottom: 2px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    text-align: center;
+  }
+  .sidebar-logo-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+  }
+  .sidebar-logo-img {
+    width: 100%;
+    max-width: 220px;
+    max-height: 86px;
+    object-fit: contain;
+    display: block;
+  }
+  .sidebar-logo-icon {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+    display: none;
+  }
+
+  /* Quick Search Wrap: PURE WHITE FLOATING PILL */
+  .sidebar-search-wrap {
+    padding: 10px 14px 12px;
+  }
+  .sidebar-search {
+    width: 100%;
+    height: 42px;
+    border: none;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 0 12px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: #0b1a3d;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    outline: none;
+    transition: all 0.15s ease;
+    cursor: text;
+    box-sizing: border-box;
+  }
+  .sidebar-search:focus-within {
+    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.35), 0 3px 12px rgba(0, 0, 0, 0.3);
+  }
+  .sidebar-search-left {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .sidebar-search-left svg {
+    width: 16px;
+    height: 16px;
+    stroke: #64748b;
+    flex-shrink: 0;
+  }
+  .search-shortcut {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: #1e293b;
+    background: #eef2f6;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-weight: 600;
+    line-height: 1.3;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  /* Navigation Links & Collapsible Category Dropdowns */
+  .sidebar-nav {
+    padding: 4px 12px 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .nav-group {
+    display: flex;
+    flex-direction: column;
+  }
+  .nav-group-header {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 7px 10px;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #ffffff;
+    cursor: pointer;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    outline: none;
+    border-radius: 8px;
+    box-shadow: none;
+    transition: background 0.15s ease;
+    user-select: none;
+    text-align: left;
+  }
+  .nav-group-header:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .nav-group-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-group-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+    color: #ffffff;
+  }
+  .nav-group.is-collapsed .nav-group-chevron {
+    transform: rotate(-90deg);
+  }
+  .nav-group-tag {
+    font-size: 11px;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.08);
+    color: #8fa0bc;
+    padding: 2px 9px;
+    border-radius: 10px;
+    letter-spacing: normal;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-family: var(--sans);
+  }
+  .nav-tabs-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-height: 500px;
+    opacity: 1;
+    overflow: hidden;
+    transition: max-height 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease;
+  }
+  .nav-group.is-collapsed .nav-tabs-list {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
+    pointer-events: none;
+  }
+  .app-sidebar.collapsed .nav-group-header {
+    display: none !important;
+  }
+  .app-sidebar.collapsed .nav-tabs-list {
+    max-height: none !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+  }
+  .nav-tab-item a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+  }
+  .nav-tab-item a:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  /* Active Navigation Tab: PURE WHITE CARD with Blue text & Blue Icon */
+  .nav-tab-item.active a {
+    color: #0b1a3d;
+    background: #ffffff;
+    font-weight: 700;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+  .nav-tab-item.active a:hover {
+    color: #0b1a3d;
+    background: #ffffff;
+  }
+  .nav-tab-item.active a .nav-tab-icon {
+    color: #0052ff;
+  }
+  .nav-tab-item.active a .nav-tab-icon svg {
+    stroke: #0052ff;
+  }
+
+  .nav-tab-left {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .nav-tab-icon {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    flex-shrink: 0;
+  }
+  .nav-tab-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .status-pip-online {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--semantic-success);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+  }
+
+  /* Topbar User Account Card (Positioned on Top-Right) */
+  .topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 3px 10px 3px 5px;
+    border-radius: var(--theme-radius);
+    background: var(--surface-1);
+    border: 1px solid var(--line-hairline);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .topbar-user:hover {
+    background: var(--surface-2);
+    border-color: var(--primary-line);
+  }
+  .topbar-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-xs);
+    background: #0052ff;
+    color: #ffffff;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 6px rgba(0, 82, 255, 0.35);
+  }
+  .topbar-user-meta {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+    text-align: left;
+  }
+  .topbar-user-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .topbar-user-role {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--ink-muted);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* Workspace */
+  .app-workspace { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    height: var(--topbar-height);
+    background: rgba(7, 9, 14, 0.94);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line-hairline);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .btn-sidebar-quick-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    border: 1px solid var(--line-hairline);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .btn-sidebar-quick-toggle:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .topbar-title { font-family: var(--mono); font-size: 12px; color: var(--ink-subtle); }
+  .topbar-title strong { color: var(--ink); font-weight: 600; }
+  .topbar-controls { display: flex; align-items: center; gap: 14px; }
+
+  .theme-toggle-switch {
+    display: flex;
+    align-items: center;
+    background: var(--surface-1);
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--radius-sm);
+    padding: 2px;
+  }
+  .theme-btn {
+    border: none;
+    background: transparent;
+    padding: 4px 10px;
+    border-radius: 2px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-muted);
+    cursor: pointer;
+  }
+  .theme-btn.active {
+    background: var(--canvas);
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .radius-selector {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px;
+    background: var(--surface-1);
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--radius-sm);
+  }
+  .radius-opt {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    border: none;
+    background: transparent;
+    color: var(--ink-muted);
+    cursor: pointer;
+  }
+  .radius-opt.active {
+    background: var(--canvas);
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* Buttons */
+  .btn {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    height: 38px;
+    border-radius: var(--theme-radius);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    border: 1px solid transparent;
+  }
+  .btn-primary { background: var(--primary); color: #ffffff; }
+  .btn-primary:hover { background: var(--primary-hover); box-shadow: 0 2px 10px var(--primary-glow); }
+  .btn-dark { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line-hairline); }
+  .btn-line { background: var(--canvas); color: var(--ink); border: 1px solid var(--line-hairline); }
+
+  /* Hero */
+  .hero-section {
+    position: relative;
+    border-bottom: 1px solid var(--line-hairline);
+    padding: 64px 40px 56px;
+  }
+  .spec-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--primary);
+    background: var(--primary-tint);
+    border: 1px solid var(--primary-line);
+    border-radius: var(--radius-xs);
+    padding: 3px 8px;
+  }
+  .hero-title {
+    font-size: 54px;
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+    margin: 18px 0;
+  }
+  .cobalt-text { color: var(--primary); }
+  .hero-desc { font-size: 16px; line-height: 1.6; color: var(--ink-muted); max-width: 700px; margin: 0 0 32px; }
+  .hero-actions { display: flex; align-items: center; gap: 12px; }
+
+  /* Ticker */
+  .ticker-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid var(--line-hairline);
+    background: var(--canvas);
+  }
+  .ticker-item { padding: 18px 24px; border-right: 1px solid var(--line-hairline); }
+  .ticker-item:last-child { border-right: none; }
+  .ticker-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-subtle);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .ticker-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); }
+  .ticker-value { font-size: 24px; font-weight: 700; color: var(--ink); }
+  .ticker-sub { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+
+  /* Content */
+  .content-shell { padding: 0 40px; }
+  section { padding: 64px 0; border-bottom: 1px solid var(--line-hairline); }
+  .section-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .section-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .section-title { font-size: 28px; font-weight: 600; color: var(--ink); margin: 0; }
+  .section-desc { font-size: 13px; color: var(--ink-muted); margin-top: 4px; }
+
+  /* Spec Grid */
+  .sidebar-spec-grid { display: grid; grid-template-columns: 320px 1fr; gap: 32px; }
+  .spec-preview-box {
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    background: var(--sidebar-bg);
+    border-right: 3px solid #ffffff;
+    padding: 20px 24px 20px 20px;
+    position: relative;
+  }
+  .spec-state-item {
+    padding: 9px 12px;
+    border-radius: var(--theme-radius);
+    font-size: 13px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .spec-state-item.default { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
+  .spec-state-item.hovered { background: rgba(255, 255, 255, 0.18); color: #ffffff; }
+  .spec-state-item.active-white { background: #ffffff; color: #0b1a3d; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+
+  .comp-panel {
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--theme-card-radius);
+    padding: 20px;
+    background: var(--canvas);
+  }
+
+  .line-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: var(--theme-radius);
+    font-family: var(--mono);
+    font-size: 11px;
+    border: 1px solid var(--line-hairline);
+    background: var(--canvas);
+    color: var(--ink);
+  }
+  .line-badge.cobalt { border-color: var(--primary-line); background: var(--primary-tint); color: var(--primary); }
+  .badge-pip { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* Prototype */
+  .proto-container {
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--theme-card-radius);
+    background: var(--canvas);
+    overflow: hidden;
+  }
+  .proto-topbar {
+    padding: 12px 20px;
+    background: var(--surface-1);
+    border-bottom: 1px solid var(--line-hairline);
+    display: flex;
+    justify-content: space-between;
+  }
+  .proto-inner-frame { display: grid; grid-template-columns: 210px 1fr; min-height: 480px; }
+  .proto-inner-sidebar {
+    background: var(--sidebar-bg);
+    border-top-right-radius: 14px;
+    border-bottom-right-radius: 14px;
+    border-right: 2px solid #ffffff;
+    margin: 8px 10px 8px 0;
+    padding: 16px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .proto-inner-nav { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+  .proto-nav-item a {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 10px;
+    font-size: 12px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    border-radius: var(--theme-radius);
+  }
+  .proto-nav-item.active a { background: var(--sidebar-active-bg); color: #ffffff; font-weight: 600; }
+  .proto-inner-main { padding: 24px; }
+
+  .linear-stepper { display: grid; grid-template-columns: repeat(4, 1fr); margin: 24px 0; position: relative; }
+  .linear-stepper::before { content: ''; position: absolute; top: 13px; left: 36px; right: 36px; height: 1px; background: var(--line-hairline); z-index: 1; }
+  .stepper-step { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .step-node {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--canvas);
+    border: 1px solid var(--line-hairline);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-muted);
+    margin-bottom: 6px;
+  }
+  .stepper-step.completed .step-node { background: var(--ink); color: var(--on-ink); }
+  .stepper-step.active .step-node { background: var(--primary); color: #ffffff; }
+
+  .footer {
+    background: #05070b;
+    color: #64748b;
+    border-top: 1px solid var(--line-hairline);
+    padding: 48px 40px 32px;
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 36px; }
+  .footer-col h6 { font-family: var(--mono); font-size: 10px; color: #ffffff; text-transform: uppercase; margin: 0 0 14px; }
+  .footer-col a { display: block; color: #94a3b8; text-decoration: none; font-size: 12px; margin-bottom: 8px; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #182030;
+    color: #ffffff;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    display: none;
+    z-index: 1000;
+  }
+</style>
+</head>
+<body class="grid-bg">
+
+<div class="app-frame" id="appFrame">
+
+  <!-- LEFT NAVIGATION SIDEBAR (ROUNDED RIGHT CORNERS, WHITE LINE & PULL-TAB) -->
+  <aside class="app-sidebar" id="appSidebar">
+    
+    <!-- Protruding pull-tab handle sticking out on the right edge -->
+    <button class="sidebar-pull-tab" id="btnSidebarPullTab" onclick="toggleSidebarCollapse()" title="Toggle Sidebar Width (Expand / Collapse)">
+      <span class="pull-tab-icon" id="pullTabIcon">
+        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 3l-5 5 5 5"/>
+        </svg>
+      </span>
+    </button>
+
+    <!-- Scrollable content container -->
+    <div class="sidebar-inner">
+      <div>
+        <!-- Logo Header: ALL WHITE BACKGROUND, 28PX RADIUS, NO BLUE BORDER -->
+        <div class="sidebar-header">
+          <a href="#" class="sidebar-logo-link" title="Universiti Teknikal Malaysia Melaka (UTeM)">
+            <img src="../../Asset/LogoJawiUTeM_blue-01.png" alt="UTeM - Universiti Teknikal Malaysia Melaka" class="sidebar-logo-img hide-on-collapse">
+            <img src="../../Asset/LogoUTeM_crest.png" alt="UTeM Crest" class="sidebar-logo-icon show-on-collapse">
+          </a>
+        </div>
+
+        <!-- Quick Search Bar: PURE WHITE FLOATING PILL -->
+        <div class="sidebar-search-wrap hide-on-collapse">
+          <div class="sidebar-search">
+            <div class="sidebar-search-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <span>Jump to token</span>
+            </div>
+            <span class="search-shortcut">&#8984;K</span>
+          </div>
+        </div>
+
+        <!-- Nav Groups with Collapsible Categories & Precision SVGs -->
+        <div class="sidebar-nav">
+          <div class="nav-group" id="navGroupDark1">
+            <button type="button" class="nav-group-header hide-on-collapse" onclick="toggleNavCategory('navGroupDark1')" aria-expanded="true" title="Click to collapse / expand">
+              <div class="nav-group-header-left">
+                <span class="nav-group-chevron">
+                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6l5 5 5-5"/>
+                  </svg>
+                </span>
+                <span>Architecture</span>
+              </div>
+              <span class="nav-group-tag">Spec</span>
+            </button>
+            <ul class="nav-tabs-list">
+              <li class="nav-tab-item" data-tooltip="Color matrix">
+                <a href="#palette">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Color matrix</span>
+                  </div>
+                </a>
+              </li>
+              <li class="nav-tab-item" data-tooltip="Rounded sidebar">
+                <a href="#sidebar-spec">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="18" height="18" rx="3"/>
+                        <line x1="9" y1="3" x2="9" y2="21"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Rounded sidebar</span>
+                  </div>
+                </a>
+              </li>
+              <!-- Active Item: Pure White Pill Card with Blue Icon -->
+              <li class="nav-tab-item active" data-tooltip="Line anatomy">
+                <a href="#line-system">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <line x1="9" y1="12" x2="21" y2="12"/>
+                        <circle cx="6" cy="12" r="2.5" fill="#0052ff"/>
+                        <line x1="3" y1="18" x2="21" y2="18"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Line anatomy</span>
+                  </div>
+                </a>
+              </li>
+              <li class="nav-tab-item" data-tooltip="Typography">
+                <a href="#typography">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <polyline points="4 7 4 4 20 4 20 7"/>
+                        <line x1="12" y1="4" x2="12" y2="20"/>
+                        <line x1="9" y1="20" x2="15" y2="20"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Typography</span>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="nav-group" id="navGroupDark2">
+            <button type="button" class="nav-group-header hide-on-collapse" onclick="toggleNavCategory('navGroupDark2')" aria-expanded="true" title="Click to collapse / expand">
+              <div class="nav-group-header-left">
+                <span class="nav-group-chevron">
+                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6l5 5 5-5"/>
+                  </svg>
+                </span>
+                <span>Components</span>
+              </div>
+              <span class="nav-group-tag">UI</span>
+            </button>
+            <ul class="nav-tabs-list">
+              <li class="nav-tab-item" data-tooltip="Buttons and badges">
+                <a href="#components">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <rect x="3" y="7" width="18" height="10" rx="5"/>
+                        <circle cx="8" cy="12" r="1.5" fill="currentColor"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Buttons and badges</span>
+                  </div>
+                </a>
+              </li>
+              <li class="nav-tab-item" data-tooltip="Micro-radius">
+                <a href="#radius">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M5 19V12a7 7 0 0 1 7-7h7"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Micro-radius</span>
+                  </div>
+                </a>
+              </li>
+              <li class="nav-tab-item" data-tooltip="Precision inputs">
+                <a href="#forms">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <rect x="3" y="5" width="18" height="14" rx="3"/>
+                        <line x1="8" y1="9" x2="8" y2="15"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Precision inputs</span>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="nav-group" id="navGroupDark3">
+            <button type="button" class="nav-group-header hide-on-collapse" onclick="toggleNavCategory('navGroupDark3')" aria-expanded="true" title="Click to collapse / expand">
+              <div class="nav-group-header-left">
+                <span class="nav-group-chevron">
+                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6l5 5 5-5"/>
+                  </svg>
+                </span>
+                <span>System app</span>
+              </div>
+              <span class="nav-group-tag">MCMS</span>
+            </button>
+            <ul class="nav-tabs-list">
+              <li class="nav-tab-item" data-tooltip="Course review">
+                <a href="#prototype">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="9"/>
+                        <polyline points="8 12 11 15 16 9"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Course review</span>
+                  </div>
+                </a>
+              </li>
+              <li class="nav-tab-item" data-tooltip="Senate queue">
+                <a href="#prototype">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <line x1="8" y1="6" x2="21" y2="6"/>
+                        <line x1="8" y1="12" x2="21" y2="12"/>
+                        <line x1="8" y1="18" x2="21" y2="18"/>
+                        <polyline points="3 6 4 7 6 5"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Senate queue</span>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="app-workspace">
+    <header class="topbar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="btn-sidebar-quick-toggle" onclick="toggleSidebarCollapse()">
+          <span id="quickToggleIcon">&#9664;</span>
+          <span id="quickToggleText">Collapse Nav</span>
+        </button>
+        <div class="topbar-title">
+          <span>SYSTEM</span> / <strong>LINEAR-DARK</strong> / <span style="color:var(--primary);">ROUNDED-COBALT-NAV</span>
+        </div>
+      </div>
+
+      <div class="topbar-controls">
+        <div class="theme-toggle-switch">
+          <button class="theme-btn" onclick="location.href='preview.html'">&#9728; Light</button>
+          <button class="theme-btn active">&#9790; Dark</button>
+        </div>
+
+        <div class="radius-selector">
+          <button class="radius-opt" onclick="setRadius('0px', '0px', this)">0px</button>
+          <button class="radius-opt active" onclick="setRadius('4px', '6px', this)">4-6px</button>
+          <button class="radius-opt" onclick="setRadius('8px', '10px', this)">8px</button>
+        </div>
+
+        <!-- Top-Right User Account Chip -->
+        <div class="topbar-user" title="Signed in as Dr. Zulkifli (CODL Academic Officer)">
+          <div class="topbar-avatar">CO</div>
+          <div class="topbar-user-meta">
+            <span class="topbar-user-name">Dr. Zulkifli</span>
+            <span class="topbar-user-role">CODL Academic Officer</span>
+          </div>
+          <span class="status-pip-online" title="Online and Verified"></span>
+        </div>
+      </div>
+    </header>
+
+    <section class="hero-section">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+        <span class="spec-tag">// DARK THEME // V2.4 PRECISION SPEC</span>
+        <span class="spec-line">FULL-HEIGHT 100VH &middot; 28PX CURVED CORNERS &middot; PURE WHITE PILL ELEMENTS</span>
+      </div>
+
+      <h1 class="hero-title">
+        High-Voltage Contrast.<br>
+        Midnight Obsidian <span class="cobalt-text">&amp; Rounded Blue Drawer</span>.
+      </h1>
+
+      <p class="hero-desc">
+        The dark-mode expression of Linear Precision featuring the rich cobalt blue left navigation drawer (`#07122a`) with 28px rounded right corners, bold white UTeM header, floating white search pill, collapsible title-case categories, and a pure white protruding pull-tab latch.
+      </p>
+
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="toggleSidebarCollapse()">
+          <span id="heroCollapseBtnText">&#9664; Toggle Sidebar Pull-Tab</span>
+        </button>
+        <button class="btn btn-dark" onclick="location.href='preview.html'">Open Light Mode</button>
+      </div>
+    </section>
+
+    <div class="ticker-bar">
+      <div class="ticker-item">
+        <div class="ticker-label"><span class="ticker-dot"></span>Right Corner Radius</div>
+        <div class="ticker-value" style="color:var(--primary);">28px Curved</div>
+        <div class="ticker-sub">Top-Right &amp; Bottom-Right</div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-label"><span class="ticker-dot" style="background:#fff;"></span>Active Tab Fill</div>
+        <div class="ticker-value">Pure White</div>
+        <div class="ticker-sub">Line Anatomy with Blue Icon</div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-label"><span class="ticker-dot" style="background:var(--primary)"></span>Pull-Tab Latch</div>
+        <div class="ticker-value">Pure White Pill</div>
+        <div class="ticker-sub">Protruding Semi-Pill Latch</div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-label"><span class="ticker-dot" style="background:var(--line-accent);"></span>Canvas Base</div>
+        <div class="ticker-value">#07090E</div>
+        <div class="ticker-sub">Jet Obsidian Floor</div>
+      </div>
+    </div>
+
+    <div class="content-shell">
+      <section id="sidebar-spec">
+        <div class="section-header">
+          <div>
+            <div class="section-eyebrow">Drawer Engineering</div>
+            <h2 class="section-title">01 &mdash; Rounded Right Corner &amp; Pull-Tab Architecture</h2>
+            <p class="section-desc">Modeled directly from your drawing: curved right corners, white line, and centered pull-tab handle.</p>
+          </div>
+          <button class="btn btn-primary" onclick="toggleSidebarCollapse()">
+            Toggle Pull-Tab Live &rarr;
+          </button>
+        </div>
+
+        <div class="sidebar-spec-grid">
+          <div class="spec-preview-box">
+            <div style="position:absolute; top:18px; bottom:18px; right:8px; width:2px; background:rgba(255,255,255,0.5); border-radius:2px;"></div>
+            <div style="position:absolute; top:50%; right:-16px; transform:translateY(-50%); width:22px; height:44px; background:var(--sidebar-bg); border:2px solid #ffffff; border-left:none; border-radius:0 6px 6px 0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:10px;">
+              &#9664;
+            </div>
+            <div style="font-family:var(--mono); font-size:11px; color:var(--sidebar-text-muted); margin-bottom:12px;">// DARK SKETCH REPRODUCTION</div>
+            <div class="spec-state-item default"><span>Resting Tab</span><span class="nav-tab-counter">12</span></div>
+            <div class="spec-state-item hovered"><span>Hover State</span><span class="nav-tab-counter">Hover</span></div>
+            <div class="spec-state-item active-white"><span>Active State (Pure White Pill)</span><span style="font-family:var(--mono); font-size:10px; font-weight:700; padding:1px 6px; border-radius:2px; background:#0052ff; color:#fff;">Active</span></div>
+          </div>
+
+          <div>
+            <h3 style="font-size:20px; font-weight:700; margin:0 0 10px; color:var(--ink);">Zero Gaps &amp; Pure White Contrast</h3>
+            <p style="color:var(--ink-muted); line-height:1.6;">
+              Flush 100vh height eliminates top and bottom gaps. The white right line, centered pull-tab latch, and pure white active tab pill maximize contrast against the deep cobalt blue sidebar canvas.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="prototype">
+        <div class="section-header">
+          <div>
+            <div class="section-eyebrow">System Application</div>
+            <h2 class="section-title">02 &mdash; Live Enterprise Prototype: MCMS Verification</h2>
+          </div>
+        </div>
+
+        <div class="proto-container">
+          <div class="proto-topbar">
+            <span>PORTAL / CODL-VERIFICATION / <strong>MC-FTMK-042</strong></span>
+            <span class="line-badge cobalt"><span class="badge-pip"></span>STAGE 3 OF 4</span>
+          </div>
+
+          <div class="proto-inner-frame">
+            <div class="proto-inner-sidebar">
+              <div style="font-family:var(--mono); font-size:9px; color:var(--sidebar-text-muted);">MCMS MODULES</div>
+              <ul class="proto-inner-nav">
+                <li class="proto-nav-item"><a href="#prototype">Curriculum</a></li>
+                <li class="proto-nav-item"><a href="#prototype">Offerings</a></li>
+                <li class="proto-nav-item active"><a href="#prototype">Verification <span>1</span></a></li>
+                <li class="proto-nav-item"><a href="#prototype">Credit Bank</a></li>
+              </ul>
+            </div>
+
+            <div class="proto-inner-main">
+              <h3 style="font-size:20px; font-weight:700; margin:0 0 6px; color:var(--ink);">Cloud Infrastructure &amp; Container Orchestration</h3>
+              <p style="font-size:12px; color:var(--ink-muted); margin-bottom:20px;">Faculty: FTMK · MQF Level 6 · 3 Credits</p>
+
+              <div class="linear-stepper">
+                <div class="stepper-step completed"><div class="step-node">&#10003;</div><div class="step-label">Submission</div></div>
+                <div class="stepper-step completed"><div class="step-node">&#10003;</div><div class="step-label">Dean Endorsement</div></div>
+                <div class="stepper-step active"><div class="step-node">03</div><div class="step-label" style="color:var(--primary);">CODL Verification</div></div>
+                <div class="stepper-step"><div class="step-node">04</div><div class="step-label">Senate Approval</div></div>
+              </div>
+
+              <div style="margin-top:20px;">
+                <button class="btn btn-primary" onclick="alert('Simulation: Endorsed with rounded blue sidebar and pull-tab!')">
+                  &#10003; Endorse &amp; Forward to Senate
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="footer">
+      <div style="font-family:var(--mono); font-size:10px; color:#64748b; text-align:center;">
+        LINEAR PRECISION // DARK THEME // ROUNDED RIGHT CORNERS (20PX) // WHITE RIGHT LINE // PULL-TAB
+      </div>
+    </footer>
+  </main>
+</div>
+
+<div id="toast" class="toast">Copied to clipboard</div>
+
+<script>
+  // COLLAPSIBLE NAVIGATION CATEGORIES
+  function toggleNavCategory(groupId) {
+    const group = document.getElementById(groupId);
+    if (!group) return;
+    const isCollapsed = group.classList.toggle('is-collapsed');
+    const btn = group.querySelector('.nav-group-header');
+    if (btn) {
+      btn.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+    }
+  }
+
+  function toggleSidebarCollapse() {
+    const sidebar = document.getElementById('appSidebar');
+    const isCollapsed = sidebar.classList.toggle('collapsed');
+    
+    const pullIcon = document.getElementById('pullTabIcon');
+    if (pullIcon) {
+      pullIcon.innerHTML = isCollapsed 
+        ? '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>'
+        : '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3l-5 5 5 5"/></svg>';
+    }
+
+    const quickIcon = document.getElementById('quickToggleIcon');
+    if (quickIcon) quickIcon.innerHTML = isCollapsed ? '&#9654;' : '&#9664;';
+
+    const quickText = document.getElementById('quickToggleText');
+    if (quickText) quickText.textContent = isCollapsed ? 'Expand Nav' : 'Collapse Nav';
+
+    const heroBtnText = document.getElementById('heroCollapseBtnText');
+    if (heroBtnText) heroBtnText.innerHTML = isCollapsed ? '&#9654; Expand Sidebar' : '&#9664; Toggle Sidebar Pull-Tab';
+
+    const stateDisplay = document.getElementById('sidebarStateDisplay');
+    if (stateDisplay) stateDisplay.textContent = isCollapsed ? 'COLLAPSED (68px)' : 'EXPANDED (260px)';
+
+    showToast(isCollapsed ? 'Sidebar collapsed (68px)' : 'Sidebar expanded (260px)');
+  }
+
+  function setRadius(btnRadius, cardRadius, el) {
+    document.documentElement.style.setProperty('--theme-radius', btnRadius);
+    document.documentElement.style.setProperty('--theme-card-radius', cardRadius);
+    if (el) {
+      document.querySelectorAll('.radius-opt').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+    }
+    document.getElementById('currentRadiusDisplay').textContent = btnRadius + ' / ' + cardRadius;
+    showToast(`Radius: ${btnRadius} / ${cardRadius}`);
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 2200);
+  }
+</script>
+</body>
+</html>

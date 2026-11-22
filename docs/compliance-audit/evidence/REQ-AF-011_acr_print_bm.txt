@@ -1,0 +1,86 @@
+URL: http://127.0.0.1:8110/my-credit/1?print=1
+FINAL: http://127.0.0.1:8110/my-credit/1?print=1
+STATUS: 200
+TITLE: Rekod Kredit Akademik - UTeM MCMS
+H1: Rekod Kredit Akademik (ACR)
+---
+Kembali
+Rekod Kredit Akademik · acr-ACR-2026-0001.pdf
+Cetak atau simpan sebagai PDF
+UTeM
+Universiti Teknikal Malaysia Melaka
+Pusat Pembelajaran Terbuka dan Jarak Jauh (CODL)
+Rekod Kredit Akademik
+ACR-2026-0001 · 19/11/2026
+Rekod Kredit Akademik (ACR)
+Rekod Kredit Akademik Rasmi yang dikeluarkan oleh Universiti Teknikal Malaysia Melaka.
+PEMEGANG
+Amir Hakimi
+B032410001
+NO. RUJUKAN ACR
+ACR-2026-0001
+SAMC · MQF 4
+KREDIT & SLT
+2 kredit
+80 jam SLT
+STATUS SEMASA
+Ditebus
+Sah sehingga 15/09/2036
+Maklumat Am
+Nama Peserta	Amir Hakimi	No. Matrik / ID	B032410001
+Penyedia	Universiti Teknikal Malaysia Melaka
+Nama Micro-Credential	Pembangunan Asal Awan
+Kategori	Micro-Credential Berdiri Sendiri Disahkan Kualiti (SAMC)	Tarikh Tamat	05/09/2026
+Nilai Kredit	2 kredit	SLT (Jam)	80 jam
+Tahap MQF	Tahap 4	Asas Pentaksiran	Continuous assessment with authentic capstone project (100% coursework).
+Pengesahan Sumber	Kredensial: UTEM-MC-2026-0001  ·  Rujukan QV: QV/2023/051 (Sah sehingga: 15/12/2026)
+Hasil Pembelajaran	
+1. Demonstrate verified micro-credential learning outcomes.
+2. Apply domain competencies in practical assessments.
+Semakan Kelayakan Sebelum ACR
+Bil.	Kriteria Kelayakan	Keputusan	Rujukan Bukti
+1	Micro-credential ialah UMC atau SAMC (bukan MCE)	Ya Tidak TB	Category confirmed as credit-bearing (UMC/SAMC).
+2	Micro-credential telah ditamatkan	Ya Tidak TB	Learner completed the micro-credential with confirmed achievement record.
+3	Identiti dan keputusan telah disahkan	Ya Tidak TB	Identity and summative assessment results verified without open integrity holds.
+4	UMC berasal daripada program induk yang diakreditasi	Ya Tidak TB	Not applicable (SAMC)
+5	SAMC mempunyai Pengesahan Kualiti (QV) yang sah pada tarikh tamat	Ya Tidak TB	Active MQA Quality Verification (QV) cycle verified on completion date.
+6	Kredit dan tahap MQF bersandarkan kelulusan atau keputusan QV yang sah	Ya Tidak TB	Planned SLT and MQF level match approved credit calculation.
+7	Rekod sumber dan kredensial boleh dijejaki	Ya Tidak TB	Linked to valid verifiable credential and faculty approval decision.
+Ringkasan Rekod Kredit Akademik
+No. Rujukan ACR	ACR-2026-0001	Tarikh ACR Dihasilkan	11/09/2026
+Disahkan Oleh	Nurul Izzah
+Records & ABC Officer, Registry / CODL
+	Tarikh Pengesahan	13/09/2026
+Status & Catatan ACR	Dideposit
+Persetujuan Peserta & Rekod Deposit ABC
+Persetujuan Peserta	Persetujuan Diperoleh  ·  14/09/2026 (web_portal)
+No. Rujukan ABC	ABC-MYS-2026-098471	Tarikh Deposit	15/09/2026
+Nilai Kredit Dideposit	2 kredit	Sah Sehingga (10 tahun)	15/09/2036
+Status Deposit	Berjaya Dalam proses Pembetulan diperlukan
+Pegawai Pendeposit (P7)	Farid Hashim — Administrator, Centre for Open and Distance Learning (CODL)
+Notis Penyimpanan Sahaja: Pendepositan ACR ke dalam Bank Kredit Akademik (ABC) menyimpan kredit selama 10 tahun dan tidak merupakan pemindahan kredit atau kemasukan ke program pengajian.
+Rekod Prinsip Penebusan Tunggal
+Peringkat Penebusan	Status	Tarikh	Bukti & Program
+1. Tersedia	Lulus	15/09/2026	Rujukan ABC: ABC-MYS-2026-098471
+2. Ditebus Sementara	Direkodkan	25/10/2026	TR-2026-0001 (BITS)
+3. Ditebus	Ditebus (Kekal)	25/10/2026	TR-2026-0001 · ABC dikemas kini 25/10/2026
+4. Program Tidak Tamat / Dilepaskan	Tiada	—	—
+Permohonan Pemindahan Berkaitan: TR-2026-0001 (BITS, Diluluskan)
+Log Pembetulan & Kemas Kini Rekod
+Tarikh	Jenis Rekod	Sebab	Tindakan Diambil	Disahkan Oleh	Dimaklumkan
+Tiada pembetulan direkodkan.
+Pengesahan & Tandatangan Tiga Pihak
+Peranan	Nama & Jawatan	Pengesahan	Tarikh	Catatan
+Penyelaras Kursus / Pensyarah	Dr. Aina Zulkifli
+Course Coordinator / Lecturer, FTMK
+	Disahkan	30/08/2026	Assessment marks and learning outcomes verified by Course Coordinator.
+Pihak Berkuasa Akademik Fakulti (Timbalan Dekan)	Hakim Rahman
+Deputy Dean (Academic), FTMK
+	Disahkan	10/09/2026	Completion confirmed by faculty academic authority.
+Unit Rekod / Pendeposit ABC	Farid Hashim
+Administrator, Centre for Open and Distance Learning (CODL)
+	Disahkan	15/09/2026	ABC deposit recorded (ABC-MYS-2026-098471).
+ACR-2026-0001
+Rekod Rasmi MCMS (A4)
+Dijana 19/11/2026 23:14
+Dijana oleh MCMS

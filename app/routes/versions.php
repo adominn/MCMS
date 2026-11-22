@@ -11,7 +11,7 @@ Route::middleware(['auth', 'role:lecturer'])->prefix('micro-credentials')->group
     Route::post('/{mc}/reoffer', [VersionController::class, 'reoffer'])->whereNumber('mc')->name('mcs.reoffer');
 });
 
-Route::middleware(['auth', 'role:deputy_dean'])->prefix('changes')->group(function () {
+Route::middleware(['auth', 'role:deputy_dean,ptj_authority'])->prefix('changes')->group(function () {
     Route::get('/{id}', [VersionController::class, 'changeShow'])->whereNumber('id')->name('changes.show');
     Route::post('/{id}/acknowledge', [VersionController::class, 'acknowledge'])->whereNumber('id')->name('changes.acknowledge');
 });

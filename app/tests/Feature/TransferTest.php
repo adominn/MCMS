@@ -57,14 +57,24 @@ function validated(int $app, bool $pass = true)
 
 /** Completes the evaluation of a line: three course outcomes with the given matches, and the other criteria. */
 if (! function_exists('evaluated')) {
-function evaluated(int $app, int $line, array $matches = ['full', 'full', 'full'])
+function evaluated(int $app, int $line, array $matches = ['full', 'full', 'full'], array $overCriteria = [])
 {
     $src = DB::table('learning_outcomes')->where('mc_version_id', DB::table('transfer_lines')->where('id', $line)->value('mc_version_id'))->value('id');
     $p = ['result' => [], 'finding' => [], 'match' => [], 'source' => [], 'note' => []];
+    $defaults = [
+        'credit_slt' => 'adequate',
+        'mqf' => 'matched',
+        'content' => 'equivalent',
+        'activities' => 'aligned',
+        'assessment' => 'aligned',
+        'accreditation' => 'valid',
+        'currency' => 'current',
+        'professional' => 'met',
+    ];
     foreach (array_keys(config('transfer.criteria')) as $k) {
         if ($k !== 'outcomes') {
-            $p['result'][$k] = 'equivalent';
-            $p['finding'][$k] = 'Checked against the course';
+            $p['result'][$k] = $overCriteria['result'][$k] ?? ($defaults[$k] ?? 'equivalent');
+            $p['finding'][$k] = $overCriteria['finding'][$k] ?? 'Checked against the course';
         }
     }
     $n = count(array_filter(explode(';', (string) DB::table('parent_courses')->where('id', DB::table('transfer_lines')->where('id', $line)->value('parent_course_id'))->value('clos'))));
@@ -146,7 +156,7 @@ it('blocks Approved while a learning outcome is not matched, even when credit an
     decision($app)->assertSessionHasErrors('outcome');
     decision($app, ['outcome' => 'approved'])->assertSessionHasErrors(); // credits equal the requested value: still blocked
     expect(DB::table('transfer_applications')->find($app)->status)->toBe('under_eval')->and(DB::table('abc_deposits')->value('credit_status'))->toBe('available');
-    decision($app, ['outcome' => 'not_approved', 'credits' => [$line => 0]])->assertSessionHasNoErrors(); // a refusal is always possible
+    decision($app, ['outcome' => 'not_approved', 'credits' => [$line => 0], 'conditions' => 'Outcome 3 not matched'])->assertSessionHasNoErrors(); // a refusal is always possible
     expect(DB::table('transfer_applications')->find($app)->status)->toBe('not_approved')->and(DB::table('abc_deposits')->value('credit_status'))->toBe('available');
 });
 
@@ -187,21 +197,125 @@ it('accepts Partly approved only with some credits approved and some not (FR-ctd
     [$app, $line] = applied();
     validated($app);
     evaluated($app, $line, ['full', 'partial', 'full']);
-    decision($app, ['outcome' => 'partly'])->assertSessionHasErrors('outcome'); // all credits approved is Approved
+    decision($app, ['outcome' => 'partly', 'conditions' => 'Partial'])->assertSessionHasErrors('outcome'); // all credits approved is Approved
     decision($app, ['outcome' => 'approved', 'credits' => [$line => 1.5]])->assertSessionHasErrors('outcome');
     decision($app, ['outcome' => 'approved', 'decision_ref' => ''])->assertSessionHasErrors('decision_ref');
-    decision($app, ['outcome' => 'partly', 'credits' => [$line => 1.5]])->assertSessionHasNoErrors();
+    decision($app, ['outcome' => 'partly', 'credits' => [$line => 1.5], 'conditions' => 'Partial outcome match'])->assertSessionHasNoErrors();
     expect(DB::table('transfer_lines')->find($line)->decision)->toBe('partly')->and(DB::table('transfer_applications')->find($app)->status)->toBe('partly');
+
+    // Partial transfer approval preserves unapproved credits without destroying them
+    $acrId = (int) DB::table('transfer_lines')->where('id', $line)->value('acr_id');
+    $depRow = DB::table('abc_deposits')->where('acr_id', $acrId)->first();
+    expect((float) $depRow->credits_provisional)->toBe(1.5)
+        ->and($depRow->credit_status)->toBe('available');
+
+    // Learner still sees remaining credits available in ledger
+    $this->actingAs($this->amir)->get('/my-credit')->assertOk();
 });
 
-it('shows limit and non-transferable warnings and records them with the decision (FR-ctlimits)', function () {
+it('unblocks approved expired-credit re-evaluation through CreditLedger provisional', function () {
+    $dep = deposited();
+    DB::table('abc_deposits')->where('id', $dep->id)->update(['credit_status' => 'expired', 'credit_expiry' => today()->subDay()]);
+    $this->actingAs($this->amir)->post('/transfer', ['programme_id' => bits()->id, 'deposits' => [$dep->id], 'course' => [$dep->id => ds1123()], 'credits' => [$dep->id => 3]])->assertSessionHasNoErrors();
+    $app = DB::table('transfer_applications')->orderByDesc('id')->value('id');
+    $line = (int) DB::table('transfer_lines')->where('transfer_application_id', $app)->value('id');
+
+    validated($app);
+    evaluated($app, $line, ['full', 'full', 'full'], ['result' => ['currency' => 'current'], 'finding' => ['currency' => 'Current knowledge re-evaluated and verified']]);
+
+    decision($app)->assertSessionHasNoErrors();
+    expect(DB::table('abc_deposits')->find($dep->id)->credit_status)->toBe('provisional');
+});
+
+it('shows limit and non-transferable warnings and enforces hard blocks on approval (FR-ctlimits)', function () {
     [$app, $line] = applied();
     DB::table('programmes')->update(['transfer_limit_percent' => 1, 'non_transferable' => 'BITS 1123']);
     validated($app);
     evaluated($app, $line);
     $this->actingAs($this->hakim)->get("/transfers/$app")->assertSee('Transfer limit')->assertSee('non-transferable');
-    decision($app)->assertSessionHasNoErrors();
+    // Approval is hard blocked by both transfer limit and non-transferable flag
+    decision($app)->assertSessionHasErrors('credits');
+    // Rejection is allowed and records warnings with the decision
+    decision($app, ['outcome' => 'not_approved', 'credits' => [$line => 0], 'conditions' => 'Programme transfer limit and non-transferable course'])->assertSessionHasNoErrors();
     expect(json_decode(DB::table('transfer_decisions')->where('transfer_application_id', $app)->value('warnings'), true))->toHaveCount(2);
+});
+
+it('blocks approval if any line violates the 30% UTeM home-credit floor (Guide Cl. 14.5.1)', function () {
+    [$app, $line] = applied();
+    // 10-credit programme with 80% transfer limit; 30% home floor permits maximum 7 credits (70%)
+    DB::table('programmes')->where('id', bits()->id)->update(['total_credits' => 10, 'transfer_limit_percent' => 80]);
+    // Requesting 8 credits: under 80% cap (8), but exceeds 70% max transfer (7.0)
+    DB::table('transfer_lines')->where('id', $line)->update(['credits_requested' => 8]);
+    validated($app);
+    evaluated($app, $line);
+    decision($app, ['credits' => [$line => 8]])->assertSessionHasErrors('credits');
+});
+
+it('blocks approval if target course credit ceiling or duplicate target course is violated', function () {
+    [$app, $line] = applied();
+    // BITS 1123 has 3 credits. Approving 4 credits exceeds the course credit value
+    DB::table('transfer_lines')->where('id', $line)->update(['credits_requested' => 4]);
+    validated($app);
+    evaluated($app, $line);
+    decision($app, ['credits' => [$line => 4]])->assertSessionHasErrors('credits');
+});
+
+it('blocks approval if any mandatory F7 rubric criterion fails', function () {
+    [$app, $line] = applied();
+    validated($app);
+    // Evaluated with credit_slt = inadequate
+    evaluated($app, $line, ['full', 'full', 'full'], ['result' => ['credit_slt' => 'inadequate']]);
+    decision($app)->assertSessionHasErrors('outcome');
+});
+
+it('rejects evaluate with na on criteria that do not allow TB or with empty findings', function () {
+    [$app, $line] = applied();
+    validated($app);
+    $src = DB::table('learning_outcomes')->where('mc_version_id', DB::table('transfer_lines')->where('id', $line)->value('mc_version_id'))->value('id');
+    $closCount = count(array_filter(explode(';', (string) DB::table('parent_courses')->where('id', ds1123())->value('clos'))));
+
+    // 'na' on credit_slt is not allowed by Guide F7
+    $this->actingAs($this->hakim)->post("/transfers/$app/lines/$line", [
+        'result' => [
+            'credit_slt' => 'na',
+            'mqf' => 'matched',
+            'content' => 'equivalent',
+            'activities' => 'aligned',
+            'assessment' => 'aligned',
+            'accreditation' => 'valid',
+            'currency' => 'current',
+            'professional' => 'met',
+        ],
+        'finding' => array_fill_keys(['credit_slt', 'mqf', 'content', 'activities', 'assessment', 'accreditation', 'currency', 'professional'], 'Finding OK'),
+        'match' => array_fill(0, $closCount, 'full'),
+        'source' => array_fill(0, $closCount, $src),
+    ])->assertSessionHasErrors('result.credit_slt');
+
+    // Empty finding on any criterion is rejected
+    $this->actingAs($this->hakim)->post("/transfers/$app/lines/$line", [
+        'result' => [
+            'credit_slt' => 'adequate',
+            'mqf' => 'matched',
+            'content' => 'equivalent',
+            'activities' => 'aligned',
+            'assessment' => 'aligned',
+            'accreditation' => 'valid',
+            'currency' => 'current',
+            'professional' => 'met',
+        ],
+        'finding' => [
+            'credit_slt' => '',
+            'mqf' => 'Finding OK',
+            'content' => 'Finding OK',
+            'activities' => 'Finding OK',
+            'assessment' => 'Finding OK',
+            'accreditation' => 'Finding OK',
+            'currency' => 'Finding OK',
+            'professional' => 'Finding OK',
+        ],
+        'match' => array_fill(0, $closCount, 'full'),
+        'source' => array_fill(0, $closCount, $src),
+    ])->assertSessionHasErrors('finding.credit_slt');
 });
 
 it('returns the application to Submitted when the applicant adds evidence (FR-ctapply)', function () {

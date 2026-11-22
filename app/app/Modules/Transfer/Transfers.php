@@ -13,7 +13,12 @@ final class Transfers
     public static function lines(int $applicationId)
     {
         return DB::table('transfer_lines as l')->join('parent_courses as c', 'c.id', '=', 'l.parent_course_id')->join('acrs as a', 'a.id', '=', 'l.acr_id')->join('abc_deposits as d', 'd.id', '=', 'l.abc_deposit_id')->join('mc_versions as v', 'v.id', '=', 'l.mc_version_id')
-            ->where('l.transfer_application_id', $applicationId)->orderBy('l.id')->get(['l.*', 'c.code as course_code', 'c.name as course_name', 'c.clos', 'c.credit as course_credit', 'a.reference as acr_reference', 'd.credit_status', 'd.credit_expiry', 'v.name_en as source_name'])
+            ->where('l.transfer_application_id', $applicationId)->orderBy('l.id')
+            ->get([
+                'l.*', 'c.code as course_code', 'c.name as course_name', 'c.clos', 'c.credit as course_credit', 'c.slt_hours as course_slt_hours',
+                'a.reference as acr_reference', 'a.slt_hours as acr_slt_hours', 'a.mqf_level as acr_mqf_level', 'a.completion_date as acr_completion_date',
+                'd.abc_reference', 'd.deposit_date', 'd.credit_status', 'd.credit_expiry', 'v.name_en as source_name',
+            ])
             ->map(function ($l) {
                 $l->criteria = DB::table('equivalence_criteria')->where('transfer_line_id', $l->id)->get()->keyBy('criterion');
                 $l->assessments = DB::table('equivalence_assessments')->where('transfer_line_id', $l->id)->get()->keyBy('target_outcome');
@@ -46,18 +51,42 @@ final class Transfers
         $total = $earlier + array_sum($approved);
         $limit = $p->total_credits * $p->transfer_limit_percent / 100;
         if ($total > $limit) {
-            $w[] = "Transfer limit: $total credits would be credited, above the limit of $limit ({$p->transfer_limit_percent}% of {$p->total_credits}).";
+            $w[] = "Transfer limit: $total credits would be credited, above the programme limit of $limit ({$p->transfer_limit_percent}% of {$p->total_credits}).";
         }
-        $blocked = array_map('trim', explode(',', (string) $p->non_transferable));
+        // Guide Cl. 14.5.1 (p. 64): at least 30% of graduating credits must be earned directly at UTeM (max 70% transferred).
+        $minHome = (int) (app(\App\Modules\Core\Settings::class)->get('stackable.min_home_credit_percent') ?? 30);
+        $utemMaxTransfer = $p->total_credits * (100 - $minHome) / 100;
+        if ($total > $utemMaxTransfer) {
+            $w[] = "UTeM minimum direct-credit requirement (Guide Cl. 14.5.1): $total credits would leave fewer than {$minHome}% of {$p->total_credits} graduating credits earned directly at UTeM (maximum transferable: {$utemMaxTransfer} credits).";
+        }
+        $raw = (string) $p->non_transferable;
+        $decoded = json_decode($raw, true);
+        $blocked = is_array($decoded) ? $decoded : array_filter(array_map('trim', explode(',', $raw)));
         foreach ($lines as $l) {
             if (in_array($l->course_code, $blocked, true) && ($approved[$l->id] ?? 0) > 0) {
                 $w[] = "{$l->course_code} is listed as non-transferable for this programme.";
+            }
+            if (($approved[$l->id] ?? 0) > (float) $l->course_credit) {
+                $w[] = "Target course credit limit: credits for {$l->course_code} ({$approved[$l->id]}) exceed the course credit value ({$l->course_credit}).";
             }
             if ($l->reevaluate) {
                 $w[] = "The credit for {$l->course_code} has expired or the curriculum changed: judge the currency of knowledge again.";
             }
             if ($l->target_version !== $p->curriculum_version) {
                 $w[] = "{$l->course_code} was evaluated against curriculum version {$l->target_version}; the programme is now version {$p->curriculum_version}.";
+            }
+        }
+
+        $counts = [];
+        foreach ($lines as $l) {
+            if (($approved[$l->id] ?? 0) > 0) {
+                $counts[$l->parent_course_id] = ($counts[$l->parent_course_id] ?? 0) + 1;
+            }
+        }
+        foreach ($counts as $cid => $cnt) {
+            if ($cnt > 1) {
+                $cname = $lines->firstWhere('parent_course_id', $cid)->course_code ?? "Course #$cid";
+                $w[] = "Duplicate target course: $cname is mapped more than once in this application.";
             }
         }
 

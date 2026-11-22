@@ -15,7 +15,7 @@
 ]" />
 <div class="title">
   <div style="display:flex;align-items:center;gap:16px">
-    <x-badge :category="$content['category'] ?? 'samc'" :size="64" />
+    <x-badge :category="$content['category'] ?? 'samc'" :size="64" :image="$enrolment->badge_image_path ?? null" />
     <div>
       <h1>{{ $content['name']['en'] }}</h1>
       <div class="sub">
@@ -214,10 +214,10 @@
                     <div style="display:flex;align-items:center;gap:8px">
                       @if(!empty($m->badge_code))
                         <a href="{{ route('verify.show', $m->badge_code) }}" target="_blank" title="{{ __('View module badge and verification details') }}" style="display:inline-flex;align-items:center;text-decoration:none">
-                          <x-badge :category="$content['category'] ?? 'samc'" :size="32" />
+                          <x-badge :category="$content['category'] ?? 'samc'" :size="32" :image="$enrolment->badge_image_path ?? null" :seq="$m->seq" />
                         </a>
                       @else
-                        <x-badge :category="$content['category'] ?? 'samc'" :size="32" />
+                        <x-badge :category="$content['category'] ?? 'samc'" :size="32" :image="$enrolment->badge_image_path ?? null" :seq="$m->seq" />
                       @endif
                         <div>
                           <a href="{{ route('verify.show', $m->badge_code) }}" target="_blank" style="font-weight:600;font-size:12px" title="{{ __('Verify this badge on public verification portal') }}">

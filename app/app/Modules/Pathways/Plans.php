@@ -31,16 +31,47 @@ final class Plans
         $programme = DB::table('programmes')->find($plan->programme_id);
         $items = DB::table('pathway_items as i')->join('micro_credentials as m', 'm.id', '=', 'i.micro_credential_id')->whereIn('i.id', json_decode($plan->item_ids, true))->get(['i.*', 'm.category']);
         $c = [];
-        $pct = rtrim(rtrim((string) $plan->utem_percent, '0'), '.');
+        $pct = mcms_num($plan->utem_percent);
         $c[] = ['key' => 'home_credit', 'met' => (float) $plan->utem_percent >= $min, 'detail' => "$pct% of the {$programme->total_credits} graduating credits would be earned directly at UTeM; at least $min% is required. Meeting $min% does not mean the rest can be transferred automatically."];
         $odl = $plan->delivery_method === 'odl';
-        $c[] = ['key' => 'residency', 'met' => $programme->mode !== 'conventional' || ((int) $plan->residency_semesters >= $res && ! $odl),
-            'detail' => $programme->mode === 'conventional' ? "Residency planned: {$plan->residency_semesters} semester(s); at least $res required for a conventional programme.".($odl ? ' The delivery method may enter ODL scope and is flagged for review under ODL policy.' : '') : 'Not required for this programme mode.'];
-        $c[] = ['key' => 'credit_bearing', 'met' => $items->every(fn ($i) => in_array($i->category, ['umc', 'samc'], true)), 'detail' => 'Every credential counted toward the degree is credit-bearing (UMC or Quality-Verified SAMC). An MCE never counts.'];
+        $resMet = $programme->mode !== 'conventional' || ((int) $plan->residency_semesters >= $res && ! $odl);
+        $c[] = ['key' => 'residency', 'met' => $resMet,
+            'detail' => $programme->mode === 'conventional' ? "Residency planned: {$plan->residency_semesters} semester(s); at least $res required for a conventional programme.".($odl ? ' Conventional-to-ODL mode shift flagged for mandatory referral to Centre for Quality Assurance (ODL scope QA referral).' : '') : 'Not required for this programme mode.'];
+        
+        $samcValid = true;
+        foreach ($items as $item) {
+            if ($item->category === 'samc') {
+                $hasQv = DB::table('qv_records')
+                    ->where('micro_credential_id', $item->micro_credential_id)
+                    ->where('status', 'verified')
+                    ->where('valid_from', '<=', today())
+                    ->where('valid_until', '>=', today())
+                    ->exists();
+                if (! $hasQv) {
+                    $samcValid = false;
+                    break;
+                }
+            }
+        }
+        $isCreditBearing = $items->every(fn ($i) => in_array($i->category, ['umc', 'samc'], true)) && $samcValid;
+        $c[] = ['key' => 'credit_bearing', 'met' => $isCreditBearing, 'detail' => $isCreditBearing ? 'Every credential counted toward the degree is credit-bearing (UMC or active Quality-Verified SAMC).' : 'One or more credentials counted are not credit-bearing (MCE or SAMC without valid Quality Verification standing).'];
+        
         $unmapped = $items->filter(fn ($i) => ! json_decode((string) $i->plo_map, true))->count();
         $c[] = ['key' => 'plo_mapping', 'met' => $unmapped === 0, 'detail' => $unmapped === 0 ? 'Every credential counted is mapped to programme learning outcomes.' : "$unmapped credential(s) are not mapped to any programme learning outcome."];
+        
         $rem = json_decode((string) $plan->remaining, true) ?: [];
-        $c[] = ['key' => 'remaining', 'met' => $rem !== [], 'detail' => $rem !== [] ? count($rem).' remaining requirement(s) listed.' : 'The remaining programme requirements are not listed.'];
+        $mandatory = collect($rem)->reject(fn ($r) => ($r['status'] ?? '') === 'na');
+        $allDone = $mandatory->isNotEmpty() && $mandatory->every(fn ($r) => ($r['status'] ?? '') === 'done');
+        $pending = $mandatory->filter(fn ($r) => ($r['status'] ?? '') !== 'done')->pluck('name')->all();
+        $c[] = [
+            'key' => 'remaining',
+            'met' => $allDone,
+            'detail' => $allDone
+                ? 'All '.count($rem).' remaining programme requirements completed.'
+                : ($rem === []
+                    ? 'The remaining programme requirements are not listed.'
+                    : count($pending).' mandatory remaining requirement(s) pending completion: '.implode(', ', $pending).'.'),
+        ];
 
         return $c;
     }

@@ -1,0 +1,213 @@
+URL: http://127.0.0.1:8110/my-credit/1
+FINAL: http://127.0.0.1:8110/my-credit/1
+STATUS: 200
+TITLE: Academic Credit Record - UTeM Micro-Credential Management System
+H1: Cloud Native Development: Academic Credit Record
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+8
+AH
+Amir Hakimi
+Student
+LEARNING
+My learning
+Find a micro-credential
+Registrations and payments
+My results
+Feedback
+ACHIEVEMENTS
+Credentials
+Achievement record
+CREDIT
+Credit ledger and ABC
+Credit transfer
+My degree plan
+Documents
+Notifications
+8
+Collapse sidebar
+←
+Back
+Credit ledger and ABC
+ACR-2026-0001
+Cloud Native Development: Academic Credit Record
+ACR-2026-0001 · Quality-Verified Standalone Micro-Credential (SAMC) · 2 credits · 80 SLT hours
+Redeemed
+Print ACR (A4)
+Micro-Credential Credit Lifecycle
+Stage 08 / 08 · ACR-2026-0001
+01
+Learning & Results
+Completed
+02
+Coordinator Sign-off
+Completed
+03
+Completion Confirmed
+Completed
+04
+ACR Confirmed
+Completed
+05
+Learner Consent
+Completed
+06
+ABC Deposit
+Completed
+07
+Transfer Evaluation
+Completed
+08
+Single Redemption
+Current stage
+Consent recorded and credit deposited. This Academic Credit Record is deposited in the Academic Bank of Credit. Consent can no longer be changed here. Contact CODL / Registry for corrections.
+Identity & ACR
+Checks (7)
+Deposit & Redemption
+Corrections & Sign-off
+General Information
+SAMC
+Participant Name	Amir Hakimi
+Matric / Participant ID	B032410001
+Provider	Universiti Teknikal Malaysia Melaka
+Micro-Credential	Cloud Native Development
+Category	Quality-Verified Standalone Micro-Credential (SAMC)
+Credit Value	2 credits
+Student Learning Time (SLT)	80 hours
+MQF Level	Level 4
+Completion Date	05/09/2026
+Assessment Basis	Continuous assessment with authentic capstone project (100% coursework).
+Source Verification	Credential: UTEM-MC-2026-0001 · Quality Verification (QV): QV/2023/051 (Valid until: 15/12/2026)
+Academic Credit Record (ACR) Summary
+Deposited
+ACR Reference	ACR-2026-0001
+ACR Created Date	11/09/2026 01:42
+Confirmed By	Nurul Izzah
+Records & ABC Officer, Registry / CODL
+
+Confirmation Date	13/09/2026 01:42
+ACR Status & Remarks	Deposited
+Learning Outcomes
+2 outcomes
+Demonstrate verified micro-credential learning outcomes.
+Apply domain competencies in practical assessments.
+Eligibility Verification Before ACR Preparation
+7 checks
+7 rows
+No.
+	Eligibility Criterion
+	Result
+	Evidence Reference
+
+1	The micro-credential is a UMC or a SAMC (never an MCE)	Yes (Passed)	Category confirmed as credit-bearing (UMC/SAMC).
+2	The micro-credential is completed	Yes (Passed)	Learner completed the micro-credential with confirmed achievement record.
+3	Identity and results are verified	Yes (Passed)	Identity and summative assessment results verified without open integrity holds.
+4	The UMC comes from an accredited parent programme	Not Applicable	Not applicable (SAMC)
+5	A SAMC has Quality Verification valid on the completion date	Yes (Passed)	Active MQA Quality Verification (QV) cycle verified on completion date.
+6	Credit and MQF level rest on a valid approval or QV decision	Yes (Passed)	Planned SLT and MQF level match approved credit calculation.
+7	The source records and the credential can be traced	Yes (Passed)	Linked to valid verifiable credential and faculty approval decision.
+Rows per page
+5
+10
+25
+50
+1–7 of 7
+Page 1 of 1
+‹
+›
+Learner Consent & ABC Deposit Record
+Successful
+Learner Consent Obtained	Consent Given 14/09/2026 01:42 (web_portal)
+ABC Reference	ABC-MYS-2026-098471
+Deposit Date	15/09/2026
+Credits Deposited	2 credits
+Credit Validity Expiry	15/09/2036 (10 years from deposit date)
+Deposit Status	Successful
+Recorded By (ABC Depositor)	Farid Hashim
+Administrator, Centre for Open and Distance Learning (CODL)
+
+Credit Ledger Status	Redeemed
+Single Redemption Principle Tracking
+Redeemed
+4 rows
+Stage
+	Status
+	Date & ABC Update
+	Evidence & Actor
+
+01. Available	Completed	15/09/2026	ABC Ref: ABC-MYS-2026-098471
+02. Provisionally Redeemed	Recorded	25/10/2026	TR-2026-0001 (BITS) · Hakim Rahman
+03. Redeemed	Redeemed (Final)	25/10/2026
+ABC: 25/10/2026
+	TR-2026-0001 (ABC-UPDATE-78192) · Hakim Rahman
+04. Programme Not Completed / Released	Not applicable	—	—
+Consent History
+1 record(s)
+1 rows
+Date
+	Decision
+	Channel
+	Wording version
+
+14/09/2026 01:42	Consent given	web_portal	en vv1.0, ms vv1.0
+Credit Ledger History
+3 entries
+3 rows
+Date
+	Event
+	From
+	To
+
+15/09/2026	Deposit	—	Available
+20/10/2026	Provisional	Available	Provisionally redeemed
+25/10/2026	Redeemed	Provisionally redeemed	Redeemed
+Three-Party Verification
+3 / 3 recorded
+3 rows
+Role
+	Name & Position
+	Verification
+	Date
+	Remarks
+
+
+Course Coordinator / Lecturer
+	Dr. Aina Zulkifli
+Course Coordinator / Lecturer, FTMK
+	Confirmed	30/08/2026	Assessment marks and learning outcomes verified by Course Coordinator.
+
+Faculty Academic Authority (Deputy Dean)
+	Hakim Rahman
+Deputy Dean (Academic), FTMK
+	Confirmed	10/09/2026	Completion confirmed by faculty academic authority.
+
+Records Unit / ABC Depositor
+	Farid Hashim
+Administrator, Centre for Open and Distance Learning (CODL)
+	Confirmed	15/09/2026	ABC deposit recorded (ABC-MYS-2026-098471).
+Record Correction & Update Log
+0 entry/entries
+Date	Record Type	Reason	Action Taken	Approved By	Notified
+No corrections recorded. Original ACR records are preserved permanently.
+Academic Credit Policy
+Policy
+
+An Academic Credit Record (ACR) is a separate record from your certificate and Digital Credential. It is retained permanently and cannot be edited directly; any correction is logged in the official correction audit log.
+
+10-Year ABC Validity
+Credits deposited in ABC remain valid for 10 years from the deposit date.
+Single Redemption Principle
+Once redeemed toward a qualification, credit cannot be reused for another qualification.
+Storage Only
+ABC deposit is storage only and never grants automatic credit transfer or programme admission.
+Linked Transfers
+1
+TR-2026-0001 · BITS
+Approved · 2 credits requested
+View transfer
+Actions
+Print Official ACR (A4)
+← Back to credit ledger

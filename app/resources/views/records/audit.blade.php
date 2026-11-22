@@ -67,7 +67,13 @@
               @endif
             </td>
             <td><code>{{ $a->subject_type }} {{ $a->subject_id }}</code></td>
-            <td>{{ $a->actor ?? 'System' }}</td>
+            <td>
+              {{ $a->actor ?? 'System' }}
+              @php $ctx = json_decode((string)($a->context ?? ''), true); @endphp
+              @if(!empty($ctx['ip']))
+                <div class="s muted" style="font-size:11px;font-family:var(--mono)">IP: {{ $ctx['ip'] }}</div>
+              @endif
+            </td>
           </tr>
         @empty
           <tr>
@@ -118,7 +124,13 @@
               @endif
             </td>
             <td><code>{{ $a->subject_type }} {{ $a->subject_id }}</code></td>
-            <td>{{ $a->actor ?? 'System' }}</td>
+            <td>
+              {{ $a->actor ?? 'System' }}
+              @php $ctx = json_decode((string)($a->context ?? ''), true); @endphp
+              @if(!empty($ctx['ip']))
+                <div class="s muted" style="font-size:11px;font-family:var(--mono)">IP: {{ $ctx['ip'] }}</div>
+              @endif
+            </td>
           </tr>
         @empty
           <tr>

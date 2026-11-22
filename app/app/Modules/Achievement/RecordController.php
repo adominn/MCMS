@@ -22,7 +22,9 @@ final class RecordController
         $e = DB::table('enrolments as e')->join('offerings as o', 'o.id', '=', 'e.offering_id')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
             ->where('e.id', $enrolment)->first(['e.user_id', 'm.owner_id', 'm.ptj_id']) ?? abort(404);
         $u = $request->user();
-        $ptjs = $u->hasAnyRole('deputy_dean') ? $u->scopedPtjIds('deputy_dean') : [];
+        $ptjs = $u->hasAnyRole('records_depositor')
+            ? $u->scopedPtjIds('records_depositor')
+            : ($u->hasAnyRole('deputy_dean') ? $u->scopedPtjIds('deputy_dean') : []);
         abort_unless($e->user_id === $u->id || $e->owner_id === $u->id || $ptjs === null || in_array($e->ptj_id, $ptjs, true), 403, 'You cannot see this record.');
 
         return view('records.show', ['d' => $this->data($enrolment)]);

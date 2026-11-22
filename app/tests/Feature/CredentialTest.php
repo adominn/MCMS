@@ -14,6 +14,7 @@ beforeEach(function () {
     $this->hakim = User::where('name', 'Hakim Rahman')->first();
     $this->amir = User::where('name', 'Amir Hakimi')->first();
     $this->farid = User::where('name', 'Farid Hashim')->first();
+    $this->nurul = User::where('name', 'Nurul Izzah')->first();
     $this->lim = User::create(['name' => 'Dr. Lim Wei Jie', 'email' => 'lim@utem.example.test']);
     $this->lim->roleAssignments()->create(['role' => 'lecturer', 'scope_type' => 'ptj', 'ptj_id' => DB::table('ptjs')->where('code', 'FTMK')->value('id')]);
 });
@@ -117,7 +118,7 @@ it('blocks issuing when a check fails, lists the participant with the reason, an
     expect(json_decode($f->reasons, true)[0])->toContain('identity does not match the official record');
     $this->actingAs($this->hakim)->get('/credentials')->assertSee('Not issued')->assertSee('Amir Hakimi')->assertSee('identity does not match');
     DB::table('users')->where('id', $this->amir->id)->update(['institution_id' => 'B032410001']);
-    $this->actingAs($this->hakim)->post('/credentials/retry/'.eid($o, $this->amir))->assertSessionHas('status');
+    $this->actingAs($this->nurul)->post('/credentials/retry/'.eid($o, $this->amir))->assertSessionHas('status');
     expect(DB::table('credentials')->count())->toBe(2)->and(DB::table('credential_issue_failures')->count())->toBe(0);
 });
 
@@ -216,8 +217,8 @@ it('checks the signature of an uploaded Digital Credential file (FR-155)', funct
 
 it('corrects a name for a confirmed error, keeps the original, and shows Corrected on the same link (FR-158, FL-10)', function () {
     [, , $c] = issued();
-    $this->actingAs($this->hakim)->post("/credentials/{$c->id}/correct", ['holder' => 'Amir Hakimi bin Ismail', 'reason' => ''])->assertSessionHasErrors('reason');
-    $this->actingAs($this->hakim)->post("/credentials/{$c->id}/correct", ['holder' => 'Amir Hakimi bin Ismail', 'reason' => 'Name must include the father\'s name'])->assertSessionHasNoErrors();
+    $this->actingAs($this->nurul)->post("/credentials/{$c->id}/correct", ['holder' => 'Amir Hakimi bin Ismail', 'reason' => ''])->assertSessionHasErrors('reason');
+    $this->actingAs($this->nurul)->post("/credentials/{$c->id}/correct", ['holder' => 'Amir Hakimi bin Ismail', 'reason' => 'Name must include the father\'s name'])->assertSessionHasNoErrors();
     $now = DB::table('credentials')->find($c->id);
     $revs = DB::table('credential_revisions')->where('credential_id', $c->id)->orderBy('revision')->get();
     expect($now->status)->toBe('corrected')->and($now->revision)->toBe(2)->and($now->public_code)->toBe($c->public_code)->and(json_decode($now->content, true)['holder'])->toBe('Amir Hakimi bin Ismail')
@@ -226,20 +227,23 @@ it('corrects a name for a confirmed error, keeps the original, and shows Correct
         ->and(DB::table('audit_events')->where('action', 'credential.corrected')->value('reason'))->toContain('father')
         ->and(DB::table('notifications')->where('user_id', $this->amir->id)->where('template_key', 'credential.corrected')->where('channel', 'in_system')->value('body'))->toContain('Reason: Name must include');
     $this->get('/public/verify/'.$c->public_code)->assertSee('Valid, corrected')->assertSee('Amir Hakimi bin Ismail')->assertDontSee('Revoked');
-    $this->actingAs($this->hakim)->get("/credentials/{$c->id}")->assertSee('History')->assertSee('Corrected');
+    $this->actingAs($this->nurul)->get("/credentials/{$c->id}")->assertSee('History')->assertSee('Corrected');
 });
 
-it('lets only the deputy dean of the owning PTj correct, replace or revoke (FR-158)', function () {
+it('lets only the records custodian correct, replace or revoke (Appendix H3, FR-158)', function () {
     [, , $c] = issued();
-    $fke = User::create(['name' => 'Dean FKE', 'email' => 'fke@utem.example.test']);
-    $fke->roleAssignments()->create(['role' => 'deputy_dean', 'scope_type' => 'ptj', 'ptj_id' => DB::table('ptjs')->where('code', 'FTKE')->value('id')]);
+    // Deputy Dean (P2) cannot mutate credentials directly (Appendix H3 RACI)
+    $this->actingAs($this->hakim)->post("/credentials/{$c->id}/correct", ['holder' => 'X Y', 'reason' => 'Trying it'])->assertForbidden();
+    $this->actingAs($this->hakim)->post("/credentials/{$c->id}/revoke", ['reason' => 'Trying it'])->assertForbidden();
+    $this->actingAs($this->hakim)->post("/credentials/{$c->id}/replace", ['reason' => 'Trying it'])->assertForbidden();
+
     foreach ([$this->aina, $this->farid, $this->amir] as $u) {
         $this->actingAs($u)->post("/credentials/{$c->id}/correct", ['holder' => 'X Y', 'reason' => 'Trying it'])->assertForbidden();
         $this->actingAs($u)->post("/credentials/{$c->id}/revoke", ['reason' => 'Trying it'])->assertForbidden();
         $this->actingAs($u)->get('/credentials')->assertForbidden();
     }
-    $this->actingAs($fke)->get("/credentials/{$c->id}")->assertForbidden();
-    $this->actingAs($fke)->post("/credentials/{$c->id}/replace", ['reason' => 'Trying it'])->assertForbidden();
+    // Records custodian (P6) can access credentials
+    $this->actingAs($this->nurul)->get("/credentials/{$c->id}")->assertOk();
     expect(DB::table('credentials')->find($c->id)->status)->toBe('valid');
 });
 
@@ -247,21 +251,21 @@ it('lets only the deputy dean of the owning PTj correct, replace or revoke (FR-1
 
 it('replaces a credential with a new one and points the old code to it (FR-159)', function () {
     [, , $c] = issued();
-    $this->actingAs($this->hakim)->post("/credentials/{$c->id}/replace", ['reason' => 'Wrong category printed'])->assertSessionHasNoErrors();
+    $this->actingAs($this->nurul)->post("/credentials/{$c->id}/replace", ['reason' => 'Wrong category printed'])->assertSessionHasNoErrors();
     $old = DB::table('credentials')->find($c->id);
     $new = DB::table('credentials')->find($old->replaced_by_id);
     expect($old->status)->toBe('replaced')->and($new->status)->toBe('valid')->and($new->public_code)->not->toBe($old->public_code)->and($new->number)->not->toBe($old->number)->and($new->replaces_id)->toBe($old->id)
         ->and(Jwt::verify($new->jwt)['ok'])->toBeTrue()->and(DB::table('notifications')->where('user_id', $this->amir->id)->where('template_key', 'credential.replaced')->exists())->toBeTrue();
     $this->get('/public/verify/'.$old->public_code)->assertSee('Replaced')->assertSee($new->public_code)->assertDontSee('Valid, corrected');
     $this->get('/public/verify/'.$new->public_code)->assertSee('Valid');
-    $this->actingAs($this->hakim)->post("/credentials/{$c->id}/correct", ['holder' => 'Late Edit', 'reason' => 'Too late now'])->assertForbidden();
-    $this->actingAs($this->hakim)->post("/credentials/{$c->id}/revoke", ['reason' => 'Too late now'])->assertForbidden();
+    $this->actingAs($this->nurul)->post("/credentials/{$c->id}/correct", ['holder' => 'Late Edit', 'reason' => 'Too late now'])->assertForbidden();
+    $this->actingAs($this->nurul)->post("/credentials/{$c->id}/revoke", ['reason' => 'Too late now'])->assertForbidden();
 });
 
 it('revokes a credential with a reason, and the public page says Revoked and shows no result (FR-160)', function () {
     [, , $c] = issued();
-    $this->actingAs($this->hakim)->post("/credentials/{$c->id}/revoke", ['reason' => ''])->assertSessionHasErrors('reason');
-    $this->actingAs($this->hakim)->post("/credentials/{$c->id}/revoke", ['reason' => 'Result found to be invalid after an integrity case'])->assertSessionHasNoErrors();
+    $this->actingAs($this->nurul)->post("/credentials/{$c->id}/revoke", ['reason' => ''])->assertSessionHasErrors('reason');
+    $this->actingAs($this->nurul)->post("/credentials/{$c->id}/revoke", ['reason' => 'Result found to be invalid after an integrity case'])->assertSessionHasNoErrors();
     $page = $this->get('/public/verify/'.$c->public_code);
     $page->assertSee('Revoked')->assertSee('must not be relied on')->assertSee(today()->format('Y-m-d'), false)->assertDontSee('Amir Hakimi');
     $this->getJson('/public/verify/'.$c->public_code)->assertOk()->assertJson(['status' => 'revoked'])->assertJsonMissing(['recipient' => 'Amir Hakimi']);
@@ -272,7 +276,7 @@ it('revokes a credential with a reason, and the public page says Revoked and sho
 
 it('never deletes or edits a credential or an earlier revision (FR-161)', function () {
     [, , $c] = issued();
-    $this->actingAs($this->hakim)->post("/credentials/{$c->id}/correct", ['holder' => 'Amir Hakimi bin Ismail', 'reason' => 'Add the father\'s name']);
+    $this->actingAs($this->nurul)->post("/credentials/{$c->id}/correct", ['holder' => 'Amir Hakimi bin Ismail', 'reason' => 'Add the father\'s name']);
     expect(fn () => DB::transaction(fn () => DB::table('credentials')->where('id', $c->id)->delete()))->toThrow(\Illuminate\Database\QueryException::class);
     expect(fn () => DB::transaction(fn () => DB::table('credential_revisions')->where('credential_id', $c->id)->delete()))->toThrow(\Illuminate\Database\QueryException::class);
     expect(fn () => DB::transaction(fn () => DB::table('credential_revisions')->where('credential_id', $c->id)->update(['reason' => 'rewritten'])))->toThrow(\Illuminate\Database\QueryException::class);
@@ -315,4 +319,58 @@ it('displays the lecturer name on credential wallet, admin list, and verificatio
     $this->actingAs($this->hakim)->get('/credentials')->assertOk()->assertSee('Dr. Aina Zulkifli');
     $this->actingAs($this->hakim)->get("/credentials/{$c->id}")->assertOk()->assertSee('Dr. Aina Zulkifli');
     $this->get('/public/verify/'.$c->public_code)->assertOk()->assertSee('Dr. Aina Zulkifli');
+});
+
+it('renders Appendix E specifications: certificate details, sheet with E10 sign-offs, and persists E8 pre-issuance checklist on issue and replace (REQ-AE-002, REQ-AE-003, REQ-AE-007, REQ-AE-008, REQ-AE-009)', function () {
+    [$o, , $c] = issued();
+
+    // 1. Verify Certificate PDF includes Faculty/PTj, Cohort, SLT, and real Signatory Position
+    $resCertEn = $this->actingAs($this->amir)->get("/my-credentials/{$c->id}/certificate")->assertOk();
+    $resCertEn->assertSee('Cohort')
+        ->assertSee('Learning Time')
+        ->assertSee('hours SLT')
+        ->assertSee('Learning Outcomes')
+        ->assertSee('Deputy Dean (Academic)');
+
+    $resCertMs = $this->actingAs($this->amir)->get("/my-credentials/{$c->id}/certificate?lang=ms")->assertOk();
+    $resCertMs->assertSee('Kohort')
+        ->assertSee('Jumlah Pembelajaran')
+        ->assertSee('jam SLT')
+        ->assertSee('Hasil Pembelajaran')
+        ->assertSee('Timbalan Dekan (Akademik)');
+
+    // 2. Verify Printable Sheet includes Appendix E10 3-role sign-offs & Nota Penting E
+    $resSheet = $this->actingAs($this->amir)->get("/my-credentials/{$c->id}/sheet")->assertOk();
+    $resSheet->assertSee('Appendix E10: Credential Specifications Sign-Off (3 Roles)')
+        ->assertSee('Penyelaras Kursus / MC')
+        ->assertSee('Wakil PTj / Timbalan Dekan')
+        ->assertSee('Urus Setia Credential')
+        ->assertSee('NOTA PENTING (Lampiran E)');
+
+    // 3. Verify E8 Checklist Persistence on credentials table
+    $credRow = DB::table('credentials')->where('id', $c->id)->first();
+    expect($credRow->e8_checklist)->not->toBeNull();
+    $checklist = json_decode($credRow->e8_checklist, true);
+    expect($checklist)->toHaveKeys([
+        'identity_match',
+        'completion_terms',
+        'assessment_verified',
+        'credential_type',
+        'accurate_title_cat',
+        'valid_credit_claims',
+        'working_verification',
+        'issuance_ready',
+    ])->and($checklist['identity_match']['passed'])->toBeTrue()
+      ->and($checklist['completion_terms']['passed'])->toBeTrue()
+      ->and($checklist['assessment_verified']['passed'])->toBeTrue();
+
+    // 4. Verify replace() runs E8 pre-issuance checks and persists on new credential
+    $this->actingAs($this->nurul)->post("/credentials/{$c->id}/replace", [
+        'reason' => 'Updated legal surname per identity card renewal',
+    ])->assertSessionHasNoErrors();
+
+    $newCred = DB::table('credentials')->where('replaces_id', $c->id)->first();
+    expect($newCred)->not->toBeNull()
+        ->and($newCred->e8_checklist)->not->toBeNull()
+        ->and($newCred->e10_signoffs)->not->toBeNull();
 });

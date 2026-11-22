@@ -8,7 +8,7 @@
 
 <div class="title">
   <div style="display:flex;align-items:center;gap:16px">
-    <x-badge :category="$o->category ?? 'samc'" :size="48" />
+    <x-badge :category="$o->category ?? 'samc'" :size="48" :image="$o->badge_image_path ?? null" />
     <div>
       <h1>{{ $o->name_en }} {{ $o->cohort_name }}</h1>
       <div class="sub">
@@ -20,17 +20,18 @@
     </div>
   </div>
   <div class="act" style="gap:8px;align-items:center">
-    <a class="btn ter sm" href="{{ route('offerings') }}">&larr; {{ __('All offerings') }}</a>
-    <x-pill :s="__($labels[$o->status] ?? ucfirst($o->status))" />
-    <a class="btn ter sm" href="{{ route('offerings.participants', $o->id) }}">{{ __('Participants') }}</a>
     @if(!$dean)
       <a class="btn ter sm" href="{{ route('results.cohort', $o->id) }}">{{ __('Results') }}</a>
+      <a class="btn ter sm" href="{{ route('completion.signoff.show', $o->id) }}">{{ __('Coordinator sign-off') }}</a>
+      <a class="btn ter sm" href="{{ route('cohorts.credits', $o->id) }}">{{ __('Cohort ACR progress') }}</a>
     @else
       <a class="btn ter sm" href="{{ route('results.verify', $o->id) }}">{{ __('Results') }}</a>
+      <a class="btn ter sm" href="{{ route('completion.show', $o->id) }}">{{ __('Confirm completion') }}</a>
     @endif
-    @if($o->status === 'open')
-      <a class="btn ter sm" href="{{ route('public.offering', $o->id) }}">{{ __('Public page') }}</a>
-    @endif
+    <a class="btn ter sm" href="{{ route('offerings.participants', $o->id) }}">{{ __('Participants') }}</a>
+    <a class="btn ter sm" href="{{ route('offerings.readiness.print', $o->id) }}">{{ __('Print Appendix B') }}</a>
+    <x-pill :s="__($labels[$o->status] ?? ucfirst($o->status))" />
+    <a class="btn ter sm" href="{{ route('offerings') }}">&larr; {{ __('All offerings') }}</a>
   </div>
 </div>
 
@@ -46,7 +47,9 @@
   </div>
 @endif
 
-@php($lecturerSent = $confirmations->where('role', 'lecturer')->isNotEmpty())
+@php
+  $lecturerSent = !empty($confirmations) && $confirmations->where('role', 'lecturer')->isNotEmpty();
+@endphp
 
 <form method="post" action="{{ $dean ? route('offerings.confirm', $o->id) : route('offerings.readiness', $o->id) }}">
   @csrf
@@ -68,6 +71,64 @@
           </tr>
         </thead>
         <tbody>
+        @php
+          $renderSections = $sections ?? config('offerings.readiness_sections');
+        @endphp
+        @if(!empty($renderSections))
+          @foreach($renderSections as $secKey => $sec)
+            <tr style="background:#f4f4f4">
+              <th colspan="4" style="text-align:left;padding:8px 12px;font-size:10pt;color:#161616;border-top:2px solid var(--border)">
+                <b>{{ $sec['code'] }}. {{ __($sec['title_ms']) }}</b> &middot; <span class="muted" style="font-weight:normal">{{ __($sec['title_en']) }}</span>
+              </th>
+            </tr>
+            @foreach($sec['items'] as $k => $itemData)
+              @php($it = $items[$k] ?? (object) ["status" => "not_yet", "note" => "", "accepted" => false])
+              @php($label = $itemData['en'])
+              <tr>
+                <td>
+                  <b>{{ $itemData['ms'] }}</b>
+                  <div class="small muted">{{ $itemData['en'] }}</div>
+                </td>
+                <td>
+                  @if($dean)
+                    <span class="tag {{ $it->status === 'yes' ? 'ok' : ($it->status === 'na' ? 'n' : 'warn') }}">
+                      {{ __(['yes' => 'Yes', 'not_yet' => 'Not yet', 'na' => 'Not applicable'][$it->status]) }}
+                    </span>
+                  @else
+                    <select name="item[{{ $k }}][status]" aria-label="Status of {{ $label }}" @disabled(!$editable)>
+                      @foreach(['yes' => 'Yes', 'not_yet' => 'Not yet', 'na' => 'Not applicable'] as $sv => $sl)
+                        <option value="{{ $sv }}" @selected($it->status === $sv)>{{ __($sl) }}</option>
+                      @endforeach
+                    </select>
+                  @endif
+                </td>
+                <td>
+                  @if($dean)
+                    {{ $it->note ?: '—' }}
+                  @else
+                    <input type="text" name="item[{{ $k }}][note]" value="{{ $it->note }}" aria-label="Evidence note for {{ $label }}" @disabled(!$editable) placeholder="{{ __('Reference to evidence') }}">
+                  @endif
+                </td>
+                <td>
+                  @if($dean && $it->status === 'yes')
+                    <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
+                      <input type="checkbox" name="accept[{{ $k }}]" value="1" @checked($it->accepted) aria-label="Accept evidence for {{ $label }}">
+                      <span>{{ __('Accept') }}</span>
+                    </label>
+                  @elseif($dean)
+                    <span class="muted">-</span>
+                  @else
+                    @if($it->accepted)
+                      <span class="tag ok">{{ __('Accepted') }}</span>
+                    @else
+                      <span class="muted">-</span>
+                    @endif
+                  @endif
+                </td>
+              </tr>
+            @endforeach
+          @endforeach
+        @else
         @foreach($items_cfg as $k => $label)
           @php($it = $items[$k] ?? (object) ["status" => "not_yet", "note" => "", "accepted" => false])
           <tr>
@@ -110,6 +171,7 @@
             </td>
           </tr>
         @endforeach
+        @endif
         </tbody>
       </table>
     </div>
@@ -174,8 +236,8 @@
       <tbody>
       @forelse($confirmations as $c)
         <tr>
-          <td><b>{{ $c->name }}</b></td>
-          <td>{{ $c->role === 'ptj' ? __('PTj (deputy dean)') : __('Lecturer') }}</td>
+          <td><b>{{ $c->name }}</b>@if(!empty($c->position)) <div class="small muted">{{ $c->position }}</div>@endif</td>
+          <td>{{ $c->role === 'ptj' ? __('PTj (deputy dean)') : ($c->role === 'support' ? __('Support / System (CODL)') : __('Course Coordinator (P1)')) }}</td>
           <td>
             <x-pill :s="__(config('offerings.outcomes')[$c->outcome] ?? $c->outcome)" />
             @if($c->conditions) &mdash; <span class="s muted">{{ $c->conditions }}</span>@endif
@@ -207,4 +269,10 @@
     </div>
   </form>
 @endif
+<div class="note info" style="margin-top:20px;margin-bottom:24px">
+  <b>{{ __('NOTA PENTING (Lampiran B):') }}</b> {{ __('Senarai semak ini bertujuan memastikan kesediaan operasi, integriti pelaksanaan, dan perlindungan peserta sebelum sesuatu penawaran dimulakan. Semakan kesediaan operasi ini TIDAK menggantikan kelulusan akademik terdahulu bagi sesuatu Micro-Credential.') }}
+  <div class="small muted" style="margin-top:4px">
+    <b>{{ __('IMPORTANT NOTICE (Appendix B):') }}</b> {{ __('This checklist ensures operational readiness, delivery integrity, and learner protection before an offering commences. This operational readiness check DOES NOT replace the prior academic approval of the Micro-Credential.') }}
+  </div>
+</div>
 @endsection

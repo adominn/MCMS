@@ -1,0 +1,96 @@
+URL: http://127.0.0.1:8110/pathways/1
+FINAL: http://127.0.0.1:8110/pathways/1
+STATUS: 200
+TITLE: Pathway mapping - UTeM Micro-Credential Management System
+H1: Pathway PW-BITS-2026-01
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+2
+AZ
+Dr. Aina Zulkifli
+Lecturer, FTMK
+TEACHING
+My tasks
+3
+My micro-credentials
+Proposals and versions
+1
+Cohorts and results
+Reviews for colleagues
+1
+QUALITY
+Quality review (CQI)
+QV evidence
+Stackable pathways
+INSIGHT
+Reports
+Traceability
+Documents
+Notifications
+2
+Collapse sidebar
+←
+Back
+Stackable pathways
+Pathway PW-BITS-2026-01
+Pathway PW-BITS-2026-01
+BITS — Bachelor of Computer Science (Software Development) with Honours
+← All pathways
+Published
+PROGRAMME CODE
+BITS
+MQF LEVEL
+Level 6
+TOTAL CREDITS
+120 credits
+DELIVERY MODE
+Conventional
+ACCREDITATION
+Accredited
+INTAKE COHORT
+2026/1
+SENATE REFERENCE
+Senate 7/2026
+An approved mapping transfers no credit. Each participant's credit still goes through credit transfer evaluation, and admission is decided separately.
+Approved on 04/08/2026, Senate reference Senate 7/2026.
+Institutional Degree Articulation Capacity
+Curriculum mapping metrics and credit articulation capacity
+10 / 120 credits mapped (8.3%)
+TOTAL DEGREE REQUIREMENT
+120 credits
+100% Graduating curriculum
+ARTICULATED VIA MCS
+10 credits
+4 degree courses mapped (8.3%)
+MAX ARTICULATION CEILING
+≤ 84 credits
+Up to 70% allowable from micro-credentials
+MANDATORY UTEM DIRECT STUDY
+≥ 36 credits
+Minimum 30% direct home institution study
+Currently mapped: 10 cr (8.3%)
+Allowable articulation headroom: 74 cr (up to 70%)
+Mandatory direct UTeM study: ≥ 36 cr (30% floor)
+✓ Home institution quota compliant: Mapped credits (10 cr) do not exceed the 70% institutional articulation limit (84 cr), preserving at least 30% (36 cr) for direct study at UTeM as the home awarding institution.
+• Residency requirement: Conventional degree students must complete at least 1 semester on-campus residency at UTeM regardless of credit transfers.
+• Mapping is not transfer: Curriculum roadmap approval establishes academic equivalence only; credit transfer is formally decided upon learner application.
+Mapped degree courses
+Equivalence pairings between eligible micro-credentials and parent degree courses
+4 courses
+4 rows
+Micro-credential
+	Target course
+	Credits
+	Outcomes
+	Content
+	Preliminary
+	PLO
+	Action
+
+Data Structures (2026 Enhanced) UMC	BITS 1123 Data Structures and Algorithms	3	High	High	Suitable	PLO1 (main), PLO2 (supporting)	
+Cloud Native Development SAMC	BITS 1124 Advanced Algorithms	2	High	Partial	Suitable	PLO4 (main)	
+Object-Oriented Software Construction UMC	BITD 1123 Object-Oriented Programming	3	High	High	Suitable	PLO1 (main), PLO2 (main)	
+Secure Software Development Lifecycle (SSDLC) SAMC	BITS 2313 Computer Networks and Distributed Systems	2	High	Partial	Suitable	PLO4 (main)	

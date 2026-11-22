@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recognition Stages - UTeM Micro-Credential Management System</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+</head>
+<body>
+  
+  <header class="brand-header">
+    <div class="container brand-header-inner">
+      <a href="../public/home.html" class="brand-identity" aria-label="UTeM Micro-Credential Management System Home">
+        <img src="../assets/LogoJawiUTeM_blue-01.png" alt="Universiti Teknikal Malaysia Melaka" class="brand-logo-img">
+        <div class="brand-titles">
+          <span class="brand-sys-title">UTeM MCMS</span>
+        </div>
+      </a>
+      
+      <nav class="header-nav" aria-label="Public Navigation">
+        <ul class="header-nav-list">
+          <li><a href="../public/home.html" class="header-nav-link ">Home</a></li>
+          <li><a href="../public/catalogue.html" class="header-nav-link ">Catalogue</a></li>
+          <li><a href="../public/pathways.html" class="header-nav-link ">Pathways</a></li>
+          <li><a href="../public/how-it-works.html" class="header-nav-link active">Recognition Stages</a></li>
+          <li><a href="../public/faq.html" class="header-nav-link ">FAQ</a></li>
+          <li><a href="../public/verify.html" class="header-nav-link ">Verify</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="../auth/signin-default.html" class="btn btn-primary btn-sm">Sign In</a>
+      </div>
+    </div>
+  </header>
+  
+  
+  <main class="main-content">
+    
+<div class="container">
+
+
+  <div class="breadcrumbs">
+    <a href="home.html">Home</a>
+    <span class="breadcrumbs-sep">/</span>
+    <span>Recognition Stages</span>
+  </div>
+
+  <div style="margin-bottom:28px">
+    <h1>The 8-Stage Credit Lifecycle</h1>
+    <p style="font-size:15px;line-height:1.6;margin-top:6px;max-width:820px">
+      At Universiti Teknikal Malaysia Melaka, earning a micro-credential and transferring academic credit are distinct, independently evaluated milestones. Completing a course does not automatically grant credit transfer or university admission.
+    </p>
+  </div>
+
+  <!-- Read-Only 8-Stage Lifecycle Tracker Component (Linear Stepper Flow) -->
+  <div class="lifecycle-tracker">
+    <div class="flex items-center justify-between" style="margin-bottom:20px">
+      <span class="tag tag-primary">Lifecycle Architecture &ndash; 8 Stages</span>
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--color-ink-muted)">Authority: MC UTeM Guide v1.0 & Appendix H</span>
+    </div>
+
+    <div class="stepper-scroll-container">
+      <div class="stepper-scroll-inner">
+        <!-- 4-Phase Grouping Bar -->
+        <div class="stepper-phase-bar">
+          <div class="phase-badge">
+            <span class="phase-num">Phase I</span>
+            <span class="phase-name">Course Achievement</span>
+          </div>
+          <div class="phase-badge">
+            <span class="phase-num">Phase II</span>
+            <span class="phase-name">Official Academic Record</span>
+          </div>
+          <div class="phase-badge active-phase">
+            <span class="phase-num">Phase III</span>
+            <span class="phase-name">National ABC Repository</span>
+          </div>
+          <div class="phase-badge">
+            <span class="phase-num">Phase IV</span>
+            <span class="phase-name">Degree Articulation</span>
+          </div>
+        </div>
+
+        <!-- 8-Stage Continuous Stepper Flow -->
+        <div class="linear-stepper linear-stepper-8">
+          <!-- Stage 01 -->
+          <div class="stepper-step completed">
+            <div class="step-node">&#10003;</div>
+            <div class="step-label">1. Completion</div>
+            <div class="step-meta">Passed Syllabus</div>
+          </div>
+
+          <!-- Stage 02 -->
+          <div class="stepper-step completed">
+            <div class="step-node">&#10003;</div>
+            <div class="step-label">2. Eligibility</div>
+            <div class="step-meta">PTj Verified</div>
+          </div>
+
+          <!-- Stage 03 -->
+          <div class="stepper-step completed">
+            <div class="step-node">&#10003;</div>
+            <div class="step-label">3. ACR Issued</div>
+            <div class="step-meta">Dean Signed</div>
+          </div>
+
+          <!-- Stage 04 -->
+          <div class="stepper-step active">
+            <div class="step-node">04</div>
+            <div class="step-label">4. Consent</div>
+            <div class="step-meta">In Progress</div>
+          </div>
+
+          <!-- Stage 05 -->
+          <div class="stepper-step">
+            <div class="step-node">05</div>
+            <div class="step-label">5. Deposited</div>
+            <div class="step-meta">10-Yr Storage</div>
+          </div>
+
+          <!-- Stage 06 -->
+          <div class="stepper-step">
+            <div class="step-node">06</div>
+            <div class="step-label">6. Transfer</div>
+            <div class="step-meta">Degree Request</div>
+          </div>
+
+          <!-- Stage 07 -->
+          <div class="stepper-step">
+            <div class="step-node">07</div>
+            <div class="step-label">7. Equivalence</div>
+            <div class="step-meta">80% Overlap Match</div>
+          </div>
+
+          <!-- Stage 08 -->
+          <div class="stepper-step">
+            <div class="step-node">08</div>
+            <div class="step-label">8. Decided</div>
+            <div class="step-meta">Senate Approval</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stepper-regulatory-note">
+      <b>Regulatory Governance Flow (Cl. 10.3.1 & Appendix H):</b> Progression from Course Achievement (Stages 01&ndash;02) to ACR Issuance (Stage 03) establishes an official, signed academic credential. ABC deposit (Stages 04&ndash;05) provides secure archival storage only. Credit transfer (Stages 06&ndash;08) is an independent evaluation conducted by the receiving faculty requiring 80% syllabus equivalence and Senate endorsement.
+    </div>
+  </div>
+
+  <!-- Detailed Stage Breakdown Cards -->
+  <div class="grid grid-cols-2 gap-md" style="margin-bottom:32px">
+    <div class="card">
+      <div class="flex items-center justify-between" style="margin-bottom:8px">
+        <span class="tag tag-primary">STAGE 01 & 02</span>
+        <span class="tag">P1 Lecturer & P2 Deputy Dean</span>
+      </div>
+      <h3 style="margin-bottom:6px">1. Module Badge & Course Credential</h3>
+      <div style="font-size:13px;line-height:1.5;margin-bottom:10px">
+        <b>What it is:</b> Digital badges are awarded for each passing modular component. A signed, verifiable certificate is minted when the complete micro-credential is concluded.
+      </div>
+      <div style="font-size:12.5px;color:var(--color-ink-muted);background:var(--color-surface-1);padding:8px 10px;border-radius:var(--radius-xs)">
+        <b>What it is not:</b> It is not a formal university degree qualification and carries no academic credit by itself without an ACR.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="flex items-center justify-between" style="margin-bottom:8px">
+        <span class="tag tag-primary">STAGE 03</span>
+        <span class="tag">P6 Records Custodian</span>
+      </div>
+      <h3 style="margin-bottom:6px">2. Academic Credit Record (ACR)</h3>
+      <div style="font-size:13px;line-height:1.5;margin-bottom:10px">
+        <b>What it is:</b> UTeM formally registers the credit hours achieved. ACR is strictly granted to Unbundled Micro-Credentials (UMC) and Standalone Micro-Credentials (SAMC) with active Quality Verification.
+      </div>
+      <div style="font-size:12.5px;color:var(--color-ink-muted);background:var(--color-surface-1);padding:8px 10px;border-radius:var(--radius-xs)">
+        <b>What it is not:</b> It is not a credit transfer. MCE executive courses never receive an ACR. Storing is not transferring.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="flex items-center justify-between" style="margin-bottom:8px">
+        <span class="tag tag-primary">STAGE 04 & 05</span>
+        <span class="tag">P7 ABC Depositor</span>
+      </div>
+      <h3 style="margin-bottom:6px">3. Academic Bank of Credit (ABC) Deposit</h3>
+      <div style="font-size:13px;line-height:1.5;margin-bottom:10px">
+        <b>What it is:</b> Only upon explicit learner consent, your verified credit record is transmitted to the national Academic Bank of Credit (ABC) where it remains valid for 10 years.
+      </div>
+      <div style="font-size:12.5px;color:var(--color-ink-muted);background:var(--color-surface-1);padding:8px 10px;border-radius:var(--radius-xs)">
+        <b>What it is not:</b> Storing is not transferring. ABC is a repository storage vault only. Depositing does not grant automatic admission.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="flex items-center justify-between" style="margin-bottom:8px">
+        <span class="tag tag-primary">STAGE 06, 07 & 08</span>
+        <span class="tag">P3 Senate & Faculty</span>
+      </div>
+      <h3 style="margin-bottom:6px">4. Academic Credit Transfer & Redemption</h3>
+      <div style="font-size:13px;line-height:1.5;margin-bottom:10px">
+        <b>What it is:</b> When enrolled in a full degree program, you submit your ACR for exemption. The faculty committee evaluates 80% syllabus overlap course-by-course and Senate renders final approval.
+      </div>
+      <div style="font-size:12.5px;color:var(--color-ink-muted);background:var(--color-surface-1);padding:8px 10px;border-radius:var(--radius-xs)">
+        <b>What it is not:</b> Transfer is not guaranteed. Stacked credits are capped at 30% of total degree credits, and each credit can be redeemed only once.
+      </div>
+    </div>
+  </div>
+
+  <!-- Mandatory Statutory Notice Callout -->
+  <div class="alert alert-info">
+    <span class="alert-title">UTeM Guide Compliance Notice &ndash; Cl. 10.3.1</span>
+    Completion, credential minting, ACR issuance, ABC storage, and credit transfer are distinct administrative stages. Completing a micro-credential does not guarantee an ACR, deposit in ABC, or that any receiving institution will grant credit exemption. Learners may pause or stop at any milestone.
+  </div>
+</div>
+
+  </main>
+
+  
+  <footer class="public-footer">
+    <div class="container">
+      <div class="grid grid-cols-4 gap-lg">
+        <div>
+          <img src="../assets/CODL_logo.png" alt="Centre for Open and Distance Learning" style="height:60px;width:auto;display:block;margin-bottom:14px">
+          <div class="footer-heading">UTeM Micro-credentials</div>
+          <p style="color:#94a3b8;font-size:12.5px;line-height:1.5">
+            Centre for Open and Distance Learning (CODL)<br>
+            Universiti Teknikal Malaysia Melaka<br>
+            Hang Tuah Jaya, 76100 Durian Tunggal, Melaka
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-heading">Learn</div>
+          <a href="../public/catalogue.html">All Micro-Credentials</a>
+          <a href="../public/pathways.html">Degree Pathways</a>
+          <a href="../public/how-it-works.html">Recognition Stages</a>
+        </div>
+
+        <div>
+          <div class="footer-heading">Help & Verification</div>
+          <a href="../public/faq.html">Frequently Asked Questions</a>
+          <a href="../public/verify.html">Verify a Credential</a>
+          <a href="mailto:codl@utem.edu.my">Contact CODL: codl@utem.edu.my</a>
+        </div>
+
+        <div>
+          <div class="footer-heading">Policies & Governance</div>
+          <a href="../public/policy-privacy.html">Privacy Notice (PDPA)</a>
+          <a href="../public/policy-terms.html">Terms of Use</a>
+          <a href="../public/policy-accessibility.html">Accessibility Statement</a>
+        </div>
+      </div>
+
+      <div class="footer-legal">
+        Micro-credentials issued under the UTeM Micro-Credential Framework compliant with MQA Code of Practice for Programme Accreditation and Malaysian Qualifications Framework (MQF) 2nd Edition. Micro-credentials do not automatically grant university admission.
+      </div>
+    </div>
+  </footer>
+  
+
+  <script src="../js/ui.js"></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+URL: http://127.0.0.1:8110/offerings/1
+FINAL: http://127.0.0.1:8110/offerings/1
+STATUS: 200
+TITLE: Readiness - UTeM Micro-Credential Management System
+H1: Cloud Native Development 2026/1
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+2
+AZ
+Dr. Aina Zulkifli
+Lecturer, FTMK
+TEACHING
+My tasks
+3
+My micro-credentials
+Proposals and versions
+1
+Cohorts and results
+Reviews for colleagues
+1
+QUALITY
+Quality review (CQI)
+QV evidence
+Stackable pathways
+INSIGHT
+Reports
+Traceability
+Documents
+Notifications
+2
+Collapse sidebar
+←
+Back
+Cohorts and results
+Cloud Native Development 2026/1
+UTeM SAMC
+Cloud Native Development 2026/1
+Dr. Aina Zulkifli · Starts 07/06/2026 · registration 08/05/2026 to 02/06/2026 · 30 places · RM 150.00
+Results
+Coordinator sign-off
+Cohort ACR progress
+Participants
+Ended
+← All offerings
+Readiness checklist
+Locked
+Item	Status	Evidence note	Accepted
+Transparency of information	
+Yes
+Not yet
+Not applicable
+		Accepted
+Learning materials and platform	
+Yes
+Not yet
+Not applicable
+		Accepted
+Assessment and integrity	
+Yes
+Not yet
+Not applicable
+		Accepted
+Participant and achievement records	
+Yes
+Not yet
+Not applicable
+		Accepted
+Completion and credential process	
+Yes
+Not yet
+Not applicable
+		Accepted
+Change notification	
+Yes
+Not yet
+Not applicable
+		Accepted
+Confirmations
+2 rows
+Who
+	Role
+	Outcome
+	Date
+
+Dr. Aina Zulkifli	Lecturer	Ready	03/05/2026 01:42
+Hakim Rahman	PTj (deputy dean)	Ready	04/05/2026 01:42

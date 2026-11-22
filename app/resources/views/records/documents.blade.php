@@ -20,7 +20,7 @@
     <!-- Pane 1: Credentials & Achievement Record -->
     <div data-pane="credentials">
       <!-- Master Achievement Transcript Feature Banner -->
-      <div class="panel" style="margin-bottom:20px;border-left:4px solid var(--accent, #1e2a6e);background:#ffffff">
+      <div class="panel" style="margin-bottom:20px;border-left:4px solid var(--accent, #1e2a6e);background:var(--card-bg, #ffffff)">
         <div class="bd" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:20px">
           <div>
             <div style="font-size:12px;font-weight:600;color:var(--primary, #1e2a6e);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">
@@ -147,7 +147,7 @@
               <tr data-href="{{ route('credit.acr', $a->id) }}">
                 <td><a href="{{ route('credit.acr', $a->id) }}"><b>{{ $a->reference }}</b></a></td>
                 <td>{{ $a->name_en }}</td>
-                <td class="num"><strong>{{ rtrim(rtrim((string) ($a->credits ?? 0), '0'), '.') }} {{ __('credits') }}</strong></td>
+                <td class="num"><strong>{{ mcms_num( ($a->credits ?? 0)) }} {{ __('credits') }}</strong></td>
                 <td><span class="tag ok">{{ ucfirst($a->status ?? 'confirmed') }}</span></td>
                 <td class="num" data-v="{{ $a->created_at }}">{{ \Carbon\Carbon::parse($a->created_at)->format('d/m/Y') }}</td>
                 <td class="num">
@@ -230,13 +230,13 @@
       @if(isset($proposals) && $proposals->isNotEmpty())
         <button data-tab="governance">{{ __('Governance & Senate Packs') }} ({{ count($proposals) + count($suspensions) }})</button>
       @endif
-      @if($dean)
+      @if($dean || ($depositor ?? false))
         <button data-tab="exchange">{{ __('External Exchange & ABC') }} ({{ count($batches) + count($transfers) }})</button>
       @endif
       @if($codl)
         <button data-tab="ucreds">{{ __('UCreds Exchange') }} ({{ count($ucredsOfferings) + count($ucredsImports) }})</button>
       @endif
-      @if($dean)
+      @if($dean || ($depositor ?? false))
         <button data-tab="audit">{{ __('Audit & Compliance') }}</button>
       @endif
     </nav>
@@ -365,8 +365,9 @@
     @endif
 
     <!-- Staff Pane 3: External Exchange & ABC -->
-    @if($dean)
+    @if($dean || ($depositor ?? false))
       <div data-pane="exchange">
+        @if($depositor ?? false)
         <div class="panel" style="margin-bottom:20px">
           <div class="hd" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
             <h2 style="margin:0;font-size:15px">{{ __('Academic Bank of Credit (ABC) Deposit Batches') }}</h2>
@@ -406,6 +407,7 @@
             </table>
           </div>
         </div>
+        @endif
 
         @if(isset($transfers) && $transfers->isNotEmpty())
           <div class="panel">
@@ -494,7 +496,7 @@
     @endif
 
     <!-- Staff Pane 5: Audit & Compliance -->
-    @if($dean)
+    @if($dean || ($depositor ?? false))
       <div data-pane="audit">
         <div class="panel">
           <div class="hd">
@@ -522,11 +524,11 @@
 @endif
 
 <!-- Document Authenticity & PDPA Privacy Card -->
-<div class="panel" style="margin-top:24px;background:#ffffff;border-left:4px solid var(--accent, #1e2a6e)">
+<div class="panel" style="margin-top:24px;background:var(--card-bg, #ffffff);border-left:4px solid var(--accent, #1e2a6e)">
   <div class="bd" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:18px 24px">
     <div style="display:flex;align-items:center;gap:14px;min-width:280px;flex:1">
-      <div style="width:40px;height:40px;background:var(--bg-subtle, #f4f4f4);border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;color:var(--accent, #1e2a6e);font-size:20px;flex-shrink:0">
-        🛡
+      <div style="width:40px;height:40px;background:var(--bg-subtle, #f4f4f4);border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;color:var(--accent, #1e2a6e);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.5px;flex-shrink:0">
+        VER
       </div>
       <div>
         <div style="font-weight:700;font-size:13.5px;color:var(--ink)">

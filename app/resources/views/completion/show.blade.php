@@ -12,7 +12,7 @@
     <h1>{{ __('Confirm completion: :name :cohort', ['name' => $o->name_en, 'cohort' => $o->cohort_name]) }}</h1>
     <div class="sub">
       @if(!empty($o->lecturer_name)){{ $o->lecturer_name }} &middot; @endif
-      {{ __('Pre-issue completion checks and batch certificate issuance') }}
+      {{ __('Pre-issue completion checks, P1 coordinator sign-off gate, and batch certificate issuance') }}
     </div>
   </div>
   <div class="act" style="gap:8px">
@@ -22,31 +22,31 @@
   </div>
 </div>
 
-<div class="note info" style="margin-bottom:20px">
-  <p style="margin:0">
-    {{ __('Verifying results gave module badges only. Completing the micro-credential is a separate decision. A certificate or Digital Credential is issued only after you confirm, and only to a participant with no requirement missing.') }}
-  </p>
-</div>
+<x-credit-lifecycle :stage="3" :note="__('Deputy Dean academic completion confirmation')" />
 
 <form method="post" action="{{ route('completion.confirm', $o->id) }}">
   @csrf
   <div class="panel">
-    <div class="hd"><h2>{{ __('Participants and pre-issue checks') }}</h2></div>
+    <div class="hd">
+      <h2>{{ __('Participants and pre-issue checks') }}</h2>
+      <span class="r"><span class="tag {{ $waiting > 0 ? 'warn' : 'info' }}">{{ $waiting }} {{ __('ready to confirm') }}</span></span>
+    </div>
     <div class="bd" style="padding:0">
       <table>
         <thead>
           <tr>
             <th style="width:5%"></th>
-            <th style="width:30%">{{ __('Participant') }}</th>
-            <th style="width:15%">{{ __('Record') }}</th>
-            <th style="width:50%">{{ __('Pre-issue checks') }}</th>
+            <th style="width:24%">{{ __('Participant') }}</th>
+            <th style="width:13%">{{ __('Record') }}</th>
+            <th style="width:20%">{{ __('P1 Coordinator Sign-off (F11)') }}</th>
+            <th style="width:38%">{{ __('Pre-issue checks') }}</th>
           </tr>
         </thead>
         <tbody>
         @forelse($rows as $e)
           <tr>
             <td style="text-align:center">
-              @if($e->status === 'enrolled' && $e->check['met'])
+              @if($e->status === 'enrolled' && $e->check['met'] && $e->coordinator_signed)
                 <input type="checkbox" name="enrolments[]" value="{{ $e->id }}" checked aria-label="Confirm {{ $e->name }}">
               @endif
             </td>
@@ -59,10 +59,23 @@
               <x-pill :s="__(['not_started' => 'Not started', 'in_progress' => 'In progress', 'complete' => 'Complete'][$e->state] ?? ucfirst($e->state))" />
             </td>
             <td>
+              @if($e->coordinator_signed)
+                <span class="tag ok">{{ __('Signed by P1') }}</span>
+                <div class="s muted" style="margin-top:4px">{{ $e->coordinator_name ?? __('Recorded') }}</div>
+                <div class="s muted">{{ \Carbon\Carbon::parse($e->coordinator_signed_at)->format('d/m/Y') }}</div>
+              @elseif($e->status === 'enrolled' && $e->check['met'])
+                <span class="tag warn">{{ __('Waiting for P1 sign-off') }}</span>
+                <div class="s muted" style="margin-top:4px">{{ __('Course Coordinator must sign off first') }}</div>
+              @else
+                <span class="not-recorded small">{{ __('Not yet recorded') }}</span>
+              @endif
+            </td>
+            <td>
               @if($e->check['met'])
                 <span class="tag ok">{{ __('All requirements met') }}</span>
               @else
                 <span class="tag overdue">{{ __('Requirement missing, not issued') }}</span>
+                <div class="s muted" style="margin-top:2px;font-size:11px">({{ __('badges only') }})</div>
               @endif
 
               <details @if(!$e->check['met']) open @endif style="margin-top:8px">
@@ -79,7 +92,7 @@
             </td>
           </tr>
         @empty
-          <tr><td colspan="4" class="muted" style="text-align:center;padding:24px">{{ __('No enrolled participants.') }}</td></tr>
+          <tr><td colspan="5" class="muted" style="text-align:center;padding:24px">{{ __('No enrolled participants.') }}</td></tr>
         @endforelse
         </tbody>
       </table>
@@ -91,7 +104,13 @@
           {{ __('Confirm completion') }}
         </button>
         @if($waiting === 0)
-          <span class="muted s">{{ __('Nobody is waiting for confirmation.') }}</span>
+          <span class="muted s">
+            @if(($awaitingCoordinator ?? 0) > 0)
+              {{ __('Waiting for Course Coordinator (P1) sign-off before Deputy Dean confirmation can proceed.') }}
+            @else
+              {{ __('Nobody is waiting for confirmation.') }}
+            @endif
+          </span>
         @endif
       </div>
     </div>

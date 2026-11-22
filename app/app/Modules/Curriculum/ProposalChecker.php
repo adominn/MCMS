@@ -38,6 +38,12 @@ final class ProposalChecker
         if ($modules->isEmpty()) {
             $block('FR-52', 'modules', __('Add at least one module.'));
         }
+        foreach ($modules as $m) {
+            $actSum = (int) DB::table('mc_module_activities')->where('mc_module_id', $m->id)->sum('slt_hours');
+            if ($actSum > 0 && $actSum > $m->slt_hours) {
+                $block('FR-36', 'modules', __('Module :seq activities SLT (:act hours) exceeds module planned SLT (:total hours).', ['seq' => $m->seq, 'act' => $actSum, 'total' => $m->slt_hours]));
+            }
+        }
         if ($los->isEmpty()) {
             $block('FR-37', 'outcomes', __('Add at least one learning outcome.'));
         }
@@ -54,8 +60,15 @@ final class ProposalChecker
         }
 
         $min = (int) $this->settings->get('slt.min_hours_samc');
+        if ($v->category === 'samc' && $v->parent_course_id) {
+            $block('FR-30', 'modules', __('A SAMC is a stand-alone micro-credential and must not be linked to a parent course.'));
+        }
+        if ($v->category === 'mce' && $v->parent_course_id) {
+            $block('FR-29', 'modules', __('An MCE is a non-credit short learning course and must not be linked to a parent course.'));
+        }
+
         match ($v->category) {
-            'umc' => $this->umc($v, $modules, $total, $block),
+            'umc' => $this->umc($v, $modules, $total, $block, $los, $comps, $warn),
             'samc' => $total < $min ? $block('FR-30', 'modules', __('A SAMC needs at least :min hours of learning time; the modules total :total hours.', ['min' => $min, 'total' => $total])) : null,
             'mce' => $this->mce($v, $total, $min, $block),
         };
@@ -82,13 +95,23 @@ final class ProposalChecker
         return ['blocking' => $b, 'warnings' => $w, 'slt' => $total];
     }
 
-    private function umc(object $v, $modules, int $total, \Closure $block): void
+    private function umc(object $v, $modules, int $total, \Closure $block, $los = null, $comps = null, ?\Closure $warn = null): void
     {
         $course = $v->parent_course_id ? DB::table('parent_courses as c')->leftJoin('programmes as p', 'p.id', '=', 'c.programme_id')->where('c.id', $v->parent_course_id)->first(['c.*', 'p.accreditation_status']) : null;
         if (! $course) {
             $block('FR-50', 'modules', __('Choose the parent course from the reference data.'));
         } elseif ($course->accreditation_status !== 'accredited') {
             $block('FR-51', 'modules', __('The parent programme is not recorded as accredited.'));
+        }
+        if ($course && ! empty($course->clos) && $los && $los->isNotEmpty()) {
+            $cloList = array_filter(array_map('trim', explode(';', (string) $course->clos)));
+            if (! empty($cloList)) {
+                foreach ($los as $lo) {
+                    if (empty($lo->parent_clo_id)) {
+                        $block('FR-50', 'outcomes', __('Outcome :code must be mapped to a parent course learning outcome (CLO).', ['code' => $lo->code]));
+                    }
+                }
+            }
         }
         if (! $v->credit_model) {
             $block('FR-52', 'modules', __('Choose one unbundling model.'));
@@ -104,6 +127,14 @@ final class ProposalChecker
             $per = (int) $this->settings->get('slt.min_hours_module_credit_model');
             foreach ($modules->where('slt_hours', '<', $per) as $m) {
                 $block('FR-55', 'modules', __('Module :seq has :hours hours; the credit-based model needs at least :min.', ['seq' => $m->seq, 'hours' => $m->slt_hours, 'min' => $per]));
+            }
+            if ($comps && $warn && $comps->whereNotNull('mc_module_id')->isNotEmpty()) {
+                $assignedMods = $comps->pluck('mc_module_id')->filter()->all();
+                foreach ($modules as $m) {
+                    if (! in_array($m->id, $assignedMods, true)) {
+                        $warn('FR-55', 'assessment', __('Module :seq in credit-based model has no linked assessment component.', ['seq' => $m->seq]));
+                    }
+                }
             }
         }
         if ($v->credit_model === 'topic_based') {

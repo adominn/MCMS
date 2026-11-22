@@ -67,10 +67,14 @@ final class ApprovalController
                 $kind = $u->hasAnyRole('industry_expert') && ! $u->hasAnyRole('lecturer') ? 'expert' : 'reviewer';
                 abort_if($uid === $v->owner_id, 422, 'A lecturer cannot review their own proposal.');
                 abort_unless($u->status === 'active' && $u->hasAnyRole('lecturer', 'industry_expert'), 422, 'This person cannot be a reviewer.');
-                if (DB::table('review_assignments')->where(['mc_version_id' => $id, 'reviewer_id' => $uid])->where('status', '!=', 'declined')->exists()) {
+                if (DB::table('review_assignments')->where(['mc_version_id' => $id, 'reviewer_id' => $uid])->whereNotIn('status', ['declined', 'superseded'])->exists()) {
                     continue;
                 }
-                DB::table('review_assignments')->where(['mc_version_id' => $id, 'reviewer_id' => $uid, 'status' => 'declined'])->delete();
+                $oldAids = DB::table('review_assignments')->where(['mc_version_id' => $id, 'reviewer_id' => $uid])->whereIn('status', ['declined', 'superseded'])->pluck('id');
+                if ($oldAids->isNotEmpty()) {
+                    DB::table('reviews')->whereIn('review_assignment_id', $oldAids)->delete();
+                    DB::table('review_assignments')->whereIn('id', $oldAids)->delete();
+                }
                 $aid = DB::table('review_assignments')->insertGetId(['mc_version_id' => $id, 'reviewer_id' => $uid, 'kind' => $kind, 'assigned_by' => $request->user()->id, 'due_on' => $d['due_on'], 'scope' => $d['scope'], 'created_at' => now(), 'updated_at' => now()]);
                 $this->audit->record('review.assigned', ['type' => 'McVersion', 'id' => $id], after: ['reviewer' => $u->name, 'kind' => $kind, 'due_on' => $d['due_on']], reason: $d['scope']); // EV-09
                 $this->notifier->send($u, 'reviewer.assigned', ['name' => $u->name, 'title' => $v->name_en, 'due' => $d['due_on']], dedupe: "assignment-$aid");
@@ -125,7 +129,7 @@ final class ApprovalController
             DB::table('micro_credentials')->where('id', $v->micro_credential_id)->update(['category_status' => 'verified', 'category_confirmed_by' => $request->user()->id, 'category_confirmed_at' => now()]);
             $this->audit->record('proposal.endorsed', ['type' => 'McVersion', 'id' => $id], before: ['status' => 'in_review'], after: ['status' => 'endorsed', 'verified_category' => $v->category]); // EV-12
             Tasks::close('decide', $id);
-            Tasks::open('deputy_dean', 'senate', $id, 'Record Senate decision: '.$v->name_en, "/approvals/$id/senate", $v->ptj_id);
+            Tasks::open('codl_admin', 'senate', $id, 'Record Senate decision: '.$v->name_en, "/approvals/$id/senate", area: 'proposals');
             $this->notifier->send(User::find($v->owner_id), 'proposal.endorsed', ['name' => User::find($v->owner_id)->name, 'title' => $v->name_en], dedupe: "endorsed-$id");
         });
 
@@ -143,6 +147,10 @@ final class ApprovalController
         DB::transaction(function () use ($id, $v, $d, $request, $return) {
             DB::table('approval_decisions')->insert(['mc_version_id' => $id, 'stage' => 'endorsement', 'decision' => $return ? 'returned' : 'not_supported', 'decided_by' => $request->user()->id, 'decided_role' => 'deputy_dean', 'comments' => $d['reason'], 'created_at' => now()]);
             DB::table('mc_versions')->where('id', $id)->update(['status' => $return ? 'returned' : 'not_approved', 'updated_at' => now()]); // a returned version unlocks
+            if ($return) {
+                // Invalidate prior reviews when returned for amendment so re-endorsement requires fresh review
+                DB::table('review_assignments')->where('mc_version_id', $id)->where('status', 'submitted')->update(['status' => 'superseded', 'updated_at' => now()]);
+            }
             $this->audit->record($return ? 'proposal.returned' : 'proposal.not_supported', ['type' => 'McVersion', 'id' => $id], before: ['status' => $v->status], after: ['status' => $return ? 'returned' : 'not_approved'], reason: $d['reason']); // EV-11, EV-13
             Tasks::close('assign_reviewers', $id);
             Tasks::close('decide', $id);
@@ -181,8 +189,10 @@ final class ApprovalController
     public function senate(Request $request, int $id)
     {
         $v = $this->version($request, $id);
-        abort_unless($request->user()->hasAnyRole($this->route('approval.route.senate')), 403, 'The role that records the decision is set in the settings.');
+        abort_unless($request->user()->hasAnyRole($this->route('approval.route.senate'), 'codl_admin'), 403, 'The role that records the decision is set in the settings.');
         abort_unless($v->status === 'endorsed', 403, 'The Senate decision is recorded after endorsement.');
+        $check = $this->checker->check($id);
+        abort_if(! empty($check['blocking']), 422, 'Cannot record Senate decision: the proposal has unresolved blocking curriculum errors.');
         $endorsed = DB::table('approval_decisions')->where('mc_version_id', $id)->where('decision', 'endorsed')->orderByDesc('id')->value('created_at');
         $d = $request->validate([
             'meeting_ref' => 'required|string|max:60', 'meeting_date' => 'required|date|before_or_equal:today|after_or_equal:'.\Carbon\Carbon::parse($endorsed)->toDateString(),
@@ -193,7 +203,8 @@ final class ApprovalController
         $status = ['approved' => 'approved', 'approved_conditions' => 'approved', 'not_approved' => 'not_approved', 'returned' => 'returned', 'deferred' => 'endorsed'][$d['decision']];
 
         DB::transaction(function () use ($id, $v, $d, $request, $status) {
-            $decisionId = DB::table('approval_decisions')->insertGetId(['mc_version_id' => $id, 'stage' => 'senate', 'decision' => $d['decision'], 'decided_by' => $request->user()->id, 'decided_role' => 'deputy_dean', 'meeting_ref' => $d['meeting_ref'], 'meeting_date' => $d['meeting_date'], 'comments' => $d['comments'], 'conditions' => $d['conditions'] ?? null, 'created_at' => now()]);
+            $decisionRole = $request->user()->hasAnyRole('codl_admin') ? 'codl_admin' : 'deputy_dean';
+            $decisionId = DB::table('approval_decisions')->insertGetId(['mc_version_id' => $id, 'stage' => 'senate', 'decision' => $d['decision'], 'decided_by' => $request->user()->id, 'decided_role' => $decisionRole, 'meeting_ref' => $d['meeting_ref'], 'meeting_date' => $d['meeting_date'], 'comments' => $d['comments'], 'conditions' => $d['conditions'] ?? null, 'created_at' => now()]);
             if ($d['decision'] !== 'deferred') {
                 DB::table('mc_versions')->where('id', $id)->update(['status' => $status, 'updated_at' => now()]);
                 Tasks::close('senate', $id);
@@ -202,6 +213,10 @@ final class ApprovalController
                 DB::table('micro_credentials')->where('id', $v->micro_credential_id)->update(['category_status' => 'confirmed', 'updated_at' => now()]); // the category is fixed by approval (FR-31)
                 DB::table('mc_versions')->where('id', $id)->update(['effective_date' => today()]);
                 if ($v->supersedes_id) {
+                    if ($v->change_class === 'material') {
+                        DB::table('mc_versions')->where('id', $id)->update(['qv_status' => 'will_apply', 'qv_valid_until' => null]);
+                        DB::table('qv_records')->where('micro_credential_id', $v->micro_credential_id)->update(['reverification' => true]);
+                    }
                     DB::table('version_transition_rules')->insert(['mc_version_id' => $id, 'from_version_id' => $v->supersedes_id, 'rule' => $d['transition_rule'], 'approval_decision_id' => $decisionId, 'note' => $d['transition_note'] ?? null, 'created_at' => now()]);
                     DB::table('mc_versions')->where('id', $v->supersedes_id)->update(['status' => 'superseded', 'updated_at' => now()]);
                     DB::table('transfer_lines')->where('mc_version_id', $v->supersedes_id)->update(['reevaluate' => true]); // an earlier equivalence is reviewed before reuse (FR-ctversion)
@@ -209,7 +224,7 @@ final class ApprovalController
                     DB::table('change_requests')->where('to_version_id', $id)->update(['status' => 'approved']);
                     $this->audit->record('version.superseded', ['type' => 'McVersion', 'id' => $v->supersedes_id], after: ['by_version' => $id, 'transition_rule' => $d['transition_rule']], reason: $d['transition_note'] ?? null); // EV-15, EV-16
                     // EV-16: participants on the old version are rebound if the rule says so, and told of the change, the date and the rule (FR-80, FR-81).
-                    $affected = DB::table('enrolments as e')->join('offerings as o', 'o.id', '=', 'e.offering_id')->where('o.mc_version_id', $v->supersedes_id)
+                    $affected = DB::table('enrolments as e')->join('offerings as o', 'o.id', '=', 'e.offering_id')->where('e.mc_version_id', $v->supersedes_id)
                         ->whereIn('e.status', ['registered', 'pending_payment', 'enrolled'])->get(['e.id', 'e.user_id', 'o.cohort_name']);
                     foreach ($affected as $e) {
                         if ($d['transition_rule'] === 'move_new') {
@@ -217,6 +232,9 @@ final class ApprovalController
                         }
                         $pu = User::find($e->user_id);
                         $this->notifier->send($pu, 'version.changed', ['name' => $pu->name, 'title' => $v->name_en.' '.$e->cohort_name, 'version' => $v->version_no, 'date' => today()->format('d/m/Y'), 'rule' => config('proposals.transition_rules')[$d['transition_rule']]], dedupe: "version-$id-{$e->id}");
+                    }
+                    if ($d['transition_rule'] === 'move_new') {
+                        DB::table('offerings')->where('mc_version_id', $v->supersedes_id)->whereIn('status', ['held', 'not_ready', 'ready'])->update(['mc_version_id' => $id]);
                     }
                     $this->audit->record('transition.applied', ['type' => 'McVersion', 'id' => $id], after: ['rule' => $d['transition_rule'], 'participants' => $affected->count()]);
                 }

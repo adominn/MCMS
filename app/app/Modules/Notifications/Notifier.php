@@ -37,6 +37,7 @@ final class Notifier
             str_starts_with($key, 'review') => $expert || $lec ? 'reviews' : ($dd ? 'approvals' : 'profile'),
             str_starts_with($key, 'qv.') => 'quality',
             $key === 'suspension.notice' => $student ? 'documents' : 'monitoring',
+            str_starts_with($key, 'results.') => $student ? 'results.mine' : 'results',
             default => 'profile',
         };
 

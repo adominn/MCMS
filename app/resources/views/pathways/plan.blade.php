@@ -28,10 +28,10 @@
   </div>
 </div>
 
-<div class="card panel" id="figures" style="margin-bottom:24px;border:1px solid var(--hairline);background:#ffffff">
+<div class="card panel" id="figures" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
   <div class="hd" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
     <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Degree requirement figures') }}</h2>
-    <span class="tag {{ $s->utem_percent >= $min ? 'ok' : 'warn' }}">{{ rtrim(rtrim((string) $s->utem_percent, '0'), '.') }}% {{ __('Direct UTeM Study') }}</span>
+    <span class="tag {{ $s->utem_percent >= $min ? 'ok' : 'warn' }}">{{ mcms_num($s->utem_percent) }}% {{ __('Direct UTeM Study') }}</span>
   </div>
   <div class="bd" style="padding:16px 20px">
     <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));gap:14px">
@@ -41,11 +41,11 @@
       </div>
       <div>
         <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--primary, #1e2a6e);letter-spacing:0.5px">{{ __('Direct UTeM Share') }}</div>
-        <div style="font-size:15px;font-weight:600;color:var(--primary, #1e2a6e);margin-top:2px">{{ rtrim(rtrim((string) $s->utem_percent, '0'), '.') }}% <span class="muted small">(&ge; {{ $min }}% required)</span></div>
+        <div style="font-size:15px;font-weight:600;color:var(--primary, #1e2a6e);margin-top:2px">{{ mcms_num($s->utem_percent) }}% <span class="muted small">(&ge; {{ $min }}% required)</span></div>
       </div>
       <div>
         <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--ink-muted);letter-spacing:0.5px">{{ __('Articulated Outside') }}</div>
-        <div style="font-size:15px;font-weight:600;color:var(--ink);margin-top:2px">{{ rtrim(rtrim((string) $s->transfer_credits, '0'), '.') }} {{ __('credits') }}</div>
+        <div style="font-size:15px;font-weight:600;color:var(--ink);margin-top:2px">{{ mcms_num($s->transfer_credits) }} {{ __('credits') }}</div>
       </div>
       <div>
         <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--ink-muted);letter-spacing:0.5px">{{ __('Planned Residency') }}</div>
@@ -100,7 +100,7 @@
       @foreach($items as $i)
         <label style="display:inline-flex;gap:8px;align-items:center;margin-bottom:6px;cursor:pointer">
           <input type="checkbox" name="items[]" value="{{ $i->id }}" @checked(in_array($i->id, $chosen))>
-          <span>{{ $i->name_en }} for <b>{{ $i->course_code }}</b> ({{ rtrim(rtrim((string) $i->credits, '0'), '.') }} credits)</span>
+          <span>{{ $i->name_en }} for <b>{{ $i->course_code }}</b> ({{ mcms_num($i->credits) }} credits)</span>
         </label><br>
       @endforeach
     </fieldset>
@@ -123,11 +123,38 @@
       </select>
     </div>
 
-    @foreach($remaining as $n => $r)
-      <input type="hidden" name="remaining[{{ $n }}][kind]" value="{{ $r['kind'] }}">
-      <input type="hidden" name="remaining[{{ $n }}][name]" value="{{ $r['name'] }}">
-      <input type="hidden" name="remaining[{{ $n }}][status]" value="{{ $r['status'] }}">
-    @endforeach
+    <div style="margin-bottom:16px">
+      <label><strong>{{ __('Remaining Requirements') }}</strong></label>
+      <table style="width:100%;border-collapse:collapse;margin-top:8px">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:6px;border-bottom:1px solid var(--hairline)">{{ __('Kind') }}</th>
+            <th style="text-align:left;padding:6px;border-bottom:1px solid var(--hairline)">{{ __('Requirement Name') }}</th>
+            <th style="text-align:left;padding:6px;border-bottom:1px solid var(--hairline);width:160px">{{ __('Status') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+        @foreach($remaining as $n => $r)
+          <tr>
+            <td style="padding:6px;border-bottom:1px solid var(--hairline)">
+              <input type="hidden" name="remaining[{{ $n }}][kind]" value="{{ $r['kind'] }}">
+              {{ $kinds[$r['kind']] ?? ucfirst($r['kind']) }}
+            </td>
+            <td style="padding:6px;border-bottom:1px solid var(--hairline)">
+              <input type="text" name="remaining[{{ $n }}][name]" value="{{ $r['name'] }}" style="width:100%;max-width:320px">
+            </td>
+            <td style="padding:6px;border-bottom:1px solid var(--hairline)">
+              <select name="remaining[{{ $n }}][status]" style="width:100%">
+                @foreach($statuses as $stKey => $stLbl)
+                  <option value="{{ $stKey }}" @selected(($r['status'] ?? 'todo') === $stKey)>{{ __($stLbl) }}</option>
+                @endforeach
+              </select>
+            </td>
+          </tr>
+        @endforeach
+        </tbody>
+      </table>
+    </div>
 
     <button type="submit" class="btn">{{ __('Update plan') }}</button>
   </div>

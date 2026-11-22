@@ -12,7 +12,13 @@ class UiLanguage
 {
     public function handle(Request $request, Closure $next)
     {
-        app()->setLocale(session('ui_lang', session('lang')) === 'ms' ? 'ms' : 'en');
+        $sessionLang = session('ui_lang', session('lang'));
+        if (! $sessionLang && $request->user() && $request->user()->locale) {
+            $sessionLang = $request->user()->locale;
+            session(['ui_lang' => $sessionLang, 'lang' => $sessionLang]);
+        }
+
+        app()->setLocale($sessionLang === 'ms' ? 'ms' : 'en');
 
         return $next($request);
     }
@@ -21,6 +27,10 @@ class UiLanguage
     {
         $lang = $request->input('lang') === 'ms' ? 'ms' : 'en';
         $request->session()->put(['ui_lang' => $lang, 'lang' => $lang]);
+
+        if ($request->user()) {
+            $request->user()->update(['locale' => $lang]);
+        }
 
         return back();
     }

@@ -67,16 +67,38 @@ final class Trace
         $v = DB::table('mc_versions')->find($o->mc_version_id);
         $has = fn (bool $b, string $yes, string $no) => ['present' => $b, 'detail' => $b ? $yes : $no];
 
+        $acrCount = DB::table('acrs')
+            ->join('achievement_records', 'achievement_records.id', '=', 'acrs.achievement_record_id')
+            ->whereIn('achievement_records.enrolment_id', $people)
+            ->count();
+        $abcCount = DB::table('abc_deposits')
+            ->join('acrs', 'acrs.id', '=', 'abc_deposits.acr_id')
+            ->join('achievement_records', 'achievement_records.id', '=', 'acrs.achievement_record_id')
+            ->whereIn('achievement_records.enrolment_id', $people)
+            ->count();
+        $hasAcr = $acrCount > 0 || $abcCount > 0;
+
+        $discCount = DB::table('discrepancies')->where(function ($q) use ($offeringId, $people) {
+            $q->where(fn ($w) => $w->where('subject_type', 'Offering')->where('subject_id', (string) $offeringId))
+              ->orWhere(fn ($w) => $w->where('subject_type', 'Enrolment')->whereIn('subject_id', $people->map(fn ($p) => (string) $p)->all()));
+        })->count();
+        $auditCount = DB::table('audit_events')->where(function ($q) use ($offeringId, $people) {
+            $q->where(fn ($w) => $w->where('subject_type', 'Offering')->where('subject_id', (string) $offeringId))
+              ->orWhere(fn ($w) => $w->where('subject_type', 'Enrolment')->whereIn('subject_id', $people->map(fn ($p) => (string) $p)->all()));
+        })->count();
+
         return [
-            ['label' => 'Approved version and decision'] + $has(DB::table('approval_decisions')->where('mc_version_id', $v->id)->where('stage', 'senate')->exists(), "Version {$v->version_no} approved", 'No Senate decision'),
-            ['label' => 'Readiness confirmations'] + $has(DB::table('readiness_confirmations')->where('offering_id', $o->id)->exists(), DB::table('readiness_confirmations')->where('offering_id', $o->id)->count().' recorded', 'None'),
-            ['label' => 'Registrations and payments'] + $has($people->isNotEmpty(), $people->count().' registrations', 'No registration'),
-            ['label' => 'UCreds export and import files'] + $has(DB::table('export_files')->where('offering_id', $o->id)->exists() || DB::table('import_files')->where('offering_id', $o->id)->exists(), 'Exchange files kept', 'No exchange file'),
-            ['label' => 'Verified results'] + $has(DB::table('assessment_results')->whereIn('enrolment_id', $people)->where('status', 'verified')->exists(), DB::table('assessment_results')->whereIn('enrolment_id', $people)->where('status', 'verified')->count().' verified', 'No verified result'),
-            ['label' => 'Completion confirmations'] + $has(DB::table('achievement_records')->whereIn('enrolment_id', $people)->where('completion_status', 'complete')->exists(), DB::table('achievement_records')->whereIn('enrolment_id', $people)->where('completion_status', 'complete')->count().' confirmed', 'None confirmed'),
-            ['label' => 'Credentials issued'] + $has(DB::table('credentials')->whereIn('enrolment_id', $people)->exists(), DB::table('credentials')->whereIn('enrolment_id', $people)->count().' issued', 'None issued'),
-            ['label' => 'Participant feedback'] + $has(DB::table('feedback_responses')->where('offering_id', $o->id)->exists(), DB::table('feedback_responses')->where('offering_id', $o->id)->count().' responses', 'None'),
-            ['label' => 'Quality review (CQI) record'] + $has(DB::table('cqi_records')->where('offering_id', $o->id)->exists(), 'Record kept', 'No quality review'),
+            ['seq' => 1, 'label' => 'Registered participants list & profile', 'label_ms' => 'Senarai Peserta Berdaftar & Profil', 'location' => 'enrolments, users', 'owner' => 'P1 / P2'] + $has($people->isNotEmpty(), $people->count().' registrations recorded', 'No registration'),
+            ['seq' => 2, 'label' => 'Approved version and decision', 'label_ms' => 'Bahan, Struktur & Versi Diluluskan', 'location' => 'mc_versions, mc_modules', 'owner' => 'P1 / P2'] + $has(DB::table('approval_decisions')->where('mc_version_id', $v->id)->where('stage', 'senate')->exists(), "Version {$v->version_no} approved", 'No Senate decision'),
+            ['seq' => 3, 'label' => 'Readiness confirmations & attendance', 'label_ms' => 'Rekod Kehadiran / Penglibatan Pembelajaran', 'location' => 'offerings, readiness_confirmations', 'owner' => 'P1'] + $has(DB::table('readiness_confirmations')->where('offering_id', $o->id)->exists(), DB::table('readiness_confirmations')->where('offering_id', $o->id)->count().' readiness/delivery items recorded', 'None'),
+            ['seq' => 4, 'label' => 'Verified results', 'label_ms' => 'Instrumen & Skrip / Bukti Penilaian', 'location' => 'assessment_components, assessment_results', 'owner' => 'P1 / P2'] + $has(DB::table('assessment_results')->whereIn('enrolment_id', $people)->where('status', 'verified')->exists(), DB::table('assessment_results')->whereIn('enrolment_id', $people)->where('status', 'verified')->count().' verified marks', 'No verified result'),
+            ['seq' => 5, 'label' => 'Completion confirmations', 'label_ms' => 'Bukti Pengesahan Tamat', 'location' => 'achievement_records', 'owner' => 'P2 / P6'] + $has(DB::table('achievement_records')->whereIn('enrolment_id', $people)->where('completion_status', 'complete')->exists(), DB::table('achievement_records')->whereIn('enrolment_id', $people)->where('completion_status', 'complete')->count().' completion records confirmed', 'None confirmed'),
+            ['seq' => 6, 'label' => 'Credentials issued', 'label_ms' => 'Kredensial / Lencana Digital Dikeluarkan', 'location' => 'credentials, digital_badges', 'owner' => 'P6'] + $has(DB::table('credentials')->whereIn('enrolment_id', $people)->exists(), DB::table('credentials')->whereIn('enrolment_id', $people)->count().' credentials issued', 'None issued'),
+            ['seq' => 7, 'label' => 'Participant feedback', 'label_ms' => 'Maklum Balas Peserta & Pemantauan', 'location' => 'feedback_responses', 'owner' => 'P1 / P2'] + $has(DB::table('feedback_responses')->where('offering_id', $o->id)->exists(), DB::table('feedback_responses')->where('offering_id', $o->id)->count().' feedback responses', 'None'),
+            ['seq' => 8, 'label' => 'Quality review (CQI) record', 'label_ms' => 'Laporan Semakan Kualiti & CQI', 'location' => 'cqi_records', 'owner' => 'P1 / P2 / P4'] + $has(DB::table('cqi_records')->where('offering_id', $o->id)->exists(), 'Record kept', 'No quality review'),
+            ['seq' => 9, 'label' => 'ACR & ABC credit deposits', 'label_ms' => 'ACR & Deposit ABC bagi Peserta Layak', 'location' => 'acrs, abc_deposits', 'owner' => 'P6 / P7'] + $has($hasAcr, ($acrCount ? "$acrCount ACR(s)" : '0 ACR').($abcCount ? ", $abcCount ABC deposit(s)" : ''), 'No ACR or ABC deposit recorded'),
+            ['seq' => 10, 'label' => 'Changes, corrections & incidents log', 'label_ms' => 'Rekod Perubahan, Pembetulan & Insiden', 'location' => 'discrepancies, audit_events', 'owner' => 'P2 / P5 / P6'] + $has(true, ($discCount ? "$discCount discrepancy/correction(s), " : '')."$auditCount audit event(s) logged", 'No logged changes'),
+            ['seq' => 10, 'label' => 'Changes, corrections & incidents log', 'label_ms' => 'Rekod Perubahan, Pembetulan & Insiden', 'location' => 'discrepancies, audit_events', 'owner' => 'P2 / P5 / P6'] + $has(true, ($discCount ? "$discCount discrepancy/correction(s), " : '')."$auditCount audit event(s) logged", 'No logged changes'),
         ];
     }
 

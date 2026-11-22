@@ -1,0 +1,56 @@
+URL: http://127.0.0.1:8110/public/verify/SEC03-2P6RW
+STATUS: 200
+---
+UTeM MCMS
+Public Verification & Credential Portal
+Sign in
+EN
+BM
+Home
+Catalogue
+Pathways to a degree
+How recognition works
+FAQ
+Verify a credential
+←
+Back
+Home
+Verify a credential
+SEC03-2P6RW
+Verification result
+Integrity and registration verification result from UTeM
+Print verification record
+Status: Revoked
+This credential was revoked on 2026-11-01. This credential must not be relied on.
+CODE:
+SEC03-2P6RW
+Copy
+Credential Withdrawn
+
+The details of revoked credentials are withdrawn from the public registry per academic governance policy. If you have questions regarding this credential, contact the UTeM Centre for Open and Distance Learning (CODL).
+
+Cryptographic Integrity Verified
+· Ed25519 (W3C VC 2.0 / Open Badges 3.0)
+Public keys discoverable via UTeM standard JWKS endpoint at /.well-known/jwks.json
+Personal Data Protection Act (PDPA 2010) Compliance Notice: Only name, credential, issuer, issue date and status are shown. Results, marks, matric numbers and personal email addresses are never public.
+Check another credential or badge
+
+Enter any official UTeM micro-credential code or badge identifier:
+
+Verify
+UTeM Micro-credentials
+Centre for Open and Distance Learning (CODL)
+UTeM, Hang Tuah Jaya, 76100 Durian Tunggal, Melaka
+Learn
+All micro-credentials
+Degree pathways
+Recognition stages
+Help
+FAQ
+Verify a credential
+codl@utem.edu.my
+Policies
+Privacy notice (PDPA)
+Terms of use
+Accessibility
+UTeM Micro-Credential Management System (MCMS). Compliant with MQA & MoHE Good Practice Standards.

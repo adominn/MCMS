@@ -1,0 +1,78 @@
+URL: http://127.0.0.1:8110/admin/audit
+FINAL: http://127.0.0.1:8110/admin/audit
+STATUS: 200
+TITLE: Audit trail - UTeM Micro-Credential Management System
+H1: Audit trail
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+FH
+Farid Hashim
+CODL administrator
+ADMINISTRATION
+Users and roles
+Reference data
+Settings
+Templates
+Demo clock
+DATA EXCHANGE
+UCreds exchange
+UCreds content
+Adapter status
+Notification log
+RECORDS
+Audit trail
+Reports
+Retention
+Documents
+Notifications
+Collapse sidebar
+Records
+Audit trail
+Audit trail
+Append-only: nobody can edit or delete an entry, including CODL administrators. Each entry is cryptographically chained to the previous one with SHA-256.
+Check integrity
+Export CSV
+Audit log entries
+Showing the latest 100 entries
+100 rows
+No.
+	When (UTC)
+	Who
+	Action
+	Record
+	Reason
+
+160	19/11/2026 23:16:28	Farid Hashim
+codl_admin	auth.signed_in	User 12	
+159	19/11/2026 23:16:10	Nurul Izzah
+records_depositor	auth.signed_in	User 13	
+158	19/11/2026 23:15:43	Hakim Rahman
+deputy_dean	auth.signed_in	User 10	
+157	19/11/2026 23:15:13	Dr. Aina Zulkifli
+lecturer	auth.signed_in	User 6	
+156	19/11/2026 23:14:36	Amir Hakimi
+student	auth.signed_in	User 1	
+155	19/11/2026 23:11:43	Dr. Aina Zulkifli
+lecturer	auth.signed_in	User 6	
+154	19/11/2026 23:10:45	Amir Hakimi
+student	auth.signed_in	User 1	
+153	19/11/2026 08:02:45	Danial Razi
+student	auth.signed_in	User 27	
+152	19/11/2026 08:02:30	Dr. Aina Zulkifli
+lecturer	auth.signed_out	User 6	
+151	19/11/2026 08:00:34	Dr. Aina Zulkifli
+lecturer	auth.signed_in	User 6	
+Showing the latest 100 entries.
+Rows per page
+5
+10
+25
+50
+1–10 of 100
+Page 1 of 10
+‹
+›
+Cryptographic verification: Click "Check integrity" at any time to traverse the hash chain and verify that no row has been modified, deleted, or inserted out of order.

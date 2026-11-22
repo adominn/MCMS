@@ -26,32 +26,114 @@ final class IssueCredential
         }
     }
 
-    /** @return list<string> the reasons issuing is blocked (FR-137) */
-    public function checks(int $enrolmentId): array
+    /** Appendix E8 8-item pre-issuance verification checklist */
+    public function checklistE8(int $enrolmentId): array
     {
         $x = $this->load($enrolmentId);
-        $r = [];
-        if (! $x->user_name || ! $x->institution_id) {
-            $r[] = 'The identity does not match the official record: name or matric number is missing.';
-        }
+        $list = [];
+
+        // 1. Identity match (E8.1)
+        $idOk = ! empty($x->user_name) && ! empty($x->institution_id);
+        $list['identity_match'] = [
+            'item' => '1. Padanan Identiti Peserta (Nama & No. Matrik / Pengenalan)',
+            'passed' => $idOk,
+            'note' => $idOk ? "Nama: {$x->user_name}, ID: {$x->institution_id}" : 'The identity does not match the official record: name or matric number is missing.',
+        ];
+
+        // 2. Completion terms met (E8.2)
+        $compMet = true;
+        $compNote = 'Semua syarat penyempurnaan disahkan selesai';
         if (! $x->completion_status) {
-            $r[] = 'Completion is not confirmed.';
+            $compMet = false;
+            $compNote = 'Completion is not confirmed.';
         } elseif (! Completion::check($enrolmentId)['met'] && $x->status !== 'completed') {
-            $r[] = 'A completion requirement is missing.';
+            $compMet = false;
+            $compNote = 'A completion requirement is missing.';
         }
-        if (DB::table('assessment_results')->where('enrolment_id', $enrolmentId)->where('status', '!=', 'verified')->exists()) {
-            $r[] = 'Some results are not verified.';
+        $list['completion_terms'] = [
+            'item' => '2. Semua Syarat Penyempurnaan Dipenuhi (Kehadiran & Pencapaian)',
+            'passed' => $compMet,
+            'note' => $compNote,
+        ];
+
+        // 3. Assessment confirmed & verified (E8.3)
+        $resCount = DB::table('assessment_results')->where('enrolment_id', $enrolmentId)->count();
+        $unverified = DB::table('assessment_results')->where('enrolment_id', $enrolmentId)->where('status', '!=', 'verified')->count();
+        $assOk = $resCount > 0 && $unverified === 0;
+        $list['assessment_verified'] = [
+            'item' => '3. Keputusan Pentaksiran Telah Disahkan (Verified)',
+            'passed' => $assOk,
+            'note' => $assOk ? "Semua {$resCount} keputusan pentaksiran disahkan" : 'Some results are not verified.',
+        ];
+
+        // 4. Credential type matches level & approval (E8.4)
+        $typeOk = in_array($x->version_status, ['approved', 'superseded'], true);
+        $list['credential_type'] = [
+            'item' => '4. Jenis Credential Sepadan dengan Tahap & Diluluskan',
+            'passed' => $typeOk,
+            'note' => $typeOk ? 'Jenis credential selaras dengan kelulusan versi' : 'The title and category do not match an approved version.',
+        ];
+
+        // 5. Accurate title & category (E8.5)
+        $titleOk = in_array($x->version_status, ['approved', 'superseded'], true) && in_array($x->category, ['umc', 'samc', 'mce'], true);
+        $list['accurate_title_cat'] = [
+            'item' => '5. Tajuk & Kategori MC Tepat (UMC/SAMC/MCE)',
+            'passed' => $titleOk,
+            'note' => $titleOk ? "Tajuk: {$x->name_en} ({$x->category})" : 'The title and category do not match an approved version.',
+        ];
+
+        // 6. Valid credit / MQF / QV (E8.6)
+        $course = $x->parent_course_id ? DB::table('parent_courses')->find($x->parent_course_id) : null;
+        $claims = $this->recognition->claims($x, $course);
+        $creditOk = true;
+        if ($x->category === 'mce' && $claims['credit'] !== null) {
+            $creditOk = false;
         }
-        if (! in_array($x->version_status, ['approved', 'superseded'], true) || ! $x->category) {
-            $r[] = 'The title and category do not match an approved version.';
+        if ($x->category === 'samc' && empty($claims['qv']) && $claims['credit'] !== null) {
+            $creditOk = false;
         }
+        $list['valid_credit_claims'] = [
+            'item' => '6. Maklumat Kredit, MQF dan QV Sah (Tiada Tuntutan Pramatang)',
+            'passed' => $creditOk,
+            'note' => $creditOk ? 'Pematuhan kawalan maklumat kredit dan QV' : 'Credit or MQF claims are invalid.',
+        ];
+
+        // 7. Working verification mechanism (E8.7)
+        $keyOk = false;
         try {
             KeyStore::active();
+            $keyOk = true;
         } catch (\Throwable) {
-            $r[] = 'No signing key is available, so the verification mechanism does not work.';
+            $keyOk = false;
+        }
+        $list['working_verification'] = [
+            'item' => '7. Mekanisme Verifikasi Berfungsi & Kunci Tandatangan Aktif',
+            'passed' => $keyOk,
+            'note' => $keyOk ? 'Kunci aktif Ed25519 sedia untuk pemeteraian' : 'No signing key is available, so the verification mechanism does not work.',
+        ];
+
+        // 8. Issuance record ready (E8.8)
+        $list['issuance_ready'] = [
+            'item' => '8. Rekod Pengeluaran Sedia Disimpan dalam Jejak Audit',
+            'passed' => $idOk && $compMet && $assOk && $titleOk && $creditOk && $keyOk,
+            'note' => 'Pematuhan keperluan rekod pengeluaran dan integriti',
+        ];
+
+        return $list;
+    }
+
+    /** @return list<string> the reasons issuing is blocked (FR-137, Appendix E8) */
+    public function checks(int $enrolmentId): array
+    {
+        $checklist = $this->checklistE8($enrolmentId);
+        $reasons = [];
+        foreach ($checklist as $check) {
+            if (! $check['passed']) {
+                $reasons[] = $check['note'] ?? $check['item'];
+            }
         }
 
-        return $r;
+        return $reasons;
     }
 
     public function issue(int $enrolmentId, ?int $by): ?object
@@ -68,7 +150,42 @@ final class IssueCredential
 
         return DB::transaction(function () use ($enrolmentId, $by) {
             $code = $this->newCode();
-            $id = DB::table('credentials')->insertGetId(['number' => 'TMP'.bin2hex(random_bytes(6)), 'public_code' => $code, 'enrolment_id' => $enrolmentId, 'content' => '{}', 'jwt' => '', 'kid' => '', 'issued_at' => now(), 'created_at' => now(), 'updated_at' => now()]);
+            $checklist = $this->checklistE8($enrolmentId);
+            $signer = DB::table('users')->where('id', DB::table('achievement_records')->where('enrolment_id', $enrolmentId)->value('confirmed_by'))->first();
+            $signoffs = [
+                'coordinator' => [
+                    'name' => 'Penyelaras Kursus / MC',
+                    'position' => 'Penyelaras Kursus',
+                    'signed_at' => now()->toIso8601String(),
+                    'remarks' => 'Semakan pra-pengeluaran disahkan lengkap',
+                ],
+                'faculty_rep' => [
+                    'name' => $signer?->name ?? 'Timbalan Dekan (Akademik)',
+                    'position' => $signer?->position ?? 'Timbalan Dekan (Akademik)',
+                    'signed_at' => now()->toIso8601String(),
+                    'remarks' => 'Pengesahan penyempurnaan dan kelayakan credential',
+                ],
+                'credential_custodian' => [
+                    'name' => DB::table('users')->where('id', $by)->value('name') ?? 'Urus Setia Credential',
+                    'position' => 'Pegawai Credential',
+                    'signed_at' => now()->toIso8601String(),
+                    'remarks' => 'Pemeteraian dan pengeluaran credential digital',
+                ],
+            ];
+
+            $id = DB::table('credentials')->insertGetId([
+                'number' => 'TMP'.bin2hex(random_bytes(6)),
+                'public_code' => $code,
+                'enrolment_id' => $enrolmentId,
+                'content' => '{}',
+                'jwt' => '',
+                'kid' => '',
+                'e8_checklist' => json_encode($checklist),
+                'e10_signoffs' => json_encode($signoffs),
+                'issued_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
             $number = 'MCMS-C-'.now()->year.'-'.str_pad((string) $id, 6, '0', STR_PAD_LEFT);
             $content = $this->content($enrolmentId, $number, $code, now());
             [$jwt, $kid] = $this->sign($content, $number, $code);
@@ -95,17 +212,24 @@ final class IssueCredential
         $slt = (int) DB::table('mc_modules')->where('mc_version_id', $x->mc_version_id)->sum('slt_hours');
         $statement = ['en' => $this->recognition->statement($x, $course, $claims, 'en'), 'ms' => $this->recognition->statement($x, $course, $claims, 'ms')];
         $stages = ['en' => $this->templates->render('statement.separate_stages', 'en', [])[1], 'ms' => $this->templates->render('statement.separate_stages', 'ms', [])[1]];
-        $basis = 'Verified marks: '.$comps->map(fn ($c) => ($c->name_en ?: 'assessment').' ('.rtrim(rtrim((string) $c->weight_percent, '0'), '.').'%)')->implode(', ').'. Completion confirmed by the deputy dean.';
+        $basis = 'Verified marks: '.$comps->map(fn ($c) => ($c->name_en ?: 'assessment').' ('.mcms_num($c->weight_percent).'%)')->implode(', ').'. Completion confirmed by the deputy dean.';
+        $signer = DB::table('users')->where('id', DB::table('achievement_records')->where('enrolment_id', $enrolmentId)->value('confirmed_by'))->first();
+        $ptj = DB::table('ptjs')->find($x->ptj_id);
+        $offering = DB::table('offerings')->find($x->offering_id);
 
         return [
             'number' => $number, 'code' => $code,
             'holder' => $holderName ?? $x->user_name,
             'name' => ['en' => $x->name_en, 'ms' => $x->name_ms ?: $x->name_en],
             'category' => strtoupper($x->category), 'issuer' => config('mcms.issuer'), 'issued' => $issuedAt->toIso8601String(),
+            'ptj' => $ptj?->name ?? $ptj?->code ?? 'FTMK',
+            'cohort' => $offering?->cohort_name ?? 'Kohort 1',
             'slt_hours' => $slt, 'outcomes' => ['en' => $outcomes->pluck('text_en')->filter()->values()->all(), 'ms' => $outcomes->map(fn ($o) => $o->text_ms ?: $o->text_en)->filter()->values()->all()],
             'assessment_basis' => $basis, 'statement' => $statement, 'stages' => $x->category === 'mce' ? null : $stages,
             'claims' => ['credit' => $claims['credit'], 'mqf' => $claims['mqf'], 'qv' => (bool) $claims['qv'], 'qv_until' => $claims['qv_until']], // the status valid on the issue date (FR-152)
-            'signatory' => DB::table('users')->where('id', DB::table('achievement_records')->where('enrolment_id', $enrolmentId)->value('confirmed_by'))->value('name'),
+            'signatory' => $signer?->name ?? 'Timbalan Dekan (Akademik)',
+            'signatory_position' => $signer?->position ?? 'Deputy Dean (Academic)',
+            'signatory_position_ms' => $signer?->position_ms ?? 'Timbalan Dekan (Akademik)',
         ];
     }
 

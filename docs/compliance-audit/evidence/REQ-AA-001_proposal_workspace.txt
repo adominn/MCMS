@@ -1,0 +1,74 @@
+URL: http://127.0.0.1:8110/proposals/1
+FINAL: http://127.0.0.1:8110/proposals/1
+STATUS: 200
+TITLE: Data Structures - UTeM Micro-Credential Management System
+H1: Data Structures
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+2
+AZ
+Dr. Aina Zulkifli
+Lecturer, FTMK
+TEACHING
+My tasks
+3
+My micro-credentials
+Proposals and versions
+1
+Cohorts and results
+Reviews for colleagues
+1
+QUALITY
+Quality review (CQI)
+QV evidence
+Stackable pathways
+INSIGHT
+Reports
+Traceability
+Documents
+Notifications
+2
+Collapse sidebar
+←
+Back
+Proposals and versions
+Data Structures
+Data Structures
+Appendix A · Version 1 · Locked
+UMC
+Verified
+Approved
+Print Proposal
+All proposals
+Basic information
+Justification
+Modules
+Learning outcomes
+Assessment
+Credential
+Readiness
+Comments
+Submit
+This proposal is approved. Its content is locked.
+Title (English)
+Title (Bahasa Melayu)
+Field or discipline
+Target group
+Delivery mode
+-
+Face to face
+Online
+Blended
+Other
+Delivery language
+Proposed offering period
+Checks
+1
+
+1 blocking error(s)
+Error The modules total 80 hours; they must equal the parent course (120 hours).
+
+Total learning time: 80 h

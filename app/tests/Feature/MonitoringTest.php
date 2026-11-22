@@ -13,6 +13,7 @@ beforeEach(function () {
     $this->hakim = User::where('name', 'Hakim Rahman')->first();
     $this->amir = User::where('name', 'Amir Hakimi')->first();
     $this->farid = User::where('name', 'Farid Hashim')->first();
+    $this->siti = User::where('name', 'Ir. Siti Aminah')->first();
     $this->lim = User::create(['name' => 'Dr. Lim Wei Jie', 'email' => 'lim@utem.example.test']);
     $this->lim->roleAssignments()->create(['role' => 'lecturer', 'scope_type' => 'ptj', 'ptj_id' => DB::table('ptjs')->where('code', 'FTMK')->value('id')]);
 });
@@ -245,7 +246,7 @@ it('routes a review outcome to the next step and schedules the next review (FR-p
     [$v1, $mc] = approvedV1();
     app(PeriodicReviews::class)->ensure();
     $p = (int) DB::table('periodic_reviews')->value('id');
-    $this->actingAs($this->aina)->post("/periodic-reviews/$p", ['outcome' => 'suspension', 'note' => 'Enrolment fell'])->assertSessionHasNoErrors();
+    $this->actingAs($this->hakim)->post("/periodic-reviews/$p", ['outcome' => 'suspension', 'note' => 'Enrolment fell'])->assertSessionHasNoErrors();
     expect(DB::table('periodic_reviews')->find($p)->completed_on)->not->toBeNull()->and(DB::table('periodic_reviews')->whereNull('completed_on')->count())->toBe(1)
         ->and(DB::table('tasks')->where('kind', 'review_suspension')->whereNull('completed_at')->exists())->toBeTrue();
     $this->post("/periodic-reviews/$p", ['outcome' => 'continue'])->assertStatus(422); // already complete
@@ -290,4 +291,86 @@ it('lets only the configured authority decide, within the faculty (FR-prsuspend,
     $fke->roleAssignments()->create(['role' => 'deputy_dean', 'scope_type' => 'ptj', 'ptj_id' => DB::table('ptjs')->where('code', 'FTKE')->value('id')]);
     $this->actingAs($fke)->post('/suspensions', $body)->assertNotFound();
     expect(DB::table('offerings')->find($o)->status)->not->toBe('held');
+});
+
+it('renders Appendix C CQI printout and enforces C1-C10 sections, 8 domains, C9 review decisions, and Nota Penting C (Guide Appendix C)', function () {
+    $o = reviewedCohort();
+    cqiOpen($o);
+    $id = (int) DB::table('cqi_records')->value('id');
+
+    // C2 Access Issues
+    $this->actingAs($this->aina)->post("/cqi/$id/access-issues", [
+        'c2_access_issues_status' => 'ada',
+        'c2_access_issues_count' => 1,
+        'c2_access_issues_notes' => 'Minor LMS server maintenance in Week 2',
+    ])->assertSessionHasNoErrors();
+
+    // C3 Summary
+    $this->actingAs($this->aina)->post("/cqi/$id/c3-summary", [
+        'c3_summary' => 'Learning outcomes attained satisfactorily across modules with practical labs reinforcement.',
+    ])->assertSessionHasNoErrors();
+
+    // C4 Feedback
+    $this->actingAs($this->aina)->post("/cqi/$id/feedback", [
+        'feedback' => [
+            'learners' => ['findings' => 'High engagement with online labs', 'issues_strengths' => 'Positive feedback on facilitators', 'initial_action' => 'Maintain lab format'],
+            'instructors' => ['findings' => 'Good pacing', 'issues_strengths' => 'Need more time for clinic', 'initial_action' => 'Extend clinic by 30 mins'],
+            'industry' => ['findings' => 'Relevant skills', 'issues_strengths' => 'Align with market demand', 'initial_action' => 'Review tools periodically'],
+            'system_data' => ['findings' => 'System uptime 99.8%', 'issues_strengths' => 'Stable platform', 'initial_action' => 'Continue monitoring'],
+        ],
+    ])->assertSessionHasNoErrors();
+
+    // C5 Domains (8 domains)
+    allDomains($id, true);
+
+    // C6 & C7 Issue & Action with title and selectable owner
+    issueWith($id, [
+        'title' => 'Module 2 Practical Assessment Gap',
+        'responsible_id' => $this->aina->id,
+    ]);
+
+    // Submit to Deputy Dean
+    $this->post("/cqi/$id/submit")->assertSessionHasNoErrors();
+
+    // C9 Decision by Deputy Dean
+    $this->actingAs($this->hakim)->post("/cqi/$id/c9-decision", [
+        'c9_decision' => 'continue_minor_cqi',
+        'c9_is_material_change' => 0,
+        'c9_learner_implications' => 'None for current cohort',
+        'c9_follow_up_actions' => 'Monitor module 2 pass rate in next cohort',
+    ])->assertSessionHasNoErrors();
+
+    // C10 Confirm by Deputy Dean
+    $ticks = collect(array_keys(config('monitoring.confirmations')))->mapWithKeys(fn ($k) => [$k => 1])->all();
+    $this->actingAs($this->hakim)->post("/cqi/$id/confirm", ['confirm' => $ticks, 'remarks' => 'Endorsed by FTMK faculty academic committee'])->assertSessionHasNoErrors();
+
+    // C10 Signoff by QA Authority
+    $this->actingAs($this->farid)->post("/cqi/$id/signoff", [
+        'role' => 'qa_authority',
+        'status' => 'disahkan',
+        'remarks' => 'Audited for quality compliance',
+    ])->assertSessionHasNoErrors();
+
+    // Verify Print View (both ?print=1 and /print)
+    $res1 = $this->actingAs($this->aina)->get("/cqi/$id?print=1");
+    $res1->assertOk()
+        ->assertSee('Lampiran C')
+        ->assertSee('LAMPIRAN C')
+        ->assertSee('C1. Maklumat Penawaran dan Tempoh Pemantauan')
+        ->assertSee('C2. Ringkasan Prestasi Kohort')
+        ->assertSee('C3. Analisis Pencapaian Hasil Pembelajaran')
+        ->assertSee('C4. Maklum Balas Peserta dan Pihak Berkepentingan')
+        ->assertSee('C5. Pemantauan Kualiti Pelaksanaan (8 Domain)')
+        ->assertSee('C6. Isu, Analisis Punca dan Tahap Keutamaan')
+        ->assertSee('C7. Pelan Tindakan CQI')
+        ->assertSee('C8. Penilaian Keberkesanan CQI')
+        ->assertSee('C9. Keputusan Semakan Penawaran')
+        ->assertSee('C10. Pengesahan dan Rekod CQI (3 Peranan)')
+        ->assertSee('NOTA PENTING (Lampiran C)')
+        ->assertSee('Module 2 Practical Assessment Gap')
+        ->assertSee('Hakim Rahman')
+        ->assertSee('Farid Hashim');
+
+    $res2 = $this->actingAs($this->hakim)->get("/cqi/$id/print");
+    $res2->assertOk()->assertSee('NOTA PENTING (Lampiran C)');
 });

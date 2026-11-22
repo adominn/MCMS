@@ -17,6 +17,7 @@
     </div>
   </div>
   <div class="act">
+    <a class="btn ter sm" href="{{ route('completion.signoff.show', $o->id) }}">{{ __('Coordinator sign-off') }} &rarr;</a>
     <a class="btn ter sm" href="{{ route('offerings.participants', $o->id) }}">{{ __('Participants') }}</a>
     <a class="btn ter sm" href="{{ route('offerings.show', $o->id) }}">&larr; {{ __('Back to cohort') }}</a>
   </div>

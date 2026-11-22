@@ -1,0 +1,64 @@
+URL: http://127.0.0.1:8110/records/cohort/1
+FINAL: http://127.0.0.1:8110/records/cohort/1
+STATUS: 200
+TITLE: Cohort records - UTeM Micro-Credential Management System
+H1: Minimum records: Cloud Native Development 2026/1
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+2
+AZ
+Dr. Aina Zulkifli
+Lecturer, FTMK
+TEACHING
+My tasks
+3
+My micro-credentials
+Proposals and versions
+1
+Cohorts and results
+Reviews for colleagues
+1
+QUALITY
+Quality review (CQI)
+QV evidence
+Stackable pathways
+INSIGHT
+Reports
+Traceability
+Documents
+Notifications
+2
+Collapse sidebar
+←
+Back
+Traceability ledger
+Cloud Native Development (2026/1)
+Minimum records: Cloud Native Development 2026/1
+The required governance records for a cohort, and whether each is present.
+← Back to traceability
+9 rows
+Record
+	Present
+	Detail
+
+Approved version and decision	Yes	Version 1 approved
+Readiness confirmations	Yes	2 recorded
+Registrations and payments	Yes	2 registrations
+UCreds export and import files	Yes	Exchange files kept
+Verified results	Yes	4 verified
+Completion confirmations	Yes	2 confirmed
+Credentials issued	Yes	3 issued
+Participant feedback	Yes	2 responses
+Quality review (CQI) record	Yes	Record kept
+Rows per page
+5
+10
+25
+50
+1–9 of 9
+Page 1 of 1
+‹
+›

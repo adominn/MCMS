@@ -42,7 +42,7 @@
       <dd><b>{{ $rows->count() }}</b> {{ __('learners') }}</dd>
 
       <dt style="font-size:9pt">{{ __('Credits in batch') }}</dt>
-      <dd><b>{{ rtrim(rtrim((string) $rows->sum('credits'), '0'), '.') }}</b> {{ __('credits') }}</dd>
+      <dd><b>{{ mcms_num($rows->sum('credits')) }}</b> {{ __('credits') }}</dd>
     </dl>
   </div>
 </div>
@@ -68,7 +68,7 @@
         <tr>
           <td><code>{{ $r->reference }}</code></td>
           <td><b>{{ $r->name_en }}</b></td>
-          <td class="num">{{ rtrim(rtrim((string) $r->credits, '0'), '.') }}</td>
+          <td class="num">{{ mcms_num($r->credits) }}</td>
           <td class="num">{{ $r->mqf_level ?? '-' }}</td>
           <td class="num">{{ \Carbon\Carbon::parse($r->completion_date)->format('d/m/Y') }}</td>
         </tr>
@@ -77,7 +77,7 @@
       <tfoot>
         <tr style="font-weight:600;background:var(--surface)">
           <th colspan="2">{{ __('Total') }}</th>
-          <th class="num">{{ rtrim(rtrim((string) $rows->sum('credits'), '0'), '.') }}</th>
+          <th class="num">{{ mcms_num($rows->sum('credits')) }}</th>
           <td colspan="2" class="num">{{ $rows->count() }} {{ __('record(s)') }}</td>
         </tr>
       </tfoot>
@@ -112,13 +112,13 @@
 <div style="display:flex;gap:40px;margin-top:auto;padding-top:20px;border-top:1px solid var(--border)">
   <div style="flex:1;text-align:center">
     <div style="height:36px;border-bottom:1px solid var(--text)"></div>
-    <div style="font-weight:600;margin-top:4px">Deputy Dean (Academic), {{ $ptj->code }}</div>
-    <div class="bm small">Timbalan Dekan (Akademik)</div>
+    <div style="font-weight:600;margin-top:4px">{{ $preparer->name ?? __('Not yet recorded') }}</div>
+    <div class="bm small">{{ $preparer->position ?? __('Registry / ABC Depositor') }}</div>
   </div>
   <div style="flex:1;text-align:center">
     <div style="height:36px;border-bottom:1px solid var(--text)"></div>
-    <div style="font-weight:600;margin-top:4px">{{ now()->format('d/m/Y') }}</div>
-    <div class="bm small">Tarikh</div>
+    <div style="font-weight:600;margin-top:4px">{{ $b->created_at ? \Carbon\Carbon::parse($b->created_at)->format('d/m/Y') : __('Not yet recorded') }}</div>
+    <div class="bm small">{{ __('Prepared date') }}</div>
   </div>
 </div>
 

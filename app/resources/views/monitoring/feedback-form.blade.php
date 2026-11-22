@@ -27,7 +27,7 @@
       <tbody>
       @foreach($items as $k => $label)
         <tr><td>{{ $label }}@if(in_array($k, $required, true)) <span class="muted small">required</span>@endif</td>
-          @for($n = 1; $n <= 5; $n++)<td class="num"><input type="radio" name="rating[{{ $k }}]" value="{{ $n }}" aria-label="{{ $label }}: {{ $n }}" @if($e->given) disabled @checked(($answers[$k] ?? null) === $n) @elseif(in_array($k, $required, true)) @checked($n === 4) @endif></td>@endfor</tr>
+          @for($n = 1; $n <= 5; $n++)<td class="num"><input type="radio" name="rating[{{ $k }}]" value="{{ $n }}" aria-label="{{ $label }}: {{ $n }}" @if($e->given) disabled @checked(($answers[$k] ?? null) === $n) @endif></td>@endfor</tr>
       @endforeach
       </tbody>
     </table>

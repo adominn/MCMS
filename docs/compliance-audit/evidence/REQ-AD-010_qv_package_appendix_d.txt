@@ -1,0 +1,64 @@
+URL: http://127.0.0.1:8110/quality/6/package
+STATUS: 200
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+1
+HR
+Hakim Rahman
+Deputy dean, FTMK
+ACADEMIC GOVERNANCE
+Task queue
+7
+Proposals and approval
+Quality Verification
+Quality review
+Stackable pathways
+COHORT OPERATIONS
+Offerings and readiness
+Results and completion
+1
+CREDIT & CERTIFICATION
+Credentials
+Credit transfer
+INSIGHT & AUDIT
+Reports
+Traceability
+Documents
+Notifications
+1
+Collapse sidebar
+←
+Back
+Quality Verification
+Applied Data Analytics
+Submission package
+Submission package: Applied Data Analytics
+Cycle 1 · Ready to submit · Official submission package for SAMC Quality Verification.
+Print or save as PDF
+← Back to QV workspace
+Summary
+
+Rationale / Need: Data storytelling and predictive analytics.
+
+Proposed credit 2.0, MQF level 5 (proposed until verified). Readiness: Ready.
+
+Learning outcomes
+LO1: Build predictive linear models using Python and statistical toolkits.
+Modules and learning time
+Exploratory Data Analysis and Visualization: 80 hours
+Evidence index
+5 checklist items
+5 rows
+Item
+	Status
+	File reference
+
+Academic design: learning outcomes, mapping and SLT	Available	docs/qv/record_3_academic_design.pdf
+Assessment and achievement: plan, cohort results and analysis	Available	docs/qv/record_3_assessment_achievement.pdf
+Delivery and participant support	Available	docs/qv/record_3_delivery_support.pdf
+Quality assurance and CQI: feedback and improvement records	Not yet	—
+Digital Credential: design and issuing	Not yet	—
+Evidence files are listed by reference. A compressed copy of the files comes with file upload.

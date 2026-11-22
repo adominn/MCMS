@@ -4,7 +4,7 @@
 @php
   $n = count($results);
   $eStatus = $e->enrolment_status ?? ($e->status ?? 'enrolled');
-  $mk = fn ($v) => rtrim(rtrim((string) $v, '0'), '.');
+  $mk = fn ($v) => mcms_num($v);
 @endphp
 
 <!-- Breadcrumbs -->
@@ -44,7 +44,7 @@
 </div>
 
 <!-- Academic Course Context Bar -->
-<div class="panel" style="margin-bottom:20px;background:linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)">
+<div class="panel" style="margin-bottom:20px;border-left:4px solid var(--accent, #1e2a6e)">
   <div class="bd" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;align-items:center">
     <div>
       <div class="small muted">{{ __('Course & Code') }}</div>
@@ -70,9 +70,18 @@
     <div>
       <div class="small muted">{{ __('Credits & Total SLT') }}</div>
       <div style="font-weight:600;color:var(--ink)">
-        {{ !empty($e->proposed_credit) ? $e->proposed_credit.' '.__('credits') : __('Non-credit') }}
+        @if(strtolower((string)($e->category ?? '')) === 'mce')
+          {{ __('Non-credit (MCE)') }}
+        @else
+          {{ !empty($e->proposed_credit) ? mcms_num($e->proposed_credit).' '.__('credits') : __('Credit upon QV') }}
+        @endif
       </div>
-      <div class="s">{{ !empty($e->planned_slt) ? $e->planned_slt.' '.__('SLT hours') : '-' }} &middot; MQF Level {{ $e->proposed_mqf_level ?? '6' }}</div>
+      <div class="s">
+        {{ !empty($e->planned_slt) ? mcms_num($e->planned_slt).' '.__('SLT hours') : '-' }}
+        @if(strtolower((string)($e->category ?? '')) !== 'mce' && !empty($e->proposed_mqf_level))
+          &middot; MQF Level {{ $e->proposed_mqf_level }}
+        @endif
+      </div>
     </div>
     <div>
       <div class="small muted">{{ __('Registration Status') }}</div>
@@ -108,7 +117,7 @@
           <div style="padding:12px;background:var(--bg-subtle, #f4f4f4);border-radius:0px">
             <div class="small muted">{{ __('Weighted Score') }}</div>
             <div style="font-size:24px;font-weight:700;color:var(--ink)">{{ number_format($overall['total_weighted'], 1) }}%</div>
-            <div class="s muted">{{ __('Overall out of 100%') }}</div>
+            <div class="s muted">{{ $overall['complete'] ? __('Overall out of 100%') : __('Provisional (:earned% of :wt% graded)', ['earned' => number_format($overall['earned_weighted'], 1), 'wt' => (int) $overall['verified_weight']]) }}</div>
           </div>
           <div style="padding:12px;background:var(--bg-subtle, #f4f4f4);border-radius:0px">
             <div class="small muted">{{ __('Letter Grade') }}</div>
@@ -147,28 +156,32 @@
       <div class="hd">
         <h2>{{ __('Assessment Breakdown') }}</h2>
         <span class="r">
-          @if($n)
-            <span class="tag ok">{{ __(':count verified', ['count' => $n]) }}</span>
-          @else
+          @php $nVer = $components->where('result_status', 'verified')->count(); @endphp
+          @if($nVer === 0)
             <span class="tag n">{{ __('Nothing verified yet') }}</span>
+          @else
+            <span class="tag {{ $nVer === $components->count() ? 'ok' : 'info' }}">
+              {{ __(':count / :total verified', ['count' => $nVer, 'total' => $components->count()]) }}
+            </span>
           @endif
         </span>
       </div>
-      @if($n)
+      @if($components->isNotEmpty())
         <table data-plain>
           <thead>
             <tr>
               <th>{{ __('Assessment') }}</th>
               @if($modules->isNotEmpty()) <th>{{ __('Module Mapping') }}</th> @endif
-              @if(collect($results)->some(fn($r) => !empty($r->weight_percent))) <th class="num">{{ __('Weight') }}</th> @endif
+              @if($components->some(fn($r) => !empty($r->weight_percent))) <th class="num">{{ __('Weight') }}</th> @endif
               <th class="num">{{ __('Mark') }}</th>
-              @if(collect($results)->some(fn($r) => isset($r->weighted_val))) <th class="num">{{ __('Weighted') }}</th> @endif
+              @if($components->some(fn($r) => isset($r->weighted_val))) <th class="num">{{ __('Weighted') }}</th> @endif
               <th class="num">{{ __('Pass mark') }}</th>
               <th>{{ __('Result') }}</th>
             </tr>
           </thead>
           <tbody>
-            @foreach($results as $r)
+            @foreach($components as $r)
+              @php $isVerified = ($r->result_status === 'verified'); @endphp
               <tr>
                 <td>
                   <strong>{{ $r->name_en }}</strong>
@@ -182,31 +195,41 @@
                     @endif
                   </td>
                 @endif
-                @if(collect($results)->some(fn($item) => !empty($item->weight_percent)))
-                  <td class="num">{{ !empty($r->weight_percent) ? $mk($r->weight_percent).'%' : '-' }}</td>
+                @if($components->some(fn($item) => !empty($item->weight_percent)))
+                  <td class="num">{{ !empty($r->weight_percent) ? $mk($r->weight_percent).'%' : '&mdash;' }}</td>
                 @endif
-                <td class="num">{{ $mk($r->score) }} / {{ $mk($r->max_mark) }}</td>
-                @if(collect($results)->some(fn($item) => isset($item->weighted_val)))
+                <td class="num">
+                  @if($isVerified)
+                    {{ $mk($r->score) }} / {{ $mk($r->max_mark) }}
+                  @else
+                    <span class="muted">&mdash;</span>
+                  @endif
+                </td>
+                @if($components->some(fn($item) => isset($item->weighted_val)))
                   <td class="num">
-                    @if(isset($r->weighted_val))
+                    @if($isVerified && isset($r->weighted_val))
                       {{ number_format($r->weighted_val, 1) }}%
                     @else
-                      -
+                      <span class="muted">&mdash;</span>
                     @endif
                   </td>
                 @endif
                 <td class="num">{{ $mk($r->pass_mark) }}</td>
                 <td>
-                  <span class="tag {{ (float) $r->score >= (float) $r->pass_mark ? 'ok' : 'warn' }}">
-                    {{ (float) $r->score >= (float) $r->pass_mark ? __('Met') : __('Below target') }}
-                  </span>
+                  @if($isVerified)
+                    <span class="tag {{ (float) $r->score >= (float) $r->pass_mark ? 'ok' : 'warn' }}">
+                      {{ (float) $r->score >= (float) $r->pass_mark ? __('Met') : __('Below target') }}
+                    </span>
+                  @else
+                    <span class="tag info" style="font-size:11px">{{ __('Pending') }}</span>
+                  @endif
                 </td>
               </tr>
             @endforeach
           </tbody>
         </table>
       @else
-        <div class="bd muted">{{ __('Nothing is verified for this registration yet. Results appear here after the deputy dean verifies them.') }}</div>
+        <div class="bd muted">{{ __('No assessment components defined for this micro-credential.') }}</div>
       @endif
     </div>
     <p class="small muted" style="font-style:italic;margin-top:8px"><em>{{ __('Progress alone never gives a pass; the deputy dean confirms completion.') }}</em></p>
@@ -254,7 +277,7 @@
             <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--rule)">
               <!-- Badge Visual -->
               @if(!empty($m->badge_id))
-                <x-badge :category="$e->mc_category ?? 'umc'" :size="44" />
+                <x-badge :category="$e->mc_category ?? 'umc'" :size="44" :image="$e->badge_image_path ?? null" :seq="$m->seq" />
               @elseif(!empty($m->separately_recognisable))
                 <div style="width:44px;height:44px;border-radius:0px;border:2px dashed var(--rule, #d1d5db);display:flex;align-items:center;justify-content:center;color:var(--ink-muted);flex-shrink:0" title="{{ __('Eligible for badge upon completion') }}">
                   <i class="bi bi-award" style="font-size:18px;opacity:0.4"></i>

@@ -1,0 +1,194 @@
+URL: http://127.0.0.1:8110/transfers/5
+STATUS: 200
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+1
+HR
+Hakim Rahman
+Deputy dean, FTMK
+ACADEMIC GOVERNANCE
+Task queue
+7
+Proposals and approval
+Quality Verification
+Quality review
+Stackable pathways
+COHORT OPERATIONS
+Offerings and readiness
+Results and completion
+1
+CREDIT & CERTIFICATION
+Credentials
+Credit transfer
+INSIGHT & AUDIT
+Reports
+Traceability
+Documents
+Notifications
+1
+Collapse sidebar
+←
+Back
+Credit transfer
+TR-2026-0005
+Transfer Decision TR-2026-0005
+Amir Hakimi (B032410001) · BITS Bachelor of Computer Science (Software Development) with Honours
+← All evaluations
+Under evaluation
+Micro-Credential Credit Lifecycle
+Stage 07 / 08 · TR-2026-0005
+01
+Learning & Results
+Completed
+02
+Coordinator Sign-off
+Completed
+03
+Completion Confirmed
+Completed
+04
+ACR Confirmed
+Completed
+05
+Learner Consent
+Completed
+06
+ABC Deposit
+Completed
+07
+Transfer Evaluation
+Current stage
+08
+Single Redemption
+Upcoming
+Supporting Documents Submitted
+2 / 8 ticked
+[X] Academic Credit Record (ACR)
+[ ] Micro-Credential certificate or credential
+[ ] Learning outcomes statement
+[ ] Course or module content outline
+[ ] Student Learning Time (SLT) and credit breakdown
+[ ] Assessment method and evidence
+[ ] Quality Verification (QV) or accreditation proof
+[ ] Other supporting documents
+Applicant notes: acr-2026-0006.pdf;acr-2026-0007.pdf
+1. Validity of the Record
+Verified
+Authenticity of the ACR or credential: Passed (Verified against CODL credential and ACR registry.)
+ABC status of the deposit: Passed (ABC deposit status confirmed as available/provisional.)
+Quality Verification or accreditation status: Passed (MQA Quality Verification cycle active on completion date.)
+Transfer line:
+BITS 2313 Computer Networks and Distributed Systems (2 cr)
+BITD 1123 Object-Oriented Programming (3 cr)
+2 lines requested
+2. BITS 2313 Computer Networks and Distributed Systems
+2 / 3 credits
+
+Credit used: Secure Software Development Lifecycle (SSDLC) (ACR-2026-0006, 80 SLT hrs , MQF 6), requested 2 of the course's 3 credit. Curriculum version 2024.
+
+Learning outcomes, one by one
+Outcome of the course	Micro-credential outcome that meets it	Match	Note
+Analyze OSI and TCP/IP network protocols	
+None
+LO1 Perform STRIDE threat modelling and remediate OWASP Top 10 vulnerabilities.
+LO2 Integrate automated SAST and DAST security gates into CI/CD pipelines.
+	
+Choose
+Full match
+Partial match
+No match
+	
+Configure enterprise routing and switching	
+None
+LO1 Perform STRIDE threat modelling and remediate OWASP Top 10 vulnerabilities.
+LO2 Integrate automated SAST and DAST security gates into CI/CD pipelines.
+	
+Choose
+Full match
+Partial match
+No match
+	
+Design resilient distributed systems	
+None
+LO1 Perform STRIDE threat modelling and remediate OWASP Top 10 vulnerabilities.
+LO2 Integrate automated SAST and DAST security gates into CI/CD pipelines.
+	
+Choose
+Full match
+Partial match
+No match
+	
+Course Equivalence Criteria
+Criterion	Finding & Evidence	Result
+Credit value and Student Learning Time (SLT)		
+Choose
+Adequate
+Partly adequate
+Not adequate
+
+MQF level		
+Choose
+Matched
+Not matched
+
+Content and depth		
+Choose
+Equivalent
+Partly equivalent
+Not equivalent
+
+Learning activities		
+Choose
+Aligned
+Partly aligned
+Not aligned
+
+Assessment and standard		
+Choose
+Aligned
+Partly aligned
+Not aligned
+
+Accreditation or Quality Verification status		
+Choose
+Valid
+Invalid
+Not applicable
+
+Currency of knowledge		
+Choose
+Adequate (Current)
+Needs further review
+
+Programme or professional body requirements		
+Choose
+Met
+Not met
+Not applicable
+Save evaluation
+3. Record Credit Transfer Decision
+Course	Credits approved (0 to requested)
+BITS 2313 Computer Networks and Distributed Systems	
+BITD 1123 Object-Oriented Programming	
+Decision *
+Approved
+Partly approved
+Not approved
+Decision reference
+Decision date *
+Conditions or justification (Required if Partly approved or Not approved)
+
+Approving holds the credit used as Provisionally redeemed. It does not admit the participant.
+
+Record decision
+Ask for more evidence
+Or ask for more evidence
+Request more evidence
+Programme Admission (Separate Fact)
+
+Admission is a separate fact from the transfer decision. Neither implies the other.
+
+Admission recorded: intake 2026/1 (evidence ADM-SURAT-TAWARAN-2026-01).

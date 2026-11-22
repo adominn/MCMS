@@ -23,7 +23,7 @@
 
 @if($standing)
 <div class="card" id="in-force"><h2>{{ __('In force') }}</h2>
-  <p><strong>{{ $standing->qv_reference }}</strong>: {{ rtrim(rtrim((string) $standing->verified_credit, '0'), '.') }} {{ __('credit') }}, MQF level {{ $standing->verified_mqf_level }}, {{ __('valid :from to :to.', ['from' => \Carbon\Carbon::parse($standing->valid_from)->format('d/m/Y'), 'to' => \Carbon\Carbon::parse($standing->valid_until)->format('d/m/Y')]) }}@if($standing->reverification) <span class="tag overdue">{{ __('Re-verification needed after a material change') }}</span>@endif</p>
+  <p><strong>{{ $standing->qv_reference }}</strong>: {{ mcms_num($standing->verified_credit) }} {{ __('credit') }}, MQF level {{ $standing->verified_mqf_level }}, {{ __('valid :from to :to.', ['from' => \Carbon\Carbon::parse($standing->valid_from)->format('d/m/Y'), 'to' => \Carbon\Carbon::parse($standing->valid_until)->format('d/m/Y')]) }}@if($standing->reverification) <span class="tag overdue">{{ __('Re-verification needed after a material change') }}</span>@endif</p>
   @if($standing->conditions)<p>{{ __('Conditions: :cond', ['cond' => $standing->conditions]) }}</p>@endif
   <p class="muted">{{ __('Quality Verification does not by itself mean a transfer, admission or stackable status.') }}</p>
   @if($dd)

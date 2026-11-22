@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verification Result - Not Found - UTeM Micro-Credential Management System</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+</head>
+<body>
+  
+  <header class="brand-header">
+    <div class="container brand-header-inner">
+      <a href="../public/home.html" class="brand-identity" aria-label="UTeM Micro-Credential Management System Home">
+        <img src="../assets/LogoJawiUTeM_blue-01.png" alt="Universiti Teknikal Malaysia Melaka" class="brand-logo-img">
+        <div class="brand-titles">
+          <span class="brand-sys-title">UTeM MCMS</span>
+        </div>
+      </a>
+      
+      <nav class="header-nav" aria-label="Public Navigation">
+        <ul class="header-nav-list">
+          <li><a href="../public/home.html" class="header-nav-link ">Home</a></li>
+          <li><a href="../public/catalogue.html" class="header-nav-link ">Catalogue</a></li>
+          <li><a href="../public/pathways.html" class="header-nav-link ">Pathways</a></li>
+          <li><a href="../public/how-it-works.html" class="header-nav-link ">Recognition Stages</a></li>
+          <li><a href="../public/faq.html" class="header-nav-link ">FAQ</a></li>
+          <li><a href="../public/verify.html" class="header-nav-link active">Verify</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="../auth/signin-default.html" class="btn btn-primary btn-sm">Sign In</a>
+      </div>
+    </div>
+  </header>
+  
+  
+  <main class="main-content">
+    
+<div class="container" style="max-width:960px">
+  <div class="breadcrumbs">
+    <a href="home.html">Home</a>
+    <span class="breadcrumbs-sep">/</span>
+    <a href="verify.html">Verify</a>
+    <span class="breadcrumbs-sep">/</span>
+    <span>Verification Result</span>
+  </div>
+
+  <div class="verify-dossier">
+    <div class="verify-dossier-banner not-found">
+      <div>
+        <div class="flex items-center gap-xs" style="margin-bottom:4px">
+          <span class="status-pill status-not-found"><span class="status-pip"></span> STATUS: NOT FOUND</span>
+        </div>
+        <h1 style="font-size:22px;margin:4px 0">We Could Not Find This Credential</h1>
+        <div style="font-family:var(--font-mono);font-size:12px;color:var(--color-ink-muted)">Query: UNKNOWN-99999</div>
+      </div>
+    </div>
+
+    <div style="padding:28px">
+      <div class="alert alert-error">
+        <span class="alert-title">No Matching Record Found</span>
+        The verification code or cryptographic artifact provided does not match any official micro-credential or digital badge registered in the UTeM Micro-Credential Management System.
+      </div>
+
+      <div class="card card-subtle" style="margin-bottom:20px">
+        <h3 style="font-size:15px;margin-bottom:8px">Try re-entering the credential code:</h3>
+        <p style="font-size:13px;color:var(--color-ink-muted);margin-bottom:14px">
+          Please verify that the code was typed correctly. UTeM credential codes typically follow the format <code>ABC12-3X4YZ</code>.
+        </p>
+
+        <form action="verify.html" method="get" class="flex gap-sm">
+          <input type="text" name="code" placeholder="e.g. CND01-7K9MJ" class="input" style="max-width:320px;font-family:var(--font-mono)" required>
+          <button type="submit" class="btn btn-primary btn-sm">Retry Verification</button>
+        </form>
+      </div>
+
+      <a href="verify.html" class="btn btn-secondary btn-sm">&larr; Return to Verification Hub</a>
+    </div>
+  </div>
+</div>
+
+  </main>
+
+  
+  <footer class="public-footer">
+    <div class="container">
+      <div class="grid grid-cols-4 gap-lg">
+        <div>
+          <img src="../assets/CODL_logo.png" alt="Centre for Open and Distance Learning" style="height:60px;width:auto;display:block;margin-bottom:14px">
+          <div class="footer-heading">UTeM Micro-credentials</div>
+          <p style="color:#94a3b8;font-size:12.5px;line-height:1.5">
+            Centre for Open and Distance Learning (CODL)<br>
+            Universiti Teknikal Malaysia Melaka<br>
+            Hang Tuah Jaya, 76100 Durian Tunggal, Melaka
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-heading">Learn</div>
+          <a href="../public/catalogue.html">All Micro-Credentials</a>
+          <a href="../public/pathways.html">Degree Pathways</a>
+          <a href="../public/how-it-works.html">Recognition Stages</a>
+        </div>
+
+        <div>
+          <div class="footer-heading">Help & Verification</div>
+          <a href="../public/faq.html">Frequently Asked Questions</a>
+          <a href="../public/verify.html">Verify a Credential</a>
+          <a href="mailto:codl@utem.edu.my">Contact CODL: codl@utem.edu.my</a>
+        </div>
+
+        <div>
+          <div class="footer-heading">Policies & Governance</div>
+          <a href="../public/policy-privacy.html">Privacy Notice (PDPA)</a>
+          <a href="../public/policy-terms.html">Terms of Use</a>
+          <a href="../public/policy-accessibility.html">Accessibility Statement</a>
+        </div>
+      </div>
+
+      <div class="footer-legal">
+        Micro-credentials issued under the UTeM Micro-Credential Framework compliant with MQA Code of Practice for Programme Accreditation and Malaysian Qualifications Framework (MQF) 2nd Edition. Micro-credentials do not automatically grant university admission.
+      </div>
+    </div>
+  </footer>
+  
+
+  <script src="../js/ui.js"></script>
+</body>
+</html>

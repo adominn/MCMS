@@ -44,15 +44,20 @@ class DatabaseSeeder extends Seeder
         // Fictional personas of the demonstration scenario. Never real people.
         $ptj = fn ($c) => DB::table('ptjs')->where('code', $c)->value('id');
         foreach ([
-            ['Amir Hakimi', 'amir.hakimi@learner.example.test', 'student', null, 'en'],
-            ['Dr. Aina Zulkifli', 'aina.zulkifli@utem.example.test', 'lecturer', 'FTMK', 'en'],
-            ['Hakim Rahman', 'hakim.rahman@utem.example.test', 'deputy_dean', 'FTMK', 'en'],
-            ['Farid Hashim', 'farid.hashim@utem.example.test', 'codl_admin', null, 'en'],
-            ['Ir. Siti Aminah', 'siti.aminah@industry.example.test', 'industry_expert', null, 'ms'],
-        ] as [$name, $email, $role, $code, $locale]) {
-            $u = User::firstOrCreate(['email' => $email], ['name' => $name, 'upn' => $email, 'locale' => $locale, 'participant_group' => $role === 'student' ? 'working professional' : null, 'institution_id' => $role === 'student' ? 'B032410001' : null]);
-            $scopeType = $code ? 'ptj' : ($role === 'codl_admin' ? 'university' : null);
+            ['Amir Hakimi', 'amir.hakimi@learner.example.test', 'student', null, 'en', 'Participant', 'Peserta'],
+            ['Dr. Aina Zulkifli', 'aina.zulkifli@utem.example.test', 'lecturer', 'FTMK', 'en', 'Course Coordinator / Senior Lecturer, FTMK', 'Penyelaras Kursus / Pensyarah Kanan, FTMK'],
+            ['Hakim Rahman', 'hakim.rahman@utem.example.test', 'deputy_dean', 'FTMK', 'en', 'Deputy Dean (Academic), FTMK', 'Timbalan Dekan (Akademik), FTMK'],
+            ['Nurul Izzah', 'nurul.izzah@utem.example.test', 'abc_depositor', null, 'en', 'Authorized ABC Depositor (P7), Registry / CODL', 'Pendeposit ABC Diberi Kuasa (P7), Pejabat Pendaftar / CODL'],
+            ['Farid Hashim', 'farid.hashim@utem.example.test', 'codl_admin', null, 'en', 'Administrator, CODL', 'Pentadbir, CODL'],
+            ['Ir. Siti Aminah', 'siti.aminah@industry.example.test', 'industry_expert', null, 'ms', 'Industry Subject-Matter Expert', 'Pakar Bidang Industri'],
+        ] as [$name, $email, $role, $code, $locale, $posEn, $posMs]) {
+            $u = User::firstOrCreate(['email' => $email], ['name' => $name, 'upn' => $email, 'locale' => $locale, 'position' => $posEn, 'position_ms' => $posMs, 'participant_group' => $role === 'student' ? 'working professional' : null, 'institution_id' => $role === 'student' ? 'B032410001' : null]);
+            $u->forceFill(['position' => $posEn, 'position_ms' => $posMs])->save();
+            $scopeType = $code ? 'ptj' : (in_array($role, ['codl_admin', 'records_depositor', 'abc_depositor', 'records_custodian'], true) ? 'university' : null);
             $u->roleAssignments()->firstOrCreate(['role' => $role], ['scope_type' => $scopeType, 'ptj_id' => $code ? $ptj($code) : null, 'reason' => 'Seed data']);
+            if ($email === 'nurul.izzah@utem.example.test') {
+                $u->roleAssignments()->firstOrCreate(['role' => 'records_custodian'], ['scope_type' => 'university', 'reason' => 'Seed dual-role P6 Records Custodian']);
+            }
         }
 
         $this->call(UcredsReferenceSeeder::class);
@@ -91,6 +96,7 @@ class DatabaseSeeder extends Seeder
             ['version.changed', 'notification', true, 'An approved change affects current participants', 'A change to {title}', 'Hello {name}, version {version} of "{title}" takes effect on {date}. What this means for you: {rule}.', 'Perubahan pada {title}', 'Salam {name}, versi {version} bagi "{title}" berkuat kuasa pada {date}. Maksudnya bagi anda: {rule}.'],
             ['results.staged', 'notification', false, 'Results or badges were staged from a UCreds file', 'UCreds {kind} staged: {title}', 'Hello {name}, {staged} rows of the UCreds {kind} file for "{title}" were staged. {detail} Complete any missing marks on the cohort results page.', 'Fail UCreds disediakan: {title}', 'Salam {name}, {staged} baris fail UCreds {kind} bagi "{title}" telah disediakan. {detail} Lengkapkan markah yang tiada pada halaman keputusan kohort.'],
             ['results.verified', 'notification', false, 'Results were verified', 'Your results are verified: {title}', 'Hello {name}, your results for "{title}" are verified. Open "My results" to see them.', 'Keputusan anda telah disahkan: {title}', 'Salam {name}, keputusan anda bagi "{title}" telah disahkan. Buka "Keputusan saya" untuk melihatnya.'],
+            ['results.changed', 'notification', true, 'A verified result was revised', 'Result revised: {title}', 'Hello {name}, your result for "{title}" was revised. What was done: {reason}. Open "My results" to see your updated results.', 'Keputusan dipinda: {title}', 'Salam {name}, keputusan anda bagi "{title}" telah dipinda. Apa yang dilakukan: {reason}. Buka "Keputusan saya" untuk melihat keputusan terkini anda.'],
             ['completion.confirmed', 'notification', true, 'Completion of a micro-credential was confirmed', 'Completion confirmed: {title}', 'Hello {name}, the deputy dean confirmed that you completed "{title}". Your certificate or Digital Credential is issued after this confirmation.', 'Penamatan disahkan: {title}', 'Salam {name}, timbalan dekan telah mengesahkan bahawa anda menamatkan "{title}". Sijil atau Digital Credential anda dikeluarkan selepas pengesahan ini.'],
             ['consent.abc_deposit', 'statement', true, 'Wording of the consent to deposit an Academic Credit Record', null, 'I agree that UTeM may send my Academic Credit Record to the Academic Bank of Credit (ABC) for storage. A deposit is storage of a credit record only. It is not a credit transfer and does not mean any programme accepts the credit. I can decline or postpone and give consent later.', null, 'Saya bersetuju UTeM menghantar Rekod Kredit Akademik saya kepada Akaun Bank Kredit (ABC) untuk disimpan. Deposit ialah penyimpanan rekod kredit sahaja. Ia bukan pindahan kredit dan tidak bermakna mana-mana program menerima kredit tersebut. Saya boleh menolak atau menangguhkan dan memberi persetujuan kemudian.'],
             ['acr.confirmed', 'notification', true, 'The Academic Credit Record was confirmed and needs consent', 'Your Academic Credit Record is ready: {title}', 'Hello {name}, your Academic Credit Record for "{title}" is confirmed. Open "Credit ledger and ABC" to give, decline or postpone consent to deposit it. Nothing is deposited without your consent.', 'Rekod Kredit Akademik anda sedia: {title}', 'Salam {name}, Rekod Kredit Akademik anda bagi "{title}" telah disahkan. Buka "Lejar kredit dan ABC" untuk memberi, menolak atau menangguhkan persetujuan deposit. Tiada apa didepositkan tanpa persetujuan anda.'],
@@ -115,7 +121,7 @@ class DatabaseSeeder extends Seeder
             ['statement.catalogue.samc', 'statement', false, 'Catalogue statement for a SAMC without valid Quality Verification', null, 'This is a Standalone Micro-Credential (SAMC). It carries no credit value and no MQF level unless it is Quality-Verified and the verification is valid.', null, 'Ini ialah Standalone Micro-Credential (SAMC). Ia tidak membawa nilai kredit atau tahap MQF melainkan telah disahkan melalui Quality Verification dan pengesahan itu masih sah.'],
             ['statement.catalogue.samc_qv', 'statement', false, 'Catalogue statement for a Quality-Verified SAMC', null, 'This SAMC is Quality-Verified. Credit {credit}, MQF level {mqf}, valid until {until}.', null, 'SAMC ini telah disahkan melalui Quality Verification. Kredit {credit}, tahap MQF {mqf}, sah hingga {until}.'],
             ['statement.catalogue.mce', 'statement', false, 'Catalogue statement for an MCE', null, 'This is an Executive Micro-Credential (MCE). It earns no academic credit, no Academic Credit Record and no deposit to the Academic Bank of Credit.', null, 'Ini ialah Micro-Credential Eksekutif (MCE). Ia tidak memberi kredit akademik, Academic Credit Record atau deposit ke Academic Bank of Credit.'],
-            ['statement.separate_stages', 'statement', false, 'Notice shown with every offering and credential', null, 'Completing this micro-credential, receiving an Academic Credit Record, depositing credit to the Academic Bank of Credit and transferring credit are separate decisions.', null, 'Menamatkan micro-credential ini, menerima Academic Credit Record, mendepositkan kredit ke Academic Bank of Credit dan memindahkan kredit adalah keputusan yang berasingan.'],
+            ['statement.separate_stages', 'statement', false, 'Notice shown with every offering and credential', null, 'Completing this micro-credential, receiving an earned credential (digital badge or certificate), receiving an Academic Credit Record, depositing credit to the Academic Bank of Credits and transferring credit are separate decisions. None guarantees automatic admission, credit transfer, or qualification award.', null, 'Menamatkan micro-credential ini, penganugerahan kredensial (lencana digital atau sijil), menerima Rekod Kredit Akademik (ACR), mendepositkan kredit ke Bank Kredit Akademik (ABC) dan memindahkan kredit adalah keputusan yang berasingan. Tiada peringkat yang menjamin kemasukan automatik, pemindahan kredit atau penganugerahan ijazah.'],
         ];
         foreach ($defs as [$key, $kind, $mand, $desc, $sEn, $bEn, $sMs, $bMs]) {
             if (DB::table('templates')->where('key', $key)->exists()) {
@@ -136,9 +142,10 @@ class DatabaseSeeder extends Seeder
         $areas = ['proposals' => 'Endorse proposal', 'offerings' => 'Confirm readiness', 'results' => 'Verify results', 'credentials' => 'Confirm completion', 'deposits' => 'Record ABC deposit', 'transfers' => 'Decide transfer'];
         $n = 0;
         foreach ($areas as $area => $verb) {
+            $assignee = 'deputy_dean';
             foreach (range(1, 4) as $i) {
                 $n++;
-                DB::table('tasks')->insert(['assignee_role' => 'deputy_dean', 'area' => $area, 'title' => "$verb: sample item $n", 'subject_ref' => strtoupper(substr($area, 0, 3))."-$n", 'created_at' => now()->subDays(($n * 2) % 26 + 1)]);
+                DB::table('tasks')->insert(['assignee_role' => $assignee, 'area' => $area, 'title' => "$verb: sample item $n", 'subject_ref' => strtoupper(substr($area, 0, 3))."-$n", 'created_at' => now()->subDays(($n * 2) % 26 + 1)]);
             }
         }
         DB::table('tasks')->insert([

@@ -38,7 +38,27 @@ class User extends Authenticatable
     // PTj ids the user may act in for a role; null means the whole University (FR-12).
     public function scopedPtjIds(string $role): ?array
     {
-        $a = $this->roleAssignments()->where('role', $role)
+        // University-wide governance roles have university-wide scope (all PTjs)
+        if ($this->hasAnyRole('codl_admin', 'qa_officer', 'academic_authority', 'records_custodian', 'abc_depositor', 'records_depositor')) {
+            $specificPtj = $this->roleAssignments()->where('role', $role)->where('scope_type', 'ptj')
+                ->where(fn ($q) => $q->whereNull('valid_from')->orWhere('valid_from', '<=', today()))
+                ->where(fn ($q) => $q->whereNull('valid_to')->orWhere('valid_to', '>=', today()))
+                ->pluck('ptj_id')->filter()->all();
+            if (empty($specificPtj)) {
+                return null;
+            }
+
+            return $specificPtj;
+        }
+
+        $targetRoles = [$role];
+        if ($role === 'deputy_dean') {
+            $targetRoles[] = 'ptj_authority';
+        } elseif ($role === 'ptj_authority') {
+            $targetRoles[] = 'deputy_dean';
+        }
+
+        $a = $this->roleAssignments()->whereIn('role', $targetRoles)
             ->where(fn ($q) => $q->whereNull('valid_from')->orWhere('valid_from', '<=', today()))
             ->where(fn ($q) => $q->whereNull('valid_to')->orWhere('valid_to', '>=', today()))->get();
 
@@ -63,7 +83,35 @@ class User extends Authenticatable
 
     public function hasAnyRole(string ...$roles): bool
     {
-        return $this->effectiveRoles()->contains(fn (Role $r) => in_array($r->value, $roles, true));
+        $targetRoles = [];
+        foreach ($roles as $r) {
+            $targetRoles[] = $r;
+            if ($r === 'deputy_dean') {
+                $targetRoles[] = 'ptj_authority';
+            } elseif ($r === 'ptj_authority') {
+                $targetRoles[] = 'deputy_dean';
+            } elseif ($r === 'records_depositor') {
+                $targetRoles[] = 'records_custodian';
+                $targetRoles[] = 'abc_depositor';
+            }
+        }
+
+        return $this->effectiveRoles()->contains(function (Role $r) use ($targetRoles) {
+            if (in_array($r->value, $targetRoles, true)) {
+                return true;
+            }
+            if ($r->value === 'records_depositor' && (in_array('records_custodian', $targetRoles, true) || in_array('abc_depositor', $targetRoles, true))) {
+                return true;
+            }
+            if ($r->value === 'deputy_dean' && in_array('ptj_authority', $targetRoles, true)) {
+                return true;
+            }
+            if ($r->value === 'ptj_authority' && in_array('deputy_dean', $targetRoles, true)) {
+                return true;
+            }
+
+            return false;
+        });
     }
 
     public function hasRole(string $role): bool

@@ -99,7 +99,8 @@ it('verifies deputy dean role route access and restrictions', function () {
     $this->actingAs($dean)->get('/results')->assertOk();
     $this->actingAs($dean)->get('/credentials')->assertOk();
     $this->actingAs($dean)->get('/quality')->assertOk();
-    $this->actingAs($dean)->get('/deposits')->assertOk();
+    $this->actingAs($dean)->get('/deposits')->assertForbidden(); // P6/P7 Registry / ABC Depositor separated from Deputy Dean (Guide App H2/H3)
+    $this->actingAs(userNurul())->get('/deposits')->assertOk();
     $this->actingAs($dean)->get('/transfers')->assertOk();
     $this->actingAs($dean)->get('/pathways')->assertOk();
     $this->actingAs($dean)->get('/monitoring')->assertOk();
@@ -158,7 +159,7 @@ it('verifies industry expert role access and restrictions', function () {
 
     // Industry expert home redirects to reviews (matching prototype)
     $this->actingAs($expert)->get('/tasks')->assertRedirect('/reviews');
-    $this->actingAs($expert)->get('/help')->assertOk()->assertSee('Review invitations');
+    $this->actingAs($expert)->get('/help')->assertOk()->assertSee(__('Review invitations'));
     $this->actingAs($expert)->get('/profile')->assertOk();
     $this->actingAs($expert)->get('/reviews')->assertOk();
 
@@ -660,10 +661,13 @@ it('enforces documents role access and PTj/owner scoping on documents, admission
 
     $this->actingAs($deanFtmk)->get('/documents')
         ->assertOk()
-        ->assertSee('ABC-FTMK-SEC-01')
-        ->assertDontSee('ABC-FTKE-SEC-99')
         ->assertSee('Own Lecturer MC One')
         ->assertDontSee('Other Faculty FTKE MC');
+
+    // Registry / ABC Depositor sees ABC deposit batches on /documents
+    $this->actingAs(userNurul())->get('/documents')
+        ->assertOk()
+        ->assertSee('ABC-FTMK-SEC-01');
 
     $this->actingAs($deanFtmk)->get('/transfers')
         ->assertOk()

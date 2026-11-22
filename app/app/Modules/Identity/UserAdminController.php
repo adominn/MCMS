@@ -62,10 +62,28 @@ final class UserAdminController
             }
         }
 
-        // D-52: Separation of Duties (SoD) - Deputy Dean and Lecturer roles are strictly mutually exclusive.
+        // Appendix H SoD: CODL admin cannot assign academic, QA, or registry roles to themselves (Cl. 15.2.3, REQ-C15-002)
+        if ((int) $request->user()->id === (int) $user->id) {
+            $academicOrRegistryRoles = [
+                Role::DeputyDean->value,
+                Role::PtjAuthority->value,
+                Role::AcademicAuthority->value,
+                Role::QaOfficer->value,
+                Role::RecordsCustodian->value,
+                Role::AbcDepositor->value,
+                Role::RecordsDepositor->value,
+            ];
+            if (in_array($d['role'], $academicOrRegistryRoles, true)) {
+                throw ValidationException::withMessages([
+                    'role' => __('Administrators cannot assign academic, quality, or registry authority roles to their own account (Appendix H, Cl. 15.2.3).'),
+                ]);
+            }
+        }
+
+        // D-52: Separation of Duties (SoD) - Deputy Dean/PTj and Lecturer roles are strictly mutually exclusive.
         if ($d['role'] === Role::Lecturer->value) {
             $hasActiveDd = $user->roleAssignments()
-                ->where('role', Role::DeputyDean->value)
+                ->whereIn('role', [Role::DeputyDean->value, Role::PtjAuthority->value])
                 ->where(fn ($q) => $q->whereNull('valid_to')->orWhere('valid_to', '>=', today()))
                 ->exists();
             if ($hasActiveDd) {
@@ -75,7 +93,7 @@ final class UserAdminController
             }
         }
 
-        if ($d['role'] === Role::DeputyDean->value) {
+        if (in_array($d['role'], [Role::DeputyDean->value, Role::PtjAuthority->value], true)) {
             $hasActiveLecturer = $user->roleAssignments()
                 ->where('role', Role::Lecturer->value)
                 ->where(fn ($q) => $q->whereNull('valid_to')->orWhere('valid_to', '>=', today()))

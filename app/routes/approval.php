@@ -14,14 +14,17 @@ Route::middleware(['auth', 'role:lecturer,industry_expert'])->prefix('reviews')-
 
 Route::middleware(['auth', 'role:lecturer'])->post('/proposals/{id}/comments/{comment}/respond', [ReviewController::class, 'respond'])->whereNumber(['id', 'comment'])->name('comments.respond');
 
-Route::middleware(['auth', 'role:deputy_dean'])->prefix('approvals')->group(function () {
+Route::middleware(['auth', 'role:deputy_dean,ptj_authority,academic_authority,qa_officer,codl_admin'])->prefix('approvals')->group(function () {
     Route::get('/', [ApprovalController::class, 'index'])->name('approvals');
     Route::get('/{id}', [ApprovalController::class, 'show'])->whereNumber('id')->name('approvals.show');
+    Route::get('/{id}/pack', [ApprovalController::class, 'pack'])->whereNumber('id')->name('approvals.pack');
+    Route::get('/{id}/senate', [ApprovalController::class, 'senateForm'])->whereNumber('id')->name('approvals.senate');
+    Route::post('/{id}/senate', [ApprovalController::class, 'senate'])->whereNumber('id');
+});
+
+Route::middleware(['auth', 'role:deputy_dean,ptj_authority'])->prefix('approvals')->group(function () {
     Route::post('/{id}/reviewers', [ApprovalController::class, 'assign'])->whereNumber('id')->name('approvals.assign');
     Route::post('/{id}/comments/{comment}/resolve', [ApprovalController::class, 'resolve'])->whereNumber(['id', 'comment'])->name('approvals.resolve');
     Route::post('/{id}/endorse', [ApprovalController::class, 'endorse'])->whereNumber('id')->name('approvals.endorse');
     Route::post('/{id}/{how}', [ApprovalController::class, 'sendBack'])->whereNumber('id')->whereIn('how', ['return', 'reject'])->name('approvals.sendback');
-    Route::get('/{id}/pack', [ApprovalController::class, 'pack'])->whereNumber('id')->name('approvals.pack');
-    Route::get('/{id}/senate', [ApprovalController::class, 'senateForm'])->whereNumber('id')->name('approvals.senate');
-    Route::post('/{id}/senate', [ApprovalController::class, 'senate'])->whereNumber('id');
 });

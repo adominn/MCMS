@@ -1,0 +1,66 @@
+URL: http://127.0.0.1:8110/records/audit
+FINAL: http://127.0.0.1:8110/records/audit
+STATUS: 200
+TITLE: Audit trail - UTeM Micro-Credential Management System
+H1: Audit trail
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+NI
+Nurul Izzah
+Registry / ABC depositor
+REGISTRY & ABC
+Task queue
+4
+ACR & ABC deposits
+4
+Discrepancies & corrections
+INSIGHT & AUDIT
+Traceability
+Audit trail
+Reports
+Documents
+Notifications
+Collapse sidebar
+←
+Back
+Traceability ledger
+Audit trail
+Audit trail
+Immutable SHA-256 hash-chained log of administrative and academic events in your role scope.
+Print or export
+← Traceability
+Search by action or record
+Search
+Audit ledger entries
+100 events
+100 rows
+Seq
+	Time
+	Action
+	Record
+	By
+
+#159	19/11/2026 23:16	auth.signed_in	User 13	Nurul Izzah
+#158	19/11/2026 23:15	auth.signed_in	User 10	Hakim Rahman
+#157	19/11/2026 23:15	auth.signed_in	User 6	Dr. Aina Zulkifli
+#156	19/11/2026 23:14	auth.signed_in	User 1	Amir Hakimi
+#155	19/11/2026 23:11	auth.signed_in	User 6	Dr. Aina Zulkifli
+#154	19/11/2026 23:10	auth.signed_in	User 1	Amir Hakimi
+#153	19/11/2026 08:02	auth.signed_in	User 27	Danial Razi
+#152	19/11/2026 08:02	auth.signed_out	User 6	Dr. Aina Zulkifli
+#151	19/11/2026 08:00	auth.signed_in	User 6	Dr. Aina Zulkifli
+#150	19/11/2026 08:00	auth.signed_out	User 27	Danial Razi
+Rows per page
+5
+10
+25
+50
+1–10 of 100
+Page 1 of 10
+‹
+›
+
+Entries for records inside your scope. Entries are never changed or removed.

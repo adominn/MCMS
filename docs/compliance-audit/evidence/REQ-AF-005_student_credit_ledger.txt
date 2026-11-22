@@ -1,0 +1,76 @@
+URL: http://127.0.0.1:8110/my-credit
+FINAL: http://127.0.0.1:8110/my-credit
+STATUS: 200
+TITLE: Credit ledger and ABC - UTeM Micro-Credential Management System
+H1: Credit Ledger & Academic Bank of Credit (ABC)
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+8
+AH
+Amir Hakimi
+Student
+LEARNING
+My learning
+Find a micro-credential
+Registrations and payments
+My results
+Feedback
+ACHIEVEMENTS
+Credentials
+Achievement record
+CREDIT
+Credit ledger and ABC
+Credit transfer
+My degree plan
+Documents
+Notifications
+8
+Collapse sidebar
+Credit Ledger & Academic Bank of Credit (ABC)
+Credit Accumulation Record · One row per Academic Credit Record (ACR)
+Apply for credit transfer
+Total accumulated credit
+12
+All ACRs, deposited or not
+Available
+5
+Deposited in ABC, ready to transfer
+Provisionally redeemed
+0
+Held by an approved transfer
+Redeemed
+4
+Permanently used for a qualification
+Expired
+0
+Past 10 years in ABC
+Credit Accumulation Record
+5 record(s)
+5 rows
+No.
+	Micro-Credential & ACR
+	Provider
+	Credits
+	Deposit Date
+	Expiry Date
+	Credit Status
+
+1	Full-Stack Web & API Engineering
+MCMS-A-2026-000011 · UMC · 120 SLT hrs
+	Universiti Teknikal Malaysia Melaka	3	Not yet recorded	Not yet recorded	Consent given, waiting for deposit
+2	Object-Oriented Software Construction
+ACR-2026-0007 · UMC · 120 SLT hrs
+	Universiti Teknikal Malaysia Melaka	3	28/10/2026	28/10/2036	Available
+3	Secure Software Development Lifecycle (SSDLC)
+ACR-2026-0006 · SAMC · 80 SLT hrs
+	Universiti Teknikal Malaysia Melaka	2	28/10/2026	28/10/2036	Available
+4	Data Structures
+ACR-2026-0003 · UMC · 80 SLT hrs
+	Universiti Teknikal Malaysia Melaka	2	30/08/2026	30/08/2036	Redeemed
+5	Cloud Native Development
+ACR-2026-0001 · SAMC · 80 SLT hrs
+	Universiti Teknikal Malaysia Melaka	2	15/09/2026	15/09/2036	Redeemed
+Total accumulated credit	12	Total Available credit: 5 · Credit is valid for 10 years from the deposit date.

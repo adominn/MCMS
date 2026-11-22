@@ -83,7 +83,7 @@
         <!-- Main Column (Left - 68%) -->
         <div style="flex:2.2;min-width:0">
           <!-- Visual Degree Articulation Credit Bar -->
-          <div class="panel" style="margin-bottom:20px;background:#ffffff;border:1px solid var(--rule)">
+          <div class="panel" style="margin-bottom:20px;background:var(--card-bg, #ffffff);border:1px solid var(--rule)">
             <div class="hd" style="display:flex;align-items:center;justify-content:space-between">
               <h2 style="margin:0;font-size:15px">{{ __('Degree Articulation Progress') }}</h2>
               <span class="tag info">{{ $earnedCredits }} / {{ $totCredits }} {{ __('Graduation Credits') }}</span>
@@ -95,7 +95,7 @@
               </div>
 
               <!-- Multi-segment progress visual -->
-              <div style="height:12px;width:100%;background:#e0e0e0;display:flex;overflow:hidden;margin-bottom:12px">
+              <div style="height:12px;width:100%;background:var(--hairline);display:flex;overflow:hidden;margin-bottom:12px">
                 <div style="width:{{ max(3, $progressPercent) }}%;background:#24a148" title="{{ $earnedCredits }} credits from micro-credentials"></div>
                 <div style="width:{{ max(0, min(100 - $progressPercent, 30)) }}%;background:#0f62fe;opacity:0.3" title="{{ $minUtemCredits }} credits minimum directly at UTeM"></div>
               </div>
@@ -110,7 +110,7 @@
                   <span>{{ __('Required directly at UTeM (30%)') }}: <strong>&ge; {{ $minUtemCredits }} cr</strong></span>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px">
-                  <span style="display:inline-block;width:10px;height:10px;background:#e0e0e0"></span>
+                  <span style="display:inline-block;width:10px;height:10px;background:var(--hairline)"></span>
                   <span>{{ __('Remaining study') }}: <strong>{{ max(0, $totCredits - $earnedCredits) }} cr</strong></span>
                 </div>
               </div>
@@ -121,7 +121,7 @@
           <div class="kpis" style="margin-bottom:20px">
             <div class="kpi">
               <div class="l">{{ __('Earned directly at UTeM') }}</div>
-              <div class="v">{{ rtrim(rtrim((string) $s->utem_percent, '0'), '.') }}%</div>
+              <div class="v">{{ mcms_num($s->utem_percent) }}%</div>
               <div class="n">{{ __('at least :min% is required', ['min' => $x['min']]) }}</div>
             </div>
             <div class="kpi">
@@ -176,7 +176,7 @@
                           <div style="font-weight:600;color:var(--accent, #1e2a6e)">{{ $i->course_code }}</div>
                         </td>
                         <td class="num">
-                          <strong>{{ rtrim(rtrim((string) $i->credits, '0'), '.') }} {{ __('credits') }}</strong>
+                          <strong>{{ mcms_num($i->credits) }} {{ __('credits') }}</strong>
                         </td>
                       </tr>
                     @empty
@@ -238,7 +238,7 @@
 
           <!-- Collaborative Responsibilities Explanation -->
           <div class="panel" style="margin-top:20px;background:var(--bg-subtle, #f4f4f4)">
-            <div class="hd"><h2 style="margin:0;font-size:14px">{{ __('Student & Faculty Collaboration Guide') }}</h2></div>
+            <div class="hd"><h2 style="margin:0;font-size:14px">{{ __('Student & Faculty Collaboration') }}</h2></div>
             <div class="bd" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:13px;line-height:1.5">
               <div>
                 <strong style="color:var(--accent, #1e2a6e);display:block;margin-bottom:4px">
@@ -288,7 +288,7 @@
                 </div>
               </div>
               <p class="small muted" style="margin:0 0 14px;line-height:1.4">
-                {{ __('Your academic advisor evaluates your prior credentials, confirms course equivalence, and guides your degree articulation.') }}
+                {{ __('Your academic advisor evaluates your prior credentials, confirms course equivalence, and supports your degree articulation.') }}
               </p>
               @if(!empty($s->decider_email))
                 <a class="btn sec sm" href="mailto:{{ $s->decider_email }}?subject=Academic Advising Consultation - Plan {{ $s->reference }}" style="width:100%;text-align:center;display:block">

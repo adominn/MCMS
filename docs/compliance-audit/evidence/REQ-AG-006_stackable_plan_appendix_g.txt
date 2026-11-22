@@ -1,0 +1,102 @@
+URL: http://127.0.0.1:8110/plans/1
+FINAL: http://127.0.0.1:8110/plans/1
+STATUS: 200
+TITLE: Individual stackable plan - UTeM Micro-Credential Management System
+H1: Plan PLAN-2026-0001
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+1
+HR
+Hakim Rahman
+Deputy dean, FTMK
+ACADEMIC GOVERNANCE
+Task queue
+7
+Proposals and approval
+Quality Verification
+Quality review
+Stackable pathways
+COHORT OPERATIONS
+Offerings and readiness
+Results and completion
+1
+CREDIT & CERTIFICATION
+Credentials
+Credit transfer
+INSIGHT & AUDIT
+Reports
+Traceability
+Documents
+Notifications
+1
+Collapse sidebar
+←
+Back
+Stackable pathways
+Plan PLAN-2026-0001
+Plan PLAN-2026-0001
+Amir Hakimi — BITS Bachelor of Computer Science (Software Development) with Honours
+← All pathways
+Suitable
+Suitable to proceed
+Advisory note: A plan is advice. It is not admission, a credit transfer or an award. Meeting 30% UTeM credit does not mean the rest can be transferred automatically. Each credit must still be evaluated course by course.
+Degree requirement figures
+100% Direct UTeM Study
+TOTAL DEGREE CREDITS
+120 credits
+DIRECT UTEM SHARE
+100% (≥ 30% required)
+ARTICULATED OUTSIDE
+5 credits
+PLANNED RESIDENCY
+6 semester(s) (Conventional)
+ADMISSION STATUS
+Recorded (intake 2026/1)
+Checks
+Met: 100% of the 120 graduating credits would be earned directly at UTeM; at least 30% is required. Meeting 30% does not mean the rest can be transferred automatically.
+Met: Residency planned: 6 semester(s); at least 1 required for a conventional programme.
+Met: Every credential counted toward the degree is credit-bearing (UMC or Quality-Verified SAMC). An MCE never counts.
+Met: Every credential counted is mapped to programme learning outcomes (BR-36).
+Met: 4 remaining requirement(s) listed.
+Remaining requirements
+Core course: BITI 2213 Software Engineering (Planned)
+Core course: BITP 3113 Operating Systems (To do)
+Project or capstone: BITU 3983 Final Year Project I (To do)
+Industrial training: BITU 3926 Industrial Training (To do)
+Conditions / Follow-up: Must maintain minimum CGPA of 2.0 in major subjects.
+Update the plan
+Credentials counted
+Data Structures (2026 Enhanced) for BITS 1123 (3 credits)
+
+
+Cloud Native Development for BITS 1124 (2 credits)
+
+
+Secure Software Development Lifecycle (SSDLC) for BITS 2313 (2 credits)
+
+
+Object-Oriented Software Construction for BITD 1123 (3 credits)
+
+
+Other credit from prior qualifications
+Residency planned (semesters)
+Delivery method
+Conventional
+Open and distance learning
+Update plan
+Plan decision
+Decision
+Suitable to proceed
+Suitable with conditions
+Not yet suitable
+Not suitable
+Conditions and follow-up
+
+Suitable to proceed needs the programme admission to be recorded and every requirement met.
+
+Record decision
+
+Award recorded on 04/11/2029 from the programme records (SENATE-AWARD-BITS-2026/04).

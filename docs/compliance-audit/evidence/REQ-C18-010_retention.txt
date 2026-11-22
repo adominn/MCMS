@@ -1,0 +1,81 @@
+URL: http://127.0.0.1:8110/records/retention
+FINAL: http://127.0.0.1:8110/records/retention
+STATUS: 200
+TITLE: Retention - UTeM Micro-Credential Management System
+H1: Retention and disposal
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+1
+HR
+Hakim Rahman
+Deputy dean, FTMK
+ACADEMIC GOVERNANCE
+Task queue
+7
+Proposals and approval
+Quality Verification
+Quality review
+Stackable pathways
+COHORT OPERATIONS
+Offerings and readiness
+Results and completion
+1
+CREDIT & CERTIFICATION
+Credentials
+Credit transfer
+INSIGHT & AUDIT
+Reports
+Traceability
+Documents
+Notifications
+1
+Collapse sidebar
+Records
+Retention and disposal
+Retention and disposal
+How long non-academic logs and operational records are kept before disposal. Academic records, credentials, and the audit trail are permanent and never disposed of.
+Record categories and retention schedules
+3 categories
+3 rows
+Category
+	Retention period
+	Older than
+	Eligible for disposal
+	Hold status
+	Action
+
+Notification log
+notifications
+	2 years	19/11/2024	0	No hold	None due
+Report run log
+report_runs
+	2 years	19/11/2024	0	No hold	None due
+Integration call log
+integration_calls
+	2 years	19/11/2024	0	On hold	Frozen by hold
+Disposal is approved by the role set in settings (deputy_dean), only after the retention period and only if no hold applies. CODL cannot approve disposal.
+Place a records hold
+Freezes disposal
+
+A hold stops disposal of records while they are needed, for example during an audit or investigation.
+
+Category
+Notification log
+Report run log
+Integration call log
+Reason
+Place hold
+Active holds
+1 active
+notifications: Legal hold on notification delivery logs during annual PDPA compliance audit.
+Farid Hashim, 01/09/2026 · Lifted
+integration_calls: Hold placed on Cohort 2026/2 records pending outcome of integrity hearing case #1.
+Hakim Rahman, 31/10/2026
+Lift hold
+Disposals approved
+2 disposal log entries
+notifications: 4120 row(s) older than 01/11/2024, approved by Farid Hashim
+report_runs: 14820 row(s) older than 04/11/2021, approved by Farid Hashim

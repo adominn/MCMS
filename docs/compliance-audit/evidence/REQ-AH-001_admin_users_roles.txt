@@ -1,0 +1,75 @@
+URL: http://127.0.0.1:8110/admin/users
+FINAL: http://127.0.0.1:8110/admin/users
+STATUS: 200
+TITLE: Users and roles - UTeM Micro-Credential Management System
+H1: Users and roles
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+FH
+Farid Hashim
+CODL administrator
+ADMINISTRATION
+Users and roles
+Reference data
+Settings
+Templates
+Demo clock
+DATA EXCHANGE
+UCreds exchange
+UCreds content
+Adapter status
+Notification log
+RECORDS
+Audit trail
+Reports
+Retention
+Documents
+Notifications
+Collapse sidebar
+Users and roles
+28 accounts from UTeM single sign-on. Accounts are never deleted; deactivating keeps every record.
+Active accounts
+24
+Able to sign in
+Deactivated
+4
+Preserved in audit
+Total accounts
+28
+Synchronized from SSO
+Governance
+Enforced
+Separation of duties
+Accounts and roles
+28 registered
+ Search
+Name
+	Staff / matric no.
+	Roles
+	Email
+	Status
+	Action
+
+Amir Hakimi	B032410001	Student	amir.hakimi@learner.example.test	Active	Manage
+Assoc. Prof. Dr. Ahmad Razali	STF-FTKE-01	Lecturer	ahmad.razali@utem.example.test	Active	Manage
+Assoc. Prof. Ts. Dr. Chong Mei Ling	STF-FAIX-01	Lecturer	chong.meiling@utem.example.test	Active	Manage
+Bee Tan	B032410002	Student	bee.tan@learner.example.test	Active	Manage
+Cee Lim	B032410003	Student	cee.lim@learner.example.test	Active	Manage
+Dan Ong	B032410004	Student	dan.ong@learner.example.test	Active	Manage
+Danial Razi	B032410099	Student	danial.razi@learner.example.test	Active	Manage
+Datuk Ir. Kamarul Azman bin Dato' Seri Ibrahim	IND-EXP-04	Industry expert	kamarul.azman@industry.example.test	Active	Manage
+Dr. Aina Zulkifli	STF-FTMK-01	Lecturer	aina.zulkifli@utem.example.test	Active	Manage
+Dr. Lim Wei Jie	STF-FTMK-02	Lecturer	lim.weijie@utem.example.test	Active	Manage
+Rows per page
+5
+10
+25
+50
+1–10 of 28
+Page 1 of 3
+‹
+›
+Separation of responsibilities: CODL assigns who can act. It does not make academic decisions: the deputy dean approves, verifies and confirms; roles listed here only decide who may see and do those things.

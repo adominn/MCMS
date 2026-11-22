@@ -15,8 +15,15 @@ final class RetentionController
 
     public function index()
     {
-        return view('records.retention', ['rows' => $this->retention->candidates(), 'holds' => DB::table('retention_holds as h')->join('users as u', 'u.id', '=', 'h.placed_by')->orderByDesc('h.id')->get(['h.*', 'u.name']),
-            'history' => DB::table('disposal_records as d')->join('users as u', 'u.id', '=', 'd.approved_by')->orderByDesc('d.id')->limit(20)->get(['d.*', 'u.name']), 'approver' => $this->settings->get('approval.route.disposal')]);
+        return view('records.retention', [
+            'rows' => $this->retention->candidates(),
+            'holds' => DB::table('retention_holds as h')->join('users as u', 'u.id', '=', 'h.placed_by')->orderByDesc('h.id')->get(['h.*', 'u.name']),
+            'history' => DB::table('disposal_records as d')->join('users as u', 'u.id', '=', 'd.approved_by')->orderByDesc('d.id')->limit(20)->get(['d.*', 'u.name']),
+            'approver' => $this->settings->get('approval.route.disposal'),
+            'matrix' => Retention::recordOwnershipMatrix(),
+            'governanceActions' => DB::table('governance_actions')->orderBy('target_date')->get(),
+            'confirmations' => DB::table('governance_confirmations')->orderByDesc('id')->get(),
+        ]);
     }
 
     public function hold(Request $request)
@@ -31,6 +38,7 @@ final class RetentionController
 
     public function lift(Request $request, int $id)
     {
+        abort_if($request->user()->hasRole('codl_admin') && ! $request->user()->hasAnyRole('deputy_dean', 'ptj_authority', 'academic_authority', 'records_custodian'), 403, 'Platform administrators cannot unilaterally lift retention holds (Cl. 18.10, REQ-C18-010).');
         $h = DB::table('retention_holds')->where('id', $id)->whereNull('lifted_at')->first() ?? abort(404);
         DB::table('retention_holds')->where('id', $id)->update(['lifted_by' => $request->user()->id, 'lifted_at' => now()]);
         $this->audit->record('retention.hold_lifted', ['type' => 'RetentionHold', 'id' => $id]);
@@ -41,6 +49,7 @@ final class RetentionController
     /** Only the approver named in the settings, and only after the period and with no hold (FR-retention). */
     public function dispose(Request $request, string $category)
     {
+        abort_if($request->user()->hasRole('codl_admin') && ! $request->user()->hasAnyRole('deputy_dean', 'ptj_authority', 'academic_authority'), 403, 'Platform administrators cannot approve record disposals.');
         abort_unless($request->user()->hasAnyRole((string) $this->settings->get('approval.route.disposal')), 403, 'The role that approves disposal is set in the settings.');
         $r = $this->retention->dispose($category, $request->user()->id);
 

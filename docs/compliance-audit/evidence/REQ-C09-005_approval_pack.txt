@@ -1,0 +1,87 @@
+URL: http://127.0.0.1:8110/approvals/1/pack
+FINAL: http://127.0.0.1:8110/approvals/1/pack
+STATUS: 200
+TITLE: Decision pack: Data Structures - UTeM Micro-Credential Management System
+H1: Decision pack: Data Structures
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+1
+HR
+Hakim Rahman
+Deputy dean, FTMK
+ACADEMIC GOVERNANCE
+Task queue
+7
+Proposals and approval
+Quality Verification
+Quality review
+Stackable pathways
+COHORT OPERATIONS
+Offerings and readiness
+Results and completion
+1
+CREDIT & CERTIFICATION
+Credentials
+Credit transfer
+INSIGHT & AUDIT
+Reports
+Traceability
+Documents
+Notifications
+1
+Collapse sidebar
+←
+Back
+Proposals and approval
+Data Structures
+Decision pack
+Decision pack: Data Structures
+Version 1 · Decision pack for Senate submission
+Print pack
+← Back to proposal
+Category verification
+
+Proposed: UMC. Verified by Hakim Rahman on 04/03/2026: UMC.
+
+Approval to offer is one decision. It sets no Quality Verification, ABC, credit transfer or stackable status.
+
+Proposal summary
+
+Data Structures / Struktur Data
+UMC · FTMK · Dr. Aina Zulkifli · Online, English
+
+Need: Critical core computer science competence requested by industry.
+
+Parent course: BITS 1123 Data Structures and Algorithms · 3 credits · 120 h SLT · Bachelor of Computer Science (Software Development) with Honours
+Unbundling Model:
+(a) Credit-Based Unbundling Model
+Each module has at least 40 hours SLT and encompasses its own learning, activities, and assessment.
+
+Modules: 1. Arrays and Linked Lists (40 h); 2. Trees and Graphs (40 h) — total 80 h
+
+Learning outcomes:
+
+LO1: Implement contiguous and linked data structures in software.
+LO2: Apply tree traversal and graph traversal algorithms to solve complex searching problems.
+LO3: Evaluate asymptotic time and memory complexity of computer algorithms.
+
+Assessment: Module 1 Test: Linear Data Structures (30%); Module 2 Test: Non-Linear Structures (30%); Comprehensive Capstone Coding Project (40%)
+
+Proposed credit / MQF level: 2 / 6 (proposals only until approval or Quality Verification confirms them)
+
+Readiness: Learning materials: Yes; Learning platform: Yes; Assessment and rubrics: Yes; Facilitators: Yes; Participant information: Yes; Records and credential mechanism: Yes; Accessibility: Yes
+
+Review summary
+
+No reviewers.
+
+Comments and responses
+
+None.
+
+Unresolved warnings
+
+None.

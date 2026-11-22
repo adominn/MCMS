@@ -93,14 +93,19 @@
       @forelse($rows as $r)
         <div class="card" style="padding:20px;gap:12px;cursor:pointer" onclick="if(!event.target.closest('a')) location.href='{{ route($offeringRoute, $r->id) }}'">
           <div class="row" style="align-items:flex-start;justify-content:space-between;gap:16px">
-            <div style="flex:1">
-              <div style="margin-bottom:6px">
-                <span class="cat">{{ strtoupper($r->category) }}</span>
-                <a href="{{ route($offeringRoute, $r->id) }}" style="font-size:18px;font-weight:600;color:var(--ink)">{{ $pick($r->name_en, $r->name_ms) }} {{ $r->cohort_name }}</a>
+            <div style="display:flex;align-items:flex-start;gap:16px;flex:1">
+              <div style="flex-shrink:0;padding-top:2px">
+                <x-badge :category="$r->category" :size="48" :image="$r->badge_image_path ?? null" />
               </div>
-              <div class="small muted">{{ $r->ptj }} &middot; @if(!empty($r->lecturer_name)){{ $r->lecturer_name }} &middot; @endif{{ $modes[$r->delivery_mode] ?? $r->delivery_mode }} &middot; {{ $r->delivery_language }}</div>
+              <div style="flex:1">
+                <div style="margin-bottom:6px">
+                  <span class="cat">{{ strtoupper($r->category) }}</span>
+                  <a href="{{ route($offeringRoute, $r->id) }}" style="font-size:18px;font-weight:600;color:var(--ink)">{{ $pick($r->name_en, $r->name_ms) }} {{ $r->cohort_name }}</a>
+                </div>
+                <div class="small muted">{{ $r->ptj }} &middot; @if(!empty($r->lecturer_name)){{ $r->lecturer_name }} &middot; @endif{{ $modes[$r->delivery_mode] ?? $r->delivery_mode }} &middot; {{ $r->delivery_language }}</div>
+              </div>
             </div>
-            <div style="text-align:right">
+            <div style="text-align:right;flex-shrink:0">
               <b style="font-size:18px;display:block;color:var(--ink)">{{ $r->fee > 0 ? 'RM '.number_format($r->fee, 2) : ($lang === 'ms' ? 'Percuma' : 'Free') }}</b>
               <div style="margin-top:4px">
                 @if(isset($mine[$r->id]))

@@ -63,7 +63,7 @@
               </span>
               <span>&bull;</span>
               <span>
-                <b>{{ rtrim(rtrim((string) $totCredits, '0'), '.') }}</b> {{ $lang === 'ms' ? 'Maksimum potensi kredit artikulasi' : 'Max articulable credits' }}
+                <b>{{ mcms_num($totCredits) }}</b> {{ $lang === 'ms' ? 'Maksimum potensi kredit artikulasi' : 'Max articulable credits' }}
               </span>
               @if(!empty($w->approval_ref))
                 <span>&bull;</span>
@@ -101,7 +101,7 @@
           {{ $lang === 'ms' ? 'Sekurang-kurangnya '.$min.'% kredit di UTeM' : 'At least '.$min.'% of degree credits at UTeM' }}
         </div>
         <p class="muted small" style="margin:0;font-size:12.5px;line-height:1.5">
-          {{ $lang === 'ms' ? 'Sekurang-kurangnya '.$min.'% daripada keseluruhan kredit pengijazahan mesti diselesaikan terus di UTeM. Kredit pindahan tidak boleh melebihi had baki pengajian.' : 'At least '.$min.'% of graduating credits must be completed directly as a registered UTeM student; transferred credits cannot exceed this threshold.' }}
+          {{ $lang === 'ms' ? 'Sekurang-kurangnya '.$min.'% daripada keseluruhan kredit pengijazahan mesti diselesaikan terus di UTeM. Kredit pindahan tidak boleh melebihi baki kredit pengajian atau had pemindahan program.' : 'At least '.$min.'% of graduating credits must be earned directly at UTeM as a registered student (residency floor); transferred credits cannot exceed the remaining balance or programme caps.' }}
         </p>
       </div>
 

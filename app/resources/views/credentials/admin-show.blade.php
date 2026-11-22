@@ -60,7 +60,7 @@
           <td>
             @if(!empty($m->badge_id))
               <div style="display:flex;align-items:center;gap:6px">
-                <x-badge :category="$enrolment->mc_category ?? 'umc'" :size="24" />
+                <x-badge :category="$enrolment->mc_category ?? 'umc'" :size="24" :image="$enrolment->badge_image_path ?? null" :seq="$m->seq" />
                 <span><a href="{{ route('verify.show', $m->badge_code) }}" target="_blank" title="{{ __('Verify badge') }}"><strong>{{ $m->badge_code }}</strong> <i class="bi bi-box-arrow-up-right" style="font-size:10px"></i></a> @if(!empty($m->badge_external_id)) &middot; UCreds {{ $m->badge_external_id }} @endif</span>
               </div>
             @elseif(!empty($m->separately_recognisable))

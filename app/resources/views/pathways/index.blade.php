@@ -139,7 +139,7 @@
                   </option>
                 @endforeach
               </select>
-              <div id="prog-summary-pill" style="margin-top:10px;padding:12px 14px;background:#f4f4f4;border-left:3px solid var(--primary, #1e2a6e);font-size:12.5px;color:var(--ink);line-height:1.5">
+              <div id="prog-summary-pill" style="margin-top:10px;padding:12px 14px;background:var(--surface, #f4f4f4);border-left:3px solid var(--primary, #1e2a6e);font-size:12.5px;color:var(--ink);line-height:1.5">
                 <span class="tag sm ok" id="summary-code" style="font-weight:600;margin-right:6px">BITD</span>
                 <span id="summary-text">{{ __('Accredited Degree · At least 30% of graduating credits must be completed directly at UTeM (Residency Requirement).') }}</span>
               </div>
@@ -159,7 +159,7 @@
                 <button type="button" class="btn ter sm" style="border-radius:2px;font-size:12px;padding:4px 8px" onclick="appendLine('plos', 'PLO 4: Communication & Collaboration')">+ PLO 4: Communication</button>
                 <button type="button" class="btn ter sm" style="border-radius:2px;font-size:12px;padding:4px 8px" onclick="appendLine('plos', 'PLO 5: Professional & Ethical Responsibility')">+ PLO 5: Ethics</button>
               </div>
-              <textarea id="plos" name="plos" rows="3" placeholder="PLO 1: Technical Knowledge & Concepts&#10;PLO 2: Practical & Technical Skills" style="width:100%;padding:10px 12px;background:#f4f4f4;border:1px solid var(--hairline);border-radius:2px;font-family:inherit;font-size:13px"></textarea>
+              <textarea id="plos" name="plos" rows="3" placeholder="PLO 1: Technical Knowledge & Concepts&#10;PLO 2: Practical & Technical Skills" style="width:100%;padding:10px 12px;background:var(--surface, #f4f4f4);border:1px solid var(--hairline);border-radius:2px;font-family:inherit;font-size:13px"></textarea>
             </div>
 
             <div class="field">
@@ -176,7 +176,7 @@
                 <button type="button" class="btn ter sm" style="border-radius:2px;font-size:12px;padding:4px 8px" onclick="appendLine('bok', 'Systems Architecture')">+ Systems Architecture</button>
                 <button type="button" class="btn ter sm" style="border-radius:2px;font-size:12px;padding:4px 8px" onclick="appendLine('bok', 'Cyber Security Operations')">+ Cyber Security</button>
               </div>
-              <textarea id="bok" name="bok" rows="2" placeholder="Software Engineering&#10;Systems Architecture" style="width:100%;padding:10px 12px;background:#f4f4f4;border:1px solid var(--hairline);border-radius:2px;font-family:inherit;font-size:13px"></textarea>
+              <textarea id="bok" name="bok" rows="2" placeholder="Software Engineering&#10;Systems Architecture" style="width:100%;padding:10px 12px;background:var(--surface, #f4f4f4);border:1px solid var(--hairline);border-radius:2px;font-family:inherit;font-size:13px"></textarea>
             </div>
           </div>
 
@@ -297,7 +297,7 @@
             </td>
             <td>{{ $s->name }}</td>
             <td><code>{{ $s->code }}</code></td>
-            <td style="text-align:right;font-weight:600">{{ rtrim(rtrim((string) $s->utem_percent, '0'), '.') }}%</td>
+            <td style="text-align:right;font-weight:600">{{ mcms_num($s->utem_percent) }}%</td>
             <td><x-pill :s="config('pathways.plan_status')[$s->status] ?? ucfirst(str_replace('_', ' ', $s->status))" /></td>
             <td style="text-align:right">
               <a class="btn ter sm" href="{{ route('plans.show', $s->id) }}">{{ __('Open') }}</a>

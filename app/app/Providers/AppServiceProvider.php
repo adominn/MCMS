@@ -11,6 +11,8 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        require_once app_path('Support/helpers.php');
+
         $this->app->bind(\App\Modules\Enrolment\PaymentAdapter::class, fn () => new \App\Modules\Enrolment\StubPaymentAdapter); // the dummy service until the UTeM payment hub is ready (A-03)
         // The adapter in use comes from config/integrations.php (IR-16).
         $this->app->bind(EmailAdapter::class, fn () => config('integrations.modes.email') === 'live' ? new SmtpEmailAdapter : new StubEmailAdapter);

@@ -87,11 +87,6 @@
             <input type="text" id="facilitators" name="facilitators" value="{{ old('facilitators') }}" placeholder="{{ __('Names of lead lecturers / facilitators') }}">
           </div>
 
-          <div class="field" style="margin-bottom:16px">
-            <label for="eligible_groups">{{ __('Eligible participant groups') }}</label>
-            <input type="text" id="eligible_groups" name="eligible_groups" value="{{ old('eligible_groups') }}" placeholder="{{ __('e.g. Open to public, IT working professionals') }}">
-          </div>
-
           <div class="field">
             <label for="platform_ref">{{ __('Learning platform course reference') }}</label>
             <input type="text" id="platform_ref" name="platform_ref" value="{{ old('platform_ref') }}" list="ucreds-courses" autocomplete="off" placeholder="e.g. UCreds course shell ID">

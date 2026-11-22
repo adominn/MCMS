@@ -1,0 +1,153 @@
+URL: http://127.0.0.1:8110/quality/2
+FINAL: http://127.0.0.1:8110/quality/2
+STATUS: 200
+TITLE: Quality Verification - UTeM Micro-Credential Management System
+H1: Quality Verification: Cloud Native Development
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+2
+AZ
+Dr. Aina Zulkifli
+Lecturer, FTMK
+TEACHING
+My tasks
+3
+My micro-credentials
+Proposals and versions
+1
+Cohorts and results
+Reviews for colleagues
+1
+QUALITY
+Quality review (CQI)
+QV evidence
+Stackable pathways
+INSIGHT
+Reports
+Traceability
+Documents
+Notifications
+2
+Collapse sidebar
+←
+Back
+QV evidence
+Cloud Native Development
+Quality Verification: Cloud Native Development
+Dr. Aina Zulkifli · Micro-credential
+← All Quality Verification
+In force
+
+QV/2023/051: 2 credit, MQF level 4, valid 15/12/2023 to 15/12/2026.
+
+Quality Verification does not by itself mean a transfer, admission or stackable status.
+
+Cycle 2: Preparing
+Basic conditions
+Met: A confirmed SAMC
+Met: A stand-alone offering
+Met: Learning time 80 hours (at least 40 needed)
+Met: The provider is registered and authorised
+Met: Completed cohorts with verified evidence: 1 (at least 1 needed)
+Met: The proposed credit and MQF level are stated and marked as proposed until verified
+Evidence checklist
+
+Evidence that MCMS holds is linked for you. Add a file reference for the rest.
+
+Item	Status	File reference	Notes
+
+Academic design: learning outcomes, mapping and SLT
+	Available (linked from MCMS)	Learning outcomes, module structure and SLT calculation of version 1	Verified and linked to system dossier.
+
+Assessment and achievement: plan, cohort results and analysis
+	Available (linked from MCMS)	Assessment plan of version 1 and the verified results of cohort 2026/1	Verified and linked to system dossier.
+
+Delivery and participant support
+	
+Available
+Not yet
+Not applicable
+		
+
+Quality assurance and CQI: feedback and improvement records
+	
+Available
+Not yet
+Not applicable
+		
+
+Digital Credential: design and issuing
+	Available (linked from MCMS)	Credential design of the proposal and the credentials issued, with their signed verification	Awaiting cohort CQI closure.
+
+Save checklist
+
+Material change review
+
+For each component, say whether it changed since the last verification and what the change needs.
+
+Component	Change	What changed
+
+Learning outcomes
+	
+No change
+Changed: internal review
+Changed: refer to QVC/MQA
+	
+
+SLT and structure
+	
+No change
+Changed: internal review
+Changed: refer to QVC/MQA
+	
+
+Assessment
+	
+No change
+Changed: internal review
+Changed: refer to QVC/MQA
+	
+
+Delivery and support
+	
+No change
+Changed: internal review
+Changed: refer to QVC/MQA
+	
+
+Quality assurance
+	
+No change
+Changed: internal review
+Changed: refer to QVC/MQA
+	
+
+Credential design
+	
+No change
+Changed: internal review
+Changed: refer to QVC/MQA
+	
+
+Save review
+
+Readiness decision
+Decision
+Ready
+Ready with minor corrections
+Not ready
+Target date
+Missing critical evidence
+Record decision
+History
+2 rows
+Cycle
+	Status
+	Reference
+	Valid
+
+2	Preparing		
+1	Quality-Verified	QV/2023/051	15/12/2023 to 15/12/2026

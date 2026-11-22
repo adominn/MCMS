@@ -55,12 +55,46 @@ final class QvAlerts
     {
         $ptj = DB::table('micro_credentials')->where('id', $q->micro_credential_id)->value('ptj_id');
         $title = DB::table('mc_versions')->where('micro_credential_id', $q->micro_credential_id)->orderByDesc('version_no')->value('name_en');
-        DB::table('qv_records')->where('id', $q->id)->update(['status' => $to, 'outcome_note' => $why, 'updated_at' => now()]);
-        DB::table('mc_versions')->where('micro_credential_id', $q->micro_credential_id)->update(['qv_status' => $to]); // the claims stop here, not only by date
+        $effectiveUntil = \Carbon\Carbon::parse($q->valid_until)->gt(today()) ? today()->toDateString() : $q->valid_until;
+        DB::table('qv_records')->where('id', $q->id)->update([
+            'status' => $to,
+            'outcome_note' => $why,
+            'valid_until' => $effectiveUntil,
+            'updated_at' => now(),
+        ]);
+        DB::table('mc_versions')->where('micro_credential_id', $q->micro_credential_id)->update([
+            'qv_status' => $to,
+            'qv_valid_until' => $effectiveUntil,
+            'updated_at' => now(),
+        ]); // the claims stop here, not only by date
         $this->audit->record('qv.'.$to, ['type' => 'QvRecord', 'id' => $q->id], before: ['status' => $q->status], after: ['status' => $to], reason: $why, actorId: $by); // EV-42
         Tasks::open('deputy_dean', 'qv_lapse', $q->id, 'Quality Verification ended, manage the affected participants: '.$title, '/quality/'.$q->micro_credential_id, $ptj, area: 'credentials');
         foreach ($this->recipients($q) as $u) {
             $this->notifier->send($u, 'qv.lapsed', ['name' => $u->name, 'title' => $title, 'why' => $why], dedupe: "qv-lapse-{$q->id}-$to");
+        }
+
+        // Guide REQ-C10-006 / Cl. 10.4: Notify enrolled participants on active cohorts
+        $enrolledLearnerIds = DB::table('enrolments as e')
+            ->join('offerings as o', 'o.id', '=', 'e.offering_id')
+            ->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
+            ->where('v.micro_credential_id', $q->micro_credential_id)
+            ->whereIn('e.status', ['enrolled', 'registered'])
+            ->whereIn('o.status', ['running', 'open', 'ready', 'held'])
+            ->pluck('e.user_id')
+            ->unique();
+
+        foreach ($enrolledLearnerIds as $uid) {
+            $learner = User::find($uid);
+            if ($learner) {
+                $this->notifier->send($learner, 'suspension.notice', [
+                    'name' => $learner->name,
+                    'title' => $title,
+                    'kind' => $to,
+                    'date' => today()->format('d/m/Y'),
+                    'reason' => $why,
+                    'plan' => 'Quality verification has been suspended or withdrawn. Enrolled participants should contact the faculty for the transition arrangement.',
+                ], dedupe: "qv-suspension-learner-{$q->id}-{$uid}");
+            }
         }
     }
 

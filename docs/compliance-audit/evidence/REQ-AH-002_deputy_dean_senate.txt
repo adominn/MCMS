@@ -1,0 +1,46 @@
+URL: http://127.0.0.1:8110/approvals/1/senate
+FINAL: http://127.0.0.1:8110/approvals/1/senate
+STATUS: 200
+TITLE: Record Senate decision - UTeM Micro-Credential Management System
+H1: Record Senate decision
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+1
+HR
+Hakim Rahman
+Deputy dean, FTMK
+ACADEMIC GOVERNANCE
+Task queue
+7
+Proposals and approval
+Quality Verification
+Quality review
+Stackable pathways
+COHORT OPERATIONS
+Offerings and readiness
+Results and completion
+1
+CREDIT & CERTIFICATION
+Credentials
+Credit transfer
+INSIGHT & AUDIT
+Reports
+Traceability
+Documents
+Notifications
+1
+Collapse sidebar
+←
+Back
+Proposals and approval
+Data Structures
+Record Senate decision
+Record Senate decision
+Data Structures · Approved
+← Back to the proposal
+Not endorsed:
+The Senate decision is recorded after endorsement. This proposal is currently approved.
+Back to the proposal

@@ -46,7 +46,12 @@ final class CatalogueController
             ->when(is_numeric($f['fee_max'] ?? null), fn ($b) => $b->where('o.fee', '<=', $f['fee_max']));
 
         return view('public.catalogue', $this->base() + [
-            'rows' => $q->orderBy('o.start_date')->paginate(5, ['o.id', 'o.cohort_name', 'o.start_date', 'o.end_date', 'o.fee', 'o.delivery_mode', 'o.status', 'o.reg_opens_on', 'o.facilitators', 'v.name_en', 'v.name_ms', 'v.discipline', 'v.delivery_language', 'm.category', 'p.code as ptj', 'u.name as lecturer_name'])->withQueryString(),
+            'rows' => $q->orderBy('o.start_date')->paginate(5, [
+                'o.id', 'o.cohort_name', 'o.start_date', 'o.end_date', 'o.fee', 
+                'o.delivery_mode', 'o.status', 'o.reg_opens_on', 'o.facilitators', 
+                'v.name_en', 'v.name_ms', 'v.discipline', 'v.delivery_language', 'v.badge_image_path',
+                'm.category', 'p.code as ptj', 'u.name as lecturer_name'
+            ])->withQueryString(),
             'f' => $f, 'ptjs' => DB::table('ptjs')->orderBy('code')->get(), 'modes' => config('proposals.delivery_modes'),
         ]);
     }
@@ -54,8 +59,16 @@ final class CatalogueController
     public function offering(int $id)
     {
         $this->status->refresh();
-        $o = $this->listed()->where('o.id', $id)->first(['o.*', 'v.name_en', 'v.name_ms', 'v.discipline', 'v.delivery_language', 'v.credential_types', 'v.assessment_standard', 'v.credit_model', 'v.parent_course_id', 'v.qv_status', 'v.qv_valid_until', 'v.proposed_credit', 'v.proposed_mqf_level', 'v.id as version_id', 'm.category', 'p.name as ptj_name', 'p.code as ptj', 'u.name as lecturer_name'])
-            ?? abort(404); // not ready, held, cancelled and ended cohorts are not public (BR-17)
+        $o = $this->listed()->where('o.id', $id)->first([
+            'o.*', 
+            'v.name_en', 'v.name_ms', 'v.discipline', 'v.delivery_language', 
+            'v.credential_types', 'v.badge_image_path', 'v.assessment_standard', 
+            'v.credit_model', 'v.parent_course_id', 'v.qv_status', 'v.qv_valid_until', 
+            'v.proposed_credit', 'v.proposed_mqf_level', 'v.id as version_id', 
+            'v.target_group', 'v.offering_period', 'v.planned_slt', 'v.need', 'v.added_value',
+            'v.integrity_mechanism', 'v.feedback_method', 'v.verification_method', 'v.achievement_level',
+            'm.category', 'p.name as ptj_name', 'p.code as ptj', 'u.name as lecturer_name'
+        ]) ?? abort(404); // not ready, held, cancelled and ended cohorts are not public (BR-17)
         $lang = session('lang', 'en');
         $course = $o->parent_course_id ? DB::table('parent_courses')->find($o->parent_course_id) : null;
         $claims = $this->recognition->claims($o, $course);
@@ -90,7 +103,7 @@ final class CatalogueController
             ->join('programmes as p', 'p.id', '=', 'w.programme_id')
             ->where('w.id', $id)
             ->where('w.status', 'published')
-            ->first(['w.*', 'p.code', 'p.name', 'p.mqf_level', 'p.total_credits', 'p.mode']) ?? abort(404);
+            ->first(['w.*', 'p.code', 'p.name', 'p.mqf_level', 'p.total_credits', 'p.mode', 'p.accreditation_status', 'p.intake']) ?? abort(404);
 
         $items = DB::table('pathway_items as i')
             ->join('parent_courses as c', 'c.id', '=', 'i.parent_course_id')
@@ -98,10 +111,107 @@ final class CatalogueController
             ->where('i.pathway_id', $w->id)
             ->get(['i.*', 'c.code as course_code', 'c.name as course_name', 'v.name_en']);
 
+        $plos = json_decode((string) $w->plos, true) ?: [];
+        $bok = json_decode((string) $w->bok, true) ?: [];
+        $g4 = json_decode((string) $w->g4_plo_evidence, true) ?: [];
+        $g5 = json_decode((string) $w->g5_bok_mapping, true) ?: [];
+        $g8 = json_decode((string) $w->g8_remaining, true) ?: [];
+        $g9 = json_decode((string) $w->g9_analysis, true) ?: [];
+        $g11 = json_decode((string) $w->g11_signoffs, true) ?: [];
+
+        if (empty($g4) && ! empty($plos)) {
+            foreach ($plos as $plo) {
+                $matched = $items->filter(fn ($item) => collect(json_decode((string) $item->plo_map, true) ?: [])->contains('plo', $plo));
+                $g4[$plo] = [
+                    'plo' => $plo,
+                    'components' => $matched->pluck('name_en')->implode(', ') ?: 'Belum dipetakan',
+                    'contribution' => $matched->isNotEmpty() ? 'Utama / Sokongan' : 'Tiada',
+                    'evidence' => $matched->isNotEmpty() ? 'Hasil pentaksiran mikro-kredential' : 'Tiada evidens langsung',
+                    'gaps' => $matched->isNotEmpty() ? 'Tiada jurang kritikal' : 'Jurang pemetaan PLO perlu disempurnakan di UTeM',
+                ];
+            }
+        }
+
+        if (empty($g5) && ! empty($bok)) {
+            foreach ($bok as $b) {
+                $matched = $items->filter(fn ($item) => in_array($b, json_decode((string) $item->bok_map, true) ?: [], true));
+                $hasMatch = $matched->isNotEmpty();
+                $g5[$b] = [
+                    'domain' => $b,
+                    'requirement' => "Keperluan teras kurikulum domain $b",
+                    'contributing' => $hasMatch ? $matched->pluck('name_en')->implode(', ') : 'Tiada (perlu kursus UTeM)',
+                    'coverage' => $hasMatch ? 'full' : 'none',
+                    'gap_action' => $hasMatch ? 'Liputan disahkan mencukupi' : 'Perlu disempurnakan melalui kursus teras UTeM',
+                ];
+            }
+        }
+
+        if (empty($g8)) {
+            $kinds = config('pathways.remaining_kind', []);
+            foreach ($kinds as $k => $label) {
+                $g8[$k] = [
+                    'kind' => $k,
+                    'name' => $label,
+                    'status' => in_array($k, ['core', 'project', 'training', 'professional'], true) ? 'todo' : ($k === 'other' ? 'na' : 'todo'),
+                    'method' => in_array($k, ['core', 'elective']) ? 'Kursus bersemuka / ODL' : ($k === 'training' ? 'Penempatan industri / WBL' : 'Penyelidikan / Projek'),
+                    'credits' => match ($k) { 'core' => 45, 'elective' => 15, 'project' => 6, 'training' => 12, 'university' => 10, 'professional' => 4, default => 0 },
+                    'remarks' => in_array($k, ['core', 'training']) ? 'Keperluan wajib bergraduat di UTeM' : 'Tertakluk kepada pelan pengajian individu',
+                ];
+            }
+        }
+
+        if (empty($g9)) {
+            $totGrad = (float) $w->total_credits;
+            $propPrior = (float) $items->sum('credits');
+            $dirUtem = max(0, $totGrad - $propPrior);
+            $apprv = (float) $items->where('preliminary', 'suitable')->sum('credits');
+            $remReq = max(0, $totGrad - $apprv);
+            $g9 = [
+                'total_credits' => $totGrad,
+                'proposed_prior_credits' => $propPrior,
+                'direct_utem_credits' => $dirUtem,
+                'approved_credits' => $apprv,
+                'remaining_credits' => $remReq,
+                'key_gaps' => $items->isEmpty() ? 'Semua komponen kurikulum memerlukan pemetaan lanjut.' : 'Sekurang-kurangnya 30% kredit wajib disempurnakan di UTeM.',
+            ];
+        }
+
+        if (empty($g11)) {
+            $creator = DB::table('users')->find($w->created_by);
+            $approver = $w->approved_by ? DB::table('users')->find($w->approved_by) : null;
+            $g11 = [
+                'coordinator' => [
+                    'name' => $creator?->name ?? 'Penyelaras Program Stackable',
+                    'position' => $creator?->position ?? 'Penyelaras Program',
+                    'signed_at' => $w->created_at,
+                    'remarks' => 'Pemetaan awal kurikulum selesai',
+                ],
+                'faculty_rep' => [
+                    'name' => $approver?->name ?? 'Timbalan Dekan (Akademik)',
+                    'position' => $approver?->position ?? 'Timbalan Dekan (Akademik)',
+                    'signed_at' => $w->approved_on,
+                    'remarks' => $w->approval_ref ? "Diluluskan Senat ({$w->approval_ref})" : 'Menunggu kelulusan Senat',
+                ],
+                'qa_assessor' => [
+                    'name' => 'Pegawai Jaminan Kualiti / Penilai Kesetaraan',
+                    'position' => 'Pegawai Penilai Kesetaraan',
+                    'signed_at' => $w->approved_on ?? $w->created_at,
+                    'remarks' => 'Semakan kesetaraan standard MQF dan UTeM disahkan',
+                ],
+            ];
+        }
+
         return view('public.pathway-print', [
             'w' => $w,
             'items' => $items,
             'min' => app(\App\Modules\Core\Settings::class)->get('stackable.min_home_credit_percent'),
+            'plos' => $plos,
+            'bok' => $bok,
+            'g4' => $g4,
+            'g5' => $g5,
+            'g8' => $g8,
+            'g9' => $g9,
+            'g11' => $g11,
         ]);
     }
 

@@ -1,0 +1,109 @@
+URL: http://127.0.0.1:8110/my-credentials
+FINAL: http://127.0.0.1:8110/my-credentials
+STATUS: 200
+TITLE: Credentials - UTeM Micro-Credential Management System
+H1: Credentials and Badges
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+8
+AH
+Amir Hakimi
+Student
+LEARNING
+My learning
+Find a micro-credential
+Registrations and payments
+My results
+Feedback
+ACHIEVEMENTS
+Credentials
+Achievement record
+CREDIT
+Credit ledger and ABC
+Credit transfer
+My degree plan
+Documents
+Notifications
+8
+Collapse sidebar
+Credentials and Badges
+Certificates and Digital Credentials issued to you. Academic credit is recorded separately on the credit ledger.
+Micro-Credential Certificates (5)
+Module Badges (10)
+Micro-Credential Certificates
+Full-programme credentials and certificates awarded upon confirmed completion.
+5 certificates
+5 rows
+Credential / Programme
+	Issued Date
+	Completion Result
+	Public Verification
+	Status
+	Actions
+
+
+UMC
+Full-Stack Web & API Engineering
+Dr. Aina Zulkifli · MCMS-C-2026-000013
+	
+18/11/2026
+1 day ago
+	Complete	3MCDP-79SPY
+↗
+	Issued	
+View details →
+
+
+UTeM UMC
+UMC
+Object-Oriented Software Construction
+Dr. Aina Zulkifli · UTEM-MC-2026-0010
+	
+06/10/2026
+1 month ago
+	Complete	OOP01-3Q7SX
+↗
+	Issued	
+View details →
+
+
+UTeM SAMC
+SAMC
+Secure Software Development Lifecycle (SSDLC)
+Dr. Lim Wei Jie · UTEM-MC-2026-0007
+	
+26/10/2026
+3 weeks ago
+	Complete	SEC01-8M4PT
+↗
+	Issued	
+View details →
+
+
+UTeM UMC
+UMC
+Data Structures
+Dr. Aina Zulkifli · UTEM-MC-2026-0003
+	
+26/08/2026
+2 months ago
+	Complete	DST01-4H8KP
+↗
+	Issued	
+View details →
+
+
+UTeM SAMC
+SAMC
+Cloud Native Development
+Dr. Aina Zulkifli · UTEM-MC-2026-0001
+	
+15/09/2026
+2 months ago
+	Complete	CND01-7K9MJ
+↗
+	Issued	
+View details →

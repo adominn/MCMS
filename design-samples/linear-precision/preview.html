@@ -1,0 +1,2519 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linear Precision &mdash; Design System Preview (Full Height Blue Sidebar &amp; High-Contrast White Elements)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* =========================================================
+       LIGHT THEME TOKENS
+       ========================================================= */
+    --canvas: #ffffff;
+    --canvas-subtle: #f8fafc;
+    --surface-1: #f1f5f9;
+    --surface-2: #e2e8f0;
+    --surface-contrast: #090a0f;
+
+    /* RICH COBALT BLUE SIDEBAR WITH HIGH-CONTRAST WHITE ELEMENTS */
+    --sidebar-bg: #0b1a3d;
+    --sidebar-border: #ffffff;
+    --sidebar-text: #ffffff;
+    --sidebar-text-muted: #e2e8f0;
+    --sidebar-text-active: #0b1a3d;
+    --sidebar-hover-bg: rgba(255, 255, 255, 0.14);
+    --sidebar-active-bg: #ffffff;
+    --sidebar-active-glow: rgba(0, 0, 0, 0.25);
+    --sidebar-hairline: rgba(255, 255, 255, 0.25);
+    --sidebar-search-bg: rgba(255, 255, 255, 0.12);
+    --sidebar-search-border: rgba(255, 255, 255, 0.28);
+
+    /* The Blue Spectrum */
+    --primary: #0052ff;
+    --primary-hover: #0045d8;
+    --primary-pressed: #0036a8;
+    --primary-deep: #0a192f;
+    --primary-tint: #edf4ff;
+    --primary-tint-hover: #dbeafe;
+    --primary-line: rgba(0, 82, 255, 0.28);
+    --primary-glow: rgba(0, 82, 255, 0.14);
+
+    /* Inks */
+    --ink: #090a0f;
+    --ink-dark: #121826;
+    --ink-muted: #475569;
+    --ink-subtle: #94a3b8;
+    --on-primary: #ffffff;
+    --on-ink: #ffffff;
+
+    /* Line Tokens */
+    --line-hairline: #e2e8f0;
+    --line-strong: #090a0f;
+    --line-accent: #0052ff;
+    --line-subtle: rgba(226, 232, 240, 0.85);
+    --grid-crosshair: #94a3b8;
+    --grid-line-color: rgba(226, 232, 240, 0.5);
+
+    /* Semantics */
+    --semantic-success: #10b981;
+    --semantic-success-tint: #ecfdf5;
+    --semantic-success-line: rgba(16, 185, 129, 0.35);
+    --semantic-warning: #f59e0b;
+    --semantic-warning-tint: #fffbeb;
+    --semantic-warning-line: rgba(245, 158, 11, 0.35);
+    --semantic-error: #ef4444;
+    --semantic-error-tint: #fef2f2;
+    --semantic-error-line: rgba(239, 68, 68, 0.35);
+
+    /* Micro-Radii System */
+    --radius-none: 0px;
+    --radius-xs: 2px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-pill: 9999px;
+
+    --theme-radius: 4px;
+    --theme-card-radius: 6px;
+
+    /* Sidebar Layout Metrics - NO TOP/BOTTOM GAP */
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 68px;
+    --sidebar-radius: 28px;
+    --sidebar-right-space: 14px;
+    --topbar-height: 56px;
+
+    /* Typography */
+    --sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  }
+
+  /* =========================================================
+     DARK THEME OVERRIDES
+     ========================================================= */
+  [data-theme="dark"], body.theme-dark {
+    --canvas: #07090e;
+    --canvas-subtle: #0b0f17;
+    --surface-1: #101522;
+    --surface-2: #182030;
+    --surface-contrast: #ffffff;
+
+    --sidebar-bg: #07122a;
+    --sidebar-border: #ffffff;
+    --sidebar-text: #ffffff;
+    --sidebar-text-muted: #e2e8f0;
+    --sidebar-text-active: #07122a;
+    --sidebar-hover-bg: rgba(255, 255, 255, 0.16);
+    --sidebar-active-bg: #ffffff;
+    --sidebar-active-glow: rgba(255, 255, 255, 0.3);
+    --sidebar-hairline: rgba(255, 255, 255, 0.2);
+    --sidebar-search-bg: rgba(255, 255, 255, 0.14);
+    --sidebar-search-border: rgba(255, 255, 255, 0.3);
+
+    --primary: #3880ff;
+    --primary-hover: #5492ff;
+    --primary-pressed: #2468e8;
+    --primary-deep: #0f1c36;
+    --primary-tint: rgba(56, 128, 255, 0.14);
+    --primary-tint-hover: rgba(56, 128, 255, 0.22);
+    --primary-line: rgba(56, 128, 255, 0.38);
+    --primary-glow: rgba(56, 128, 255, 0.25);
+
+    --ink: #f8fafc;
+    --ink-dark: #ffffff;
+    --ink-muted: #94a3b8;
+    --ink-subtle: #64748b;
+    --on-primary: #ffffff;
+    --on-ink: #07090e;
+
+    --line-hairline: #1c2436;
+    --line-strong: #334155;
+    --line-accent: #3880ff;
+    --line-subtle: rgba(28, 36, 54, 0.85);
+    --grid-crosshair: #475569;
+    --grid-line-color: rgba(28, 36, 54, 0.55);
+
+    --semantic-success: #10b981;
+    --semantic-success-tint: rgba(16, 185, 129, 0.14);
+    --semantic-success-line: rgba(16, 185, 129, 0.4);
+    --semantic-warning: #f59e0b;
+    --semantic-warning-tint: rgba(245, 158, 11, 0.14);
+    --semantic-warning-line: rgba(245, 158, 11, 0.4);
+    --semantic-error: #f43f5e;
+    --semantic-error-tint: rgba(244, 63, 94, 0.14);
+    --semantic-error-line: rgba(244, 63, 94, 0.4);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    background: var(--canvas);
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  /* =========================================================
+     GLOBAL SLEEK SCROLLBARS (SUBTLE & UNOBTRUSIVE)
+     ========================================================= */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    background: transparent;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.2);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.38);
+  }
+  [data-theme="dark"] ::-webkit-scrollbar-thumb,
+  body.theme-dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  [data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
+  body.theme-dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.28);
+  }
+
+  .grid-bg {
+    background-size: 40px 40px;
+    background-image: 
+      linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
+  }
+
+  /* =========================================================
+     APP FRAME (SIDEBAR + MAIN CONTENT)
+     ========================================================= */
+  .app-frame {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+    padding-left: 0;
+  }
+
+  /* =========================================================
+     BLUE SIDEBAR: ZERO TOP & BOTTOM GAP, ROUNDED RIGHT CORNERS
+     ========================================================= */
+  .app-sidebar {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+    background: var(--sidebar-bg);
+    position: sticky;
+    top: 0;                      /* NO TOP GAP - FLUSH TO TOP */
+    height: 100vh;               /* NO BOTTOM GAP - FULL HEIGHT */
+    margin: 0 var(--sidebar-right-space) 0 0; /* Only right gap/channel */
+    z-index: 95;
+    transition: width 0.25s cubic-bezier(0.2, 0, 0, 1), background 0.2s ease;
+    
+    /* Rounded corner on top-right and bottom-right */
+    border-top-right-radius: var(--sidebar-radius);
+    border-bottom-right-radius: var(--sidebar-radius);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+
+    /* Clean dark navy edge without white border */
+    border-right: none;
+    box-shadow: 4px 0 24px rgba(11, 26, 61, 0.22);
+    overflow: visible;
+  }
+
+  /* Internal White Accent Line - Hidden to match exact mockup */
+  .sidebar-right-white-line {
+    display: none;
+  }
+
+  /* Protruding Pure White Pull-Tab Handle in the middle of the right edge */
+  .sidebar-pull-tab {
+    position: absolute;
+    top: 50%;
+    right: -18px;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 52px;
+    background: #ffffff;
+    border: none;
+    border-radius: 0 24px 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0b1a3d;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 3px 0 14px rgba(0, 0, 0, 0.28);
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+    padding: 0;
+    outline: none;
+  }
+  .sidebar-pull-tab:hover {
+    background: #ffffff;
+    width: 34px;
+    right: -22px;
+    box-shadow: 5px 0 20px rgba(0, 0, 0, 0.35);
+  }
+  .pull-tab-icon {
+    font-size: 13px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0b1a3d;
+  }
+
+  /* Internal scrollable content container with ultra-subtle, hard-to-see scrollbar */
+  .sidebar-inner {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    border-top-right-radius: var(--sidebar-radius);
+    border-bottom-right-radius: var(--sidebar-radius);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    padding-right: 0;
+    padding-top: 0;                      /* NO TOP GAP - FLUSH FOR WHITE LOGO HEADER */
+    padding-bottom: 16px;
+
+    /* Firefox subtle scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+  }
+  .sidebar-inner:hover {
+    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  }
+
+  /* WebKit (Chrome, Edge, Safari) - Ultra-slim (4px), transparent track, faint thumb */
+  .sidebar-inner::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+    background: transparent;
+  }
+  .sidebar-inner::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 6px 0;
+  }
+  .sidebar-inner::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  .sidebar-inner::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.06); /* Blends into deep navy, very hard to see */
+    border-radius: 9999px;
+    transition: background 0.2s ease;
+  }
+  .sidebar-inner:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18); /* Gentle visibility on hover */
+  }
+  .sidebar-inner::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.32); /* Drag feedback */
+  }
+
+  /* COLLAPSED STATE STYLES */
+  .app-sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+  }
+  .app-sidebar.collapsed .hide-on-collapse {
+    display: none !important;
+  }
+  .app-sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 12px 6px;
+    height: 64px;
+  }
+  .app-sidebar.collapsed .sidebar-logo-img {
+    display: none !important;
+  }
+  .app-sidebar.collapsed .sidebar-logo-icon {
+    display: block !important;
+  }
+  .app-sidebar.collapsed .nav-tab-item a {
+    justify-content: center;
+    padding: 10px 0;
+    position: relative;
+  }
+  .app-sidebar.collapsed .nav-tab-left {
+    gap: 0;
+  }
+  .app-sidebar.collapsed .nav-tab-icon {
+    font-size: 16px;
+  }
+
+  /* Tooltip on Collapsed Navigation Items */
+  .app-sidebar.collapsed .nav-tab-item {
+    position: relative;
+  }
+  .app-sidebar.collapsed .nav-tab-item:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 80px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #090a0f;
+    color: #ffffff;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: var(--theme-radius);
+    white-space: nowrap;
+    z-index: 1000;
+    border: 1px solid rgba(0, 82, 255, 0.4);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    pointer-events: none;
+    letter-spacing: 0.02em;
+  }
+
+  /* Sidebar Header: ALL WHITE BACKGROUND, 28PX CURVED TOP-RIGHT, NO BLUE BORDER */
+  .sidebar-header {
+    background: #ffffff;                 /* ALL WHITE BG */
+    width: 100%;
+    height: 112px;
+    padding: 14px 18px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top-right-radius: var(--sidebar-radius);
+    border-top-left-radius: 0;
+    border-bottom: none;
+    margin-bottom: 2px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    text-align: center;
+  }
+  .sidebar-logo-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+  }
+  .sidebar-logo-img {
+    width: 100%;
+    max-width: 220px;
+    max-height: 86px;
+    object-fit: contain;
+    display: block;
+  }
+  .sidebar-logo-icon {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+    display: none;
+  }
+
+  /* Quick Search Wrap: PURE WHITE FLOATING PILL */
+  .sidebar-search-wrap {
+    padding: 10px 14px 12px;
+  }
+  .sidebar-search {
+    width: 100%;
+    height: 42px;
+    border: none;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 0 12px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: #0b1a3d;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+    outline: none;
+    transition: all 0.15s ease;
+    cursor: text;
+    box-sizing: border-box;
+  }
+  .sidebar-search:focus-within {
+    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.35), 0 3px 12px rgba(0, 0, 0, 0.2);
+  }
+  .sidebar-search-left {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .sidebar-search-left svg {
+    width: 16px;
+    height: 16px;
+    stroke: #64748b;
+    flex-shrink: 0;
+  }
+  .search-shortcut {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: #1e293b;
+    background: #eef2f6;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-weight: 600;
+    line-height: 1.3;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  /* Navigation Links & Collapsible Category Dropdowns */
+  .sidebar-nav {
+    padding: 4px 12px 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .nav-group {
+    display: flex;
+    flex-direction: column;
+  }
+  .nav-group-header {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 7px 10px;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #ffffff;
+    cursor: pointer;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    outline: none;
+    border-radius: 8px;
+    box-shadow: none;
+    transition: background 0.15s ease;
+    user-select: none;
+    text-align: left;
+  }
+  .nav-group-header:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .nav-group-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-group-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+    color: #ffffff;
+  }
+  .nav-group.is-collapsed .nav-group-chevron {
+    transform: rotate(-90deg);
+  }
+  .nav-group-tag {
+    font-size: 11px;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.08);
+    color: #8fa0bc;
+    padding: 2px 9px;
+    border-radius: 10px;
+    letter-spacing: normal;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-family: var(--sans);
+  }
+  .nav-tabs-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-height: 500px;
+    opacity: 1;
+    overflow: hidden;
+    transition: max-height 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease;
+  }
+  .nav-group.is-collapsed .nav-tabs-list {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
+    pointer-events: none;
+  }
+  .app-sidebar.collapsed .nav-group-header {
+    display: none !important;
+  }
+  .app-sidebar.collapsed .nav-tabs-list {
+    max-height: none !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+  }
+  .nav-tab-item a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+  }
+  .nav-tab-item a:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Active Navigation Tab: PURE WHITE CARD with Blue text & Blue Icon */
+  .nav-tab-item.active a {
+    color: #0b1a3d;
+    background: #ffffff;
+    font-weight: 700;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+  }
+  .nav-tab-item.active a:hover {
+    color: #0b1a3d;
+    background: #ffffff;
+  }
+  .nav-tab-item.active a .nav-tab-icon {
+    color: #0052ff;
+  }
+  .nav-tab-item.active a .nav-tab-icon svg {
+    stroke: #0052ff;
+  }
+
+  .nav-tab-left {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .nav-tab-icon {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    flex-shrink: 0;
+  }
+  .nav-tab-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  }
+
+  .status-pip-online {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--semantic-success);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+  }
+
+  /* Topbar User Account Card (Positioned on Top-Right) */
+  .topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 3px 10px 3px 5px;
+    border-radius: var(--theme-radius);
+    background: var(--surface-1);
+    border: 1px solid var(--line-hairline);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .topbar-user:hover {
+    background: var(--canvas-subtle);
+    border-color: var(--primary-line);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  .topbar-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-xs);
+    background: #0052ff;
+    color: #ffffff;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 6px rgba(0, 82, 255, 0.35);
+  }
+  .topbar-user-meta {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+    text-align: left;
+  }
+  .topbar-user-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .topbar-user-role {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--ink-muted);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* =========================================================
+     MAIN WORKSPACE
+     ========================================================= */
+  .app-workspace {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* TOP COMMAND BAR */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    height: var(--topbar-height);
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line-hairline);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+  [data-theme="dark"] .topbar {
+    background: rgba(7, 9, 14, 0.92);
+  }
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .btn-sidebar-quick-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    border: 1px solid var(--line-hairline);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-sidebar-quick-toggle:hover {
+    background: var(--canvas);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .topbar-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-subtle);
+  }
+  .topbar-title strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .topbar-controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  /* Theme Toggle Switch */
+  .theme-toggle-switch {
+    display: flex;
+    align-items: center;
+    background: var(--surface-1);
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--radius-sm);
+    padding: 2px;
+  }
+  .theme-btn {
+    border: none;
+    background: transparent;
+    padding: 4px 10px;
+    border-radius: 2px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s ease;
+  }
+  .theme-btn.active {
+    background: var(--canvas);
+    color: var(--ink);
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+
+  /* Radius Selector */
+  .radius-selector {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px;
+    background: var(--surface-1);
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--radius-sm);
+  }
+  .radius-opt {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--ink-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .radius-opt.active {
+    background: var(--canvas);
+    color: var(--ink);
+    border-color: var(--line-hairline);
+    font-weight: 600;
+  }
+
+  /* Buttons */
+  .btn {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    padding: 8px 16px;
+    height: 38px;
+    border-radius: var(--theme-radius);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    border: 1px solid transparent;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: var(--on-primary);
+    border-color: var(--primary);
+  }
+  .btn-primary:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    box-shadow: 0 2px 8px var(--primary-glow);
+  }
+  .btn-dark {
+    background: var(--ink);
+    color: var(--on-ink);
+    border-color: var(--ink);
+  }
+  .btn-dark:hover { background: var(--ink-dark); }
+  .btn-line {
+    background: var(--canvas);
+    color: var(--ink);
+    border-color: var(--line-hairline);
+  }
+  .btn-line:hover {
+    border-color: var(--ink);
+    background: var(--surface-1);
+  }
+  .btn-cobalt-line {
+    background: var(--canvas);
+    color: var(--primary);
+    border-color: var(--primary-line);
+  }
+  .btn-cobalt-line:hover {
+    background: var(--primary-tint);
+    border-color: var(--primary);
+  }
+  .btn-ghost { background: transparent; color: var(--ink); }
+  .btn-ghost:hover { background: var(--surface-1); color: var(--primary); }
+  .btn-danger-line {
+    background: var(--canvas);
+    color: var(--semantic-error);
+    border-color: var(--semantic-error-line);
+  }
+
+  /* Hero Section */
+  .hero-section {
+    position: relative;
+    border-bottom: 1px solid var(--line-hairline);
+    padding: 64px 40px 56px;
+  }
+  .spec-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--primary);
+    background: var(--primary-tint);
+    border: 1px solid var(--primary-line);
+    border-radius: var(--radius-xs);
+    padding: 3px 8px;
+  }
+  .spec-line {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-subtle);
+    margin-left: 10px;
+  }
+  .hero-title {
+    font-size: 54px;
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+    margin: 18px 0;
+    max-width: 860px;
+  }
+  .cobalt-text { color: var(--primary); }
+  .hero-desc {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink-muted);
+    max-width: 720px;
+    margin: 0 0 32px;
+  }
+  .hero-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  /* Ticker Bar */
+  .ticker-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid var(--line-hairline);
+    background: var(--canvas);
+  }
+  .ticker-item {
+    padding: 18px 24px;
+    border-right: 1px solid var(--line-hairline);
+  }
+  .ticker-item:last-child { border-right: none; }
+  .ticker-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ink-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ticker-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+  .ticker-value {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .ticker-sub {
+    font-size: 11px;
+    color: var(--ink-muted);
+    margin-top: 2px;
+  }
+
+  /* Content Shell */
+  .content-shell { padding: 0 40px; }
+  section {
+    padding: 64px 0;
+    border-bottom: 1px solid var(--line-hairline);
+    position: relative;
+  }
+  .section-header {
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .section-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-eyebrow::after {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 1px;
+    background: var(--primary-line);
+  }
+  .section-title {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0;
+  }
+  .section-desc {
+    font-size: 13px;
+    color: var(--ink-muted);
+    max-width: 620px;
+    margin-top: 4px;
+  }
+
+  /* Crosshair Box Markers */
+  .has-crosshairs { position: relative; }
+  .crosshair-corner { position: absolute; width: 9px; height: 9px; pointer-events: none; z-index: 2; }
+  .crosshair-corner::before, .crosshair-corner::after { content: ''; position: absolute; background: var(--grid-crosshair); }
+  .crosshair-corner::before { top: 4px; left: 0; width: 9px; height: 1px; }
+  .crosshair-corner::after { top: 0; left: 4px; width: 1px; height: 9px; }
+  .ch-tl { top: -5px; left: -5px; }
+  .ch-tr { top: -5px; right: -5px; }
+  .ch-bl { bottom: -5px; left: -5px; }
+  .ch-br { bottom: -5px; right: -5px; }
+
+  /* Palette Swatches */
+  .palette-category { margin-bottom: 32px; }
+  .palette-cat-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--line-hairline);
+    display: flex;
+    justify-content: space-between;
+  }
+  .swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+  .swatch-card {
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--theme-radius);
+    background: var(--canvas);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .swatch-card:hover { border-color: var(--ink); transform: translateY(-2px); }
+  .swatch-preview { height: 68px; width: 100%; border-bottom: 1px solid var(--line-hairline); }
+  .swatch-meta { padding: 10px 12px; }
+  .swatch-name { font-size: 12px; font-weight: 600; color: var(--ink); display: flex; justify-content: space-between; }
+  .swatch-hex { font-family: var(--mono); font-size: 11px; color: var(--ink-subtle); margin-top: 2px; }
+  .swatch-desc { font-size: 11px; color: var(--ink-muted); margin-top: 4px; line-height: 1.35; }
+
+  /* SECTION 02: Collapsible Sidebar Spec */
+  .sidebar-spec-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+  .spec-preview-box {
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    background: var(--sidebar-bg);
+    border-right: 3px solid #ffffff;
+    padding: 20px 24px 20px 20px;
+    box-shadow: 4px 0 20px rgba(11, 26, 61, 0.2);
+    position: relative;
+  }
+  .spec-preview-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #ffffff;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+  }
+  .spec-state-item {
+    padding: 9px 12px;
+    border-radius: var(--theme-radius);
+    font-size: 13px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .spec-state-item.default {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #ffffff;
+  }
+  .spec-state-item.hovered {
+    background: var(--sidebar-hover-bg);
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.35);
+  }
+  .spec-state-item.active-white {
+    background: #ffffff;
+    color: #0b1a3d;
+    font-weight: 700;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+  }
+
+  /* Bento Layout */
+  .bento-shell {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--line-hairline);
+    gap: 1px;
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--theme-card-radius);
+    overflow: hidden;
+  }
+  .bento-cell { background: var(--canvas); padding: 24px; }
+  .bento-cell.span-2 { grid-column: span 2; }
+  .bento-cell.dark { background: var(--surface-contrast); color: var(--on-ink); }
+  .bento-cell.dark .bento-sub { color: #94a3b8; }
+
+  /* Typography Table */
+  .type-table { width: 100%; border-collapse: collapse; }
+  .type-row {
+    border-bottom: 1px solid var(--line-hairline);
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    padding: 18px 0;
+    align-items: baseline;
+    gap: 24px;
+  }
+  .type-meta { font-family: var(--mono); font-size: 11px; color: var(--ink-subtle); line-height: 1.5; }
+  .type-meta strong { display: block; font-size: 12px; color: var(--ink); }
+  .type-sample { color: var(--ink); }
+
+  /* Components & Controls */
+  .comp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+  .comp-panel {
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--theme-card-radius);
+    padding: 20px;
+    background: var(--canvas);
+  }
+  .comp-panel-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--ink-subtle);
+    margin-bottom: 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line-hairline);
+  }
+  .btn-flex-wrap { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+  /* Line Badges */
+  .line-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: var(--theme-radius);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid var(--line-hairline);
+    background: var(--canvas);
+    color: var(--ink);
+  }
+  .line-badge.cobalt { border-color: var(--primary-line); background: var(--primary-tint); color: var(--primary); font-weight: 600; }
+  .line-badge.success { border-color: var(--semantic-success-line); background: var(--semantic-success-tint); color: var(--semantic-success); }
+  .line-badge.warning { border-color: var(--semantic-warning-line); background: var(--semantic-warning-tint); color: var(--semantic-warning); }
+  .line-badge.error { border-color: var(--semantic-error-line); background: var(--semantic-error-tint); color: var(--semantic-error); }
+  .badge-pip { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* Radius Specimens */
+  .radius-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .radius-box-item {
+    border: 1px solid var(--line-hairline);
+    padding: 16px;
+    background: var(--canvas);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .radius-specimen {
+    width: 90px;
+    height: 56px;
+    border: 1px solid var(--primary);
+    background: var(--primary-tint);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  /* Form Elements */
+  .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  .form-field { display: flex; flex-direction: column; gap: 5px; }
+  .form-field.full { grid-column: span 2; }
+  .field-label { font-size: 12px; font-weight: 600; color: var(--ink); display: flex; justify-content: space-between; }
+  .field-helper { font-family: var(--mono); font-size: 10px; color: var(--ink-subtle); }
+  .line-input {
+    height: 38px;
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--theme-radius);
+    padding: 0 12px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--canvas);
+    outline: none;
+    transition: all 0.15s ease;
+  }
+  .line-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+  .line-input.with-addon { display: flex; align-items: center; padding: 0; }
+  .line-input.with-addon input { border: none; outline: none; height: 100%; flex: 1; padding: 0 10px; background: transparent; color: var(--ink); }
+  .input-addon {
+    background: var(--surface-1);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-muted);
+    border-right: 1px solid var(--line-hairline);
+  }
+  textarea.line-input { height: 84px; padding: 10px 12px; resize: vertical; }
+
+  /* Live MCMS Prototype Mockup with Nested Left Nav */
+  .proto-container {
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--theme-card-radius);
+    background: var(--canvas);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.04);
+    overflow: hidden;
+  }
+  .proto-topbar {
+    padding: 12px 20px;
+    background: var(--surface-1);
+    border-bottom: 1px solid var(--line-hairline);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .proto-title-crumb {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-muted);
+  }
+  .proto-title-crumb strong { color: var(--ink); }
+
+  /* Prototype Inside Split: Inner Sidebar + Main View */
+  .proto-inner-frame {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    min-height: 480px;
+  }
+  .proto-inner-sidebar {
+    background: var(--sidebar-bg);
+    border-top-right-radius: 14px;
+    border-bottom-right-radius: 14px;
+    border-right: 2px solid #ffffff;
+    margin: 0 10px 0 0;
+    padding: 16px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+  }
+  .proto-inner-nav {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .proto-nav-item a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    font-size: 12px;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: var(--theme-radius);
+  }
+  .proto-nav-item a:hover {
+    background: var(--sidebar-hover-bg);
+  }
+  .proto-nav-item.active a {
+    background: #ffffff;
+    color: #0b1a3d;
+    font-weight: 700;
+  }
+  .proto-inner-main { padding: 24px; }
+
+  /* Linear Stepper */
+  .linear-stepper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin: 24px 0;
+    position: relative;
+  }
+  .linear-stepper::before {
+    content: '';
+    position: absolute;
+    top: 13px;
+    left: 36px;
+    right: 36px;
+    height: 1px;
+    background: var(--line-hairline);
+    z-index: 1;
+  }
+  .stepper-step {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .step-node {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--canvas);
+    border: 1px solid var(--line-hairline);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ink-muted);
+    margin-bottom: 6px;
+  }
+  .stepper-step.completed .step-node { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
+  .stepper-step.active .step-node {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--on-primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+  }
+  .step-label { font-size: 11px; font-weight: 600; color: var(--ink); }
+  .step-meta { font-family: var(--mono); font-size: 9px; color: var(--ink-subtle); }
+
+  /* Criteria Items */
+  .criteria-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--theme-radius);
+    background: var(--canvas-subtle);
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+  .criteria-left { display: flex; align-items: center; gap: 8px; }
+  .criteria-check {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    background: var(--semantic-success);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: bold;
+  }
+
+  /* Footer */
+  .footer {
+    background: var(--surface-contrast);
+    color: #94a3b8;
+    border-top: 1px solid var(--line-hairline);
+    padding: 48px 40px 32px;
+    margin-top: 48px;
+  }
+  [data-theme="dark"] .footer {
+    background: #06080d;
+    color: #64748b;
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 36px; }
+  .footer-col h6 {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 14px;
+  }
+  .footer-col a { display: block; color: #94a3b8; text-decoration: none; font-size: 12px; margin-bottom: 8px; }
+  .footer-col a:hover { color: #ffffff; }
+
+  /* Toast Notification */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--ink);
+    color: var(--on-ink);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    display: none;
+    z-index: 1000;
+    border: 1px solid var(--line-hairline);
+  }
+
+  /* Responsive Rules */
+  @media (max-width: 1080px) {
+    .app-sidebar { width: var(--sidebar-collapsed-width); }
+    .app-sidebar .hide-on-collapse { display: none !important; }
+    .app-sidebar .sidebar-header { justify-content: center; padding: 16px 6px; }
+    .app-sidebar .nav-tab-item a { justify-content: center; padding: 10px 0; }
+    .sidebar-spec-grid { grid-template-columns: 1fr; }
+    .proto-inner-frame { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .app-sidebar { display: none; }
+    .topbar { padding: 0 16px; }
+    .content-shell { padding: 0 16px; }
+    .hero-section { padding: 36px 16px; }
+    .hero-title { font-size: 34px; }
+    .ticker-bar { grid-template-columns: repeat(2, 1fr); }
+    .comp-row, .form-grid, .radius-grid { grid-template-columns: 1fr; }
+    .form-field.full { grid-column: span 1; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body class="grid-bg">
+
+<div class="app-frame" id="appFrame">
+
+  <!-- =========================================================
+       1. FLUSH FULL-HEIGHT BLUE SIDEBAR WITH HIGH-CONTRAST WHITE ELEMENTS
+       ========================================================= -->
+  <aside class="app-sidebar" id="appSidebar">
+    
+    <!-- Protruding pull-tab handle sticking out on the right edge -->
+    <button class="sidebar-pull-tab" id="btnSidebarPullTab" onclick="toggleSidebarCollapse()" title="Toggle Sidebar Width (Expand / Collapse)">
+      <span class="pull-tab-icon" id="pullTabIcon">
+        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 3l-5 5 5 5"/>
+        </svg>
+      </span>
+    </button>
+
+    <!-- Scrollable content container -->
+    <div class="sidebar-inner">
+      <div>
+        <!-- Logo Header: ALL WHITE BACKGROUND, 28PX RADIUS, NO BLUE BORDER -->
+        <div class="sidebar-header">
+          <a href="#" class="sidebar-logo-link" title="Universiti Teknikal Malaysia Melaka (UTeM)">
+            <img src="../../Asset/LogoJawiUTeM_blue-01.png" alt="UTeM - Universiti Teknikal Malaysia Melaka" class="sidebar-logo-img hide-on-collapse">
+            <img src="../../Asset/LogoUTeM_crest.png" alt="UTeM Crest" class="sidebar-logo-icon show-on-collapse">
+          </a>
+        </div>
+
+        <!-- Quick Search Bar: PURE WHITE FLOATING PILL -->
+        <div class="sidebar-search-wrap hide-on-collapse">
+          <div class="sidebar-search" onclick="document.getElementById('sidebarSearchInput')?.focus()">
+            <div class="sidebar-search-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <span>Jump to token</span>
+            </div>
+            <span class="search-shortcut">&#8984;K</span>
+          </div>
+        </div>
+
+        <!-- Nav Groups with Collapsible Categories & Precision SVGs -->
+        <div class="sidebar-nav">
+          <div class="nav-group" id="navGroup1">
+            <button type="button" class="nav-group-header hide-on-collapse" onclick="toggleNavCategory('navGroup1')" aria-expanded="true" title="Click to collapse / expand">
+              <div class="nav-group-header-left">
+                <span class="nav-group-chevron">
+                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6l5 5 5-5"/>
+                  </svg>
+                </span>
+                <span>Architecture</span>
+              </div>
+              <span class="nav-group-tag">Spec</span>
+            </button>
+            <ul class="nav-tabs-list">
+              <li class="nav-tab-item" data-tooltip="Color matrix">
+                <a href="#palette">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Color matrix</span>
+                  </div>
+                </a>
+              </li>
+              <li class="nav-tab-item" data-tooltip="Rounded sidebar">
+                <a href="#sidebar-spec">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="18" height="18" rx="3"/>
+                        <line x1="9" y1="3" x2="9" y2="21"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Rounded sidebar</span>
+                  </div>
+                </a>
+              </li>
+              <!-- Active Item: Pure White Pill Card with Blue Icon -->
+              <li class="nav-tab-item active" data-tooltip="Line anatomy">
+                <a href="#line-system">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <line x1="9" y1="12" x2="21" y2="12"/>
+                        <circle cx="6" cy="12" r="2.5" fill="#0052ff"/>
+                        <line x1="3" y1="18" x2="21" y2="18"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Line anatomy</span>
+                  </div>
+                </a>
+              </li>
+              <li class="nav-tab-item" data-tooltip="Typography">
+                <a href="#typography">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <polyline points="4 7 4 4 20 4 20 7"/>
+                        <line x1="12" y1="4" x2="12" y2="20"/>
+                        <line x1="9" y1="20" x2="15" y2="20"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Typography</span>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="nav-group" id="navGroup2">
+            <button type="button" class="nav-group-header hide-on-collapse" onclick="toggleNavCategory('navGroup2')" aria-expanded="true" title="Click to collapse / expand">
+              <div class="nav-group-header-left">
+                <span class="nav-group-chevron">
+                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6l5 5 5-5"/>
+                  </svg>
+                </span>
+                <span>Components</span>
+              </div>
+              <span class="nav-group-tag">UI</span>
+            </button>
+            <ul class="nav-tabs-list">
+              <li class="nav-tab-item" data-tooltip="Buttons and badges">
+                <a href="#components">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <rect x="3" y="7" width="18" height="10" rx="5"/>
+                        <circle cx="8" cy="12" r="1.5" fill="currentColor"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Buttons and badges</span>
+                  </div>
+                </a>
+              </li>
+              <li class="nav-tab-item" data-tooltip="Micro-radius">
+                <a href="#radius">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M5 19V12a7 7 0 0 1 7-7h7"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Micro-radius</span>
+                  </div>
+                </a>
+              </li>
+              <li class="nav-tab-item" data-tooltip="Precision inputs">
+                <a href="#forms">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <rect x="3" y="5" width="18" height="14" rx="3"/>
+                        <line x1="8" y1="9" x2="8" y2="15"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Precision inputs</span>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="nav-group" id="navGroup3">
+            <button type="button" class="nav-group-header hide-on-collapse" onclick="toggleNavCategory('navGroup3')" aria-expanded="true" title="Click to collapse / expand">
+              <div class="nav-group-header-left">
+                <span class="nav-group-chevron">
+                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6l5 5 5-5"/>
+                  </svg>
+                </span>
+                <span>System app</span>
+              </div>
+              <span class="nav-group-tag">MCMS</span>
+            </button>
+            <ul class="nav-tabs-list">
+              <li class="nav-tab-item" data-tooltip="Course review">
+                <a href="#prototype">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="9"/>
+                        <polyline points="8 12 11 15 16 9"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Course review</span>
+                  </div>
+                </a>
+              </li>
+              <li class="nav-tab-item" data-tooltip="Senate queue">
+                <a href="#prototype">
+                  <div class="nav-tab-left">
+                    <span class="nav-tab-icon">
+                      <svg viewBox="0 0 24 24">
+                        <line x1="8" y1="6" x2="21" y2="6"/>
+                        <line x1="8" y1="12" x2="21" y2="12"/>
+                        <line x1="8" y1="18" x2="21" y2="18"/>
+                        <polyline points="3 6 4 7 6 5"/>
+                      </svg>
+                    </span>
+                    <span class="hide-on-collapse">Senate queue</span>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- =========================================================
+       2. MAIN WORKSPACE
+       ========================================================= -->
+  <main class="app-workspace" id="appWorkspace">
+
+    <!-- Top Command Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn-sidebar-quick-toggle" onclick="toggleSidebarCollapse()" title="Toggle Sidebar (Ctrl+B)">
+          <span id="quickToggleIcon">&#9664;</span>
+          <span id="quickToggleText">Collapse Nav</span>
+        </button>
+
+        <div class="topbar-title">
+          <span>SYSTEM</span> / <strong>LINEAR-PRECISION</strong> / <span style="color:var(--primary); font-weight:600;">FULL-HEIGHT-NAV</span>
+        </div>
+      </div>
+
+      <div class="topbar-controls">
+        <div class="theme-toggle-switch" title="Toggle Theme (Light / Dark)">
+          <button class="theme-btn active" id="btnThemeLight" onclick="setThemeMode('light')">&#9728; Light</button>
+          <button class="theme-btn" id="btnThemeDark" onclick="setThemeMode('dark')">&#9790; Dark</button>
+        </div>
+
+        <div class="radius-selector" title="Switch Corner Radius">
+          <button class="radius-opt" onclick="setRadius('0px', '0px', this)">0px</button>
+          <button class="radius-opt active" onclick="setRadius('4px', '6px', this)">4-6px</button>
+          <button class="radius-opt" onclick="setRadius('8px', '10px', this)">8px</button>
+        </div>
+
+        <a href="#prototype" class="btn btn-primary" style="height:32px; padding:0 12px; font-size:12px;">Open Live Demo &rarr;</a>
+
+        <!-- Top-Right User Account Chip -->
+        <div class="topbar-user" title="Signed in as Dr. Zulkifli (CODL Academic Officer)">
+          <div class="topbar-avatar">CO</div>
+          <div class="topbar-user-meta">
+            <span class="topbar-user-name">Dr. Zulkifli</span>
+            <span class="topbar-user-role">CODL Academic Officer</span>
+          </div>
+          <span class="status-pip-online" title="Online and Verified"></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+        <span class="spec-tag">// ZERO TOP/BOTTOM GAP // V2.4 PRECISION SPEC</span>
+        <span class="spec-line">FULL-HEIGHT 100VH &middot; 28PX CURVED CORNERS &middot; PURE WHITE PILL ELEMENTS &middot; TITLE CASE GROUPS</span>
+      </div>
+
+      <h1 class="hero-title">
+        Full-Height Cobalt Drawer.<br>
+        <span class="cobalt-text">Pure White Elements</span> &amp; Precision Latch.
+      </h1>
+
+      <p class="hero-desc">
+        The navigation drawer extends flush to the viewport (100vh) with 28px curved right corners. Featuring a bold white UTeM header, floating white search pill, title-case collapsible categories, high-contrast white items, and a pure white pull-tab latch.
+      </p>
+
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="toggleSidebarCollapse()">
+          <span id="heroCollapseBtnText">&#9664; Toggle Sidebar Pull-Tab</span>
+        </button>
+        <button class="btn btn-dark" onclick="scrollToId('sidebar-spec')">Inspect White Tab Elements</button>
+        <button class="btn btn-line" onclick="toggleThemeQuick()">Toggle Dark / Light</button>
+      </div>
+    </section>
+
+    <!-- Ticker Metrics Bar -->
+    <div class="ticker-bar">
+      <div class="ticker-item">
+        <div class="ticker-label"><span class="ticker-dot"></span>Top / Bottom Gap</div>
+        <div class="ticker-value" style="color:var(--semantic-success);">0px (Closed)</div>
+        <div class="ticker-sub">Flush Full-Height 100vh</div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-label"><span class="ticker-dot" style="background:#ffffff; border:1px solid #ccc;"></span>Active Tab Fill</div>
+        <div class="ticker-value">Pure White</div>
+        <div class="ticker-sub">Line Anatomy with Cobalt #0052FF Icon</div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-label"><span class="ticker-dot" style="background:#ffffff; border:1px solid #0052ff;"></span>Pull-Tab Latch</div>
+        <div class="ticker-value">Pure White Pill</div>
+        <div class="ticker-sub">Protruding Semi-Pill Latch</div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-label"><span class="ticker-dot" style="background:var(--line-accent)"></span>Right Corners</div>
+        <div class="ticker-value">28px Radius</div>
+        <div class="ticker-sub">Top-Right &amp; Bottom-Right</div>
+      </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="content-shell">
+
+      <!-- SECTION 01: Color Palette -->
+      <section id="palette">
+        <div class="section-header">
+          <div>
+            <div class="section-eyebrow">Token Architecture</div>
+            <h2 class="section-title">01 &mdash; Color Spectrum (Cobalt Blue Scale)</h2>
+            <p class="section-desc">Click any swatch to copy its HEX value. Engineered around rich blue sidebars, pure white active cards, and electric indicators.</p>
+          </div>
+          <button class="btn btn-line" style="height:32px; font-size:11px;" onclick="copyTokensJSON()">Copy Tokens JSON</button>
+        </div>
+
+        <div class="palette-category">
+          <div class="palette-cat-title">
+            <span>A. Blue Navigation &amp; Interaction Scale</span>
+            <span>Sidebar &amp; Actions</span>
+          </div>
+          <div class="swatch-grid">
+            <div class="swatch-card" onclick="copyHex('#0b1a3d')">
+              <div class="swatch-preview" style="background:#0b1a3d;"></div>
+              <div class="swatch-meta">
+                <div class="swatch-name">Cobalt Sidebar Base <span>NAV</span></div>
+                <div class="swatch-hex">#0b1a3d</div>
+                <div class="swatch-desc">Rich deep navy for the left navigation drawer floor.</div>
+              </div>
+            </div>
+            <div class="swatch-card" onclick="copyHex('#ffffff')">
+              <div class="swatch-preview" style="background:#ffffff; border-bottom:1px solid #e2e8f0;"></div>
+              <div class="swatch-meta">
+                <div class="swatch-name">Pure White Active Tab <span>NEW</span></div>
+                <div class="swatch-hex">#ffffff</div>
+                <div class="swatch-desc">High-contrast active card fill inside the blue drawer.</div>
+              </div>
+            </div>
+            <div class="swatch-card" onclick="copyHex('#0052ff')">
+              <div class="swatch-preview" style="background:#0052ff;"></div>
+              <div class="swatch-meta">
+                <div class="swatch-name">Electric Cobalt <span>ACTIVE</span></div>
+                <div class="swatch-hex">#0052ff</div>
+                <div class="swatch-desc">Text color on active white tab and primary CTA buttons.</div>
+              </div>
+            </div>
+            <div class="swatch-card" onclick="copyHex('#edf4ff')">
+              <div class="swatch-preview" style="background:#edf4ff; border-bottom:1px solid #dbeafe;"></div>
+              <div class="swatch-meta">
+                <div class="swatch-name">Icy Blue Wash</div>
+                <div class="swatch-hex">#edf4ff</div>
+                <div class="swatch-desc">Hovered data rows, badge backgrounds on white canvas.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="palette-category">
+          <div class="palette-cat-title">
+            <span>B. High-Contrast Canvas &amp; Jet Inks</span>
+            <span>Surfaces &amp; Type</span>
+          </div>
+          <div class="swatch-grid">
+            <div class="swatch-card" onclick="copyHex('#ffffff')">
+              <div class="swatch-preview" style="background:#ffffff; border-bottom:1px solid #e2e8f0;"></div>
+              <div class="swatch-meta">
+                <div class="swatch-name">Pure Canvas White</div>
+                <div class="swatch-hex">#ffffff</div>
+                <div class="swatch-desc">Main workspace background. Delivers airy contrast.</div>
+              </div>
+            </div>
+            <div class="swatch-card" onclick="copyHex('#090a0f')">
+              <div class="swatch-preview" style="background:#090a0f;"></div>
+              <div class="swatch-meta">
+                <div class="swatch-name">Jet Obsidian</div>
+                <div class="swatch-hex">#090a0f</div>
+                <div class="swatch-desc">Display headlines, high-contrast dark buttons.</div>
+              </div>
+            </div>
+            <div class="swatch-card" onclick="copyHex('#e2e8f0')">
+              <div class="swatch-preview" style="background:#e2e8f0;"></div>
+              <div class="swatch-meta">
+                <div class="swatch-name">Hairline Rule</div>
+                <div class="swatch-hex">#e2e8f0</div>
+                <div class="swatch-desc">1px boundary between blue sidebar and white canvas.</div>
+              </div>
+            </div>
+            <div class="swatch-card" onclick="copyHex('#475569')">
+              <div class="swatch-preview" style="background:#475569;"></div>
+              <div class="swatch-meta">
+                <div class="swatch-name">Slate Muted</div>
+                <div class="swatch-hex">#475569</div>
+                <div class="swatch-desc">Primary reading body copy and secondary metadata.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 02: Full-Height & White Elements Spec -->
+      <section id="sidebar-spec">
+        <div class="section-header">
+          <div>
+            <div class="section-eyebrow">Drawer Engineering</div>
+            <h2 class="section-title">02 &mdash; Full-Height Alignment &amp; White Navigation Elements</h2>
+            <p class="section-desc">Zero top/bottom gap (flush 100vh), pure white active tabs, high-contrast white typography, and white user card.</p>
+          </div>
+          <button class="btn btn-primary" onclick="toggleSidebarCollapse()" style="height:32px; font-size:12px;">
+            Test Pull-Tab Live &rarr;
+          </button>
+        </div>
+
+        <div class="sidebar-spec-grid">
+          <!-- Visual State Box -->
+          <div class="spec-preview-box has-crosshairs">
+            <!-- White accent line -->
+            <div style="position:absolute; top:20px; bottom:20px; right:8px; width:2px; background:#ffffff; border-radius:2px; opacity:0.9;"></div>
+
+            <!-- Protruding pull-tab representation -->
+            <div style="position:absolute; top:50%; right:-16px; transform:translateY(-50%); width:22px; height:44px; background:var(--sidebar-bg); border:2px solid #ffffff; border-left:none; border-radius:0 6px 6px 0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:10px; box-shadow:3px 0 8px rgba(0,0,0,0.2);">
+              &#9664;
+            </div>
+
+            <div class="spec-preview-title">
+              <span>// WHITE NAVIGATION TOKENS</span>
+              <span style="color:#ffffff;">HIGH CONTRAST</span>
+            </div>
+
+            <div class="spec-state-item default">
+              <span>Resting: Pure White Text</span>
+              <span class="nav-tab-counter">12</span>
+            </div>
+
+            <div class="spec-state-item hovered">
+              <span>Hover: White Wash Tint</span>
+              <span class="nav-tab-counter">Hover</span>
+            </div>
+
+            <div class="spec-state-item active-white">
+              <span>Active: Pure White Card Pill</span>
+              <span class="nav-tab-counter" style="background:#0052ff; color:#ffffff;">Active</span>
+            </div>
+
+            <div style="margin-top:16px; padding:10px; border:1px dashed rgba(255,255,255,0.3); border-radius:var(--theme-radius); font-family:var(--mono); font-size:10px; color:#ffffff; line-height:1.5;">
+              TOP/BOTTOM GAP: 0px (Closed)<br>
+              HEIGHT: 100vh (Flush to viewport)<br>
+              ACTIVE TAB: background: #ffffff; color: #0b1a3d;
+            </div>
+          </div>
+
+          <!-- Feature Breakdown -->
+          <div>
+            <h3 style="font-size:20px; font-weight:700; margin:0 0 10px; color:var(--ink);">Engineered for Maximum Contrast &amp; Clean Layout</h3>
+            <p style="color:var(--ink-muted); line-height:1.6; margin-bottom:20px;">
+              Closing the top and bottom margins allows the blue drawer to serve as a solid vertical pillar, while the white elements provide instant visual hierarchy:
+            </p>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+              <div class="comp-panel" style="padding:16px;">
+                <div style="font-family:var(--mono); font-size:11px; font-weight:600; color:var(--primary); margin-bottom:6px;">1. FLUSH FULL-HEIGHT (100VH)</div>
+                <p style="font-size:12px; color:var(--ink-muted); margin:0;">
+                  Zero top gap and zero bottom gap. The blue panel docks flush against the screen bounds while maintaining its 20px curved right edge.
+                </p>
+              </div>
+
+              <div class="comp-panel" style="padding:16px;">
+                <div style="font-family:var(--mono); font-size:11px; font-weight:600; color:var(--primary); margin-bottom:6px;">2. PURE WHITE ACTIVE TAB PILL</div>
+                <p style="font-size:12px; color:var(--ink-muted); margin:0;">
+                  The selected navigation tab is now a bright white card (<code>#ffffff</code>) with deep cobalt text (<code>#0b1a3d</code>) and an electric cobalt badge.
+                </p>
+              </div>
+
+              <div class="comp-panel" style="padding:16px;">
+                <div style="font-family:var(--mono); font-size:11px; font-weight:600; color:var(--primary); margin-bottom:6px;">3. BRIGHT WHITE LABELS &amp; BADGES</div>
+                <p style="font-size:12px; color:var(--ink-muted); margin:0;">
+                  All resting tabs, icons, and counter badges use bright white (<code>#ffffff</code>) with crisp translucent white borders.
+                </p>
+              </div>
+
+              <div class="comp-panel" style="padding:16px;">
+                <div style="font-family:var(--mono); font-size:11px; font-weight:600; color:var(--primary); margin-bottom:6px;">4. WHITE USER CARD FOOTER</div>
+                <p style="font-size:12px; color:var(--ink-muted); margin:0;">
+                  The user card at the bottom is styled as a clean white card with dark charcoal typography and an online green status pip.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 03: Line Anatomy -->
+      <section id="line-system">
+        <div class="section-header">
+          <div>
+            <div class="section-eyebrow">Geometric DNA</div>
+            <h2 class="section-title">03 &mdash; Line Design &amp; Architectural Motifs</h2>
+            <p class="section-desc">Coordinate '+' crosshairs, directional indicator strokes, and shared 1px bento grids.</p>
+          </div>
+        </div>
+
+        <div class="bento-shell">
+          <div class="bento-cell span-2">
+            <div style="font-family:var(--mono); font-size:11px; font-weight:600; color:var(--primary); margin-bottom:6px;">// SHARED BENTO ARCHITECTURE</div>
+            <h3 style="font-size:22px; font-weight:700; margin:0 0 10px; color:var(--ink);">Continuous 1px Hairline Grids</h3>
+            <p style="color:var(--ink-muted); font-size:13px; line-height:1.6; max-width:540px;">
+              Modules share single 1px structural walls rather than arbitrary floating margins. This yields high information density, clean vertical tracking, and zero wasted space.
+            </p>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+              <span class="line-badge cobalt"><span class="badge-pip"></span>1px Shared Wall</span>
+              <span class="line-badge"><span class="badge-pip"></span>6px Card Radius</span>
+              <span class="line-badge success"><span class="badge-pip"></span>Zero Drop Shadow</span>
+            </div>
+          </div>
+
+          <div class="bento-cell dark">
+            <div style="font-family:var(--mono); font-size:11px; font-weight:600; color:#38bdf8; margin-bottom:6px;">// TELEMETRY</div>
+            <h4 style="font-size:18px; margin:0 0 8px; color:white;">Line Alignment</h4>
+            <p class="bento-sub" style="font-size:12px; line-height:1.5;">
+              Precision hairline grid rules ensure consistent visual cadence across viewports.
+            </p>
+            <div style="margin-top:20px; font-family:var(--mono); font-size:26px; font-weight:700; color:#38bdf8;">
+              100%
+            </div>
+            <div style="font-family:var(--mono); font-size:10px; color:#64748b;">Geometric Concordance</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 04: Typography Scale -->
+      <section id="typography">
+        <div class="section-header">
+          <div>
+            <div class="section-eyebrow">Type Hierarchy</div>
+            <h2 class="section-title">04 &mdash; Typography Scale</h2>
+            <p class="section-desc">Plus Jakarta Sans for display and body; JetBrains Mono for metadata, specs, and status codes.</p>
+          </div>
+        </div>
+
+        <div class="type-table">
+          <div class="type-row">
+            <div class="type-meta">
+              <strong>display-xl</strong>
+              54px · Weight 300 · Line 1.1<br>
+              Plus Jakarta Sans
+            </div>
+            <div class="type-sample" style="font-size:46px; font-weight:300; letter-spacing:-0.035em;">
+              Architectural Simplicity.
+            </div>
+          </div>
+
+          <div class="type-row">
+            <div class="type-meta">
+              <strong>headline-md</strong>
+              22px · Weight 600 · Line 1.3<br>
+              Plus Jakarta Sans
+            </div>
+            <div class="type-sample" style="font-size:22px; font-weight:600; letter-spacing:-0.01em;">
+              Micro-Credential Verification &amp; Senate Approval
+            </div>
+          </div>
+
+          <div class="type-row">
+            <div class="type-meta">
+              <strong>body-regular</strong>
+              14px · Weight 400 · Line 1.55<br>
+              Plus Jakarta Sans
+            </div>
+            <div class="type-sample" style="font-size:14px; font-weight:400; line-height:1.55; color:var(--ink-muted); max-width:620px;">
+              Courses comply with Garis Panduan Micro-Credential UTeM Versi 1.0. All assessment rubrics, SLT calculations, and MQF levels are locked to digital audit logs.
+            </div>
+          </div>
+
+          <div class="type-row">
+            <div class="type-meta">
+              <strong>mono-metadata</strong>
+              12px · Weight 500 · Line 1.4<br>
+              JetBrains Mono
+            </div>
+            <div class="type-sample" style="font-family:var(--mono); font-size:12px; color:var(--primary); font-weight:500;">
+              MQF_LEVEL_6 // CODE: UTEM-MC-CS201 // STATUS: VERIFIED_CODL
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 05: Buttons & Components -->
+      <section id="components">
+        <div class="section-header">
+          <div>
+            <div class="section-eyebrow">Foundry</div>
+            <h2 class="section-title">05 &mdash; Buttons, Badges &amp; Controls</h2>
+            <p class="section-desc">Interactive components honoring the micro-radius (4px) and line styling rules.</p>
+          </div>
+        </div>
+
+        <div class="comp-row">
+          <div class="comp-panel">
+            <div class="comp-panel-title">Button Hierarchy (4px Micro-Radius)</div>
+            <div class="btn-flex-wrap">
+              <button class="btn btn-primary">Primary Cobalt</button>
+              <button class="btn btn-dark">Jet Obsidian</button>
+              <button class="btn btn-line">Linear Wireframe</button>
+              <button class="btn btn-cobalt-line">Cobalt Line</button>
+              <button class="btn btn-ghost">Ghost Link &rarr;</button>
+              <button class="btn btn-danger-line">Delete</button>
+            </div>
+          </div>
+
+          <div class="comp-panel">
+            <div class="comp-panel-title">Semantic Line Badges (Outline + Status Pip)</div>
+            <div class="btn-flex-wrap">
+              <span class="line-badge cobalt"><span class="badge-pip"></span>In Verification</span>
+              <span class="line-badge success"><span class="badge-pip"></span>Senate Endorsed</span>
+              <span class="line-badge warning"><span class="badge-pip"></span>Pending Review</span>
+              <span class="line-badge error"><span class="badge-pip"></span>Non-Compliant</span>
+              <span class="line-badge"><span class="badge-pip"></span>Draft v1.4</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 06: Micro-Radius Scale -->
+      <section id="radius">
+        <div class="section-header">
+          <div>
+            <div class="section-eyebrow">Geometry Study</div>
+            <h2 class="section-title">06 &mdash; Radius Scale Comparison</h2>
+            <p class="section-desc">Visualizing why 4px&ndash;6px micro-radii strike the perfect balance between human touch and technical precision.</p>
+          </div>
+        </div>
+
+        <div class="radius-grid">
+          <div class="radius-box-item">
+            <div class="radius-specimen" style="border-radius:0px;">0px</div>
+            <div style="text-align:center;">
+              <strong style="display:block; font-size:12px; color:var(--ink);">Carbon Flat</strong>
+              <span style="font-family:var(--mono); font-size:10px; color:var(--ink-subtle);">0px · Rigid &amp; severe</span>
+            </div>
+          </div>
+
+          <div class="radius-box-item" style="border-color:var(--primary); background:var(--primary-tint);">
+            <div class="radius-specimen" style="border-radius:4px; border-width:2px;">4px &#9733;</div>
+            <div style="text-align:center;">
+              <strong style="display:block; font-size:12px; color:var(--primary);">Micro-Radius (Sweet Spot)</strong>
+              <span style="font-family:var(--mono); font-size:10px; color:var(--primary);">4px · Buttons, inputs, pills</span>
+            </div>
+          </div>
+
+          <div class="radius-box-item">
+            <div class="radius-specimen" style="border-radius:6px;">6px</div>
+            <div style="text-align:center;">
+              <strong style="display:block; font-size:12px; color:var(--ink);">Card Optimum</strong>
+              <span style="font-family:var(--mono); font-size:10px; color:var(--ink-subtle);">6px · Bento cards, tables</span>
+            </div>
+          </div>
+
+          <div class="radius-box-item" style="opacity:0.6;">
+            <div class="radius-specimen" style="border-radius:16px; border-style:dashed;">16px</div>
+            <div style="text-align:center;">
+              <strong style="display:block; font-size:12px; color:var(--ink);">Overly Rounded</strong>
+              <span style="font-family:var(--mono); font-size:10px; color:var(--ink-subtle);">16px · Degrades line rigor</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 07: Precision Form Inputs -->
+      <section id="forms">
+        <div class="section-header">
+          <div>
+            <div class="section-eyebrow">Data Entry</div>
+            <h2 class="section-title">07 &mdash; Precision Form Inputs</h2>
+            <p class="section-desc">Line-anchored fields with crisp focus highlights and monospaced auxiliary units.</p>
+          </div>
+        </div>
+
+        <div class="comp-panel">
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="field-label">Course Title <span class="field-helper">REQUIRED</span></label>
+              <input type="text" class="line-input" value="Advanced Cloud Computing &amp; Serverless">
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Course Code <span class="field-helper">AUTO-INCREMENT</span></label>
+              <div class="line-input with-addon">
+                <span class="input-addon">UTEM-MC-</span>
+                <input type="text" value="CS2026-09A">
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Faculty Department <span class="field-helper">SELECT</span></label>
+              <select class="line-input" style="cursor:pointer;">
+                <option>Faculty of Information and Communication Technology (FTMK)</option>
+                <option>Faculty of Electrical Engineering (FKE)</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Credit Value &amp; Equivalent SLT <span class="field-helper">CALCULATED</span></label>
+              <div class="line-input with-addon">
+                <input type="text" value="3 Credits (120 SLT Hours)">
+                <span class="input-addon" style="border-right:none; border-left:1px solid var(--line-hairline);">40h/Cr</span>
+              </div>
+            </div>
+
+            <div class="form-field full">
+              <label class="field-label">CLO Description <span class="field-helper">PLAIN TEXT</span></label>
+              <textarea class="line-input">Demonstrate mastery over microservices architecture and implement automated CI/CD pipeline deployment.</textarea>
+            </div>
+          </div>
+
+          <div style="margin-top:16px; display:flex; justify-content:flex-end; gap:10px;">
+            <button class="btn btn-line">Discard</button>
+            <button class="btn btn-primary">Save Course Spec &rarr;</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 08: Live MCMS Enterprise Prototype Simulation -->
+      <section id="prototype">
+        <div class="section-header">
+          <div>
+            <div class="section-eyebrow">Real-World Application</div>
+            <h2 class="section-title">08 &mdash; Live Enterprise Prototype: MCMS Verification</h2>
+            <p class="section-desc">Experience the design system inside an authentic micro-credential approval workflow featuring a rounded nested cobalt navigation drawer.</p>
+          </div>
+          <span class="line-badge cobalt"><span class="badge-pip"></span>Interactive Simulation</span>
+        </div>
+
+        <div class="proto-container has-crosshairs">
+          <div class="crosshair-corner ch-tl"></div>
+          <div class="crosshair-corner ch-tr"></div>
+          <div class="crosshair-corner ch-bl"></div>
+          <div class="crosshair-corner ch-br"></div>
+
+          <div class="proto-topbar">
+            <div class="proto-title-crumb">
+              <span>PORTAL</span> / <span>CODL-VERIFICATION</span> / <strong>MC-FTMK-042</strong>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="line-badge cobalt"><span class="badge-pip"></span>STAGE 3 OF 4</span>
+              <button class="btn btn-dark" style="height:26px; padding:0 8px; font-size:10px;">Print PDF</button>
+            </div>
+          </div>
+
+          <div class="proto-inner-frame">
+            <!-- Nested Cobalt Left Navigation with Rounded Right Corner -->
+            <div class="proto-inner-sidebar">
+              <div style="font-family:var(--mono); font-size:9px; font-weight:700; color:#ffffff; letter-spacing:0.06em;">MCMS MODULES</div>
+              <ul class="proto-inner-nav">
+                <li class="proto-nav-item"><a href="#prototype">Curriculum</a></li>
+                <li class="proto-nav-item"><a href="#prototype">Offerings</a></li>
+                <li class="proto-nav-item"><a href="#prototype">Enrolments</a></li>
+                <li class="proto-nav-item active"><a href="#prototype">Verification <span class="nav-tab-counter" style="background:#0052ff; color:#fff;">1</span></a></li>
+                <li class="proto-nav-item"><a href="#prototype">Credit Bank</a></li>
+                <li class="proto-nav-item"><a href="#prototype">Audit Trail</a></li>
+              </ul>
+              <div style="margin-top:auto; padding-top:12px; border-top:1px dashed rgba(255,255,255,0.3); font-family:var(--mono); font-size:10px; color:#ffffff;">
+                ROLE: CODL_OFFICER
+              </div>
+            </div>
+
+            <!-- Main Course Review Content -->
+            <div class="proto-inner-main">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:16px; border-bottom:1px solid var(--line-hairline);">
+                <div>
+                  <span class="line-badge cobalt" style="font-size:11px; margin-bottom:6px;"><span class="badge-pip"></span>MC-CS201 · 3 CREDITS</span>
+                  <h3 style="font-size:20px; font-weight:700; margin:0 0 6px; color:var(--ink);">Cloud Infrastructure &amp; Container Orchestration</h3>
+                  <div style="font-size:12px; color:var(--ink-muted); display:flex; gap:14px;">
+                    <span><strong>Faculty:</strong> FTMK</span>
+                    <span><strong>Coordinator:</strong> Assoc. Prof. Dr. Zulkifli</span>
+                    <span><strong>MQF Level:</strong> Level 6</span>
+                  </div>
+                </div>
+                <div style="text-align:right;">
+                  <span class="line-badge cobalt" style="font-size:11px; padding:3px 10px;"><span class="badge-pip"></span>UNDER CODL REVIEW</span>
+                </div>
+              </div>
+
+              <div class="linear-stepper">
+                <div class="stepper-step completed">
+                  <div class="step-node">&#10003;</div>
+                  <div class="step-label">1. Submission</div>
+                  <div class="step-meta">12 Nov 2026</div>
+                </div>
+                <div class="stepper-step completed">
+                  <div class="step-node">&#10003;</div>
+                  <div class="step-label">2. Dean Endorsement</div>
+                  <div class="step-meta">15 Nov 2026</div>
+                </div>
+                <div class="stepper-step active">
+                  <div class="step-node">03</div>
+                  <div class="step-label" style="color:var(--primary);">3. CODL Verification</div>
+                  <div class="step-meta">In Progress</div>
+                </div>
+                <div class="stepper-step">
+                  <div class="step-node">04</div>
+                  <div class="step-label" style="color:var(--ink-subtle);">4. Senate Endorsement</div>
+                  <div class="step-meta">Pending</div>
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:3fr 2fr; gap:18px;">
+                <div class="comp-panel" style="padding:16px;">
+                  <div style="font-size:12px; font-weight:600; color:var(--ink); margin-bottom:12px; display:flex; justify-content:space-between;">
+                    <span>UTeM Guide v1.0 Compliance Check</span>
+                    <span style="font-family:var(--mono); color:var(--primary);">4 / 4 PASSED</span>
+                  </div>
+
+                  <div class="criteria-item">
+                    <div class="criteria-left">
+                      <div class="criteria-check">&#10003;</div>
+                      <div><strong>Total SLT Calculation (120 Hours)</strong></div>
+                    </div>
+                    <span class="line-badge success">Compliant</span>
+                  </div>
+
+                  <div class="criteria-item">
+                    <div class="criteria-left">
+                      <div class="criteria-check">&#10003;</div>
+                      <div><strong>Constructive Alignment to CLO</strong></div>
+                    </div>
+                    <span class="line-badge success">Compliant</span>
+                  </div>
+
+                  <div class="criteria-item">
+                    <div class="criteria-left">
+                      <div class="criteria-check">&#10003;</div>
+                      <div><strong>Target Industry Partner Alignment</strong></div>
+                    </div>
+                    <span class="line-badge success">Compliant</span>
+                  </div>
+
+                  <div class="criteria-item">
+                    <div class="criteria-left">
+                      <div class="criteria-check">&#10003;</div>
+                      <div><strong>uLearn LMS Content Readiness</strong></div>
+                    </div>
+                    <span class="line-badge success">Compliant</span>
+                  </div>
+                </div>
+
+                <div class="comp-panel" style="padding:16px; display:flex; flex-direction:column; justify-content:space-between;">
+                  <div>
+                    <div style="font-size:12px; font-weight:600; color:var(--ink); margin-bottom:8px;">Evaluator Sign-Off</div>
+                    <p style="font-size:11px; color:var(--ink-muted); margin:0 0 14px; line-height:1.45;">
+                      All criteria under Garis Panduan Micro-Credential UTeM Versi 1.0 verified. Ready to endorse and route to the Senate queue.
+                    </p>
+                    <div style="padding:8px 12px; background:var(--canvas-subtle); border:1px solid var(--line-hairline); border-radius:var(--theme-radius); font-family:var(--mono); font-size:10px; color:var(--semantic-success);">
+                      AUDIT STATUS: PASS WITH MERIT (100%)
+                    </div>
+                  </div>
+
+                  <div style="margin-top:16px; display:flex; flex-direction:column; gap:8px;">
+                    <button class="btn btn-primary" onclick="simulateApprove()" style="width:100%;">
+                      &#10003; Endorse &amp; Forward to Senate
+                    </button>
+                    <button class="btn btn-line" style="width:100%;">
+                      Request Faculty Revision
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- High-Contrast Footer -->
+    <footer class="footer">
+      <div class="footer-grid">
+        <div>
+          <h5 style="color:white; margin:0 0 10px; font-size:14px; font-weight:700;">LINEAR PRECISION DESIGN SYSTEM</h5>
+          <p style="font-size:12px; line-height:1.6; max-width:280px; margin:0;">
+            High-contrast enterprise framework with full-height cobalt navy drawer, white border line, right pull-tab latch, and 4px micro-radii.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h6>Navigation</h6>
+          <a href="#palette">Color Matrix</a>
+          <a href="#sidebar-spec">White Tab Specs</a>
+          <a href="#line-system">Line Anatomy</a>
+          <a href="#typography">Typography</a>
+        </div>
+
+        <div class="footer-col">
+          <h6>Components</h6>
+          <a href="#components">Buttons &amp; Badges</a>
+          <a href="#radius">Micro-Radius Scale</a>
+          <a href="#forms">Precision Forms</a>
+          <a href="#prototype">MCMS Prototype</a>
+        </div>
+
+        <div class="footer-col">
+          <h6>System Tokens</h6>
+          <a href="#" onclick="setThemeMode('light'); return false;">Light Mode</a>
+          <a href="#" onclick="setThemeMode('dark'); return false;">Dark Mode</a>
+          <a href="#" onclick="toggleSidebarCollapse(); return false;">Toggle Pull-Tab</a>
+          <a href="#">UTeM Guide v1.0</a>
+        </div>
+      </div>
+
+      <div style="padding-top:20px; border-top:1px solid var(--line-hairline); display:flex; justify-content:space-between; font-family:var(--mono); font-size:10px; color:#64748b;">
+        <span>LINEAR PRECISION // DESIGN SYSTEM V2.3</span>
+        <span>FULL-HEIGHT (100VH) // SOLID WHITE ACTIVE TAB PILL // 3PX WHITE BORDER</span>
+      </div>
+    </footer>
+
+  </main>
+</div>
+
+<!-- Toast Feedback -->
+<div id="toast" class="toast">Copied to clipboard</div>
+
+<script>
+  // COLLAPSIBLE NAVIGATION CATEGORIES
+  function toggleNavCategory(groupId) {
+    const group = document.getElementById(groupId);
+    if (!group) return;
+    const isCollapsed = group.classList.toggle('is-collapsed');
+    const btn = group.querySelector('.nav-group-header');
+    if (btn) {
+      btn.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+    }
+  }
+
+  // COLLAPSIBLE SIDEBAR WITH PULL-TAB
+  function toggleSidebarCollapse() {
+    const sidebar = document.getElementById('appSidebar');
+    const isCollapsed = sidebar.classList.toggle('collapsed');
+    
+    const pullIcon = document.getElementById('pullTabIcon');
+    if (pullIcon) {
+      pullIcon.innerHTML = isCollapsed 
+        ? '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>'
+        : '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3l-5 5 5 5"/></svg>';
+    }
+
+    const quickIcon = document.getElementById('quickToggleIcon');
+    if (quickIcon) quickIcon.innerHTML = isCollapsed ? '&#9654;' : '&#9664;';
+
+    const quickText = document.getElementById('quickToggleText');
+    if (quickText) quickText.textContent = isCollapsed ? 'Expand Nav' : 'Collapse Nav';
+
+    const heroBtnText = document.getElementById('heroCollapseBtnText');
+    if (heroBtnText) heroBtnText.innerHTML = isCollapsed ? '&#9654; Expand Sidebar' : '&#9664; Toggle Sidebar Pull-Tab';
+
+    const stateDisplay = document.getElementById('sidebarStateDisplay');
+    if (stateDisplay) stateDisplay.textContent = isCollapsed ? 'COLLAPSED (68px)' : 'EXPANDED (260px)';
+
+    showToast(isCollapsed ? 'Sidebar collapsed (68px)' : 'Sidebar expanded (260px)');
+  }
+
+  // Keyboard shortcut Ctrl+B or Cmd+B
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+      e.preventDefault();
+      toggleSidebarCollapse();
+    }
+  });
+
+  // Theme Switching (Light / Dark)
+  function setThemeMode(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.body.className = theme === 'dark' ? 'grid-bg theme-dark' : 'grid-bg';
+    
+    document.getElementById('btnThemeLight').classList.toggle('active', theme === 'light');
+    document.getElementById('btnThemeDark').classList.toggle('active', theme === 'dark');
+
+    showToast(`Switched to ${theme.toUpperCase()} Theme`);
+  }
+
+  function toggleThemeQuick() {
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
+    const next = current === 'light' ? 'dark' : 'light';
+    setThemeMode(next);
+  }
+
+  // Live Radius Switcher
+  function setRadius(btnRadius, cardRadius, el) {
+    document.documentElement.style.setProperty('--theme-radius', btnRadius);
+    document.documentElement.style.setProperty('--theme-card-radius', cardRadius);
+    
+    if (el) {
+      document.querySelectorAll('.radius-opt').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+    }
+    showToast(`Radius: ${btnRadius} (controls) / ${cardRadius} (cards)`);
+  }
+
+  // Copy Hex Utility
+  function copyHex(hex) {
+    navigator.clipboard.writeText(hex).then(() => {
+      showToast(`Copied ${hex} to clipboard`);
+    }).catch(() => {
+      showToast(`Hex: ${hex}`);
+    });
+  }
+
+  // Copy Tokens JSON
+  function copyTokensJSON() {
+    const tokens = {
+      system: "linear-precision",
+      version: "2.3",
+      sidebar: {
+        background: "#0b1a3d",
+        borderRight: "3px solid #ffffff",
+        cornerRadiusRight: "20px",
+        height: "100vh (flush to top and bottom)",
+        activeTab: "pure white card #ffffff with #0b1a3d text",
+        pullTab: "centered 50% protruding handle",
+        expandedWidth: "260px",
+        collapsedWidth: "68px"
+      },
+      canvas: "#ffffff",
+      ink: "#090a0f",
+      radius: "4px"
+    };
+    navigator.clipboard.writeText(JSON.stringify(tokens, null, 2)).then(() => {
+      showToast("Design tokens JSON copied to clipboard");
+    });
+  }
+
+  // Toast Functionality
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    clearTimeout(window._toastTimeout);
+    window._toastTimeout = setTimeout(() => {
+      toast.style.display = 'none';
+    }, 2200);
+  }
+
+  // Prototype Simulation
+  function simulateApprove() {
+    alert("Simulation: Course 'MC-CS201' endorsed by CODL and forwarded to Senate queue!\n\nNotice how the flush full-height 100vh sidebar and pure white active tab eliminate visual clutter.");
+  }
+
+  function scrollToId(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Highlight Active Left Nav Tab on Scroll
+  window.addEventListener('scroll', () => {
+    if (window.scrollY < 80) return; // Preserve initial mockup active state (Line anatomy)
+    const sections = ['palette', 'sidebar-spec', 'line-system', 'typography', 'components', 'radius', 'forms', 'prototype'];
+    let current = 'line-system';
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && window.scrollY >= (el.offsetTop - 120)) {
+        current = id;
+      }
+    });
+    document.querySelectorAll('.app-sidebar .nav-tab-item').forEach(item => {
+      const a = item.querySelector('a');
+      if (a && a.getAttribute('href') === '#' + current) {
+        item.classList.add('active');
+      } else {
+        item.classList.remove('active');
+      }
+    });
+  });
+</script>
+</body>
+</html>

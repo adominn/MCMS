@@ -1,0 +1,84 @@
+URL: http://127.0.0.1:8110/public/verify/CND01-7K9MJ
+FINAL: http://127.0.0.1:8110/public/verify/CND01-7K9MJ
+STATUS: 200
+TITLE: Verification Result - UTeM Micro-Credential Management System
+H1: Verification result
+---
+UTeM MCMS
+Public Verification & Credential Portal
+Sign in
+EN
+BM
+Home
+Catalogue
+Pathways to a degree
+How recognition works
+FAQ
+Verify a credential
+←
+Back
+Home
+Verify a credential
+CND01-7K9MJ
+Verification result
+Integrity and registration verification result from UTeM
+Print verification record
+Status: Valid
+Valid. This credential was issued by UTeM and has not been changed or revoked.
+CODE:
+CND01-7K9MJ
+Copy
+Cloud Native Development
+Stand-Alone Micro-Credential (SAMC)
+2
+graduating credits
+80h
+Student Learning Time (SLT)
+MQF Level
+4
+RECIPIENT NAME
+AMIR HAKIMI BIN ZULKIFLI
+ISSUING INSTITUTION
+Universiti Teknikal Malaysia Melaka
+FACULTY / ACADEMIC PTJ
+Fakulti Teknologi Maklumat Dan Komunikasi
+LECTURER
+Dr. Aina Zulkifli
+DATE AWARDED
+15/09/2026
+AUTHORIZED SIGNATORY
+Hakim Rahman
+EARNED COMPONENT MODULES & BADGES
+Module 1: Containerization with Docker · 40h SLT
+BADGE-CND-M1-01
+Verify →
+Module 2: Kubernetes Orchestration & CI/CD · 40h SLT
+BADGE-CND-M2-01
+Verify →
+Cryptographic Integrity Verified
+· Ed25519 (W3C VC 2.0 / Open Badges 3.0)
+Public keys discoverable via UTeM standard JWKS endpoint at /.well-known/jwks.json
+Download Credential (.json)
+Download Signed Token (.jwt)
+Personal Data Protection Act (PDPA 2010) Compliance Notice: Only name, credential, issuer, issue date and status are shown. Results, marks, matric numbers and personal email addresses are never public.
+Check another credential or badge
+
+Enter any official UTeM micro-credential code or badge identifier:
+
+Verify
+UTeM Micro-credentials
+Centre for Open and Distance Learning (CODL)
+UTeM, Hang Tuah Jaya, 76100 Durian Tunggal, Melaka
+Learn
+All micro-credentials
+Degree pathways
+Recognition stages
+Help
+FAQ
+Verify a credential
+codl@utem.edu.my
+Policies
+Privacy notice (PDPA)
+Terms of use
+Accessibility
+UTeM Micro-Credential Management System (MCMS). Compliant with MQA & MoHE Good Practice Standards.

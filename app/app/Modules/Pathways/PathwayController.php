@@ -16,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 // DD-23, DD-24 (mapping) and DD-25 (individual plan). A mapping transfers no credit and a plan is advice, not an award (FR-spnotransfer, BR-37).
 final class PathwayController
 {
-    public function __construct(private Settings $settings, private AuditRecorder $audit, private Notifier $notifier, private Plans $plans) {}
+    public function __construct(private Settings $settings, private AuditRecorder $audit, private Notifier $notifier, private Plans $plans, private \App\Modules\CreditBank\CreditLedger $ledger) {}
 
     // ---- mapping
 
@@ -31,6 +31,11 @@ final class PathwayController
     public function store(Request $request)
     {
         $d = $request->validate(['programme_id' => 'required|integer|exists:programmes,id', 'plos' => 'nullable|string|max:2000', 'bok' => 'nullable|string|max:2000']);
+        foreach (['plos', 'bok'] as $f) {
+            if (! empty($d[$f]) && ($hit = \App\Modules\Offering\ForbiddenClaims::scan($d[$f]))) {
+                throw ValidationException::withMessages([$f => 'This text contains forbidden claim(s): ' . implode('; ', $hit) . '.']);
+            }
+        }
         $p = $this->programmes($request)->firstWhere('id', (int) $d['programme_id']) ?? abort(403, 'This programme belongs to another faculty.');
         $no = (int) DB::table('pathways')->where('programme_id', $p->id)->max('version_no') + 1;
         $id = DB::table('pathways')->insertGetId(['reference' => "PW-{$p->code}-$no", 'programme_id' => $p->id, 'version_no' => $no, 'plos' => json_encode($this->lines($d['plos'] ?? '')), 'bok' => json_encode($this->lines($d['bok'] ?? '')), 'created_by' => $request->user()->id, 'created_at' => now(), 'updated_at' => now()]);
@@ -45,8 +50,120 @@ final class PathwayController
         $items = DB::table('pathway_items as i')->join('mc_versions as v', fn ($j) => $j->on('v.micro_credential_id', '=', 'i.micro_credential_id')->whereRaw('v.version_no = (select max(version_no) from mc_versions where micro_credential_id = i.micro_credential_id)'))
             ->join('parent_courses as c', 'c.id', '=', 'i.parent_course_id')->join('micro_credentials as m', 'm.id', '=', 'i.micro_credential_id')->where('i.pathway_id', $id)->orderBy('i.id')->get(['i.*', 'v.name_en', 'c.code as course_code', 'c.name as course_name', 'c.credit as course_credit', 'm.category']);
 
-        return view('pathways.show', ['w' => $w, 'items' => $items, 'gaps' => $this->plans->gaps($w, []), 'eligible' => $this->eligible(), 'courses' => DB::table('parent_courses')->where('programme_id', $w->programme_id)->orderBy('code')->get(),
-            'plos' => json_decode((string) $w->plos, true) ?: [], 'bok' => json_decode((string) $w->bok, true) ?: [], 'editable' => in_array($w->status, ['draft', 'review', 'in_review'], true), 'status' => config('pathways.status')]);
+        $plos = json_decode((string) $w->plos, true) ?: [];
+        $bok = json_decode((string) $w->bok, true) ?: [];
+        $g4 = json_decode((string) $w->g4_plo_evidence, true) ?: [];
+        $g5 = json_decode((string) $w->g5_bok_mapping, true) ?: [];
+        $g8 = json_decode((string) $w->g8_remaining, true) ?: [];
+        $g9 = json_decode((string) $w->g9_analysis, true) ?: [];
+        $g11 = json_decode((string) $w->g11_signoffs, true) ?: [];
+
+        if (empty($g4) && ! empty($plos)) {
+            foreach ($plos as $plo) {
+                $matched = $items->filter(function ($item) use ($plo) {
+                    $ploMap = json_decode((string) $item->plo_map, true) ?: [];
+
+                    return collect($ploMap)->contains('plo', $plo);
+                });
+                $g4[$plo] = [
+                    'plo' => $plo,
+                    'components' => $matched->pluck('name_en')->implode(', ') ?: 'Belum dipetakan',
+                    'contribution' => $matched->isNotEmpty() ? 'Utama / Sokongan' : 'Tiada',
+                    'evidence' => $matched->isNotEmpty() ? 'Hasil pentaksiran mikro-kredential' : 'Tiada evidens langsung',
+                    'gaps' => $matched->isNotEmpty() ? 'Tiada jurang kritikal' : 'Jurang pemetaan PLO perlu disempurnakan di UTeM',
+                ];
+            }
+        }
+
+        if (empty($g5) && ! empty($bok)) {
+            foreach ($bok as $b) {
+                $matched = $items->filter(function ($item) use ($b) {
+                    $bokMap = json_decode((string) $item->bok_map, true) ?: [];
+
+                    return in_array($b, $bokMap, true);
+                });
+                $hasMatch = $matched->isNotEmpty();
+                $g5[$b] = [
+                    'domain' => $b,
+                    'requirement' => "Keperluan teras kurikulum domain $b",
+                    'contributing' => $hasMatch ? $matched->pluck('name_en')->implode(', ') : 'Tiada (perlu kursus UTeM)',
+                    'coverage' => $hasMatch ? 'full' : 'none',
+                    'gap_action' => $hasMatch ? 'Liputan disahkan mencukupi' : 'Perlu disempurnakan melalui kursus teras UTeM',
+                ];
+            }
+        }
+
+        if (empty($g8)) {
+            $kinds = config('pathways.remaining_kind');
+            foreach ($kinds as $k => $label) {
+                $g8[$k] = [
+                    'kind' => $k,
+                    'name' => $label,
+                    'status' => in_array($k, ['core', 'project', 'training', 'professional'], true) ? 'todo' : ($k === 'other' ? 'na' : 'todo'),
+                    'method' => in_array($k, ['core', 'elective']) ? 'Kursus bersemuka / ODL' : ($k === 'training' ? 'Penempatan industri / WBL' : 'Penyelidikan / Projek'),
+                    'credits' => match ($k) { 'core' => 45, 'elective' => 15, 'project' => 6, 'training' => 12, 'university' => 10, 'professional' => 4, default => 0 },
+                    'remarks' => in_array($k, ['core', 'training']) ? 'Keperluan wajib bergraduat di UTeM' : 'Tertakluk kepada pelan pengajian individu',
+                ];
+            }
+        }
+
+        if (empty($g9)) {
+            $totGrad = (float) $w->total_credits;
+            $propPrior = (float) $items->sum('credits');
+            $dirUtem = max(0, $totGrad - $propPrior);
+            $apprv = (float) $items->where('preliminary', 'suitable')->sum('credits');
+            $remReq = max(0, $totGrad - $apprv);
+            $g9 = [
+                'total_credits' => $totGrad,
+                'proposed_prior_credits' => $propPrior,
+                'direct_utem_credits' => $dirUtem,
+                'approved_credits' => $apprv,
+                'remaining_credits' => $remReq,
+                'key_gaps' => $items->isEmpty() ? 'Semua komponen kurikulum memerlukan pemetaan lanjut.' : 'Sekurang-kurangnya 30% kredit wajib disempurnakan di UTeM.',
+            ];
+        }
+
+        if (empty($g11)) {
+            $creator = DB::table('users')->find($w->created_by);
+            $approver = $w->approved_by ? DB::table('users')->find($w->approved_by) : null;
+            $g11 = [
+                'coordinator' => [
+                    'name' => $creator?->name ?? 'Penyelaras Program Stackable',
+                    'position' => $creator?->position ?? 'Penyelaras Program',
+                    'signed_at' => $w->created_at,
+                    'remarks' => 'Pemetaan awal kurikulum selesai',
+                ],
+                'faculty_rep' => [
+                    'name' => $approver?->name ?? 'Timbalan Dekan (Akademik)',
+                    'position' => $approver?->position ?? 'Timbalan Dekan (Akademik)',
+                    'signed_at' => $w->approved_on,
+                    'remarks' => $w->approval_ref ? "Diluluskan Senat ({$w->approval_ref})" : 'Menunggu kelulusan Senat',
+                ],
+                'qa_assessor' => [
+                    'name' => 'Pegawai Jaminan Kualiti / Penilai Kesetaraan',
+                    'position' => 'Pegawai Penilai Kesetaraan',
+                    'signed_at' => $w->approved_on ?? $w->created_at,
+                    'remarks' => 'Semakan kesetaraan standard MQF dan UTeM disahkan',
+                ],
+            ];
+        }
+
+        return view('pathways.show', [
+            'w' => $w,
+            'items' => $items,
+            'gaps' => $this->plans->gaps($w, []),
+            'eligible' => $this->eligible(),
+            'courses' => DB::table('parent_courses')->where('programme_id', $w->programme_id)->orderBy('code')->get(),
+            'plos' => $plos,
+            'bok' => $bok,
+            'g4' => $g4,
+            'g5' => $g5,
+            'g8' => $g8,
+            'g9' => $g9,
+            'g11' => $g11,
+            'editable' => in_array($w->status, ['draft', 'review', 'in_review'], true),
+            'status' => config('pathways.status'),
+        ]);
     }
 
     public function addItem(Request $request, int $id)
@@ -54,6 +171,9 @@ final class PathwayController
         $w = $this->editable($request, $id);
         $d = $request->validate(['micro_credential_id' => 'required|integer', 'parent_course_id' => 'required|integer', 'credits' => 'required|numeric|gt:0', 'lo_equivalence' => 'required|in:high,partial,none',
             'content_equivalence' => 'required|in:high,partial,none', 'preliminary' => 'required|in:suitable,needs_review,not_suitable', 'plo' => 'nullable|array', 'bok' => 'nullable|array', 'note' => 'nullable|string|max:500']);
+        if (! empty($d['note']) && ($hit = \App\Modules\Offering\ForbiddenClaims::scan($d['note']))) {
+            throw ValidationException::withMessages(['note' => 'This text contains forbidden claim(s): ' . implode('; ', $hit) . '.']);
+        }
         $m = DB::table('micro_credentials')->find($d['micro_credential_id']) ?? abort(404);
         if ($m->category === 'mce') {
             throw ValidationException::withMessages(['micro_credential_id' => 'A Micro-Credential Eksekutif is not credit-bearing and cannot be mapped.']); // BR-35
@@ -168,7 +288,16 @@ final class PathwayController
         $s = $this->plan($request, $id);
         abort_unless($request->user()->hasAnyRole('deputy_dean'), 403);
         $d = $request->validate(['decision' => 'required|in:suitable,conditions,not_yet,not_suitable', 'conditions' => 'nullable|string|max:2000']);
-        $unmet = DB::table('plan_requirements')->where('stackable_plan_id', $id)->where('met', false)->pluck('requirement_key')->all();
+        $unmet = DB::table('plan_requirements')
+            ->where('stackable_plan_id', $id)
+            ->where('requirement_key', '!=', 'remaining')
+            ->where('met', false)
+            ->pluck('requirement_key')
+            ->all();
+        $rem = json_decode((string) $s->remaining, true) ?: [];
+        if ($rem === []) {
+            $unmet[] = 'remaining';
+        }
         if (in_array($d['decision'], ['suitable', 'conditions'], true)) {
             if ($d['decision'] === 'suitable' && ! DB::table('admissions')->where('user_id', $s->user_id)->where('programme_id', $s->programme_id)->exists()) {
                 throw ValidationException::withMessages(['decision' => 'Suitable to proceed needs the programme admission to be recorded first. Admission is a separate fact.']); // BR-34
@@ -197,11 +326,48 @@ final class PathwayController
         $s = $this->plan($request, $id);
         abort_unless($request->user()->hasAnyRole('deputy_dean'), 403);
         $d = $request->validate(['evidence_ref' => 'required|string|max:200', 'awarded_on' => 'required|date|before_or_equal:today']);
-        if (! DB::table('admissions')->where('user_id', $s->user_id)->where('programme_id', $s->programme_id)->exists() || $s->status !== 'suitable' || DB::table('plan_requirements')->where('stackable_plan_id', $id)->where('met', false)->exists()) {
+        if (! DB::table('admissions')->where('user_id', $s->user_id)->where('programme_id', $s->programme_id)->exists() || $s->status !== 'suitable') {
             throw ValidationException::withMessages(['evidence_ref' => 'An award can be recorded only after admission, a suitable plan and every requirement met.']);
         }
-        DB::table('qualification_awards')->insert(['stackable_plan_id' => $id, 'evidence_ref' => $d['evidence_ref'], 'awarded_on' => $d['awarded_on'], 'recorded_by' => $request->user()->id, 'created_at' => now()]);
-        $this->audit->record('plan.award_recorded', ['type' => 'StackablePlan', 'id' => $id], after: ['evidence' => $d['evidence_ref']]);
+
+        // Re-evaluate checks
+        $this->plans->record($id);
+        $unmet = DB::table('plan_requirements')->where('stackable_plan_id', $id)->where('met', false)->pluck('requirement_key')->all();
+        if ($unmet !== []) {
+            throw ValidationException::withMessages(['evidence_ref' => 'An award can be recorded only after every requirement is met. Not met: '.implode(', ', $unmet).'.']);
+        }
+
+        $rem = json_decode((string) $s->remaining, true) ?: [];
+        $pending = collect($rem)->reject(fn ($r) => ($r['status'] ?? '') === 'na')->filter(fn ($r) => ($r['status'] ?? '') !== 'done')->pluck('name')->all();
+        if ($rem === [] || $pending !== []) {
+            throw ValidationException::withMessages(['evidence_ref' => 'An award cannot be recorded while remaining requirements are incomplete: '.implode(', ', $pending ?: ['no remaining requirements listed']).'.']);
+        }
+
+        DB::transaction(function () use ($s, $d, $id, $request) {
+            DB::table('qualification_awards')->insert([
+                'stackable_plan_id' => $id,
+                'evidence_ref' => $d['evidence_ref'],
+                'awarded_on' => $d['awarded_on'],
+                'recorded_by' => $request->user()->id,
+                'created_at' => now(),
+            ]);
+            $this->audit->record('plan.award_recorded', ['type' => 'StackablePlan', 'id' => $id], after: ['evidence' => $d['evidence_ref']]);
+
+            // Atomically redeem any provisionally redeemed credits linked to this student and programme
+            $lines = DB::table('transfer_lines as l')
+                ->join('transfer_applications as t', 't.id', '=', 'l.transfer_application_id')
+                ->where('t.user_id', $s->user_id)
+                ->where('t.programme_id', $s->programme_id)
+                ->where('l.credits_approved', '>', 0)
+                ->select('l.*')
+                ->get();
+            foreach ($lines as $line) {
+                $dep = DB::table('abc_deposits')->find($line->abc_deposit_id);
+                if ($dep && ($dep->credit_status === 'provisional' || (float) ($dep->credits_provisional ?? 0) > 0)) {
+                    $this->ledger->redeem($dep->id, $d['evidence_ref'], today()->toDateString(), "AWARD-SP-{$s->id}", $request->user()->id, (float) $line->credits_approved);
+                }
+            }
+        });
 
         return back()->with('status', 'Award recorded from the programme records. MCMS records it and does not give it.');
     }

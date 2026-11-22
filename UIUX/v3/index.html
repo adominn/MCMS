@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UTeM MCMS UI/UX Design Reference (v3)</title>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <header class="brand-header">
+    <div class="container brand-header-inner">
+      <div class="brand-identity">
+        <img src="assets/LogoJawiUTeM_blue-01.png" alt="Universiti Teknikal Malaysia Melaka" class="brand-logo-img">
+        <div class="brand-titles">
+          <span class="brand-sys-title">UTeM MCMS</span>
+          
+        </div>
+      </div>
+      <div class="header-actions">
+        <span class="tag tag-primary">Version 3.0 Deliverable</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+
+
+      <!-- Hero Summary -->
+      <div class="card card-navy has-crosshairs" style="padding:36px;margin-bottom:32px;border-left:4px solid var(--color-primary);background:linear-gradient(135deg, #0b1a3d 0%, #07122a 100%)">
+        <div class="flex flex-col gap-xs" style="max-width:800px">
+          <span class="tag tag-primary" style="align-self:flex-start">Design System Specification</span>
+          <h1 style="color:#ffffff;font-size:32px;margin:8px 0">UTeM MCMS v3 Design Reference</h1>
+          <p style="color:#d8e2ff;font-size:15px;line-height:1.6;margin-bottom:16px">
+            Official static reference for the Public Portal and Authentication experiences of the UTeM Micro-Credential Management System. Mapped 1:1 to <code>DESIGN.md</code> (v2.4 "linear-precision" light theme), adhering strictly to institutional governance rules in <code>MC UTeM Guide.pdf</code>.
+          </p>
+          <div class="flex items-center gap-sm" style="flex-wrap:wrap">
+            <a href="public/home.html" class="btn btn-primary">Open Public Portal</a>
+            <a href="auth/signin-default.html" class="btn btn-secondary">Open Sign-In Flow</a>
+            <a href="docs/IMPLEMENTATION_INVENTORY.md" class="btn btn-ghost" style="color:#ffffff">View Inventory &rarr;</a>
+            <a href="docs/DESIGN_PLAN.md" class="btn btn-ghost" style="color:#ffffff">View Design Plan &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Public Portal Pages (17 Screens) -->
+      <div style="margin-bottom:36px">
+        <div class="flex items-center justify-between" style="margin-bottom:16px">
+          <div>
+            <span class="tag">Part 1: Public Portal</span>
+            <h2 style="margin-top:4px">Public Portal Screens (17 Pages)</h2>
+          </div>
+          <span class="tag tag-success">100% COVERED</span>
+        </div>
+
+        <table class="card" style="width:100%;border-collapse:collapse;font-size:13px;text-align:left;padding:0;overflow:hidden">
+          <thead>
+            <tr style="background:var(--color-surface-1);border-bottom:2px solid var(--color-line-hairline);color:var(--color-ink-muted);font-family:var(--font-mono);font-size:11px">
+              <th style="padding:10px 14px">REF</th>
+              <th style="padding:10px 14px">PAGE / SCREEN NAME</th>
+              <th style="padding:10px 14px">URL / ROUTE MAPPING</th>
+              <th style="padding:10px 14px">KEY FEATURES</th>
+              <th style="padding:10px 14px">STATUS</th>
+              <th style="padding:10px 14px">ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-01</td>
+              <td style="padding:10px 14px;font-weight:600">Public Portal Landing</td>
+              <td style="padding:10px 14px"><code>/public</code> / <code>/</code></td>
+              <td style="padding:10px 14px">Bento category cards (UMC/SAMC/MCE), featured cohorts, verification quick-check</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/home.html" class="btn btn-primary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-02</td>
+              <td style="padding:10px 14px;font-weight:600">Course Catalogue & Search</td>
+              <td style="padding:10px 14px"><code>/public/catalogue</code></td>
+              <td style="padding:10px 14px">Sidebar filters (discipline, mode, PTj, fee), active offerings cards, pagination</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/catalogue.html" class="btn btn-primary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-02-E</td>
+              <td style="padding:10px 14px;font-weight:600">Catalogue Zero Results State</td>
+              <td style="padding:10px 14px"><code>/public/catalogue?q=...</code></td>
+              <td style="padding:10px 14px">Empty results illustration, filter reset guidance</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/catalogue-empty.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-03</td>
+              <td style="padding:10px 14px;font-weight:600">Offering Detail Page</td>
+              <td style="padding:10px 14px"><code>/public/offering/{id}</code></td>
+              <td style="padding:10px 14px">Full CLO mapping, 4-module syllabus breakdown, integrity standards, statutory credit box</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/offering.html" class="btn btn-primary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-04</td>
+              <td style="padding:10px 14px;font-weight:600">Degree Pathways Explorer</td>
+              <td style="padding:10px 14px"><code>/public/pathways</code></td>
+              <td style="padding:10px 14px">Approved stackable articulation matrices, 30% MQA statutory credit cap notice</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/pathways.html" class="btn btn-primary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-04-P</td>
+              <td style="padding:10px 14px;font-weight:600">Printable Pathway Advisory</td>
+              <td style="padding:10px 14px"><code>/public/pathways/{id}/print</code></td>
+              <td style="padding:10px 14px">Formal print-optimized institutional advisory sheet with UTeM crest and signatories</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/pathway-print.html" class="btn btn-secondary btn-sm" target="_blank">Print &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-05</td>
+              <td style="padding:10px 14px;font-weight:600">8-Stage Credit Lifecycle</td>
+              <td style="padding:10px 14px"><code>/public/how</code></td>
+              <td style="padding:10px 14px">Read-only <code>lifecycle-tracker</code> component, Milestone cards, prohibited-claims rules</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/how-it-works.html" class="btn btn-primary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-06</td>
+              <td style="padding:10px 14px;font-weight:600">Interactive Accordion FAQ</td>
+              <td style="padding:10px 14px"><code>/public/faq</code></td>
+              <td style="padding:10px 14px">4 categories (Badges, Credit/ACR, Fees, Privacy), expandable <code>&lt;details&gt;</code></td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/faq.html" class="btn btn-primary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-07</td>
+              <td style="padding:10px 14px;font-weight:600">Public Verification Hub</td>
+              <td style="padding:10px 14px"><code>/public/verify</code></td>
+              <td style="padding:10px 14px">Dual verification: Method 1 (Public Code) + Method 2 (Cryptographic File Signature)</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/verify.html" class="btn btn-primary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-08-A</td>
+              <td style="padding:10px 14px;font-weight:600">Verification Result - Valid</td>
+              <td style="padding:10px 14px"><code>/public/verify/CND01-7K9MJ</code></td>
+              <td style="padding:10px 14px">Authentic credential dossier, Ed25519 signature stamp, W3C JSON-LD and JWT downloads</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/verify-result-valid.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-08-B</td>
+              <td style="padding:10px 14px;font-weight:600">Verification Result - Superseded</td>
+              <td style="padding:10px 14px"><code>/public/verify/SEC02-3X8PQ</code></td>
+              <td style="padding:10px 14px">Reissued credential notice, link to replacement code</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/verify-result-superseded.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-08-C</td>
+              <td style="padding:10px 14px;font-weight:600">Verification Result - Revoked</td>
+              <td style="padding:10px 14px"><code>/public/verify/DATA9-1Z4TR</code></td>
+              <td style="padding:10px 14px">Revocation timestamp, Senate disciplinary justification</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/verify-result-revoked.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-08-D</td>
+              <td style="padding:10px 14px;font-weight:600">Verification Result - Badge</td>
+              <td style="padding:10px 14px"><code>/public/verify/BADGE-CND-M1-01</code></td>
+              <td style="padding:10px 14px">Single module achievement, SLT hours, non-credit notice</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/verify-result-badge.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-08-E</td>
+              <td style="padding:10px 14px;font-weight:600">Verification Result - Not Found</td>
+              <td style="padding:10px 14px"><code>/public/verify/UNKNOWN</code></td>
+              <td style="padding:10px 14px">404 response card with retry search box</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/verify-result-not-found.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-09</td>
+              <td style="padding:10px 14px;font-weight:600">Privacy Notice</td>
+              <td style="padding:10px 14px"><code>/public/privacy</code></td>
+              <td style="padding:10px 14px">PDPA 2010 statutory summary, data collection, consent rules</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/policy-privacy.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-10</td>
+              <td style="padding:10px 14px;font-weight:600">Terms of Use</td>
+              <td style="padding:10px 14px"><code>/public/terms</code></td>
+              <td style="padding:10px 14px">Portal terms, credential validity conditions, refund boundaries</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/policy-terms.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr>
+              <td style="padding:10px 14px;font-family:var(--font-mono)">PUB-11</td>
+              <td style="padding:10px 14px;font-weight:600">Accessibility Statement</td>
+              <td style="padding:10px 14px"><code>/public/accessibility</code></td>
+              <td style="padding:10px 14px">WCAG 2.1 AA target statement, contrast standards, contact email</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="public/policy-accessibility.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section: Sign-In Flow & Authentication States (11 Screens) -->
+      <div style="margin-bottom:36px">
+        <div class="flex items-center justify-between" style="margin-bottom:16px">
+          <div>
+            <span class="tag">Part 2: Authentication</span>
+            <h2 style="margin-top:4px">Sign-In & Authentication States (11 Pages)</h2>
+          </div>
+          <span class="tag tag-success">100% COVERED</span>
+        </div>
+
+        <table class="card" style="width:100%;border-collapse:collapse;font-size:13px;text-align:left;padding:0;overflow:hidden">
+          <thead>
+            <tr style="background:var(--color-surface-1);border-bottom:2px solid var(--color-line-hairline);color:var(--color-ink-muted);font-family:var(--font-mono);font-size:11px">
+              <th style="padding:10px 14px">REF</th>
+              <th style="padding:10px 14px">STATE NAME</th>
+              <th style="padding:10px 14px">ROLES IMPACTED</th>
+              <th style="padding:10px 14px">KEY CHARACTERISTICS</th>
+              <th style="padding:10px 14px">STATUS</th>
+              <th style="padding:10px 14px">ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">AUTH-01</td>
+              <td style="padding:10px 14px;font-weight:600">Default Sign-In Hub</td>
+              <td style="padding:10px 14px">All Roles (P1-P8)</td>
+              <td style="padding:10px 14px">Microsoft SSO prompt, credential format guide, 9-persona test selector dialog</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="auth/signin-default.html" class="btn btn-primary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">AUTH-02</td>
+              <td style="padding:10px 14px;font-weight:600">Field Validation Error</td>
+              <td style="padding:10px 14px">All Roles</td>
+              <td style="padding:10px 14px">Inline field error association, role alert banner</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="auth/signin-validation-error.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">AUTH-03</td>
+              <td style="padding:10px 14px;font-weight:600">Wrong Credentials / SSO Fail</td>
+              <td style="padding:10px 14px">All Roles</td>
+              <td style="padding:10px 14px">Invalid user principal name/password alert banner</td>
+              <td style="padding:10px 14px"><span class="tag tag-primary">PROPOSED</span></td>
+              <td style="padding:10px 14px"><a href="auth/signin-wrong-credentials.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">AUTH-04</td>
+              <td style="padding:10px 14px;font-weight:600">Account Deactivated / Refused</td>
+              <td style="padding:10px 14px">Staff & Students</td>
+              <td style="padding:10px 14px">Exact codebase refusal: <code>This account is deactivated. Ask the CODL administrator.</code></td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="auth/signin-account-locked.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">AUTH-05</td>
+              <td style="padding:10px 14px;font-weight:600">Forgot Password Guidance</td>
+              <td style="padding:10px 14px">All Roles</td>
+              <td style="padding:10px 14px">Institutional Office 365 self-service password reset dispatch</td>
+              <td style="padding:10px 14px"><span class="tag tag-primary">PROPOSED</span></td>
+              <td style="padding:10px 14px"><a href="auth/signin-forgot-password.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">AUTH-06</td>
+              <td style="padding:10px 14px;font-weight:600">Password Reset Confirmation</td>
+              <td style="padding:10px 14px">All Roles</td>
+              <td style="padding:10px 14px">Email dispatched notification, 30-minute expiry warning</td>
+              <td style="padding:10px 14px"><span class="tag tag-primary">PROPOSED</span></td>
+              <td style="padding:10px 14px"><a href="auth/signin-reset-confirmation.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">AUTH-07</td>
+              <td style="padding:10px 14px;font-weight:600">MFA 6-Digit Authenticator Entry</td>
+              <td style="padding:10px 14px">P2, P3, P4, P5, P6, P7</td>
+              <td style="padding:10px 14px">Mandatory second-factor for staff roles, numeric keypad input</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="auth/signin-mfa-entry.html" class="btn btn-primary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">AUTH-08</td>
+              <td style="padding:10px 14px;font-weight:600">MFA Code Failed</td>
+              <td style="padding:10px 14px">Staff Roles</td>
+              <td style="padding:10px 14px">Exact validation message: <code>Enter the 6-digit code.</code></td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="auth/signin-mfa-failed.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">AUTH-09</td>
+              <td style="padding:10px 14px;font-weight:600">Session Expired / Inactivity</td>
+              <td style="padding:10px 14px">All Roles</td>
+              <td style="padding:10px 14px">15-minute inactivity timeout notice, preserves intended return URL</td>
+              <td style="padding:10px 14px"><span class="tag tag-primary">PROPOSED</span></td>
+              <td style="padding:10px 14px"><a href="auth/signin-session-expired.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-line-hairline)">
+              <td style="padding:10px 14px;font-family:var(--font-mono)">AUTH-10</td>
+              <td style="padding:10px 14px;font-weight:600">403 Forbidden / Role Denied</td>
+              <td style="padding:10px 14px">Cross-role users</td>
+              <td style="padding:10px 14px">Unauthorized workspace warning, role switcher recommendation</td>
+              <td style="padding:10px 14px"><span class="tag tag-primary">PROPOSED</span></td>
+              <td style="padding:10px 14px"><a href="auth/signin-unauthorised.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+            <tr>
+              <td style="padding:10px 14px;font-family:var(--font-mono)">AUTH-11</td>
+              <td style="padding:10px 14px;font-weight:600">Signed Out Confirmation</td>
+              <td style="padding:10px 14px">All Roles</td>
+              <td style="padding:10px 14px">Explicit termination of authenticated session</td>
+              <td style="padding:10px 14px"><span class="tag tag-success">COVERED</span></td>
+              <td style="padding:10px 14px"><a href="auth/signin-signed-out.html" class="btn btn-secondary btn-sm">Open &rarr;</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section: Token Matrix & Typography Specs -->
+      <div class="card" style="margin-bottom:32px">
+        <span class="tag tag-primary" style="margin-bottom:10px">Design System Tokens & Rules</span>
+        <h2 style="font-size:20px;margin-bottom:14px">Design Tokens & Style Enforcements</h2>
+
+        <div class="grid grid-cols-3 gap-md" style="margin-bottom:20px">
+          <div>
+            <h4 style="margin-bottom:8px">1. Core Light Color Palette</h4>
+            <div class="flex flex-col gap-xs" style="font-size:12px;font-family:var(--font-mono)">
+              <div class="flex items-center gap-xs"><span style="width:16px;height:16px;background:#0052ff;border-radius:2px"></span> <code>--color-primary: #0052ff</code></div>
+              <div class="flex items-center gap-xs"><span style="width:16px;height:16px;background:#0a192f;border-radius:2px"></span> <code>--color-primary-deep: #0a192f</code></div>
+              <div class="flex items-center gap-xs"><span style="width:16px;height:16px;background:#0b1a3d;border-radius:2px"></span> <code>--color-sidebar-bg: #0b1a3d</code></div>
+              <div class="flex items-center gap-xs"><span style="width:16px;height:16px;background:#090a0f;border-radius:2px"></span> <code>--color-ink: #090a0f</code> (18:1)</div>
+              <div class="flex items-center gap-xs"><span style="width:16px;height:16px;background:#475569;border-radius:2px"></span> <code>--color-ink-muted: #475569</code> (4.6:1)</div>
+              <div class="flex items-center gap-xs"><span style="width:16px;height:16px;background:#e2e8f0;border-radius:2px"></span> <code>--color-line-hairline: #e2e8f0</code></div>
+            </div>
+          </div>
+
+          <div>
+            <h4 style="margin-bottom:8px">2. Controlled Micro-Radius</h4>
+            <div class="flex flex-col gap-xs" style="font-size:12px;font-family:var(--font-mono)">
+              <div><code>--radius-xs: 2px</code> (Micro tags, inline badges)</div>
+              <div><code>--radius-sm: 4px</code> (Buttons, precision inputs)</div>
+              <div><code>--radius-md: 6px</code> (Standard cards, bento cells)</div>
+              <div><code>--radius-lg: 8px</code> (Hero containers, modals)</div>
+              <div><code>--radius-search-pill: 12px</code> (Search input)</div>
+              <div><code>--radius-sidebar-corner: 28px</code> (Brand header contour)</div>
+              <div><code>--radius-pill: 9999px</code> (Status indicator pips only)</div>
+            </div>
+          </div>
+
+          <div>
+            <h4 style="margin-bottom:8px">3. Typographic Markers (D-53)</h4>
+            <div class="flex flex-col gap-xs" style="font-size:12px">
+              <div><b>No Generic Icons:</b> Zero icon fonts, emojis, or stock SVGs.</div>
+              <div><b>Section Tags:</b> <code>[F1]</code> through <code>[F11]</code></div>
+              <div><b>Role Tags:</b> <code>[P1]</code> through <code>[P8]</code></div>
+              <div><b>Status Pills:</b> Must have text prefix (<code>[STATUS: VALID]</code>)</div>
+              <div><b>Toggles:</b> <code>[+]</code>, <code>[-]</code>, <code>&lt;</code>, <code>&gt;</code></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="public-footer">
+    <div class="container text-center" style="font-size:12px;color:#8fa0bc">
+      UTeM Micro-Credential Management System &middot; UI/UX v3 Design Reference &middot; Strict Compliance with MQA & UTeM Guide v1.0
+    </div>
+  </footer>
+
+  <script src="js/ui.js"></script>
+</body>
+</html>

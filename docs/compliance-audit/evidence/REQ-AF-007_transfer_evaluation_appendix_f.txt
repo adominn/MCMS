@@ -1,0 +1,140 @@
+URL: http://127.0.0.1:8110/transfers/1
+FINAL: http://127.0.0.1:8110/transfers/1
+STATUS: 200
+TITLE: Transfer decision - UTeM Micro-Credential Management System
+H1: Transfer Decision TR-2026-0001
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+1
+HR
+Hakim Rahman
+Deputy dean, FTMK
+ACADEMIC GOVERNANCE
+Task queue
+7
+Proposals and approval
+Quality Verification
+Quality review
+Stackable pathways
+COHORT OPERATIONS
+Offerings and readiness
+Results and completion
+1
+CREDIT & CERTIFICATION
+Credentials
+Credit transfer
+INSIGHT & AUDIT
+Reports
+Traceability
+Documents
+Notifications
+1
+Collapse sidebar
+←
+Back
+Credit transfer
+TR-2026-0001
+Transfer Decision TR-2026-0001
+Amir Hakimi (B032410001) · BITS Bachelor of Computer Science (Software Development) with Honours
+← All evaluations
+Decision Letter (A4)
+Approved
+Micro-Credential Credit Lifecycle
+Stage 08 / 08 · TR-2026-0001
+01
+Learning & Results
+Completed
+02
+Coordinator Sign-off
+Completed
+03
+Completion Confirmed
+Completed
+04
+ACR Confirmed
+Completed
+05
+Learner Consent
+Completed
+06
+ABC Deposit
+Completed
+07
+Transfer Evaluation
+Completed
+08
+Single Redemption
+Current stage
+Supporting Documents Submitted
+3 / 8 ticked
+[X] Academic Credit Record (ACR)
+[ ] Micro-Credential certificate or credential
+[ ] Learning outcomes statement
+[ ] Course or module content outline
+[ ] Student Learning Time (SLT) and credit breakdown
+[ ] Assessment method and evidence
+[ ] Quality Verification (QV) or accreditation proof
+[X] Other supporting documents
+Other specified: portfolio-amir.pdf
+Applicant notes: acr-2026-0001.pdf;portfolio-amir.pdf
+1. Validity of the Record
+Verified
+Authenticity of the ACR or credential: Passed (Verified against CODL credential and ACR registry.)
+ABC status of the deposit: Passed (ABC deposit status confirmed as available/provisional.)
+Quality Verification or accreditation status: Passed (MQA Quality Verification cycle active on completion date.)
+2. BITS 1124 Advanced Algorithms
+2 / 3 credits
+
+Credit used: Cloud Native Development (ACR-2026-0001, 80 SLT hrs , MQF 4), requested 2 of the course's 3 credit. Curriculum version 2024.
+
+Learning Outcomes Comparison
+2 rows
+Outcome of the course
+	Micro-credential outcome
+	Match
+	Note
+
+Design divide-and-conquer algorithms	LO1 Package cloud-ready container images following OCI specifications.	Partial match	Covered via distributed container scheduling labs.
+Solve dynamic programming models	Not yet recorded	Not yet recorded	Not yet recorded
+Course Equivalence Criteria Findings
+8 rows
+Criterion
+	Finding & Evidence Checked
+	Result
+
+Credit value and Student Learning Time (SLT)	Criterion 'credit_slt' verified >= 80% equivalence.	Equivalent
+MQF level	Criterion 'mqf' verified >= 80% equivalence.	Equivalent
+Content and depth	Criterion 'content' verified >= 80% equivalence.	Equivalent
+Learning activities	Criterion 'activities' verified >= 80% equivalence.	Equivalent
+Assessment and standard	Criterion 'assessment' verified >= 80% equivalence.	Equivalent
+Accreditation or Quality Verification status	Criterion 'accreditation' verified >= 80% equivalence.	Equivalent
+Currency of knowledge	Criterion 'currency' verified >= 80% equivalence.	Equivalent
+Programme or professional body requirements	Not regulated by external professional body.	Not applicable
+Rows per page
+5
+10
+25
+50
+1–8 of 8
+Page 1 of 1
+‹
+›
+
+Learning-outcome criterion: Partly equivalent
+
+Decision Recorded
+Approved
+
+Approved on 25/10/2026 by Hakim Rahman (Deputy Dean (Academic), FTMK) , reference JKKP-FTMK-TR-2026/02.
+
+Conditions / Justification: Exemption granted for 2 elective credits.
+
+Print Official Decision Letter (A4)
+Programme Admission (Separate Fact)
+
+Admission is a separate fact from the transfer decision. Neither implies the other.
+
+Admission recorded: intake 2026/1 (evidence ADM-SURAT-TAWARAN-2026-01).

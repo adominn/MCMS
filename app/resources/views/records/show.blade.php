@@ -20,13 +20,12 @@
   <div style="display:flex;gap:40px;margin-top:auto;padding-top:20px;border-top:1px solid var(--border)">
     <div style="flex:1;text-align:center">
       <div style="height:36px;border-bottom:1px solid var(--text)"></div>
-      <div style="font-weight:600;margin-top:4px">Registrar's Office / CODL</div>
-      <div class="bm small">Pejabat Pendaftar / CODL</div>
+      <div style="font-weight:600;margin-top:4px">{{ __("Registrar's Office / CODL") }}</div>
     </div>
     <div style="flex:1;text-align:center">
       <div style="height:36px;border-bottom:1px solid var(--text)"></div>
       <div style="font-weight:600;margin-top:4px">{{ now()->format('d/m/Y') }}</div>
-      <div class="bm small">Tarikh</div>
+      <div class="bm small">{{ __('Date') }}</div>
     </div>
   </div>
 

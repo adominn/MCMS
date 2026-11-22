@@ -39,4 +39,39 @@ final class CompletionWindow
 
         return $sent;
     }
+
+    public function isExpired(int|object $enrolment): bool
+    {
+        $e = is_object($enrolment) ? $enrolment : DB::table('enrolments')->find($enrolment);
+        $o = DB::table('offerings')->find($e->offering_id);
+        $months = $o->completion_window_months ?? $this->settings->get('umc.completion_window_months');
+        if (! $months) {
+            return false;
+        }
+
+        $ends = \Carbon\Carbon::parse($e->created_at)->addMonths((int) $months);
+
+        return now()->gt($ends);
+    }
+
+    public function expireOverdue(): int
+    {
+        $default = $this->settings->get('umc.completion_window_months');
+        $count = 0;
+        $rows = DB::table('enrolments as e')->join('offerings as o', 'o.id', '=', 'e.offering_id')
+            ->where('e.status', 'enrolled')->where('o.staged_completion', true)->get(['e.id', 'e.created_at', 'o.completion_window_months']);
+        foreach ($rows as $r) {
+            $months = $r->completion_window_months ?? $default;
+            if (! $months) {
+                continue;
+            }
+            $ends = \Carbon\Carbon::parse($r->created_at)->addMonths((int) $months);
+            if (now()->gt($ends)) {
+                DB::table('enrolments')->where('id', $r->id)->update(['status' => 'not_completed', 'updated_at' => now()]);
+                $count++;
+            }
+        }
+
+        return $count;
+    }
 }

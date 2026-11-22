@@ -157,13 +157,13 @@
 
   {{-- ===================== TAB 2: OPEN IMPROVEMENT ACTIONS ===================== --}}
   <div id="tab-actions" class="tab-pane" style="display:none">
-    <div class="note info" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;border-left:4px solid #7c3aed;background:#f5f3ff">
-      <div style="font-size:20px;color:#7c3aed;flex:none">
+    <div class="note info" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px">
+      <div style="font-size:20px;color:var(--accent);flex:none">
         <svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor"><path d="M3 13V8M7 13V4M11 13V7M15 13H1"/></svg>
       </div>
       <div>
-        <div style="font-weight:700;font-size:14px;color:#4c1d95">{{ __('Continuous Quality Improvement (CQI) Action Tracking') }}</div>
-        <div class="muted s" style="font-size:12px;color:#6b21a8">{{ __('Consolidated oversight of all open improvement actions generated across micro-credentials, including due dates and implementation status.') }}</div>
+        <div style="font-weight:700;font-size:14px;color:var(--ink)">{{ __('Continuous Quality Improvement (CQI) Action Tracking') }}</div>
+        <div class="muted s" style="font-size:12px">{{ __('Consolidated oversight of all open improvement actions generated across micro-credentials, including due dates and implementation status.') }}</div>
       </div>
     </div>
 
@@ -206,13 +206,13 @@
 
   {{-- ===================== TAB 3: PERIODIC REVIEWS & GOVERNANCE ===================== --}}
   <div id="tab-periodic" class="tab-pane" style="display:none">
-    <div class="note info" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;border-left:4px solid #0284c7;background:#f0f9ff">
-      <div style="font-size:20px;color:#0284c7;flex:none">
+    <div class="note info" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px">
+      <div style="font-size:20px;color:var(--accent);flex:none">
         <svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2.5a1 1 0 110 2 1 1 0 010-2zM9 12H7V7h2v5z"/></svg>
       </div>
       <div>
-        <div style="font-weight:700;font-size:14px;color:#0369a1">{{ __('Institutional Accreditation & Cyclical Reviews') }}</div>
-        <div class="muted s" style="font-size:12px;color:#0284c7">{{ __('Monitor Senate-mandated periodic review cycles, Quality Verification (QV) standings for SAMCs, and faculty governance orders.') }}</div>
+        <div style="font-weight:700;font-size:14px;color:var(--ink)">{{ __('Institutional Accreditation & Cyclical Reviews') }}</div>
+        <div class="muted s" style="font-size:12px">{{ __('Monitor Senate-mandated periodic review cycles, Quality Verification (QV) standings for SAMCs, and faculty governance orders.') }}</div>
       </div>
     </div>
 

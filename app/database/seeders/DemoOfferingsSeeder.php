@@ -19,8 +19,17 @@ class DemoOfferingsSeeder extends DemoProposalsSeeder
 
         foreach ([['Cloud Native Development', '2027/1', 150, 'Basic programming'], ['Lean Six Sigma Yellow Belt', '2026/12', 200, null]] as [$title, $cohort, $fee, $prereq]) {
             $v = $this->proposal($aina, $ftmk, $title, 'approved', now()->subDays(30));
-            DB::table('mc_versions')->where('id', $v)->update(['effective_date' => today()->subDays(10)]);
-            DB::table('micro_credentials')->where('id', DB::table('mc_versions')->where('id', $v)->value('micro_credential_id'))->update(['category_status' => 'confirmed']);
+            $cat = $title === 'Lean Six Sigma Yellow Belt' ? 'mce' : 'samc';
+            $slt = $title === 'Lean Six Sigma Yellow Belt' ? 24 : 80;
+            DB::table('micro_credentials')->where('id', DB::table('mc_versions')->where('id', $v)->value('micro_credential_id'))->update(['category' => $cat, 'category_status' => 'confirmed']);
+            DB::table('mc_versions')->where('id', $v)->update([
+                'effective_date' => today()->subDays(10),
+                'planned_slt' => $slt,
+                'proposed_credit' => $cat === 'mce' ? null : 2,
+                'proposed_mqf_level' => $cat === 'mce' ? null : 4,
+                'credit_sought' => $cat === 'mce' ? 0 : 1,
+            ]);
+            DB::table('mc_modules')->where('mc_version_id', $v)->update(['slt_hours' => $slt]);
             $o = DB::table('offerings')->insertGetId([
                 'mc_version_id' => $v, 'cohort_name' => $cohort, 'start_date' => today()->addDays(5), 'end_date' => today()->addDays(90), 'delivery_mode' => 'online', 'capacity' => 30,
                 'reg_opens_on' => today()->subDay(), 'reg_closes_on' => today()->addDays(4), 'fee' => $fee, 'facilitators' => 'Dr. Aina Zulkifli', 'platform_ref' => 'UCreds course '.strtoupper(substr($title, 0, 3)),

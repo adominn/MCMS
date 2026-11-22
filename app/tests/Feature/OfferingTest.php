@@ -12,6 +12,7 @@ beforeEach(function () {
     $this->aina = User::where('name', 'Dr. Aina Zulkifli')->first();
     $this->hakim = User::where('name', 'Hakim Rahman')->first();
     $this->siti = User::where('name', 'Ir. Siti Aminah')->first();
+    $this->farid = User::where('name', 'Farid Hashim')->first();
     $this->lim = User::create(['name' => 'Dr. Lim Wei Jie', 'email' => 'lim@utem.example.test']);
     $this->lim->roleAssignments()->create(['role' => 'lecturer', 'scope_type' => 'ptj', 'ptj_id' => DB::table('ptjs')->where('code', 'FTMK')->value('id')]);
 });
@@ -84,7 +85,7 @@ it('creates a cohort only for an approved version, inside scope, with its readin
     [$v1] = approvedV1();
     $o = newCohort($v1);
     expect(DB::table('offerings')->find($o)->status)->toBe('not_ready')
-        ->and(DB::table('readiness_items')->where('offering_id', $o)->count())->toBe(6)
+        ->and(DB::table('readiness_items')->where('offering_id', $o)->count())->toBe(count(config('offerings.readiness')))
         ->and(DB::table('audit_events')->where('action', 'offering.created')->exists())->toBeTrue();
 
     $draft = completeUmc();
@@ -114,8 +115,11 @@ it('checks the dates and numbers of a cohort', function () {
 
 it('refuses free text that promises credit, transfer or a degree (FR-93)', function (string $text) {
     expect(ForbiddenClaims::scan($text))->not->toBeEmpty();
-})->with(['We guarantee credit transfer to your degree', 'This course will be transferred to the programme', 'Gives automatic credit toward a degree', 'It leads to a degree in computing',
-    'Three micro-credentials make a degree', 'Earn 3 credits', 'Rated MQF level 6', 'A Quality-Verified course']);
+})->with([
+    'We guarantee credit transfer to your degree', 'This course will be transferred to the programme', 'Gives automatic credit toward a degree', 'It leads to a degree in computing',
+    'Three micro-credentials make a degree', 'Earn 3 credits', 'Rated MQF level 6', 'A Quality-Verified course',
+    'Kami memberi jaminan pemindahan kredit', 'Mendapat kredit automatik ke ijazah', 'Membawa kepada ijazah sarjana muda', 'Memperoleh 3 kredit', 'Tahap MQF 6', 'Kursus yang disahkan kualiti',
+]);
 
 it('accepts honest free text', function () {
     expect(ForbiddenClaims::scan('Hands-on labs, weekly clinics and a final project. Ask the programme about recognition.'))->toBeEmpty();
@@ -185,20 +189,41 @@ it('withdraws acceptance when the lecturer changes an item, tells the lecturer t
     $o = newCohort($v1);
     answerAll($o);
     sendChecklist($o);
-    $this->actingAs($this->hakim)->post("/offerings/$o/confirm", ['outcome' => 'not_ready', 'accept' => ['transparency' => 1]]);
-    expect((bool) DB::table('readiness_items')->where('offering_id', $o)->where('item', 'transparency')->value('accepted'))->toBeTrue()
+    $this->actingAs($this->hakim)->post("/offerings/$o/confirm", ['outcome' => 'not_ready', 'accept' => ['b2_01' => 1]]);
+    expect((bool) DB::table('readiness_items')->where('offering_id', $o)->where('item', 'b2_01')->value('accepted'))->toBeTrue()
         ->and(DB::table('tasks')->where('kind', 'readiness')->whereNull('completed_at')->exists())->toBeFalse()
         ->and(DB::table('notifications')->where('user_id', $this->aina->id)->where('template_key', 'decision.made')->where('channel', 'in_system')->orderByDesc('id')->value('body'))->toContain('Readiness: Not ready');
-    $this->actingAs($this->aina)->post("/offerings/$o/readiness", ['item' => ['transparency' => ['status' => 'yes', 'note' => 'Updated evidence']], 'action' => 'save']);
-    expect((bool) DB::table('readiness_items')->where('offering_id', $o)->where('item', 'transparency')->value('accepted'))->toBeFalse();
+    $this->actingAs($this->aina)->post("/offerings/$o/readiness", ['item' => ['b2_01' => ['status' => 'yes', 'note' => 'Updated evidence']], 'action' => 'save']);
+    expect((bool) DB::table('readiness_items')->where('offering_id', $o)->where('item', 'b2_01')->value('accepted'))->toBeFalse();
 });
 
 it('pre-fills the checklist of a new cohort from the last one (FR-88)', function () {
     [$o, $v1] = openCohort();
     $second = newCohort($v1, ['cohort_name' => '2027/2', 'start_date' => today()->addDays(120)->toDateString(), 'end_date' => today()->addDays(180)->toDateString(), 'reg_opens_on' => today()->addDays(60)->toDateString(), 'reg_closes_on' => today()->addDays(100)->toDateString()]);
-    $item = DB::table('readiness_items')->where('offering_id', $second)->where('item', 'records')->first();
-    expect($item->status)->toBe('yes')->and($item->note)->toBe('Evidence for records')->and((bool) $item->accepted)->toBeTrue()
+    $item = DB::table('readiness_items')->where('offering_id', $second)->where('item', 'b5_01')->first();
+    expect($item->status)->toBe('yes')->and($item->note)->toBe('Evidence for b5_01')->and((bool) $item->accepted)->toBeTrue()
         ->and(DB::table('offerings')->find($second)->status)->toBe('not_ready'); // still needs its own confirmation
+});
+
+it('renders Appendix B offering readiness printout with all sections and Nota Penting B (Guide Appendix B)', function () {
+    [$o, $v1] = openCohort();
+    $res = $this->actingAs($this->hakim)->get("/offerings/$o/readiness?print=1");
+    $res->assertOk()
+        ->assertSee('Appendix B')
+        ->assertSee('Lampiran B')
+        ->assertSee('B1. Maklumat Penawaran dan Kohort')
+        ->assertSee('B2. Ketelusan Maklumat Sebelum Pendaftaran')
+        ->assertSee('B3. Kesediaan Bahan, Platform dan Akses')
+        ->assertSee('B4. Kesediaan Pentaksiran dan Integriti')
+        ->assertSee('B5. Rekod Peserta dan Pencapaian')
+        ->assertSee('B6. Proses Penyempurnaan dan Pengeluaran Credential')
+        ->assertSee('B7. Makluman Perubahan dan Perlindungan Peserta')
+        ->assertSee('B8. Pengesahan Kesediaan Sebelum Penawaran')
+        ->assertSee('NOTA PENTING (Lampiran B)');
+
+    // Support party (P5) confirmation recording
+    $this->actingAs($this->farid)->post("/offerings/$o/confirm", ['outcome' => 'ready', 'conditions' => 'Platform verified'])->assertSessionHasNoErrors();
+    expect(DB::table('readiness_confirmations')->where('offering_id', $o)->where('role', 'support')->exists())->toBeTrue();
 });
 
 // ---- status by date (BR-17, JB-21)
@@ -384,4 +409,38 @@ it('displays the lecturer name across catalogue, student portal, and staff views
     $this->actingAs($this->hakim)->get('/results')->assertOk()->assertSee('Dr. Aina Zulkifli');
     $this->actingAs($this->hakim)->get("/results/$o")->assertOk()->assertSee('Dr. Aina Zulkifli');
     $this->actingAs($this->hakim)->get("/completion/$o")->assertOk()->assertSee('Dr. Aina Zulkifli');
+});
+
+it('blocks proposals containing forbidden claims in English or Bahasa Melayu (REQ-C03-003, REQ-C09-008)', function () {
+    $v = completeUmc();
+    $this->actingAs($this->aina)->post("/proposals/$v/basics", [
+        'name_en' => 'We guarantee credit transfer course',
+    ])->assertSessionHasErrors('name_en');
+
+    $this->actingAs($this->aina)->post("/proposals/$v/justification", [
+        'need' => 'Kursus ini memberi kredit automatik untuk pelajar.',
+    ])->assertSessionHasErrors('need');
+});
+
+it('blocks pathways containing forbidden claims (REQ-AE-005)', function () {
+    $prog = DB::table('programmes')->first();
+
+    $this->actingAs($this->hakim)->post('/pathways', [
+        'programme_id' => $prog->id,
+        'plos' => 'Jaminan pemindahan kredit bagi semua kursus',
+    ])->assertSessionHasErrors('plos');
+});
+
+it('renders public offering credentials strictly per credential_types and labels Credential Verification Method (REQ-C10-004, REQ-C10-005)', function () {
+    [$o, $v1, $mc] = openCohort();
+    DB::table('mc_versions')->where('id', $v1)->update([
+        'credential_types' => json_encode(['certificate']),
+        'verification_method' => 'CODL Cryptographic Registry',
+    ]);
+
+    $this->get("/public/offering/$o")
+        ->assertOk()
+        ->assertSee('Credential Verification Method')
+        ->assertSee('Official Certificate')
+        ->assertDontSee('Modular Digital Badges Awarded');
 });

@@ -1,0 +1,34 @@
+Revoked credential: UTEM-MC-2026-0009 (SEC03-2P6RW, status=revoked)
+GET /public/verify/SEC03-2P6RW/download/json -> HTTP 200
+Body preview: {
+    "@context": [
+        "https://www.w3.org/ns/credentials/v2",
+        "https://purl.imsglobal.org/spec/ob/v3p0/context-3.0.3.json"
+    ],
+    "id": "http://localhost/public/verify/SEC03-2P6RW",
+    "type": [
+        "VerifiableCredential",
+        "OpenBadgeCredential"
+    ],
+    "name": "Secure Software Development Lifecycle (SSDLC)",
+    "issuer": {
+        "id": "http://localhost",
+        "type": [
+            "Profile"
+        ],
+        "name": "Universiti Teknikal Malaysia Melaka"
+    },
+    "validFrom": "2026-10-26T10:00:00+00:00",
+    "credentialSubject": {
+        "type": [
+            "AchievementSubject"
+        ],
+        "identifier": [
+            {
+                "type": "IdentityObject",
+                "identityType": "name",
+                "hashed": false,
+      
+
+GET /public/verify/SEC03-2P6RW/download/jwt -> HTTP 200
+Body preview: eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDp1dGVtOmNvZGw6dmMtMjAyNi0wMSJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwianRpIjoiaHR0cDovL2xvY2FsaG9zdC9wdWJsaWMvdmVyaWZ5L1NFQzAzLTJQNlJXIiwic3ViIjoidXJuOm1jbXM6aG9sZGVyOjY1MDU0OTk2OWMzYzA1NmMiLCJuYmYiOjE3OTMwMDg4MDAsImlhdCI6MTc5MzkyNjMzMSwidmMiOnsiQGNvbnR

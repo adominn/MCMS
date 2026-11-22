@@ -53,8 +53,23 @@ final class Qv
     /** A cohort that ended, with at least one participant whose completion was confirmed on verified results (BR-03). */
     public static function completedCohorts(int $mc): int
     {
-        return DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->where('v.micro_credential_id', $mc)->where('o.end_date', '<', today())
-            ->whereIn('o.status', ['ended', 'running'])->whereExists(fn ($q) => $q->select(DB::raw(1))->from('enrolments as e')->join('achievement_records as a', 'a.enrolment_id', '=', 'e.id')->whereColumn('e.offering_id', 'o.id')->where('a.completion_status', 'complete'))->count();
+        $v = self::latestVersion($mc);
+        if (! $v) {
+            return 0;
+        }
+
+        return DB::table('offerings as o')
+            ->where('o.mc_version_id', $v->id)
+            ->where('o.end_date', '<', today())
+            ->whereIn('o.status', ['ended', 'running'])
+            ->whereExists(fn ($q) => $q->select(DB::raw(1))
+                ->from('enrolments as e')
+                ->join('achievement_records as a', 'a.enrolment_id', '=', 'e.id')
+                ->join('assessment_results as r', 'r.enrolment_id', '=', 'e.id')
+                ->whereColumn('e.offering_id', 'o.id')
+                ->where('a.completion_status', 'complete')
+                ->where('r.status', 'verified')
+            )->count();
     }
 
     /** Evidence that MCMS holds itself is linked, not typed (FR-166). @return array<string, string> item => what was linked */
@@ -67,13 +82,19 @@ final class Qv
         $out = [];
         if (DB::table('learning_outcomes')->where('mc_version_id', $v->id)->exists() && DB::table('mc_modules')->where('mc_version_id', $v->id)->exists()) {
             $out['academic_design'] = "Learning outcomes, module structure and SLT calculation of version {$v->version_no}";
+            $out['d3_2_outcomes'] = "Learning outcomes of version {$v->version_no}";
+            $out['d3_4_structure'] = "Module structure of version {$v->version_no}";
+            $out['d3_6_slt_calc'] = "SLT calculation of version {$v->version_no}";
         }
         $cohort = DB::table('offerings as o')->join('mc_versions as x', 'x.id', '=', 'o.mc_version_id')->where('x.micro_credential_id', $mc)->whereExists(fn ($q) => $q->select(DB::raw(1))->from('enrolments as e')->join('assessment_results as r', 'r.enrolment_id', '=', 'e.id')->whereColumn('e.offering_id', 'o.id')->where('r.status', 'verified'))->orderByDesc('o.id')->value('o.cohort_name');
         if ($cohort && DB::table('assessment_components')->where('mc_version_id', $v->id)->exists()) {
             $out['assessment_achievement'] = "Assessment plan of version {$v->version_no} and the verified results of cohort $cohort";
+            $out['d4_1_assessment_plan'] = "Assessment plan of version {$v->version_no}";
+            $out['d4_6_results'] = "Verified results of cohort $cohort";
         }
         if (json_decode($v->credential_types ?? '[]', true) && DB::table('credentials as c')->join('enrolments as e', 'e.id', '=', 'c.enrolment_id')->join('offerings as o', 'o.id', '=', 'e.offering_id')->join('mc_versions as x', 'x.id', '=', 'o.mc_version_id')->where('x.micro_credential_id', $mc)->exists()) {
             $out['credential'] = 'Credential design of the proposal and the credentials issued, with their signed verification';
+            $out['d7_1_format'] = 'Digital credential design registered in system';
         }
 
         return $out;
@@ -83,11 +104,22 @@ final class Qv
     {
         $links = self::links($mc);
         foreach (array_keys(config('qv.checklist')) as $item) {
+            $cat = null;
+            if (preg_match('/^(d\d+)_/', $item, $matches)) {
+                $cat = strtoupper($matches[1]);
+            }
             $row = DB::table('qv_evidence')->where('qv_record_id', $recordId)->where('item', $item)->first();
             if (isset($links[$item])) {
-                DB::table('qv_evidence')->updateOrInsert(['qv_record_id' => $recordId, 'item' => $item], ['status' => 'available', 'file_ref' => $links[$item], 'linked' => true]);
+                DB::table('qv_evidence')->updateOrInsert(
+                    ['qv_record_id' => $recordId, 'item' => $item],
+                    ['category' => $cat, 'status' => 'available', 'file_ref' => $links[$item], 'linked' => true]
+                );
             } elseif (! $row) {
-                DB::table('qv_evidence')->insert(['qv_record_id' => $recordId, 'item' => $item]);
+                DB::table('qv_evidence')->insert([
+                    'qv_record_id' => $recordId,
+                    'item' => $item,
+                    'category' => $cat,
+                ]);
             } elseif ($row->linked) {
                 DB::table('qv_evidence')->where('id', $row->id)->update(['linked' => false, 'status' => 'not_yet', 'file_ref' => null]); // the link no longer holds
             }

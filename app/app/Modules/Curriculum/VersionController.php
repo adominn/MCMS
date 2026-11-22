@@ -35,11 +35,45 @@ final class VersionController
         $cohorts = DB::table('offerings as o')->whereIn('o.mc_version_id', $versions->pluck('id'))->orderByDesc('o.start_date')->get(['o.id', 'o.cohort_name', 'o.start_date', 'o.end_date', 'o.status']);
         $modules = ($cur = $versions->firstWhere('status', 'approved')) ? DB::table('mc_modules')->where('mc_version_id', $cur->id)->orderBy('seq')->get(['seq', 'name_en', 'slt_hours']) : collect();
 
+        $diffs = [];
+        foreach ($versions as $ver) {
+            if ($ver->supersedes_id) {
+                $old = $versions->firstWhere('id', $ver->supersedes_id) ?? DB::table('mc_versions')->find($ver->supersedes_id);
+                if ($old) {
+                    $d = [];
+                    if ($ver->planned_slt != $old->planned_slt) {
+                        $d[] = "SLT: {$old->planned_slt}h → {$ver->planned_slt}h";
+                    }
+                    if ($ver->proposed_credit != $old->proposed_credit) {
+                        $d[] = "Credit: " . ($old->proposed_credit ?? 0) . " → " . ($ver->proposed_credit ?? 0);
+                    }
+                    if ($ver->proposed_mqf_level != $old->proposed_mqf_level) {
+                        $d[] = "MQF: Level " . ($old->proposed_mqf_level ?? '-') . " → Level " . ($ver->proposed_mqf_level ?? '-');
+                    }
+                    if ($ver->delivery_mode != $old->delivery_mode) {
+                        $d[] = "Mode: " . ucfirst(str_replace('_', ' ', (string) $old->delivery_mode)) . " → " . ucfirst(str_replace('_', ' ', (string) $ver->delivery_mode));
+                    }
+                    $oldModCount = DB::table('mc_modules')->where('mc_version_id', $old->id)->count();
+                    $newModCount = DB::table('mc_modules')->where('mc_version_id', $ver->id)->count();
+                    if ($oldModCount != $newModCount) {
+                        $d[] = "Modules: {$oldModCount} → {$newModCount}";
+                    }
+                    $oldLoCount = DB::table('learning_outcomes')->where('mc_version_id', $old->id)->count();
+                    $newLoCount = DB::table('learning_outcomes')->where('mc_version_id', $ver->id)->count();
+                    if ($oldLoCount != $newLoCount) {
+                        $d[] = "Outcomes: {$oldLoCount} → {$newLoCount}";
+                    }
+                    $diffs[$ver->id] = $d;
+                }
+            }
+        }
+
         return view('curriculum.mcs.show', [
             'cohorts' => $cohorts, 'modules' => $modules,
             'm' => $m, 'versions' => $versions, 'decisions' => $decisions, 'rules' => $rules, 'rulesText' => config('proposals.transition_rules'),
             'current' => $versions->firstWhere('status', 'approved'), 'open' => $versions->first(fn ($v) => in_array($v->status, self::OPEN, true)),
             'changes' => DB::table('change_requests')->where('micro_credential_id', $mc)->orderByDesc('id')->get(), 'statusLabels' => \App\Modules\Approval\ApprovalController::STATUS + ['superseded' => 'Superseded'],
+            'diffs' => $diffs,
         ]);
     }
 
@@ -170,15 +204,40 @@ final class VersionController
             'version_no' => 1 + (int) DB::table('mc_versions')->where('micro_credential_id', $f['micro_credential_id'])->max('version_no'), 'proposal_type' => $type, 'status' => 'draft', 'supersedes_id' => $fromId,
             'change_class' => $class, 'change_summary' => $summary, 'ip_confirmed' => false, 'updated_by' => $by->id, 'created_at' => now(), 'updated_at' => now(),
         ]);
+        if ($class === 'material') {
+            $new['qv_status'] = ($f['qv_status'] === 'verified') ? 'will_apply' : ($f['qv_status'] ?? 'not_applied');
+            $new['qv_valid_until'] = null;
+            DB::table('qv_records')->where('micro_credential_id', $f['micro_credential_id'])->update(['reverification' => true]);
+        }
         $id = DB::table('mc_versions')->insertGetId($new);
 
         $mod = [];
         foreach (DB::table('mc_modules')->where('mc_version_id', $fromId)->orderBy('seq')->get() as $m) {
-            $mod[$m->id] = DB::table('mc_modules')->insertGetId(['mc_version_id' => $id, 'seq' => $m->seq, 'name_en' => $m->name_en, 'name_ms' => $m->name_ms, 'slt_hours' => $m->slt_hours, 'is_assessment' => $m->is_assessment, 'separately_recognisable' => $m->separately_recognisable]);
+            $newModId = DB::table('mc_modules')->insertGetId([
+                'mc_version_id' => $id, 'seq' => $m->seq, 'name_en' => $m->name_en, 'name_ms' => $m->name_ms,
+                'slt_hours' => $m->slt_hours, 'is_assessment' => $m->is_assessment,
+                'separately_recognisable' => $m->separately_recognisable,
+                'key_content' => $m->key_content ?? null,
+            ]);
+            $mod[$m->id] = $newModId;
+            foreach (DB::table('mc_module_activities')->where('mc_module_id', $m->id)->get() as $act) {
+                DB::table('mc_module_activities')->insert([
+                    'mc_module_id' => $newModId,
+                    'activity_type' => $act->activity_type,
+                    'description_en' => $act->description_en,
+                    'description_ms' => $act->description_ms,
+                    'slt_hours' => $act->slt_hours,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
         }
         $lo = [];
         foreach (DB::table('learning_outcomes')->where('mc_version_id', $fromId)->orderBy('sort_order')->get() as $l) {
-            $lo[$l->id] = DB::table('learning_outcomes')->insertGetId(['mc_version_id' => $id, 'code' => $l->code, 'text_en' => $l->text_en, 'text_ms' => $l->text_ms, 'sort_order' => $l->sort_order]);
+            $lo[$l->id] = DB::table('learning_outcomes')->insertGetId([
+                'mc_version_id' => $id, 'code' => $l->code, 'text_en' => $l->text_en, 'text_ms' => $l->text_ms, 'sort_order' => $l->sort_order,
+                'parent_clo_id' => $l->parent_clo_id ?? null,
+            ]);
         }
         foreach (DB::table('assessment_components')->where('mc_version_id', $fromId)->orderBy('id')->get() as $c) {
             $cid = DB::table('assessment_components')->insertGetId(['mc_version_id' => $id, 'mc_module_id' => $mod[$c->mc_module_id] ?? null, 'name_en' => $c->name_en, 'weight_percent' => $c->weight_percent, 'csv_key' => $c->csv_key, 'max_mark' => $c->max_mark, 'pass_mark' => $c->pass_mark]);

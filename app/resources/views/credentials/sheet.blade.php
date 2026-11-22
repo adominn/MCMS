@@ -95,8 +95,62 @@
   </div>
 </div>
 
-<div class="note warn" style="margin-bottom:24px;font-size:9.5pt">
+<div class="note warn" style="margin-bottom:20px;font-size:9.5pt">
   Signed with an official UTeM key pair. Open Badges 3.0 compliant. No IC number, email or raw score is carried in the credential.
+</div>
+
+<div class="sec-hd" style="font-size:11pt;font-weight:700;margin:16px 0 8px;text-transform:uppercase;border-left:3px solid #0f62fe;padding-left:6px;background:#f4f4f4;padding-top:4px;padding-bottom:4px">{{ __("Appendix E10: Credential Specifications Sign-Off (3 Roles)") }}</div>
+<table style="width:100%;border-collapse:collapse;margin-bottom:12px;font-size:9pt">
+  <thead>
+    <tr style="background:#f4f4f4">
+      <th style="border:1px solid #8d8d8d;padding:5px 7px;text-align:left;width:25%">{{ __('Role') }}</th>
+      <th style="border:1px solid #8d8d8d;padding:5px 7px;text-align:left;width:30%">{{ __('Name / Position') }}</th>
+      <th style="border:1px solid #8d8d8d;padding:5px 7px;text-align:left;width:15%">{{ __('Confirmation') }}</th>
+      <th style="border:1px solid #8d8d8d;padding:5px 7px;text-align:left;width:15%">{{ __('Date') }}</th>
+      <th style="border:1px solid #8d8d8d;padding:5px 7px;text-align:left;width:15%">{{ __('Remarks') }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    @php($signoffs = json_decode($c->e10_signoffs ?? '[]', true) ?: [])
+    @php($s1 = $signoffs['coordinator'] ?? null)
+    <tr>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px"><strong>Penyelaras Kursus / MC</strong><br><span style="font-size:8pt;color:#525252">(P1 Coordinator)</span></td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px">
+        <strong>{{ $s1['name'] ?? ($x['signatory'] ?? 'Dr. Aina Zulkifli') }}</strong><br>
+        <span style="font-size:8.5pt;color:#525252">{{ $s1['position'] ?? 'Penyelaras Kursus' }}</span>
+      </td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px"><span class="tag ok">{{ __('Disahkan') }}</span></td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px">{{ !empty($s1['signed_at']) ? \Carbon\Carbon::parse($s1['signed_at'])->format('d/m/Y') : $issued }}</td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px">{{ $s1['remarks'] ?? 'Pencapaian disahkan' }}</td>
+    </tr>
+    @php($s2 = $signoffs['faculty_rep'] ?? null)
+    <tr>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px"><strong>Wakil PTj / Timbalan Dekan</strong><br><span style="font-size:8pt;color:#525252">(P2 Faculty / Deputy Dean)</span></td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px">
+        <strong>{{ $s2['name'] ?? ($x['signatory'] ?? 'Hakim Rahman') }}</strong><br>
+        <span style="font-size:8.5pt;color:#525252">{{ $s2['position'] ?? ($x['signatory_position'] ?? 'Timbalan Dekan (Akademik)') }}</span>
+      </td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px"><span class="tag ok">{{ __('Disahkan') }}</span></td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px">{{ !empty($s2['signed_at']) ? \Carbon\Carbon::parse($s2['signed_at'])->format('d/m/Y') : $issued }}</td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px">{{ $s2['remarks'] ?? 'Pengesahan penyempurnaan' }}</td>
+    </tr>
+    @php($s3 = $signoffs['credential_custodian'] ?? null)
+    <tr>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px"><strong>Urus Setia Credential</strong><br><span style="font-size:8pt;color:#525252">(P6 Custodian)</span></td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px">
+        <strong>{{ $s3['name'] ?? 'Urus Setia Credential UTeM' }}</strong><br>
+        <span style="font-size:8.5pt;color:#525252">{{ $s3['position'] ?? 'Pegawai Credential' }}</span>
+      </td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px"><span class="tag ok">{{ __('Disahkan') }}</span></td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px">{{ !empty($s3['signed_at']) ? \Carbon\Carbon::parse($s3['signed_at'])->format('d/m/Y') : $issued }}</td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px">{{ $s3['remarks'] ?? 'Pemeteraian kriptografi disahkan' }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="nota-box" style="border:1.5px solid #0f62fe;background:#edf5ff;padding:10px 14px;margin-top:14px;margin-bottom:20px;font-size:9.5pt;line-height:1.45">
+  <b style="color:#0043ce;text-transform:uppercase;letter-spacing:0.5px">NOTA PENTING (Lampiran E):</b><br>
+  Digital Badge, Sijil/Digital Credential, Rekod Pencapaian Pembelajaran (Internal Achievement Record), ACR dan ABC mempunyai fungsi berbeza dan tidak boleh digunakan secara bertukar ganti. Pengeluaran credential digital tidak memberikan jaminan pemindahan kredit secara automatik; sebarang pemindahan kredit masih tertakluk kepada dasar dan kelulusan program pengajian serta institusi penerima.
 </div>
 
 <div style="page-break-before:always;margin-top:24px;padding-top:16px;border-top:1px dashed var(--border)">

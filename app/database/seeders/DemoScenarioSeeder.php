@@ -34,7 +34,13 @@ class DemoScenarioSeeder extends DemoProposalsSeeder
         $v = $this->proposal($owner, $ptj, $title, 'approved', now()->subDays(30));
         $mc = DB::table('mc_versions')->where('id', $v)->value('micro_credential_id');
         DB::table('micro_credentials')->where('id', $mc)->update(['category' => $category, 'category_status' => 'confirmed']);
-        DB::table('mc_versions')->where('id', $v)->update(['effective_date' => today()->subDays(200), 'planned_slt' => $hours]);
+        $versionUpdates = ['effective_date' => today()->subDays(200), 'planned_slt' => $hours];
+        if ($category === 'mce') {
+            $versionUpdates['proposed_credit'] = null;
+            $versionUpdates['proposed_mqf_level'] = null;
+            $versionUpdates['credit_sought'] = 0;
+        }
+        DB::table('mc_versions')->where('id', $v)->update($versionUpdates);
         DB::table('mc_modules')->where('mc_version_id', $v)->update(['slt_hours' => $hours]);
         // The assessment component belongs to the module, so that the module can be achieved.
         DB::table('assessment_components')->where('mc_version_id', $v)->update(['mc_module_id' => DB::table('mc_modules')->where('mc_version_id', $v)->value('id'), 'max_mark' => 100, 'pass_mark' => 50, 'csv_key' => 'project_mark']);
@@ -57,7 +63,7 @@ class DemoScenarioSeeder extends DemoProposalsSeeder
         DB::table('assessment_results')->insert(['enrolment_id' => $e, 'assessment_component_id' => $component, 'score' => 78, 'status' => 'verified', 'source' => 'manual', 'verified_by' => $hakim->id, 'verified_at' => now(), 'verification_evidence' => 'Seed data', 'created_at' => now(), 'updated_at' => now()]);
         DB::table('module_achievements')->insert(['enrolment_id' => $e, 'mc_module_id' => $module, 'verified_by' => $hakim->id, 'achieved_at' => now()]);
         if ($completed) {
-            DB::table('achievement_records')->insert(['enrolment_id' => $e, 'mc_version_id' => $version, 'completion_status' => 'complete', 'completed_on' => $end, 'final_result' => '{}', 'confirmed_by' => $hakim->id, 'confirmed_at' => now(), 'created_at' => now()]);
+            DB::table('achievement_records')->insert(['enrolment_id' => $e, 'mc_version_id' => $version, 'completion_status' => 'complete', 'completed_on' => $end, 'final_result' => '{}', 'coordinator_signed_by' => $aina->id, 'coordinator_signed_at' => now()->subDay(), 'coordinator_remarks' => 'Verified by Course Coordinator.', 'confirmed_by' => $hakim->id, 'confirmed_at' => now(), 'created_at' => now()]);
         }
     }
 }

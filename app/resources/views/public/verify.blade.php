@@ -69,7 +69,7 @@
   <!-- Verification Result Display -->
   @isset($file)
     <div class="panel" style="margin-bottom:24px;border-left:4px solid {{ $file['ok'] ? '#24a148' : '#da1e28' }}">
-      <div class="hd" style="background:#ffffff">
+      <div class="hd" style="background:var(--card-bg, #ffffff)">
         <h2 style="font-size:16px;font-weight:700;color:{{ $file['ok'] ? '#24a148' : '#da1e28' }}">
           <i class="bi bi-{{ $file['ok'] ? 'check-circle-fill' : 'exclamation-circle-fill' }}" style="margin-right:6px"></i>
           {{ $file['ok'] ? ($lang === 'ms' ? 'Pengesahan Kriptografi Berjaya' : 'Cryptographic Verification Succeeded') : ($lang === 'ms' ? 'Ralat Pengesahan Fail' : 'File Verification Failed') }}
@@ -134,7 +134,7 @@
     </div>
   @endisset
 
-  <div class="panel" style="background:#ffffff">
+  <div class="panel" style="background:var(--card-bg, #ffffff)">
     <div class="hd"><h2>{{ __('Public Cryptographic Trust Framework') }}</h2></div>
     <div class="bd" style="font-size:13px;line-height:1.6;color:var(--ink-muted)">
       <p style="margin:0 0 8px">

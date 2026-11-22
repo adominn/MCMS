@@ -1,0 +1,136 @@
+URL: http://127.0.0.1:8110/public/offering/7
+FINAL: http://127.0.0.1:8110/public/offering/7
+STATUS: 200
+TITLE: Electric Circuit Theory & Power Systems - UTeM Micro-Credential Management System
+H1: Electric Circuit Theory & Power Systems
+---
+UTeM MCMS
+Public Verification & Credential Portal
+Sign in
+EN
+BM
+Home
+Catalogue
+Pathways to a degree
+How recognition works
+FAQ
+Verify a credential
+←
+Back
+Home
+Catalogue
+Electric Circuit Theory & Power Systems 2026/FTKE1
+UTeM UMC
+UMC
+2026/FTKE1
+3 credits
+Electric Circuit Theory & Power Systems
+Fakulti Teknologi Dan Kejuruteraan Elektrik · Assoc. Prof. Dr. Ahmad Razali · Online · English
+Register
+
+Comprehensive modular micro-credential delivered via UTeM uLearn with guided lab clinics and authentic competency assessment.
+
+What this does and does not give you
+This is an Unbundled Micro-Credential (UMC) from BENE 1123 Electric Circuit Theory. Completing the whole UMC carries the credit of the parent course. A module or a badge on its own is not completion and not credit.
+Credit: 3
+Completing this micro-credential, receiving an Academic Credit Record, depositing credit to the Academic Bank of Credit and transferring credit are separate decisions.
+Learning outcomes
+Analyze complex multi-loop circuits using network theorems.
+Modules
+Learning time (SLT): 40 Hours
+1 rows
+#
+	Modules
+	Digital Badge
+	SLT (Hours)
+
+1	
+AC and DC Network Analysis
+Separately Recognisable Module
+	
+MOD 1
+UTeM UMC
+M1 Badge
+	40 hours
+Each module is part of the whole UMC. Completing a module or earning a badge is not completion of the UMC and is not academic credit.
+Completion in stages: Allowed
+Assessment
+1 rows
+Assessment Component
+	Weighting (%)
+
+AC/DC Network Theorem Analysis Assessment	100%
+Pass standard: Minimum 50% pass mark across all summative components with verified identity.
+Assessment Integrity: Proctored online assessment and viva verification.
+Feedback Method: Individual rubric breakdown and automated quiz feedback within 7 days.
+Identity Verification: National ID / Passport check and LMS proctoring log.
+What you receive
+Verifiable Credentials
+UTeM UMC
+Open Badges 3.0
+Electric Circuit Theory & Power Systems Digital Badge
+UMC
+Standard: Open Badges 3.0 · W3C Verifiable Credential (Ed25519 Cryptographic Proof)
+Issuer: Universiti Teknikal Malaysia Melaka (UTeM) · CODL
+Portability: Shareable to LinkedIn, digital CVs, and verifiable credential wallets.
+Modular Digital Badges Awarded:
+MOD 1
+UTeM UMC
+M1: AC and DC Network Analysis
+Each module earns its own digital badge upon verified assessment completion.
+OFFICIAL CERTIFICATE
+UTeM Micro-Credential Certificate
+High-resolution digital certificate with a unique immutable verification code and QR code for employer verification.
+ACADEMIC RECOGNITION
+3 credits
+Academic Credit Record (ACR) issued and eligible for deposit into the national Academic Bank of Credit (ABC) with 10-year validity.
+Requirements and support
+Prerequisites: Basic programming or engineering literacy; laptop with 8GB RAM.
+Access period: 16 weeks from cohort start date.
+Completion conditions: Complete all learning modules and achieve at least 50% in every summative assessment component.
+Learning support: Weekly 1-hour synchronous consultation via Microsoft Teams and 24/7 uLearn discussion forum.
+Parent Degree Course: BENE 1123 Electric Circuit Theory (3 credits)
+Fee
+RM 180.00
+UTeM UMC
+Institution
+UTeM (CODL)
+Faculty
+Fakulti Teknologi Dan Kejuruteraan Elektrik
+Lecturer
+Assoc. Prof. Dr. Ahmad Razali
+Delivery mode
+Online
+Language
+English
+Duration
+12 weeks
+Starts
+25/11/2026
+Ends
+15/02/2027
+Places
+35 places
+Credit
+3 credits
+Course
+BENE 1123
+Credential you receive
+Certificate, Digital Badge
+Registration open: 20/10/2026 to 20/11/2026
+UTeM Micro-credentials
+Centre for Open and Distance Learning (CODL)
+UTeM, Hang Tuah Jaya, 76100 Durian Tunggal, Melaka
+Learn
+All micro-credentials
+Degree pathways
+Recognition stages
+Help
+FAQ
+Verify a credential
+codl@utem.edu.my
+Policies
+Privacy notice (PDPA)
+Terms of use
+Accessibility
+UTeM Micro-Credential Management System (MCMS). Compliant with MQA & MoHE Good Practice Standards.

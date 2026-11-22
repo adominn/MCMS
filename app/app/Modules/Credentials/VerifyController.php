@@ -40,8 +40,12 @@ final class VerifyController
     {
         $r = $this->lookup($code);
         abort_if($r['outcome'] === 'not_found' || empty($r['credential']), 404, 'Credential not found.');
+        abort_if($r['outcome'] === 'revoked', 410, 'Credential has been revoked and cannot be downloaded.');
         abort_unless(in_array($as, ['json', 'jwt'], true), 404);
         $c = $r['credential'];
+
+        $fields = array_map('strtolower', (array) $this->settings->get('verification.public_fields', ['Name', 'Credential', 'Issuer', 'Date', 'Status']));
+        $show = fn (string $f) => in_array($f, $fields, true);
 
         if ($as === 'jwt') {
             return response($c->jwt ?? '', 200, [
@@ -85,7 +89,7 @@ final class VerifyController
                             'type' => 'IdentityObject',
                             'identityType' => 'name',
                             'hashed' => false,
-                            'identityHash' => $x['holder'] ?? 'Participant',
+                            'identityHash' => $show('name') ? ($x['holder'] ?? 'Participant') : 'Redacted',
                         ],
                     ],
                     'achievement' => [
@@ -102,6 +106,8 @@ final class VerifyController
                 ],
                 'proof_jwt' => $c->jwt,
             ];
+        } elseif (!$show('name') && isset($vc['credentialSubject']['identifier'][0]['identityHash'])) {
+            $vc['credentialSubject']['identifier'][0]['identityHash'] = 'Redacted';
         }
 
         $body = json_encode($vc, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -129,9 +135,21 @@ final class VerifyController
         $v = Jwt::verify($jwtString);
         $code = null;
         if ($v['ok']) {
-            $jti = (string) ($v['payload']['jti'] ?? '');
-            if (preg_match('#/public/verify/([A-Za-z0-9\-_]+)$#', $jti, $m)) {
-                $code = $m[1];
+            if (is_array($decodedJson) && isset($v['payload']['vc'])) {
+                $innerVc = $v['payload']['vc'];
+                $outerId = $decodedJson['id'] ?? null;
+                $innerId = $innerVc['id'] ?? null;
+                $outerHolder = $decodedJson['credentialSubject']['identifier'][0]['identityHash'] ?? null;
+                $innerHolder = $innerVc['credentialSubject']['identifier'][0]['identityHash'] ?? null;
+                if (($outerId && $innerId && $outerId !== $innerId) || ($outerHolder && $innerHolder && $outerHolder !== $innerHolder)) {
+                    $v = ['ok' => false, 'error' => 'Outer document claims do not match cryptographic signature (tampering detected).'];
+                }
+            }
+            if ($v['ok']) {
+                $jti = (string) ($v['payload']['jti'] ?? '');
+                if (preg_match('#/public/verify/([A-Za-z0-9\-_]+)$#', $jti, $m)) {
+                    $code = $m[1];
+                }
             }
         }
         $cred = $code ? DB::table('credentials')->where('public_code', $code)->orWhere('number', $code)->first() : null;
@@ -215,8 +233,8 @@ final class VerifyController
             $isRevoked = $c->status === 'revoked';
             $isReplaced = $c->status === 'replaced';
             $isCorrected = $c->status === 'corrected';
-            $qvUntil = $x['claims']['qv_until'] ?? $c->qv_valid_until;
-            $isExpired = $qvUntil && \Carbon\Carbon::parse($qvUntil)->isPast() && $c->status === 'valid';
+            // Cl. 10.5 & 17.6: Earned credentials stay valid; qv_valid_until applies only to offering/QV renewal, never retroactively expires earned credentials.
+            $isExpired = false;
 
             $outcome = 'valid';
             if ($isRevoked) {
@@ -225,8 +243,6 @@ final class VerifyController
                 $outcome = 'replaced';
             } elseif ($isCorrected) {
                 $outcome = 'corrected';
-            } elseif ($isExpired) {
-                $outcome = 'expired';
             } elseif (!$cryptoOk) {
                 $outcome = 'invalid_signature';
             }
@@ -248,19 +264,23 @@ final class VerifyController
                 $public = ['status' => 'revoked', 'revoked_on' => substr((string) $c->status_changed_at, 0, 10)];
             }
 
+            $cat = $x['category'] ?? $c->mc_category ?? null;
+            $isMce = strtolower((string)$cat) === 'mce';
+            $credits = $x['claims']['credit'] ?? ($isMce ? null : $c->proposed_credit);
+
             $details = [
                 'credential_number' => $c->number,
                 'public_code' => $c->public_code,
-                'category' => $x['category'] ?? $c->mc_category ?? 'UMC',
-                'credits' => $x['claims']['credit'] ?? $c->proposed_credit ?? 3,
-                'mqf_level' => $x['claims']['mqf'] ?? $c->proposed_mqf_level ?? null,
+                'category' => $cat,
+                'credits' => $credits,
+                'mqf_level' => $x['claims']['mqf'] ?? ($isMce ? null : $c->proposed_mqf_level),
                 'slt_hours' => $x['slt_hours'] ?? null,
                 'course' => ['en' => $c->course_name_en, 'ms' => $c->course_name_ms],
                 'faculty' => $c->ptj_name,
                 'lecturer' => $c->lecturer_name,
                 'outcomes' => $x['outcomes'] ?? null,
                 'signatory' => $x['signatory'] ?? null,
-                'crypto_verified' => $cryptoOk,
+                'crypto_verified' => $cryptoOk && !$isRevoked,
                 'signature_algorithm' => 'Ed25519 (EdDSA)',
                 'jwks_url' => url('/.well-known/jwks.json'),
             ];
@@ -315,7 +335,7 @@ final class VerifyController
                 'b.id', 'b.code', 'b.external_id', 'b.external_url', 'b.issued_at',
                 'a.achieved_at', 'u.name as recipient_name', 'm.seq',
                 'm.name_en as module_name_en', 'm.name_ms as module_name_ms', 'm.slt_hours',
-                'v.name_en as course_name_en', 'v.name_ms as course_name_ms',
+                'v.name_en as course_name_en', 'v.name_ms as course_name_ms', 'v.badge_image_path',
                 'mc.category as mc_category', 'p.name as ptj_name', 'lu.name as lecturer_name',
             ])
             ->first();
@@ -340,6 +360,7 @@ final class VerifyController
                     'module_name_ms' => $badge->module_name_ms,
                     'course_name_en' => $badge->course_name_en,
                     'course_name_ms' => $badge->course_name_ms,
+                    'image' => $badge->badge_image_path,
                     'issuer' => 'Universiti Teknikal Malaysia Melaka',
                     'faculty' => $badge->ptj_name,
                     'issued' => $issuedDate,

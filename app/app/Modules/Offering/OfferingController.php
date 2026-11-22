@@ -6,6 +6,7 @@ namespace App\Modules\Offering;
 
 use App\Models\User;
 use App\Modules\Core\Tasks;
+use App\Modules\Curriculum\ProposalChecker;
 use App\Modules\Notifications\Notifier;
 use App\Modules\Records\AuditRecorder;
 use Illuminate\Http\Request;
@@ -15,9 +16,9 @@ use Illuminate\Validation\ValidationException;
 // LEC-11 create an offering, LEC-12 readiness checklist, DD-06 offerings and readiness, DD-07 confirm readiness (MD-04).
 final class OfferingController
 {
-    private const TEXT_FIELDS = ['description', 'prerequisites', 'access_period', 'learning_support', 'completion_conditions'];
+    private const TEXT_FIELDS = ['description', 'prerequisites', 'access_period', 'learning_support', 'completion_conditions', 'facilitators', 'eligible_groups'];
 
-    public function __construct(private AuditRecorder $audit, private Notifier $notifier, private OfferingStatus $status) {}
+    public function __construct(private AuditRecorder $audit, private Notifier $notifier, private OfferingStatus $status, private ProposalChecker $checker) {}
 
     public function index(Request $request)
     {
@@ -37,6 +38,10 @@ final class OfferingController
     {
         $d = $this->validated($request) + $request->validate(['mc_version_id' => 'required|integer']);
         $v = $this->approvedVersions($request)->where('v.id', $d['mc_version_id'])->first() ?? abort(403, 'Only an approved version, inside your scope, can be offered.');
+        if (DB::table('mc_modules')->where('mc_version_id', $v->id)->exists()) {
+            $check = $this->checker->check($v->id);
+            abort_if(! empty($check['blocking']), 422, 'Cannot offer this version: the proposal has unresolved blocking curriculum errors.');
+        }
 
         $id = DB::transaction(function () use ($d, $v, $request) {
             $id = DB::table('offerings')->insertGetId(array_diff_key($d, ['mc_version_id' => 1]) + ['mc_version_id' => $v->id, 'created_by' => $request->user()->id, 'staged_completion' => $request->boolean('staged_completion'), 'created_at' => now(), 'updated_at' => now()]);
@@ -59,11 +64,42 @@ final class OfferingController
         $this->status->refresh();
         $o = $this->find($request, $id);
 
-        return view('offerings.show', [
-            'o' => $o, 'items' => DB::table('readiness_items')->where('offering_id', $id)->get()->keyBy('item'), 'labels' => config('offerings.status'), 'items_cfg' => config('offerings.readiness'),
-            'confirmations' => DB::table('readiness_confirmations as c')->join('users as u', 'u.id', '=', 'c.user_id')->where('c.offering_id', $id)->orderBy('c.id')->get(['c.*', 'u.name']),
-            'dean' => $request->user()->hasAnyRole('deputy_dean') && $o->owner_id !== $request->user()->id, 'editable' => ! in_array($o->status, ['cancelled', 'ended', 'running', 'held'], true),
-        ]);
+        $qv = null;
+        if ($o->category === 'samc') {
+            $mcId = DB::table('mc_versions')->where('id', $o->mc_version_id)->value('micro_credential_id');
+            $qv = DB::table('qv_records')
+                ->where('micro_credential_id', $mcId)
+                ->where('status', 'verified')
+                ->where('valid_from', '<=', today())
+                ->where('valid_until', '>=', today())
+                ->first();
+        }
+
+        $viewData = [
+            'o' => $o,
+            'qv' => $qv,
+            'items' => DB::table('readiness_items')->where('offering_id', $id)->get()->keyBy('item'),
+            'labels' => config('offerings.status'),
+            'items_cfg' => config('offerings.readiness'),
+            'sections' => config('offerings.readiness_sections'),
+            'confirmations' => DB::table('readiness_confirmations as c')->join('users as u', 'u.id', '=', 'c.user_id')->where('c.offering_id', $id)->orderBy('c.id')->get(['c.*', 'u.name', 'u.position']),
+            'dean' => $request->user()->hasAnyRole('deputy_dean') && $o->owner_id !== $request->user()->id,
+            'support' => $request->user()->hasAnyRole('codl_admin'),
+            'editable' => ! in_array($o->status, ['cancelled', 'ended', 'running', 'held'], true),
+        ];
+
+        if ($request->query('print') == '1') {
+            return view('offerings.readiness-print', $viewData);
+        }
+
+        return view('offerings.show', $viewData);
+    }
+
+    public function readinessPrint(Request $request, int $id)
+    {
+        $request->query->set('print', '1');
+
+        return $this->show($request, $id);
     }
 
     // LEC-09: the participants of a cohort, filtered by status, exportable (FR-108).
@@ -123,28 +159,37 @@ final class OfferingController
         return redirect()->route('offerings.show', $id)->with('status', 'Saved.');
     }
 
-    // FR-86, FR-87: the PTj confirmation opens the way to registration. Its own record (D-15).
+    // FR-86, FR-87, Appendix B8: the PTj (P2) or Support/System (P5) confirmation
     public function confirm(Request $request, int $id)
     {
         $o = $this->find($request, $id);
-        abort_unless($request->user()->hasAnyRole('deputy_dean') && $o->owner_id !== $request->user()->id, 403, 'Only a deputy dean of the PTj, not the lecturer of the cohort, confirms readiness.');
+        $user = $request->user();
+        $isDean = $user->hasAnyRole('deputy_dean') && $o->owner_id !== $user->id;
+        $isSupport = $user->hasAnyRole('codl_admin');
+        abort_unless($isDean || $isSupport, 403, 'Only a deputy dean of the PTj, not the lecturer of the cohort, confirms readiness.');
         abort_if(in_array($o->status, ['cancelled', 'ended', 'running', 'held'], true), 403, 'This cohort can no longer be confirmed.');
         abort_unless(DB::table('readiness_confirmations')->where('offering_id', $id)->where('role', 'lecturer')->exists(), 403, 'The lecturer has not sent the checklist yet.');
         $d = $request->validate(['outcome' => 'required|in:ready,ready_conditions,not_ready', 'conditions' => 'nullable|required_if:outcome,ready_conditions|string|max:1000']);
 
-        foreach (array_keys(config('offerings.readiness')) as $item) {
-            DB::table('readiness_items')->where(['offering_id' => $id, 'item' => $item])->update(['accepted' => isset($request->input('accept', [])[$item])]);
-        }
-        $this->requireAnswered($id, $d['outcome'], accepted: true);
+        if ($isDean) {
+            foreach (array_keys(config('offerings.readiness')) as $item) {
+                DB::table('readiness_items')->where(['offering_id' => $id, 'item' => $item])->update(['accepted' => isset($request->input('accept', [])[$item])]);
+            }
+            $this->requireAnswered($id, $d['outcome'], accepted: true);
 
-        DB::transaction(function () use ($id, $d, $request, $o) {
-            DB::table('readiness_confirmations')->insert(['offering_id' => $id, 'role' => 'ptj', 'user_id' => $request->user()->id, 'outcome' => $d['outcome'], 'conditions' => $d['conditions'] ?? null, 'created_at' => now()]);
-            DB::table('offerings')->where('id', $id)->update(['readiness_state' => $d['outcome'], 'updated_at' => now()]);
-            $this->audit->record('readiness.confirmed', ['type' => 'Offering', 'id' => $id], after: ['outcome' => $d['outcome']], reason: $d['conditions'] ?? null); // EV-17
-            Tasks::close('readiness', $id);
-            $owner = User::find($o->owner_id);
-            $this->notifier->send($owner, 'decision.made', ['name' => $owner->name, 'item' => $o->name_en.' '.$o->cohort_name, 'decision' => 'Readiness: '.config('offerings.outcomes')[$d['outcome']]], dedupe: "readiness-$id-".now()->timestamp);
-        });
+            DB::transaction(function () use ($id, $d, $request, $o, $user) {
+                DB::table('readiness_confirmations')->insert(['offering_id' => $id, 'role' => 'ptj', 'user_id' => $user->id, 'outcome' => $d['outcome'], 'conditions' => $d['conditions'] ?? null, 'created_at' => now()]);
+                DB::table('offerings')->where('id', $id)->update(['readiness_state' => $d['outcome'], 'updated_at' => now()]);
+                $this->audit->record('readiness.confirmed', ['type' => 'Offering', 'id' => $id], after: ['outcome' => $d['outcome']], reason: $d['conditions'] ?? null); // EV-17
+                Tasks::close('readiness', $id);
+                $owner = User::find($o->owner_id);
+                $this->notifier->send($owner, 'decision.made', ['name' => $owner->name, 'item' => $o->name_en.' '.$o->cohort_name, 'decision' => 'Readiness: '.config('offerings.outcomes')[$d['outcome']]], dedupe: "readiness-$id-".now()->timestamp);
+            });
+        } elseif ($isSupport) {
+            DB::table('readiness_confirmations')->insert(['offering_id' => $id, 'role' => 'support', 'user_id' => $user->id, 'outcome' => $d['outcome'], 'conditions' => $d['conditions'] ?? null, 'created_at' => now()]);
+            $this->audit->record('readiness.support_confirmed', ['type' => 'Offering', 'id' => $id], after: ['outcome' => $d['outcome']], reason: $d['conditions'] ?? null);
+        }
+
         $this->status->refresh();
 
         return redirect()->route('offerings.show', $id)->with('status', $d['outcome'] === 'not_ready' ? 'Recorded as not ready. Registration stays closed.' : 'Readiness confirmed. Registration opens on its date, and the cohort shows in the public catalogue.');
@@ -226,17 +271,28 @@ final class OfferingController
         $user = $request->user();
         $ptjs = $user->scopedPtjIds('deputy_dean');
 
-        return DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
+        return DB::table('offerings as o')
+            ->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
+            ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+            ->leftJoin('ptjs as p', 'p.id', '=', 'm.ptj_id')
+            ->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
             ->where(function ($q) use ($user, $ptjs) {
                 $q->where('m.owner_id', $user->id);
                 if ($user->hasAnyRole('deputy_dean')) {
                     $q->orWhereRaw($ptjs === null ? 'true' : 'm.ptj_id in ('.implode(',', array_map('intval', $ptjs) ?: [0]).')');
+                }
+                if ($user->hasAnyRole('codl_admin')) {
+                    $q->orWhereRaw('true');
                 }
             });
     }
 
     private function find(Request $request, int $id): object
     {
-        return $this->scoped($request)->where('o.id', $id)->first(['o.*', 'v.name_en', 'v.version_no', 'm.ptj_id', 'm.owner_id', 'm.category', 'u.name as lecturer_name']) ?? abort(404);
+        return $this->scoped($request)->where('o.id', $id)->first([
+            'o.*', 'v.name_en', 'v.version_no', 'v.badge_image_path',
+            'm.ptj_id', 'm.owner_id', 'm.category',
+            'u.name as lecturer_name', 'p.name as ptj_name', 'p.code as ptj_code',
+        ]) ?? abort(404);
     }
 }

@@ -335,6 +335,24 @@ components:
     typography: "{typography.body-sm}"
     rounded: "{rounded.none}"
     padding: 64px 32px
+  lifecycle-tracker:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    typography: "{typography.caption}"
+    rounded: "{rounded.none}"
+    padding: 12px 16px
+  orientation-strip:
+    backgroundColor: "{colors.surface-1}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.none}"
+    padding: 16px 20px
+  print-audit-table:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    typography: "{typography.caption}"
+    rounded: "{rounded.none}"
+    padding: 6px 8px
 ---
 
 ## Overview
@@ -531,6 +549,22 @@ The brand commits to flat 0px corners. The other tokens exist for product / mobi
 
 **`button-danger`** — Carbon's destructive variant.
 - Background `{colors.semantic-error}`, text `{colors.on-primary}`, type `{typography.button}`, rounded `{rounded.none}`, padding 12px 16px.
+
+### Prohibition of Generic Icons & Emojis (D-53)
+
+Under Decision **D-53**, generic decorative icons, random emojis, and unvetted SVG clip-art are **strictly prohibited** across all application interfaces, cards, sidebars, buttons, and documentation:
+- **No Emojis**: Never use emoji characters (such as ⏱, 🔒, ⚖️, 💡, 👉, ⭐, 🔥, etc.) in user-facing views or guidelines.
+- **No Unvetted Decorative SVGs**: Do not insert arbitrary novelty icons.
+- **Pure Carbon Typography and Geometry**: Visual hierarchy, emphasis, and status must be communicated exclusively through IBM Plex typography, semantic layout geometry, structured definition tables, and official Carbon status pills (`tag ok`, `tag info`, `tag warn`, `tag err`).
+- **Text-First Action Buttons**: Buttons and action triggers must use clean, professional text labels adhering strictly to the approved clickable prototype (D-38).
+
+### Pure Typographic Markers, Lifecycle Tracker & Official Print Tables (Appendix F Compliance)
+
+To comply with Decision **D-53** and the UTeM Micro-Credential Guidelines (Appendix F1–F11, Appendix H) without introducing generic icons, three structured Carbon components carry credit-lifecycle state and official print records:
+
+- **`lifecycle-tracker`** — Unified 8-stage horizontal progression bar (`01` Learning → `02` Coordinator Sign-off → `03` Completion → `04` ACR Confirmation → `05` Learner Consent → `06` ABC Deposit → `07` Credit Transfer → `08` Redemption). Flat 0px geometry, 1px `{colors.hairline}` border, 3px top rule (`{colors.ink}` for completed stages, `{colors.primary}` for current stage with `aria-current="step"`, `{colors.surface-2}` for upcoming). Never conveys state by colour alone — every step carries a numeral (`01`–`08`), English/BM label, and explicit state word (`Done`, `Current`, `Next`, `Waiting`, `Blocked`).
+- **`orientation-strip`** — Three-column summary band (`{colors.surface-1}` fill, 3px left rule in `{colors.primary}`, 1px `{colors.hairline}` border) placed directly beneath the page header on every ACR, deposit, completion, and transfer screen. Answers three plain-language questions: **Where is this?**, **What happens next?**, and **Who is responsible?** (annotated with Appendix H role marker `[P1]`–`[P8]`).
+- **`print-audit-table`** — Monochrome A4 official compliance table used in the Printable ACR (F1, F2, F3, F4, F9, F10, F11) and Printable Transfer Decision Letter (F6, F7, F8, F9, F11). Features square 0px cells, 1px `#161616` grid rules, 2px `#161616` header bottom rule, CSS-drawn square checkboxes (`[X]` / `[ ]`), Appendix section tags (`[F1]`–`[F11]`), and explicit `"Not yet recorded"` states whenever an action has not occurred.
 
 ### Dropdown Entity Switcher & Card Section Pattern
 

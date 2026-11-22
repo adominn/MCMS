@@ -21,7 +21,7 @@ final class ReferenceDataController
             'rules' => ['code' => 'required|string|max:30', 'name' => 'required|string|max:200', 'programme_code' => 'required|exists:programmes,code', 'credit' => 'required|integer|min:1|max:30', 'slt_hours' => 'required|integer|min:1|max:2000', 'clos' => 'required|string|max:2000']],
     ];
 
-    public function __construct(private AuditRecorder $audit) {}
+    public function __construct(private AuditRecorder $audit, private \App\Modules\Notifications\Notifier $notifier) {}
 
     public function index(string $entity)
     {
@@ -79,6 +79,87 @@ final class ReferenceDataController
             if ($table === 'parent_courses') {
                 foreach ($rows as $r) {
                     \App\Modules\Pathways\Plans::flagCourse($r['code'], 'The target course '.$r['code'].' changed: review the mapping.'); // a material change to the target flags the mapping (FR-spcurrchange)
+                }
+            }
+
+            // Guide Cl. 11.5 / REQ-C11-012: Updating parent_courses or programmes automatically opens periodic_reviews for all linked active UMCs and notifies P1/P2/P4
+            if (in_array($table, ['parent_courses', 'programmes'], true)) {
+                $courseIds = [];
+                if ($table === 'parent_courses') {
+                    $codes = array_column($rows, 'code');
+                    $courseIds = DB::table('parent_courses')->whereIn('code', $codes)->pluck('id')->all();
+                } else {
+                    $progCodes = array_column($rows, 'code');
+                    $progIds = DB::table('programmes')->whereIn('code', $progCodes)->pluck('id')->all();
+                    $courseIds = DB::table('parent_courses')->whereIn('programme_id', $progIds)->pluck('id')->all();
+                }
+
+                if (! empty($courseIds)) {
+                    $activeUmcs = DB::table('mc_versions as v')
+                        ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+                        ->where('v.status', 'approved')
+                        ->whereIn('v.parent_course_id', $courseIds)
+                        ->select('m.id', 'm.owner_id', 'm.ptj_id', 'v.name_en')
+                        ->distinct()
+                        ->get();
+
+                    foreach ($activeUmcs as $umc) {
+                        $existing = DB::table('periodic_reviews')
+                            ->where('micro_credential_id', $umc->id)
+                            ->whereNull('completed_on')
+                            ->first();
+
+                        if (! $existing) {
+                            DB::table('periodic_reviews')->insert([
+                                'micro_credential_id' => $umc->id,
+                                'due_on' => today()->toDateString(),
+                                'note' => 'Triggered by parent course/programme update (Cl. 11.5)',
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        } else {
+                            DB::table('periodic_reviews')->where('id', $existing->id)->update([
+                                'due_on' => today()->toDateString(),
+                                'updated_at' => now(),
+                            ]);
+                        }
+
+                        // Notify P1 (Owner/Lecturer)
+                        $owner = \App\Models\User::find($umc->owner_id);
+                        if ($owner) {
+                            $this->notifier->send($owner, 'review.due', [
+                                'name' => $owner->name,
+                                'title' => $umc->name_en.' (Parent Course Updated)',
+                                'date' => today()->format('d/m/Y'),
+                            ], dedupe: "review-parent-p1-{$umc->id}-{$owner->id}-".today()->toDateString());
+                        }
+
+                        // Notify P2 (PTj authority / Deputy Dean)
+                        $p2Users = \App\Models\User::whereIn('id', DB::table('role_assignments')
+                            ->whereIn('role', ['deputy_dean', 'ptj_authority'])
+                            ->where(fn ($q) => $q->where('ptj_id', $umc->ptj_id)->orWhere('scope_type', 'university'))
+                            ->pluck('user_id'))->get();
+                        foreach ($p2Users as $p2) {
+                            $this->notifier->send($p2, 'review.due', [
+                                'name' => $p2->name,
+                                'title' => $umc->name_en.' (Parent Course Updated)',
+                                'date' => today()->format('d/m/Y'),
+                            ], dedupe: "review-parent-p2-{$umc->id}-{$p2->id}-".today()->toDateString());
+                        }
+
+                        // Notify P4 (QA Officer)
+                        $p4Users = \App\Models\User::whereIn('id', DB::table('role_assignments')
+                            ->where('role', 'qa_officer')
+                            ->where(fn ($q) => $q->where('ptj_id', $umc->ptj_id)->orWhere('scope_type', 'university'))
+                            ->pluck('user_id'))->get();
+                        foreach ($p4Users as $p4) {
+                            $this->notifier->send($p4, 'review.due', [
+                                'name' => $p4->name,
+                                'title' => $umc->name_en.' (Parent Course Updated)',
+                                'date' => today()->format('d/m/Y'),
+                            ], dedupe: "review-parent-p4-{$umc->id}-{$p4->id}-".today()->toDateString());
+                        }
+                    }
                 }
             }
         }

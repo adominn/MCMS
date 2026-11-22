@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catalogue - No Results - UTeM Micro-Credential Management System</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+</head>
+<body>
+  
+  <header class="brand-header">
+    <div class="container brand-header-inner">
+      <a href="../public/home.html" class="brand-identity" aria-label="UTeM Micro-Credential Management System Home">
+        <img src="../assets/LogoJawiUTeM_blue-01.png" alt="Universiti Teknikal Malaysia Melaka" class="brand-logo-img">
+        <div class="brand-titles">
+          <span class="brand-sys-title">UTeM MCMS</span>
+        </div>
+      </a>
+      
+      <nav class="header-nav" aria-label="Public Navigation">
+        <ul class="header-nav-list">
+          <li><a href="../public/home.html" class="header-nav-link ">Home</a></li>
+          <li><a href="../public/catalogue.html" class="header-nav-link active">Catalogue</a></li>
+          <li><a href="../public/pathways.html" class="header-nav-link ">Pathways</a></li>
+          <li><a href="../public/how-it-works.html" class="header-nav-link ">Recognition Stages</a></li>
+          <li><a href="../public/faq.html" class="header-nav-link ">FAQ</a></li>
+          <li><a href="../public/verify.html" class="header-nav-link ">Verify</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="../auth/signin-default.html" class="btn btn-primary btn-sm">Sign In</a>
+      </div>
+    </div>
+  </header>
+  
+  
+  <main class="main-content">
+    
+<div class="container">
+  <div class="flex items-center justify-between" style="margin-bottom:20px">
+    <div>
+      <div class="breadcrumbs">
+        <a href="home.html">Home</a>
+        <span class="breadcrumbs-sep">/</span>
+        <a href="catalogue.html">Catalogue</a>
+        <span class="breadcrumbs-sep">/</span>
+        <span>Search Results</span>
+      </div>
+      <h1>Micro-Credential Catalogue</h1>
+      <p style="margin-top:4px">No micro-credentials matched your search criteria.</p>
+    </div>
+    <div>
+      <span class="tag tag-error">0 Results Found</span>
+    </div>
+  </div>
+
+  <div class="catalogue-layout">
+    <!-- Filter Sidebar (Active with strict criteria) -->
+    <aside class="catalogue-sidebar">
+      <form action="catalogue.html" method="get" class="card">
+        <div class="flex items-center justify-between" style="margin-bottom:14px">
+          <span class="tag">Filters Active</span>
+          <a href="catalogue.html" style="font-size:12px;color:var(--color-primary)">Reset Filters</a>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Keyword Search</label>
+          <input type="search" name="q" class="input" value="Quantum Robotics Hypercomputing">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select name="category" class="select">
+            <option value="">All Categories</option>
+            <option value="umc" selected>UMC &ndash; Unbundled</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Faculty / PTj</label>
+          <select name="ptj" class="select">
+            <option value="FKP" selected>FKP &ndash; Manufacturing</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Apply Filters</button>
+      </form>
+    </aside>
+
+    <!-- Empty Results Card -->
+    <section class="catalogue-results">
+      <div class="card flex flex-col items-center justify-center text-center" style="padding:64px 32px;background:var(--color-surface-1)">
+        <span class="tag" style="margin-bottom:12px">Empty Search Result</span>
+        <h2 style="font-size:20px;margin-bottom:8px">No Micro-Credentials Found</h2>
+        <p style="max-width:480px;margin-bottom:20px">
+          We could not find any active cohorts matching "Quantum Robotics Hypercomputing". Try adjusting your search query, selecting different faculties, or removing category constraints.
+        </p>
+        <div class="flex items-center gap-sm">
+          <a href="catalogue.html" class="btn btn-primary btn-sm">Clear All Filters</a>
+          <a href="home.html" class="btn btn-secondary btn-sm">Return to Home</a>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+  </main>
+
+  
+  <footer class="public-footer">
+    <div class="container">
+      <div class="grid grid-cols-4 gap-lg">
+        <div>
+          <img src="../assets/CODL_logo.png" alt="Centre for Open and Distance Learning" style="height:60px;width:auto;display:block;margin-bottom:14px">
+          <div class="footer-heading">UTeM Micro-credentials</div>
+          <p style="color:#94a3b8;font-size:12.5px;line-height:1.5">
+            Centre for Open and Distance Learning (CODL)<br>
+            Universiti Teknikal Malaysia Melaka<br>
+            Hang Tuah Jaya, 76100 Durian Tunggal, Melaka
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-heading">Learn</div>
+          <a href="../public/catalogue.html">All Micro-Credentials</a>
+          <a href="../public/pathways.html">Degree Pathways</a>
+          <a href="../public/how-it-works.html">Recognition Stages</a>
+        </div>
+
+        <div>
+          <div class="footer-heading">Help & Verification</div>
+          <a href="../public/faq.html">Frequently Asked Questions</a>
+          <a href="../public/verify.html">Verify a Credential</a>
+          <a href="mailto:codl@utem.edu.my">Contact CODL: codl@utem.edu.my</a>
+        </div>
+
+        <div>
+          <div class="footer-heading">Policies & Governance</div>
+          <a href="../public/policy-privacy.html">Privacy Notice (PDPA)</a>
+          <a href="../public/policy-terms.html">Terms of Use</a>
+          <a href="../public/policy-accessibility.html">Accessibility Statement</a>
+        </div>
+      </div>
+
+      <div class="footer-legal">
+        Micro-credentials issued under the UTeM Micro-Credential Framework compliant with MQA Code of Practice for Programme Accreditation and Malaysian Qualifications Framework (MQF) 2nd Edition. Micro-credentials do not automatically grant university admission.
+      </div>
+    </div>
+  </footer>
+  
+
+  <script src="../js/ui.js"></script>
+</body>
+</html>

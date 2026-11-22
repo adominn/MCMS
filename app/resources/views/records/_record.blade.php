@@ -10,7 +10,7 @@
 @endphp
 
 @if(!$isPrint)
-  {{-- Guide Section 8.7.5 Compliance Banner --}}
+  {{-- Section 8.7.5 Compliance Banner --}}
   <div class="note info" style="margin-bottom:16px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
     <div>
       <strong>{{ __('Internal record, not an Academic Credit Record') }}</strong>
@@ -197,9 +197,9 @@
                 @endphp
                 <tr>
                   <td><strong>{{ $r->name_en }}</strong></td>
-                  <td class="num">{{ rtrim(rtrim((string) $r->pass_mark, '0'), '.') }}</td>
+                  <td class="num">{{ mcms_num($r->pass_mark) }}</td>
                   <td class="num" style="font-weight:600">
-                    {{ rtrim(rtrim((string) $r->score, '0'), '.') }} / {{ rtrim(rtrim((string) $r->max_mark, '0'), '.') }}
+                    {{ mcms_num($r->score) }} / {{ mcms_num($r->max_mark) }}
                   </td>
                   <td>
                     <span class="tag {{ $isMet ? 'ok' : 'err' }}">
@@ -319,7 +319,7 @@
         </div>
         <div class="bd col" style="gap:12px">
           <p class="s muted" style="margin:0;line-height:1.4">
-            {{ __('Under UTeM Micro-Credential Guide Bahagian D, academic credits are maintained separately in an Academic Credit Record (ACR) and deposited into the ABC upon participant consent.') }}
+            {{ __('Academic credits are maintained separately in an Academic Credit Record (ACR) and deposited into the ABC upon participant consent.') }}
           </p>
 
           @if(!empty($d['acr']))
@@ -390,7 +390,13 @@
           </div>
           <div style="display:flex;justify-content:space-between;margin-bottom:6px">
             <span class="muted">{{ __('Proposed Credit:') }}</span>
-            <span>{{ $d['e']->proposed_credit ?? 0 }} Credits</span>
+            <span>
+              @if(strtolower((string)($d['e']->category ?? '')) === 'mce')
+                {{ __('Non-credit (MCE)') }}
+              @else
+                {{ mcms_num($d['e']->proposed_credit ?? 0) }} {{ __('Credits') }}
+              @endif
+            </span>
           </div>
           <div style="display:flex;justify-content:space-between;margin-bottom:6px">
             <span class="muted">{{ __('Delivery Mode:') }}</span>
@@ -415,7 +421,7 @@
   <div class="note warn" style="margin-bottom:16px;font-size:9.5pt">
     <div>
       <b>{{ __('Internal record, not an Academic Credit Record') }}</b> &ndash;
-      <span>{{ __('This is MCMS internal record of modules, digital badges, and confirmed completions. It is governed separately from Academic Credit Records (ACR) under Bahagian D.') }}</span>
+      <span>{{ __('This is an internal record of modules, digital badges, and confirmed completions. It is governed separately from Academic Credit Records (ACR).') }}</span>
     </div>
   </div>
 
@@ -524,8 +530,8 @@
           @foreach($d['results'] as $r)
             <tr>
               <td>{{ $r->name_en }}</td>
-              <td class="num">{{ rtrim(rtrim((string) $r->pass_mark, '0'), '.') }}</td>
-              <td class="num">{{ rtrim(rtrim((string) $r->score, '0'), '.') }} / {{ rtrim(rtrim((string) $r->max_mark, '0'), '.') }}</td>
+              <td class="num">{{ mcms_num($r->pass_mark) }}</td>
+              <td class="num">{{ mcms_num($r->score) }} / {{ mcms_num($r->max_mark) }}</td>
               <td>
                 <span class="tag {{ (float) $r->score >= (float) $r->pass_mark ? 'ok' : 'err' }}">
                   {{ (float) $r->score >= (float) $r->pass_mark ? __('Met') : __('Not met') }}
@@ -563,7 +569,7 @@
         @endif
         @if(!empty($d['acr']))
           <div>
-            <b>{{ __('Academic Credit Record (Bahagian D):') }}</b>
+            <b>{{ __('Academic Credit Record (ACR):') }}</b>
             <code>{{ $d['acr']->reference }}</code> &ndash; {{ $d['acr']->credits }} {{ __('credits') }} ({{ $d['acr']->status }})
           </div>
         @endif

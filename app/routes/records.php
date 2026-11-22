@@ -5,15 +5,15 @@ use App\Modules\Records\RecordsController;
 use App\Modules\Records\RetentionController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'role:student,lecturer,deputy_dean,codl_admin'])->get('/documents', [RecordsController::class, 'documents'])->name('documents');
+Route::middleware(['auth', 'role:student,lecturer,deputy_dean,ptj_authority,academic_authority,qa_officer,records_custodian,abc_depositor,records_depositor,codl_admin'])->get('/documents', [RecordsController::class, 'documents'])->name('documents');
 
-Route::middleware(['auth', 'role:lecturer,deputy_dean,codl_admin'])->prefix('records')->group(function () {
+Route::middleware(['auth', 'role:lecturer,deputy_dean,ptj_authority,academic_authority,qa_officer,records_custodian,abc_depositor,records_depositor,codl_admin'])->prefix('records')->group(function () {
     Route::get('/reports', [RecordsController::class, 'reports'])->name('reports');
     Route::get('/reports/{kind}', [RecordsController::class, 'report'])->where('kind', '[a-z]+')->name('reports.show');
     Route::get('/reports/{kind}/print', [RecordsController::class, 'reportPrint'])->where('kind', '[a-z]+')->name('reports.print');
     Route::get('/reports/{kind}/csv', [RecordsController::class, 'reportCsv'])->where('kind', '[a-z]+')->name('reports.csv');
 });
-Route::middleware(['auth', 'role:lecturer,deputy_dean'])->prefix('records')->group(function () {
+Route::middleware(['auth', 'role:lecturer,deputy_dean,ptj_authority,academic_authority,qa_officer,records_custodian,abc_depositor,records_depositor'])->prefix('records')->group(function () {
     Route::get('/trace', [RecordsController::class, 'traceIndex'])->name('trace');
     Route::get('/trace/{enrolment}', [RecordsController::class, 'traceShow'])->whereNumber('enrolment')->name('trace.show');
     Route::get('/cohort/{offering}', [RecordsController::class, 'cohort'])->whereNumber('offering')->name('cohort.records');
@@ -21,13 +21,13 @@ Route::middleware(['auth', 'role:lecturer,deputy_dean'])->prefix('records')->gro
     Route::get('/audit/print', [RecordsController::class, 'auditPrint'])->name('records.audit.print');
     Route::get('/audit/csv', [RecordsController::class, 'auditCsv'])->name('records.audit.csv');
 });
-Route::middleware(['auth', 'role:deputy_dean'])->prefix('records')->group(function () {
+Route::middleware(['auth', 'role:deputy_dean,ptj_authority,academic_authority,records_custodian,abc_depositor,records_depositor'])->prefix('records')->group(function () {
     Route::get('/discrepancies', [RecordsController::class, 'discrepancies'])->name('discrepancies');
     Route::post('/discrepancies/scan', [RecordsController::class, 'scan'])->name('discrepancies.scan');
     Route::post('/discrepancies/{id}/resolve', [RecordsController::class, 'resolve'])->whereNumber('id')->name('discrepancies.resolve');
 });
-Route::middleware(['auth', 'role:deputy_dean'])->get('/deposits/batches/{id}', [CreditBankController::class, 'batch'])->whereNumber('id')->name('deposits.batch');
-Route::middleware(['auth', 'role:codl_admin,deputy_dean'])->prefix('records/retention')->group(function () {
+Route::middleware(['auth', 'role:abc_depositor,records_depositor'])->get('/deposits/batches/{id}', [CreditBankController::class, 'batch'])->whereNumber('id')->name('deposits.batch');
+Route::middleware(['auth', 'role:codl_admin,deputy_dean,ptj_authority,academic_authority,records_custodian,records_depositor'])->prefix('records/retention')->group(function () {
     Route::get('/', [RetentionController::class, 'index'])->name('retention');
     Route::post('/holds', [RetentionController::class, 'hold'])->name('retention.hold');
     Route::post('/holds/{id}/lift', [RetentionController::class, 'lift'])->whereNumber('id')->name('retention.lift');

@@ -1,0 +1,153 @@
+URL: http://127.0.0.1:8110/my-plan
+FINAL: http://127.0.0.1:8110/my-plan
+STATUS: 200
+TITLE: My degree plan - UTeM Micro-Credential Management System
+H1: My degree plan
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+8
+AH
+Amir Hakimi
+Student
+LEARNING
+My learning
+Find a micro-credential
+Registrations and payments
+My results
+Feedback
+ACHIEVEMENTS
+Credentials
+Achievement record
+CREDIT
+Credit ledger and ABC
+Credit transfer
+My degree plan
+Documents
+Notifications
+8
+Collapse sidebar
+My degree plan
+Your plan is faculty advice on how your micro-credentials could count toward a degree programme.
+A pathway is not admission, a credit transfer or an award. No number of micro-credentials or badges leads to a degree automatically. Credit goes through credit transfer evaluation by the receiving programme, credit is valid for a limited time, and you must meet the graduation conditions of the programme.
+PLAN-2026-0001: BITS Bachelor of Computer Science (Software Development) with Honours
+Suitable to proceed
+·
+FTMK – Fakulti Teknologi Maklumat Dan Komunikasi
+Download Pathway Specification (PDF)
+✓
+Faculty Evaluation: Suitable to proceed
+Evaluated by Hakim Rahman · Your micro-credentials have been verified against the degree syllabus and are eligible to articulate into this programme.
+Apply for Credit Transfer →
+Plan prepared
+by the faculty
+Faculty review
+Suitable to proceed
+Credit transfer
+decided by the programme
+Admission
+intake 2026/1
+Award
+recorded
+Degree Articulation Progress
+10 / 120 Graduation Credits
+8.3% of degree curriculum articulated via micro-credentials
+10 credits mapped
+Micro-credentials mapped: 10 cr
+Required directly at UTeM (30%): ≥ 36 cr
+Remaining study: 110 cr
+Earned directly at UTeM
+100%
+at least 30% is required
+Credentials counted
+4
+10 credits
+Checks met
+5 / 5
+All criteria met
+Requirements left
+4
+Remaining curriculum items
+Academic Conditions & Follow-up: Must maintain minimum CGPA of 2.0 in major subjects.
+Credentials counted (4)
+Checks (5)
+What is left (4)
+4 rows
+Micro-credential
+	Target Degree Course
+	Credit Equivalent
+
+Data Structures (2026 Enhanced)
+Mapped credential
+	
+BITS 1123
+	3 credits
+Cloud Native Development
+Mapped credential
+	
+BITS 1124
+	2 credits
+Secure Software Development Lifecycle (SSDLC)
+Mapped credential
+	
+BITS 2313
+	2 credits
+Object-Oriented Software Construction
+Mapped credential
+	
+BITD 1123
+	3 credits
+5 rows
+Requirement & Policy Criterion
+	Result
+
+100% of the 120 graduating credits would be earned directly at UTeM; at least 30% is required. Meeting 30% does not mean the rest can be transferred automatically.	Met
+Residency planned: 6 semester(s); at least 1 required for a conventional programme.	Met
+Every credential counted toward the degree is credit-bearing (UMC or Quality-Verified SAMC). An MCE never counts.	Met
+Every credential counted is mapped to programme learning outcomes (BR-36).	Met
+4 remaining requirement(s) listed.	Met
+4 rows
+Remaining Degree Subject
+	Kind
+	Status
+
+BITI 2213 Software Engineering	Core course	Planned
+BITP 3113 Operating Systems	Core course	To do
+BITU 3983 Final Year Project I	Project or capstone	To do
+BITU 3926 Industrial Training	Industrial training	To do
+Student & Faculty Collaboration
+Role of Academic Advisor / Faculty:
+Evaluates micro-credential syllabi and learning outcomes.
+Confirms course-by-course equivalence against degree syllabus.
+Verifies MQA 30% minimum UTeM residency requirement.
+Records official conditions and recommends next steps.
+Your Next Steps as Student:
+Maintain required academic conditions (e.g. CGPA >= 2.0).
+Complete eligible micro-credentials to earn verified badges.
+Lodge formal Credit Transfer application once admitted.
+Consult with advisor if you wish to adjust your plan.
+Academic Advisor
+Ha
+Hakim Rahman
+FTMK · Degree Articulation Evaluator
+
+Your academic advisor evaluates your prior credentials, confirms course equivalence, and supports your degree articulation.
+
+Email Advisor
+Action Center
+Go to Credit Transfer →
+Find Next Micro-Credential
+Download Specification (PDF)
+Articulation Roadmap
+Study Plan Mapped
+Prepared by faculty
+Faculty Review
+Suitable
+Degree Admission
+Intake 2026/1
+Formal Credit Transfer
+Decided case by case by the programme
+Degree Graduation
+Award recorded

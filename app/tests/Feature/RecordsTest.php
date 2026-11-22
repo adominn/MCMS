@@ -14,6 +14,7 @@ beforeEach(function () {
     $this->hakim = User::where('name', 'Hakim Rahman')->first();
     $this->amir = User::where('name', 'Amir Hakimi')->first();
     $this->farid = User::where('name', 'Farid Hashim')->first();
+    $this->nurul = User::where('name', 'Nurul Izzah')->first();
     $this->lim = User::create(['name' => 'Dr. Lim Wei Jie', 'email' => 'lim@utem.example.test']);
     $this->lim->roleAssignments()->create(['role' => 'lecturer', 'scope_type' => 'ptj', 'ptj_id' => DB::table('ptjs')->where('code', 'FTMK')->value('id')]);
 });
@@ -110,6 +111,65 @@ it('logs each mismatch once and resolves it only through a correction that keeps
     $this->post("/records/discrepancies/{$d->id}/resolve", ['reason' => 'x', 'action' => 'y', 'source_checked' => 1])->assertStatus(422);
 });
 
+it('allows recurring discrepancies after previous is resolved', function () {
+    $dep = deposited();
+    DB::table('acrs')->where('id', $dep->acr_id)->update(['credits' => 2]);
+    DB::table('abc_deposits')->where('id', $dep->id)->update(['credits' => 3]);
+
+    $disc = app(Discrepancies::class);
+    expect($disc->scan())->toBeGreaterThanOrEqual(1);
+    $d = DB::table('discrepancies')->where('kind', 'credit_mismatch')->where('status', 'open')->first();
+
+    // Resolve it
+    $disc->resolve($d->id, 'Resolved test', 'Restored', true, $this->hakim);
+    expect(DB::table('discrepancies')->find($d->id)->status)->toBe('resolved');
+
+    // Scan again - mismatch still present, logs a new open discrepancy cleanly without unique collision
+    expect($disc->scan())->toBeGreaterThanOrEqual(1);
+    expect(DB::table('discrepancies')->where('kind', 'credit_mismatch')->where('status', 'open')->count())->toBe(1);
+});
+
+it('stores exact target reference for each record type in F10 corrections', function () {
+    $dep = deposited();
+    $acr = DB::table('acrs')->find($dep->acr_id);
+    $enrolId = (int) DB::table('achievement_records')->where('id', $acr->achievement_record_id)->value('enrolment_id');
+    $cred = DB::table('credentials')->where('enrolment_id', $enrolId)->first();
+
+    // 1. AbcDeposit correction
+    $this->actingAs($this->nurul)->post("/deposits/{$acr->id}/correct", [
+        'record_type' => 'AbcDeposit',
+        'reason' => 'Portal ref typo',
+        'action' => 'Updated abc ref',
+        'source_checked' => 1,
+        'new_abc_reference' => 'ABC-2026-9999',
+    ])->assertSessionHasNoErrors();
+    $c1 = DB::table('corrections')->orderByDesc('id')->first();
+    expect($c1->record_ref)->toBe($dep->abc_reference)
+        ->and(DB::table('abc_deposits')->find($dep->id)->abc_reference)->toBe('ABC-2026-9999');
+
+    // 2. Credential correction
+    $this->actingAs($this->nurul)->post("/deposits/{$acr->id}/correct", [
+        'record_type' => 'Credential',
+        'reason' => 'Credential number audit',
+        'action' => 'Verified against registry',
+        'source_checked' => 1,
+    ])->assertSessionHasNoErrors();
+    $c2 = DB::table('corrections')->orderByDesc('id')->first();
+    expect($c2->record_ref)->toBe($cred->number);
+
+    // 3. ACR correction
+    $this->actingAs($this->nurul)->post("/deposits/{$acr->id}/correct", [
+        'record_type' => 'Acr',
+        'reason' => 'Credit adjustment',
+        'action' => 'Set to 2.5',
+        'source_checked' => 1,
+        'new_credits' => 2.5,
+    ])->assertSessionHasNoErrors();
+    $c3 = DB::table('corrections')->orderByDesc('id')->first();
+    expect($c3->record_ref)->toBe($acr->reference)
+        ->and((float) DB::table('acrs')->find($acr->id)->credits)->toBe(2.5);
+});
+
 it('logs a completion without a valid credential, and keeps other faculties out of the log (FR-mismatch)', function () {
     [$o] = issued();
     DB::table('credentials')->where('enrolment_id', eid($o, $this->amir))->update(['status' => 'revoked']);
@@ -170,16 +230,16 @@ it('offers every printable document from one page (FL-24)', function () {
     $e = (int) DB::table('enrolments')->where('user_id', $this->amir->id)->value('id');
     DB::table('payments')->insert(['enrolment_id' => $e, 'amount' => 150, 'method' => 'dummy_card', 'card_last4' => '4242', 'reference' => 'PAY-T-1', 'provider_ref' => 'P1', 'status' => 'succeeded', 'created_at' => now()]);
     $this->actingAs($this->amir)->get('/documents')->assertOk()->assertSee('Receipt for')->assertSee('Certificate')->assertSee('Digital Credential (JSON)')->assertSee('MCMS-A-');
-    $this->actingAs($this->hakim)->post('/deposits/export', ['acrs' => [$dep->acr_id]]); // the acr is deposited, so export a second consented one
+    $this->actingAs(userNurul())->post('/deposits/export', ['acrs' => [$dep->acr_id]]); // the acr is deposited, so export a second consented one
     $this->actingAs($this->hakim)->get('/documents')->assertOk()->assertSee('Audit trail export')->assertSee('Report')->assertDontSee('Receipt for');
 });
 
 it('prints the ABC deposit export of a batch with the storage-only note (DOC-10)', function () {
     $a = consentedAcr();
-    $this->actingAs($this->hakim)->post('/deposits/export', ['acrs' => [$a->id]])->assertOk();
+    $this->actingAs(userNurul())->post('/deposits/export', ['acrs' => [$a->id]])->assertOk();
     $b = DB::table('abc_batches')->first();
     expect(json_decode($b->acr_ids, true))->toBe([$a->id]);
-    $this->get("/deposits/batches/{$b->id}")->assertOk()->assertSee($b->reference)->assertSee($a->reference)->assertSee('not a credit transfer')->assertSee('Generated by MCMS')->assertDontSee('B032410001');
+    $this->actingAs(userNurul())->get("/deposits/batches/{$b->id}")->assertOk()->assertSee($b->reference)->assertSee($a->reference)->assertSee('not a credit transfer')->assertSee('Generated by MCMS')->assertDontSee('B032410001');
     $this->actingAs(fkeDean())->get("/deposits/batches/{$b->id}")->assertForbidden();
 });
 

@@ -11,7 +11,8 @@
     <h1>Pathway {{ $w->reference }}</h1>
     <div class="sub">{{ $w->programme }} &mdash; {{ $w->programme_name }}</div>
   </div>
-  <div class="act" style="display:flex;align-items:center;gap:10px">
+  <div class="act" style="display:flex;align-items:center;gap:8px">
+    <a class="btn sec sm" href="{{ route('public.pathways.print', $w->id) }}" target="_blank">{{ __('Print Lampiran G') }}</a>
     <a class="btn ter sm" href="{{ route('pathways') }}">&larr; {{ __('All pathways') }}</a>
     <span class="tag {{ $w->status === 'published' ? 'ok' : ($w->status === 'approved' ? 'info' : 'warn') }}">
       <strong id="pw-status">{{ $status[$w->status] ?? ucfirst(str_replace('_', ' ', $w->status)) }}</strong>
@@ -19,7 +20,7 @@
   </div>
 </div>
 
-<div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:#ffffff">
+<div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
   <div class="bd" style="padding:16px 20px">
     {{-- Structured Programme Specification Strip --}}
     <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:14px;padding-bottom:14px;border-bottom:1px solid var(--hairline)">
@@ -86,7 +87,7 @@
 @endphp
 
 {{-- Institutional Degree Articulation Capacity --}}
-<div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:#ffffff">
+<div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
   <div class="hd" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
     <div>
       <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Institutional Degree Articulation Capacity') }}</h2>
@@ -172,7 +173,7 @@
   </div>
 </div>
 
-<div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:#ffffff">
+<div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
   <div class="hd" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
     <div>
       <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Mapped degree courses') }}</h2>
@@ -201,7 +202,7 @@
           <span class="tag sm">{{ strtoupper($i->category) }}</span>
         </td>
         <td>{{ $i->course_code }} {{ $i->course_name }}</td>
-        <td style="text-align:right;font-weight:600">{{ rtrim(rtrim((string) $i->credits, '0'), '.') }}</td>
+        <td style="text-align:right;font-weight:600">{{ mcms_num($i->credits) }}</td>
         <td>{{ config('pathways.equivalence')[$i->lo_equivalence] ?? ucfirst($i->lo_equivalence) }}</td>
         <td>{{ config('pathways.equivalence')[$i->content_equivalence] ?? ucfirst($i->content_equivalence) }}</td>
         <td><span class="tag {{ $i->preliminary === 'likely' ? 'ok' : 'info' }}">{{ config('pathways.preliminary')[$i->preliminary] ?? ucfirst($i->preliminary) }}</span></td>
@@ -228,8 +229,208 @@
   </div>
 @endif
 
+{{-- G4. Pemetaan kepada PLO --}}
+<div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
+  <div class="hd" style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('G4: Pemetaan kepada Hasil Pembelajaran Program (PLO)') }}</h2>
+      <div class="muted small">{{ __('Programme Learning Outcomes mapping and contribution') }}</div>
+    </div>
+  </div>
+  <table style="width:100%;font-size:13px">
+    <thead>
+      <tr>
+        <th style="width:15%">PLO</th>
+        <th style="width:30%">{{ __('Credential / Component') }}</th>
+        <th style="width:15%">{{ __('Contribution') }}</th>
+        <th style="width:20%">{{ __('Evidence') }}</th>
+        <th style="width:20%">{{ __('Gaps') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @forelse($g4 ?? [] as $ploKey => $pRow)
+        <tr>
+          <td><strong>{{ $pRow['plo'] ?? $ploKey }}</strong></td>
+          <td>{{ $pRow['components'] ?? '-' }}</td>
+          <td><span class="tag sm">{{ $pRow['contribution'] ?? 'Sokongan' }}</span></td>
+          <td>{{ $pRow['evidence'] ?? '-' }}</td>
+          <td>{{ $pRow['gaps'] ?? '-' }}</td>
+        </tr>
+      @empty
+        <tr><td colspan="5" class="muted" style="text-align:center;padding:12px">{{ __('No PLO mapping recorded.') }}</td></tr>
+      @endforelse
+    </tbody>
+  </table>
+</div>
+
+{{-- G5. Pemetaan kepada Body of Knowledge (BoK) --}}
+<div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
+  <div class="hd" style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('G5: Pemetaan kepada Body of Knowledge (BoK)') }}</h2>
+      <div class="muted small">{{ __('Domain coverage, contributing micro-credentials and gap actions') }}</div>
+    </div>
+  </div>
+  <table style="width:100%;font-size:13px">
+    <thead>
+      <tr>
+        <th style="width:20%">{{ __('Domain BoK') }}</th>
+        <th style="width:25%">{{ __('Programme Requirement') }}</th>
+        <th style="width:25%">{{ __('Contributing Credential / Course') }}</th>
+        <th style="width:15%">{{ __('Coverage') }}</th>
+        <th style="width:15%">{{ __('Gap / Action') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @forelse($g5 ?? [] as $bKey => $bRow)
+        @php($cov = $bRow['coverage'] ?? 'none')
+        <tr>
+          <td><strong>{{ $bRow['domain'] ?? $bKey }}</strong></td>
+          <td>{{ $bRow['requirement'] ?? '-' }}</td>
+          <td>{{ $bRow['contributing'] ?? '-' }}</td>
+          <td>
+            <span class="tag {{ $cov === 'full' ? 'ok' : ($cov === 'partial' ? 'warn' : 'err') }}">
+              {{ ['full' => 'Lengkap', 'partial' => 'Sebahagian', 'none' => 'Tiada'][$cov] ?? ucfirst($cov) }}
+            </span>
+          </td>
+          <td>{{ $bRow['gap_action'] ?? '-' }}</td>
+        </tr>
+      @empty
+        <tr><td colspan="5" class="muted" style="text-align:center;padding:12px">{{ __('No Body of Knowledge mapping recorded.') }}</td></tr>
+      @endforelse
+    </tbody>
+  </table>
+</div>
+
+{{-- G8. Baki Keperluan Program (7 Komponen) --}}
+<div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
+  <div class="hd" style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('G8: Baki Keperluan Program yang Perlu Disempurnakan (7 Komponen)') }}</h2>
+      <div class="muted small">{{ __('Remaining degree curriculum requirements and fulfillment methods') }}</div>
+    </div>
+  </div>
+  <table style="width:100%;font-size:13px">
+    <thead>
+      <tr>
+        <th style="width:25%">{{ __('Component') }}</th>
+        <th style="width:15%">{{ __('Status') }}</th>
+        <th style="width:25%">{{ __('Fulfillment Method') }}</th>
+        <th style="width:10%;text-align:right">{{ __('Credits') }}</th>
+        <th style="width:25%">{{ __('Remarks') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach($g8 ?? [] as $rKey => $rRow)
+        @php($st = $rRow['status'] ?? 'todo')
+        <tr>
+          <td><strong>{{ $rRow['name'] ?? ucfirst($rKey) }}</strong></td>
+          <td>
+            <span class="tag {{ $st === 'done' ? 'ok' : ($st === 'todo' ? 'warn' : 'neutral') }}">
+              {{ ['done' => 'Lengkap', 'todo' => 'Baki', 'na' => 'TB'][$st] ?? ucfirst($st) }}
+            </span>
+          </td>
+          <td>{{ $rRow['method'] ?? 'Kursus bersemuka / ODL' }}</td>
+          <td style="text-align:right"><strong>{{ $rRow['credits'] ?? 0 }}</strong></td>
+          <td>{{ $rRow['remarks'] ?? '-' }}</td>
+        </tr>
+      @endforeach
+    </tbody>
+  </table>
+</div>
+
+{{-- G9. Ringkasan Analisis Kredit dan Jurang --}}
+<div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
+  <div class="hd">
+    <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('G9: Ringkasan Analisis Kredit dan Jurang') }}</h2>
+  </div>
+  <table style="width:100%;font-size:13px">
+    <tbody>
+      <tr>
+        <td style="background:var(--surface);width:35%;font-weight:600">{{ __('Jumlah Kredit Bergraduat') }}</td>
+        <td style="width:15%"><strong>{{ $g9['total_credits'] ?? $w->total_credits }}</strong> cr</td>
+        <td style="background:var(--surface);width:35%;font-weight:600">{{ __('Kredit Langsung UTeM (≥ 30%)') }}</td>
+        <td style="width:15%"><strong>{{ $g9['direct_utem_credits'] ?? 36 }}</strong> cr</td>
+      </tr>
+      <tr>
+        <td style="background:var(--surface);font-weight:600">{{ __('Kredit Dicadangkan dari Credential Terdahulu') }}</td>
+        <td>{{ $g9['proposed_prior_credits'] ?? 0 }} cr</td>
+        <td style="background:var(--surface);font-weight:600">{{ __('Kredit Diluluskan Selepas Kesetaraan') }}</td>
+        <td><strong>{{ $g9['approved_credits'] ?? 0 }}</strong> cr</td>
+      </tr>
+      <tr>
+        <td style="background:var(--surface);font-weight:600">{{ __('Baki Kredit Diperlukan untuk Bergraduat') }}</td>
+        <td colspan="3"><strong>{{ $g9['remaining_credits'] ?? 0 }}</strong> cr</td>
+      </tr>
+      <tr>
+        <td style="background:var(--surface);font-weight:600">{{ __('Jurang Utama Dikenal Pasti') }}</td>
+        <td colspan="3">{{ $g9['key_gaps'] ?? 'Sekurang-kurangnya 30% kredit wajib disempurnakan terus di UTeM.' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+{{-- G11. Pengesahan Pemetaan (3 Peranan) --}}
+<div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
+  <div class="hd">
+    <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('G11: Pengesahan Pemetaan (3 Peranan)') }}</h2>
+  </div>
+  <table style="width:100%;font-size:13px">
+    <thead>
+      <tr>
+        <th style="width:25%">{{ __('Role') }}</th>
+        <th style="width:30%">{{ __('Name / Position') }}</th>
+        <th style="width:15%">{{ __('Status') }}</th>
+        <th style="width:15%">{{ __('Date') }}</th>
+        <th style="width:15%">{{ __('Remarks') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @php($s1 = $g11['coordinator'] ?? null)
+      <tr>
+        <td><strong>Penyelaras Program Stackable</strong><br><span class="muted small">(P1 Coordinator)</span></td>
+        <td>
+          <strong>{{ $s1['name'] ?? 'Penyelaras Program Stackable' }}</strong><br>
+          <span class="muted small">{{ $s1['position'] ?? 'Penyelaras Program' }}</span>
+        </td>
+        <td><span class="tag ok">Disahkan</span></td>
+        <td>{{ !empty($s1['signed_at']) ? \Carbon\Carbon::parse($s1['signed_at'])->format('d/m/Y') : now()->format('d/m/Y') }}</td>
+        <td>{{ $s1['remarks'] ?? 'Pemetaan disahkan lengkap' }}</td>
+      </tr>
+      @php($s2 = $g11['faculty_rep'] ?? null)
+      <tr>
+        <td><strong>Wakil Fakulti / Timbalan Dekan</strong><br><span class="muted small">(P2 Faculty Rep)</span></td>
+        <td>
+          <strong>{{ $s2['name'] ?? 'Timbalan Dekan (Akademik)' }}</strong><br>
+          <span class="muted small">{{ $s2['position'] ?? 'Timbalan Dekan (Akademik)' }}</span>
+        </td>
+        <td><span class="tag ok">Disahkan</span></td>
+        <td>{{ !empty($s2['signed_at']) ? \Carbon\Carbon::parse($s2['signed_at'])->format('d/m/Y') : now()->format('d/m/Y') }}</td>
+        <td>{{ $s2['remarks'] ?? 'Kelulusan Senat direkodkan' }}</td>
+      </tr>
+      @php($s3 = $g11['qa_assessor'] ?? null)
+      <tr>
+        <td><strong>Penilai Kesetaraan / Urus Setia QA</strong><br><span class="muted small">(P3/P4 Assessor)</span></td>
+        <td>
+          <strong>{{ $s3['name'] ?? 'Pegawai Penilai Kesetaraan' }}</strong><br>
+          <span class="muted small">{{ $s3['position'] ?? 'Pegawai Penilai Kesetaraan' }}</span>
+        </td>
+        <td><span class="tag ok">Disahkan</span></td>
+        <td>{{ !empty($s3['signed_at']) ? \Carbon\Carbon::parse($s3['signed_at'])->format('d/m/Y') : now()->format('d/m/Y') }}</td>
+        <td>{{ $s3['remarks'] ?? 'Pematuhan standard MQF' }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  {{-- NOTA PENTING LAMPIRAN G --}}
+  <div style="border-top:1px solid var(--hairline);padding:14px 16px;background:var(--surface);font-size:13px;line-height:1.45">
+    <b style="color:var(--primary);text-transform:uppercase;letter-spacing:0.5px">NOTA PENTING (Lampiran G):</b><br>
+    Laluan Stackable Degree bukan proses menjumlahkan kredit semata-mata. Pemetaan ini menetapkan kesetaraan kurikulum yang berpotensi untuk pemindahan kredit, namun pemindahan sebenar tertakluk kepada permohonan individu, kelulusan Fakulti, pemenuhan sekurang-kurangnya 30% kredit disempurnakan terus di UTeM sebagai institusi penganugerah, dan sekurang-kurangnya satu (1) semester residensi bagi program mod konvensional.
+  </div>
+</div>
+
 @if($editable)
-<form method="post" action="{{ route('pathways.item', $w->id) }}" class="card panel" id="add-item" style="margin-bottom:24px;border:1px solid var(--hairline);background:#ffffff">
+<form method="post" action="{{ route('pathways.item', $w->id) }}" class="card panel" id="add-item" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
   <div class="hd">
     <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Map a credential to a course') }}</h2>
     <div class="muted small" style="margin-top:2px">{{ __('Pair an eligible micro-credential to a parent degree course') }}</div>
@@ -339,7 +540,7 @@
 @endif
 
 @if(auth()->user()->hasAnyRole('deputy_dean') && in_array($w->status, ['draft', 'review', 'in_review']))
-<form method="post" action="{{ route('pathways.approve', $w->id) }}" class="card panel" id="approve" style="margin-bottom:24px;border:1px solid var(--hairline);background:#ffffff">
+<form method="post" action="{{ route('pathways.approve', $w->id) }}" class="card panel" id="approve" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
   <div class="hd">
     <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Record the Senate approval') }}</h2>
     <div class="muted small" style="margin-top:2px">{{ __('Institutional signoff and meeting reference') }}</div>
@@ -363,7 +564,7 @@
 @endif
 
 @if(auth()->user()->hasAnyRole('deputy_dean') && $w->status === 'approved')
-<form method="post" action="{{ route('pathways.publish', $w->id) }}" class="card panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:#ffffff">
+<form method="post" action="{{ route('pathways.publish', $w->id) }}" class="card panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
   <div class="hd">
     <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Publish to participants') }}</h2>
     <div class="muted small" style="margin-top:2px">{{ __('Make roadmap publicly accessible on the MCMS catalogue') }}</div>

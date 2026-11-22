@@ -1,10 +1,18 @@
 @extends('layouts.app')
 @section('title', __('Register'))
 @section('content')
+@if($step > 1 && !($e && $e->status === 'pending_payment'))
+<x-breadcrumb :crumbs="[
+  'Find a micro-credential' => route('catalogue'),
+  __('Step 1: eligibility') => route('register', ['offering' => $o->id, 'step' => 1]),
+  __('Register: :name :cohort', ['name' => $o->name_en, 'cohort' => $o->cohort_name]) => null,
+]" />
+@else
 <x-breadcrumb :crumbs="[
   'Find a micro-credential' => route('catalogue'),
   __('Register: :name :cohort', ['name' => $o->name_en, 'cohort' => $o->cohort_name]) => null,
 ]" />
+@endif
 <div class="title">
   <div>
     <h1>{{ __('Register') }}: {{ $o->name_en }} {{ $o->cohort_name }}</h1>
@@ -15,9 +23,15 @@
 <div class="track" style="margin-bottom:24px">
   @php($trackSteps = [1 => 'Eligibility and details', 2 => 'Acknowledgement', 3 => 'Payment', 4 => 'Confirmation'])
   @foreach($trackSteps as $n => $label)
-    <div class="stp {{ $n < $step ? 'done' : ($n === $step ? 'now' : '') }}">
-      <b>{{ $n }}. {{ __($label) }}</b>
-    </div>
+    @if($n < $step && !($e && $e->status === 'pending_payment' && $n < 3))
+      <a href="{{ route('register', ['offering' => $o->id, 'step' => $n]) }}" class="stp done" style="text-decoration:none;cursor:pointer">
+        <b>{{ $n }}. {{ __($label) }}</b>
+      </a>
+    @else
+      <div class="stp {{ $n === $step ? 'now' : '' }}">
+        <b>{{ $n }}. {{ __($label) }}</b>
+      </div>
+    @endif
   @endforeach
 </div>
 
@@ -25,10 +39,13 @@
   <div>
     @if($step === 1)
       <div class="panel">
-        <div class="hd"><h2>{{ __('Step 1: eligibility') }}</h2><span class="r"><span class="tag {{ empty($reasons) ? 'ok' : 'err' }}">{{ empty($reasons) ? __('Eligible') : __('Not eligible') }}</span></span></div>
+        <div class="hd">
+          <h2>{{ __('Step 1: eligibility') }}</h2>
+          <span class="r"><span class="tag {{ empty($reasons) ? 'ok' : 'err' }}">{{ empty($reasons) ? __('Eligible') : __('Not eligible') }}</span></span>
+        </div>
         <div class="bd">
           @if($reasons)
-            <div class="note err" role="alert" style="margin-bottom:16px">
+            <div class="note err" role="alert" style="margin-bottom:20px">
               <div>
                 <b>{{ __('You cannot register:') }}</b>
                 <ul style="margin:6px 0 0;padding-left:18px">
@@ -39,64 +56,120 @@
               </div>
             </div>
           @else
-            <div class="note ok" style="margin-bottom:16px">{{ __('The checks pass: the registration window is open, there is a place, and your group is eligible.') }}</div>
+            <div class="note ok" style="margin-bottom:20px">
+              {{ __('The checks pass: the registration window is open, there is a place, and your group is eligible.') }}
+            </div>
           @endif
 
-          <div class="checks" style="margin-bottom:16px">
-            <div class="check">
-              <span class="dot ok"></span>
-              <div class="grow">{{ __('Active UTeM learner account') }}<span class="s" style="display:block;color:var(--muted);font-size:12px">{{ auth()->user()->matric_no ?? 'ID: '.auth()->user()->id }}, {{ auth()->user()->name }}</span></div>
+          {{-- Automated Pre-Registration Checks Table --}}
+          <div style="margin-bottom:24px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <h3 style="font-size:14px;font-weight:600;margin:0;letter-spacing:0.2px">{{ __('Automated Pre-Registration Checks') }}</h3>
+              <span class="tag {{ empty($reasons) ? 'ok' : 'err' }}" style="white-space:nowrap !important;display:inline-flex !important">
+                {{ empty($reasons) ? __('Checks pass') : __('Checks failed') }}
+              </span>
             </div>
-            <div class="check">
-              <span class="dot {{ !in_array('Micro-credential is not approved', $reasons ?? []) ? 'ok' : 'err' }}"></span>
-              <div class="grow">{{ __('Micro-credential is approved') }}<span class="s" style="display:block;color:var(--muted);font-size:12px">{{ $o->name_en }}</span></div>
+            <div class="table-wrap" style="border:1px solid var(--hairline);border-radius:2px;overflow:hidden">
+              <table style="width:100%;border-collapse:collapse;margin:0">
+                <thead>
+                  <tr style="background:var(--table-header-bg);border-bottom:1px solid var(--hairline)">
+                    <th style="width:110px;padding:8px 16px;font-size:12px;text-align:left">{{ __('Status') }}</th>
+                    <th style="padding:8px 16px;font-size:12px;text-align:left">{{ __('Eligibility Criterion') }}</th>
+                    <th style="width:220px;padding:8px 16px;font-size:12px;text-align:right">{{ __('Verification Details') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach($checks ?? [] as $chk)
+                  <tr style="border-bottom:1px solid var(--hairline)">
+                    <td style="padding:12px 16px;vertical-align:middle;white-space:nowrap">
+                      <span class="tag {{ $chk['tag'] }}" style="white-space:nowrap !important;display:inline-flex !important;font-weight:600">{{ __($chk['status']) }}</span>
+                    </td>
+                    <td style="padding:12px 16px;vertical-align:middle">
+                      <div style="font-weight:600;font-size:13.5px">{{ __($chk['criterion']) }}</div>
+                    </td>
+                    <td style="padding:12px 16px;vertical-align:middle;text-align:right;white-space:nowrap">
+                      <span style="font-size:12px;color:var(--muted)">{{ $chk['details'] }}</span>
+                    </td>
+                  </tr>
+                  @endforeach
+                </tbody>
+              </table>
             </div>
-            <div class="check">
-              <span class="dot {{ empty($reasons) ? 'ok' : 'err' }}"></span>
-              <div class="grow">{{ __('Registration is open and a place is free') }}<span class="s" style="display:block;color:var(--muted);font-size:12px">{{ __('Registration closes :date', ['date' => \Carbon\Carbon::parse($o->reg_closes_on)->format('d/m/Y')]) }}</span></div>
-            </div>
-            @if($o->prerequisites)
-            <div class="check">
-              <span class="dot warn"></span>
-              <div class="grow">{{ __('Prerequisite: :prereq', ['prereq' => $o->prerequisites]) }}<span class="s" style="display:block;color:var(--muted);font-size:12px">{{ __('Confirm you meet this requirement below') }}</span></div>
-            </div>
-            @endif
           </div>
 
+          @if($o->prerequisites)
+            @php($activeLang = session('lang', app()->getLocale() ?: 'en'))
+            <div style="background:var(--surface);border:1px solid var(--hairline);border-left:4px solid var(--accent);border-radius:2px;padding:14px 18px;margin-bottom:24px">
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <div>
+                  <div style="font-weight:600;font-size:13.5px;color:var(--ink);margin-bottom:4px">
+                    {{ $activeLang === 'ms' ? 'Pengetahuan Sedia Ada yang Disyorkan (Nasihat)' : 'Recommended Prior Knowledge (Advisory)' }}
+                  </div>
+                  <div style="font-size:13px;line-height:1.5;color:var(--ink-light)">
+                    @if($activeLang === 'ms')
+                      Micro-credential ini mengandaikan latar belakang sedia ada dalam <strong>{{ $o->prerequisites }}</strong>. Tiada kursus prasyarat akademik formal diperlukan untuk mendaftar.
+                    @else
+                      This micro-credential assumes prior background in <strong>{{ $o->prerequisites }}</strong>. No formal academic prerequisite course is required to register.
+                    @endif
+                  </div>
+                </div>
+              </div>
+            </div>
+          @endif
+
           @if(empty($reasons))
+          {{-- Authenticated Learner Profile Card --}}
+          <div style="margin-bottom:24px">
+            <h3 style="font-size:14px;font-weight:600;margin:0 0 10px;letter-spacing:0.2px">{{ __('Participant Profile (From UTeM Identity Records)') }}</h3>
+            <div style="background:var(--surface);border:1px solid var(--hairline);border-radius:2px;padding:16px">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px">
+                <div>
+                  <div class="small muted">{{ __('Full Name') }}</div>
+                  <div style="font-weight:600;font-size:14px;margin-top:2px">{{ auth()->user()->name }}</div>
+                </div>
+                <div>
+                  <div class="small muted">{{ __('Learner / Matric ID') }}</div>
+                  <div style="font-weight:600;font-size:14px;margin-top:2px">{{ auth()->user()->institution_id ?? 'ID: '.auth()->user()->id }}</div>
+                </div>
+                <div>
+                  <div class="small muted">{{ __('Registered Email') }}</div>
+                  <div style="font-weight:600;font-size:14px;margin-top:2px">{{ auth()->user()->email }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <form method="post" action="{{ route('register.eligibility', $o->id) }}">
             @csrf
-            <div class="field" style="margin-bottom:16px">
-              <label for="name">{{ __('Name') }}</label>
-              <input type="text" id="name" readonly value="{{ auth()->user()->name }}" class="read" style="max-width:400px">
-            </div>
-            <div class="field" style="margin-bottom:16px">
-              <label for="email">{{ __('Email') }}</label>
-              <input type="email" id="email" readonly value="{{ auth()->user()->email }}" class="read" style="max-width:400px">
-              <div class="help" style="font-size:12px;color:var(--muted);margin-top:4px">{{ __('From your UTeM account.') }}</div>
-            </div>
-            <div class="field" style="margin-bottom:16px">
-              <label for="phone">{{ __('Confirm your phone number') }}</label>
-              <input type="text" id="phone" name="phone" value="{{ old('phone', auth()->user()->phone) }}" required style="max-width:300px">
+            <div class="field" style="margin-bottom:20px;max-width:440px">
+              <label for="phone" style="font-weight:600;margin-bottom:6px;display:block">
+                {{ __('Confirm your phone number') }} <span style="color:var(--err)">*</span>
+              </label>
+              <input type="text" id="phone" name="phone" value="{{ old('phone', auth()->user()->phone) }}" required placeholder="+60123456789" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:2px">
+              <div class="help" style="font-size:12px;color:var(--muted);margin-top:4px">
+                {{ __('Required for cohort communications, LMS account provisioning, and credential issuance.') }}
+              </div>
               @error('phone')<div class="help err" role="alert" style="color:var(--err);font-size:12px;margin-top:4px">{{ $message }}</div>@enderror
             </div>
+
             @if($o->prerequisites)
-              <div style="margin-bottom:20px">
-                <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer">
+              <div class="field" style="margin-bottom:20px;max-width:540px">
+                <label style="display:inline-flex;align-items:flex-start;gap:10px;cursor:pointer;font-weight:600;font-size:13px">
                   <input type="checkbox" id="prerequisites_ok" name="prerequisites_ok" value="1" {{ old('prerequisites_ok') ? 'checked' : '' }}>
-                  <span>{{ __('I meet the prerequisites: :prereq', ['prereq' => $o->prerequisites]) }}</span>
+                  <span>{{ __('I confirm that I meet the prerequisite knowledge or experience for this micro-credential (:prereq).', ['prereq' => $o->prerequisites]) }} <span style="color:var(--err)">*</span></span>
                 </label>
                 @error('prerequisites_ok')<div class="help err" role="alert" style="color:var(--err);font-size:12px;margin-top:4px">{{ $message }}</div>@enderror
               </div>
             @endif
-            <div class="row" style="gap:12px;margin-top:20px">
-              <button type="submit" class="btn">{{ __('Continue') }}</button>
-              <a class="btn ter" href="{{ route('offering', $o->id) }}">{{ __('Back to the offering') }}</a>
+
+            <div class="row" style="gap:12px;margin-top:24px">
+              <button type="submit" class="btn" style="min-width:140px">{{ __('Continue') }} &rarr;</button>
+              <a class="btn ter" href="{{ route('offering', $o->id) }}">&larr; {{ __('Back to the offering') }}</a>
             </div>
           </form>
           @else
           <div class="row" style="gap:12px;margin-top:20px">
-            <a class="btn ter" href="{{ route('catalogue') }}">{{ __('Back to the catalogue') }}</a>
+            <a class="btn ter" href="{{ route('catalogue') }}">&larr; {{ __('Back to the catalogue') }}</a>
           </div>
           @endif
         </div>
@@ -107,11 +180,23 @@
         <div class="panel">
           <div class="hd"><h2>{{ __('Step 2: what this does and does not give you') }}</h2></div>
           <div class="bd">
-            <div class="panel" style="margin-bottom:20px">
-              <div class="hd"><h2>{{ __('Recognition statement') }}</h2></div>
-              <div class="bd">
-                <p style="white-space:pre-line;margin:0 0 16px">{{ $ack }}</p>
-                <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer">
+            <div class="panel" style="margin-bottom:20px;border:1px solid var(--border)">
+              <div class="hd" style="background:var(--surface);padding:12px 16px">
+                <h3 style="font-size:15px;margin:0">{{ __('Recognition statement') }}</h3>
+              </div>
+              <div class="bd" style="padding:16px">
+                <p style="white-space:pre-line;margin:0 0 16px;line-height:1.6">{{ $ack }}</p>
+
+                <div style="background:var(--surface);border:1px solid var(--hairline);border-left:3px solid var(--accent);padding:12px 16px;margin:16px 0;font-size:13px">
+                  <div style="font-weight:600;margin-bottom:6px;color:var(--accent)">{{ __('Key Recognition Principles:') }}</div>
+                  <ul style="margin:0;padding-left:18px;line-height:1.5">
+                    <li><b>{{ __('Learning Achievement') }}</b>: {{ __('Completion of individual modules earns digital badges; only full MC completion qualifies for an Academic Credit Record (ACR).') }}</li>
+                    <li><b>{{ __('ACR & ABC Deposit') }}</b>: {{ __('ACR preparation and ABC deposit are separate administrative and quality processes.') }}</li>
+                    <li><b>{{ __('Credit Transfer') }}</b>: {{ __('Credit transfer is an academic evaluation decided solely by the receiving degree programme, never an automatic guarantee.') }}</li>
+                  </ul>
+                </div>
+
+                <label style="display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;font-size:13px;margin-top:8px">
                   <input type="checkbox" id="ack_statement" name="ack_statement" value="1">
                   <span>{{ __('I have read the recognition statement.') }}</span>
                 </label>
@@ -119,12 +204,14 @@
             </div>
 
             @if($pdpa)
-            <div class="panel" style="margin-bottom:20px">
-              <div class="hd"><h2>{{ __('Personal data notice (PDPA)') }}</h2></div>
-              <div class="bd">
-                <p style="margin:0 0 12px">{{ $pdpaText['en'] }}</p>
-                <p lang="ms" class="muted" style="margin:0 0 16px">{{ $pdpaText['ms'] }}</p>
-                <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer">
+            @php($activeLang = session('lang', app()->getLocale() ?: 'en'))
+            <div class="panel" style="margin-bottom:20px;border:1px solid var(--border)">
+              <div class="hd" style="background:var(--surface);padding:12px 16px">
+                <h3 style="font-size:15px;margin:0">{{ __('Personal data notice (PDPA)') }}</h3>
+              </div>
+              <div class="bd" style="padding:16px">
+                <p style="margin:0 0 16px;line-height:1.6">{{ $pdpaText[$activeLang] ?? ($pdpaText['en'] ?? '') }}</p>
+                <label style="display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;font-size:13px">
                   <input type="checkbox" id="pdpa" name="pdpa" value="1">
                   <span>{{ __('I have read the personal data notice.') }}</span>
                 </label>
@@ -134,7 +221,7 @@
 
             <div class="row" style="gap:12px;margin-top:20px">
               <button type="submit" class="btn">{{ $o->fee > 0 ? __('Continue to payment') : __('Register') }}</button>
-              <a class="btn ter" href="{{ route('register', $o->id) }}">{{ __('Back') }}</a>
+              <a class="btn ter" href="{{ route('register', ['offering' => $o->id, 'step' => 1]) }}">&larr; {{ __('Back') }}</a>
             </div>
           </div>
         </div>
@@ -208,7 +295,7 @@
                   <a class="btn ter" href="{{ route('register', $o->id) }}">{{ __('Back') }}</a>
                 </div>
 
-                <dialog id="confirm" aria-labelledby="ctitle" style="border:1px solid var(--ink);padding:24px;max-width:480px;background:#fff">
+                <dialog id="confirm" aria-labelledby="ctitle" style="border:1px solid var(--hairline);padding:24px;max-width:480px;background:var(--card-bg);color:var(--ink)">
                   <div class="small muted" style="margin-bottom:6px">{{ __('Registration') }} &middot; {{ $o->cohort_name }}</div>
                   <h2 id="ctitle" style="margin:0 0 12px;font-size:20px">{{ __('Pay RM :amount?', ['amount' => number_format($e->fee_amount, 2)]) }}</h2>
                   <p style="margin:0 0 8px">{{ __('Your card will be charged once.') }}</p>
@@ -292,24 +379,60 @@
   </div>
 
   <div>
-    <div class="panel">
-      <div class="hd"><h2>{{ __('Your registration') }}</h2></div>
-      <div class="bd">
-        <dl class="dl">
-          <dt>{{ __('Micro-credential') }}</dt>
-          <dd><b>{{ $o->name_en }}</b></dd>
-          @if(!empty($o->lecturer_name))
-            <dt>{{ __('Lecturer') }}</dt>
-            <dd>{{ $o->lecturer_name }}</dd>
+    <div class="panel" style="border:1px solid var(--border)">
+      <div class="hd" style="background:var(--surface);padding:12px 16px">
+        <h2 style="font-size:16px;margin:0">{{ __('Your registration') }}</h2>
+      </div>
+      <div class="bd" style="padding:16px">
+        <dl class="dl" style="margin:0">
+          <dt style="font-size:12px;color:var(--muted)">{{ __('Micro-credential') }}</dt>
+          <dd style="font-size:14px;font-weight:600;margin-bottom:10px">{{ $o->name_en }}</dd>
+
+          <dt style="font-size:12px;color:var(--muted)">{{ __('Category') }}</dt>
+          <dd style="margin-bottom:10px">
+            <span class="tag info">{{ $o->category === 'umc' ? 'Unbundled (UMC)' : ($o->category === 'samc' ? 'Standalone (SAMC)' : 'Executive (MCE)') }}</span>
+          </dd>
+
+          @if(!empty($o->parent_course_code))
+            <dt style="font-size:12px;color:var(--muted)">{{ __('Parent Course') }}</dt>
+            <dd style="margin-bottom:10px;font-size:13px">{{ $o->parent_course_code }} &middot; {{ $o->parent_course_name }}</dd>
           @endif
-          <dt>{{ __('Cohort') }}</dt>
-          <dd>{{ $o->cohort_name }}</dd>
-          <dt>{{ __('Dates') }}</dt>
-          <dd>{{ \Carbon\Carbon::parse($o->start_date)->format('d/m/Y') }} {{ __('to') }} {{ \Carbon\Carbon::parse($o->end_date)->format('d/m/Y') }}</dd>
-          <dt>{{ __('Credit') }}</dt>
-          <dd>{{ $o->category === 'MCE' ? __('No credit. Certificate only') : ($o->category === 'UMC' ? __('Credit bearing') : __('Credit after Quality Verification')) }}</dd>
-          <dt>{{ __('Fee') }}</dt>
-          <dd><b>{{ $o->fee > 0 ? 'RM '.number_format($o->fee, 2) : __('Free') }}</b></dd>
+
+          <dt style="font-size:12px;color:var(--muted)">{{ __('Academic Credit & MQF') }}</dt>
+          <dd style="margin-bottom:10px;font-size:13px">
+            @if($o->category === 'mce')
+              <span class="tag warn">{{ __('No academic credit') }}</span>
+            @elseif($o->category === 'samc' && $o->qv_status !== 'verified')
+              <span class="tag info">{{ __('Credit upon Quality Verification (QV)') }}</span>
+            @else
+              <b>{{ $o->proposed_credit ? mcms_num($o->proposed_credit) . ' ' . __('credits') : __('Credit upon QV') }}</b>
+              @if(!empty($o->proposed_mqf_level)) &middot; {{ __('MQF Level :level', ['level' => $o->proposed_mqf_level]) }}@endif
+            @endif
+          </dd>
+
+          @if(!empty($o->planned_slt))
+            <dt style="font-size:12px;color:var(--muted)">{{ __('Notional SLT') }}</dt>
+            <dd style="margin-bottom:10px;font-size:13px">{{ $o->planned_slt }} {{ __('hours') }}</dd>
+          @endif
+
+          @if(!empty($o->delivery_mode) || !empty($o->version_delivery_mode))
+            <dt style="font-size:12px;color:var(--muted)">{{ __('Delivery Mode') }}</dt>
+            <dd style="margin-bottom:10px;font-size:13px;text-transform:capitalize">{{ __($o->delivery_mode ?? $o->version_delivery_mode) }}</dd>
+          @endif
+
+          @if(!empty($o->lecturer_name))
+            <dt style="font-size:12px;color:var(--muted)">{{ __('Lecturer / Facilitator') }}</dt>
+            <dd style="margin-bottom:10px;font-size:13px">{{ $o->lecturer_name }}</dd>
+          @endif
+
+          <dt style="font-size:12px;color:var(--muted)">{{ __('Cohort') }}</dt>
+          <dd style="margin-bottom:10px;font-size:13px">{{ $o->cohort_name }}</dd>
+
+          <dt style="font-size:12px;color:var(--muted)">{{ __('Duration') }}</dt>
+          <dd style="margin-bottom:10px;font-size:13px">{{ \Carbon\Carbon::parse($o->start_date)->format('d/m/Y') }} {{ __('to') }} {{ \Carbon\Carbon::parse($o->end_date)->format('d/m/Y') }}</dd>
+
+          <dt style="font-size:12px;color:var(--muted)">{{ __('Fee') }}</dt>
+          <dd style="font-size:15px;margin-bottom:0"><b>{{ $o->fee > 0 ? 'RM '.number_format($o->fee, 2) : __('Free') }}</b></dd>
         </dl>
       </div>
     </div>

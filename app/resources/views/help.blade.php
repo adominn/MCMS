@@ -1,10 +1,10 @@
 @extends('layouts.app')
-@section('title', __('Help and guides'))
+@section('title', __('Help Center'))
 @section('content')
 <div class="ph" style="margin-bottom:16px">
   <div>
-    <h1>{{ __('Help and guides') }}</h1>
-    <div class="sub">{{ __('Plain-language answers about each recognition stage, and a quick guide for your role') }}</div>
+    <h1>{{ __('Help Center') }}</h1>
+    <div class="sub">{{ __('Plain-language answers about each recognition stage, and a quick overview for your role') }}</div>
   </div>
 </div>
 
@@ -36,7 +36,7 @@
 </div>
 
 <div class="panel" style="margin-bottom:24px">
-  <div class="hd"><h2>{{ __('Quick guide for your role') }}</h2></div>
+  <div class="hd"><h2>{{ __('Overview for your role') }}</h2></div>
   <div class="bd">
     <div class="checks">
       @if($u?->hasRole('student'))

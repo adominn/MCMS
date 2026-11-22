@@ -45,8 +45,34 @@ final class TransferController
 
     public function store(Request $request)
     {
-        $d = $request->validate(['programme_id' => 'required|integer|exists:programmes,id', 'institution' => 'nullable|string|max:120', 'documents' => 'nullable|string|max:2000', 'deposits' => 'required|array|min:1', 'deposits.*' => 'integer',
-            'course' => 'required|array', 'credits' => 'required|array'], ['deposits.required' => 'Choose the credit you want to use.']);
+        $validDocs = implode(',', array_keys(config('transfer.documents_checklist')));
+        $d = $request->validate([
+            'programme_id' => 'required|integer|exists:programmes,id',
+            'institution' => 'nullable|string|max:120',
+            'document_checklist' => 'nullable|array',
+            'document_checklist.*' => "in:$validDocs",
+            'other_document' => 'nullable|string|max:500',
+            'documents' => 'nullable|string|max:2000',
+            'deposits' => 'required|array|min:1',
+            'deposits.*' => 'integer',
+            'course' => 'required|array',
+            'credits' => 'required|array',
+        ], ['deposits.required' => 'Choose the credit you want to use.']);
+        $checkedDocs = array_values(array_unique($d['document_checklist'] ?? []));
+        $otherDoc = trim((string) ($d['other_document'] ?? '')) ?: null;
+        $notesDoc = trim((string) ($d['documents'] ?? '')) ?: null;
+        $checklistPayload = ($checkedDocs !== [] || $otherDoc !== null || $notesDoc !== null)
+            ? json_encode(['items' => $checkedDocs, 'other' => $otherDoc, 'notes' => $notesDoc])
+            : null;
+        $docSummaryParts = array_map(fn ($k) => config("transfer.documents_checklist.$k", $k), $checkedDocs);
+        if ($otherDoc) {
+            $docSummaryParts[] = 'Other: '.$otherDoc;
+        }
+        if ($notesDoc) {
+            $docSummaryParts[] = $notesDoc;
+        }
+        $documentsText = $docSummaryParts !== [] ? implode('; ', $docSummaryParts) : null;
+
         $lines = [];
         foreach (array_unique(array_map('intval', $d['deposits'])) as $did) {
             $dep = DB::table('abc_deposits as d')->join('acrs as a', 'a.id', '=', 'd.acr_id')->join('mc_versions as v', 'v.id', '=', 'a.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
@@ -74,30 +100,70 @@ final class TransferController
             }
             $lines[] = [$dep, $course, $cr, $expired];
         }
-        $app = DB::transaction(function () use ($d, $lines, $request) {
+        $app = DB::transaction(function () use ($d, $lines, $request, $checklistPayload, $documentsText) {
             $prog = DB::table('programmes')->find($d['programme_id']);
-            $id = DB::table('transfer_applications')->insertGetId(['reference' => 'TMP'.bin2hex(random_bytes(8)), 'user_id' => $request->user()->id, 'programme_id' => $prog->id, 'institution' => ($d['institution'] ?? null) ?: 'UTeM', 'documents' => $d['documents'] ?? null,
-                'applied_by' => $request->user()->id, 'applied_at' => now(), 'created_at' => now(), 'updated_at' => now()]);
+            $id = DB::table('transfer_applications')->insertGetId([
+                'reference' => 'TMP'.bin2hex(random_bytes(8)),
+                'user_id' => $request->user()->id,
+                'programme_id' => $prog->id,
+                'institution' => ($d['institution'] ?? null) ?: 'UTeM',
+                'documents' => $documentsText,
+                'document_checklist' => $checklistPayload,
+                'applied_by' => $request->user()->id,
+                'applied_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
             $ref = 'TR-'.now()->year.'-'.str_pad((string) $id, 6, '0', STR_PAD_LEFT);
             DB::table('transfer_applications')->where('id', $id)->update(['reference' => $ref]);
             foreach ($lines as [$dep, $course, $cr, $expired]) {
                 DB::table('transfer_lines')->insert(['transfer_application_id' => $id, 'acr_id' => $dep->acr_id, 'abc_deposit_id' => $dep->id, 'mc_version_id' => $dep->mc_version_id, 'parent_course_id' => $course->id, 'credits_requested' => $cr,
                     'reevaluate' => $expired, 'target_version' => $prog->curriculum_version, 'source_version_no' => $dep->version_no, 'created_at' => now(), 'updated_at' => now()]);
             }
-            Tasks::open('deputy_dean', 'transfer_eval', $id, "Evaluate credit transfer $ref ({$request->user()->name})", "/transfers/$id", $prog->ptj_id, area: 'transfers');
+            Tasks::open('codl_admin', 'transfer_eval', $id, "Evaluate credit transfer $ref ({$request->user()->name})", "/transfers/$id", area: 'transfers');
             $this->audit->record('transfer.applied', ['type' => 'TransferApplication', 'id' => $id], after: ['reference' => $ref, 'lines' => count($lines)]); // EV-51
 
             return $id;
         });
 
-        return redirect()->route('transfer.show', $app)->with('status', 'Application submitted. The deputy dean of the receiving faculty will evaluate it. Applying does not mean the credit is accepted or that you are admitted.');
+        return redirect()->route('transfer.show', $app)->with('status', 'Application submitted. CODL and Senate will evaluate it. Applying does not mean the credit is accepted or that you are admitted.');
     }
 
     public function show(Request $request, int $id)
     {
-        $a = DB::table('transfer_applications as t')->join('programmes as p', 'p.id', '=', 't.programme_id')->where('t.id', $id)->where('t.user_id', $request->user()->id)->first(['t.*', 'p.code as programme', 'p.name as programme_name']) ?? abort(404);
+        $a = DB::table('transfer_applications as t')
+            ->join('programmes as p', 'p.id', '=', 't.programme_id')
+            ->join('users as u', 'u.id', '=', 't.user_id')
+            ->where('t.id', $id)
+            ->where('t.user_id', $request->user()->id)
+            ->first(['t.*', 'p.code as programme', 'p.name as programme_name', 'u.name as user_name', 'u.institution_id', 'u.email as user_email']) ?? abort(404);
+        $lines = Transfers::lines($id);
+        $decision = DB::table('transfer_decisions as td')
+            ->leftJoin('users as du', 'du.id', '=', 'td.decided_by')
+            ->where('td.transfer_application_id', $id)
+            ->orderByDesc('td.id')
+            ->first(['td.*', 'du.name as actor_name', 'du.position as actor_position']);
+        $depositIds = $lines->pluck('abc_deposit_id')->unique()->all();
+        $acrIds = $lines->pluck('acr_id')->unique()->all();
+        $redemptions = $depositIds
+            ? DB::table('redemption_events as re')
+                ->leftJoin('users as ru', 'ru.id', '=', 're.recorded_by')
+                ->whereIn('re.abc_deposit_id', $depositIds)
+                ->orderBy('re.id')
+                ->get(['re.*', 'ru.name as recorded_by_name', 'ru.position as recorded_by_position'])
+            : collect();
+        $verifications = $acrIds
+            ? DB::table('acr_verifications')->whereIn('acr_id', $acrIds)->orderBy('id')->get()
+            : collect();
 
-        return view('transfer.show', ['a' => $a, 'lines' => Transfers::lines($id), 'decision' => DB::table('transfer_decisions')->where('transfer_application_id', $id)->orderByDesc('id')->first(), 'status' => config('transfer.status')]);
+        return view('transfer.show', [
+            'a' => $a,
+            'lines' => $lines,
+            'decision' => $decision,
+            'redemptions' => $redemptions,
+            'verifications' => $verifications,
+            'status' => config('transfer.status'),
+        ]);
     }
 
     /** The participant answers a request for more evidence (More evidence needed returns to Submitted). */
@@ -110,7 +176,7 @@ final class TransferController
             DB::table('transfer_applications')->where('id', $a->id)->update(['status' => 'submitted', 'documents' => trim($a->documents."\n".$d['documents']), 'updated_at' => now()]);
             Tasks::close('transfer_evidence', $a->id);
             $ptj = DB::table('programmes')->where('id', $a->programme_id)->value('ptj_id');
-            Tasks::open('deputy_dean', 'transfer_eval', $a->id, "Evaluate credit transfer {$a->reference}: evidence added", "/transfers/{$a->id}", $ptj, area: 'transfers');
+            Tasks::open('codl_admin', 'transfer_eval', $a->id, "Evaluate credit transfer {$a->reference}: evidence added", "/transfers/{$a->id}", area: 'transfers');
         });
 
         return back()->with('status', 'Evidence added. The application is back with the evaluator.');

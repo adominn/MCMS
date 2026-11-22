@@ -105,9 +105,16 @@ final class ProposalController
         $data = ['v' => $v, 'tab' => $tab, 'tabs' => config('proposals.tabs'), 'cfg' => config('proposals'), 'checks' => $this->checker->check($id), 'locked' => ! in_array($v->status, ['draft', 'returned'], true),
             'returned' => $v->status === 'returned' ? DB::table('approval_decisions')->where('mc_version_id', $id)->whereIn('decision', ['returned'])->orderByDesc('id')->first() : null];
         $data += match ($tab) {
-            'modules' => ['modules' => DB::table('mc_modules')->where('mc_version_id', $id)->orderBy('seq')->get(),
-                'course' => $v->parent_course_id ? DB::table('parent_courses as c')->leftJoin('programmes as p', 'p.id', '=', 'c.programme_id')->where('c.id', $v->parent_course_id)->first(['c.*', 'p.name as programme', 'p.accreditation_status']) : null],
-            'outcomes' => ['los' => DB::table('learning_outcomes')->where('mc_version_id', $id)->orderBy('sort_order')->get()],
+            'modules' => [
+                'modules' => DB::table('mc_modules')->where('mc_version_id', $id)->orderBy('seq')->get(),
+                'course' => $v->parent_course_id ? DB::table('parent_courses as c')->leftJoin('programmes as p', 'p.id', '=', 'c.programme_id')->where('c.id', $v->parent_course_id)->first(['c.*', 'p.name as programme', 'p.accreditation_status']) : null,
+                'activities' => DB::table('mc_module_activities as a')->join('mc_modules as m', 'm.id', '=', 'a.mc_module_id')->where('m.mc_version_id', $id)->select('a.*')->orderBy('a.id')->get()->groupBy('mc_module_id'),
+                'los' => DB::table('learning_outcomes')->where('mc_version_id', $id)->orderBy('sort_order')->get(),
+            ],
+            'outcomes' => [
+                'los' => DB::table('learning_outcomes')->where('mc_version_id', $id)->orderBy('sort_order')->get(),
+                'course' => $v->parent_course_id ? DB::table('parent_courses')->find($v->parent_course_id) : null,
+            ],
             'assessment' => ['los' => DB::table('learning_outcomes')->where('mc_version_id', $id)->orderBy('sort_order')->get(),
                 'comps' => DB::table('assessment_components')->where('mc_version_id', $id)->orderBy('id')->get(),
                 'links' => DB::table('assessment_component_outcomes')->get()->groupBy('assessment_component_id'),
@@ -133,16 +140,54 @@ final class ProposalController
                 $ids = $user->scopedPtjIds('deputy_dean');
                 abort_unless($ids === null || in_array($v->ptj_id, $ids, true), 403, 'This proposal belongs to another PTj.');
             } else {
-                $isReviewer = DB::table('review_assignments')->where('mc_version_id', $id)->where('reviewer_id', $user->id)->exists();
-                abort_unless($isReviewer, 403, 'You do not have permission to view this proposal.');
+                $assignment = DB::table('review_assignments')
+                    ->where('mc_version_id', $id)
+                    ->where('reviewer_id', $user->id)
+                    ->where('status', '!=', 'declined')
+                    ->where('has_conflict', false)
+                    ->first();
+                abort_unless($assignment && in_array($assignment->status, ['in_progress', 'submitted'], true), 403, 'You do not have permission to view this proposal or have not completed the conflict of interest declaration.');
             }
         }
 
         $data = ProposalSummary::load($id);
         $ptj = DB::table('ptjs')->where('id', $data['v']->ptj_id)->first();
-        $dean = DB::table('users')->where('id', DB::table('approval_decisions')->where('mc_version_id', $id)->where('decision', 'endorsed')->value('decided_by'))->value('name');
 
-        return view('curriculum.print', $data + ['ptj' => $ptj, 'dean' => $dean]);
+        $stage1 = DB::table('reviews as r')
+            ->join('review_assignments as ra', 'ra.id', '=', 'r.review_assignment_id')
+            ->join('users as u', 'u.id', '=', 'ra.reviewer_id')
+            ->where('ra.mc_version_id', $id)
+            ->where('ra.status', 'submitted')
+            ->select('r.*', 'u.name as reviewer_name', 'u.position as reviewer_position', 'ra.due_on')
+            ->first();
+
+        $stage2 = DB::table('approval_decisions as ad')
+            ->join('users as u', 'u.id', '=', 'ad.decided_by')
+            ->where('ad.mc_version_id', $id)
+            ->where('ad.stage', 'endorsement')
+            ->select('ad.*', 'u.name as decider_name', 'u.position as decider_position')
+            ->orderByDesc('ad.id')
+            ->first();
+
+        $stage3 = DB::table('approval_decisions as ad')
+            ->join('users as u', 'u.id', '=', 'ad.decided_by')
+            ->where('ad.mc_version_id', $id)
+            ->where('ad.stage', 'senate')
+            ->select('ad.*', 'u.name as decider_name', 'u.position as decider_position')
+            ->orderByDesc('ad.id')
+            ->first();
+
+        $proposer = DB::table('users')->where('id', $data['v']->owner_id)->first();
+        $dean = $stage2?->decider_name ?: ($stage3?->decider_name ?: null);
+
+        return view('curriculum.print', $data + [
+            'ptj' => $ptj,
+            'dean' => $dean,
+            'stage1' => $stage1,
+            'stage2' => $stage2,
+            'stage3' => $stage3,
+            'proposer' => $proposer,
+        ]);
     }
 
     public function save(Request $request, int $id, string $tab)
@@ -152,10 +197,34 @@ final class ProposalController
         abort_unless(in_array($v->status, ['draft', 'returned'], true), 403, 'A submitted proposal is locked.');
         $auto = $request->header('X-Autosave') !== null;
 
+        $forbiddenErrors = [];
+        foreach ($request->except(['_token', 'action', 'add_activity_module_id', 'remove_activity_id', 'remove']) as $key => $val) {
+            if (is_string($val)) {
+                if ($hit = \App\Modules\Offering\ForbiddenClaims::scan($val)) {
+                    $forbiddenErrors[$key] = 'This field contains forbidden claim(s): ' . implode('; ', $hit) . '. Recognition is stated only through official regulatory approval.';
+                }
+            } elseif (is_array($val)) {
+                foreach ($val as $subKey => $subVal) {
+                    if (is_array($subVal)) {
+                        foreach ($subVal as $fKey => $fVal) {
+                            if (is_string($fVal) && ($hit = \App\Modules\Offering\ForbiddenClaims::scan($fVal))) {
+                                $forbiddenErrors["{$key}.{$subKey}.{$fKey}"] = 'This field contains forbidden claim(s): ' . implode('; ', $hit) . '.';
+                            }
+                        }
+                    } elseif (is_string($subVal) && ($hit = \App\Modules\Offering\ForbiddenClaims::scan($subVal))) {
+                        $forbiddenErrors["{$key}.{$subKey}"] = 'This field contains forbidden claim(s): ' . implode('; ', $hit) . '.';
+                    }
+                }
+            }
+        }
+        if (! empty($forbiddenErrors)) {
+            throw \Illuminate\Validation\ValidationException::withMessages($forbiddenErrors);
+        }
+
         DB::transaction(function () use ($request, $id, $tab) {
             match ($tab) {
                 'basics' => $this->update($id, $request, ['name_en', 'name_ms', 'discipline', 'target_group', 'delivery_mode', 'delivery_language', 'offering_period']),
-                'justification' => $this->update($id, $request, ['need', 'added_value'], ['evidence_types' => array_values(array_intersect((array) $request->input('evidence_types'), array_keys(config('proposals.evidence_types'))))]),
+                'justification' => $this->update($id, $request, ['need', 'category_justification', 'existing_equivalents', 'recognition_potential', 'added_value', 'follow_up_action'], ['evidence_types' => array_values(array_intersect((array) $request->input('evidence_types'), array_keys(config('proposals.evidence_types'))))]),
                 'modules' => $this->modules($id, $request),
                 'outcomes' => $this->outcomes($id, $request),
                 'assessment' => $this->assessment($id, $request),
@@ -302,8 +371,38 @@ final class ProposalController
                 'name_en' => mb_substr(trim((string) ($r['name_en'] ?? '')), 0, 200) ?: null,
                 'name_ms' => mb_substr(trim((string) ($r['name_ms'] ?? '')), 0, 200) ?: null,
                 'slt_hours' => max(0, min(2000, (int) ($r['slt_hours'] ?? 0))),
+                'key_content' => mb_substr(trim((string) ($r['key_content'] ?? '')), 0, 4000) ?: null,
                 'is_assessment' => $isAssess,
             ]);
+        }
+        if ($actInputs = $request->input('activities')) {
+            foreach ((array) $actInputs as $actId => $actData) {
+                if (is_numeric($actId) && DB::table('mc_module_activities')->where('id', $actId)->exists()) {
+                    DB::table('mc_module_activities')->where('id', $actId)->update([
+                        'name_en' => mb_substr(trim((string) ($actData['name_en'] ?? '')), 0, 200) ?: 'Activity',
+                        'name_ms' => mb_substr(trim((string) ($actData['name_ms'] ?? '')), 0, 200) ?: null,
+                        'activity_type' => array_key_exists((string) ($actData['activity_type'] ?? ''), config('proposals.activity_types')) ? $actData['activity_type'] : 'lecture',
+                        'slt_hours' => max(0, min(1000, (int) ($actData['slt_hours'] ?? 0))),
+                        'learning_outcome_id' => ! empty($actData['learning_outcome_id']) ? (int) $actData['learning_outcome_id'] : null,
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        }
+        if ($newActMod = $request->input('add_activity_module_id')) {
+            if (DB::table('mc_modules')->where('id', $newActMod)->where('mc_version_id', $id)->exists()) {
+                DB::table('mc_module_activities')->insert([
+                    'mc_module_id' => (int) $newActMod,
+                    'name_en' => 'Interactive Learning Session',
+                    'activity_type' => 'lecture',
+                    'slt_hours' => 10,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+        if ($rmAct = $request->input('remove_activity_id')) {
+            DB::table('mc_module_activities')->where('id', $rmAct)->delete();
         }
         if ($chosenModel !== 'separate_assessment' && $request->has('credit_model')) {
             DB::table('mc_modules')->where('mc_version_id', $id)->update(['is_assessment' => false]);
@@ -323,12 +422,26 @@ final class ProposalController
 
     private function outcomes(int $id, Request $request): void
     {
+        $v = DB::table('mc_versions')->find($id);
+        $defaultClo = ($v && $v->parent_course_id) ? 1 : null;
+
         foreach ((array) $request->input('rows') as $lid => $r) {
-            DB::table('learning_outcomes')->where('id', $lid)->where('mc_version_id', $id)->update(['text_en' => mb_substr(trim((string) ($r['text_en'] ?? '')), 0, 1000) ?: null, 'text_ms' => mb_substr(trim((string) ($r['text_ms'] ?? '')), 0, 1000) ?: null]);
+            $loUpdate = [
+                'text_en' => mb_substr(trim((string) ($r['text_en'] ?? '')), 0, 1000) ?: null,
+                'text_ms' => mb_substr(trim((string) ($r['text_ms'] ?? '')), 0, 1000) ?: null,
+            ];
+            if (array_key_exists('parent_clo_id', $r)) {
+                $loUpdate['parent_clo_id'] = ! empty($r['parent_clo_id']) ? (int) $r['parent_clo_id'] : null;
+            } elseif ($defaultClo) {
+                // Preserve existing or default to first parent CLO for UMC
+                $existingClo = DB::table('learning_outcomes')->where('id', $lid)->value('parent_clo_id');
+                $loUpdate['parent_clo_id'] = $existingClo ?: $defaultClo;
+            }
+            DB::table('learning_outcomes')->where('id', $lid)->where('mc_version_id', $id)->update($loUpdate);
         }
         if ($request->input('action') === 'add') {
             $n = 1 + (int) DB::table('learning_outcomes')->where('mc_version_id', $id)->max('sort_order');
-            DB::table('learning_outcomes')->insert(['mc_version_id' => $id, 'code' => 'LO'.$n, 'sort_order' => $n]);
+            DB::table('learning_outcomes')->insert(['mc_version_id' => $id, 'code' => 'LO'.$n, 'sort_order' => $n, 'parent_clo_id' => $defaultClo]);
         }
         if ($rm = $request->input('remove')) {
             DB::table('assessment_component_outcomes')->where('learning_outcome_id', $rm)->delete();
@@ -370,13 +483,27 @@ final class ProposalController
         $credit = $request->input('proposed_credit');
         $mqf = $request->input('proposed_mqf_level');
 
+        $isMce = $category === 'mce';
+        $existingQv = DB::table('mc_versions')->where('id', $id)->value('qv_status');
+        $allowedQv = array_diff_key(config('proposals.qv_status'), ['verified' => true]);
+        $requestedQv = (string) $request->input('qv_status');
+
+        // 'verified' is awarded strictly by Quality Verification Committee decision (QvController::result), never self-selected in proposal drafts
+        if (array_key_exists($requestedQv, $allowedQv)) {
+            $qvStatus = $requestedQv;
+        } elseif ($existingQv === 'verified' && $requestedQv === 'verified') {
+            $qvStatus = 'verified';
+        } else {
+            $qvStatus = null;
+        }
+
         $data = [
             'credential_types' => json_encode(array_values(array_intersect((array) $request->input('credential_types'), array_keys(config('proposals.credential_types'))))),
             'achievement_level' => in_array($request->input('achievement_level'), ['module', 'whole'], true) ? $request->input('achievement_level') : null,
-            'qv_status' => array_key_exists((string) $request->input('qv_status'), config('proposals.qv_status')) ? $request->input('qv_status') : null,
+            'qv_status' => $qvStatus,
             'verification_method' => mb_substr(trim((string) $request->input('verification_method')), 0, 300) ?: null,
-            'proposed_credit' => is_numeric($credit) ? max(0, min(99, (float) $credit)) : null,
-            'proposed_mqf_level' => is_numeric($mqf) ? max(1, min(8, (int) $mqf)) : null,
+            'proposed_credit' => ($isMce || ! is_numeric($credit)) ? null : max(0, min(99, (float) $credit)),
+            'proposed_mqf_level' => ($isMce || ! is_numeric($mqf)) ? null : max(1, min(8, (int) $mqf)),
             'updated_by' => $request->user()->id, 'updated_at' => now(),
         ];
 

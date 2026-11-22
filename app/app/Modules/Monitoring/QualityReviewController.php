@@ -68,7 +68,7 @@ final class QualityReviewController
             ->first([
                 'o.id', 'o.cohort_name', 'o.status', 'o.start_date', 'o.end_date', 'o.reg_opens_on', 'o.reg_closes_on', 'o.capacity', 'o.fee',
                 'o.delivery_mode', 'o.readiness_state',
-                'v.id as version_id', 'v.name_en', 'v.name_ms', 'v.version_no', 'v.planned_slt', 'v.proposed_credit',
+                'v.id as version_id', 'v.name_en', 'v.name_ms', 'v.version_no', 'v.planned_slt', 'v.proposed_credit', 'v.badge_image_path',
                 'm.id as micro_credential_id', 'm.category', 'm.code as mc_code', 'm.owner_id',
                 'p.name as ptj_name', 'p.code as ptj_code', 'u.name as owner_name',
             ]);
@@ -144,6 +144,8 @@ final class QualityReviewController
     {
         $p = DB::table('periodic_reviews')->find($id) ?? abort(404);
         $m = $this->mcs($request)->firstWhere('id', $p->micro_credential_id) ?? abort(404);
+        abort_if($m->owner_id === $request->user()->id, 403, 'You cannot approve a periodic quality review for your own micro-credential.');
+        abort_unless($request->user()->hasAnyRole('deputy_dean', 'ptj_authority', 'qa_officer'), 403, 'Only faculty or QA authorities can decide periodic review outcomes.');
         abort_if($p->completed_on, 422, 'This review is complete.');
         $d = $request->validate(['outcome' => 'required|in:'.implode(',', array_keys(config('monitoring.review_outcome'))), 'note' => 'nullable|string|max:2000']);
         DB::transaction(function () use ($p, $m, $d, $request) {
@@ -265,7 +267,9 @@ final class QualityReviewController
             ];
         });
 
-        $dean = DB::table('users')->where('id', $s ? $s->decided_by : $request->user()->id)->value('name') ?: $request->user()->name;
+        $decider = DB::table('users')->where('id', $s ? $s->decided_by : $request->user()->id)->first(['name', 'position', 'position_ms']);
+        $dean = $decider->name ?? $request->user()->name;
+        $deciderPosition = $decider->position ?? null;
 
         return view('monitoring.suspension-notice', [
             's' => $s,
@@ -273,6 +277,7 @@ final class QualityReviewController
             'v' => $v,
             'cohorts' => $cohortData,
             'dean' => $dean,
+            'deciderPosition' => $deciderPosition,
         ]);
     }
 

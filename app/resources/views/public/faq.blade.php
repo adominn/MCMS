@@ -62,7 +62,7 @@ $groups = $lang === 'ms' ? $faqs_ms : $faqs_en;
   <div class="title">
     <div>
       <h1>{{ $lang === 'ms' ? 'Soalan Lazim (FAQ)' : 'Frequently asked questions' }}</h1>
-      <div class="sub">{{ $lang === 'ms' ? 'Panduan rasmi mengenai kredensial, kredit akademik, pendaftaran dan pengiktirafan' : 'Answers about credentials, academic credit, registration and recognition' }}</div>
+      <div class="sub">{{ $lang === 'ms' ? 'Maklumat rasmi mengenai kredensial, kredit akademik, pendaftaran dan pengiktirafan' : 'Answers about credentials, academic credit, registration and recognition' }}</div>
     </div>
   </div>
 

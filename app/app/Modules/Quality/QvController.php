@@ -110,12 +110,42 @@ final class QvController
         $m = $this->mc($request, $mc);
         abort_unless($this->isOwner($request, $m), 403);
         $rec = $this->editable($mc);
-        $d = $request->validate(['decision' => 'required|in:ready,ready_minor,not_ready', 'missing' => 'nullable|string|max:2000', 'target_date' => 'nullable|date|after:today']);
+        $d = $request->validate([
+            'decision' => 'required|in:ready,ready_minor,not_ready',
+            'missing' => 'nullable|string|max:2000',
+            'target_date' => 'nullable|date|after:today',
+            'required_actions' => 'nullable|string|max:2000',
+            'qvc_mechanism' => 'nullable|string|max:100',
+            'evidence_cohort' => 'nullable|string|max:100',
+        ]);
         if ($d['decision'] === 'not_ready' && trim((string) ($d['missing'] ?? '')) === '') {
             throw ValidationException::withMessages(['missing' => 'Name the critical evidence that is missing.']);
         }
-        DB::table('qv_records')->where('id', $rec->id)->update(['readiness_decision' => $d['decision'], 'readiness_missing' => $d['missing'] ?? null, 'target_date' => $d['target_date'] ?? null, 'readiness_by' => $request->user()->id,
-            'readiness_confirmed_by' => null, 'readiness_confirmed_at' => null, 'status' => 'preparing', 'updated_at' => now()]);
+
+        $signoffs = json_decode($rec->d10_signoffs ?? '[]', true) ?: [];
+        $u = $request->user();
+        $signoffs['coordinator'] = [
+            'user_id' => $u->id,
+            'name' => $u->name,
+            'position' => $u->position ?? 'Penyelaras SAMC',
+            'signed_at' => now()->toIso8601String(),
+            'remarks' => 'Semakan kesediaan dalaman SAMC selesai',
+        ];
+
+        DB::table('qv_records')->where('id', $rec->id)->update([
+            'readiness_decision' => $d['decision'],
+            'readiness_missing' => $d['missing'] ?? null,
+            'target_date' => $d['target_date'] ?? null,
+            'd9_required_actions' => $d['required_actions'] ?? null,
+            'qvc_mechanism' => $d['qvc_mechanism'] ?? null,
+            'evidence_cohort' => $d['evidence_cohort'] ?? null,
+            'readiness_by' => $u->id,
+            'readiness_confirmed_by' => null,
+            'readiness_confirmed_at' => null,
+            'd10_signoffs' => json_encode($signoffs),
+            'status' => 'preparing',
+            'updated_at' => now(),
+        ]);
         Tasks::open('deputy_dean', 'qv_confirm', $rec->id, 'Confirm the Quality Verification readiness decision: '.$m->name_en, "/quality/$mc", $m->ptj_id, area: 'credentials');
         $this->audit->record('qv.readiness_recorded', ['type' => 'QvRecord', 'id' => $rec->id], after: ['decision' => $d['decision']]); // EV-38
 
@@ -134,21 +164,109 @@ final class QvController
         if ($ready && ! collect($conds)->every('ok')) {
             return back()->withErrors(['qv' => 'Not ready to submit: '.collect($conds)->where('ok', false)->pluck('text')->implode('; ').'.']);
         }
-        DB::table('qv_records')->where('id', $rec->id)->update(['readiness_confirmed_by' => $request->user()->id, 'readiness_confirmed_at' => now(), 'status' => $ready ? 'ready' : 'preparing', 'updated_at' => now()]);
+
+        $signoffs = json_decode($rec->d10_signoffs ?? '[]', true) ?: [];
+        $u = $request->user();
+        $signoffs['faculty_rep'] = [
+            'user_id' => $u->id,
+            'name' => $u->name,
+            'position' => $u->position ?? 'Timbalan Dekan (Akademik)',
+            'signed_at' => now()->toIso8601String(),
+            'remarks' => $ready ? 'Disahkan sedia untuk penyerahan QV' : 'Disahkan belum sedia',
+        ];
+
+        DB::table('qv_records')->where('id', $rec->id)->update([
+            'readiness_confirmed_by' => $u->id,
+            'readiness_confirmed_at' => now(),
+            'd10_signoffs' => json_encode($signoffs),
+            'status' => $ready ? 'ready' : 'preparing',
+            'updated_at' => now(),
+        ]);
         Tasks::close('qv_confirm', $rec->id);
         $this->audit->record('qv.readiness_confirmed', ['type' => 'QvRecord', 'id' => $rec->id], after: ['decision' => $rec->readiness_decision, 'status' => $ready ? 'ready' : 'preparing']);
 
         return back()->with('status', $ready ? 'Confirmed. The micro-credential is ready to submit.' : 'Confirmed as not ready. It stays in preparation.');
     }
 
-    /** DOC-11: the submission package as a page. shortcut: no zip of the evidence files yet, when file upload exists. */
+    /** DOC-11: the submission package as a page (Appendix D). */
     public function package(Request $request, int $mc)
     {
         $m = $this->mc($request, $mc);
-        $rec = DB::table('qv_records')->where('micro_credential_id', $mc)->whereIn('status', ['ready', 'submitted'])->first() ?? abort(404, 'There is no package until the micro-credential is ready to submit.');
+        $rec = DB::table('qv_records')->where('micro_credential_id', $mc)->whereIn('status', ['ready', 'submitted', 'verified'])->first()
+            ?? DB::table('qv_records')->where('micro_credential_id', $mc)->orderByDesc('cycle_no')->first()
+            ?? abort(404, 'There is no package until the micro-credential is ready to submit.');
 
-        return view('quality.package', ['m' => $m, 'v' => Qv::latestVersion($mc), 'rec' => $rec, 'evidence' => DB::table('qv_evidence')->where('qv_record_id', $rec->id)->get()->keyBy('item'),
-            'modules' => DB::table('mc_modules')->where('mc_version_id', Qv::latestVersion($mc)->id)->orderBy('seq')->get(), 'outcomes' => DB::table('learning_outcomes')->where('mc_version_id', Qv::latestVersion($mc)->id)->orderBy('sort_order')->get()]);
+        $v = Qv::latestVersion($mc);
+        $ptj = DB::table('ptjs')->find($m->ptj_id);
+        $owner = DB::table('users')->find($m->owner_id);
+        $confirmer = $rec->readiness_confirmed_by ? DB::table('users')->find($rec->readiness_confirmed_by) : null;
+        $sections = config('qv.sections', []);
+        $components = config('qv.material_components', config('qv.components', []));
+        $reviewActions = config('qv.review_actions', []);
+        $changeReview = json_decode($rec->change_review ?? '[]', true) ?: [];
+        $d10Signoffs = json_decode($rec->d10_signoffs ?? '[]', true) ?: [];
+
+        return view('quality.package', [
+            'm' => $m,
+            'v' => $v,
+            'rec' => $rec,
+            'ptj' => $ptj,
+            'owner' => $owner,
+            'confirmer' => $confirmer,
+            'sections' => $sections,
+            'components' => $components,
+            'reviewActions' => $reviewActions,
+            'changeReview' => $changeReview,
+            'd10Signoffs' => $d10Signoffs,
+            'evidence' => DB::table('qv_evidence')->where('qv_record_id', $rec->id)->get()->keyBy('item'),
+            'modules' => DB::table('mc_modules')->where('mc_version_id', $v->id)->orderBy('seq')->get(),
+            'outcomes' => DB::table('learning_outcomes')->where('mc_version_id', $v->id)->orderBy('sort_order')->get(),
+        ]);
+    }
+
+    /** Appendix D10: 3-role sign-off handler */
+    public function signoff(Request $request, int $mc)
+    {
+        $m = $this->mc($request, $mc);
+        $rec = $this->editable($mc);
+        $d = $request->validate([
+            'role' => 'required|in:coordinator,faculty_rep,qa_authority',
+            'remarks' => 'nullable|string|max:1000',
+        ]);
+        $u = $request->user();
+        if ($d['role'] === 'coordinator') {
+            abort_unless($this->isOwner($request, $m), 403, 'Hanya penyelaras SAMC boleh menandatangani peranan ini.');
+        } elseif ($d['role'] === 'faculty_rep') {
+            abort_unless($u->hasAnyRole('deputy_dean', 'admin'), 403, 'Hanya wakil Fakulti / Timbalan Dekan boleh menandatangani peranan ini.');
+        } elseif ($d['role'] === 'qa_authority') {
+            abort_unless($u->hasAnyRole('qa_officer', 'codl_admin', 'admin'), 403, 'Hanya pihak Jaminan Kualiti / Urus Setia boleh menandatangani peranan ini.');
+        }
+
+        $signoffs = json_decode($rec->d10_signoffs ?? '[]', true) ?: [];
+        $signoffs[$d['role']] = [
+            'user_id' => $u->id,
+            'name' => $u->name,
+            'position' => $u->position ?? match ($d['role']) {
+                'coordinator' => 'Penyelaras SAMC',
+                'faculty_rep' => 'Timbalan Dekan (Akademik)',
+                'qa_authority' => 'Pegawai Jaminan Kualiti',
+            },
+            'signed_at' => now()->toIso8601String(),
+            'remarks' => $d['remarks'] ?: match ($d['role']) {
+                'coordinator' => 'Semakan kesediaan dalaman SAMC selesai',
+                'faculty_rep' => 'Disahkan sedia untuk penyerahan QV',
+                'qa_authority' => 'Pematuhan keperluan audit dan penyerahan QV universiti',
+            },
+        ];
+
+        DB::table('qv_records')->where('id', $rec->id)->update([
+            'd10_signoffs' => json_encode($signoffs),
+            'updated_at' => now(),
+        ]);
+
+        $this->audit->record('qv.signed', ['type' => 'QvRecord', 'id' => $rec->id], after: ['role' => $d['role']]);
+
+        return back()->with('status', 'Pengesahan berjaya direkodkan.');
     }
 
     public function submit(Request $request, int $mc)
@@ -169,32 +287,76 @@ final class QvController
     public function result(Request $request, int $mc)
     {
         $m = $this->mc($request, $mc);
+        abort_unless($m->category === 'samc', 422, 'Quality Verification applies strictly to Standalone Micro-Credentials (SAMC).');
+
         $rec = DB::table('qv_records')->where('micro_credential_id', $mc)->where('status', 'submitted')->first();
         if (! $rec) {
             return back()->withErrors(['qv' => 'A result can be recorded only after a submission.']);
         }
-        if ($request->input('outcome') === 'not_verified') {
+        $outcome = $request->validate([
+            'outcome' => 'required|in:verified,not_verified',
+        ])['outcome'];
+
+        if ($outcome === 'not_verified') {
             $d = $request->validate(['note' => 'required|string|max:2000'], ['note.required' => 'Record why it was not verified.']);
             DB::table('qv_records')->where('id', $rec->id)->update(['status' => 'preparing', 'outcome_note' => $d['note'], 'readiness_confirmed_by' => null, 'readiness_confirmed_at' => null, 'decided_by' => $request->user()->id, 'updated_at' => now()]);
             $this->audit->record('qv.not_verified', ['type' => 'QvRecord', 'id' => $rec->id], reason: $d['note']); // EV-40
 
             return back()->with('status', 'Recorded as not verified. The record is back in preparation.');
         }
-        $d = $request->validate(['qv_reference' => 'required|string|max:60', 'verified_credit' => 'required|numeric|min:0|max:99', 'verified_mqf_level' => 'required|integer|between:1,8',
-            'valid_from' => 'required|date', 'valid_until' => 'required|date|after:valid_from', 'conditions' => 'nullable|string|max:2000', 'decision_document' => 'required|string|max:255']);
+
+        $d = $request->validate([
+            'qv_reference' => 'required|string|max:60',
+            'verified_credit' => 'required|numeric|min:1|max:99',
+            'verified_mqf_level' => 'required|integer|between:1,8',
+            'valid_from' => 'required|date',
+            'valid_until' => 'required|date|after:valid_from|after_or_equal:today',
+            'conditions' => 'nullable|string|max:2000',
+            'decision_document' => 'required|string|max:255',
+        ]);
+
         $max = (int) $this->settings->get('qv.max_validity_years');
-        if (\Carbon\Carbon::parse($d['valid_until'])->gt(\Carbon\Carbon::parse($d['valid_from'])->addYears($max))) {
-            throw ValidationException::withMessages(['valid_until' => "Quality Verification can be valid for at most $max years from its start. Check the dates."]); // BR-02
+        $maxValidUntil = \Carbon\Carbon::parse($d['valid_from'])->addYearsNoOverflow($max)->toDateString();
+        if (\Carbon\Carbon::parse($d['valid_until'])->toDateString() > $maxValidUntil) {
+            throw ValidationException::withMessages(['valid_until' => "Quality Verification can be valid for at most $max years from its start (until $maxValidUntil). Check the dates."]); // BR-02
         }
+
         DB::transaction(function () use ($rec, $mc, $d, $request) {
             $old = DB::table('qv_records')->where('micro_credential_id', $mc)->where('status', 'verified')->get();
             foreach ($old as $o) {
                 DB::table('qv_records')->where('id', $o->id)->update(['status' => 'superseded', 'updated_at' => now()]);
             }
-            DB::table('qv_records')->where('id', $rec->id)->update(['status' => 'verified', 'qv_reference' => $d['qv_reference'], 'verified_credit' => $d['verified_credit'], 'verified_mqf_level' => $d['verified_mqf_level'], 'valid_from' => $d['valid_from'],
-                'valid_until' => $d['valid_until'], 'conditions' => $d['conditions'] ?? null, 'decision_document' => $d['decision_document'], 'reverification' => false, 'decided_by' => $request->user()->id, 'updated_at' => now()]);
-            // The bridge Recognition reads. Only this action writes it.
-            DB::table('mc_versions')->where('micro_credential_id', $mc)->update(['qv_status' => 'verified', 'qv_valid_until' => $d['valid_until'], 'proposed_credit' => $d['verified_credit'], 'proposed_mqf_level' => $d['verified_mqf_level']]);
+            DB::table('qv_records')->where('id', $rec->id)->update([
+                'status' => 'verified',
+                'qv_reference' => $d['qv_reference'],
+                'verified_credit' => $d['verified_credit'],
+                'verified_mqf_level' => $d['verified_mqf_level'],
+                'valid_from' => $d['valid_from'],
+                'valid_until' => $d['valid_until'],
+                'conditions' => $d['conditions'] ?? null,
+                'decision_document' => $d['decision_document'],
+                'reverification' => false,
+                'decided_by' => $request->user()->id,
+                'updated_at' => now(),
+            ]);
+
+            // The bridge Recognition reads. Only this action writes it, updating only current approved version
+            $currentVerId = DB::table('mc_versions')
+                ->where('micro_credential_id', $mc)
+                ->where('status', 'approved')
+                ->orderByDesc('version_no')
+                ->value('id');
+
+            if ($currentVerId) {
+                DB::table('mc_versions')->where('id', $currentVerId)->update([
+                    'qv_status' => 'verified',
+                    'qv_valid_until' => $d['valid_until'],
+                    'proposed_credit' => $d['verified_credit'],
+                    'proposed_mqf_level' => $d['verified_mqf_level'],
+                    'updated_at' => now(),
+                ]);
+            }
+
             Tasks::close('qv_lapse', $rec->id);
             $this->audit->record('qv.verified', ['type' => 'QvRecord', 'id' => $rec->id], after: ['reference' => $d['qv_reference'], 'credit' => $d['verified_credit'], 'mqf' => $d['verified_mqf_level'], 'until' => $d['valid_until']]); // EV-41
         });
@@ -239,7 +401,9 @@ final class QvController
     {
         $q = DB::table('micro_credentials as m')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->where('m.category', 'samc')->where('m.category_status', 'confirmed')->whereExists(fn ($w) => $w->select(DB::raw(1))->from('mc_versions as v')->whereColumn('v.micro_credential_id', 'm.id')->whereIn('v.status', ['approved', 'superseded']));
         $u = $request->user();
-        if ($u->hasAnyRole('deputy_dean') && ! $u->hasAnyRole('lecturer')) {
+        if ($u->hasAnyRole('codl_admin', 'qa_officer', 'admin')) {
+            // University-wide access
+        } elseif ($u->hasAnyRole('deputy_dean') && ! $u->hasAnyRole('lecturer')) {
             $ids = $u->scopedPtjIds('deputy_dean');
             $ids === null ?: $q->whereIn('m.ptj_id', $ids);
         } else {

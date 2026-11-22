@@ -21,6 +21,36 @@ final class Enrolments
         return DB::table('enrolments')->where('offering_id', $offeringId)->whereIn('status', config('enrolment.holds_place'))->count();
     }
 
+    public function isGroupEligible(User $u, object $o): bool
+    {
+        if (empty($o->eligible_groups)) {
+            return true;
+        }
+
+        $eligible = strtolower(trim((string) $o->eligible_groups));
+        if (str_contains($eligible, 'all') || str_contains($eligible, 'everyone') || str_contains($eligible, 'public') || str_contains($eligible, 'open')) {
+            return true;
+        }
+
+        $userGroup = strtolower(trim((string) ($u->participant_group ?? '')));
+        if ($userGroup === '') {
+            return false;
+        }
+
+        if (str_contains($eligible, $userGroup)) {
+            return true;
+        }
+
+        $tokens = preg_split('/[,\s\.\/]+/', $userGroup, -1, PREG_SPLIT_NO_EMPTY);
+        foreach ($tokens as $token) {
+            if (strlen($token) >= 4 && str_contains($eligible, $token)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /** @return list<string> reasons the user cannot register; empty when eligible (FR-97, FR-98) */
     public function reasons(User $u, object $o): array
     {
@@ -34,12 +64,53 @@ final class Enrolments
         if ($this->taken($o->id) >= $o->capacity) {
             $r[] = 'The cohort is full.';
         }
-        $groups = array_filter(array_map(fn ($g) => mb_strtolower(trim($g)), explode(',', (string) $o->eligible_groups)));
-        if ($groups && ! in_array(mb_strtolower((string) $u->participant_group), $groups, true)) {
-            $r[] = 'This cohort is for: '.trim((string) $o->eligible_groups).'. Your group is '.($u->participant_group ?: 'not set').'. Ask the CODL office to update it if that is wrong.';
+        if (! $this->isGroupEligible($u, $o)) {
+            $r[] = 'Your learner group (' . ($u->participant_group ?: 'unspecified') . ') is not eligible for this cohort (' . $o->eligible_groups . ').';
         }
 
         return $r;
+    }
+
+    /**
+     * Automated pre-registration evaluation checks for display in the registration view.
+     * @return list<array{status: string, criterion: string, details: string, tag: string}>
+     */
+    public function checks(User $u, object $o): array
+    {
+        $taken = $this->taken($o->id);
+        $groupOk = $this->isGroupEligible($u, $o);
+        $regOpen = $o->status === 'open';
+        $capacityOk = $taken < $o->capacity;
+        $activeAccount = ($u->status ?? 'active') === 'active';
+
+        return [
+            [
+                'status' => $activeAccount ? 'Passed' : 'Failed',
+                'tag' => $activeAccount ? 'ok' : 'err',
+                'criterion' => 'Active UTeM learner account',
+                'details' => $activeAccount ? 'Verified Account: ' . ($u->institution_id ?: 'ID: ' . $u->id) : 'Inactive or suspended account',
+            ],
+            [
+                'status' => $regOpen ? 'Passed' : 'Failed',
+                'tag' => $regOpen ? 'ok' : 'err',
+                'criterion' => 'Registration is open',
+                'details' => $regOpen ? 'Closes on ' . Carbon::parse($o->reg_closes_on)->format('d/m/Y') : 'Cohort status is ' . $o->status,
+            ],
+            [
+                'status' => $capacityOk ? 'Passed' : 'Failed',
+                'tag' => $capacityOk ? 'ok' : 'err',
+                'criterion' => 'Cohort capacity and places',
+                'details' => $capacityOk ? ($o->capacity - $taken) . ' of ' . $o->capacity . ' places available' : 'The cohort is full (' . $o->capacity . ' places taken)',
+            ],
+            [
+                'status' => $groupOk ? 'Passed' : 'Failed',
+                'tag' => $groupOk ? 'ok' : 'err',
+                'criterion' => 'Target learner group eligibility',
+                'details' => empty($o->eligible_groups) || str_contains(strtolower((string) $o->eligible_groups), 'all')
+                    ? 'Open Entry / All learner groups'
+                    : ($groupOk ? 'Eligible (' . ($u->participant_group ?: 'General') . ')' : 'Restricted to ' . $o->eligible_groups),
+            ],
+        ];
     }
 
     public function withdrawalDeadline(object $o): Carbon

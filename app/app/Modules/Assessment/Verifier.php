@@ -16,22 +16,34 @@ final class Verifier
     public function __construct(private AuditRecorder $audit, private Notifier $notifier) {}
 
     /**
-     * Verifies the provisional results of a cohort for the chosen scopes ('mc' for components of the whole micro-credential, 'm{id}' for a module).
+     * Verifies the provisional results of a cohort for the chosen scopes ('mc' for components of the whole micro-credential, 'm{id}' for a module)
+     * and optional participant enrolment IDs.
      * Held results are left out. Returns the counts.
      */
-    public function verify(object $o, User $by, string $evidence, array $scopes): array
+    public function verify(object $o, User $by, string $evidence, array $scopes, array $enrolmentIds = []): array
     {
         $comps = Template::components($o->mc_version_id);
         $inScope = $comps->filter(fn ($c) => ! $scopes || in_array($c->mc_module_id ? 'm'.$c->mc_module_id : 'mc', $scopes, true))->pluck('id');
         $q = DB::table('assessment_results as r')->join('enrolments as e', 'e.id', '=', 'r.enrolment_id')->where('e.offering_id', $o->id)->whereIn('r.assessment_component_id', $inScope);
-        abort_if((clone $q)->where('r.status', 'provisional')->where('r.entered_by', $by->id)->exists(), 403, 'You entered some of these results yourself, so you cannot verify them (separation of duties).');
-        $ids = (clone $q)->where('r.status', 'provisional')->whereNotNull('r.score')->pluck('r.id');
-        $held = (clone $q)->where('r.status', 'held')->count();
+        if (! empty($enrolmentIds)) {
+            $q->whereIn('e.id', $enrolmentIds);
+        }
+        $openCaseEnrolments = DB::table('integrity_cases')->where('offering_id', $o->id)->where('status', 'open')->pluck('enrolment_id')->all();
+
+        abort_if((clone $q)->where('r.status', 'provisional')->whereNotIn('e.id', $openCaseEnrolments)->where('r.entered_by', $by->id)->exists(), 403, 'You entered some of these results yourself, so you cannot verify them (separation of duties).');
+        $ids = (clone $q)->where('r.status', 'provisional')->whereNotNull('r.score')->whereNotIn('e.id', $openCaseEnrolments)->pluck('r.id');
+        $held = (clone $q)->where(function ($w) use ($openCaseEnrolments) {
+            $w->where('r.status', 'held')->orWhereIn('e.id', $openCaseEnrolments);
+        })->distinct('r.id')->count('r.id');
 
         $badges = 0;
-        DB::transaction(function () use ($ids, $by, $evidence, $o, &$badges) {
+        DB::transaction(function () use ($ids, $by, $evidence, $o, &$badges, $enrolmentIds, $openCaseEnrolments) {
             DB::table('assessment_results')->whereIn('id', $ids)->update(['status' => 'verified', 'verified_by' => $by->id, 'verified_at' => now(), 'verification_evidence' => $evidence, 'updated_at' => now()]);
-            foreach (DB::table('enrolments')->where('offering_id', $o->id)->pluck('id') as $eid) {
+            $enrolmentsToProcess = DB::table('enrolments')->where('offering_id', $o->id)
+                ->whereNotIn('id', $openCaseEnrolments)
+                ->when(! empty($enrolmentIds), fn ($b) => $b->whereIn('id', $enrolmentIds))
+                ->pluck('id');
+            foreach ($enrolmentsToProcess as $eid) {
                 $badges += $this->achievements($eid, $o->mc_version_id, $by->id);
             }
             \App\Modules\Achievement\Completion::syncTask($o->id);
@@ -44,6 +56,10 @@ final class Verifier
     /** FR-126: a module is achieved when every assessment of the module is verified and met. Returns the new badges. */
     public function achievements(int $enrolmentId, int $versionId, int $verifiedBy): int
     {
+        if (DB::table('integrity_cases')->where('enrolment_id', $enrolmentId)->where('status', 'open')->exists()) {
+            return 0;
+        }
+
         $new = 0;
         foreach (DB::table('mc_modules')->where('mc_version_id', $versionId)->orderBy('seq')->get() as $m) {
             $comps = DB::table('assessment_components')->where('mc_version_id', $versionId)->where('mc_module_id', $m->id)->get();

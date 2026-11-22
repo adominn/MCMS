@@ -95,9 +95,9 @@ it('chains audit entries and detects a break (FR-254, DR-03)', function () {
         DB::table('audit_events')->where('action', 'test.one')->update(['reason' => 'edited']);
         DB::unprepared('ALTER TABLE audit_events ENABLE TRIGGER audit_events_no_change');
     } else {
-        DB::statement('SET @mcms_disable_triggers = 1');
+        DB::unprepared('DROP TRIGGER IF EXISTS audit_events_no_update');
         DB::table('audit_events')->where('action', 'test.one')->update(['reason' => 'edited']);
-        DB::statement('SET @mcms_disable_triggers = 0');
+        DB::unprepared('CREATE TRIGGER audit_events_no_update BEFORE UPDATE ON audit_events FOR EACH ROW BEGIN SIGNAL SQLSTATE "45000" SET MESSAGE_TEXT = "audit_events is append-only"; END');
     }
     expect($audit->verify())->toBe(DB::table('audit_events')->where('action', 'test.one')->value('seq'));
 });

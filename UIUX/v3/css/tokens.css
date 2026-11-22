@@ -1,0 +1,106 @@
+/**
+ * UTeM MCMS UI/UX Design System (v3) - Design Tokens
+ * Authority: DESIGN.md (v2.4 "linear-precision") in design-samples/linear-precision/DESIGN.md
+ * Scope: Light theme only. Zero dark theme blocks.
+ */
+
+:root {
+  /* ==========================================================================
+     Color Tokens (Light Theme Scale)
+     ========================================================================== */
+  --color-primary: #0052ff;              /* Electric Cobalt - core brand, primary actions */
+  --color-primary-hover: #0045d8;        /* Interactive hover state */
+  --color-primary-pressed: #0036a8;      /* Pressed active state */
+  --color-primary-deep: #0a192f;         /* Deep Navy Obsidian - dark accents */
+  --color-primary-tint: #edf4ff;         /* Airy ice blue wash for hovered rows */
+  --color-primary-line: rgba(0, 82, 255, 0.28);
+  --color-primary-glow: rgba(0, 82, 255, 0.12);
+
+  --color-canvas: #ffffff;               /* Pure white default background */
+  --color-canvas-subtle: #f8fafc;        /* Ghost white for alternating sections */
+  --color-surface-1: #f1f5f9;            /* Cool slate-50 for secondary panels & code blocks */
+  --color-surface-2: #e2e8f0;            /* Cool slate-200 for hairline dividers & borders */
+  --color-surface-contrast: #090a0f;     /* Jet black slate for inverse modules */
+
+  --color-sidebar-bg: #0b1a3d;           /* Deep Cobalt Navy */
+  --color-header-bg: #ffffff;            /* Pure white brand header */
+
+  /* Typography Colors (WCAG AA Compliance) */
+  --color-ink: #090a0f;                  /* Absolute Jet Black (~18:1 contrast on white) */
+  --color-ink-muted: #475569;            /* Slate-600 (~4.6:1 contrast on white - WCAG AA pass) */
+  --color-ink-subtle: #94a3b8;           /* Slate-400 (FORBIDDEN for body text; lines/borders only) */
+  --color-ink-inverse: #ffffff;          /* White text on navy/cobalt surfaces */
+
+  /* Line & Border Rules */
+  --color-line-hairline: #e2e8f0;        /* 1px default hairline border */
+  --color-line-strong: #090a0f;          /* 1px stark jet black outline */
+  --color-line-accent: #0052ff;          /* 2px electric cobalt indicator stroke */
+  --color-card-border: #090a0f;          /* Stark black card outline */
+
+  /* Semantic Feedback Tokens */
+  --color-success: #24a148;
+  --color-success-tint: #edfcf0;
+  --color-success-border: #a7f0ba;
+
+  --color-warning: #b28900;              /* Accessible amber on white (>4.5:1) */
+  --color-warning-tint: #fefdf0;
+  --color-warning-border: #f1c21b;
+
+  --color-error: #da1e28;
+  --color-error-tint: #fff1f1;
+  --color-error-border: #ffd7d9;
+
+  --color-info: #0052ff;
+  --color-info-tint: #edf4ff;
+  --color-info-border: #d0e2ff;
+
+  /* ==========================================================================
+     Radius Scale (Controlled Micro-Radius)
+     ========================================================================== */
+  --radius-none: 0px;
+  --radius-xs: 2px;                      /* Micro tags, inline badges */
+  --radius-sm: 4px;                      /* Standard buttons, inputs, segmented controls */
+  --radius-md: 6px;                      /* Standard cards, popovers, bento cells */
+  --radius-lg: 8px;                      /* Hero containers, modals */
+  --radius-sidebar-corner: 28px;         /* Brand header & sidebar contours */
+  --radius-search-pill: 12px;            /* Floating search input container */
+  --radius-active-tab: 12px;             /* Active tab pill */
+  --radius-pull-tab-latch: 24px;         /* Semi-pill right curve (0 24px 24px 0) */
+  --radius-pill: 9999px;                 /* Status indicator pips ONLY */
+
+  /* ==========================================================================
+     Typography Tokens
+     ========================================================================== */
+  --font-primary: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", Menlo, Consolas, monospace;
+
+  --font-size-display-xl: 54px;
+  --font-size-display-lg: 44px;
+  --font-size-display-md: 32px;
+  --font-size-headline: 22px;
+  --font-size-title: 18px;
+  --font-size-body: 14px;
+  --font-size-small: 13px;
+  --font-size-caption: 12px;
+  --font-size-mono-code: 12px;
+  --font-size-eyebrow: 11px;
+
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.15;
+  --line-height-normal: 1.45;
+  --line-height-relaxed: 1.60;
+
+  /* ==========================================================================
+     Line Rules & Elevation
+     ========================================================================== */
+  --border-width-hairline: 1px;
+  --border-width-accent: 2px;
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-dropdown: 0 8px 24px rgba(9, 10, 15, 0.12);
+  --shadow-modal: 0 16px 40px rgba(9, 10, 15, 0.20);
+}

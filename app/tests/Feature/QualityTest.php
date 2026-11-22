@@ -213,3 +213,151 @@ it('displays the lecturer name on quality verification pages', function () {
     $this->actingAs($this->hakim)->get('/quality')->assertOk()->assertSee('Dr. Aina Zulkifli');
     $this->actingAs($this->hakim)->get("/quality/$mc")->assertOk()->assertSee('Dr. Aina Zulkifli');
 });
+
+it('enforces exact calendar bound and rejects leap-year overflow or 0 credit (REQ-C11-004, REQ-C11-007)', function () {
+    [$mc] = samcCompleted();
+    qvReady($mc);
+    $this->post("/quality/$mc/submit", ['submitted_on' => today()->toDateString(), 'reference' => 'R']);
+
+    // Reject 0 credit
+    qvVerified($mc, ['verified_credit' => 0])->assertSessionHasErrors('verified_credit');
+
+    // Reject past valid_until
+    qvVerified($mc, ['valid_from' => '2023-01-01', 'valid_until' => '2023-06-01'])->assertSessionHasErrors('valid_until');
+
+    // Reject leap year overflow: 2024-02-29 + 3 years max is 2027-02-28; 2027-03-01 must fail
+    qvVerified($mc, [
+        'valid_from' => '2024-02-29',
+        'valid_until' => '2027-03-01',
+    ])->assertSessionHasErrors('valid_until');
+
+    // Exact calendar bound
+    $from = today()->toDateString();
+    $maxValid = \Carbon\Carbon::parse($from)->addYearsNoOverflow(3)->toDateString();
+    $overflow = \Carbon\Carbon::parse($maxValid)->addDay()->toDateString();
+    qvVerified($mc, ['valid_from' => $from, 'valid_until' => $overflow])->assertSessionHasErrors('valid_until');
+    qvVerified($mc, ['valid_from' => $from, 'valid_until' => $maxValid])->assertSessionHasNoErrors();
+});
+
+it('rejects recording QV result on non-SAMC micro-credentials (REQ-C11-002)', function () {
+    [$mc] = samcCompleted();
+    qvReady($mc);
+    $this->post("/quality/$mc/submit", ['submitted_on' => today()->toDateString(), 'reference' => 'R']);
+    DB::table('micro_credentials')->where('id', $mc)->update(['category' => 'umc']);
+    qvVerified($mc)->assertNotFound();
+});
+
+it('truncates valid_until and dispatches suspension notices to enrolled learners on suspension (REQ-C10-006, REQ-C11-006)', function () {
+    [$mc, $v1, $o] = samcCompleted();
+    qvReady($mc);
+    $this->post("/quality/$mc/submit", ['submitted_on' => today()->toDateString(), 'reference' => 'R']);
+    qvVerified($mc, [
+        'valid_from' => today()->toDateString(),
+        'valid_until' => today()->addYears(2)->toDateString(),
+    ])->assertSessionHasNoErrors();
+
+    // Create active cohort with enrolled learner
+    $learner = User::create(['name' => 'Active Learner', 'email' => 'active_learner@utem.example.test']);
+    $learner->roleAssignments()->create(['role' => 'student', 'scope_type' => 'university']);
+    $activeCohort = DB::table('offerings')->insertGetId([
+        'mc_version_id' => $v1,
+        'cohort_name' => '2027/QV-ACT',
+        'delivery_mode' => 'online',
+        'capacity' => 30,
+        'fee' => '0',
+        'created_by' => $this->hakim->id,
+        'start_date' => today()->addDays(5)->toDateString(),
+        'end_date' => today()->addDays(60)->toDateString(),
+        'reg_opens_on' => today()->subDays(5)->toDateString(),
+        'reg_closes_on' => today()->addDays(4)->toDateString(),
+        'status' => 'open',
+        'readiness_state' => 'ready',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    DB::table('enrolments')->insert([
+        'reference' => 'ENR-TEST-999',
+        'user_id' => $learner->id,
+        'offering_id' => $activeCohort,
+        'mc_version_id' => $v1,
+        'status' => 'enrolled',
+        'ack_text' => 'Acknowledged personal data and recognition conditions',
+        'ack_versions' => json_encode(['recognition' => 1]),
+        'status_changed_at' => now(),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $this->actingAs($this->hakim)->post("/quality/$mc/end", [
+        'to' => 'suspended',
+        'reason' => 'Curriculum review under investigation',
+    ])->assertRedirect();
+
+    $q = DB::table('qv_records')->where('micro_credential_id', $mc)->first();
+    expect($q->status)->toBe('suspended')
+        ->and($q->valid_until)->toBe(today()->toDateString());
+
+    expect(DB::table('notifications')->where('user_id', $learner->id)->where('template_key', 'suspension.notice')->exists())->toBeTrue();
+});
+
+it('renders Appendix D official SAMC QV evidence package with D1-D10, 48 items, 9 components, and 3-role sign-offs (REQ-C11-001, App D)', function () {
+    [$mc, $v1, $o] = samcCompleted();
+    
+    // Lecturer starts cycle, fills readiness with D9 required actions & sign-off
+    $this->actingAs($this->aina)->post("/quality/$mc/start")->assertSessionHasNoErrors();
+    $this->actingAs($this->aina)->post("/quality/$mc/readiness", [
+        'decision' => 'ready',
+        'required_actions' => 'Submit complete package to QVC secretariat.',
+        'target_date' => today()->addMonths(1)->toDateString(),
+        'qvc_mechanism' => 'Malaysian Qualifications Agency (MQA) / QVC',
+        'evidence_cohort' => '2027/QV-COHORT-1',
+    ])->assertSessionHasNoErrors();
+
+    // Deputy dean confirms (P2 sign-off)
+    $this->actingAs($this->hakim)->post("/quality/$mc/confirm")->assertSessionHasNoErrors();
+
+    // QA authority signs off (P4 sign-off)
+    $this->farid->roleAssignments()->firstOrCreate(['role' => 'qa_officer'], ['scope_type' => 'university', 'reason' => 'P4 testing']);
+    $this->actingAs($this->farid)->post("/quality/$mc/signoff", [
+        'role' => 'qa_authority',
+        'remarks' => 'Semakan audit kualiti universiti disahkan lengkap.',
+    ])->assertSessionHasNoErrors();
+
+    // Verify package web view
+    $res = $this->actingAs($this->aina)->get("/quality/$mc/package")->assertOk();
+    $res->assertSee('D1. Maklumat SAMC dan Status Permohonan')
+        ->assertSee('D2. Kelayakan Asas SAMC untuk QV')
+        ->assertSee('D3. Evidens Reka Bentuk Akademik')
+        ->assertSee('D4. Evidens Pentaksiran dan Pencapaian')
+        ->assertSee('D5. Evidens Pelaksanaan dan Sokongan Peserta')
+        ->assertSee('D6. Evidens Jaminan Kualiti dan CQI')
+        ->assertSee('D7. Evidens Digital Credential')
+        ->assertSee('D8. Semakan Perubahan Signifikan (9 Komponen)')
+        ->assertSee('D9. Keputusan Semakan Kesediaan Dalaman')
+        ->assertSee('D10. Pengesahan (3 Peranan)')
+        ->assertSee('Dr. Aina Zulkifli')
+        ->assertSee('Hakim Rahman')
+        ->assertSee('Farid Hashim')
+        ->assertSee('NOTA PENTING (Lampiran D)');
+
+    // Verify print view
+    $printRes = $this->actingAs($this->hakim)->get("/quality/$mc/package?print=1")->assertOk();
+    $printRes->assertSee('Lampiran D: Senarai Evidens Quality Verification (QV) bagi Stand-Alone Micro-Credential (SAMC)')
+        ->assertSee('NOTA PENTING (Lampiran D)');
+
+    // Verify database persistence of D9/D10 and category in qv_evidence
+    $q = Qv::open($mc);
+    expect($q->d9_required_actions)->toBe('Submit complete package to QVC secretariat.')
+        ->and($q->qvc_mechanism)->toBe('Malaysian Qualifications Agency (MQA) / QVC')
+        ->and($q->evidence_cohort)->toBe('2027/QV-COHORT-1');
+
+    $signoffs = json_decode($q->d10_signoffs, true);
+    expect($signoffs)->toHaveKeys(['coordinator', 'faculty_rep', 'qa_authority'])
+        ->and($signoffs['coordinator']['name'])->toBe('Dr. Aina Zulkifli')
+        ->and($signoffs['faculty_rep']['name'])->toBe('Hakim Rahman')
+        ->and($signoffs['qa_authority']['name'])->toBe('Farid Hashim');
+
+    // Verify qv_evidence categories
+    $categories = DB::table('qv_evidence')->where('qv_record_id', $q->id)->pluck('category')->filter()->unique()->all();
+    expect($categories)->toContain('D2', 'D3', 'D4', 'D5', 'D6', 'D7');
+});

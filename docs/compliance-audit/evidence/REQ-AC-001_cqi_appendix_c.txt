@@ -1,0 +1,134 @@
+URL: http://127.0.0.1:8110/cqi/1
+FINAL: http://127.0.0.1:8110/cqi/1
+STATUS: 200
+TITLE: Quality review record - UTeM Micro-Credential Management System
+H1: Quality review CQI-2026-001
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+2
+AZ
+Dr. Aina Zulkifli
+Lecturer, FTMK
+TEACHING
+My tasks
+3
+My micro-credentials
+Proposals and versions
+1
+Cohorts and results
+Reviews for colleagues
+1
+QUALITY
+Quality review (CQI)
+QV evidence
+Stackable pathways
+INSIGHT
+Reports
+Traceability
+Documents
+Notifications
+2
+Collapse sidebar
+Quality review (CQI)
+Quality review CQI-2026-001
+Continuous Quality Improvement (CQI) record for cohort performance and evaluation
+← All quality reviews
+Confirmed
+All quality reviews
+Offering information and monitoring period
+MICRO-CREDENTIAL
+Cloud Native Development
+Version 1 · SAMC
+COHORT / SESSION
+2026/1
+07/06/2026 – 05/09/2026
+PTJ / FACULTY & OWNER
+Fakulti Teknologi Maklumat Dan Komunikasi
+Dr. Aina Zulkifli
+PARTICIPANTS & REVIEW DATE
+2 registered · 2 completed
+Reviewed on: 15/09/2026
+Cohort performance and evaluation data
+Quantitative performance indicators, student feedback, and learning outcome attainment.
+Cohort performance indicators
+5 rows
+Indicator
+	Value
+	Target
+	
+Active participation rate	100%	80%	Met
+Completion rate	100%	70%	Met
+Pass rate	100%	70%	Met
+Credential issuance rate	100%	95%	Met
+Average & median score	84.5 · 84.5
+Student feedback
+View all comments (2)
+Average Rating (Scale 1 – 5)
+2 responses
+Content
+4.5
+Learning activities
+4.5
+Assessment
+4.5
+Platform
+4.5
+Support
+4.5
+Relevance
+4.5
+STUDENT QUALITATIVE COMMENTS
+“Exceptional course. The Kubernetes deployment project directly improved my daily work at my company.”
+“Very comprehensive curriculum, appreciated the weekly live consultation clinics.”
+Learning outcome attainment
+2 rows
+Code
+	Learning Outcome
+	Attainment Share
+	Evaluation
+
+LO1	Package cloud-ready container images following OCI specifications.	100%	Satisfactory
+LO2	Deploy resilient microservices workloads onto Kubernetes clusters.	100%	Satisfactory
+Implementation quality domains
+Evaluate curriculum alignment, delivery, assessment validity and academic integrity.
+6 rows
+Domain
+	Status
+	Evidence / Finding
+
+Content currency	Satisfactory	Domain 'content' met cohort quality threshold (>= 80% satisfaction).
+Delivery	Satisfactory	Domain 'delivery' met cohort quality threshold (>= 80% satisfaction).
+Assessment and integrity	Satisfactory	Domain 'assessment' met cohort quality threshold (>= 80% satisfaction).
+Platform and access	Satisfactory	Domain 'platform' met cohort quality threshold (>= 80% satisfaction).
+Participant support	Satisfactory	Domain 'support' met cohort quality threshold (>= 80% satisfaction).
+Learning outcome attainment	Satisfactory	Domain 'outcomes' met cohort quality threshold (>= 80% satisfaction).
+Rows per page
+5
+10
+25
+50
+1–6 of 6
+Page 1 of 1
+‹
+›
+Issues, root cause and CQI action plan
+Record issues identified from evidence, formulate targeted actions, and track their implementation.
+Medium priority Student feedback survey indicated Docker CLI setup on Windows Home caused configuration delays in week 2.
+17/09/2026
+Root cause:
+Inconsistent local virtualization environments among learners.
+Impact:
+3 students delayed initial lab submission by 2 days.
+1 rows
+Action
+	Owner
+	Due
+	Status
+	
+Migrate local lab exercises to cloud-hosted GitHub Codespaces / browser IDE.
+Success indicator: Zero setup configuration errors reported in week 1 of 2027/1 cohort.
+	Dr. Aina Zulkifli	03/01/2027	In progress	
+Mark done

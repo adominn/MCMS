@@ -222,3 +222,65 @@ it('never deletes a version that was submitted (FR-79)', function () {
     DB::table('proposal_readiness')->where('mc_version_id', $draft)->delete();
     expect(DB::table('mc_versions')->where('id', $v1)->exists())->toBeTrue();
 });
+
+it('resets qv_status and flags reverification on material change v2 and on senate approval (REQ-C11-008)', function () {
+    [$v1, $mc] = approvedV1();
+    DB::table('mc_versions')->where('id', $v1)->update(['qv_status' => 'verified', 'qv_valid_until' => '2028-01-01']);
+    DB::table('qv_records')->insert([
+        'micro_credential_id' => $mc,
+        'cycle_no' => 1,
+        'status' => 'verified',
+        'reverification' => false,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    requestChange($mc, ['content']);
+    $v2 = v2Of($mc);
+    expect($v2->qv_status)->toBe('will_apply')
+        ->and($v2->qv_valid_until)->toBeNull()
+        ->and((bool) DB::table('qv_records')->where('micro_credential_id', $mc)->value('reverification'))->toBeTrue();
+
+    approveV2($v2->id, 'move_new');
+    $v2Approved = DB::table('mc_versions')->find($v2->id);
+    expect($v2Approved->qv_status)->toBe('will_apply')
+        ->and($v2Approved->qv_valid_until)->toBeNull()
+        ->and((bool) DB::table('qv_records')->where('micro_credential_id', $mc)->value('reverification'))->toBeTrue();
+});
+
+it('displays structural diff on version view when supersedes_id exists', function () {
+    [$v1, $mc] = approvedV1();
+    requestChange($mc, ['outcomes']);
+    $v2 = v2Of($mc);
+    DB::table('mc_versions')->where('id', $v2->id)->update(['planned_slt' => 160]);
+    $this->actingAs($this->aina)->get("/micro-credentials/$mc")
+        ->assertOk()
+        ->assertSee('Diff')
+        ->assertSee('SLT:');
+});
+
+it('triggers periodic review and notifies P1, P2, and P4 when parent course is updated (REQ-C11-012)', function () {
+    [$v1, $mc] = approvedV1();
+    $courseId = DB::table('mc_versions')->where('id', $v1)->value('parent_course_id');
+    $course = DB::table('parent_courses')->find($courseId);
+
+    $qaUser = User::create(['name' => 'QA Officer', 'email' => 'qa_officer@utem.example.test']);
+    $qaUser->roleAssignments()->create(['role' => 'qa_officer', 'scope_type' => 'university']);
+
+    $adminUser = User::create(['name' => 'CODL Admin', 'email' => 'codl_admin_ref@utem.example.test']);
+    $adminUser->roleAssignments()->create(['role' => 'codl_admin', 'scope_type' => 'university']);
+
+    $this->actingAs($adminUser)->post('/admin/reference/course', [
+        'code' => $course->code,
+        'name' => 'Updated Course Name',
+        'programme_code' => DB::table('programmes')->where('id', $course->programme_id)->value('code'),
+        'credit' => $course->credit,
+        'slt_hours' => $course->slt_hours,
+        'clos' => $course->clos ?: 'CLO1;CLO2',
+    ])->assertRedirect();
+
+    expect(DB::table('periodic_reviews')->where('micro_credential_id', $mc)->whereNull('completed_on')->exists())->toBeTrue();
+    expect(DB::table('notifications')->where('user_id', $this->aina->id)->where('template_key', 'review.due')->exists())->toBeTrue();
+    expect(DB::table('notifications')->where('user_id', $this->hakim->id)->where('template_key', 'review.due')->exists())->toBeTrue();
+    expect(DB::table('notifications')->where('user_id', $qaUser->id)->where('template_key', 'review.due')->exists())->toBeTrue();
+});

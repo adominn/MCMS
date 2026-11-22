@@ -1,14 +1,160 @@
 <?php
 
 return [
-    // Guide Appendix B2 to B7 (FR-85)
+    // Guide Appendix B2 to B7: 38 items + 10-row B5 table = 48 items
+    'readiness_sections' => [
+        'b2' => [
+            'code' => 'B2',
+            'title_ms' => 'Ketelusan Maklumat Sebelum Pendaftaran',
+            'title_en' => 'Pre-Registration Information Transparency',
+            'items' => [
+                'b2_01' => ['en' => 'Clear title, synopsis, and learning outcomes published', 'ms' => 'Tajuk, sinopsis, dan hasil pembelajaran dinyatakan dengan jelas'],
+                'b2_02' => ['en' => 'MC category (UMC/SAMC/MCE) and recognition implications stated', 'ms' => 'Kategori MC (UMC/SAMC/MCE) dan implikasi pengiktirafan dinyatakan'],
+                'b2_03' => ['en' => 'Eligibility requirements and prerequisites clearly specified', 'ms' => 'Syarat kelayakan dan prasyarat penyertaan dinyatakan'],
+                'b2_04' => ['en' => 'Delivery mode and schedule specified with dates', 'ms' => 'Kaedah penyampaian dan jadual penawaran dinyatakan'],
+                'b2_05' => ['en' => 'Total Student Learning Time (SLT) and activity breakdown stated', 'ms' => 'Jumlah SLT dan pecahan masa pembelajaran dinyatakan'],
+                'b2_06' => ['en' => 'Assessment methods and passing standards clearly published', 'ms' => 'Kaedah pentaksiran dan standard lulus dinyatakan'],
+                'b2_07' => ['en' => 'Credential type awarded (Badge/Certificate/Digital Credential) stated', 'ms' => 'Jenis credential yang dianugerahkan dinyatakan'],
+                'b2_08' => ['en' => 'Fee structure and refund policy published (if applicable)', 'ms' => 'Struktur yuran dan polisi bayaran balik dinyatakan'],
+                'b2_09' => ['en' => 'Non-automatic credit transfer transparency notice prominently displayed', 'ms' => 'Notis ketelusan pemindahan kredit bukan automatik dipaparkan'],
+                'b2_10' => ['en' => 'Coordinator and technical support contact details provided', 'ms' => 'Maklumat hubungan penyelaras dan bantuan teknikal disediakan'],
+            ],
+        ],
+        'b3' => [
+            'code' => 'B3',
+            'title_ms' => 'Kesediaan Bahan, Platform dan Akses',
+            'title_en' => 'Materials, Platform and Access Readiness',
+            'items' => [
+                'b3_01' => ['en' => 'Learning materials complete and aligned with outcomes', 'ms' => 'Bahan pembelajaran lengkap dan sejajar dengan hasil pembelajaran'],
+                'b3_02' => ['en' => 'Learning platform (uLearn/UCreds) configured and ready', 'ms' => 'Platform pembelajaran telah dikonfigurasikan dan sedia digunakan'],
+                'b3_03' => ['en' => 'Learner and instructor platform access verified', 'ms' => 'Akses peserta dan pengajar telah diuji dan berfungsi'],
+                'b3_04' => ['en' => 'Participant navigation and orientation guide prepared', 'ms' => 'Panduan navigasi dan orientasi peserta disediakan'],
+                'b3_05' => ['en' => 'Supplementary reading and learning resources accessible', 'ms' => 'Bahan rujukan dan sumber sokongan sedia diakses'],
+                'b3_06' => ['en' => 'Minimum technical and device specifications informed to learners', 'ms' => 'Spesifikasi peranti dan teknikal minimum dimaklumkan'],
+                'b3_07' => ['en' => 'Technical helpdesk and learner support operational', 'ms' => 'Mekanisme bantuan teknikal (helpdesk) sedia beroperasi'],
+                'b3_08' => ['en' => 'Participant data privacy and security comply with PDPA', 'ms' => 'Privasi dan keselamatan data peserta mematuhi PDPA'],
+            ],
+        ],
+        'b4' => [
+            'code' => 'B4',
+            'title_ms' => 'Kesediaan Pentaksiran dan Integriti',
+            'title_en' => 'Assessment and Integrity Readiness',
+            'items' => [
+                'b4_01' => ['en' => 'Assessment instruments verified and approved prior to offering', 'ms' => 'Instrumen pentaksiran disahkan sebelum penawaran'],
+                'b4_02' => ['en' => 'Scoring rubrics complete and constructively aligned', 'ms' => 'Rubrik pemarkahan lengkap dan selaras dengan LO'],
+                'b4_03' => ['en' => 'Submission deadlines and assessment schedules published', 'ms' => 'Tarikh penghantaran dan jadual pentaksiran ditetapkan'],
+                'b4_04' => ['en' => 'Identity verification mechanism aligned with course risk tier', 'ms' => 'Mekanisme pengesahan identiti mengikut tahap risiko kursus'],
+                'b4_05' => ['en' => 'Academic integrity controls and plagiarism prevention in place', 'ms' => 'Kawalan integriti akademik dan anti-plagiarisme disediakan'],
+                'b4_06' => ['en' => 'Grading workflow and timely feedback mechanism established', 'ms' => 'Kaedah perekodan markah dan maklum balas sedia'],
+                'b4_07' => ['en' => 'Assessment verifier and examiners officially appointed', 'ms' => 'Pemeriksa dan pengesah markah pentaksiran dilantik'],
+            ],
+        ],
+        'b5' => [
+            'code' => 'B5',
+            'title_ms' => 'Rekod Peserta dan Pencapaian',
+            'title_en' => 'Participant and Achievement Records Table',
+            'items' => [
+                'b5_01' => ['en' => 'Learner Identity Records (Name, IC/Passport, Profile)', 'ms' => 'Identiti Peserta (Nama, No. KP/Pasport, Profil)'],
+                'b5_02' => ['en' => 'Registration and Cohort Enrolment Records', 'ms' => 'Rekod Pendaftaran dan Kohort Penawaran'],
+                'b5_03' => ['en' => 'LMS Access, Participation and Activity Logs', 'ms' => 'Log Akses, Kehadiran dan Penglibatan Platform'],
+                'b5_04' => ['en' => 'Module / Activity Completion Records (modular UMC)', 'ms' => 'Penyempurnaan Modul / Aktiviti (UMC modular)'],
+                'b5_05' => ['en' => 'Assessment Component Marks and Final Scores', 'ms' => 'Markah Komponen dan Skor Pentaksiran'],
+                'b5_06' => ['en' => 'Pass / Completion Determination Records', 'ms' => 'Keputusan Lulus dan Pengesahan Penyempurnaan'],
+                'b5_07' => ['en' => 'Digital Badge Issuance Records', 'ms' => 'Perekodan Pengeluaran Digital Badge'],
+                'b5_08' => ['en' => 'Official Certificate / Digital Credential Records', 'ms' => 'Perekodan Pengeluaran Sijil / Digital Credential'],
+                'b5_09' => ['en' => 'Academic Credit Record (ACR) Generation for Eligible MCs', 'ms' => 'Penyediaan Academic Credit Record (ACR)'],
+                'b5_10' => ['en' => 'Academic Bank of Certificate (ABC) Deposit Status', 'ms' => 'Status Deposit Academic Bank of Certificate (ABC)'],
+            ],
+        ],
+        'b6' => [
+            'code' => 'B6',
+            'title_ms' => 'Proses Penyempurnaan dan Pengeluaran Credential',
+            'title_en' => 'Completion and Credential Issuance Process',
+            'items' => [
+                'b6_01' => ['en' => 'Completion criteria (attendance, activities, pass marks) enforced', 'ms' => 'Kriteria penyempurnaan dipatuhi sepenuhnya'],
+                'b6_02' => ['en' => 'Mark verification by Course Coordinator / Verifier before confirmation', 'ms' => 'Verifikasi markah oleh Penyelaras sebelum pengesahan'],
+                'b6_03' => ['en' => 'Completion endorsement by PTj Deputy Dean / Faculty Authority', 'ms' => 'Pengesahan penyempurnaan oleh Timbalan Dekan / PTj'],
+                'b6_04' => ['en' => 'Automated / governed Digital Badge issuance pipeline ready', 'ms' => 'Pengeluaran Digital Badge sedia dilaksanakan'],
+                'b6_05' => ['en' => 'Official UTeM Certificate / Digital Credential generation ready', 'ms' => 'Penjanaan Sijil / Digital Credential rasmi sedia'],
+                'b6_06' => ['en' => 'Internal UTeM Learning Achievement Record maintained', 'ms' => 'Rekod Pencapaian Pembelajaran dalaman UTeM sedia'],
+                'b6_07' => ['en' => 'ACR preparation ready for credit-bearing UMC and QV-SAMC', 'ms' => 'Penyediaan ACR sedia bagi UMC dan SAMC terverifikasi'],
+                'b6_08' => ['en' => 'Result notification and credential claim links communicated to learners', 'ms' => 'Notifikasi keputusan dan pautan credential kepada peserta'],
+            ],
+        ],
+        'b7' => [
+            'code' => 'B7',
+            'title_ms' => 'Makluman Perubahan dan Perlindungan Peserta',
+            'title_en' => 'Change Notification and Learner Protection',
+            'items' => [
+                'b7_01' => ['en' => 'Procedure for notifying learners of schedule or content changes', 'ms' => 'Prosedur makluman perubahan jadual atau kandungan'],
+                'b7_02' => ['en' => 'Contingency and mitigation plan for delivery disruptions', 'ms' => 'Pelan mitigasi sekiranya berlaku gangguan penawaran'],
+                'b7_03' => ['en' => 'Learner protection to complete offering under original terms', 'ms' => 'Perlindungan hak peserta menyempurnakan mengikut syarat asal'],
+                'b7_04' => ['en' => 'Appeals and grievance redressal channel established', 'ms' => 'Saluran aduan dan rayuan keputusan pentaksiran disediakan'],
+                'b7_05' => ['en' => 'Post-offering participant data retention and archiving plan', 'ms' => 'Pengendalian dan arkib data peserta mengikut dasar retensi'],
+            ],
+        ],
+    ],
+
     'readiness' => [
-        'transparency' => 'Transparency of information',
-        'materials_platform' => 'Learning materials and platform',
-        'assessment_integrity' => 'Assessment and integrity',
-        'records' => 'Participant and achievement records',
-        'completion_credential' => 'Completion and credential process',
-        'change_notification' => 'Change notification',
+        // B2: Pre-Registration Information Transparency (10 items)
+        'b2_01' => 'Clear title, synopsis, and learning outcomes published',
+        'b2_02' => 'MC category (UMC/SAMC/MCE) and recognition implications stated',
+        'b2_03' => 'Eligibility requirements and prerequisites clearly specified',
+        'b2_04' => 'Delivery mode and schedule specified with dates',
+        'b2_05' => 'Total Student Learning Time (SLT) and activity breakdown stated',
+        'b2_06' => 'Assessment methods and passing standards clearly published',
+        'b2_07' => 'Credential type awarded (Badge/Certificate/Digital Credential) stated',
+        'b2_08' => 'Fee structure and refund policy published (if applicable)',
+        'b2_09' => 'Non-automatic credit transfer transparency notice prominently displayed',
+        'b2_10' => 'Coordinator and technical support contact details provided',
+
+        // B3: Materials, Platform and Access Readiness (8 items)
+        'b3_01' => 'Learning materials complete and aligned with outcomes',
+        'b3_02' => 'Learning platform (uLearn/UCreds) configured and ready',
+        'b3_03' => 'Learner and instructor platform access verified',
+        'b3_04' => 'Participant navigation and orientation guide prepared',
+        'b3_05' => 'Supplementary reading and learning resources accessible',
+        'b3_06' => 'Minimum technical and device specifications informed to learners',
+        'b3_07' => 'Technical helpdesk and learner support operational',
+        'b3_08' => 'Participant data privacy and security comply with PDPA',
+
+        // B4: Assessment and Integrity Readiness (7 items)
+        'b4_01' => 'Assessment instruments verified and approved prior to offering',
+        'b4_02' => 'Scoring rubrics complete and constructively aligned',
+        'b4_03' => 'Submission deadlines and assessment schedules published',
+        'b4_04' => 'Identity verification mechanism aligned with course risk tier',
+        'b4_05' => 'Academic integrity controls and plagiarism prevention in place',
+        'b4_06' => 'Grading workflow and timely feedback mechanism established',
+        'b4_07' => 'Assessment verifier and examiners officially appointed',
+
+        // B5: Participant and Achievement Records (10 items)
+        'b5_01' => 'Learner Identity Records (Name, IC/Passport, Profile)',
+        'b5_02' => 'Registration and Cohort Enrolment Records',
+        'b5_03' => 'LMS Access, Participation and Activity Logs',
+        'b5_04' => 'Module / Activity Completion Records (modular UMC)',
+        'b5_05' => 'Assessment Component Marks and Final Scores',
+        'b5_06' => 'Pass / Completion Determination Records',
+        'b5_07' => 'Digital Badge Issuance Records',
+        'b5_08' => 'Official Certificate / Digital Credential Records',
+        'b5_09' => 'Academic Credit Record (ACR) Generation for Eligible MCs',
+        'b5_10' => 'Academic Bank of Certificate (ABC) Deposit Status',
+
+        // B6: Completion and Credential Issuance Process (8 items)
+        'b6_01' => 'Completion criteria (attendance, activities, pass marks) enforced',
+        'b6_02' => 'Mark verification by Course Coordinator / Verifier before confirmation',
+        'b6_03' => 'Completion endorsement by PTj Deputy Dean / Faculty Authority',
+        'b6_04' => 'Automated / governed Digital Badge issuance pipeline ready',
+        'b6_05' => 'Official UTeM Certificate / Digital Credential generation ready',
+        'b6_06' => 'Internal UTeM Learning Achievement Record maintained',
+        'b6_07' => 'ACR preparation ready for credit-bearing UMC and QV-SAMC',
+        'b6_08' => 'Result notification and credential claim links communicated to learners',
+
+        // B7: Change Notification and Learner Protection (5 items)
+        'b7_01' => 'Procedure for notifying learners of schedule or content changes',
+        'b7_02' => 'Contingency and mitigation plan for delivery disruptions',
+        'b7_03' => 'Learner protection to complete offering under original terms',
+        'b7_04' => 'Appeals and grievance redressal channel established',
+        'b7_05' => 'Post-offering participant data retention and archiving plan',
     ],
     'outcomes' => ['ready' => 'Ready', 'ready_conditions' => 'Ready with conditions', 'not_ready' => 'Not ready'],
     'status' => ['not_ready' => 'Not ready', 'ready' => 'Ready', 'open' => 'Open', 'running' => 'Running', 'ended' => 'Ended', 'held' => 'On hold', 'cancelled' => 'Cancelled'],
@@ -16,11 +162,18 @@ return [
     // Free text must not promise what only a separate decision can give (FR-93, BR-16).
     'forbidden' => [
         '/\bguarantee[sd]?\b.{0,40}\b(credit|transfer|admission|degree|qualification|exemption)/i' => 'a guarantee of credit, transfer, admission or a qualification',
+        '/\b(jaminan|menjamin)\b.{0,40}\b(pemindahan\s+kredit|kredit|kemasukan|ijazah|kelayakan|pengecualian)/i' => 'jaminan pemindahan kredit, kemasukan atau kelayakan (guarantee of credit, transfer or qualification)',
         '/\b(will|shall)\s+(be\s+)?(transferred|counted|recogni[sz]ed|accepted)\b/i' => 'a promise that credit will transfer or be recognised',
+        '/\b(akan|pasti)\s+(dipindahkan|diiktiraf|diterima|dikira)\b/i' => 'janji pemindahan atau pengiktirafan kredit (promise of credit transfer or recognition)',
         '/\bautomatic(ally)?\b.{0,30}\b(credit|transfer|degree|admission|exemption)/i' => 'automatic credit, transfer, admission or a degree',
+        '/\b(automatik|secara\s+automatik)\b.{0,30}\b(kredit|pemindahan|pindahan|ijazah|kemasukan|pengecualian)/i' => 'kredit, pemindahan atau ijazah automatik (automatic credit, transfer or degree)',
+        '/\b(kredit|pemindahan|pindahan|ijazah|kemasukan|pengecualian)\s+(secara\s+)?automatik\b/i' => 'kredit, pemindahan atau ijazah automatik (automatic credit, transfer or degree)',
         '/\bleads?\s+to\s+(a|an|your)\s+(degree|diploma|qualification)/i' => 'a promise that it leads to a degree',
+        '/\b(membawa|menuju|melayakkan)\s+kepada\s+(suatu\s+)?(ijazah|diploma|kelayakan)\b/i' => 'janji membawa kepada ijazah (promise that it leads to a degree)',
         '/\b(\d+|two|three|four|five|six|several|multiple|a number of)\s+micro-?credentials?\b.{0,40}\b(lead|leads|equal|equals|make|makes|count|counts)\b.{0,30}\b(degree|diploma)/i' => 'a number of micro-credentials adding up to a degree',
+        '/\b(\d+|dua|tiga|empat|lima|enam|beberapa)\s+micro-?credentials?\b.{0,40}\b(menjadikan|membawa|bersamaan|dikira|membentuk)\b.{0,30}\b(ijazah|diploma)/i' => 'sejumlah micro-credential membentuk ijazah (micro-credentials adding up to a degree)',
         '/(\b\d+(\.\d+)?\s+credits?\b|\bmqf\s+level\s*\d|\bquality[- ]verified\b)/i' => 'a credit value, MQF level or Quality Verification claim (these appear only through the generated statement)',
+        '/(\b\d+(\.\d+)?\s+kredit\b|\btahap\s+mqf\s*\d|\bterverifikasi\s+kualiti\b|\bdisahkan\s+kualiti\b)/i' => 'tuntutan nilai kredit, tahap MQF atau pengesahan kualiti (credit, MQF, or QV claim)',
     ],
 
     'labels' => [

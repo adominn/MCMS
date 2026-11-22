@@ -130,15 +130,19 @@ it('renders proposal print (Appendix A) with 10 sections', function () {
         ->assertSee('Appendix A')
         ->assertSee('1. Basics')
         ->assertSee('2. Justification')
+        ->assertSee('A3. Category Determination')
         ->assertSee('3. Learning outcomes')
         ->assertSee('4. Modules and learning time (SLT)')
         ->assertSee('5. Assessment weightings')
         ->assertSee('6. Alignment of outcomes to assessment')
         ->assertSee('7. Credential design')
         ->assertSee('8. Delivery')
+        ->assertSee('A8. Kesediaan Pelaksanaan')
         ->assertSee('9. Co-developers')
+        ->assertSee('A9. Semakan dan Kelulusan')
         ->assertSee('10. Declarations and Signatures')
         ->assertSee('Intellectual property declaration')
+        ->assertSee('NOTA PENTING (Lampiran A)')
         ->assertSee('Print or save as PDF');
 });
 

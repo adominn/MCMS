@@ -60,7 +60,7 @@ if (! function_exists('completeUmc')) {
         $id = newUmc();
         DB::table('mc_versions')->where('id', $id)->update(['name_ms' => 'Ujian Perisian', 'delivery_mode' => 'online', 'delivery_language' => 'English', 'need' => 'Industry asked for it', 'credit_model' => 'credit_based', 'ip_confirmed' => true]);
         modules($id, [40, 40, 40]);
-        $lo = DB::table('learning_outcomes')->insertGetId(['mc_version_id' => $id, 'code' => 'LO1', 'text_en' => 'Test software', 'sort_order' => 1]);
+        $lo = DB::table('learning_outcomes')->insertGetId(['mc_version_id' => $id, 'code' => 'LO1', 'text_en' => 'Test software', 'sort_order' => 1, 'parent_clo_id' => 1]);
         $c = DB::table('assessment_components')->insertGetId(['mc_version_id' => $id, 'name_en' => 'Project', 'weight_percent' => 100]);
         DB::table('assessment_component_outcomes')->insert(['assessment_component_id' => $c, 'learning_outcome_id' => $lo]);
         foreach (array_keys(config('proposals.readiness')) as $item) {
@@ -235,7 +235,7 @@ it('requires a SAMC to reach the threshold (FR-30)', function () {
 
 it('requires the weightings to total 100% and warns about outcomes without assessment (FR-39, FR-40)', function () {
     $id = newUmc();
-    $lo = DB::table('learning_outcomes')->insertGetId(['mc_version_id' => $id, 'code' => 'LO1', 'text_en' => 'x', 'sort_order' => 1]);
+    $lo = DB::table('learning_outcomes')->insertGetId(['mc_version_id' => $id, 'code' => 'LO1', 'text_en' => 'x', 'sort_order' => 1, 'parent_clo_id' => 1]);
     $c = DB::table('assessment_components')->insertGetId(['mc_version_id' => $id, 'name_en' => 'Exam', 'weight_percent' => 60]);
     $r = app(ProposalChecker::class)->check($id);
     expect(collect($r['blocking'])->firstWhere('fr', 'FR-39')['msg'])->toContain('60%')
@@ -381,3 +381,101 @@ it('allows a lecturer to upload a custom badge image and revert to standard temp
     ])->assertRedirect();
     $this->get("/proposals/$id?tab=credential")->assertOk()->assertSee('display:none');
 });
+
+it('strips verified from writable qv_status and clears credit/mqf on mce (REQ-C06-013, REQ-C06-015)', function () {
+    $samc = newOwn(80, 'yes');
+    $this->actingAs($this->aina)->post("/proposals/$samc/credential", [
+        'qv_status' => 'verified',
+        'proposed_credit' => 2.0,
+        'proposed_mqf_level' => 6,
+    ])->assertRedirect();
+    // 'verified' must not be self-set by proposer in draft
+    expect(DB::table('mc_versions')->where('id', $samc)->value('qv_status'))->toBeNull();
+
+    // Normal allowed value 'will_apply' is preserved
+    $this->post("/proposals/$samc/credential", ['qv_status' => 'will_apply'])->assertRedirect();
+    expect(DB::table('mc_versions')->where('id', $samc)->value('qv_status'))->toBe('will_apply');
+
+    // MCE clears proposed credit and MQF level
+    $mce = newOwn(20, 'no');
+    $this->post("/proposals/$mce/credential", [
+        'proposed_credit' => 3.0,
+        'proposed_mqf_level' => 6,
+    ])->assertRedirect();
+    $vMce = DB::table('mc_versions')->find($mce);
+    expect($vMce->proposed_credit)->toBeNull()->and($vMce->proposed_mqf_level)->toBeNull();
+});
+
+it('blocks parent_course_id on SAMC and blocks UMC LOs without parent_clo_id (REQ-C06-011, REQ-C08-002)', function () {
+    $samc = newOwn(80);
+    modules($samc, [80]);
+    $courseId = DB::table('parent_courses')->where('code', 'BITS 1123')->value('id');
+    DB::table('mc_versions')->where('id', $samc)->update(['parent_course_id' => $courseId]);
+
+    $check = app(ProposalChecker::class)->check($samc);
+    expect(array_column($check['blocking'], 'fr'))->toContain('FR-30');
+    expect(collect($check['blocking'])->firstWhere('fr', 'FR-30')['msg'])->toContain('stand-alone');
+
+    // UMC without parent_clo_id on LO is blocked
+    $umc = completeUmc();
+    DB::table('learning_outcomes')->where('mc_version_id', $umc)->update(['parent_clo_id' => null]);
+    $checkUmc = app(ProposalChecker::class)->check($umc);
+    expect(array_column($checkUmc['blocking'], 'fr'))->toContain('FR-50');
+    expect(collect($checkUmc['blocking'])->firstWhere('fr', 'FR-50')['msg'])->toContain('parent course learning outcome (CLO)');
+});
+
+it('saves A3 category justification, A5 module content and activities, and A10 follow-up action (REQ-C08-001, REQ-AA-003, REQ-AA-005)', function () {
+    $id = newUmc();
+
+    // 1. Save A3 Justification & A10 follow-up action
+    $this->actingAs($this->aina)->post("/proposals/$id/justification", [
+        'need' => 'High demand for software testing skills in tech sector.',
+        'category_justification' => 'UMC unbundled from BITS 1123 to provide modular upskilling.',
+        'existing_equivalents' => 'Complements existing Software Engineering diploma modules.',
+        'added_value' => 'Includes automated test automation pipelines with CI/CD.',
+        'recognition_potential' => 'Industry endorsed by MDEC partner network.',
+        'follow_up_action' => 'stackable',
+        'evidence_types' => ['industry'],
+    ])->assertRedirect();
+
+    $v = DB::table('mc_versions')->find($id);
+    expect($v->category_justification)->toBe('UMC unbundled from BITS 1123 to provide modular upskilling.')
+        ->and($v->existing_equivalents)->toBe('Complements existing Software Engineering diploma modules.')
+        ->and($v->recognition_potential)->toBe('Industry endorsed by MDEC partner network.')
+        ->and($v->follow_up_action)->toBe('stackable');
+
+    // 2. Save A5 Key Content and module activities
+    modules($id, [60, 60]);
+    $m1 = DB::table('mc_modules')->where('mc_version_id', $id)->where('seq', 1)->value('id');
+    $m2 = DB::table('mc_modules')->where('mc_version_id', $id)->where('seq', 2)->value('id');
+
+    $this->post("/proposals/$id/modules", [
+        'rows' => [
+            $m1 => ['name_en' => 'Test Planning', 'name_ms' => 'Perancangan Ujian', 'slt_hours' => '60', 'key_content' => 'Test strategy, test cases, boundary value analysis.'],
+            $m2 => ['name_en' => 'Test Automation', 'name_ms' => 'Automasi Ujian', 'slt_hours' => '60', 'key_content' => 'Selenium, Playwright, CI/CD automated gates.'],
+        ],
+        'add_activity_module_id' => $m1,
+    ])->assertRedirect();
+
+    expect(DB::table('mc_modules')->where('id', $m1)->value('key_content'))->toBe('Test strategy, test cases, boundary value analysis.')
+        ->and(DB::table('mc_module_activities')->where('mc_module_id', $m1)->exists())->toBeTrue();
+
+    $act = DB::table('mc_module_activities')->where('mc_module_id', $m1)->first();
+
+    // Update activity SLT and verify validation
+    $this->post("/proposals/$id/modules", [
+        'rows' => [
+            $m1 => ['name_en' => 'Test Planning', 'slt_hours' => '60'],
+            $m2 => ['name_en' => 'Test Automation', 'slt_hours' => '60'],
+        ],
+        'activities' => [
+            $act->id => ['name_en' => 'Boundary Value Lab', 'activity_type' => 'practical', 'slt_hours' => '80'], // 80h > 60h module SLT
+        ],
+    ])->assertRedirect();
+
+    // Check blocking error when activity SLT exceeds module SLT
+    $check = app(ProposalChecker::class)->check($id);
+    expect(array_column($check['blocking'], 'fr'))->toContain('FR-36');
+});
+
+

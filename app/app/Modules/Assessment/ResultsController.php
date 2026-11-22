@@ -64,8 +64,13 @@ final class ResultsController
                     if ($existing && (float) $existing->score === (float) $v) {
                         continue;
                     }
+                    $isHeld = ($existing && $existing->status === 'held')
+                        || DB::table('integrity_cases')->where('enrolment_id', $eid)->where('status', 'open')->exists();
                     $vals = ['score' => $v, 'source' => 'manual', 'entered_by' => $request->user()->id, 'updated_at' => now()];
-                    $existing ? DB::table('assessment_results')->where('id', $existing->id)->update($vals) : DB::table('assessment_results')->insert($vals + ['enrolment_id' => $eid, 'assessment_component_id' => $cid, 'status' => 'provisional', 'created_at' => now()]);
+                    if ($isHeld) {
+                        $vals['status'] = 'held';
+                    }
+                    $existing ? DB::table('assessment_results')->where('id', $existing->id)->update($vals) : DB::table('assessment_results')->insert($vals + ['enrolment_id' => $eid, 'assessment_component_id' => $cid, 'status' => $isHeld ? 'held' : 'provisional', 'created_at' => now()]);
                     $count++;
                 }
             }
@@ -131,7 +136,12 @@ final class ResultsController
     {
         $ids = $request->user()->scopedPtjIds('deputy_dean');
         $rows = DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
-            ->when($ids !== null, fn ($b) => $b->whereIn('m.ptj_id', $ids))->whereIn('o.status', ['running', 'ended'])->orderByDesc('o.start_date')->get(['o.id', 'o.cohort_name', 'o.status', 'o.results_submitted_at', 'v.name_en', 'u.name as lecturer_name']);
+            ->when($ids !== null, fn ($b) => $b->whereIn('m.ptj_id', $ids))
+            ->where(function ($q) {
+                $q->whereIn('o.status', ['running', 'ended'])
+                  ->orWhereNotNull('o.results_submitted_at');
+            })
+            ->orderByDesc('o.start_date')->get(['o.id', 'o.cohort_name', 'o.status', 'o.results_submitted_at', 'v.name_en', 'u.name as lecturer_name']);
         $stats = DB::table('assessment_results as r')->join('enrolments as e', 'e.id', '=', 'r.enrolment_id')->whereIn('e.offering_id', $rows->pluck('id'))
             ->selectRaw('e.offering_id, r.status, count(*) n')->groupBy('e.offering_id', 'r.status')->get()->groupBy('offering_id');
 
@@ -163,8 +173,13 @@ final class ResultsController
     {
         $o = $this->offering($request, $id);
         abort_unless($o->results_submitted_at, 403, 'The lecturer has not submitted the results for verification yet.');
-        $d = $request->validate(['evidence' => 'required|string|min:5|max:500', 'scopes' => 'nullable|array'], ['evidence.required' => 'Say how identity, assessment and result were linked (the evidence).']);
-        $r = $this->verifier->verify($o, $request->user(), $d['evidence'], (array) ($d['scopes'] ?? []));
+        $d = $request->validate([
+            'evidence' => 'required|string|min:5|max:500',
+            'scopes' => 'nullable|array',
+            'enrolments' => 'nullable|array',
+        ], ['evidence.required' => 'Say how identity, assessment and result were linked (the evidence).']);
+        $enrolmentIds = array_map('intval', (array) ($d['enrolments'] ?? []));
+        $r = $this->verifier->verify($o, $request->user(), $d['evidence'], (array) ($d['scopes'] ?? []), $enrolmentIds);
         if (! DB::table('assessment_results as r')->join('enrolments as e', 'e.id', '=', 'r.enrolment_id')->where('e.offering_id', $id)->where('r.status', 'provisional')->exists()) {
             Tasks::close('verify_results', $id);
         }
@@ -206,8 +221,45 @@ final class ResultsController
             if ($d['decision'] === 'approve') {
                 DB::table('assessment_result_revisions')->insert(['assessment_result_id' => $r->id, 'old_score' => $r->score, 'new_score' => $q->new_score, 'reason' => $q->reason, 'requested_by' => $q->requested_by, 'approved_by' => $request->user()->id, 'created_at' => now()]); // the old value is kept
                 DB::table('assessment_results')->where('id', $r->id)->update(['score' => $q->new_score, 'updated_at' => now()]);
+
+                // Re-evaluate module pass status and revoke achievement/badge if score lowered below pass mark
+                $comp = DB::table('assessment_components')->find($r->assessment_component_id);
+                if ($comp && $comp->mc_module_id) {
+                    $moduleComps = DB::table('assessment_components')->where('mc_version_id', $o->mc_version_id)->where('mc_module_id', $comp->mc_module_id)->get();
+                    $moduleResults = DB::table('assessment_results')->where('enrolment_id', $r->enrolment_id)->whereIn('assessment_component_id', $moduleComps->pluck('id'))->get()->keyBy('assessment_component_id');
+                    $stillMet = $moduleComps->every(fn ($c) => isset($moduleResults[$c->id]) && $moduleResults[$c->id]->status === 'verified' && (float) $moduleResults[$c->id]->score >= (float) $c->pass_mark);
+
+                    if (! $stillMet) {
+                        $existingAch = DB::table('module_achievements')->where('enrolment_id', $r->enrolment_id)->where('mc_module_id', $comp->mc_module_id)->first();
+                        if ($existingAch) {
+                            DB::table('digital_badges')->where('module_achievement_id', $existingAch->id)->delete();
+                            DB::table('module_achievements')->where('id', $existingAch->id)->delete();
+                            $this->audit->record('achievement.revoked', ['type' => 'ModuleAchievement', 'id' => $existingAch->id], reason: 'Score lowered below pass mark to '.$q->new_score);
+                        }
+                        $enrolRow = DB::table('enrolments')->find($r->enrolment_id);
+                        if ($enrolRow && $enrolRow->status === 'completed') {
+                            DB::table('enrolments')->where('id', $r->enrolment_id)->update(['status' => 'enrolled', 'updated_at' => now()]);
+                        }
+                    }
+                }
+
                 $this->verifier->achievements($r->enrolment_id, $o->mc_version_id, $request->user()->id);
                 \App\Modules\Achievement\Completion::syncTask($o->id);
+
+                // Notify the learner about the result change
+                $enrolment = DB::table('enrolments')->find($r->enrolment_id);
+                if ($enrolment) {
+                    $learnerUser = User::find($enrolment->user_id);
+                    if ($learnerUser) {
+                        $tplKey = DB::table('templates')->where('key', 'results.changed')->exists() ? 'results.changed' : 'results.verified';
+                        $this->notifier->send($learnerUser, $tplKey, [
+                            'name' => $learnerUser->name,
+                            'title' => $o->name_en.' '.$o->cohort_name,
+                            'reason' => $q->reason,
+                        ], dedupe: "result-change-{$r->id}-".now()->timestamp);
+                    }
+                }
+
                 if ($cred = DB::table('credentials')->where('enrolment_id', $r->enrolment_id)->whereIn('status', ['valid', 'corrected'])->first()) {
                     Tasks::open('deputy_dean', 'credential_correction', $cred->id, 'Check the credential after a result change: '.$cred->number, "/credentials/{$cred->id}", $o->ptj_id, area: 'credentials');
                 }
@@ -235,7 +287,7 @@ final class ResultsController
             ->get([
                 'e.id', 'e.reference', 'e.status as enrolment_status', 'e.progress_percent', 'e.created_at as registered_at',
                 'o.id as offering_id', 'o.cohort_name', 'o.start_date', 'o.end_date', 'o.delivery_mode', 'o.facilitators', 'o.fee',
-                'v.id as version_id', 'v.name_en', 'v.name_ms', 'v.discipline', 'v.planned_slt', 'v.proposed_credit', 'v.proposed_mqf_level', 'v.credential_types',
+                'v.id as version_id', 'v.name_en', 'v.name_ms', 'v.discipline', 'v.planned_slt', 'v.proposed_credit', 'v.proposed_mqf_level', 'v.credential_types', 'v.badge_image_path',
                 'm.code as mc_code', 'm.category as mc_category',
                 'p.code as ptj_code', 'p.name as ptj_name',
                 'u.name as lecturer_name',
@@ -275,7 +327,7 @@ final class ResultsController
             ->first([
                 'e.id', 'e.reference', 'e.status as enrolment_status', 'e.progress_percent', 'e.created_at as registered_at',
                 'o.id as offering_id', 'o.cohort_name', 'o.start_date', 'o.end_date', 'o.delivery_mode', 'o.facilitators', 'o.fee',
-                'v.id as version_id', 'v.name_en', 'v.name_ms', 'v.discipline', 'v.planned_slt', 'v.proposed_credit', 'v.proposed_mqf_level', 'v.credential_types',
+                'v.id as version_id', 'v.name_en', 'v.name_ms', 'v.discipline', 'v.planned_slt', 'v.proposed_credit', 'v.proposed_mqf_level', 'v.credential_types', 'v.badge_image_path',
                 'm.code as mc_code', 'm.category as mc_category',
                 'p.code as ptj_code', 'p.name as ptj_name',
                 'u.name as lecturer_name',
@@ -347,19 +399,25 @@ final class ResultsController
 
         $verifiedComps = $components->where('result_status', 'verified');
         $hasAllVerified = $components->isNotEmpty() && $components->every(fn ($c) => $c->result_status === 'verified');
-        $weightedTotal = $components->whereNotNull('weighted_val')->sum('weighted_val');
+        $allPassed = $hasAllVerified && $components->every(fn ($c) => (bool) $c->is_pass);
+        $verifiedWeightedTotal = (float) $verifiedComps->whereNotNull('weighted_val')->sum('weighted_val');
+        $verifiedWeightSum = (float) $verifiedComps->sum('weight_percent');
 
         $overall = null;
         if ($verifiedComps->isNotEmpty()) {
-            $calcScore = $hasAllVerified ? $weightedTotal : ($verifiedComps->sum('weight_percent') > 0 ? round(($weightedTotal / $verifiedComps->sum('weight_percent')) * 100, 2) : 0);
+            $calcScore = ($verifiedWeightSum > 0) ? round(($verifiedWeightedTotal / $verifiedWeightSum) * 100, 2) : 0;
             $scale = $gradeScale($calcScore);
             $overall = [
-                'total_weighted' => $weightedTotal,
+                'total_weighted' => $hasAllVerified ? $verifiedWeightedTotal : $calcScore,
+                'earned_weighted' => $verifiedWeightedTotal,
+                'verified_weight' => $verifiedWeightSum,
                 'scale_score' => $calcScore,
                 'grade' => $scale['grade'],
                 'point' => $scale['point'],
                 'grade_desc' => $scale['desc'],
                 'complete' => $hasAllVerified,
+                'passed' => $allPassed,
+                'failed' => $hasAllVerified && ! $allPassed,
                 'verified_count' => $verifiedComps->count(),
                 'total_count' => $components->count(),
                 'latest_verification' => $verifiedComps->sortByDesc('verified_at')->first(),
@@ -427,7 +485,7 @@ final class ResultsController
     {
         $user = $request->user();
         $o = DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->where('o.id', $id)
-            ->first(['o.*', 'v.name_en', 'm.ptj_id', 'm.owner_id', 'u.name as lecturer_name']) ?? abort(404);
+            ->first(['o.*', 'v.name_en', 'v.badge_image_path', 'm.category', 'm.ptj_id', 'm.owner_id', 'u.name as lecturer_name']) ?? abort(404);
         if ($lecturer) {
             abort_unless($o->owner_id === $user->id, 403, 'These are the results of another lecturer\'s cohort.');
         } else {

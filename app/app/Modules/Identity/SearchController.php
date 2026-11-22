@@ -13,18 +13,39 @@ class SearchController
 {
     public function search(Request $request)
     {
-        abort_unless($request->user()->hasAnyRole('lecturer', 'deputy_dean', 'codl_admin'), 403);
+        abort_unless($request->user()->hasAnyRole('lecturer', 'deputy_dean', 'ptj_authority', 'academic_authority', 'qa_officer', 'records_custodian', 'abc_depositor', 'records_depositor', 'codl_admin'), 403);
         $q = trim((string) $request->query('q'));
         $like = '%'.$q.'%';
         $mcs = $cohorts = $people = $settings = $files = collect();
         if (mb_strlen($q) >= 2) {
-            $mcs = DB::table('micro_credentials as m')->join('mc_versions as v', 'v.micro_credential_id', '=', 'm.id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
+            $user = $request->user();
+            $ptjIds = $user->hasRole('deputy_dean') ? $user->scopedPtjIds('deputy_dean') : null;
+            $isLecturerOnly = $user->hasRole('lecturer') && ! $user->hasAnyRole('deputy_dean', 'codl_admin');
+
+            $mcsQuery = DB::table('micro_credentials as m')
+                ->join('mc_versions as v', 'v.micro_credential_id', '=', 'm.id')
+                ->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
                 ->whereRaw('v.version_no = (select max(version_no) from mc_versions where micro_credential_id = m.id)')
-                ->where(fn ($w) => $w->where('v.name_en', db_like(), $like)->orWhere('m.code', db_like(), $like)->orWhere('u.name', db_like(), $like))
-                ->orderBy('v.name_en')->limit(50)->get(['m.id', 'm.code', 'm.category', 'v.name_en', 'v.status', 'u.name as lecturer_name']);
-            $cohorts = DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
-                ->where(fn ($w) => $w->where('o.cohort_name', db_like(), $like)->orWhere('v.name_en', db_like(), $like)->orWhere('u.name', db_like(), $like))
-                ->orderBy('o.start_date')->limit(50)->get(['o.id', 'o.cohort_name', 'o.status', 'v.name_en', 'u.name as lecturer_name']);
+                ->where(fn ($w) => $w->where('v.name_en', db_like(), $like)->orWhere('m.code', db_like(), $like)->orWhere('u.name', db_like(), $like));
+            if ($isLecturerOnly) {
+                $mcsQuery->where(fn ($w) => $w->where('m.owner_id', $user->id)->orWhere('m.ptj_id', $user->ptj_id));
+            } elseif ($user->hasRole('deputy_dean') && ! $user->hasRole('codl_admin') && $ptjIds !== null) {
+                $mcsQuery->whereIn('m.ptj_id', $ptjIds);
+            }
+            $mcs = $mcsQuery->orderBy('v.name_en')->limit(50)->get(['m.id', 'm.code', 'm.category', 'v.name_en', 'v.status', 'u.name as lecturer_name']);
+
+            $cohortsQuery = DB::table('offerings as o')
+                ->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
+                ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+                ->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
+                ->where(fn ($w) => $w->where('o.cohort_name', db_like(), $like)->orWhere('v.name_en', db_like(), $like)->orWhere('u.name', db_like(), $like));
+            if ($isLecturerOnly) {
+                $cohortsQuery->where(fn ($w) => $w->where('m.owner_id', $user->id)->orWhere('m.ptj_id', $user->ptj_id));
+            } elseif ($user->hasRole('deputy_dean') && ! $user->hasRole('codl_admin') && $ptjIds !== null) {
+                $cohortsQuery->whereIn('m.ptj_id', $ptjIds);
+            }
+            $cohorts = $cohortsQuery->orderBy('o.start_date')->limit(50)->get(['o.id', 'o.cohort_name', 'o.status', 'v.name_en', 'u.name as lecturer_name']);
+
             if ($request->user()->hasAnyRole('deputy_dean', 'codl_admin')) {
                 $people = DB::table('users')->where(fn ($w) => $w->where('name', db_like(), $like)->orWhere('email', db_like(), $like))->orderBy('name')->limit(50)->get(['id', 'name', 'email']);
             }
@@ -62,6 +83,18 @@ class SearchController
         } elseif ($u->hasRole('deputy_dean')) {
             $post = 'Deputy Dean (Academic)'.($ptjCode ? ', '.$ptjCode : '');
             $roleLabel = 'Deputy Dean (Academic'.($ptjCode ? ', '.$ptjCode : '').')';
+        } elseif ($u->hasRole('academic_authority')) {
+            $post = 'Senate Academic Representative / PBA (P3)';
+            $roleLabel = 'Academic Authority / Senate (P3)';
+        } elseif ($u->hasRole('qa_officer')) {
+            $post = 'Quality Assurance Officer, PKA (P4)';
+            $roleLabel = 'Quality Assurance Officer (P4)';
+        } elseif ($u->hasRole('records_custodian')) {
+            $post = 'Records & Credential Custodian, Registry (P6)';
+            $roleLabel = 'Records & Credential Custodian (P6)';
+        } elseif ($u->hasRole('abc_depositor')) {
+            $post = 'Authorized Records & ABC Depositor Officer (P6/P7)';
+            $roleLabel = 'Authorized Records & ABC Depositor (P6/P7)';
         } elseif ($u->hasRole('lecturer')) {
             $post = 'Senior Lecturer'.($ptjCode ? ', '.$ptjCode : '');
             $roleLabel = 'Lecturer'.($ptjCode ? ' ('.$ptjCode.')' : '').'; Reviewer when invited';
@@ -132,12 +165,27 @@ class SearchController
 
     public function requestCorrection(Request $request)
     {
-        $request->validate([
+        $d = $request->validate([
             'what' => ['required', 'string', 'max:60'],
             'should' => ['required', 'string', 'max:255'],
         ]);
 
-        return redirect(route('profile').'#data')->with('status', 'Correction requested. Reference DC-2026-0118. You will be notified of the outcome.');
+        $u = $request->user();
+        $ref = 'DC-2026-0118';
+
+        DB::table('discrepancies')->insert([
+            'kind' => 'pdpa_request',
+            'key' => $ref,
+            'user_id' => $u->id,
+            'ptj_id' => $u->ptj_id,
+            'subject_type' => 'user_identity',
+            'subject_id' => (string) $u->id,
+            'description' => $d['what'].': '.$d['should'],
+            'status' => 'open',
+            'found_at' => now(),
+        ]);
+
+        return redirect(route('profile').'#data')->with('status', "Correction requested. Reference $ref. You will be notified of the outcome.");
     }
 
     public function terminateSession(Request $request)

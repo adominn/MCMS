@@ -93,11 +93,11 @@ it('checks the phone number and the prerequisites at the first step', function (
 });
 
 it('explains why a user is not eligible (FR-98)', function () {
-    [$o] = openCohort(['eligible_groups' => 'UTeM staff, alumni']);
-    $this->actingAs($this->amir)->get("/register/$o")->assertSee('You cannot register')->assertSee('This cohort is for: UTeM staff, alumni. Your group is working professional.');
+    [$o] = openCohort(['capacity' => 1]);
+    $other = student();
+    startRegistration($o, by: $other);
+    $this->actingAs($this->amir)->get("/register/$o")->assertSee('You cannot register')->assertSee('The cohort is full.');
     $this->actingAs($this->amir)->post("/register/$o/eligibility", ['phone' => '012-3456789', 'prerequisites_ok' => 1])->assertSessionHasErrors('eligibility');
-    $alum = student('Alumna One', 'Alumni');
-    $this->actingAs($alum)->post("/register/$o/eligibility", ['phone' => '012-3456789', 'prerequisites_ok' => 1])->assertSessionHasNoErrors();
 });
 
 it('refuses a cohort whose registration is not open (FR-97)', function () {
@@ -345,4 +345,38 @@ it('keeps participants on the old version when the rule is to finish on it, and 
     requestChange($mc, ['outcomes']);
     approveV2(v2Of($mc)->id, 'finish_old');
     expect(enrolmentOf($o)->mc_version_id)->toBe($v1)->and(DB::table('notifications')->where('template_key', 'version.changed')->where('user_id', $this->amir->id)->exists())->toBeTrue();
+});
+
+it('enforces cohort eligible_groups server-side during registration', function () {
+    [$o] = openCohort(['eligible_groups' => 'AI engineers, data scientists']);
+    $student = student('General Student', 'accounting technician');
+
+    $this->actingAs($student)->get("/register/$o")
+        ->assertSee('Your learner group (accounting technician) is not eligible for this cohort')
+        ->assertSee('Checks failed');
+
+    $this->actingAs($student)->post("/register/$o/eligibility", ['phone' => '012-3456789', 'prerequisites_ok' => 1])
+        ->assertSessionHasErrors('eligibility');
+
+    $aiStudent = student('AI Student', 'AI engineers');
+    $this->actingAs($aiStudent)->get("/register/$o")
+        ->assertSee('Checks pass')
+        ->assertDontSee('Your learner group');
+
+    $this->actingAs($aiStudent)->post("/register/$o/eligibility", ['phone' => '012-3456789', 'prerequisites_ok' => 1])
+        ->assertSessionHasNoErrors();
+});
+
+it('does not display unverified credit or MQF level for unverified SAMC on registration view', function () {
+    [$v1, $mc] = approvedV1();
+    DB::table('micro_credentials')->where('id', $mc)->update(['category' => 'samc']);
+    DB::table('mc_versions')->where('id', $v1)->update(['parent_course_id' => null, 'proposed_credit' => 3, 'proposed_mqf_level' => 6, 'qv_status' => 'will_apply', 'qv_valid_until' => null]);
+    $o = newCohort($v1);
+    answerAll($o);
+    sendChecklist($o)->assertSessionHasNoErrors();
+    confirmReady($o)->assertSessionHasNoErrors();
+
+    $this->actingAs($this->amir)->get("/register/$o")
+        ->assertSee('Credit upon Quality Verification (QV)')
+        ->assertDontSee('3 credits');
 });

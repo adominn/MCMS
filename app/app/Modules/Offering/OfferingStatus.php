@@ -15,8 +15,15 @@ final class OfferingStatus
     /** JB-21 OpenCloseRegistrationJob: open registration when the date is reached, run and end by date (BR-17). */
     public function refresh(): void
     {
-        foreach (DB::table('offerings')->whereNotIn('status', ['held', 'cancelled'])->get() as $o) {
+        foreach (DB::table('offerings as o')
+            ->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
+            ->whereNotIn('o.status', ['held', 'cancelled'])
+            ->select('o.*', 'v.status as version_status')
+            ->get() as $o) {
             $status = self::compute($o);
+            if ($o->version_status === 'superseded' && in_array($status, ['open', 'ready'], true)) {
+                $status = 'not_ready';
+            }
             if ($status !== $o->status) {
                 DB::table('offerings')->where('id', $o->id)->update(['status' => $status, 'updated_at' => now()]);
                 if ($status === 'open') {
@@ -58,7 +65,12 @@ final class OfferingStatus
 
     public function releaseForChange(int $microCredentialId, string $reason): void
     {
-        $ids = DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->where('v.micro_credential_id', $microCredentialId)->where('o.status', 'held')->pluck('o.id');
+        $ids = DB::table('offerings as o')
+            ->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
+            ->where('v.micro_credential_id', $microCredentialId)
+            ->where('o.status', 'held')
+            ->where('v.status', '!=', 'superseded')
+            ->pluck('o.id');
         foreach ($ids as $id) {
             DB::table('offerings')->where('id', $id)->update(['status' => 'not_ready', 'held_reason' => null, 'updated_at' => now()]);
             $this->audit->record('offering.hold_lifted', ['type' => 'Offering', 'id' => $id], reason: $reason);

@@ -22,6 +22,7 @@ final class ProposalSummary
             'comps' => $comps,
             'links' => DB::table('assessment_component_outcomes')->whereIn('assessment_component_id', $comps->pluck('id'))->get()->groupBy('assessment_component_id'),
             'ready' => DB::table('proposal_readiness')->where('mc_version_id', $id)->get()->keyBy('item'),
+            'activities' => DB::table('mc_module_activities as a')->join('mc_modules as m', 'm.id', '=', 'a.mc_module_id')->where('m.mc_version_id', $id)->select('a.*')->orderBy('a.id')->get()->groupBy('mc_module_id'),
             'course' => $v->parent_course_id ? DB::table('parent_courses as c')->leftJoin('programmes as p', 'p.id', '=', 'c.programme_id')->where('c.id', $v->parent_course_id)->first(['c.*', 'p.name as programme']) : null,
             'cfg' => config('proposals'),
         ];

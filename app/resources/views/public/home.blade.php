@@ -144,14 +144,14 @@
     <h2 style="font-weight:700;font-size:24px;line-height:32px;margin:4px 0 4px;color:var(--text)">
       {{ $t('how') }}
     </h2>
-    <p style="max-width:760px;font-size:14px;color:#525252;margin:0">
+    <p style="max-width:760px;font-size:14px;color:var(--muted);margin:0">
       {{ $lang === 'ms' 
           ? 'Setiap peringkat pembelajaran diuruskan secara telus dengan rekod rasmi tersendiri di bawah kerangka tadbir urus UTeM.' 
           : 'Each stage is a separate decision with its own record. Finishing one does not promise the next.' }}
     </p>
   </div>
 
-  <div class="track" style="margin:16px 0;background:#ffffff;border:1px solid #e0e0e0;padding:20px">
+  <div class="track" style="margin:16px 0;background:var(--card-bg);border:1px solid var(--hairline);padding:20px">
     <div class="stp">
       <div style="font-size:12px;font-weight:700;color:#0f62fe;margin-bottom:2px">01</div>
       <b>{{ $lang === 'ms' ? 'Lencana Modul' : 'Module badge' }}</b>
@@ -187,7 +187,7 @@
 </div>
 
 <!-- Faculties Grid -->
-<div class="pub-sec alt" style="background:#f4f4f4;margin:24px -40px;padding:36px 40px">
+<div class="pub-sec alt" style="background:var(--surface);margin:24px -40px;padding:36px 40px">
   <div style="margin-bottom:16px">
     <div style="font-size:12px;font-weight:700;color:#0f62fe;text-transform:uppercase;letter-spacing:0.5px">
       {{ $lang === 'ms' ? 'Pusat Tanggungjawab' : 'Academic Centres' }}
@@ -245,7 +245,7 @@
     <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:12px">
       <div style="font-size:24px;color:#24a148">&#63;</div>
       <h3 style="font-size:18px;font-weight:700;margin:0;color:var(--text)">
-        {{ $lang === 'ms' ? 'Soalan Lazim & Panduan' : 'Questions & FAQ' }}
+        {{ $lang === 'ms' ? 'Soalan Lazim & Bantuan' : 'Questions & FAQ' }}
       </h3>
       <p style="font-size:13.5px;line-height:1.5;color:var(--muted);margin:0">
         {{ $lang === 'ms' 

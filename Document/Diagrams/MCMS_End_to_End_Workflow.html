@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UTeM MCMS — Complete End-to-End Workflow & Governance Map</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #0b1120;
+      --surface: #131c31;
+      --surface-elevated: #1a2642;
+      --border: #233354;
+      --border-light: #324772;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-sub: #cbd5e1;
+      --navy-primary: #1e2a6e;
+      --navy-hover: #29388c;
+      --navy-light: #e0e7ff;
+      --accent: #38bdf8;
+      
+      /* Actor Tag Colors */
+      --tag-lecturer-bg: #172554;
+      --tag-lecturer-border: #38bdf8;
+      --tag-lecturer-text: #bae6fd;
+
+      --tag-dean-bg: #450a0a;
+      --tag-dean-border: #f87171;
+      --tag-dean-text: #fecaca;
+
+      --tag-reviewer-bg: #451a03;
+      --tag-reviewer-border: #fbbf24;
+      --tag-reviewer-text: #fef08a;
+
+      --tag-senate-bg: #3b0764;
+      --tag-senate-border: #c084fc;
+      --tag-senate-text: #f3e8ff;
+
+      --tag-student-bg: #064e3b;
+      --tag-student-border: #34d399;
+      --tag-student-text: #a7f3d0;
+
+      --tag-system-bg: #1e293b;
+      --tag-system-border: #94a3b8;
+      --tag-system-text: #e2e8f0;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-elevated: #f1f5f9;
+      --border: #e2e8f0;
+      --border-light: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-sub: #334155;
+      --navy-primary: #1e2a6e;
+      --navy-hover: #162055;
+      --navy-light: #e0e7ff;
+      --accent: #0284c7;
+
+      --tag-lecturer-bg: #eff6ff;
+      --tag-lecturer-border: #60a5fa;
+      --tag-lecturer-text: #1e40af;
+
+      --tag-dean-bg: #fef2f2;
+      --tag-dean-border: #f87171;
+      --tag-dean-text: #991b1b;
+
+      --tag-reviewer-bg: #fffbeb;
+      --tag-reviewer-border: #fbbf24;
+      --tag-reviewer-text: #92400e;
+
+      --tag-senate-bg: #faf5ff;
+      --tag-senate-border: #c084fc;
+      --tag-senate-text: #6b21a8;
+
+      --tag-student-bg: #f0fdf4;
+      --tag-student-border: #34d399;
+      --tag-student-text: #065f46;
+
+      --tag-system-bg: #f1f5f9;
+      --tag-system-border: #94a3b8;
+      --tag-system-text: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 80px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    /* Top Navbar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(8px);
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .topbar-logo {
+      width: 32px;
+      height: 32px;
+      background: var(--navy-primary);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #ffffff;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .topbar-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .topbar-badge {
+      font-size: 11px;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 999px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .btn-primary {
+      background: var(--navy-primary);
+      color: #ffffff;
+      border-color: var(--navy-primary);
+    }
+    .btn-primary:hover {
+      background: var(--navy-hover);
+      border-color: var(--navy-hover);
+      color: #ffffff;
+    }
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    /* Hero Section */
+    .hero {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 40px 24px 24px;
+    }
+    .hero h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .hero p {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 860px;
+      line-height: 1.6;
+    }
+
+    /* Controls & Filter Bar */
+    .controls-panel {
+      max-width: 1280px;
+      margin: 0 auto 28px;
+      padding: 0 24px;
+    }
+    .controls-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .view-switcher {
+      display: inline-flex;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px;
+    }
+    .view-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .view-btn.active {
+      background: var(--navy-primary);
+      color: #ffffff;
+    }
+    .filter-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .filter-btn {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-sub);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .filter-btn.active {
+      background: var(--accent);
+      color: #0b1120;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .search-input {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      font-size: 13px;
+      border-radius: 6px;
+      width: 220px;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    /* Main Container */
+    .main-wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Phase Block */
+    .phase-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 24px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: border-color 0.2s ease;
+    }
+    .phase-card:hover {
+      border-color: var(--border-light);
+    }
+    .phase-header {
+      padding: 16px 20px;
+      background: var(--surface-elevated);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .phase-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .phase-pill {
+      background: var(--navy-primary);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .phase-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .phase-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .phase-stats {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .toggle-icon {
+      font-size: 14px;
+      transition: transform 0.2s ease;
+    }
+    .phase-card.collapsed .phase-body {
+      display: none;
+    }
+    .phase-card.collapsed .toggle-icon {
+      transform: rotate(-90deg);
+    }
+
+    /* Steps Grid / Timeline */
+    .phase-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .step-item {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      gap: 16px;
+      align-items: start;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .step-item:hover {
+      border-color: var(--border-light);
+      background: rgba(30, 42, 110, 0.08);
+      transform: translateX(2px);
+    }
+    .step-item.is-gate {
+      border-left: 4px solid var(--tag-dean-border);
+    }
+    .step-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .step-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .step-top {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .step-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .step-desc {
+      font-size: 13.5px;
+      color: var(--text-sub);
+      line-height: 1.5;
+    }
+    .step-meta {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .route-pill {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .route-pill:hover {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    /* Role Badges */
+    .role-badge {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-width: 1px;
+      border-style: solid;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .role-lecturer {
+      background: var(--tag-lecturer-bg);
+      border-color: var(--tag-lecturer-border);
+      color: var(--tag-lecturer-text);
+    }
+    .role-dean {
+      background: var(--tag-dean-bg);
+      border-color: var(--tag-dean-border);
+      color: var(--tag-dean-text);
+    }
+    .role-reviewer {
+      background: var(--tag-reviewer-bg);
+      border-color: var(--tag-reviewer-border);
+      color: var(--tag-reviewer-text);
+    }
+    .role-senate {
+      background: var(--tag-senate-bg);
+      border-color: var(--tag-senate-border);
+      color: var(--tag-senate-text);
+    }
+    .role-student {
+      background: var(--tag-student-bg);
+      border-color: var(--tag-student-border);
+      color: var(--tag-student-text);
+    }
+    .role-system {
+      background: var(--tag-system-bg);
+      border-color: var(--tag-system-border);
+      color: var(--tag-system-text);
+    }
+    .gate-badge {
+      background: #dc2626;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Flowchart View Section */
+    #flowchart-view {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      position: relative;
+    }
+    .diagram-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .zoom-btn-group {
+      display: flex;
+      gap: 6px;
+    }
+    #diagram-viewport {
+      overflow: auto;
+      max-height: 80vh;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #090e1a;
+      padding: 24px;
+      text-align: center;
+    }
+
+    /* Matrix Table View */
+    #matrix-view {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow-x: auto;
+    }
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    .matrix-table th {
+      background: var(--surface-elevated);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .matrix-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: top;
+    }
+    .matrix-table tr:hover td {
+      background: rgba(30, 42, 110, 0.08);
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .topbar, .controls-panel, .view-switcher, .filter-tags {
+        display: none !important;
+      }
+      .phase-card {
+        border: 1px solid #cccccc !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+        margin-bottom: 16px;
+      }
+      .step-item {
+        border: 1px solid #eeeeee !important;
+        background: #fafafa !important;
+      }
+      .route-pill {
+        color: #000000 !important;
+        border: 1px solid #cccccc !important;
+      }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-logo">MC</div>
+      <div class="topbar-title">
+        <span>UTeM MCMS</span>
+        <span class="topbar-badge">Complete Lifecycle Roadmap</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-sm" id="theme-toggle" onclick="toggleTheme()">☀️ Light Mode</button>
+      <a class="btn btn-sm btn-primary" href="http://127.0.0.1:8110" target="_blank">Open MCMS Portal &rarr;</a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>UTeM Micro-Credential Management System</h1>
+    <p>Complete End-to-End Governance, Offering Setup, Grading, Digital Credentials & National ABC Credit Transfer Lifecycle across all institutional roles (Phases 1 &ndash; 7, 27 Steps).</p>
+  </section>
+
+  <!-- Control & Filter Bar -->
+  <section class="controls-panel">
+    <div class="controls-bar">
+      <!-- View Mode Buttons -->
+      <div class="view-switcher">
+        <button class="view-btn active" onclick="switchView('timeline')">🗺️ Interactive Timeline</button>
+        <button class="view-btn" onclick="switchView('flowchart')">📊 Vector Flowchart</button>
+        <button class="view-btn" onclick="switchView('matrix')">📋 Quick Matrix Table</button>
+      </div>
+
+      <!-- Quick Role Filters -->
+      <div class="filter-tags">
+        <button class="filter-btn active" onclick="filterRole('all', this)">All (27)</button>
+        <button class="filter-btn" onclick="filterRole('Lecturer', this)">👨‍🏫 Lecturer (6)</button>
+        <button class="filter-btn" onclick="filterRole('Deputy Dean', this)">🏛️ Deputy Dean (9)</button>
+        <button class="filter-btn" onclick="filterRole('Student', this)">🎓 Student (9)</button>
+        <button class="filter-btn" onclick="filterRole('Reviewer', this)">📝 Reviewer & Senate (2)</button>
+      </div>
+
+      <!-- Search Box -->
+      <input type="text" class="search-input" id="search-box" placeholder="Search route or step..." oninput="handleSearch(this.value)">
+    </div>
+  </section>
+
+  <!-- Main Content Wrap -->
+  <main class="main-wrap">
+
+    <!-- 1. TIMELINE CARDS VIEW -->
+    <div id="timeline-view">
+
+      <!-- Phase 1 -->
+      <div class="phase-card" data-phase="1">
+        <div class="phase-header" onclick="togglePhase(this)">
+          <div class="phase-header-left">
+            <span class="phase-pill">PHASE 1</span>
+            <div>
+              <div class="phase-title">MC Proposal & Senate Approval</div>
+              <div class="phase-subtitle">Category determination, 9-tab curriculum dossier, COI declaration, peer review appraisal, DD endorsement, and Senate minute pack.</div>
+            </div>
+          </div>
+          <div class="phase-stats">
+            <span>7 Steps</span>
+            <span class="toggle-icon">▼</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="step-item" data-role="Lecturer">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-lecturer">Lecturer</span>
+                <span class="step-title">Determine Category (UMC / SAMC / MCE)</span>
+              </div>
+              <div class="step-desc">Interactive wizard selects qualification pathway: Unbundled (UMC, credit-bearing linked to parent course), Standalone (SAMC, credit-bearing with Quality Verification), or Executive (MCE, non-credit).</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/curriculum/wizard" target="_blank">🔗 /curriculum/wizard</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item" data-role="Lecturer">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-lecturer">Lecturer</span>
+                <span class="step-title">Fill 9-Tab Proposal Dossier</span>
+              </div>
+              <div class="step-desc">Complete all statutory tabs: General Info, Learning Outcomes, Market Need, Lampiran B Readiness (R1&ndash;R7), Assessment Strategy, Delivery, Articulation Pathways, Budget, and Evidence Uploads.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/curriculum/proposals/1" target="_blank">🔗 /curriculum/proposals/{id}</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item is-gate" data-role="Deputy Dean">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-dean">Deputy Dean</span>
+                <span class="step-title">Assign Reviewers & Evaluation Scope</span>
+              </div>
+              <div class="step-desc">Deputy Dean (Academic) assigns 2 internal or external subject matter experts; system triggers official evaluation invitations and statutory declarations.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/approval/proposals/1/reviewers" target="_blank">🔗 /approval/proposals/{id}/reviewers</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item" data-role="Reviewer">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-reviewer">Reviewer</span>
+                <span class="step-title">Sign COI & Submit Evaluation Form</span>
+              </div>
+              <div class="step-desc">Expert reviewer signs statutory Conflict of Interest (COI) declaration, evaluates dossier against MQA micro-credential rubrics, and submits formal appraisal comments.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/reviews/1/coi" target="_blank">🔗 /reviews/{id}/coi</a>
+                <a class="route-pill" href="http://127.0.0.1:8110/reviews/1" target="_blank">🔗 /reviews/{id}</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item" data-role="Lecturer">
+            <div class="step-num">5</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-lecturer">Lecturer</span>
+                <span class="step-title">Respond to Reviewer Comments & Amend</span>
+              </div>
+              <div class="step-desc">Lecturer addresses appraisal recommendations, updates syllabus or assessment weightings, and enters formal line-by-line response remarks.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/curriculum/proposals/1" target="_blank">🔗 /curriculum/proposals/{id}</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item is-gate" data-role="Deputy Dean">
+            <div class="step-num">6</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-dean">Deputy Dean</span>
+                <span class="step-title">Verify Feedback Resolution & Faculty Endorsement</span>
+              </div>
+              <div class="step-desc">Deputy Dean inspects reviewer resolution notes, verifies MQA compliance, and formally endorses the proposal forward to the University Senate.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/approval/proposals/1" target="_blank">🔗 /approval/proposals/{id}</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item" data-role="Reviewer">
+            <div class="step-num">7</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-senate">Senate</span>
+                <span class="step-title">Record Senate Minutes & Issue Approval Pack</span>
+              </div>
+              <div class="step-desc">Senate Committee records official meeting minutes, Senate paper reference, and formally stamps curriculum approval, enabling the micro-credential for live cohort offerings.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/approval/proposals/1/senate" target="_blank">🔗 /approval/proposals/{id}/senate</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 2 -->
+      <div class="phase-card" data-phase="2">
+        <div class="phase-header" onclick="togglePhase(this)">
+          <div class="phase-header-left">
+            <span class="phase-pill">PHASE 2</span>
+            <div>
+              <div class="phase-title">Offering Setup & Readiness Sign-off</div>
+              <div class="phase-subtitle">Cohort creation, Lampiran B readiness audit (R1–R7), and official catalogue publication.</div>
+            </div>
+          </div>
+          <div class="phase-stats">
+            <span>3 Steps</span>
+            <span class="toggle-icon">▼</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="step-item" data-role="Lecturer">
+            <div class="step-num">8</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-lecturer">Lecturer</span>
+                <span class="step-title">Create Cohort Offering & Fill R1–R7 Checklist</span>
+              </div>
+              <div class="step-desc">Define cohort study dates, enrollment capacity, course fee, and link Lampiran B readiness evidence (Syllabus, LMS links, Staffing, QA).</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/offerings/new" target="_blank">🔗 /offerings/new</a>
+                <a class="route-pill" href="http://127.0.0.1:8110/offerings/1" target="_blank">🔗 /offerings/{id}</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item is-gate" data-role="Deputy Dean">
+            <div class="step-num">9</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-dean">Deputy Dean</span>
+                <span class="step-title">Inspect Evidence & Confirm Readiness</span>
+              </div>
+              <div class="step-desc">Deputy Dean audits all 7 readiness proofs (R1&ndash;R7) and signs statutory confirmation, transitioning status from Draft &rarr; Ready &rarr; Open.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/offerings/1" target="_blank">🔗 /offerings/{id}</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item" data-role="Lecturer">
+            <div class="step-num">10</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-system">System / Admin</span>
+                <span class="step-title">Publish to Public & Learner Catalogue</span>
+              </div>
+              <div class="step-desc">Course is officially published to the public portal and internal catalogue with syllabus highlights, credit count, and tuition fees.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/public/catalogue" target="_blank">🔗 /public/catalogue</a>
+                <a class="route-pill" href="http://127.0.0.1:8110/catalogue" target="_blank">🔗 /catalogue</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 3 -->
+      <div class="phase-card" data-phase="3">
+        <div class="phase-header" onclick="togglePhase(this)">
+          <div class="phase-header-left">
+            <span class="phase-pill">PHASE 3</span>
+            <div>
+              <div class="phase-title">Student Registration & Enrolment</div>
+              <div class="phase-subtitle">Public catalogue discovery, PDPA statutory consent, gateway payment, and verified cohort enrolment.</div>
+            </div>
+          </div>
+          <div class="phase-stats">
+            <span>4 Steps</span>
+            <span class="toggle-icon">▼</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="step-item" data-role="Student">
+            <div class="step-num">11</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-student">Student</span>
+                <span class="step-title">Browse Offering & Register (PDPA Consent)</span>
+              </div>
+              <div class="step-desc">Student browses offering, selects enrolment mode, provides identification details (IC/Passport), and signs statutory Personal Data Protection Act (PDPA 2010) consent.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/register/1" target="_blank">🔗 /register/{offering}</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item" data-role="Student">
+            <div class="step-num">12</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-student">Student</span>
+                <span class="step-title">Pay Course Fee via Gateway</span>
+              </div>
+              <div class="step-desc">Execute online payment via UTeM payment gateway (FPX / Credit Card) or submit institutional sponsorship guarantee letter.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/register/1" target="_blank">🔗 /register/{offering} (Step 3: Pay)</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item" data-role="Student">
+            <div class="step-num">13</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-student">Student / System</span>
+                <span class="step-title">Enrolment Confirmed & Confirmation Letter</span>
+              </div>
+              <div class="step-desc">System confirms registration reference, generates official Enrolment Confirmation PDF letter, issue receipt, and grants LMS access.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/enrolments/1/confirmation" target="_blank">🔗 /enrolments/{id}/confirmation</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item" data-role="Lecturer">
+            <div class="step-num">14</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-lecturer">Lecturer</span>
+                <span class="step-title">Access Cohort Roster & Monitor Attendance</span>
+              </div>
+              <div class="step-desc">Lecturer accesses live participant roster, verifies LMS onboarding, tracks coursework completion, and monitors learner engagement.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/offerings/1/participants" target="_blank">🔗 /offerings/{id}/participants</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 4 -->
+      <div class="phase-card" data-phase="4">
+        <div class="phase-header" onclick="togglePhase(this)">
+          <div class="phase-header-left">
+            <span class="phase-pill">PHASE 4</span>
+            <div>
+              <div class="phase-title">Grading & Results Approval (Gate 1)</div>
+              <div class="phase-subtitle">Modular mark entry, assessment weights, academic integrity resolution, and statutory mark verification.</div>
+            </div>
+          </div>
+          <div class="phase-stats">
+            <span>3 Steps &middot; Gate 1</span>
+            <span class="toggle-icon">▼</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="step-item" data-role="Lecturer">
+            <div class="step-num">15</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-lecturer">Lecturer</span>
+                <span class="step-title">Key in Modular Marks & Whole-MC Scores</span>
+              </div>
+              <div class="step-desc">Lecturer grades each student across modular assessment components (e.g. 4 continuous labs) and the whole-MC Capstone; system computes weighted score, letter grade, and grade points (4.00 scale).</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/offerings/1/results" target="_blank">🔗 /offerings/{id}/results</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item is-gate" data-role="Deputy Dean">
+            <div class="step-num">16</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-dean">Deputy Dean</span>
+                <span class="gate-badge">GATE 1</span>
+                <span class="step-title">Verify Marks & Resolve Integrity Cases</span>
+              </div>
+              <div class="step-desc">Statutory Gate 1: Deputy Dean audits score distribution, resolves plagiarism or academic integrity flags, endorses results, and mints module-level digital badges.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/results" target="_blank">🔗 /results</a>
+                <a class="route-pill" href="http://127.0.0.1:8110/results/1" target="_blank">🔗 /results/{id}</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item" data-role="Student">
+            <div class="step-num">17</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-student">Student</span>
+                <span class="step-title">View Published Verified Grades</span>
+              </div>
+              <div class="step-desc">Student logs in to view official breakdown of verified marks, letter grade (e.g. A / 4.00), examiner comments, and earned module badges.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/my-results" target="_blank">🔗 /my-results</a>
+                <a class="route-pill" href="http://127.0.0.1:8110/my-results/1" target="_blank">🔗 /my-results/{id}</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 5 -->
+      <div class="phase-card" data-phase="5">
+        <div class="phase-header" onclick="togglePhase(this)">
+          <div class="phase-header-left">
+            <span class="phase-pill">PHASE 5</span>
+            <div>
+              <div class="phase-title">Cohort Completion & Digital Credentials (Gate 2)</div>
+              <div class="phase-subtitle">Statutory completion confirmation, Open Badges 3.0 auto-minting, A4 certificate, and VC-JWT public verification.</div>
+            </div>
+          </div>
+          <div class="phase-stats">
+            <span>3 Steps &middot; Gate 2</span>
+            <span class="toggle-icon">▼</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="step-item is-gate" data-role="Deputy Dean">
+            <div class="step-num">18</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-dean">Deputy Dean</span>
+                <span class="gate-badge">GATE 2</span>
+                <span class="step-title">Confirm Completion & Authorize Minting</span>
+              </div>
+              <div class="step-desc">Statutory Gate 2: Deputy Dean verifies whole-MC requirements (passing all components + Capstone), authorizes graduation, and signs cryptographic credential issuance.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/completion/1" target="_blank">🔗 /completion/{id}</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item" data-role="Student">
+            <div class="step-num">19</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-student">Student</span>
+                <span class="step-title">Access Open Badges 3.0 & A4 Certificate</span>
+              </div>
+              <div class="step-desc">Student downloads the official bilingual A4 Certificate PDF and accesses 1EdTech Open Badges 3.0 with complete metadata (criteria, assertion, issuer, recipient hash).</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/credentials" target="_blank">🔗 /credentials</a>
+                <a class="route-pill" href="http://127.0.0.1:8110/credentials/1" target="_blank">🔗 /credentials/{id}</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item" data-role="Student">
+            <div class="step-num">20</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-system">Public / Verifier</span>
+                <span class="step-title">Verify Cryptographic VC-JWT Signatures</span>
+              </div>
+              <div class="step-desc">External employers and universities verify certificate and badge authenticity without an account using UTeM's public JWKS endpoint (`/.well-known/jwks.json`).</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/verify" target="_blank">🔗 /verify</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 6 -->
+      <div class="phase-card" data-phase="6">
+        <div class="phase-header" onclick="togglePhase(this)">
+          <div class="phase-header-left">
+            <span class="phase-pill">PHASE 6</span>
+            <div>
+              <div class="phase-title">Academic Credit Record (ACR) & National ABC Deposit</div>
+              <div class="phase-subtitle">ACR generation, student deposit consent, and ABC batch export with 10-year credit storage.</div>
+            </div>
+          </div>
+          <div class="phase-stats">
+            <span>3 Steps</span>
+            <span class="toggle-icon">▼</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="step-item" data-role="Student">
+            <div class="step-num">21</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-student">Student</span>
+                <span class="step-title">View ACR & Submit Consent to Deposit</span>
+              </div>
+              <div class="step-desc">Student reviews the Academic Credit Record (MQF level, credit value, 120 SLT hours, assessment breakdown) and chooses statutory consent: "I consent", "Postpone", or "Decline".</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/my-credit" target="_blank">🔗 /my-credit</a>
+                <a class="route-pill" href="http://127.0.0.1:8110/my-credit/1" target="_blank">🔗 /my-credit/{id}</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item is-gate" data-role="Deputy Dean">
+            <div class="step-num">22</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-dean">Deputy Dean</span>
+                <span class="step-title">Confirm Queue & Export ABC CSV Batch</span>
+              </div>
+              <div class="step-desc">Deputy Dean audits consent queue, records National ABC deposit reference (e.g. ABC-2026-UTEM-0042), or downloads MQA batch CSV format.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/deposits" target="_blank">🔗 /deposits</a>
+                <a class="route-pill" href="http://127.0.0.1:8110/deposits/1" target="_blank">🔗 /deposits/{id}</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item" data-role="Student">
+            <div class="step-num">23</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-student">Student</span>
+                <span class="step-title">Credits Added to Ledger (10-Yr Validity)</span>
+              </div>
+              <div class="step-desc">Academic credit is flagged as Available on the student's credit ledger with a 10-year statutory validity countdown ready for university degree articulation.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/my-credit" target="_blank">🔗 /my-credit</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 7 -->
+      <div class="phase-card" data-phase="7">
+        <div class="phase-header" onclick="togglePhase(this)">
+          <div class="phase-header-left">
+            <span class="phase-pill">PHASE 7</span>
+            <div>
+              <div class="phase-title">Credit Transfer & Degree Exemption (Gate 3)</div>
+              <div class="phase-subtitle">Articulation matching (&ge;80% learning outcome match), single redemption lock, and official DOC-12 decision letter.</div>
+            </div>
+          </div>
+          <div class="phase-stats">
+            <span>4 Steps &middot; Gate 3</span>
+            <span class="toggle-icon">▼</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="step-item" data-role="Student">
+            <div class="step-num">24</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-student">Student</span>
+                <span class="step-title">Apply for Transfer to Degree Programme</span>
+              </div>
+              <div class="step-desc">Student selects target degree (e.g. BITS Software Development), ticks available deposited micro-credentials, selects target degree courses to exempt, and provides syllabus mapping evidence.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/transfer" target="_blank">🔗 /transfer</a>
+                <a class="route-pill" href="http://127.0.0.1:8110/transfer/new" target="_blank">🔗 /transfer/new</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item is-gate" data-role="Deputy Dean">
+            <div class="step-num">25</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-dean">Deputy Dean</span>
+                <span class="gate-badge">GATE 3</span>
+                <span class="step-title">Evaluate 80% LO Match & Single Redemption</span>
+              </div>
+              <div class="step-desc">Statutory Gate 3: Receiving faculty evaluates &ge;80% learning outcome equivalency match; system enforces single redemption lock so credits can never be used twice.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/transfers" target="_blank">🔗 /transfers</a>
+                <a class="route-pill" href="http://127.0.0.1:8110/transfers/1" target="_blank">🔗 /transfers/{id}</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item is-gate" data-role="Deputy Dean">
+            <div class="step-num">26</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-dean">Deputy Dean</span>
+                <span class="step-title">Issue Official Decision Letter (DOC-12)</span>
+              </div>
+              <div class="step-desc">System formats and issues the official bilingual Credit Transfer Decision Letter (DOC-12) detailing approved course exemptions, credit waivers, and faculty conditions.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/transfers/1/letter" target="_blank">🔗 /transfers/{id}/letter</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-item" data-role="Student">
+            <div class="step-num">27</div>
+            <div class="step-content">
+              <div class="step-top">
+                <span class="role-badge role-student">Student</span>
+                <span class="step-title">View Approved Course Exemptions</span>
+              </div>
+              <div class="step-desc">Student views confirmed credit exemption; status transitions from Available &rarr; Provisionally redeemed &rarr; Redeemed upon official programme matriculation.</div>
+              <div class="step-meta">
+                <a class="route-pill" href="http://127.0.0.1:8110/transfer/1" target="_blank">🔗 /transfer/{id}</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 2. VECTOR FLOWCHART VIEW -->
+    <div id="flowchart-view">
+      <div class="diagram-controls">
+        <div>
+          <h2 style="font-size:18px;font-weight:700">Vector SVG Flowchart</h2>
+          <p style="font-size:13px;color:var(--text-muted)">High-contrast, crystal-clear vector graph of all 27 steps and 7 phases.</p>
+        </div>
+        <div class="zoom-btn-group">
+          <button class="btn btn-sm" onclick="zoomDiagram(1.2)">🔍 Zoom In</button>
+          <button class="btn btn-sm" onclick="zoomDiagram(0.8)">🔍 Zoom Out</button>
+          <button class="btn btn-sm" onclick="resetZoom()">↺ Reset</button>
+        </div>
+      </div>
+      <div id="diagram-viewport">
+        <div id="svg-container" style="display:flex;justify-content:center;overflow:auto;padding:16px;">
+  <svg id="mermaid-1794970886886" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="max-width: 1488.234375px;" viewBox="-8 -8 1488.234375 2152" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#mermaid-1794970886886{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#ccc;}#mermaid-1794970886886 .error-icon{fill:#a44141;}#mermaid-1794970886886 .error-text{fill:#ddd;stroke:#ddd;}#mermaid-1794970886886 .edge-thickness-normal{stroke-width:2px;}#mermaid-1794970886886 .edge-thickness-thick{stroke-width:3.5px;}#mermaid-1794970886886 .edge-pattern-solid{stroke-dasharray:0;}#mermaid-1794970886886 .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-1794970886886 .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-1794970886886 .marker{fill:lightgrey;stroke:lightgrey;}#mermaid-1794970886886 .marker.cross{stroke:lightgrey;}#mermaid-1794970886886 svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#mermaid-1794970886886 .label{font-family:"trebuchet ms",verdana,arial,sans-serif;color:#ccc;}#mermaid-1794970886886 .cluster-label text{fill:#F9FFFE;}#mermaid-1794970886886 .cluster-label span,#mermaid-1794970886886 p{color:#F9FFFE;}#mermaid-1794970886886 .label text,#mermaid-1794970886886 span,#mermaid-1794970886886 p{fill:#ccc;color:#ccc;}#mermaid-1794970886886 .node rect,#mermaid-1794970886886 .node circle,#mermaid-1794970886886 .node ellipse,#mermaid-1794970886886 .node polygon,#mermaid-1794970886886 .node path{fill:#1f2020;stroke:#81B1DB;stroke-width:1px;}#mermaid-1794970886886 .flowchart-label text{text-anchor:middle;}#mermaid-1794970886886 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mermaid-1794970886886 .node .label{text-align:center;}#mermaid-1794970886886 .node.clickable{cursor:pointer;}#mermaid-1794970886886 .arrowheadPath{fill:lightgrey;}#mermaid-1794970886886 .edgePath .path{stroke:lightgrey;stroke-width:2.0px;}#mermaid-1794970886886 .flowchart-link{stroke:lightgrey;fill:none;}#mermaid-1794970886886 .edgeLabel{background-color:hsl(0, 0%, 34.4117647059%);text-align:center;}#mermaid-1794970886886 .edgeLabel rect{opacity:0.5;background-color:hsl(0, 0%, 34.4117647059%);fill:hsl(0, 0%, 34.4117647059%);}#mermaid-1794970886886 .labelBkg{background-color:rgba(87.75, 87.75, 87.75, 0.5);}#mermaid-1794970886886 .cluster rect{fill:hsl(180, 1.5873015873%, 28.3529411765%);stroke:rgba(255, 255, 255, 0.25);stroke-width:1px;}#mermaid-1794970886886 .cluster text{fill:#F9FFFE;}#mermaid-1794970886886 .cluster span,#mermaid-1794970886886 p{color:#F9FFFE;}#mermaid-1794970886886 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:12px;background:hsl(20, 1.5873015873%, 12.3529411765%);border:1px solid rgba(255, 255, 255, 0.25);border-radius:2px;pointer-events:none;z-index:100;}#mermaid-1794970886886 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#ccc;}#mermaid-1794970886886 :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}#mermaid-1794970886886 .step&gt;*{fill:rgb(30, 41, 59)!important;stroke:rgb(56, 189, 248)!important;stroke-width:2px!important;color:rgb(255, 255, 255)!important;}#mermaid-1794970886886 .step span{fill:rgb(30, 41, 59)!important;stroke:rgb(56, 189, 248)!important;stroke-width:2px!important;color:rgb(255, 255, 255)!important;}#mermaid-1794970886886 .step tspan{fill:rgb(255, 255, 255)!important;}#mermaid-1794970886886 .ddGate&gt;*{fill:rgb(69, 10, 10)!important;stroke:rgb(248, 113, 113)!important;stroke-width:2px!important;color:rgb(255, 255, 255)!important;}#mermaid-1794970886886 .ddGate span{fill:rgb(69, 10, 10)!important;stroke:rgb(248, 113, 113)!important;stroke-width:2px!important;color:rgb(255, 255, 255)!important;}#mermaid-1794970886886 .ddGate tspan{fill:rgb(255, 255, 255)!important;}#mermaid-1794970886886 .studentStep&gt;*{fill:rgb(6, 78, 59)!important;stroke:rgb(52, 211, 153)!important;stroke-width:2px!important;color:rgb(255, 255, 255)!important;}#mermaid-1794970886886 .studentStep span{fill:rgb(6, 78, 59)!important;stroke:rgb(52, 211, 153)!important;stroke-width:2px!important;color:rgb(255, 255, 255)!important;}#mermaid-1794970886886 .studentStep tspan{fill:rgb(255, 255, 255)!important;}#mermaid-1794970886886 .senateStep&gt;*{fill:rgb(59, 7, 100)!important;stroke:rgb(192, 132, 252)!important;stroke-width:2px!important;color:rgb(255, 255, 255)!important;}#mermaid-1794970886886 .senateStep span{fill:rgb(59, 7, 100)!important;stroke:rgb(192, 132, 252)!important;stroke-width:2px!important;color:rgb(255, 255, 255)!important;}#mermaid-1794970886886 .senateStep tspan{fill:rgb(255, 255, 255)!important;}#mermaid-1794970886886 .reviewerStep&gt;*{fill:rgb(69, 26, 3)!important;stroke:rgb(251, 191, 36)!important;stroke-width:2px!important;color:rgb(255, 255, 255)!important;}#mermaid-1794970886886 .reviewerStep span{fill:rgb(69, 26, 3)!important;stroke:rgb(251, 191, 36)!important;stroke-width:2px!important;color:rgb(255, 255, 255)!important;}#mermaid-1794970886886 .reviewerStep tspan{fill:rgb(255, 255, 255)!important;}</style><g><marker id="mermaid-1794970886886_flowchart-pointEnd" class="marker flowchart" viewBox="0 0 10 10" refX="6" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><marker id="mermaid-1794970886886_flowchart-pointStart" class="marker flowchart" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><marker id="mermaid-1794970886886_flowchart-circleEnd" class="marker flowchart" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id="mermaid-1794970886886_flowchart-circleStart" class="marker flowchart" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id="mermaid-1794970886886_flowchart-crossEnd" class="marker cross flowchart" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"></path></marker><marker id="mermaid-1794970886886_flowchart-crossStart" class="marker cross flowchart" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"></path></marker><g class="root"><g class="clusters"><g class="cluster default flowchart-label" id="P7"><rect style="" rx="0" ry="0" x="0" y="1808" width="505.046875" height="328"></rect><g class="cluster-label" transform="translate(60.140625, 1808)"><foreignObject width="384.765625" height="20"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">Phase 7: Credit Transfer &amp; Degree Exemption (Gate 3)</span></div></foreignObject></g></g><g class="cluster default flowchart-label" id="P6"><rect style="" rx="0" ry="0" x="17.0625" y="1520" width="470.921875" height="260"></rect><g class="cluster-label" transform="translate(24.7734375, 1520)"><foreignObject width="455.5" height="20"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">Phase 6: Academic Credit Record (ACR) &amp; National ABC Deposit</span></div></foreignObject></g></g><g class="cluster default flowchart-label" id="P5"><rect style="" rx="0" ry="0" x="507.984375" y="1410" width="478.1640625" height="274"></rect><g class="cluster-label" transform="translate(540.60546875, 1410)"><foreignObject width="412.921875" height="20"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">Phase 5: Cohort Completion &amp; Digital Credentials (Gate 2)</span></div></foreignObject></g></g><g class="cluster default flowchart-label" id="P4"><rect style="" rx="0" ry="0" x="1006.1484375" y="1232" width="459.421875" height="260"></rect><g class="cluster-label" transform="translate(1073.9921875, 1232)"><foreignObject width="323.734375" height="20"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">Phase 4: Grading &amp; Results Approval (Gate 1)</span></div></foreignObject></g></g><g class="cluster default flowchart-label" id="P3"><rect style="" rx="0" ry="0" x="1004.0625" y="876" width="463.59375" height="328"></rect><g class="cluster-label" transform="translate(1082.6328125, 876)"><foreignObject width="306.453125" height="20"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">Phase 3: Student Registration &amp; Enrolment</span></div></foreignObject></g></g><g class="cluster default flowchart-label" id="P2"><rect style="" rx="0" ry="0" x="999.484375" y="602" width="472.75" height="246"></rect><g class="cluster-label" transform="translate(1074.65625, 602)"><foreignObject width="322.40625" height="20"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">Phase 2: Offering Setup &amp; Readiness Sign-off</span></div></foreignObject></g></g><g class="cluster default flowchart-label" id="P1"><rect style="" rx="0" ry="0" x="1013.859375" y="0" width="444" height="574"></rect><g class="cluster-label" transform="translate(1089.7578125, 0)"><foreignObject width="292.203125" height="20"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">Phase 1: MC Proposal &amp; Senate Approval</span></div></foreignObject></g></g></g><g class="edgePaths"><path d="M1235.859,68L1235.859,70.333C1235.859,72.667,1235.859,77.333,1235.859,81.117C1235.859,84.9,1235.859,87.8,1235.859,89.25L1235.859,90.7" id="L-A1-A2-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-A1 LE-A2" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1235.859,150L1235.859,152.333C1235.859,154.667,1235.859,159.333,1235.859,163.117C1235.859,166.9,1235.859,169.8,1235.859,171.25L1235.859,172.7" id="L-A2-A3-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-A2 LE-A3" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1235.859,232L1235.859,234.333C1235.859,236.667,1235.859,241.333,1235.859,245.117C1235.859,248.9,1235.859,251.8,1235.859,253.25L1235.859,254.7" id="L-A3-A4-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-A3 LE-A4" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1235.859,314L1235.859,316.333C1235.859,318.667,1235.859,323.333,1235.859,327.117C1235.859,330.9,1235.859,333.8,1235.859,335.25L1235.859,336.7" id="L-A4-A5-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-A4 LE-A5" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1235.859,396L1235.859,398.333C1235.859,400.667,1235.859,405.333,1235.859,409.117C1235.859,412.9,1235.859,415.8,1235.859,417.25L1235.859,418.7" id="L-A5-A6-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-A5 LE-A6" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1235.859,478L1235.859,480.333C1235.859,482.667,1235.859,487.333,1235.859,491.117C1235.859,494.9,1235.859,497.8,1235.859,499.25L1235.859,500.7" id="L-A6-A7-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-A6 LE-A7" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1235.859,560L1235.859,562.333C1235.859,564.667,1235.859,569.333,1235.859,574C1235.859,578.667,1235.859,583.333,1235.859,588C1235.859,592.667,1235.859,597.333,1235.859,601.117C1235.859,604.9,1235.859,607.8,1235.859,609.25L1235.859,610.7" id="L-A7-B1-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-A7 LE-B1" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1235.859,670L1235.859,672.333C1235.859,674.667,1235.859,679.333,1235.859,683.117C1235.859,686.9,1235.859,689.8,1235.859,691.25L1235.859,692.7" id="L-B1-B2-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-B1 LE-B2" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1235.859,752L1235.859,754.333C1235.859,756.667,1235.859,761.333,1235.859,765.117C1235.859,768.9,1235.859,771.8,1235.859,773.25L1235.859,774.7" id="L-B2-B3-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-B2 LE-B3" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1235.859,834L1235.859,836.333C1235.859,838.667,1235.859,843.333,1235.859,848C1235.859,852.667,1235.859,857.333,1235.859,862C1235.859,866.667,1235.859,871.333,1235.859,875.117C1235.859,878.9,1235.859,881.8,1235.859,883.25L1235.859,884.7" id="L-B3-C1-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-B3 LE-C1" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1235.859,944L1235.859,946.333C1235.859,948.667,1235.859,953.333,1235.859,957.117C1235.859,960.9,1235.859,963.8,1235.859,965.25L1235.859,966.7" id="L-C1-C2-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-C1 LE-C2" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1235.859,1026L1235.859,1028.333C1235.859,1030.667,1235.859,1035.333,1235.859,1039.117C1235.859,1042.9,1235.859,1045.8,1235.859,1047.25L1235.859,1048.7" id="L-C2-C3-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-C2 LE-C3" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1235.859,1108L1235.859,1110.333C1235.859,1112.667,1235.859,1117.333,1235.859,1121.117C1235.859,1124.9,1235.859,1127.8,1235.859,1129.25L1235.859,1130.7" id="L-C3-C4-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-C3 LE-C4" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1235.859,1190L1235.859,1192.333C1235.859,1194.667,1235.859,1199.333,1235.859,1204C1235.859,1208.667,1235.859,1213.333,1235.859,1218C1235.859,1222.667,1235.859,1227.333,1235.859,1231.117C1235.859,1234.9,1235.859,1237.8,1235.859,1239.25L1235.859,1240.7" id="L-C4-D1-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-C4 LE-D1" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1235.859,1300L1235.859,1302.333C1235.859,1304.667,1235.859,1309.333,1235.859,1313.117C1235.859,1316.9,1235.859,1319.8,1235.859,1321.25L1235.859,1322.7" id="L-D1-D2-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-D1 LE-D2" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1249.804,1382L1251.01,1384.333C1252.215,1386.667,1254.625,1391.333,1255.83,1396C1257.035,1400.667,1257.035,1405.333,1257.035,1409.117C1257.035,1412.9,1257.035,1415.8,1257.035,1417.25L1257.035,1418.7" id="L-D2-D3-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-D2 LE-D3" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M1166.808,1382L1160.841,1384.333C1154.873,1386.667,1142.939,1391.333,1136.971,1396C1131.004,1400.667,1131.004,1405.333,1104.046,1410.541C1077.087,1415.749,1023.171,1421.498,996.213,1424.372L969.255,1427.247" id="L-D2-E1-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-D2 LE-E1" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M753.07,1478L753.639,1480.333C754.208,1482.667,755.346,1487.333,755.915,1492C756.484,1496.667,756.484,1501.333,756.484,1506C756.484,1510.667,756.484,1515.333,756.484,1519.117C756.484,1522.9,756.484,1525.8,756.484,1527.25L756.484,1528.7" id="L-E1-E2-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-E1 LE-E2" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M756.484,1588L756.484,1590.333C756.484,1592.667,756.484,1597.333,756.484,1601.117C756.484,1604.9,756.484,1607.8,756.484,1609.25L756.484,1610.7" id="L-E2-E3-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-E2 LE-E3" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M674.539,1478L668.322,1480.333C662.104,1482.667,649.669,1487.333,643.452,1492C637.234,1496.667,637.234,1501.333,637.234,1506C637.234,1510.667,637.234,1515.333,606.221,1520.972C575.207,1526.61,513.18,1533.221,482.167,1536.526L451.153,1539.831" id="L-E1-F1-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-E1 LE-F1" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M252.523,1588L252.523,1590.333C252.523,1592.667,252.523,1597.333,252.523,1601.117C252.523,1604.9,252.523,1607.8,252.523,1609.25L252.523,1610.7" id="L-F1-F2-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-F1 LE-F2" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M252.523,1670L252.523,1672.333C252.523,1674.667,252.523,1679.333,252.523,1684C252.523,1688.667,252.523,1693.333,252.523,1697.117C252.523,1700.9,252.523,1703.8,252.523,1705.25L252.523,1706.7" id="L-F2-F3-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-F2 LE-F3" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M252.523,1766L252.523,1768.333C252.523,1770.667,252.523,1775.333,252.523,1780C252.523,1784.667,252.523,1789.333,252.523,1794C252.523,1798.667,252.523,1803.333,252.523,1807.117C252.523,1810.9,252.523,1813.8,252.523,1815.25L252.523,1816.7" id="L-F3-G1-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-F3 LE-G1" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M252.523,1876L252.523,1878.333C252.523,1880.667,252.523,1885.333,252.523,1889.117C252.523,1892.9,252.523,1895.8,252.523,1897.25L252.523,1898.7" id="L-G1-G2-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-G1 LE-G2" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M252.523,1958L252.523,1960.333C252.523,1962.667,252.523,1967.333,252.523,1971.117C252.523,1974.9,252.523,1977.8,252.523,1979.25L252.523,1980.7" id="L-G2-G3-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-G2 LE-G3" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path><path d="M252.523,2040L252.523,2042.333C252.523,2044.667,252.523,2049.333,252.523,2053.117C252.523,2056.9,252.523,2059.8,252.523,2061.25L252.523,2062.7" id="L-G3-G4-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-G3 LE-G4" style="fill:none;" marker-end="url(#mermaid-1794970886886_flowchart-pointEnd)"></path></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default studentStep flowchart-label" id="flowchart-G1-53" data-node="true" data-id="G1" transform="translate(252.5234375, 1849)"><rect class="basic label-container" style="" rx="0" ry="0" x="-198.765625" y="-27" width="397.53125" height="54"></rect><g class="label" style="" transform="translate(-190.765625, -19)"><rect></rect><foreignObject width="381.53125" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">24. Student: Apply for Transfer to Degree Programme<br>Pages: /transfer &amp; /transfer/new</span></div></foreignObject></g></g><g class="node default ddGate flowchart-label" id="flowchart-G2-54" data-node="true" data-id="G2" transform="translate(252.5234375, 1931)"><rect class="basic label-container" style="" rx="0" ry="0" x="-231.5234375" y="-27" width="463.046875" height="54"></rect><g class="label" style="" transform="translate(-223.5234375, -19)"><rect></rect><foreignObject width="447.046875" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">25. Deputy Dean: Evaluate 80% LO Match &amp; Single Redemption<br>Page: /transfers/{id}</span></div></foreignObject></g></g><g class="node default ddGate flowchart-label" id="flowchart-G3-55" data-node="true" data-id="G3" transform="translate(252.5234375, 2013)"><rect class="basic label-container" style="" rx="0" ry="0" x="-210.234375" y="-27" width="420.46875" height="54"></rect><g class="label" style="" transform="translate(-202.234375, -19)"><rect></rect><foreignObject width="404.46875" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">26. Deputy Dean: Issue Official Decision Letter (DOC-12)<br>Page: /transfers/{id}/letter</span></div></foreignObject></g></g><g class="node default studentStep flowchart-label" id="flowchart-G4-56" data-node="true" data-id="G4" transform="translate(252.5234375, 2095)"><rect class="basic label-container" style="" rx="0" ry="0" x="-177.828125" y="-27" width="355.65625" height="54"></rect><g class="label" style="" transform="translate(-169.828125, -19)"><rect></rect><foreignObject width="339.65625" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">27. Student: View Approved Course Exemptions<br>Page: /transfer/{id}</span></div></foreignObject></g></g><g class="node default studentStep flowchart-label" id="flowchart-F1-46" data-node="true" data-id="F1" transform="translate(252.5234375, 1561)"><rect class="basic label-container" style="" rx="0" ry="0" x="-193.359375" y="-27" width="386.71875" height="54"></rect><g class="label" style="" transform="translate(-185.359375, -19)"><rect></rect><foreignObject width="370.71875" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">21. Student: View ACR &amp; Submit Consent to Deposit<br>Pages: /my-record &amp; /my-credit/{id}/consent</span></div></foreignObject></g></g><g class="node default ddGate flowchart-label" id="flowchart-F2-47" data-node="true" data-id="F2" transform="translate(252.5234375, 1643)"><rect class="basic label-container" style="" rx="0" ry="0" x="-214.4609375" y="-27" width="428.921875" height="54"></rect><g class="label" style="" transform="translate(-206.4609375, -19)"><rect></rect><foreignObject width="412.921875" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">22. Deputy Dean: Confirm Queue &amp; Export ABC CSV Batch<br>Pages: /deposits &amp; /deposits/{id}</span></div></foreignObject></g></g><g class="node default studentStep flowchart-label" id="flowchart-F3-48" data-node="true" data-id="F3" transform="translate(252.5234375, 1739)"><rect class="basic label-container" style="" rx="0" ry="0" x="-197.78125" y="-27" width="395.5625" height="54"></rect><g class="label" style="" transform="translate(-189.78125, -19)"><rect></rect><foreignObject width="379.5625" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">23. Student: Credits Added to Ledger (10-Yr Validity)<br>Page: /my-credit</span></div></foreignObject></g></g><g class="node default ddGate flowchart-label" id="flowchart-E1-37" data-node="true" data-id="E1" transform="translate(746.484375, 1451)"><rect class="basic label-container" style="" rx="0" ry="0" x="-217.5" y="-27" width="435" height="54"></rect><g class="label" style="" transform="translate(-209.5, -19)"><rect></rect><foreignObject width="419" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">18. Deputy Dean: Confirm Completion &amp; Authorize Minting<br>Page: /completion/{id}</span></div></foreignObject></g></g><g class="node default studentStep flowchart-label" id="flowchart-E2-38" data-node="true" data-id="E2" transform="translate(756.484375, 1561)"><rect class="basic label-container" style="" rx="0" ry="0" x="-199.828125" y="-27" width="399.65625" height="54"></rect><g class="label" style="" transform="translate(-191.828125, -19)"><rect></rect><foreignObject width="383.65625" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">19. Student: Access Open Badges 3.0 &amp; A4 Certificate<br>Pages: /my-credentials &amp; /my-credentials/{id}</span></div></foreignObject></g></g><g class="node default step flowchart-label" id="flowchart-E3-39" data-node="true" data-id="E3" transform="translate(756.484375, 1643)"><rect class="basic label-container" style="" rx="0" ry="0" x="-191.734375" y="-27" width="383.46875" height="54"></rect><g class="label" style="" transform="translate(-183.734375, -19)"><rect></rect><foreignObject width="367.46875" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">20. Public: Verify Cryptographic VC-JWT Signatures<br>Page: /verify/{code}</span></div></foreignObject></g></g><g class="node default step flowchart-label" id="flowchart-D1-30" data-node="true" data-id="D1" transform="translate(1235.859375, 1273)"><rect class="basic label-container" style="" rx="0" ry="0" x="-204.15625" y="-27" width="408.3125" height="54"></rect><g class="label" style="" transform="translate(-196.15625, -19)"><rect></rect><foreignObject width="392.3125" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">15. Lecturer: Key in Modular Marks &amp; Whole-MC Scores<br>Page: /offerings/{id}/results</span></div></foreignObject></g></g><g class="node default ddGate flowchart-label" id="flowchart-D2-31" data-node="true" data-id="D2" transform="translate(1235.859375, 1355)"><rect class="basic label-container" style="" rx="0" ry="0" x="-208.7109375" y="-27" width="417.421875" height="54"></rect><g class="label" style="" transform="translate(-200.7109375, -19)"><rect></rect><foreignObject width="401.421875" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">16. Deputy Dean: Verify Marks &amp; Resolve Integrity Cases<br>Pages: /results &amp; /results/{id}</span></div></foreignObject></g></g><g class="node default studentStep flowchart-label" id="flowchart-D3-32" data-node="true" data-id="D3" transform="translate(1257.03515625, 1451)"><rect class="basic label-container" style="" rx="0" ry="0" x="-166.359375" y="-27" width="332.71875" height="54"></rect><g class="label" style="" transform="translate(-158.359375, -19)"><rect></rect><foreignObject width="316.71875" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">17. Student: View Published Verified Grades<br>Pages: /my-results &amp; /my-results/{id}</span></div></foreignObject></g></g><g class="node default studentStep flowchart-label" id="flowchart-C1-21" data-node="true" data-id="C1" transform="translate(1235.859375, 917)"><rect class="basic label-container" style="" rx="0" ry="0" x="-208.03125" y="-27" width="416.0625" height="54"></rect><g class="label" style="" transform="translate(-200.03125, -19)"><rect></rect><foreignObject width="400.0625" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">11. Student: Browse Offering &amp; Register (PDPA Consent)<br>Pages: /public/offering/{id} &amp; /register/{offering}</span></div></foreignObject></g></g><g class="node default studentStep flowchart-label" id="flowchart-C2-22" data-node="true" data-id="C2" transform="translate(1235.859375, 999)"><rect class="basic label-container" style="" rx="0" ry="0" x="-155.453125" y="-27" width="310.90625" height="54"></rect><g class="label" style="" transform="translate(-147.453125, -19)"><rect></rect><foreignObject width="294.90625" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">12. Student: Pay Course Fee via Gateway<br>Page: /register/{offering} (Step 3: Pay)</span></div></foreignObject></g></g><g class="node default studentStep flowchart-label" id="flowchart-C3-23" data-node="true" data-id="C3" transform="translate(1235.859375, 1081)"><rect class="basic label-container" style="" rx="0" ry="0" x="-210.796875" y="-27" width="421.59375" height="54"></rect><g class="label" style="" transform="translate(-202.796875, -19)"><rect></rect><foreignObject width="405.59375" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">13. System: Enrolment Confirmed &amp; Confirmation Letter<br>Pages: /enrolments/{id}/confirmation &amp; /receipt</span></div></foreignObject></g></g><g class="node default step flowchart-label" id="flowchart-C4-24" data-node="true" data-id="C4" transform="translate(1235.859375, 1163)"><rect class="basic label-container" style="" rx="0" ry="0" x="-131.9765625" y="-27" width="263.953125" height="54"></rect><g class="label" style="" transform="translate(-123.9765625, -19)"><rect></rect><foreignObject width="247.953125" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">14. Lecturer: Access Cohort Roster<br>Page: /offerings/{id}/participants</span></div></foreignObject></g></g><g class="node default step flowchart-label" id="flowchart-B1-14" data-node="true" data-id="B1" transform="translate(1235.859375, 643)"><rect class="basic label-container" style="" rx="0" ry="0" x="-215.375" y="-27" width="430.75" height="54"></rect><g class="label" style="" transform="translate(-207.375, -19)"><rect></rect><foreignObject width="414.75" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">8. Lecturer: Create Cohort Offering &amp; Fill R1-R7 Checklist<br>Pages: /offerings/new &amp; /offerings/{id}</span></div></foreignObject></g></g><g class="node default ddGate flowchart-label" id="flowchart-B2-15" data-node="true" data-id="B2" transform="translate(1235.859375, 725)"><rect class="basic label-container" style="" rx="0" ry="0" x="-204.7265625" y="-27" width="409.453125" height="54"></rect><g class="label" style="" transform="translate(-196.7265625, -19)"><rect></rect><foreignObject width="393.453125" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">9. Deputy Dean: Inspect Evidence &amp; Confirm Readiness<br>Page: /offerings/{id}</span></div></foreignObject></g></g><g class="node default step flowchart-label" id="flowchart-B3-16" data-node="true" data-id="B3" transform="translate(1235.859375, 807)"><rect class="basic label-container" style="" rx="0" ry="0" x="-148.078125" y="-27" width="296.15625" height="54"></rect><g class="label" style="" transform="translate(-140.078125, -19)"><rect></rect><foreignObject width="280.15625" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">10. Published to Catalogue<br>Pages: /public/catalogue &amp; /catalogue</span></div></foreignObject></g></g><g class="node default step flowchart-label" id="flowchart-A1-0" data-node="true" data-id="A1" transform="translate(1235.859375, 41)"><rect class="basic label-container" style="" rx="0" ry="0" x="-201" y="-27" width="402" height="54"></rect><g class="label" style="" transform="translate(-193, -19)"><rect></rect><foreignObject width="386" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">1. Lecturer: Determine Category (UMC / SAMC / MCE)<br>Page: /curriculum/wizard</span></div></foreignObject></g></g><g class="node default step flowchart-label" id="flowchart-A2-1" data-node="true" data-id="A2" transform="translate(1235.859375, 123)"><rect class="basic label-container" style="" rx="0" ry="0" x="-146.734375" y="-27" width="293.46875" height="54"></rect><g class="label" style="" transform="translate(-138.734375, -19)"><rect></rect><foreignObject width="277.46875" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">2. Lecturer: Fill 9-Tab Proposal Dossier<br>Page: /curriculum/proposals/{id}</span></div></foreignObject></g></g><g class="node default ddGate flowchart-label" id="flowchart-A3-2" data-node="true" data-id="A3" transform="translate(1235.859375, 205)"><rect class="basic label-container" style="" rx="0" ry="0" x="-159.5078125" y="-27" width="319.015625" height="54"></rect><g class="label" style="" transform="translate(-151.5078125, -19)"><rect></rect><foreignObject width="303.015625" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">3. Deputy Dean: Assign Reviewers &amp; Scope<br>Page: /approval/proposals/{id}/reviewers</span></div></foreignObject></g></g><g class="node default reviewerStep flowchart-label" id="flowchart-A4-3" data-node="true" data-id="A4" transform="translate(1235.859375, 287)"><rect class="basic label-container" style="" rx="0" ry="0" x="-180.6640625" y="-27" width="361.328125" height="54"></rect><g class="label" style="" transform="translate(-172.6640625, -19)"><rect></rect><foreignObject width="345.328125" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">4. Reviewer: Sign COI &amp; Submit Evaluation Form<br>Pages: /reviews/{id}/coi &amp; /reviews/{id}</span></div></foreignObject></g></g><g class="node default step flowchart-label" id="flowchart-A5-4" data-node="true" data-id="A5" transform="translate(1235.859375, 369)"><rect class="basic label-container" style="" rx="0" ry="0" x="-167.2734375" y="-27" width="334.546875" height="54"></rect><g class="label" style="" transform="translate(-159.2734375, -19)"><rect></rect><foreignObject width="318.546875" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">5. Lecturer: Respond to Comments &amp; Amend<br>Page: /curriculum/proposals/{id}</span></div></foreignObject></g></g><g class="node default ddGate flowchart-label" id="flowchart-A6-5" data-node="true" data-id="A6" transform="translate(1235.859375, 451)"><rect class="basic label-container" style="" rx="0" ry="0" x="-167.2734375" y="-27" width="334.546875" height="54"></rect><g class="label" style="" transform="translate(-159.2734375, -19)"><rect></rect><foreignObject width="318.546875" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">6. Deputy Dean: Verify Resolution &amp; Endorse<br>Page: /approval/proposals/{id}</span></div></foreignObject></g></g><g class="node default senateStep flowchart-label" id="flowchart-A7-6" data-node="true" data-id="A7" transform="translate(1235.859375, 533)"><rect class="basic label-container" style="" rx="0" ry="0" x="-180.3203125" y="-27" width="360.640625" height="54"></rect><g class="label" style="" transform="translate(-172.3203125, -19)"><rect></rect><foreignObject width="344.640625" height="38"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="nodeLabel">7. Senate: Record Minutes &amp; Issue Decision Pack<br>Page: /approval/proposals/{id}/senate</span></div></foreignObject></g></g></g></g></g></svg>
+</div>
+      </div>
+    </div>
+
+    <!-- 3. MATRIX TABLE VIEW -->
+    <div id="matrix-view">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th style="width:60px">Step</th>
+            <th style="width:140px">Phase</th>
+            <th style="width:130px">Actor</th>
+            <th>Title & Action Description</th>
+            <th style="width:280px">Route Link</th>
+          </tr>
+        </thead>
+        <tbody id="matrix-tbody">
+          <!-- Populated by script -->
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <script>
+    // Initialize Mermaid
+    // Mermaid initialized via pre-rendered inline vector SVG
+
+    // Theme Toggle
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.getAttribute('data-theme') === 'dark';
+      body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('theme-toggle').textContent = isDark ? '🌙 Dark Mode' : '☀️ Light Mode';
+    }
+
+    // View Switching
+    function switchView(mode) {
+      document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.getElementById('timeline-view').style.display = mode === 'timeline' ? 'block' : 'none';
+      document.getElementById('flowchart-view').style.display = mode === 'flowchart' ? 'block' : 'none';
+      document.getElementById('matrix-view').style.display = mode === 'matrix' ? 'block' : 'none';
+
+      if (mode === 'matrix' && document.getElementById('matrix-tbody').children.length === 0) {
+        populateMatrix();
+      }
+    }
+
+    // Phase Collapsing
+    function togglePhase(header) {
+      const card = header.closest('.phase-card');
+      card.classList.toggle('collapsed');
+    }
+
+    // Role Filtering
+    function filterRole(role, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const items = document.querySelectorAll('.step-item');
+      items.forEach(item => {
+        const itemRole = item.getAttribute('data-role');
+        if (role === 'all' || itemRole.includes(role)) {
+          item.style.display = 'grid';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // Search Filtering
+    function handleSearch(query) {
+      const q = query.toLowerCase().trim();
+      const items = document.querySelectorAll('.step-item');
+      items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (!q || text.includes(q)) {
+          item.style.display = 'grid';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // Diagram Zooming
+    let currentZoom = 1;
+    function zoomDiagram(factor) {
+      currentZoom *= factor;
+      const el = document.querySelector('#svg-container svg');
+      el.style.transform = `scale(${currentZoom})`;
+      el.style.transformOrigin = 'top center';
+    }
+    function resetZoom() {
+      currentZoom = 1;
+      const el = document.querySelector('#svg-container svg');
+      el.style.transform = 'scale(1)';
+    }
+
+    // Build Matrix Table from Cards
+    function populateMatrix() {
+      const tbody = document.getElementById('matrix-tbody');
+      tbody.innerHTML = '';
+      const cards = document.querySelectorAll('.phase-card');
+      cards.forEach(card => {
+        const phaseNum = card.getAttribute('data-phase');
+        const phaseTitle = card.querySelector('.phase-title').textContent;
+        const steps = card.querySelectorAll('.step-item');
+        steps.forEach(step => {
+          const num = step.querySelector('.step-num').textContent;
+          const role = step.querySelector('.role-badge').textContent;
+          const roleClass = step.querySelector('.role-badge').className;
+          const title = step.querySelector('.step-title').textContent;
+          const desc = step.querySelector('.step-desc').textContent;
+          const routes = Array.from(step.querySelectorAll('.route-pill')).map(r => r.outerHTML).join(' ');
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><b>#${num}</b></td>
+            <td><span class="phase-pill" style="font-size:10px">P${phaseNum}</span> <span style="font-size:12px;color:var(--text-muted)">${phaseTitle}</span></td>
+            <td><span class="${roleClass}">${role}</span></td>
+            <td><b>${title}</b><div style="font-size:12.5px;color:var(--text-muted);margin-top:2px">${desc}</div></td>
+            <td>${routes}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

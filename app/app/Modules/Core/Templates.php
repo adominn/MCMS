@@ -66,7 +66,14 @@ final class Templates
     public function render(string $key, string $locale, array $vars): array
     {
         $v = $this->current($key, $locale);
-        $fill = fn (?string $s) => preg_replace_callback('/\{(\w+)\}/', fn ($m) => (string) ($vars[$m[1]] ?? $m[0]), (string) $s);
+        $fill = fn (?string $s) => preg_replace_callback('/\{(\w+)\}/', function ($m) use ($vars, $locale) {
+            $val = $vars[$m[1]] ?? $m[0];
+            if ($locale === 'ms' && is_string($val)) {
+                $trans = __($val, [], 'ms');
+                return $trans !== $val ? $trans : $val;
+            }
+            return (string) $val;
+        }, (string) $s);
 
         if ($v) {
             return [$fill($v->subject), $fill($v->body)];

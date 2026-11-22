@@ -31,18 +31,20 @@
   </div>
 </div>
 
-<div style="font-size:10.5pt;margin-bottom:4px">
-  To all participants registered in <b>{{ $title }}</b>.
-</div>
-<div class="bm" style="font-size:9.5pt;margin-bottom:12px">
-  Kepada semua peserta yang berdaftar dalam {{ $title }}.
+<div style="font-size:10.5pt;margin-bottom:10px">
+  @if(app()->getLocale() === 'ms')
+    Kepada semua peserta yang berdaftar dalam <b>{{ $title }}</b>.
+  @else
+    To all participants registered in <b>{{ $title }}</b>.
+  @endif
 </div>
 
-<div style="font-size:10.5pt;line-height:1.5;margin-bottom:6px">
-  The {{ $ptjName }} has decided on the {{ $kind }} of {{ $title }}, effective <b>{{ $eff }}</b>.@if($s && $s->reason) Reason: {{ $s->reason }}.@endif This notice explains what it means for you.
-</div>
-<div class="bm" style="font-size:9.5pt;line-height:1.4;margin-bottom:20px">
-  Fakulti telah memutuskan {{ $kind === 'termination' ? 'penamatan' : 'penggantungan' }} {{ $title }} berkuat kuasa {{ $eff }}.
+<div style="font-size:10.5pt;line-height:1.5;margin-bottom:20px">
+  @if(app()->getLocale() === 'ms')
+    {{ $ptjName }} telah memutuskan {{ $kind === 'termination' ? 'penamatan' : 'penggantungan' }} bagi {{ $title }}, berkuat kuasa <b>{{ $eff }}</b>.@if($s && $s->reason) Sebab: {{ $s->reason }}.@endif Notis ini menerangkan kesannya kepada anda.
+  @else
+    The {{ $ptjName }} has decided on the {{ $kind }} of {{ $title }}, effective <b>{{ $eff }}</b>.@if($s && $s->reason) Reason: {{ $s->reason }}.@endif This notice explains what it means for you.
+  @endif
 </div>
 
 {{-- Who is affected --}}
@@ -89,15 +91,13 @@
 </div>
 
 {{-- Participant safeguards --}}
-<div class="note ok" style="margin-bottom:8px;font-size:10pt">
-  <b>{{ __("Credentials and credit you have already earned stay valid.") }}</b> Certificates, Digital Credentials, Academic Credit Records and any ABC deposit are not changed by this decision.
-</div>
-<div class="bm" style="font-size:9.5pt;margin-bottom:20px">
-  Kredensial dan kredit yang telah anda peroleh kekal sah. Sijil, Kredensial Digital, ACR dan deposit ABC tidak berubah.
+<div class="note ok" style="margin-bottom:20px;font-size:10pt">
+  <div><b>{{ __("Credentials and credit you have already earned stay valid.") }}</b> Certificates, Digital Credentials, Academic Credit Records and any ABC deposit are not changed by this decision.</div>
+  <div style="margin-top:4px;font-size:9.5pt;color:var(--muted)"><b>Kredensial dan kredit yang telah anda peroleh kekal sah.</b> Sijil, Kredensial Digital, Rekod Kredit Akademik (ACR) dan sebarang deposit ABC tidak berubah oleh keputusan ini.</div>
 </div>
 
 <div class="small muted" style="margin-bottom:24px">
-  Questions: codl@utem.edu.my, 06-270 2000 (08:00 to 17:00, Monday to Friday).
+  {{ __('Questions: codl@utem.edu.my, 06-270 2000 (08:00 to 17:00, Monday to Friday).') }}
 </div>
 
 {{-- Signatory --}}
@@ -105,8 +105,7 @@
   <div style="width:50%">
     <div style="height:36px;border-bottom:1px solid var(--ink, #000);margin-bottom:4px"></div>
     <div style="font-size:10pt"><b>{{ $dean }}</b></div>
-    <div class="small muted">Deputy Dean (Academic), {{ $ptjName }}</div>
-    <div class="bm" style="font-size:8.5pt">Timbalan Dekan (Akademik)</div>
+    <div class="small muted">{{ $deciderPosition ?? __('Deputy Dean (Academic)') }}, {{ $ptjName }}</div>
   </div>
 </div>
 

@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home - UTeM Micro-Credential Management System</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+</head>
+<body>
+  
+  <header class="brand-header">
+    <div class="container brand-header-inner">
+      <a href="../public/home.html" class="brand-identity" aria-label="UTeM Micro-Credential Management System Home">
+        <img src="../assets/LogoJawiUTeM_blue-01.png" alt="Universiti Teknikal Malaysia Melaka" class="brand-logo-img">
+        <div class="brand-titles">
+          <span class="brand-sys-title">UTeM MCMS</span>
+        </div>
+      </a>
+      
+      <nav class="header-nav" aria-label="Public Navigation">
+        <ul class="header-nav-list">
+          <li><a href="../public/home.html" class="header-nav-link active">Home</a></li>
+          <li><a href="../public/catalogue.html" class="header-nav-link ">Catalogue</a></li>
+          <li><a href="../public/pathways.html" class="header-nav-link ">Pathways</a></li>
+          <li><a href="../public/how-it-works.html" class="header-nav-link ">Recognition Stages</a></li>
+          <li><a href="../public/faq.html" class="header-nav-link ">FAQ</a></li>
+          <li><a href="../public/verify.html" class="header-nav-link ">Verify</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="../auth/signin-default.html" class="btn btn-primary btn-sm">Sign In</a>
+      </div>
+    </div>
+  </header>
+  
+  
+  <main class="main-content">
+    
+<div class="container">
+
+
+  <!-- Hero Section -->
+  <div class="card card-navy has-crosshairs" style="padding:48px 40px;margin-bottom:32px;border-left:4px solid var(--color-primary);background:linear-gradient(135deg, #0b1a3d 0%, #07122a 100%)">
+    <div class="flex flex-col gap-sm" style="max-width:720px">
+      <div class="tag tag-primary" style="align-self:flex-start">UTeM Academic Gateway</div>
+      <h1 style="color:#ffffff;font-size:36px;margin:8px 0 12px">UTeM Micro-Credential Portal</h1>
+      <p style="color:#d8e2ff;font-size:16px;line-height:1.6;margin-bottom:20px">
+        Stackable, verifiable modular learning accredited by Universiti Teknikal Malaysia Melaka and aligned with the Malaysian Qualifications Framework (MQF). Designed for lifelong learners, industry practitioners, and prospective students.
+      </p>
+      <div class="flex items-center gap-md" style="flex-wrap:wrap">
+        <a href="catalogue.html" class="btn btn-primary btn-lg">Browse Full Catalogue</a>
+        <a href="verify.html" class="btn btn-secondary btn-lg">Verify a Credential</a>
+        <a href="pathways.html" class="btn btn-secondary btn-lg" style="background:#ffffff;color:#0b1a3d;border:1px solid #ffffff;font-weight:600">Explore Degree Pathways &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Micro-Credential Framework Categories (Bento Grid) -->
+  <div style="margin-bottom:36px">
+    <div class="flex items-center justify-between" style="margin-bottom:16px">
+      <div>
+        
+        <h2 style="margin-top:4px">Micro-Credential Categories</h2>
+      </div>
+      <a href="how-it-works.html" class="btn btn-ghost btn-sm">Understanding Recognition &rarr;</a>
+    </div>
+
+    <div class="grid grid-cols-3 gap-md">
+      <!-- UMC -->
+      <div class="card card-interactive flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between" style="margin-bottom:12px">
+            <span class="tag tag-primary">UMC</span>
+            <span class="tag tag-success">ACR Eligible</span>
+          </div>
+          <h3 style="margin-bottom:8px">UMC &ndash; Unbundled Micro-Credential</h3>
+          <p style="font-size:13px;line-height:1.5;margin-bottom:12px">
+            Derived directly from existing accredited UTeM academic degree courses. Carries official academic credit value.
+          </p>
+          <div style="font-size:12px;color:var(--color-ink);background:var(--color-surface-1);padding:8px 10px;border-radius:var(--radius-xs);margin-bottom:12px">
+            <b>Credit Status:</b> Yes, via official Academic Credit Record (ACR).
+          </div>
+        </div>
+        <a href="catalogue.html?category=umc" class="btn btn-secondary btn-sm btn-block">Explore UMC Courses</a>
+      </div>
+
+      <!-- SAMC -->
+      <div class="card card-interactive flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between" style="margin-bottom:12px">
+            <span class="tag tag-primary">SAMC</span>
+            <span class="tag tag-warning">QV Required</span>
+          </div>
+          <h3 style="margin-bottom:8px">SAMC &ndash; Standalone Micro-Credential</h3>
+          <p style="font-size:13px;line-height:1.5;margin-bottom:12px">
+            Industry and professional courses engineered for immediate workforce upskilling. Evaluated through Quality Verification.
+          </p>
+          <div style="font-size:12px;color:var(--color-ink);background:var(--color-surface-1);padding:8px 10px;border-radius:var(--radius-xs);margin-bottom:12px">
+            <b>Credit Status:</b> Only with valid Quality Verification (QV).
+          </div>
+        </div>
+        <a href="catalogue.html?category=samc" class="btn btn-secondary btn-sm btn-block">Explore SAMC Courses</a>
+      </div>
+
+      <!-- MCE -->
+      <div class="card card-interactive flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between" style="margin-bottom:12px">
+            <span class="tag tag-primary">MCE</span>
+            <span class="tag">Competency Only</span>
+          </div>
+          <h3 style="margin-bottom:8px">MCE &ndash; Micro-Credential Eksekutif</h3>
+          <p style="font-size:13px;line-height:1.5;margin-bottom:12px">
+            High-level executive programs, leadership masterclasses, and corporate technical modules for experienced executives.
+          </p>
+          <div style="font-size:12px;color:var(--color-ink);background:var(--color-surface-1);padding:8px 10px;border-radius:var(--radius-xs);margin-bottom:12px">
+            <b>Credit Status:</b> None (Certificate of Competency).
+          </div>
+        </div>
+        <a href="catalogue.html?category=mce" class="btn btn-secondary btn-sm btn-block">Explore MCE Courses</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Featured Upcoming Cohorts -->
+  <div style="margin-bottom:36px">
+    <div class="flex items-center justify-between" style="margin-bottom:16px">
+      <div>
+        
+        <h2 style="margin-top:4px">Featured Upcoming Cohorts</h2>
+      </div>
+      <a href="catalogue.html" class="btn btn-outline btn-sm">View All Cohorts &rarr;</a>
+    </div>
+
+    <div class="grid grid-cols-2 gap-md">
+      <!-- Cohort 1 -->
+      <div class="card offering-card">
+        <div>
+          <div class="offering-card-header">
+            <div>
+              <div class="flex items-center gap-xs" style="margin-bottom:6px">
+                <span class="tag tag-primary">UMC</span>
+                <span class="tag">FTMK</span>
+                <span class="tag">MQF 6</span>
+              </div>
+              <h3 style="font-size:17px"><a href="offering.html">Cloud Native Application Development & Microservices</a></h3>
+            </div>
+            <div style="text-align:right">
+              <span style="font-size:16px;font-weight:700;color:var(--color-primary)">RM 450.00</span>
+            </div>
+          </div>
+          <p style="font-size:13px;color:var(--color-ink-muted);line-height:1.5">
+            Architect, deploy, and scale enterprise containerized applications using Kubernetes, Docker, and CI/CD pipelines.
+          </p>
+        </div>
+        <div class="offering-card-meta">
+          <span><b>Credits:</b> 3 Credits</span>
+          <span><b>Mode:</b> Online (ODL)</span>
+          <span><b>Start Date:</b> 15 Jan 2027</span>
+          <a href="offering.html" class="btn btn-primary btn-sm" style="margin-left:auto">Details & Enroll</a>
+        </div>
+      </div>
+
+      <!-- Cohort 2 -->
+      <div class="card offering-card">
+        <div>
+          <div class="offering-card-header">
+            <div>
+              <div class="flex items-center gap-xs" style="margin-bottom:6px">
+                <span class="tag tag-primary">SAMC</span>
+                <span class="tag">FTKEE</span>
+                <span class="tag">MQF 6</span>
+              </div>
+              <h3 style="font-size:17px"><a href="offering.html">Industrial IoT Sensors & Edge Computing Gateway</a></h3>
+            </div>
+            <div style="text-align:right">
+              <span style="font-size:16px;font-weight:700;color:var(--color-primary)">RM 380.00</span>
+            </div>
+          </div>
+          <p style="font-size:13px;color:var(--color-ink-muted);line-height:1.5">
+            Hands-on integration of industrial sensors with embedded microcontrollers and MQTT telemetry protocols for Industry 4.0.
+          </p>
+        </div>
+        <div class="offering-card-meta">
+          <span><b>Credits:</b> 2 Credits (QV Valid)</span>
+          <span><b>Mode:</b> Blended</span>
+          <span><b>Start Date:</b> 01 Feb 2027</span>
+          <a href="offering.html" class="btn btn-primary btn-sm" style="margin-left:auto">Details & Enroll</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verification Teaser Strip -->
+  <div class="card card-subtle flex items-center justify-between" style="padding:24px 32px">
+    <div>
+      
+      <h3 style="margin:4px 0 6px">Verify an Issued Credential or Digital Badge</h3>
+      <p style="font-size:13.5px;margin:0">
+        Employers, academic institutions, and learners can verify UTeM micro-credentials instantly using public codes or cryptographic file signatures.
+      </p>
+    </div>
+    <a href="verify.html" class="btn btn-primary">Verify Credential</a>
+  </div>
+</div>
+
+  </main>
+
+  
+  <footer class="public-footer">
+    <div class="container">
+      <div class="grid grid-cols-4 gap-lg">
+        <div>
+          <img src="../assets/CODL_logo.png" alt="Centre for Open and Distance Learning" style="height:60px;width:auto;display:block;margin-bottom:14px">
+          <div class="footer-heading">UTeM Micro-credentials</div>
+          <p style="color:#94a3b8;font-size:12.5px;line-height:1.5">
+            Centre for Open and Distance Learning (CODL)<br>
+            Universiti Teknikal Malaysia Melaka<br>
+            Hang Tuah Jaya, 76100 Durian Tunggal, Melaka
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-heading">Learn</div>
+          <a href="../public/catalogue.html">All Micro-Credentials</a>
+          <a href="../public/pathways.html">Degree Pathways</a>
+          <a href="../public/how-it-works.html">Recognition Stages</a>
+        </div>
+
+        <div>
+          <div class="footer-heading">Help & Verification</div>
+          <a href="../public/faq.html">Frequently Asked Questions</a>
+          <a href="../public/verify.html">Verify a Credential</a>
+          <a href="mailto:codl@utem.edu.my">Contact CODL: codl@utem.edu.my</a>
+        </div>
+
+        <div>
+          <div class="footer-heading">Policies & Governance</div>
+          <a href="../public/policy-privacy.html">Privacy Notice (PDPA)</a>
+          <a href="../public/policy-terms.html">Terms of Use</a>
+          <a href="../public/policy-accessibility.html">Accessibility Statement</a>
+        </div>
+      </div>
+
+      <div class="footer-legal">
+        Micro-credentials issued under the UTeM Micro-Credential Framework compliant with MQA Code of Practice for Programme Accreditation and Malaysian Qualifications Framework (MQF) 2nd Edition. Micro-credentials do not automatically grant university admission.
+      </div>
+    </div>
+  </footer>
+  
+
+  <script src="../js/ui.js"></script>
+</body>
+</html>

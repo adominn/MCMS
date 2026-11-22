@@ -1,0 +1,96 @@
+URL: http://127.0.0.1:8110/offerings/1/results
+FINAL: http://127.0.0.1:8110/offerings/1/results
+STATUS: 200
+TITLE: Cohort results - UTeM Micro-Credential Management System
+H1: Results: Cloud Native Development 2026/1
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+2
+AZ
+Dr. Aina Zulkifli
+Lecturer, FTMK
+TEACHING
+My tasks
+3
+My micro-credentials
+Proposals and versions
+1
+Cohorts and results
+Reviews for colleagues
+1
+QUALITY
+Quality review (CQI)
+QV evidence
+Stackable pathways
+INSIGHT
+Reports
+Traceability
+Documents
+Notifications
+2
+Collapse sidebar
+←
+Back
+Cohorts and results
+Cloud Native Development 2026/1
+Results
+Results: Cloud Native Development 2026/1
+Dr. Aina Zulkifli · The cohort · Participants · Submitted for verification 30/08/2026 10:00
+Coordinator sign-off →
+Participants
+← Back to cohort
+Total learners
+2
+Graded / Provisional
+2
+Marks missing
+0
+Held for integrity
+0
+Submitted to the Deputy Dean (30/08/2026 10:00). Marks are locked pending verification.
+The assessment plan comes from the approved micro-credential version and cannot be altered here. Attendance or progress never gives a pass: only verified marks do (FR-121). As the course lecturer who entered these marks, verification belongs to the Deputy Dean (D-15 Separation of Duties).
+Participant	Progress	
+Module 1: Containerization with Docker
+40h SLT
+	
+Module 2: Kubernetes Orchestration & CI/CD
+40h SLT
+	Final	Result
+
+Docker Containerization Practical Lab
+50%
+Pass: 50/100
+	
+Kubernetes Production Cluster Project
+50%
+Pass: 50/100
+
+
+Amir Hakimi
+B032410001
+	100%	
+88
+Verified
+Change
+	
+92
+Verified
+Change
+	90	Pass
+
+Bee Tan
+B032410002
+	100%	
+76
+Verified
+Change
+	
+82
+Verified
+Change
+	79	Pass
+
+Withdraw the submission

@@ -1,0 +1,49 @@
+URL: http://127.0.0.1:8110/reviews/3
+FINAL: http://127.0.0.1:8110/reviews/3
+STATUS: 200
+TITLE: Review - UTeM Micro-Credential Management System
+H1: Comment on a proposal: Applied Data Analytics
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+1
+SA
+Ir. Siti Aminah
+Industry expert
+INVITATIONS
+My review invitations
+Notifications
+1
+Collapse sidebar
+←
+Back
+My review invitations
+Applied Data Analytics
+Comment on a proposal: Applied Data Analytics
+Due 25/10/2026 · Scope: Industry relevance and competency mapping · SAMC
+Back to invitations
+Proposal summary
+
+Applied Data Analytics / Analisis Data Gunaan
+SAMC · FTMK · Dr. Aina Zulkifli · Online, English
+
+Need: Data storytelling and predictive analytics.
+
+Modules: 1. Exploratory Data Analysis and Visualization (80 h) — total 80 h
+
+Learning outcomes:
+
+LO1: Build predictive linear models using Python and statistical toolkits.
+
+Assessment: Predictive Analytics Python Notebook Project (100%)
+
+Proposed credit / MQF level: 2 / 5 (proposals only until approval or Quality Verification confirms them)
+
+Readiness: Learning materials: Not yet; Learning platform: Not yet; Assessment and rubrics: Not yet; Facilitators: Not yet; Participant information: Not yet; Records and credential mechanism: Not yet; Accessibility: Not yet
+
+Your comments
+None yet.
+
+Comments are closed: the decision is recorded.

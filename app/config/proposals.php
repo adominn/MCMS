@@ -58,5 +58,19 @@ return [
         'partner' => 'The provider or a partner', 'integrity' => 'The identity and integrity mechanism',
     ],
     'transition_rules' => ['finish_old' => 'Current participants finish on the old version', 'move_new' => 'Current participants move to the new version', 'equivalence' => 'Current participants continue by a recorded equivalence'],
+    'activity_types' => [
+        'lecture' => 'Lecture / Kuliah',
+        'tutorial' => 'Tutorial / Perbincangan',
+        'practical' => 'Practical / Amali / Makmal',
+        'self_learning' => 'Self-Learning / Pembelajaran Kendiri',
+        'e_learning' => 'e-Learning / Pembelajaran Maya',
+        'project' => 'Project / Tugasan Berasaskan Projek',
+    ],
+    'follow_up_actions' => [
+        'stackable' => 'Laluan Ijazah Bertumpuk (Stackable Degree Pathway)',
+        'standalone' => 'Penawaran Kendiri / Pensijilan Profesional (Stand-Alone Certification)',
+        'cqi' => 'Penambahbaikan Berterusan Kurikulum (CQI Curriculum Evolution)',
+        'industry' => 'Kerjasama Industri / Latihan Korporat (Industry Corporate Training)',
+    ],
     'tabs' => ['basics' => 'Basic information', 'justification' => 'Justification', 'modules' => 'Modules', 'outcomes' => 'Learning outcomes', 'assessment' => 'Assessment', 'credential' => 'Credential', 'readiness' => 'Readiness', 'comments' => 'Comments', 'submit' => 'Submit'],
 ];

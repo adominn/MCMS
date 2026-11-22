@@ -1,0 +1,659 @@
+[
+  {
+    "role": "public",
+    "url": "/public/catalogue",
+    "finalPath": "/public/catalogue",
+    "status": 200,
+    "title": "Catalogue - UTeM Micro-Credential Management System",
+    "h1": "Catalogue",
+    "file": "REQ-C09-008_public_catalogue.png"
+  },
+  {
+    "role": "public",
+    "url": "/public/offering/7",
+    "finalPath": "/public/offering/7",
+    "status": 200,
+    "title": "Electric Circuit Theory & Power Systems - UTeM Micro-Credential Management System",
+    "h1": "Electric Circuit Theory & Power Systems",
+    "file": "REQ-C10-004_public_offering_open.png"
+  },
+  {
+    "role": "public",
+    "url": "/public/offering/4",
+    "finalPath": "/public/offering/4",
+    "status": 200,
+    "title": "Lean Six Sigma Yellow Belt - UTeM Micro-Credential Management System",
+    "h1": "Lean Six Sigma Yellow Belt",
+    "file": "REQ-C06-014_public_offering_mce_demo_violation.png"
+  },
+  {
+    "role": "public",
+    "url": "/public/pathways",
+    "finalPath": "/public/pathways",
+    "status": 200,
+    "title": "Pathways to a degree - UTeM Micro-Credential Management System",
+    "h1": "Pathways to a degree",
+    "file": "REQ-C14-012_public_pathways.png"
+  },
+  {
+    "role": "public",
+    "url": "/public/pathways/1/print",
+    "finalPath": "/public/pathways/1/print",
+    "status": 200,
+    "title": "BITS Bachelor of Computer Science (Software Development) with Honours - Pathway Articulation - UTeM MCMS",
+    "h1": "BITS - Bachelor of Computer Science (Software Development) with Honours",
+    "file": "REQ-AG-001_pathway_print.png"
+  },
+  {
+    "role": "public",
+    "url": "/public/verify/CND01-7K9MJ",
+    "finalPath": "/public/verify/CND01-7K9MJ",
+    "status": 200,
+    "title": "Verification Result - UTeM Micro-Credential Management System",
+    "h1": "Verification result",
+    "file": "REQ-AE-006_public_verify_valid.png"
+  },
+  {
+    "role": "public",
+    "url": "/public/verify/CND02-8M3NP",
+    "finalPath": "/public/verify/CND02-8M3NP",
+    "status": 200,
+    "title": "Verification Result - UTeM Micro-Credential Management System",
+    "h1": "Verification result",
+    "file": "REQ-AE-007_public_verify_corrected.png"
+  },
+  {
+    "role": "student",
+    "url": "/my-record",
+    "finalPath": "/my-record",
+    "status": 200,
+    "title": "Achievement record - UTeM Micro-Credential Management System",
+    "h1": "Achievement record",
+    "file": "REQ-C08-013_student_internal_record.png"
+  },
+  {
+    "role": "student",
+    "url": "/my-credentials",
+    "finalPath": "/my-credentials",
+    "status": 200,
+    "title": "Credentials - UTeM Micro-Credential Management System",
+    "h1": "Credentials and Badges",
+    "file": "REQ-AE-001_student_wallet.png"
+  },
+  {
+    "role": "student",
+    "url": "/my-credentials/1",
+    "finalPath": "/my-credentials/1",
+    "status": 200,
+    "title": "Credential - UTeM Micro-Credential Management System",
+    "h1": "Cloud Native Development",
+    "file": "REQ-AE-004_student_digital_credential.png"
+  },
+  {
+    "role": "student",
+    "url": "/my-credentials/1/certificate",
+    "finalPath": "/my-credentials/1/certificate",
+    "status": 200,
+    "title": "Certificate - UTeM MCMS",
+    "h1": "Certificate",
+    "file": "REQ-AE-003_student_certificate.png"
+  },
+  {
+    "role": "student",
+    "url": "/my-credentials/1/sheet",
+    "finalPath": "/my-credentials/1/sheet",
+    "status": 200,
+    "title": "Digital Credential - UTeM MCMS",
+    "h1": "Digital Credential",
+    "file": "REQ-AE-004_student_credential_sheet.png"
+  },
+  {
+    "role": "student",
+    "url": "/my-credit",
+    "finalPath": "/my-credit",
+    "status": 200,
+    "title": "Credit ledger and ABC - UTeM Micro-Credential Management System",
+    "h1": "Credit Ledger & Academic Bank of Credit (ABC)",
+    "file": "REQ-AF-005_student_credit_ledger.png"
+  },
+  {
+    "role": "student",
+    "url": "/my-credit/1",
+    "finalPath": "/my-credit/1",
+    "status": 200,
+    "title": "Academic Credit Record - UTeM Micro-Credential Management System",
+    "h1": "Cloud Native Development: Academic Credit Record",
+    "file": "REQ-AF-003_student_acr_view.png"
+  },
+  {
+    "role": "student",
+    "url": "/my-credit/1?print=1",
+    "finalPath": "/my-credit/1?print=1",
+    "status": 200,
+    "title": "Academic Credit Record - UTeM MCMS",
+    "h1": "Academic Credit Record (ACR)",
+    "file": "REQ-AF-011_acr_print_en.png"
+  },
+  {
+    "role": "student",
+    "url": "/transfer/1",
+    "finalPath": "/transfer/1",
+    "status": 200,
+    "title": "Transfer application - UTeM Micro-Credential Management System",
+    "h1": "Transfer Application TR-2026-0001",
+    "file": "REQ-AF-006_student_transfer_show.png"
+  },
+  {
+    "role": "student",
+    "url": "/my-plan",
+    "finalPath": "/my-plan",
+    "status": 200,
+    "title": "My degree plan - UTeM Micro-Credential Management System",
+    "h1": "My degree plan",
+    "file": "REQ-C14-001_student_stackable_plan.png"
+  },
+  {
+    "role": "student_bm",
+    "url": "/my-credit/1?print=1",
+    "finalPath": "/my-credit/1?print=1",
+    "status": 200,
+    "title": "Rekod Kredit Akademik - UTeM MCMS",
+    "h1": "Rekod Kredit Akademik (ACR)",
+    "file": "REQ-AF-011_acr_print_bm.png"
+  },
+  {
+    "role": "student_rbac",
+    "url": "/proposals",
+    "finalPath": "/proposals",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "student_rbac",
+    "url": "/approvals",
+    "finalPath": "/approvals",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "student_rbac",
+    "url": "/credentials",
+    "finalPath": "/credentials",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "student_rbac",
+    "url": "/deposits",
+    "finalPath": "/deposits",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "student_rbac",
+    "url": "/transfers",
+    "finalPath": "/transfers",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "student_rbac",
+    "url": "/admin/users",
+    "finalPath": "/admin/users",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "lecturer",
+    "url": "/proposals/1",
+    "finalPath": "/proposals/1",
+    "status": 200,
+    "title": "Data Structures - UTeM Micro-Credential Management System",
+    "h1": "Data Structures",
+    "file": "REQ-AA-001_proposal_workspace.png"
+  },
+  {
+    "role": "lecturer",
+    "url": "/proposals/1/print",
+    "finalPath": "/proposals/1/print",
+    "status": 200,
+    "title": "Proposal: Data Structures - UTeM MCMS",
+    "h1": "Data Structures",
+    "file": "REQ-AA-009_proposal_print_appendix_a.png"
+  },
+  {
+    "role": "lecturer",
+    "url": "/offerings/1",
+    "finalPath": "/offerings/1",
+    "status": 200,
+    "title": "Readiness - UTeM Micro-Credential Management System",
+    "h1": "Cloud Native Development 2026/1",
+    "file": "REQ-AB-001_offering_readiness_appendix_b.png"
+  },
+  {
+    "role": "lecturer",
+    "url": "/offerings/1/results",
+    "finalPath": "/offerings/1/results",
+    "status": 200,
+    "title": "Cohort results - UTeM Micro-Credential Management System",
+    "h1": "Results: Cloud Native Development 2026/1",
+    "file": "REQ-C10-007_results_cohort.png"
+  },
+  {
+    "role": "lecturer",
+    "url": "/quality/2",
+    "finalPath": "/quality/2",
+    "status": 200,
+    "title": "Quality Verification - UTeM Micro-Credential Management System",
+    "h1": "Quality Verification: Cloud Native Development",
+    "file": "REQ-AD-001_qv_samc_show.png"
+  },
+  {
+    "role": "lecturer",
+    "url": "/quality/2/package",
+    "finalPath": "/quality/2/package",
+    "status": 404,
+    "title": "This page was not found - UTeM Micro-Credential Management System",
+    "h1": "This page was not found",
+    "file": "REQ-AD-010_qv_package_appendix_d.png"
+  },
+  {
+    "role": "lecturer",
+    "url": "/cqi/1",
+    "finalPath": "/cqi/1",
+    "status": 200,
+    "title": "Quality review record - UTeM Micro-Credential Management System",
+    "h1": "Quality review CQI-2026-001",
+    "file": "REQ-AC-001_cqi_appendix_c.png"
+  },
+  {
+    "role": "lecturer",
+    "url": "/pathways/1",
+    "finalPath": "/pathways/1",
+    "status": 200,
+    "title": "Pathway mapping - UTeM Micro-Credential Management System",
+    "h1": "Pathway PW-BITS-2026-01",
+    "file": "REQ-AG-003_pathway_mapping_appendix_g.png"
+  },
+  {
+    "role": "lecturer",
+    "url": "/records/cohort/1",
+    "finalPath": "/records/cohort/1",
+    "status": 200,
+    "title": "Cohort records - UTeM Micro-Credential Management System",
+    "h1": "Minimum records: Cloud Native Development 2026/1",
+    "file": "REQ-AH-004_cohort_records_appendix_h5.png"
+  },
+  {
+    "role": "lecturer",
+    "url": "/records/trace/1",
+    "finalPath": "/records/trace/1",
+    "status": 200,
+    "title": "Trace a participant - UTeM Micro-Credential Management System",
+    "h1": "Trace: Amir Hakimi, Cloud Native Development",
+    "file": "REQ-C18-012_trace_end_to_end.png"
+  },
+  {
+    "role": "lecturer_rbac",
+    "url": "/approvals",
+    "finalPath": "/approvals",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "lecturer_rbac",
+    "url": "/credentials",
+    "finalPath": "/credentials",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "lecturer_rbac",
+    "url": "/deposits",
+    "finalPath": "/deposits",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "lecturer_rbac",
+    "url": "/transfers",
+    "finalPath": "/transfers",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "lecturer_rbac",
+    "url": "/suspensions",
+    "finalPath": "/suspensions",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "lecturer_rbac",
+    "url": "/admin/users",
+    "finalPath": "/admin/users",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "deputy_dean",
+    "url": "/approvals/1/pack",
+    "finalPath": "/approvals/1/pack",
+    "status": 200,
+    "title": "Decision pack: Data Structures - UTeM Micro-Credential Management System",
+    "h1": "Decision pack: Data Structures",
+    "file": "REQ-C09-005_approval_pack.png"
+  },
+  {
+    "role": "deputy_dean",
+    "url": "/approvals/1/senate",
+    "finalPath": "/approvals/1/senate",
+    "status": 200,
+    "title": "Record Senate decision - UTeM Micro-Credential Management System",
+    "h1": "Record Senate decision",
+    "file": "REQ-AH-002_deputy_dean_senate.png"
+  },
+  {
+    "role": "deputy_dean",
+    "url": "/credentials",
+    "finalPath": "/credentials",
+    "status": 200,
+    "title": "Credentials - UTeM Micro-Credential Management System",
+    "h1": "Credentials",
+    "file": "REQ-AH-002_deputy_dean_credentials_admin.png"
+  },
+  {
+    "role": "deputy_dean",
+    "url": "/credentials/2",
+    "finalPath": "/credentials/2",
+    "status": 200,
+    "title": "UTEM-MC-2026-0002 - UTeM Micro-Credential Management System",
+    "h1": "UTEM-MC-2026-0002",
+    "file": "REQ-AE-007_credential_correction_audit.png"
+  },
+  {
+    "role": "deputy_dean",
+    "url": "/quality/1",
+    "finalPath": "/quality/1",
+    "status": 404,
+    "title": "This page was not found - UTeM Micro-Credential Management System",
+    "h1": "This page was not found",
+    "file": "REQ-C11-005_qv_umc_demo_violation.png"
+  },
+  {
+    "role": "deputy_dean",
+    "url": "/transfers/1",
+    "finalPath": "/transfers/1",
+    "status": 200,
+    "title": "Transfer decision - UTeM Micro-Credential Management System",
+    "h1": "Transfer Decision TR-2026-0001",
+    "file": "REQ-AF-007_transfer_evaluation_appendix_f.png"
+  },
+  {
+    "role": "deputy_dean",
+    "url": "/transfers/1/letter",
+    "finalPath": "/transfers/1/letter",
+    "status": 200,
+    "title": "Transfer application - UTeM Micro-Credential Management System",
+    "h1": "Transfer Application TR-2026-0001",
+    "file": "REQ-AF-008_transfer_decision_letter.png"
+  },
+  {
+    "role": "deputy_dean",
+    "url": "/plans/1",
+    "finalPath": "/plans/1",
+    "status": 200,
+    "title": "Individual stackable plan - UTeM Micro-Credential Management System",
+    "h1": "Plan PLAN-2026-0001",
+    "file": "REQ-AG-006_stackable_plan_appendix_g.png"
+  },
+  {
+    "role": "deputy_dean",
+    "url": "/suspensions/1/print",
+    "finalPath": "/suspensions/1/print",
+    "status": 200,
+    "title": "Notice of Suspension - UTeM MCMS",
+    "h1": "Cloud Native Development: Suspension notice",
+    "file": "REQ-C17-008_suspension_notice.png"
+  },
+  {
+    "role": "deputy_dean",
+    "url": "/records/discrepancies",
+    "finalPath": "/records/discrepancies",
+    "status": 200,
+    "title": "Discrepancy log - UTeM Micro-Credential Management System",
+    "h1": "Discrepancy & Record Correction Log",
+    "file": "REQ-C18-008_discrepancies.png"
+  },
+  {
+    "role": "deputy_dean",
+    "url": "/records/retention",
+    "finalPath": "/records/retention",
+    "status": 200,
+    "title": "Retention - UTeM Micro-Credential Management System",
+    "h1": "Retention and disposal",
+    "file": "REQ-C18-010_retention.png"
+  },
+  {
+    "role": "deputy_dean_rbac",
+    "url": "/deposits",
+    "finalPath": "/deposits",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "deputy_dean_rbac",
+    "url": "/admin/users",
+    "finalPath": "/admin/users",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "records_depositor",
+    "url": "/deposits",
+    "finalPath": "/deposits",
+    "status": 200,
+    "title": "ACR and ABC deposits - UTeM Micro-Credential Management System",
+    "h1": "ACR Confirmation & Academic Bank of Credit (ABC) Deposits",
+    "file": "REQ-C12-009_abc_deposit_queue.png"
+  },
+  {
+    "role": "records_depositor",
+    "url": "/deposits/1",
+    "finalPath": "/deposits/1",
+    "status": 200,
+    "title": "Academic Credit Record - UTeM Micro-Credential Management System",
+    "h1": "Cloud Native Development: Academic Credit Record",
+    "file": "REQ-AF-004_abc_deposit_detail.png"
+  },
+  {
+    "role": "records_depositor",
+    "url": "/deposits/1?print=1",
+    "finalPath": "/deposits/1?print=1",
+    "status": 200,
+    "title": "Academic Credit Record - UTeM MCMS",
+    "h1": "Academic Credit Record (ACR)",
+    "file": "REQ-AF-011_depositor_acr_print.png"
+  },
+  {
+    "role": "records_depositor",
+    "url": "/records/audit",
+    "finalPath": "/records/audit",
+    "status": 200,
+    "title": "Audit trail - UTeM Micro-Credential Management System",
+    "h1": "Audit trail",
+    "file": "REQ-C18-009_records_audit.png"
+  },
+  {
+    "role": "records_depositor_rbac",
+    "url": "/credentials",
+    "finalPath": "/credentials",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": "REQ-AH-002_depositor_blocked_from_credentials_403.png"
+  },
+  {
+    "role": "records_depositor_rbac",
+    "url": "/approvals",
+    "finalPath": "/approvals",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "records_depositor_rbac",
+    "url": "/transfers",
+    "finalPath": "/transfers",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "records_depositor_rbac",
+    "url": "/admin/users",
+    "finalPath": "/admin/users",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "codl_admin",
+    "url": "/admin/users",
+    "finalPath": "/admin/users",
+    "status": 200,
+    "title": "Users and roles - UTeM Micro-Credential Management System",
+    "h1": "Users and roles",
+    "file": "REQ-AH-001_admin_users_roles.png"
+  },
+  {
+    "role": "codl_admin",
+    "url": "/admin/settings",
+    "finalPath": "/admin/settings",
+    "status": 200,
+    "title": "Settings - UTeM Micro-Credential Management System",
+    "h1": "System Settings",
+    "file": "REQ-C15-002_admin_settings.png"
+  },
+  {
+    "role": "codl_admin",
+    "url": "/admin/audit",
+    "finalPath": "/admin/audit",
+    "status": 200,
+    "title": "Audit trail - UTeM Micro-Credential Management System",
+    "h1": "Audit trail",
+    "file": "REQ-C15-005_admin_audit_chain.png"
+  },
+  {
+    "role": "codl_admin_rbac",
+    "url": "/approvals",
+    "finalPath": "/approvals",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "codl_admin_rbac",
+    "url": "/credentials",
+    "finalPath": "/credentials",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "codl_admin_rbac",
+    "url": "/deposits",
+    "finalPath": "/deposits",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "codl_admin_rbac",
+    "url": "/transfers",
+    "finalPath": "/transfers",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "codl_admin_rbac",
+    "url": "/records/retention",
+    "finalPath": "/records/retention",
+    "status": 200,
+    "title": "Retention - UTeM Micro-Credential Management System",
+    "h1": "Retention and disposal",
+    "file": null
+  },
+  {
+    "role": "industry_expert",
+    "url": "/reviews/3",
+    "finalPath": "/reviews/3",
+    "status": 200,
+    "title": "Review - UTeM Micro-Credential Management System",
+    "h1": "Comment on a proposal: Applied Data Analytics",
+    "file": "REQ-C16-004_industry_review_coi.png"
+  },
+  {
+    "role": "industry_expert_rbac",
+    "url": "/proposals",
+    "finalPath": "/proposals",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "industry_expert_rbac",
+    "url": "/approvals",
+    "finalPath": "/approvals",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  },
+  {
+    "role": "industry_expert_rbac",
+    "url": "/transfers",
+    "finalPath": "/transfers",
+    "status": 403,
+    "title": "You cannot open this page - UTeM Micro-Credential Management System",
+    "h1": "You cannot open this page",
+    "file": null
+  }
+]

@@ -1,0 +1,172 @@
+/**
+ * UTeM MCMS UI/UX Design System (v3) - Base & Layout Rules
+ * Authority: DESIGN.md (v2.4 "linear-precision")
+ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-primary);
+  font-size: 16px;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+/* ==========================================================================
+   Custom Architectural Scrollbar
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.25);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.45);
+}
+
+/* ==========================================================================
+   Focus Accessibility (WCAG 2.1 AA)
+   ========================================================================== */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Typography Base
+   ========================================================================== */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-ink);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+h1 { font-size: var(--font-size-display-md); letter-spacing: -0.02em; }
+h2 { font-size: var(--font-size-headline); letter-spacing: -0.01em; }
+h3 { font-size: var(--font-size-title); }
+h4 { font-size: var(--font-size-body); font-weight: var(--font-weight-bold); }
+
+p {
+  color: var(--color-ink-muted);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-relaxed);
+}
+
+code, kbd, samp, pre {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-mono-code);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   Layout Containers & Grid Rules
+   ========================================================================== */
+.container {
+  width: 100%;
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.main-content {
+  flex: 1;
+  padding-top: 24px;
+  padding-bottom: 48px;
+}
+
+/* Corner Crosshair Geometry */
+.has-crosshairs {
+  position: relative;
+}
+
+.has-crosshairs::before {
+  content: "+";
+  position: absolute;
+  top: -7px;
+  left: -5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-ink-subtle);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.has-crosshairs::after {
+  content: "+";
+  position: absolute;
+  bottom: -7px;
+  right: -5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-ink-subtle);
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Utility Flex & Grid Classes */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-xs { gap: 4px; }
+.gap-sm { gap: 8px; }
+.gap-md { gap: 16px; }
+.gap-lg { gap: 24px; }
+.gap-xl { gap: 32px; }
+
+.grid { display: grid; }
+.grid-cols-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-cols-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-cols-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .grid-cols-3, .grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .grid-cols-2, .grid-cols-3, .grid-cols-4 { grid-template-columns: 1fr; }
+  .container { padding-left: 16px; padding-right: 16px; }
+}

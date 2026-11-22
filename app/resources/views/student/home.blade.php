@@ -70,7 +70,7 @@
           <tr>
             <td>
               <div style="display:flex;align-items:center;gap:12px">
-                <x-badge :category="$c->category" :size="36" />
+                <x-badge :category="$c->category" :size="36" :image="$c->badge_image_path ?? null" />
                 <div>
                   <div style="display:flex;align-items:center;gap:6px">
                     <x-cat :c="$c->category" />

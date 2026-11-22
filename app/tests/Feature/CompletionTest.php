@@ -136,7 +136,10 @@ it('opens a completion task when someone is ready after verification, and none w
 });
 
 it('gives the deputy dean a task and a screen with the pre-issue checks (FL-08)', function () {
-    [$o] = verifiedCohort();
+    [$o, , , $people] = verifiedCohort();
+    $ct = DB::table('tasks')->where('kind', 'coordinator_signoff')->first();
+    expect($ct)->not->toBeNull()->and($ct->assignee_role)->toBe('lecturer')->and($ct->link)->toBe("/cohorts/$o/signoff");
+    coordinatorSignOff($o, [eid($o, $this->amir), eid($o, $people[2])]);
     $t = DB::table('tasks')->where('kind', 'completion')->first();
     expect($t->title)->toContain('Confirm completion')->and($t->assignee_role)->toBe('deputy_dean')->and($t->link)->toBe("/completion/$o");
     $this->actingAs($this->hakim)->get("/tasks/{$t->id}")->assertRedirect("/completion/$o");
@@ -159,9 +162,10 @@ it('lets only the deputy dean of the PTj open or use the completion screen (D-12
 
 it('confirms completion: record complete, enrolment completed, final result, audit, notice and the event (EV-31)', function () {
     Event::fake([CompletionConfirmed::class]);
-    [$o] = verifiedCohort();
+    [$o, , , $people] = verifiedCohort();
     $amir = eid($o, $this->amir);
-    confirmCompletion($o, [$amir])->assertSessionHasNoErrors()->assertSessionHas('status');
+    coordinatorSignOff($o, [$amir, eid($o, $people[2])]);
+    confirmCompletion($o, [$amir], false)->assertSessionHasNoErrors()->assertSessionHas('status');
     $rec = DB::table('achievement_records')->where('enrolment_id', $amir)->first();
     expect($rec->completion_status)->toBe('complete')->and($rec->confirmed_by)->toBe($this->hakim->id)->and($rec->completed_on)->toStartWith(today()->toDateString())
         ->and(json_decode($rec->final_result, true)['weighted_percent'])->toBe(72.5)
@@ -202,7 +206,9 @@ it('opens the completion task again when an approved result change makes a parti
     $this->actingAs($this->aina)->post("/results/{$res->id}/change", ['new_score' => '75', 'reason' => 'The project was marked on the wrong rubric'])->assertSessionHasNoErrors();
     $q = DB::table('result_change_requests')->first();
     $this->actingAs($this->hakim)->post("/results/$o/changes/{$q->id}", ['decision' => 'approve', 'note' => 'Re-marked on the right rubric'])->assertSessionHasNoErrors();
-    expect(Completion::check(eid($o, $this->amir))['met'])->toBeTrue()->and(DB::table('tasks')->where('kind', 'completion')->whereNull('completed_at')->exists())->toBeTrue();
+    expect(Completion::check(eid($o, $this->amir))['met'])->toBeTrue()->and(DB::table('tasks')->where('kind', 'coordinator_signoff')->whereNull('completed_at')->exists())->toBeTrue();
+    coordinatorSignOff($o, [eid($o, $this->amir)]);
+    expect(DB::table('tasks')->where('kind', 'completion')->whereNull('completed_at')->exists())->toBeTrue();
 });
 
 // ---- who sees the record (FR-130, FR-135, FR-136)
@@ -256,4 +262,245 @@ it('does not remind early, late, or for a cohort that is not staged, and prefers
     DB::table('offerings')->where('id', $o)->update(['staged_completion' => false]);
     DB::table('notifications')->delete();
     expect(app(CompletionWindow::class)->remind())->toBe(0);
+});
+
+it('evaluates completion cleanly for separate_assessment UMC without deadlock', function () {
+    [$o, $v1, $mc] = openCohort();
+    DB::table('mc_modules')->where('mc_version_id', $v1)->where('seq', '>', 2)->delete();
+    DB::table('mc_versions')->where('id', $v1)->update(['credit_model' => 'separate_assessment']);
+    $m1 = DB::table('mc_modules')->where('mc_version_id', $v1)->where('seq', 1)->value('id');
+    $m2 = DB::table('mc_modules')->where('mc_version_id', $v1)->where('seq', 2)->value('id');
+    // Modules: Module 1 (learning, is_assessment=0), Module 2 (integrated assessment, is_assessment=1)
+    DB::table('mc_modules')->where('id', $m1)->update(['is_assessment' => false]);
+    DB::table('mc_modules')->where('id', $m2)->update(['is_assessment' => true]);
+
+    $oldCids = DB::table('assessment_components')->where('mc_version_id', $v1)->pluck('id');
+    DB::table('assessment_component_outcomes')->whereIn('assessment_component_id', $oldCids)->delete();
+    DB::table('assessment_components')->where('mc_version_id', $v1)->delete();
+
+    $assessCompId = DB::table('assessment_components')->insertGetId([
+        'mc_version_id' => $v1,
+        'mc_module_id' => $m2,
+        'name_en' => 'Integrated Final Assessment',
+        'weight_percent' => 100,
+        'max_mark' => 100,
+        'pass_mark' => 50,
+    ]);
+
+    $e = DB::table('enrolments')->insertGetId([
+        'reference' => 'E-T-'.Str::random(6),
+        'user_id' => $this->amir->id,
+        'offering_id' => $o,
+        'mc_version_id' => $v1,
+        'status' => 'enrolled',
+        'fee_amount' => 0,
+        'ack_text' => 'x',
+        'ack_versions' => '{}',
+        'modules_completed' => 1,
+        'status_changed_at' => now(),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Add marks for the integrated assessment module 2
+    DB::table('assessment_results')->insert([
+        'enrolment_id' => $e,
+        'assessment_component_id' => $assessCompId,
+        'score' => 80,
+        'status' => 'verified',
+        'source' => 'manual',
+        'verified_by' => $this->hakim->id,
+        'verified_at' => now(),
+        'verification_evidence' => 'Exam pass',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $check = Completion::check($e);
+    expect($check['met'])->toBeTrue();
+});
+
+it('aggregates module achievements across cohorts within completion window (Cl. 7.4)', function () {
+    [$o1, $v1, $mc] = openCohort(['cohort_name' => '2026/1', 'completion_window_months' => 24]);
+    DB::table('mc_modules')->where('mc_version_id', $v1)->where('seq', '>', 2)->delete();
+    $m1 = DB::table('mc_modules')->where('mc_version_id', $v1)->where('seq', 1)->value('id');
+    $m2 = DB::table('mc_modules')->where('mc_version_id', $v1)->where('seq', 2)->value('id');
+
+    $oldCids = DB::table('assessment_components')->where('mc_version_id', $v1)->pluck('id');
+    DB::table('assessment_component_outcomes')->whereIn('assessment_component_id', $oldCids)->delete();
+    DB::table('assessment_components')->where('mc_version_id', $v1)->delete();
+
+    $c1 = DB::table('assessment_components')->insertGetId([
+        'mc_version_id' => $v1, 'mc_module_id' => $m1, 'name_en' => 'Module 1 Assessment',
+        'weight_percent' => 50, 'max_mark' => 100, 'pass_mark' => 50,
+    ]);
+    $c2 = DB::table('assessment_components')->insertGetId([
+        'mc_version_id' => $v1, 'mc_module_id' => $m2, 'name_en' => 'Module 2 Assessment',
+        'weight_percent' => 50, 'max_mark' => 100, 'pass_mark' => 50,
+    ]);
+
+    $e1 = DB::table('enrolments')->insertGetId([
+        'reference' => 'E-T-'.Str::random(6),
+        'user_id' => $this->amir->id,
+        'offering_id' => $o1,
+        'mc_version_id' => $v1,
+        'status' => 'enrolled',
+        'fee_amount' => 0,
+        'ack_text' => 'x',
+        'ack_versions' => '{}',
+        'status_changed_at' => now()->subMonths(3),
+        'created_at' => now()->subMonths(3),
+        'updated_at' => now()->subMonths(3),
+    ]);
+
+    // Amir achieves Module 1 in Cohort 1
+    DB::table('assessment_results')->insert([
+        'enrolment_id' => $e1, 'assessment_component_id' => $c1, 'score' => 80,
+        'status' => 'verified', 'source' => 'manual', 'verified_by' => $this->hakim->id,
+        'verified_at' => now()->subMonths(3), 'created_at' => now()->subMonths(3),
+    ]);
+    DB::table('module_achievements')->insert([
+        'enrolment_id' => $e1, 'mc_module_id' => $m1,
+        'verified_by' => $this->hakim->id, 'achieved_at' => now()->subMonths(3),
+    ]);
+
+    // Later, Amir enrols in Cohort 2 for Module 2
+    $o2 = DB::table('offerings')->insertGetId([
+        'mc_version_id' => $v1,
+        'cohort_name' => '2026/2',
+        'status' => 'open',
+        'readiness_state' => 'confirmed',
+        'completion_window_months' => 24,
+        'start_date' => today()->addDays(30),
+        'end_date' => today()->addDays(90),
+        'reg_opens_on' => today(),
+        'reg_closes_on' => today()->addDays(20),
+        'delivery_mode' => 'online',
+        'capacity' => 30,
+        'fee' => 0,
+        'created_by' => $this->aina->id,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $e2 = DB::table('enrolments')->insertGetId([
+        'reference' => 'E-T-'.Str::random(6),
+        'user_id' => $this->amir->id,
+        'offering_id' => $o2,
+        'mc_version_id' => $v1,
+        'status' => 'enrolled',
+        'fee_amount' => 0,
+        'ack_text' => 'x',
+        'ack_versions' => '{}',
+        'status_changed_at' => now(),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // In Cohort 2, Amir achieves Module 2
+    DB::table('assessment_results')->insert([
+        'enrolment_id' => $e2, 'assessment_component_id' => $c2, 'score' => 85,
+        'status' => 'verified', 'source' => 'manual', 'verified_by' => $this->hakim->id,
+        'verified_at' => now(), 'created_at' => now(),
+    ]);
+    DB::table('module_achievements')->insert([
+        'enrolment_id' => $e2, 'mc_module_id' => $m2,
+        'verified_by' => $this->hakim->id, 'achieved_at' => now(),
+    ]);
+
+    // Check completion on Cohort 2 enrolment: it recognizes Module 1 from Cohort 1 and Module 2 from Cohort 2
+    $check = Completion::check($e2);
+    expect($check['met'])->toBeTrue();
+});
+
+it('blocks cross-cohort aggregation when module achievement is outside completion window', function () {
+    [$o1, $v1, $mc] = openCohort(['cohort_name' => '2024/1', 'completion_window_months' => 12]);
+    DB::table('mc_modules')->where('mc_version_id', $v1)->where('seq', '>', 2)->delete();
+    $m1 = DB::table('mc_modules')->where('mc_version_id', $v1)->where('seq', 1)->value('id');
+    $m2 = DB::table('mc_modules')->where('mc_version_id', $v1)->where('seq', 2)->value('id');
+
+    $oldCids = DB::table('assessment_components')->where('mc_version_id', $v1)->pluck('id');
+    DB::table('assessment_component_outcomes')->whereIn('assessment_component_id', $oldCids)->delete();
+    DB::table('assessment_components')->where('mc_version_id', $v1)->delete();
+
+    $c1 = DB::table('assessment_components')->insertGetId([
+        'mc_version_id' => $v1, 'mc_module_id' => $m1, 'name_en' => 'Module 1 Assessment',
+        'weight_percent' => 50, 'max_mark' => 100, 'pass_mark' => 50,
+    ]);
+    $c2 = DB::table('assessment_components')->insertGetId([
+        'mc_version_id' => $v1, 'mc_module_id' => $m2, 'name_en' => 'Module 2 Assessment',
+        'weight_percent' => 50, 'max_mark' => 100, 'pass_mark' => 50,
+    ]);
+
+    $e1 = DB::table('enrolments')->insertGetId([
+        'reference' => 'E-T-'.Str::random(6),
+        'user_id' => $this->amir->id,
+        'offering_id' => $o1,
+        'mc_version_id' => $v1,
+        'status' => 'enrolled',
+        'fee_amount' => 0,
+        'ack_text' => 'x',
+        'ack_versions' => '{}',
+        'status_changed_at' => now()->subMonths(20),
+        'created_at' => now()->subMonths(20),
+        'updated_at' => now()->subMonths(20),
+    ]);
+
+    // Module 1 achieved 20 months ago (window is 12 months)
+    DB::table('assessment_results')->insert([
+        'enrolment_id' => $e1, 'assessment_component_id' => $c1, 'score' => 80,
+        'status' => 'verified', 'source' => 'manual', 'verified_by' => $this->hakim->id,
+        'verified_at' => now()->subMonths(20), 'created_at' => now()->subMonths(20),
+    ]);
+    DB::table('module_achievements')->insert([
+        'enrolment_id' => $e1, 'mc_module_id' => $m1,
+        'verified_by' => $this->hakim->id, 'achieved_at' => now()->subMonths(20),
+    ]);
+
+    // Cohort 2
+    $o2 = DB::table('offerings')->insertGetId([
+        'mc_version_id' => $v1,
+        'cohort_name' => '2026/2',
+        'status' => 'open',
+        'readiness_state' => 'confirmed',
+        'completion_window_months' => 12,
+        'start_date' => today()->addDays(30),
+        'end_date' => today()->addDays(90),
+        'reg_opens_on' => today(),
+        'reg_closes_on' => today()->addDays(20),
+        'delivery_mode' => 'online',
+        'capacity' => 30,
+        'fee' => 0,
+        'created_by' => $this->aina->id,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $e2 = DB::table('enrolments')->insertGetId([
+        'reference' => 'E-T-'.Str::random(6),
+        'user_id' => $this->amir->id,
+        'offering_id' => $o2,
+        'mc_version_id' => $v1,
+        'status' => 'enrolled',
+        'fee_amount' => 0,
+        'ack_text' => 'x',
+        'ack_versions' => '{}',
+        'status_changed_at' => now(),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    DB::table('assessment_results')->insert([
+        'enrolment_id' => $e2, 'assessment_component_id' => $c2, 'score' => 85,
+        'status' => 'verified', 'source' => 'manual', 'verified_by' => $this->hakim->id,
+        'verified_at' => now(), 'created_at' => now(),
+    ]);
+    DB::table('module_achievements')->insert([
+        'enrolment_id' => $e2, 'mc_module_id' => $m2,
+        'verified_by' => $this->hakim->id, 'achieved_at' => now(),
+    ]);
+
+    // Module 1 is expired, so completion is not met
+    $check = Completion::check($e2);
+    expect($check['met'])->toBeFalse();
 });

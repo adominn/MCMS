@@ -18,7 +18,7 @@
     <x-cat :c="$v->category" />
     <x-pill :s="$v->category_status === 'proposed' ? __('Proposed') : __('Verified')" />
     <x-pill :s="__(\App\Modules\Approval\ApprovalController::STATUS[$v->status] ?? $v->status)" />
-    <a class="btn ter sm" href="{{ route('proposals.print', $v->id) }}" target="_blank">{{ __('Print (Appendix A)') }}</a>
+    <a class="btn ter sm" href="{{ route('proposals.print', $v->id) }}" target="_blank">{{ __('Print Proposal') }}</a>
     <a class="btn ter sm" href="{{ route('proposals') }}">{{ __('All proposals') }}</a>
     @if($v->status === 'draft')
       <form method="post" action="{{ route('proposals.destroy', $v->id) }}" data-confirm="{{ __('Delete this draft proposal?') }}|{{ __('This draft proposal and its unsaved changes will be permanently removed. This action cannot be undone.') }}" data-danger data-label="{{ __('Delete draft') }}" style="display:inline;margin:0">
@@ -215,7 +215,7 @@
       clearTimeout(timer);
     });
 
-    // Save changes before user clicks ANY link (top tabs or check guide in sidebar)
+    // Save changes before user clicks ANY link (top tabs or sidebar)
     document.addEventListener('click', function (e) {
       var a = e.target.closest('a');
       if (!a || !a.href || a.target === '_blank') return;

@@ -1,0 +1,101 @@
+URL: http://127.0.0.1:8110/transfers/1/letter
+FINAL: http://127.0.0.1:8110/transfers/1/letter
+STATUS: 200
+TITLE: Transfer application - UTeM Micro-Credential Management System
+H1: Transfer Application TR-2026-0001
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+1
+HR
+Hakim Rahman
+Deputy dean, FTMK
+ACADEMIC GOVERNANCE
+Task queue
+7
+Proposals and approval
+Quality Verification
+Quality review
+Stackable pathways
+COHORT OPERATIONS
+Offerings and readiness
+Results and completion
+1
+CREDIT & CERTIFICATION
+Credentials
+Credit transfer
+INSIGHT & AUDIT
+Reports
+Traceability
+Documents
+Notifications
+1
+Collapse sidebar
+←
+Back
+Credit transfer evaluation
+TR-2026-0001
+Transfer Application TR-2026-0001
+Amir Hakimi (B032410001) · BITS Bachelor of Computer Science (Software Development) with Honours · applied 15/10/2026
+← Credit transfer queue
+Approved
+Decision letter (PDF)
+Micro-Credential Credit Lifecycle
+Stage 08 / 08 · TR-2026-0001
+01
+Learning & Results
+Completed
+02
+Coordinator Sign-off
+Completed
+03
+Completion Confirmed
+Completed
+04
+ACR Confirmed
+Completed
+05
+Learner Consent
+Completed
+06
+ABC Deposit
+Completed
+07
+Transfer Evaluation
+Completed
+08
+Single Redemption
+Current stage
+Approved on 25/10/2026 , reference JKKP-FTMK-TR-2026/02 · Decided by Hakim Rahman (Deputy Dean (Academic), FTMK) .
+Conditions / Justification: Exemption granted for 2 elective credits.
+Transfer Lines & Outcomes
+1 rows
+Credit used (ACR)
+	Course requested
+	Requested
+	Approved
+	Credit status
+
+Cloud Native Development
+ACR-2026-0001	BITS 1124 Advanced Algorithms	2	2	Redeemed
+Supporting Documents Checklist
+[X] Academic Credit Record (ACR)
+[ ] Micro-Credential certificate or credential
+[ ] Learning outcomes statement
+[ ] Course or module content outline
+[ ] Student Learning Time (SLT) and credit breakdown
+[ ] Assessment method and evidence
+[ ] Quality Verification (QV) or accreditation proof
+[X] Other supporting documents
+Other: portfolio-amir.pdf
+acr-2026-0001.pdf;portfolio-amir.pdf
+What this means
+
+The decision is made by the receiving programme. It does not admit you to the programme, and a refusal does not change your Academic Credit Record, badges, certificates or credentials.
+
+If a line is not approved, your ACR and credit stay as they were. An approved transfer holds credit as Provisionally Redeemed until programme graduation.
+
+Print Decision Letter (A4)
+← Back to credit transfer queue

@@ -159,6 +159,9 @@ final class EnrolmentController
         $this->status->refresh();
         $o = $this->offering($offering);
         $u = $request->user();
+        if ($request->query('step') === '1' || $request->has('back')) {
+            $request->session()->forget("reg.$offering");
+        }
         $mine = DB::table('enrolments')->where('user_id', $u->id)->where('offering_id', $offering)->whereNotIn('status', ['withdrawn', 'cancelled'])->first();
         $step = $mine ? ($mine->status === 'pending_payment' ? 3 : 4) : ($request->session()->get("reg.$offering") ? 2 : 1);
         $ack = $this->recognition->acknowledged($offering);
@@ -168,6 +171,7 @@ final class EnrolmentController
             'pdpa' => ! DB::table('pdpa_acknowledgements')->where('user_id', $u->id)->where('notice_version', config('enrolment.pdpa_version'))->exists(), 'pdpaText' => config('enrolment.pdpa'),
             'token' => (string) Str::uuid(), 'platform' => $o->platform_ref,
             'payment' => $mine ? DB::table('payments')->where('enrolment_id', $mine->id)->orderByDesc('id')->first() : null,
+            'checks' => $this->enrol->checks($u, $o),
         ]);
     }
 
@@ -323,7 +327,27 @@ final class EnrolmentController
 
     private function offering(int $id): object
     {
-        return DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->where('o.id', $id)
-            ->first(['o.*', 'v.name_en', 'v.name_ms', 'm.category', 'u.name as lecturer_name']) ?? abort(404);
+        return DB::table('offerings as o')
+            ->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
+            ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+            ->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
+            ->leftJoin('parent_courses as p', 'p.id', '=', 'v.parent_course_id')
+            ->where('o.id', $id)
+            ->first([
+                'o.*',
+                'v.name_en',
+                'v.name_ms',
+                'v.planned_slt',
+                'v.proposed_credit',
+                'v.proposed_mqf_level',
+                'v.delivery_mode as version_delivery_mode',
+                'v.qv_status',
+                'v.qv_valid_until',
+                'p.code as parent_course_code',
+                'p.name as parent_course_name',
+                'm.code as mc_code',
+                'm.category',
+                'u.name as lecturer_name',
+            ]) ?? abort(404);
     }
 }

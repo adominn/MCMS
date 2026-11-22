@@ -65,33 +65,42 @@
 
 <div style="margin-bottom:16px">
   <h2 style="font-size:12pt;margin:0 0 6px">{{ __('How to open your course on UCreds') }}</h2>
-  <ol style="padding-left:18px;margin:0;display:flex;flex-direction:column;gap:4px;font-size:10pt">
-    <li>The course space opens on UCreds before {{ $startDate }}. You get a message when it is ready.</li>
-    <li>Sign in to UCreds with your UTeM account. There is no separate password.</li>
-    <li>Open the course named <b>{{ $o->name_en }}, {{ $o->cohort_name }}</b>. Modules open in order.</li>
-    <li>Return to MCMS to follow progress. Results and credentials appear there after the lecturer submits and the deputy dean verifies them.</li>
-  </ol>
-  <div class="bm" style="font-size:9pt;margin-top:4px;color:var(--muted)">
-    Log masuk ke UCreds dengan akaun UTeM anda. Ruang kursus dibuka sebelum {{ $startDate }}; modul dibuka mengikut urutan.
-  </div>
+  @if(app()->getLocale() === 'ms')
+    <ol style="padding-left:18px;margin:0;display:flex;flex-direction:column;gap:4px;font-size:10pt">
+      <li>Ruang kursus dibuka di UCreds sebelum {{ $startDate }}. Anda akan menerima mesej apabila ia tersedia.</li>
+      <li>Log masuk ke UCreds menggunakan akaun UTeM anda. Tiada kata laluan berasingan diperlukan.</li>
+      <li>Buka kursus bernama <b>{{ $o->name_ms ?: $o->name_en }}, {{ $o->cohort_name }}</b>. Modul dibuka mengikut urutan.</li>
+      <li>Kembali ke MCMS untuk memantau kemajuan. Keputusan dan kredensial dipaparkan selepas pensyarah menghantar dan timbalan dekan mengesahkannya.</li>
+    </ol>
+  @else
+    <ol style="padding-left:18px;margin:0;display:flex;flex-direction:column;gap:4px;font-size:10pt">
+      <li>The course space opens on UCreds before {{ $startDate }}. You get a message when it is ready.</li>
+      <li>Sign in to UCreds with your UTeM account. There is no separate password.</li>
+      <li>Open the course named <b>{{ $o->name_en }}, {{ $o->cohort_name }}</b>. Modules open in order.</li>
+      <li>Return to MCMS to follow progress. Results and credentials appear there after the lecturer submits and the deputy dean verifies them.</li>
+    </ol>
+  @endif
 </div>
 
 <div style="margin-bottom:16px">
   <h2 style="font-size:12pt;margin:0 0 6px">{{ __('What you receive') }}</h2>
   <div style="font-size:10pt">
-    @if($cat === 'MCE')
-      {{ $o->name_en }} is a Micro-Credential Eksekutif (MCE). It earns a certificate and module badges. It carries no academic credit, so no Academic Credit Record is made and it cannot be used for credit transfer.
-    @elseif($cat === 'UMC')
-      {{ $o->name_en }} is an Unbundled Micro-Credential (UMC). Completing all modules earns academic credit, a certificate, a Digital Credential, and an Academic Credit Record (ACR) you may choose to deposit in ABC.
+    @if(app()->getLocale() === 'ms')
+      @if($cat === 'MCE')
+        {{ $o->name_ms ?: $o->name_en }} ialah Micro-Credential Eksekutif (MCE). Tawaran ini memberi sijil dan lencana modul sahaja tanpa kredit akademik, jadi tiada Rekod Kredit Akademik (ACR) dikeluarkan dan tidak boleh digunakan untuk pemindahan kredit.
+      @elseif($cat === 'UMC')
+        {{ $o->name_ms ?: $o->name_en }} ialah Micro-Credential Terungkai (UMC). Penamatan semua modul menganugerahkan kredit akademik, sijil, Kredensial Digital, dan Rekod Kredit Akademik (ACR) yang boleh anda pilih untuk didepositkan ke dalam ABC.
+      @else
+        {{ $o->name_ms ?: $o->name_en }} ialah Micro-Credential Berdiri Sendiri (SAMC). Penamatan semua modul menganugerahkan sijil dan lencana; kredit serta tahap MQF direkodkan dalam ACR hanya apabila Pengesahan Kualiti masih sah.
+      @endif
     @else
-      {{ $o->name_en }} is a Standalone Micro-Credential (SAMC). Completing all modules earns a certificate and badges. Credit and MQF level are recorded in an ACR only while Quality Verification is valid.
-    @endif
-  </div>
-  <div class="bm" style="font-size:9pt;margin-top:4px;color:var(--muted)">
-    @if($cat === 'MCE')
-      Tawaran ini memberi sijil dan lencana modul sahaja, tanpa kredit akademik.
-    @else
-      Penamatan memberi sijil dan Kredensial Digital; kredit direkodkan dalam ACR hanya apabila layak mengikut pengesahan kualiti.
+      @if($cat === 'MCE')
+        {{ $o->name_en }} is a Micro-Credential Eksekutif (MCE). It earns a certificate and module badges. It carries no academic credit, so no Academic Credit Record is made and it cannot be used for credit transfer.
+      @elseif($cat === 'UMC')
+        {{ $o->name_en }} is an Unbundled Micro-Credential (UMC). Completing all modules earns academic credit, a certificate, a Digital Credential, and an Academic Credit Record (ACR) you may choose to deposit in ABC.
+      @else
+        {{ $o->name_en }} is a Standalone Micro-Credential (SAMC). Completing all modules earns a certificate and badges. Credit and MQF level are recorded in an ACR only while Quality Verification is valid.
+      @endif
     @endif
   </div>
 </div>
@@ -99,10 +108,11 @@
 <div class="note" style="margin-bottom:16px;font-size:9.5pt">
   <div>
     <b>{{ __("Separate stages notice:") }}</b>
-    Completion, credential, ACR, ABC deposit and credit transfer are separate decisions, each made by a different person at a different time. Registering does not promise any of them. Deposit in ABC is storage, not a transfer.
-  </div>
-  <div class="bm" style="font-size:8.5pt;margin-top:4px">
-    Penamatan, kredensial, ACR, deposit ABC dan pindahan kredit ialah keputusan berasingan. Pendaftaran tidak menjanjikan mana-mana daripadanya.
+    @if(app()->getLocale() === 'ms')
+      Penamatan, kredensial, ACR, deposit ABC dan pemindahan kredit ialah keputusan berasingan yang dibuat oleh pihak berbeza pada masa berbeza. Pendaftaran tidak menjanjikan mana-mana daripadanya. Deposit dalam ABC ialah penyimpanan sahaja, bukan pemindahan kredit.
+    @else
+      Completion, credential, ACR, ABC deposit and credit transfer are separate decisions, each made by a different person at a different time. Registering does not promise any of them. Deposit in ABC is storage, not a transfer.
+    @endif
   </div>
 </div>
 

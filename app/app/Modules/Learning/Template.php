@@ -27,7 +27,13 @@ final class Template
 
     public static function components(int $versionId)
     {
-        return DB::table('assessment_components')->where('mc_version_id', $versionId)->orderBy('id')->get();
+        return DB::table('assessment_components as ac')
+            ->leftJoin('mc_modules as m', 'm.id', '=', 'ac.mc_module_id')
+            ->where('ac.mc_version_id', $versionId)
+            ->select('ac.*', 'm.name_en as module_name', 'm.seq as module_seq', 'm.slt_hours as module_slt')
+            ->orderByRaw('CASE WHEN ac.mc_module_id IS NULL THEN 999 ELSE m.seq END')
+            ->orderBy('ac.id')
+            ->get();
     }
 
     /** @return list<string> */

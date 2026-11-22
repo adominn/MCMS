@@ -12,8 +12,8 @@
   <div>
     <b>{{ $lang === 'ms' ? 'Pelajari' : 'Learn' }}</b>
     <a href="{{ route('public.catalogue') }}" style="display:block">{{ $lang === 'ms' ? 'Senarai penuh tawaran' : 'All micro-credentials' }}</a>
-    <a href="{{ route('public.pathways') }}" style="display:block">{{ $lang === 'ms' ? 'Laluan ke ijazah (panduan)' : 'Degree pathways guide' }}</a>
-    <a href="{{ route('public.how') }}" style="display:block">{{ $lang === 'ms' ? 'Peringkat pengiktirafan (panduan)' : 'Recognition stages guide' }}</a>
+    <a href="{{ route('public.pathways') }}" style="display:block">{{ $lang === 'ms' ? 'Laluan ke ijazah' : 'Degree pathways' }}</a>
+    <a href="{{ route('public.how') }}" style="display:block">{{ $lang === 'ms' ? 'Peringkat pengiktirafan' : 'Recognition stages' }}</a>
   </div>
   <div>
     <b>{{ $lang === 'ms' ? 'Bantuan' : 'Help' }}</b>
@@ -28,6 +28,6 @@
     <a href="{{ route('public.accessibility') }}" style="display:block">{{ $lang === 'ms' ? 'Kebolehcapaian' : 'Accessibility' }}</a>
   </div>
   <div style="margin-left:auto;max-width:360px">
-    {{ $lang === 'ms' ? 'Sistem Pengurusan Micro-Credential UTeM (MCMS). Mematuhi Garis Panduan Amalan Baik MQA & KPT.' : 'UTeM Micro-Credential Management System (MCMS). Compliant with MQA & MoHE Good Practice Guidelines.' }}
+    {{ $lang === 'ms' ? 'Sistem Pengurusan Micro-Credential UTeM (MCMS). Mematuhi Standard Amalan Baik MQA & KPT.' : 'UTeM Micro-Credential Management System (MCMS). Compliant with MQA & MoHE Good Practice Standards.' }}
   </div>
 </footer>

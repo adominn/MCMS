@@ -1,0 +1,262 @@
+/**
+ * UTeM MCMS UI/UX Design System (v3) - Page Specific Styles
+ * Authority: DESIGN.md (v2.4 "linear-precision")
+ */
+
+/* ==========================================================================
+   Sign-In Split View Architecture (Public Auth)
+   ========================================================================== */
+.signin-viewport {
+  min-height: 100vh;
+  display: flex;
+  background-color: var(--color-sidebar-bg);
+}
+
+.signin-hero-side {
+  flex: 1.2;
+  position: relative;
+  background-color: var(--color-sidebar-bg);
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  color: #ffffff;
+}
+
+.signin-hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.55;
+  filter: saturate(1.15) contrast(1.05);
+}
+
+.signin-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(11, 26, 61, 0.70) 0%, rgba(7, 18, 42, 0.82) 100%);
+}
+
+.signin-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 620px;
+}
+
+.signin-panel-side {
+  flex: 0.8;
+  min-width: 420px;
+  background-color: var(--color-canvas);
+  border-top-left-radius: var(--radius-sidebar-corner);
+  border-bottom-left-radius: var(--radius-sidebar-corner);
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  z-index: 5;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.15);
+}
+
+.signin-panel-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.signin-sso-guide {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-line-hairline);
+  border-left: 3px solid var(--color-primary);
+  padding: 12px 16px;
+  border-radius: var(--radius-xs);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.sso-guide-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sso-email-text {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.sso-role-note {
+  font-size: 12.5px;
+  color: var(--color-ink-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.sso-code {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--color-primary);
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-weight: var(--font-weight-semibold);
+}
+
+@media (max-width: 992px) {
+  .signin-viewport {
+    flex-direction: column;
+  }
+  .signin-hero-side {
+    flex: none;
+    padding: 32px 24px;
+    min-height: 240px;
+  }
+  .signin-panel-side {
+    flex: none;
+    min-width: unset;
+    border-top-left-radius: var(--radius-sidebar-corner);
+    border-bottom-left-radius: 0;
+    border-top-right-radius: var(--radius-sidebar-corner);
+    padding: 36px 24px;
+  }
+}
+
+/* ==========================================================================
+   Public Catalogue Layout
+   ========================================================================== */
+.catalogue-layout {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+.catalogue-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 140px;
+}
+
+.catalogue-results {
+  flex: 1;
+  min-width: 0;
+}
+
+.offering-card {
+  background: var(--color-canvas);
+  border: 1px solid var(--color-card-border, #090a0f);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.offering-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(0, 82, 255, 0.06);
+}
+
+.offering-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.offering-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--color-ink-muted);
+  border-top: var(--border-width-hairline) solid var(--color-line-hairline);
+  padding-top: 12px;
+  margin-top: 14px;
+}
+
+@media (max-width: 860px) {
+  .catalogue-layout {
+    flex-direction: column;
+  }
+  .catalogue-sidebar {
+    width: 100%;
+    position: static;
+  }
+}
+
+/* ==========================================================================
+   Verification Results Dossier
+   ========================================================================== */
+.verify-dossier {
+  background: var(--color-canvas);
+  border: 1px solid var(--color-card-border, #090a0f);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-subtle);
+  margin-bottom: 32px;
+}
+
+.verify-dossier-banner {
+  padding: 24px;
+  border-bottom: var(--border-width-hairline) solid var(--color-line-hairline);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.verify-dossier-banner.valid { background: var(--color-success-tint); border-left: 6px solid var(--color-success); }
+.verify-dossier-banner.superseded { background: var(--color-warning-tint); border-left: 6px solid var(--color-warning); }
+.verify-dossier-banner.revoked { background: var(--color-error-tint); border-left: 6px solid var(--color-error); }
+.verify-dossier-banner.badge { background: var(--color-info-tint); border-left: 6px solid var(--color-primary); }
+.verify-dossier-banner.not-found { background: var(--color-surface-1); border-left: 6px solid var(--color-ink-muted); }
+
+.crypto-stamp-box {
+  background: var(--color-surface-1);
+  border: var(--border-width-hairline) solid var(--color-line-hairline);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--color-ink);
+  line-height: 1.5;
+  margin-top: 20px;
+  word-break: break-all;
+}
+
+/* ==========================================================================
+   Print Sheet Rules (Academic Pathway & Verification Transcripts)
+   ========================================================================== */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 12pt;
+  }
+  .brand-header, .nav-ribbon, .public-footer, .btn, .search-pill-form, .no-print {
+    display: none !important;
+  }
+  .main-content {
+    padding: 0 !important;
+  }
+  .card, .verify-dossier {
+    border: 1px solid #000000 !important;
+    box-shadow: none !important;
+  }
+}

@@ -1,0 +1,69 @@
+URL: http://127.0.0.1:8110/records/discrepancies
+FINAL: http://127.0.0.1:8110/records/discrepancies
+STATUS: 200
+TITLE: Discrepancy log - UTeM Micro-Credential Management System
+H1: Discrepancy & Record Correction Log
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+1
+HR
+Hakim Rahman
+Deputy dean, FTMK
+ACADEMIC GOVERNANCE
+Task queue
+7
+Proposals and approval
+Quality Verification
+Quality review
+Stackable pathways
+COHORT OPERATIONS
+Offerings and readiness
+Results and completion
+1
+CREDIT & CERTIFICATION
+Credentials
+Credit transfer
+INSIGHT & AUDIT
+Reports
+Traceability
+Documents
+Notifications
+1
+Collapse sidebar
+←
+Back
+Traceability
+Discrepancy log
+Discrepancy & Record Correction Log
+Mismatches between achievement records, credentials, ACR, and ABC are resolved strictly through logged corrections while preserving the original record.
+Check the records now
+Traceability
+Audit trail
+Reports
+Discrepancy log
+Retention
+Recorded discrepancies and corrections
+4 discrepancies
+Found	Mismatch	Status	Correction, Source Check & Approver (F10)
+03/11/2026	ACR-2026-0003 carries 2.0 MC credits mapped to 3.0 parent course credits in TR-2026-0003.	Open	
+Reason
+Action taken
+I checked the valid source record
+Resolve
+
+02/11/2026	Database Systems module SLT sum (74 hours) does not equal total planned SLT (80 hours).	Open	
+Reason
+Action taken
+I checked the valid source record
+Resolve
+
+01/11/2026	Credential UTEM-MC-2026-0009 was revoked on 2026-11-01; verify no active ACR deposit remains.	Resolved	
+Reason: Employer sponsorship audit finding. · Action: Confirmed credential revocation and blocked ACR generation for enrolment #15.
+Corrected on: 01/11/2026 · Approved by: Farid Hashim (Administrator, Centre for Open and Distance Learning (CODL)) · Source verified: Yes · Participant notified: Yes
+
+13/10/2026	Student Bee Tan registered passport number in LMS differed by one digit from national IC record.	Resolved	
+Reason: Verified against physical passport photocopy presented at CODL counter. · Action: Updated user profile and re-issued valid verifiable credential revision 2.
+Corrected on: 15/10/2026 · Approved by: Farid Hashim (Administrator, Centre for Open and Distance Learning (CODL)) · Source verified: Yes · Participant notified: Yes

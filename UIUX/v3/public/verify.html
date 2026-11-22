@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verify a Credential - UTeM Micro-Credential Management System</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+</head>
+<body>
+  
+  <header class="brand-header">
+    <div class="container brand-header-inner">
+      <a href="../public/home.html" class="brand-identity" aria-label="UTeM Micro-Credential Management System Home">
+        <img src="../assets/LogoJawiUTeM_blue-01.png" alt="Universiti Teknikal Malaysia Melaka" class="brand-logo-img">
+        <div class="brand-titles">
+          <span class="brand-sys-title">UTeM MCMS</span>
+        </div>
+      </a>
+      
+      <nav class="header-nav" aria-label="Public Navigation">
+        <ul class="header-nav-list">
+          <li><a href="../public/home.html" class="header-nav-link ">Home</a></li>
+          <li><a href="../public/catalogue.html" class="header-nav-link ">Catalogue</a></li>
+          <li><a href="../public/pathways.html" class="header-nav-link ">Pathways</a></li>
+          <li><a href="../public/how-it-works.html" class="header-nav-link ">Recognition Stages</a></li>
+          <li><a href="../public/faq.html" class="header-nav-link ">FAQ</a></li>
+          <li><a href="../public/verify.html" class="header-nav-link active">Verify</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="../auth/signin-default.html" class="btn btn-primary btn-sm">Sign In</a>
+      </div>
+    </div>
+  </header>
+  
+  
+  <main class="main-content">
+    
+<div class="container">
+
+
+  <div class="breadcrumbs">
+    <a href="home.html">Home</a>
+    <span class="breadcrumbs-sep">/</span>
+    <span>Verify a Credential</span>
+  </div>
+
+  <div style="margin-bottom:28px">
+    <h1>Verify Credentials & Digital Badges</h1>
+    <p style="margin-top:4px">Verify the authenticity of UTeM micro-credential certificates and digital badges online or via cryptographic file signature.</p>
+  </div>
+
+  <div class="grid grid-cols-2 gap-lg" style="margin-bottom:32px">
+    <!-- Method 1: Verify by Code -->
+    <div class="card flex flex-col justify-between" style="border-top:4px solid var(--color-primary)">
+      <div>
+        <div class="flex items-center gap-xs" style="margin-bottom:8px">
+          <span class="tag tag-primary">Method 1: Public Code</span>
+        </div>
+        <h2 style="font-size:18px;margin-bottom:8px">Search by Credential Code</h2>
+        <p style="font-size:13.5px;line-height:1.5;margin-bottom:16px">
+          Enter the 10-character code printed on the official certificate or digital badge transcript (e.g., CND01-7K9MJ).
+        </p>
+
+        <form id="public-verify-form">
+          <div class="form-group">
+            <label for="verify-code-input" class="form-label">Credential or Badge Code</label>
+            <input type="text" id="verify-code-input" placeholder="e.g. CND01-7K9MJ or BADGE-CND-M1-01" class="input" style="font-family:var(--font-mono);font-size:14px;letter-spacing:0.04em" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg">Verify Credential Code</button>
+        </form>
+      </div>
+
+      <div style="font-size:12px;color:var(--color-ink-muted);border-top:1px solid var(--color-line-hairline);padding-top:12px;margin-top:20px">
+        <b>Test sample codes:</b> 
+        <code>CND01-7K9MJ</code> (Valid), 
+        <code>SEC02-3X8PQ</code> (Superseded), 
+        <code>DATA9-1Z4TR</code> (Revoked), 
+        <code>BADGE-CND-M1-01</code> (Badge)
+      </div>
+    </div>
+
+    <!-- Method 2: Cryptographic File Verification -->
+    <div class="card flex flex-col justify-between" style="border-top:4px solid var(--color-success)">
+      <div>
+        <div class="flex items-center gap-xs" style="margin-bottom:8px">
+          <span class="tag tag-success">Method 2: Cryptographic Signature</span>
+        </div>
+        <h2 style="font-size:18px;margin-bottom:8px">Verify Cryptographic File</h2>
+        <p style="font-size:13.5px;line-height:1.5;margin-bottom:16px">
+          Upload a W3C Verifiable Credential (.json) or signed token (.jwt) to verify its signature against UTeM's Ed25519 public key.
+        </p>
+
+        <form action="verify-result-valid.html" method="get">
+          <div class="form-group">
+            <label for="file-upload-input" class="form-label">Select Credential File (.json / .jwt / .txt)</label>
+            <input type="file" id="file-upload-input" accept=".json,.jwt,.txt" class="input" style="padding:6px">
+          </div>
+          <button type="submit" class="btn btn-secondary btn-block btn-lg" style="background:var(--color-success);color:#ffffff;border-color:var(--color-success)">
+            Verify Cryptographic Signature
+          </button>
+        </form>
+      </div>
+
+      <div style="font-size:12px;color:var(--color-ink-muted);border-top:1px solid var(--color-line-hairline);padding-top:12px;margin-top:20px">
+        <b>Cryptographic Standards:</b> W3C Verifiable Credentials 2.0 &middot; Open Badges 3.0 &middot; Ed25519 (EdDSA)
+      </div>
+    </div>
+  </div>
+
+  <!-- Trust & Cryptographic Explanation Card -->
+  <div class="card card-subtle">
+    <div class="flex items-center gap-xs" style="margin-bottom:8px">
+      <span class="tag"> INTEGRITY & SECURITY]</span>
+    </div>
+    <h3 style="font-size:16px;margin-bottom:8px">How Cryptographic Verification Works</h3>
+    <p style="font-size:13px;line-height:1.6;margin-bottom:0">
+      Every credential issued through UTeM MCMS is cryptographically signed using an asynchronous Ed25519 private key securely stored in UTeM's hardware security module (HSM). The cryptographic signature guarantees that the recipient name, completion outcomes, and credit values have not been modified or tampered with since issuance.
+    </p>
+  </div>
+</div>
+
+  </main>
+
+  
+  <footer class="public-footer">
+    <div class="container">
+      <div class="grid grid-cols-4 gap-lg">
+        <div>
+          <img src="../assets/CODL_logo.png" alt="Centre for Open and Distance Learning" style="height:60px;width:auto;display:block;margin-bottom:14px">
+          <div class="footer-heading">UTeM Micro-credentials</div>
+          <p style="color:#94a3b8;font-size:12.5px;line-height:1.5">
+            Centre for Open and Distance Learning (CODL)<br>
+            Universiti Teknikal Malaysia Melaka<br>
+            Hang Tuah Jaya, 76100 Durian Tunggal, Melaka
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-heading">Learn</div>
+          <a href="../public/catalogue.html">All Micro-Credentials</a>
+          <a href="../public/pathways.html">Degree Pathways</a>
+          <a href="../public/how-it-works.html">Recognition Stages</a>
+        </div>
+
+        <div>
+          <div class="footer-heading">Help & Verification</div>
+          <a href="../public/faq.html">Frequently Asked Questions</a>
+          <a href="../public/verify.html">Verify a Credential</a>
+          <a href="mailto:codl@utem.edu.my">Contact CODL: codl@utem.edu.my</a>
+        </div>
+
+        <div>
+          <div class="footer-heading">Policies & Governance</div>
+          <a href="../public/policy-privacy.html">Privacy Notice (PDPA)</a>
+          <a href="../public/policy-terms.html">Terms of Use</a>
+          <a href="../public/policy-accessibility.html">Accessibility Statement</a>
+        </div>
+      </div>
+
+      <div class="footer-legal">
+        Micro-credentials issued under the UTeM Micro-Credential Framework compliant with MQA Code of Practice for Programme Accreditation and Malaysian Qualifications Framework (MQF) 2nd Edition. Micro-credentials do not automatically grant university admission.
+      </div>
+    </div>
+  </footer>
+  
+
+  <script src="../js/ui.js"></script>
+</body>
+</html>

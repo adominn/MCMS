@@ -33,7 +33,7 @@
 
   $unread = $u ? \Illuminate\Support\Facades\DB::table('notifications')->where('user_id', $u->id)->where('channel', 'in_system')->whereNull('read_at')->count() : 0;
   $tasksOpen = $u ? app(\App\Modules\Identity\TaskController::class)->visible($u)->whereNull('completed_at')->count() : 0;
-  $searchHint = $u ? ($activeRole === 'codl_admin' ? 'Search users, settings, files' : ($activeRole === 'deputy_dean' ? 'Search micro-credentials, learners, credentials' : ($activeRole === 'lecturer' ? 'Search micro-credentials, cohorts, learners' : null))) : null;
+  $searchHint = $u ? (in_array($activeRole, ['codl_admin']) ? 'Search users, settings, files' : (in_array($activeRole, ['deputy_dean', 'ptj_authority', 'academic_authority']) ? 'Search micro-credentials, learners, credentials' : (in_array($activeRole, ['lecturer', 'qa_officer']) ? 'Search micro-credentials, cohorts, learners' : (in_array($activeRole, ['records_custodian', 'abc_depositor', 'records_depositor']) ? 'Search credentials, deposits, learners' : null)))) : null;
   $ptjCode = $u ? \Illuminate\Support\Facades\DB::table('role_assignments as ra')->join('ptjs', 'ptjs.id', '=', 'ra.ptj_id')->where('ra.user_id', $u->id)->value('ptjs.code') : null;
   $recent = $u && ! request()->routeIs('public.*') ? \Illuminate\Support\Facades\DB::table('notifications')->where('user_id', $u->id)->where('channel', 'in_system')->orderByDesc('created_at')->limit(5)->get() : collect();
   $initials = $u ? collect(explode(' ', preg_replace('/^(Dr\.|Ir\.|Prof\.)\s+/', '', $u->name)))->map(fn ($w) => mb_substr($w, 0, 1))->take(2)->implode('') : '';
@@ -45,14 +45,36 @@
     'bell' => '<path d="M4 11V7a4 4 0 018 0v4l1 1H3zM6.5 14a1.5 1.5 0 003 0"/>', 'search' => '<circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/>', 'clock' => '<circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/>', 'edit' => '<path d="M2 14l1-4 8-8 3 3-8 8z"/>',
   ];
 
-  $areaCount = fn ($a) => $u && $activeRole === 'deputy_dean' ? app(\App\Modules\Identity\TaskController::class)->visible($u)->whereNull('completed_at')->where('area', $a)->count() : 0;
+  $areaCount = fn ($a) => $u && in_array($activeRole, ['deputy_dean', 'ptj_authority', 'academic_authority', 'records_depositor', 'records_custodian', 'abc_depositor', 'qa_officer', 'codl_admin'], true) ? app(\App\Modules\Identity\TaskController::class)->visible($u)->whereNull('completed_at')->where('area', $a)->count() : 0;
   $counts = match ($activeRole) {
-    'deputy_dean' => [
+    'codl_admin' => [
+      'approvals' => $areaCount('proposals'),
+      'transfers' => $areaCount('transfers'),
+    ],
+    'deputy_dean', 'ptj_authority' => [
       'approvals' => $areaCount('proposals'),
       'offerings' => $areaCount('offerings'),
       'results' => $areaCount('results'),
+      'transfers' => $areaCount('transfers'),
+      'credentials.admin' => $areaCount('credentials'),
+    ],
+    'academic_authority' => [
+      'approvals' => $areaCount('proposals'),
+      'transfers' => $areaCount('transfers'),
+    ],
+    'qa_officer' => [
+      'monitoring' => $areaCount('proposals'),
+    ],
+    'records_custodian' => [
+      'credentials.admin' => $areaCount('credentials'),
+      'results' => $areaCount('results'),
+    ],
+    'abc_depositor' => [
       'deposits' => $areaCount('deposits'),
       'transfers' => $areaCount('transfers'),
+    ],
+    'records_depositor' => [
+      'deposits' => $areaCount('deposits'),
       'credentials.admin' => $areaCount('credentials'),
     ],
     'lecturer' => [
@@ -81,7 +103,7 @@
       ['Teaching', 'My tasks', 'tasks', ['tasks*'], 'home'],
       ['Teaching', 'My micro-credentials', 'mcs', ['mcs*'], 'list'],
       ['Teaching', 'Proposals and versions', 'proposals', ['proposals*', 'comments.respond*'], 'edit'],
-      ['Teaching', 'Cohorts and results', 'offerings', ['offerings*', 'results.cohort*', 'results.save*', 'results.flag*'], 'cap'],
+      ['Teaching', 'Cohorts and results', 'offerings', ['offerings*', 'results.cohort*', 'results.save*', 'results.flag*', 'completion.signoff*', 'cohorts.credits*'], 'cap'],
       ['Teaching', 'Reviews for colleagues', 'reviews', ['reviews*'], 'check'],
       ['Quality', 'Quality review (CQI)', 'monitoring', ['monitoring*', 'cqi*', 'reviews.periodic*'], 'chart'],
       ['Quality', 'QV evidence', 'quality', ['quality*'], 'shield'],
@@ -91,7 +113,7 @@
       ['General', 'Documents', 'documents', ['documents*'], 'doc'],
       ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
     ],
-    'deputy_dean' => [
+    'deputy_dean', 'ptj_authority' => [
       ['Academic Governance', 'Task queue', 'tasks', ['tasks*'], 'home'],
       ['Academic Governance', 'Proposals and approval', 'approvals', ['approvals*', 'changes*'], 'edit'],
       ['Academic Governance', 'Quality Verification', 'quality', ['quality*'], 'shield'],
@@ -100,14 +122,70 @@
       ['Cohort Operations', 'Offerings and readiness', 'offerings', ['offerings*'], 'cap'],
       ['Cohort Operations', 'Results and completion', 'results', ['results*', 'completion*'], 'check'],
       ['Credit & Certification', 'Credentials', 'credentials.admin', ['credentials.admin*'], 'award'],
-      ['Credit & Certification', 'ACR and ABC deposits', 'deposits', ['deposits*'], 'bank'],
-      ['Credit & Certification', 'Credit transfer', 'transfers', ['transfers*'], 'swap'],
+      ['Credit & Certification', 'Transfer monitor', 'transfers', ['transfers*'], 'swap'],
       ['Insight & Audit', 'Reports', 'reports', ['reports*'], 'chart'],
       ['Insight & Audit', 'Traceability', 'trace', ['trace*', 'records.audit*', 'discrepancies*'], 'search'],
       ['General', 'Documents', 'documents', ['documents*'], 'doc'],
       ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
     ],
+    'academic_authority' => [
+      ['Senate & Academic Decisions', 'Task queue', 'tasks', ['tasks*'], 'home'],
+      ['Senate & Academic Decisions', 'Senate approvals', 'approvals', ['approvals*', 'changes*'], 'edit'],
+      ['Senate & Academic Decisions', 'Credit transfer decisions', 'transfers', ['transfers*'], 'swap'],
+      ['Senate & Academic Decisions', 'Stackable pathways', 'pathways', ['pathways*', 'plans*'], 'cap'],
+      ['Quality & Standards', 'Quality Verification', 'quality', ['quality*'], 'shield'],
+      ['Quality & Standards', 'Quality review (CQI)', 'monitoring', ['monitoring*', 'cqi*', 'suspensions*'], 'chart'],
+      ['Insight & Audit', 'Reports', 'reports', ['reports*'], 'chart'],
+      ['Insight & Audit', 'Traceability', 'trace', ['trace*', 'records.audit*', 'discrepancies*'], 'search'],
+      ['General', 'Documents', 'documents', ['documents*'], 'doc'],
+      ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
+    ],
+    'qa_officer' => [
+      ['Quality Assurance', 'Task queue', 'tasks', ['tasks*'], 'home'],
+      ['Quality Assurance', 'Quality Verification (QV)', 'quality', ['quality*'], 'shield'],
+      ['Quality Assurance', 'Quality review (CQI)', 'monitoring', ['monitoring*', 'cqi*', 'suspensions*'], 'chart'],
+      ['Quality Assurance', 'Proposals review', 'approvals', ['approvals*'], 'edit'],
+      ['Insight & Audit', 'Cohort records', 'trace', ['trace*', 'cohort.records*'], 'search'],
+      ['Insight & Audit', 'Reports', 'reports', ['reports*'], 'chart'],
+      ['General', 'Documents', 'documents', ['documents*'], 'doc'],
+      ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
+    ],
+    'records_custodian' => [
+      ['Registry & Credentials', 'Task queue', 'tasks', ['tasks*'], 'home'],
+      ['Registry & Credentials', 'Credentials management', 'credentials.admin', ['credentials.admin*'], 'award'],
+      ['Registry & Credentials', 'Results & completion', 'results', ['results*', 'completion*'], 'check'],
+      ['Registry & Credentials', 'Discrepancies & corrections', 'discrepancies', ['discrepancies*'], 'check'],
+      ['Insight & Audit', 'Cohort records', 'trace', ['trace*', 'cohort.records*'], 'search'],
+      ['Insight & Audit', 'Audit trail', 'records.audit', ['records.audit*'], 'list'],
+      ['Insight & Audit', 'Reports', 'reports', ['reports*'], 'chart'],
+      ['General', 'Documents', 'documents', ['documents*'], 'doc'],
+      ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
+    ],
+    'abc_depositor' => [
+      ['Credit Bank & ABC', 'Task queue', 'tasks', ['tasks*'], 'home'],
+      ['Credit Bank & ABC', 'ACR & ABC deposits', 'deposits', ['deposits*'], 'bank'],
+      ['Credit Bank & ABC', 'Credit transfer redemptions', 'transfers', ['transfers*'], 'swap'],
+      ['Credit Bank & ABC', 'Discrepancies & corrections', 'discrepancies', ['discrepancies*'], 'check'],
+      ['Insight & Audit', 'Traceability', 'trace', ['trace*'], 'search'],
+      ['Insight & Audit', 'Audit trail', 'records.audit', ['records.audit*'], 'list'],
+      ['Insight & Audit', 'Reports', 'reports', ['reports*'], 'chart'],
+      ['General', 'Documents', 'documents', ['documents*'], 'doc'],
+      ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
+    ],
+    'records_depositor' => [
+      ['Registry & ABC', 'Task queue', 'tasks', ['tasks*'], 'home'],
+      ['Registry & ABC', 'Credentials', 'credentials.admin', ['credentials.admin*'], 'award'],
+      ['Registry & ABC', 'ACR & ABC deposits', 'deposits', ['deposits*'], 'bank'],
+      ['Registry & ABC', 'Discrepancies & corrections', 'discrepancies', ['discrepancies*'], 'check'],
+      ['Insight & Audit', 'Traceability', 'trace', ['trace*'], 'search'],
+      ['Insight & Audit', 'Audit trail', 'records.audit', ['records.audit*'], 'list'],
+      ['Insight & Audit', 'Reports', 'reports', ['reports*'], 'chart'],
+      ['General', 'Documents', 'documents', ['documents*'], 'doc'],
+      ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
+    ],
     'codl_admin' => [
+      ['Academic Governance', 'Proposals & Senate', 'approvals', ['approvals*', 'changes*'], 'edit'],
+      ['Credit & Certification', 'Credit transfers', 'transfers', ['transfers*'], 'swap'],
       ['Administration', 'Users and roles', 'users', ['users*'], 'users'],
       ['Administration', 'Reference data', 'reference', ['reference*'], 'list', 'ptj'],
       ['Administration', 'Settings', 'settings', ['settings*'], 'gear'],
@@ -123,7 +201,7 @@
       ['General', 'Documents', 'documents', ['documents*'], 'doc'],
       ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
     ],
-    'industry_expert' => [
+    'industry_expert', 'reviewer' => [
       ['Invitations', 'My review invitations', 'reviews', ['reviews*'], 'check'],
       ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
     ],
@@ -220,10 +298,10 @@
             <a class="mi" href="{{ route('profile') }}">{{ __('My profile') }}</a>
             <a class="mi" href="{{ route('profile') }}#notifications">{{ __('Notification preferences') }}</a>
             <a class="mi" href="{{ route('profile') }}#sessions">{{ __('Sign-in and sessions') }}</a>
-            @if($u->hasAnyRole('student', 'lecturer', 'deputy_dean', 'codl_admin'))
+            @if($u->hasAnyRole('student', 'lecturer', 'deputy_dean', 'records_depositor', 'codl_admin'))
               <a class="mi" href="{{ route('documents') }}">{{ __('My documents') }}</a>
             @endif
-            <a class="mi" href="{{ route('help') }}">{{ __('Help and guides') }}</a>
+            <a class="mi" href="{{ route('help') }}">{{ __('Help Center') }}</a>
             <div class="sep"></div>
             <form method="post" action="{{ route('signout') }}">@csrf <button type="submit" class="mi" style="width:100%;background:none;color:var(--ink);height:auto;border:0">{{ __('Sign out') }}</button></form>
           </div>

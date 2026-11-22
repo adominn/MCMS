@@ -1,0 +1,117 @@
+URL: http://127.0.0.1:8110/deposits
+FINAL: http://127.0.0.1:8110/deposits
+STATUS: 200
+TITLE: ACR and ABC deposits - UTeM Micro-Credential Management System
+H1: ACR Confirmation & Academic Bank of Credit (ABC) Deposits
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+NI
+Nurul Izzah
+Registry / ABC depositor
+REGISTRY & ABC
+Task queue
+4
+ACR & ABC deposits
+4
+Discrepancies & corrections
+INSIGHT & AUDIT
+Traceability
+Audit trail
+Reports
+Documents
+Notifications
+Collapse sidebar
+ACR Confirmation & Academic Bank of Credit (ABC) Deposits
+Registry / ABC Depositor Workspace · Review and confirm generated Academic Credit Records (ACRs), export consented batches, and record ABC deposits.
+To confirm
+4
+Deposit queue
+2
+Waiting for consent
+1
+Deposited
+7
+Academic Credit Records to confirm
+4 records
+4 rows
+Record
+	Participant
+	Credits
+	Action
+
+Secure Software Development Lifecycle (SSDLC)
+ACR-2026-0009 · SAMC	Tengku Muhammad Iskandar Zulkarnain bin Tengku Abdul Rahman Al-Haj
+B032410006
+	2	Review
+Full-Stack Web & API Engineering
+MCMS-A-2026-000012 · UMC	Bee Tan
+B032410002
+	3	Review
+Full-Stack Web & API Engineering
+MCMS-A-2026-000013 · UMC	Cee Lim
+B032410003
+	3	Review
+Full-Stack Web & API Engineering
+MCMS-A-2026-000014 · UMC	Elena Gomez
+B032410005
+	3	Review
+Consented and confirmed records only. Only confirmed Academic Credit Records with explicit learner consent appear in the deposit queue.
+Queue for Academic Bank of Credit deposit
+2 ready
+	Record	Participant	Credits	Status	Action
+	Data Structures
+ACR-2026-0010	Tan Yi
+B032410007
+	2	Consent given, waiting for deposit	Record deposit
+	Full-Stack Web & API Engineering
+MCMS-A-2026-000011	Amir Hakimi
+B032410001
+	3	Consent given, waiting for deposit	Record deposit
+Export selected (CSV)
+Confirmed records awaiting learner consent
+1 waiting
+1 rows
+Record
+	Participant
+	Status
+	Action
+
+Data Structures
+ACR-2026-0005	Cee Lim	Confirmed, waiting for learner consent	Inspect
+Deposited in Academic Bank of Credit
+7 deposited
+7 rows
+Record
+	Participant
+	ABC reference
+	Deposit date
+	Expiry
+	Credit
+	Action
+
+Cloud Native Development
+ACR-2026-0001	Amir Hakimi	ABC-MYS-2026-098471	15/09/2026	15/09/2036	Redeemed	Open ACR
+Cloud Native Development
+ACR-2026-0002	Bee Tan	ABC-MYS-2026-098472	15/09/2026	15/09/2036	Available	Open ACR
+Data Structures
+ACR-2026-0003	Amir Hakimi	ABC-MYS-2026-098473	30/08/2026	30/08/2036	Redeemed	Open ACR
+Data Structures
+ACR-2026-0004	Bee Tan	ABC-MYS-2026-098474	30/08/2026	30/08/2036	Available	Open ACR
+Secure Software Development Lifecycle (SSDLC)
+ACR-2026-0006	Amir Hakimi	ABC-MYS-2026-098475	28/10/2026	28/10/2036	Available	Open ACR
+Object-Oriented Software Construction
+ACR-2026-0007	Amir Hakimi	ABC-MYS-2026-098476	28/10/2026	28/10/2036	Available	Open ACR
+Strategic Technopreneurship & Venture Creation
+ACR-2026-0008	Tan Yi	ABC-MYS-2026-098477	12/10/2026	12/10/2036	Redeemed	Open ACR
+Rows per page
+5
+10
+25
+50
+1–7 of 7
+Page 1 of 1
+‹
+›

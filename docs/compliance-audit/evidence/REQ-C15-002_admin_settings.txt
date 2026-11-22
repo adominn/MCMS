@@ -1,0 +1,457 @@
+URL: http://127.0.0.1:8110/admin/settings
+FINAL: http://127.0.0.1:8110/admin/settings
+STATUS: 200
+TITLE: Settings - UTeM Micro-Credential Management System
+H1: System Settings
+---
+UTeM MCMS
+Micro-Credential Management
+EN
+BM
+FH
+Farid Hashim
+CODL administrator
+ADMINISTRATION
+Users and roles
+Reference data
+Settings
+Templates
+Demo clock
+DATA EXCHANGE
+UCreds exchange
+UCreds content
+Adapter status
+Notification log
+RECORDS
+Audit trail
+Reports
+Retention
+Documents
+Notifications
+Collapse sidebar
+Administration
+Settings
+System Settings
+Values the business rules read. Every change requires an audit reason and an effective date. Earlier decisions keep the value that applied on their date.
+Configurable parameters
+35 rules
+Setting	Current value	Change setting
+
+Minimum SLT for a SAMC
+slt.min_hours_samc
+	
+40 hours
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Minimum SLT for a whole UMC (or 1 credit)
+slt.min_hours_umc_whole
+	
+40 hours
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Minimum SLT per module under the credit-based unbundling model
+slt.min_hours_module_credit_model
+	
+40 hours
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Notional learning hours per credit
+credit.slt_hours_per_credit
+	
+40 hours
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Maximum continuous validity of Quality Verification
+qv.max_validity_years
+	
+3 years
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Completed cohorts needed before QV submission
+qv.min_completed_cohorts
+	
+1 cohorts
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+UTeM is registered and authorised to offer the programme (1 = yes, 0 = no)
+qv.provider_registered
+	
+1 1 = yes
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Validity of credit in ABC from deposit date
+credit.abc_validity_years
+	
+10 years
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Minimum share of graduating credit earned at UTeM
+stackable.min_home_credit_percent
+	
+30 percent
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Residency for conventional programmes
+stackable.residency_semesters
+	
+1 semesters
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Days before QV expiry at which alerts are sent
+alerts.qv_expiry_days
+	
+180, 90, 60, 30 days
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Days before credit expiry at which the participant is alerted
+alerts.credit_expiry_days
+	
+365, 90 days
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Days after which a pending review or decision is reminded
+alerts.decision_overdue_days
+	
+14 days
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Default period to complete all modules of a modular UMC; an offering may set its own period
+umc.completion_window_months
+	
+No value yet
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Role that endorses a proposal and verifies its category
+approval.route.endorsement
+	
+deputy_dean
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Role that decides a credit transfer for the target programme
+approval.route.transfer
+	
+deputy_dean
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Role that approves and publishes a stackable pathway mapping
+approval.route.stackable
+	
+deputy_dean
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Role that decides the suspension or termination of an offering
+approval.route.suspension
+	
+deputy_dean
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Target active participation rate of a cohort
+quality.target_participation_percent
+	
+80 percent
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Target completion rate of a cohort
+quality.target_completion_percent
+	
+70 percent
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Target pass rate of a cohort
+quality.target_pass_percent
+	
+70 percent
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Target credential issuance rate among those who completed
+quality.target_issuance_percent
+	
+95 percent
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Months between periodic reviews of a micro-credential
+review.interval_months
+	
+24 months
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Days before a periodic review at which the lecturer and PTj are reminded
+review.remind_days
+	
+30 days
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Role that approves the disposal of records after their retention period
+approval.route.disposal
+	
+deputy_dean
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Retention of the notification log
+retention.notifications_years
+	
+2 years
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Retention of the report run log
+retention.report_runs_years
+	
+2 years
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Retention of the integration call log
+retention.integration_years
+	
+2 years
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Days the demo clock is ahead of the real date (test environments only)
+demo.clock_offset_days
+	
+0 days
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Role that records the Senate decision
+approval.route.senate
+	
+deputy_dean
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+A participant can withdraw until this many days before the cohort ends
+enrolment.withdrawal_days_before_end
+	
+20 days
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+A registration not paid within this time is cancelled and the place released
+enrolment.payment_window_hours
+	
+48 hours
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Idle session timeout
+auth.idle_timeout_minutes
+	
+30 minutes
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Fields shown on the public verification page
+verification.public_fields
+	
+Name, Credential, Issuer, Date, Status
+	
+New value
+Effective date
+Reason
+Change
+History
+
+
+Public base URL for credential sharing and external verification (e.g. https://credentials.utem.edu.my)
+verification.public_url
+	
+	
+New value
+Effective date
+Reason
+Change
+History
+Note on module credit flags: The module credit flag is not a setting. Whether a module carries academic credit is decided with the programme structure and the deputy dean, not by CODL administrators.

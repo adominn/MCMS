@@ -45,7 +45,13 @@
           <td><a href="{{ route('proposals.show', $v->id) }}">Version {{ $v->version_no }}</a></td>
           <td><x-pill :s="__($statusLabels[$v->status] ?? ucfirst($v->status))" /></td>
           <td>{{ $v->effective_date ? \Carbon\Carbon::parse($v->effective_date)->format('d/m/Y') : '' }}</td>
-          <td>{{ __(['initial' => 'First version', 'minor' => 'Minor', 'material' => 'Material change', 'reoffer' => 'Re-offer'][$v->change_class] ?? $v->change_class) }}@if($v->change_summary)<span class="s" style="display:block;color:var(--muted);font-size:12px">{{ $v->change_summary }}</span>@endif</td>
+          <td>
+            {{ __(['initial' => 'First version', 'minor' => 'Minor', 'material' => 'Material change', 'reoffer' => 'Re-offer'][$v->change_class] ?? $v->change_class) }}
+            @if($v->change_summary)<span class="s" style="display:block;color:var(--muted);font-size:12px">{{ $v->change_summary }}</span>@endif
+            @if(!empty($diffs[$v->id]))
+              <div style="margin-top:4px;font-size:11px;color:var(--text-secondary);"><span class="badge" style="background:#e0e0e0;padding:1px 5px;border-radius:2px;font-size:10px;text-transform:uppercase;font-weight:600;">Diff</span> {{ implode(' · ', $diffs[$v->id]) }}</div>
+            @endif
+          </td>
           <td>@if($dec){{ __(str_replace('_', ' ', ucfirst($dec->decision))) }}, {{ $dec->meeting_ref }}@endif</td>
           <td>@if($rules->has($v->id)){{ __($rulesText[$rules[$v->id]->rule] ?? $rules[$v->id]->rule) }}@else<span class="muted">{{ $v->supersedes_id ? __('Rule recorded at approval') : __('No change') }}</span>@endif</td>
         </tr>
@@ -86,5 +92,12 @@
     </form>
   </div></div>
   @endif
+</div>
+
+<div class="note info" style="margin-top:20px">
+  <b>{{ __('NOTA PENTING (Lampiran A):') }}</b> {{ __('Kelulusan penawaran MC, penganugerahan credential, penyediaan ACR, deposit ke ABC dan pemindahan kredit merupakan proses yang berbeza dan tertakluk kepada ketetapan serta kelulusan pihak berkuasa yang berkaitan. Kelulusan penawaran tidak menjamin pemindahan kredit atau kemasukan ke program akademik UTeM secara automatik.') }}
+  <div class="small muted" style="margin-top:4px">
+    <b>{{ __('IMPORTANT NOTICE (Appendix A):') }}</b> {{ __('MC offering approval, credential award, ACR preparation, ABC deposit, and credit transfer are distinct processes subject to the requirements and approvals of respective authorities. Offering approval does not guarantee automatic credit transfer or admission into UTeM degree programmes.') }}
+  </div>
 </div>
 @endsection

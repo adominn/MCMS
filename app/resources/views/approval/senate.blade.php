@@ -33,7 +33,7 @@
         <div class="hd"><h2>{{ __('Senate meeting details') }}</h2></div>
         <div class="bd">
           <p class="muted s" style="margin-top:0">
-            {{ __('The Senate does not use MCMS directly. As deputy dean, you record its formal decision from meeting minutes. Endorsed by faculty on :date.', ['date' => \Carbon\Carbon::parse($endorsedOn)->format('d/m/Y')]) }}
+            {{ __('The Senate does not use MCMS directly. As CODL administrator, you record its formal decision from meeting minutes. Endorsed by faculty on :date.', ['date' => \Carbon\Carbon::parse($endorsedOn)->format('d/m/Y')]) }}
           </p>
 
           <div class="field" style="margin-bottom:16px;max-width:320px">
@@ -125,7 +125,7 @@
           <div style="border-top:1px solid var(--border);padding-top:10px">
             <b>{{ __('Separation of credit claims') }}</b>
             <p class="muted s" style="margin:2px 0 0">
-              {{ __('Under MQA guidelines, SAMC credit and MQF levels require an independent Quality Verification dossier review.') }}
+              {{ __('Under MQA standards, SAMC credit and MQF levels require an independent Quality Verification dossier review.') }}
             </p>
           </div>
         </div>

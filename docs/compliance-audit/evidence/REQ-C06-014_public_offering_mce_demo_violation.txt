@@ -1,0 +1,130 @@
+URL: http://127.0.0.1:8110/public/offering/4
+FINAL: http://127.0.0.1:8110/public/offering/4
+STATUS: 200
+TITLE: Lean Six Sigma Yellow Belt - UTeM Micro-Credential Management System
+H1: Lean Six Sigma Yellow Belt
+---
+UTeM MCMS
+Public Verification & Credential Portal
+Sign in
+EN
+BM
+Home
+Catalogue
+Pathways to a degree
+How recognition works
+FAQ
+Verify a credential
+←
+Back
+Home
+Catalogue
+Lean Six Sigma Yellow Belt 2026/12
+UTeM MCE
+MCE
+2026/12
+Lean Six Sigma Yellow Belt
+Fakulti Pengurusan Teknologi Dan Teknousahawanan · Dr. Aina Zulkifli · Online · English
+Register
+
+Comprehensive modular micro-credential delivered via UTeM uLearn with guided lab clinics and authentic competency assessment.
+
+What this does and does not give you
+This is an Executive Micro-Credential (MCE). It earns no academic credit, no Academic Credit Record and no deposit to the Academic Bank of Credit.
+Learning outcomes
+Apply DMAIC metrics to identify and eliminate manufacturing bottlenecks.
+Modules
+Learning time (SLT): 40 Hours
+1 rows
+#
+	Modules
+	Digital Badge
+	SLT (Hours)
+
+1	
+DMAIC Principles and Process Capability
+Separately Recognisable Module
+	
+MOD 1
+UTeM MCE
+M1 Badge
+	40 hours
+Assessment
+1 rows
+Assessment Component
+	Weighting (%)
+
+DMAIC Process Capability Case Study	100%
+Pass standard: Competency-based practical lab and capstone project (>= 50%).
+Assessment Integrity: Git commit history audit and authenticated sandbox environment.
+Feedback Method: Line-by-line code review and rubric commentary.
+Identity Verification: Authenticated learner session and code repository signature.
+What you receive
+Verifiable Credentials
+UTeM MCE
+Open Badges 3.0
+Lean Six Sigma Yellow Belt Digital Badge
+MCE
+Standard: Open Badges 3.0 · W3C Verifiable Credential (Ed25519 Cryptographic Proof)
+Issuer: Universiti Teknikal Malaysia Melaka (UTeM) · CODL
+Portability: Shareable to LinkedIn, digital CVs, and verifiable credential wallets.
+Modular Digital Badges Awarded:
+MOD 1
+UTeM MCE
+M1: DMAIC Principles and Process Capability
+Each module earns its own digital badge upon verified assessment completion.
+OFFICIAL CERTIFICATE
+UTeM Micro-Credential Certificate
+High-resolution digital certificate with a unique immutable verification code and QR code for employer verification.
+ACADEMIC RECOGNITION
+Professional Skill Development
+Competency certificate of completion (no academic credit and no ACR record).
+Requirements and support
+Prerequisites: Basic programming or engineering literacy; laptop with 8GB RAM.
+Access period: 16 weeks from cohort start date.
+Completion conditions: Complete all learning modules and achieve at least 50% in every summative assessment component.
+Learning support: Weekly 1-hour synchronous consultation via Microsoft Teams and 24/7 uLearn discussion forum.
+Fee
+RM 200.00
+UTeM MCE
+Institution
+UTeM (CODL)
+Faculty
+Fakulti Pengurusan Teknologi Dan Teknousahawanan
+Lecturer
+Dr. Aina Zulkifli
+Facilitators
+Assoc. Prof. Dr. Ahmad Razali
+Delivery mode
+Online
+Language
+English
+Duration
+4 weeks
+Starts
+14/12/2026
+Ends
+02/02/2027
+Places
+25 places
+Credit
+None
+Credential you receive
+Certificate, Digital Badge
+Registration open: 30/10/2026 to 04/12/2026
+UTeM Micro-credentials
+Centre for Open and Distance Learning (CODL)
+UTeM, Hang Tuah Jaya, 76100 Durian Tunggal, Melaka
+Learn
+All micro-credentials
+Degree pathways
+Recognition stages
+Help
+FAQ
+Verify a credential
+codl@utem.edu.my
+Policies
+Privacy notice (PDPA)
+Terms of use
+Accessibility
+UTeM Micro-Credential Management System (MCMS). Compliant with MQA & MoHE Good Practice Standards.

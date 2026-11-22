@@ -210,9 +210,60 @@ it('records an award only after admission, a suitable plan and every requirement
     $this->post("/plans/{$s->id}/award", ['evidence_ref' => 'Graduation list', 'awarded_on' => today()->toDateString()])->assertSessionHasErrors('evidence_ref');
     DB::table('admissions')->insert(['user_id' => $this->amir->id, 'programme_id' => bits()->id, 'intake' => '2027/1', 'recorded_by' => $this->hakim->id, 'recorded_at' => now()]);
     $this->post("/plans/{$s->id}/decision", ['decision' => 'suitable']);
-    $this->post("/plans/{$s->id}/award", ['evidence_ref' => 'Graduation list', 'awarded_on' => today()->toDateString()])->assertSessionHasNoErrors();
+
+    // Remaining requirements still 'todo' - award must be blocked
+    $this->post("/plans/{$s->id}/award", ['evidence_ref' => 'Graduation list', 'awarded_on' => today()->toDateString()])->assertSessionHasErrors('evidence_ref');
+
+    // Complete remaining requirements
+    $this->post("/plans/{$s->id}", [
+        'items' => array_slice($items, 0, 2),
+        'residency_semesters' => 1,
+        'delivery_method' => 'conventional',
+        'remaining' => [['kind' => 'project', 'name' => 'Final year project', 'status' => 'done']],
+    ])->assertSessionHasNoErrors();
+    $this->post("/plans/{$s->id}/decision", ['decision' => 'suitable']);
+
+    // Set up a provisional ABC deposit for Amir to verify atomic redemption on award
+    $dep = deposited();
+    DB::table('abc_deposits')->where('id', $dep->id)->update([
+        'credit_status' => 'provisional',
+        'credits_provisional' => 3.0,
+        'credits_redeemed' => 0.0,
+    ]);
+    $appId = DB::table('transfer_applications')->insertGetId([
+        'reference' => 'TR-2026-0001',
+        'user_id' => $this->amir->id,
+        'programme_id' => bits()->id,
+        'applied_by' => $this->amir->id,
+        'applied_at' => now(),
+        'status' => 'approved',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $mcVer = DB::table('mc_versions')->first();
+    DB::table('transfer_lines')->insert([
+        'transfer_application_id' => $appId,
+        'acr_id' => $dep->acr_id,
+        'abc_deposit_id' => $dep->id,
+        'mc_version_id' => $mcVer->id,
+        'parent_course_id' => course('BITS 1123'),
+        'credits_requested' => 3.0,
+        'credits_approved' => 3.0,
+        'target_version' => '2026',
+        'source_version_no' => 1,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $this->actingAs($this->hakim)->post("/plans/{$s->id}/award", ['evidence_ref' => 'Graduation list', 'awarded_on' => today()->toDateString()])->assertSessionHasNoErrors();
     expect(DB::table('qualification_awards')->count())->toBe(1);
     $this->get("/plans/{$s->id}")->assertSee('does not give it', false)->assertSee('Award recorded');
+
+    // Assert that the provisional credit was atomically redeemed on degree conferment
+    $depRow = DB::table('abc_deposits')->find($dep->id);
+    expect($depRow->credit_status)->toBe('redeemed')
+        ->and((float) $depRow->credits_redeemed)->toBe(3.0)
+        ->and((float) $depRow->credits_provisional)->toBe(0.0);
 });
 
 it('uses a published mapping only, and keeps a plan inside the faculty (FR-spplan, FR-12)', function () {
@@ -254,4 +305,27 @@ it('flags a mapping for review when the micro-credential changes or the target c
     DB::table('pathways')->where('id', $pw)->update(['status' => 'published', 'review_reason' => null]);
     Plans::flagCourse('BITS 1124', 'The target course BITS 1124 changed');
     expect(DB::table('pathways')->find($pw)->status)->toBe('review');
+});
+
+it('renders Appendix G specifications: G4 PLO, G5 BoK table, G8 7-component remaining, G9 analysis, G11 sign-off and Nota Penting G (REQ-AG-004, REQ-AG-005, REQ-AG-008, REQ-AG-009, REQ-AG-011)', function () {
+    [$pw, $mc, $items] = publishedPathway();
+
+    // Verify Pathway Show view
+    $res = $this->actingAs($this->hakim)->get("/pathways/$pw")->assertOk();
+    $res->assertSee('G4: Pemetaan kepada Hasil Pembelajaran Program (PLO)')
+        ->assertSee('G5: Pemetaan kepada Body of Knowledge (BoK)')
+        ->assertSee('G8: Baki Keperluan Program yang Perlu Disempurnakan (7 Komponen)')
+        ->assertSee('G9: Ringkasan Analisis Kredit dan Jurang')
+        ->assertSee('G11: Pengesahan Pemetaan (3 Peranan)')
+        ->assertSee('Penyelaras Program Stackable')
+        ->assertSee('NOTA PENTING (Lampiran G)');
+
+    // Verify Print view (Lampiran G)
+    $printRes = $this->get("/public/pathways/$pw/print")->assertOk();
+    $printRes->assertSee('G4. Pemetaan kepada Hasil Pembelajaran Program (PLO)')
+        ->assertSee('G5. Pemetaan kepada Body of Knowledge (BoK)')
+        ->assertSee('G8. Baki Keperluan Program yang Perlu Disempurnakan (7 Komponen)')
+        ->assertSee('G9. Ringkasan Analisis Kredit dan Jurang')
+        ->assertSee('G11. Pengesahan Pemetaan (3 Peranan)')
+        ->assertSee('NOTA PENTING (Lampiran G)');
 });

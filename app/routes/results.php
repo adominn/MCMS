@@ -22,9 +22,12 @@ Route::middleware(['auth', 'role:lecturer'])->group(function () {
     Route::post('/results/{result}/change', [ResultsController::class, 'requestChange'])->whereNumber('result')->name('results.change');
 });
 
-Route::middleware(['auth', 'role:deputy_dean'])->prefix('results')->group(function () {
+Route::middleware(['auth', 'role:deputy_dean,ptj_authority,records_custodian,records_depositor'])->prefix('results')->group(function () {
     Route::get('/', [ResultsController::class, 'index'])->name('results');
     Route::get('/{id}', [ResultsController::class, 'verifyPage'])->whereNumber('id')->name('results.verify');
+});
+
+Route::middleware(['auth', 'role:deputy_dean,ptj_authority'])->prefix('results')->group(function () {
     Route::post('/{id}/verify', [ResultsController::class, 'verify'])->whereNumber('id')->name('results.verify.do');
     Route::post('/{id}/cases/{case}/resolve', [ResultsController::class, 'resolveCase'])->whereNumber(['id', 'case'])->name('results.case');
     Route::post('/{id}/changes/{change}', [ResultsController::class, 'decideChange'])->whereNumber(['id', 'change'])->name('results.decide');

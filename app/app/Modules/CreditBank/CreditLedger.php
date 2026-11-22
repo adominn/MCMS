@@ -57,29 +57,125 @@ final class CreditLedger
         };
     }
 
-    public function provisional(int $depositId, ?int $lineId, ?int $by): void
+    public function provisional(int $depositId, ?int $lineId, ?int $by, ?float $credits = null): void
     {
         $d = $this->locked($depositId);
-        if ($why = $this->whyNot($d)) {
+        $reqCredits = $credits !== null ? (float) $credits : (float) $d->credits;
+        $curProv = (float) ($d->credits_provisional ?? 0);
+        $curRed = (float) ($d->credits_redeemed ?? 0);
+        $avail = max(0.0, (float) $d->credits - $curProv - $curRed);
+
+        // Check if expired credit has been re-evaluated and deemed current
+        $isReevalApproved = false;
+        if ($lineId) {
+            $line = DB::table('transfer_lines')->find($lineId);
+            if ($line && $line->reevaluate) {
+                $currencyResult = DB::table('equivalence_criteria')
+                    ->where('transfer_line_id', $lineId)
+                    ->where('criterion', 'currency')
+                    ->value('result');
+                if ($currencyResult === 'current') {
+                    $isReevalApproved = true;
+                }
+            }
+        }
+
+        if (! $isReevalApproved && ($why = $this->whyNot($d))) {
             throw ValidationException::withMessages(['credit' => $why]); // the second active application is blocked (FR-rdconflict)
         }
-        $this->move($d, 'provisional', 'provisional', 'provisional', $lineId, null, null, null, $by); // EV-49
+
+        if ($reqCredits > $avail && ! $isReevalApproved && $avail > 0) {
+            throw ValidationException::withMessages(['credit' => "Only {$avail} credits available on this deposit."]);
+        }
+
+        $newProv = $curProv + $reqCredits;
+        $newStatus = ($newProv + $curRed) >= (float) $d->credits ? 'provisional' : 'available';
+
+        DB::transaction(function () use ($d, $reqCredits, $newProv, $newStatus, $lineId, $by) {
+            $rid = DB::table('redemption_events')->insertGetId([
+                'abc_deposit_id' => $d->id,
+                'transfer_line_id' => $lineId,
+                'event' => 'provisional',
+                'evidence_ref' => null,
+                'abc_updated_on' => null,
+                'abc_update_ref' => null,
+                'recorded_by' => $by,
+                'occurred_at' => now(),
+            ]);
+            DB::table('abc_deposits')->where('id', $d->id)->update([
+                'credits_provisional' => $newProv,
+                'credit_status' => $newStatus,
+                'updated_at' => now(),
+            ]);
+            $this->entry($d->id, 'provisional', $d->credit_status, $newStatus, (string) $reqCredits, $rid, $by);
+            $this->audit->record('credit.provisional', ['type' => 'AbcDeposit', 'id' => $d->id], before: ['status' => $d->credit_status, 'credits_provisional' => (float) ($d->credits_provisional ?? 0)], after: ['status' => $newStatus, 'credits_provisional' => $newProv], actorId: $by);
+        });
     }
 
-    public function redeem(int $depositId, string $evidence, ?string $abcOn, ?string $abcRef, int $by): void
+    public function redeem(int $depositId, string $evidence, ?string $abcOn, ?string $abcRef, int $by, ?float $credits = null): void
     {
         $d = $this->locked($depositId);
-        abort_unless($d->credit_status === 'provisional', 422, 'Only provisionally redeemed credit can be redeemed.');
-        $this->move($d, 'redeemed', 'final', 'redeemed', null, $evidence, $abcOn, $abcRef, $by);
+        abort_unless($d->credit_status === 'provisional' || (float) ($d->credits_provisional ?? 0) > 0, 422, 'Only provisionally redeemed credit can be redeemed.');
+        $reqCredits = $credits !== null ? (float) $credits : (float) ($d->credits_provisional > 0 ? $d->credits_provisional : $d->credits);
+        $curProv = (float) ($d->credits_provisional ?? 0);
+        $curRed = (float) ($d->credits_redeemed ?? 0);
+        $newProv = max(0.0, $curProv - $reqCredits);
+        $newRed = $curRed + $reqCredits;
+        $newStatus = ($newRed >= (float) $d->credits) ? 'redeemed' : ($newProv > 0 ? 'provisional' : 'available');
+
+        DB::transaction(function () use ($d, $reqCredits, $newProv, $newRed, $newStatus, $evidence, $abcOn, $abcRef, $by) {
+            $rid = DB::table('redemption_events')->insertGetId([
+                'abc_deposit_id' => $d->id,
+                'transfer_line_id' => null,
+                'event' => 'final',
+                'evidence_ref' => $evidence,
+                'abc_updated_on' => $abcOn,
+                'abc_update_ref' => $abcRef,
+                'recorded_by' => $by,
+                'occurred_at' => now(),
+            ]);
+            DB::table('abc_deposits')->where('id', $d->id)->update([
+                'credits_provisional' => $newProv,
+                'credits_redeemed' => $newRed,
+                'credit_status' => $newStatus,
+                'updated_at' => now(),
+            ]);
+            $this->entry($d->id, 'redeemed', $d->credit_status, $newStatus, (string) $reqCredits, $rid, $by);
+            $this->audit->record('credit.redeemed', ['type' => 'AbcDeposit', 'id' => $d->id], before: ['status' => $d->credit_status], after: ['status' => $newStatus, 'credits_redeemed' => $newRed], actorId: $by);
+        });
     }
 
     /** Withdrawal or non-completion: back to Available if still valid, else Expired (FR-rdrelease). */
-    public function release(int $depositId, string $evidence, ?string $abcOn, ?string $abcRef, int $by): void
+    public function release(int $depositId, string $evidence, ?string $abcOn, ?string $abcRef, int $by, ?float $credits = null): void
     {
         $d = $this->locked($depositId);
-        abort_unless($d->credit_status === 'provisional', 422, 'Only provisionally redeemed credit can be released.');
-        $to = $d->credit_expiry >= today()->toDateString() ? 'available' : 'expired';
-        $this->move($d, $to === 'available' ? 'released' : 'expired', 'released', $to, null, $evidence, $abcOn, $abcRef, $by); // EV-50
+        abort_unless($d->credit_status === 'provisional' || (float) ($d->credits_provisional ?? 0) > 0, 422, 'Only provisionally redeemed credit can be released.');
+        $reqCredits = $credits !== null ? (float) $credits : (float) ($d->credits_provisional > 0 ? $d->credits_provisional : $d->credits);
+        $curProv = (float) ($d->credits_provisional ?? 0);
+        $newProv = max(0.0, $curProv - $reqCredits);
+        $isExpired = $d->credit_expiry && $d->credit_expiry < today()->toDateString();
+        $newStatus = ($newProv > 0) ? 'provisional' : ($isExpired ? 'expired' : 'available');
+
+        DB::transaction(function () use ($d, $reqCredits, $newProv, $newStatus, $isExpired, $evidence, $abcOn, $abcRef, $by) {
+            $rid = DB::table('redemption_events')->insertGetId([
+                'abc_deposit_id' => $d->id,
+                'transfer_line_id' => null,
+                'event' => 'released',
+                'evidence_ref' => $evidence,
+                'abc_updated_on' => $abcOn,
+                'abc_update_ref' => $abcRef,
+                'recorded_by' => $by,
+                'occurred_at' => now(),
+            ]);
+            DB::table('abc_deposits')->where('id', $d->id)->update([
+                'credits_provisional' => $newProv,
+                'credit_status' => $newStatus,
+                'updated_at' => now(),
+            ]);
+            $event = ($isExpired && $newProv <= 0) ? 'expired' : 'released';
+            $this->entry($d->id, $event, $d->credit_status, $newStatus, (string) $reqCredits, $rid, $by);
+            $this->audit->record('credit.'.$event, ['type' => 'AbcDeposit', 'id' => $d->id], before: ['status' => $d->credit_status], after: ['status' => $newStatus, 'credits_provisional' => $newProv], actorId: $by);
+        });
     }
 
     /** JB-09: credit past its expiry becomes Expired. The ACR stays (BR-28). */
@@ -92,10 +188,12 @@ final class CreditLedger
                 if ($d->credit_status !== 'available') {
                     return;
                 }
-                DB::table('abc_deposits')->where('id', $d->id)->update(['credit_status' => 'expired', 'updated_at' => now()]);
-                $this->entry($d->id, 'expired', 'available', 'expired', (string) $d->credits, null, null);
+                $unheld = (float) $d->credits - (float) ($d->credits_provisional ?? 0) - (float) ($d->credits_redeemed ?? 0);
+                $newStatus = ((float) ($d->credits_provisional ?? 0) > 0) ? 'provisional' : 'expired';
+                DB::table('abc_deposits')->where('id', $d->id)->update(['credit_status' => $newStatus, 'updated_at' => now()]);
+                $this->entry($d->id, 'expired', 'available', $newStatus, (string) max(0.0, $unheld), null, null);
                 \App\Modules\Transfer\Transfers::flagDeposit($d->id); // EV-48 flags an application that uses it
-                $this->audit->record('credit.expired', ['type' => 'AbcDeposit', 'id' => $d->id], before: ['status' => 'available'], after: ['status' => 'expired']); // EV-48
+                $this->audit->record('credit.expired', ['type' => 'AbcDeposit', 'id' => $d->id], before: ['status' => 'available'], after: ['status' => $newStatus]); // EV-48
                 $u = User::find(DB::table('acrs')->where('id', $d->acr_id)->value('user_id'));
                 $this->notifier->send($u, 'credit.expired', ['name' => $u->name, 'title' => $this->title($d->acr_id), 'date' => \Carbon\Carbon::parse($d->credit_expiry)->format('d/m/Y')], dedupe: "credit-expired-{$d->id}");
                 $n++;

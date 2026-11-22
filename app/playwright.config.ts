@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 // End-to-end flows of the UI/UX Design Specification (FL-xx) against the real application and its own database.
 const env = { ...process.env, DB_DATABASE: 'mcms_e2e', MCMS_STUB_IDP: 'true', APP_ENV: 'local' } as Record<string, string>;
-const port = 8101;
+const port = 8105;
 
 export default defineConfig({
   testDir: 'tests/E2E',

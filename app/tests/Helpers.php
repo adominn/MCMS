@@ -37,6 +37,13 @@ if (! function_exists('userFarid')) {
     }
 }
 
+if (! function_exists('userNurul')) {
+    function userNurul(): User
+    {
+        return (property_exists(test(), 'nurul') ? test()->nurul : null) ?? User::where('name', 'Nurul Izzah')->first() ?? User::first();
+    }
+}
+
 if (! function_exists('userLim')) {
     function userLim(): User
     {
@@ -45,6 +52,45 @@ if (! function_exists('userLim')) {
             $u = User::create(['name' => 'Dr. Lim Wei Jie', 'email' => 'lim_'.uniqid().'@utem.example.test']);
             $ftmkId = DB::table('ptjs')->where('code', 'FTMK')->value('id');
             $u->roleAssignments()->create(['role' => 'lecturer', 'scope_type' => 'ptj', 'ptj_id' => $ftmkId]);
+        }
+
+        return $u;
+    }
+}
+
+if (! function_exists('userZulkifli')) {
+    function userZulkifli(): User
+    {
+        $u = (property_exists(test(), 'zulkifli') ? test()->zulkifli : null) ?? User::where('name', 'Prof. Dr. Zulkifli Ahmad')->first();
+        if (! $u) {
+            $u = User::create(['name' => 'Prof. Dr. Zulkifli Ahmad', 'email' => 'zulkifli_'.uniqid().'@utem.example.test', 'position' => 'Senate Academic Representative / PBA (P3)']);
+            $u->roleAssignments()->create(['role' => 'academic_authority', 'scope_type' => 'university', 'reason' => 'P3 helper']);
+        }
+
+        return $u;
+    }
+}
+
+if (! function_exists('userNorazlina')) {
+    function userNorazlina(): User
+    {
+        $u = (property_exists(test(), 'norazlina') ? test()->norazlina : null) ?? User::where('name', 'Dr. Norazlina Mohd')->first();
+        if (! $u) {
+            $u = User::create(['name' => 'Dr. Norazlina Mohd', 'email' => 'norazlina_'.uniqid().'@utem.example.test', 'position' => 'Quality Assurance Officer, PKA (P4)']);
+            $u->roleAssignments()->create(['role' => 'qa_officer', 'scope_type' => 'university', 'reason' => 'P4 helper']);
+        }
+
+        return $u;
+    }
+}
+
+if (! function_exists('userHasnah')) {
+    function userHasnah(): User
+    {
+        $u = (property_exists(test(), 'hasnah') ? test()->hasnah : null) ?? User::where('name', 'Hasnah Abu Bakar')->first();
+        if (! $u) {
+            $u = User::create(['name' => 'Hasnah Abu Bakar', 'email' => 'hasnah_'.uniqid().'@utem.example.test', 'position' => 'Senior Assistant Registrar, Records Unit (P6)']);
+            $u->roleAssignments()->create(['role' => 'records_custodian', 'scope_type' => 'university', 'reason' => 'P6 helper']);
         }
 
         return $u;
@@ -99,7 +145,7 @@ if (! function_exists('completeUmc')) {
         $id = newUmc();
         DB::table('mc_versions')->where('id', $id)->update(['name_ms' => 'Ujian Perisian', 'delivery_mode' => 'online', 'delivery_language' => 'English', 'need' => 'Industry asked for it', 'credit_model' => 'credit_based', 'ip_confirmed' => true]);
         modules($id, [40, 40, 40]);
-        $lo = DB::table('learning_outcomes')->insertGetId(['mc_version_id' => $id, 'code' => 'LO1', 'text_en' => 'Test software', 'sort_order' => 1]);
+        $lo = DB::table('learning_outcomes')->insertGetId(['mc_version_id' => $id, 'code' => 'LO1', 'text_en' => 'Test software', 'sort_order' => 1, 'parent_clo_id' => 1]);
         $c = DB::table('assessment_components')->insertGetId(['mc_version_id' => $id, 'name_en' => 'Project', 'weight_percent' => 100]);
         DB::table('assessment_component_outcomes')->insert(['assessment_component_id' => $c, 'learning_outcome_id' => $lo]);
         foreach (array_keys(config('proposals.readiness')) as $item) {
@@ -403,9 +449,20 @@ if (! function_exists('eid')) {
     }
 }
 
-if (! function_exists('confirmCompletion')) {
-    function confirmCompletion(int $o, array $ids): \Illuminate\Testing\TestResponse
+if (! function_exists('coordinatorSignOff')) {
+    function coordinatorSignOff(int $o, array $ids, ?string $remarks = null): \Illuminate\Testing\TestResponse
     {
+        return test()->actingAs(userAina())->post("/cohorts/$o/signoff", ['enrolments' => $ids, 'remarks' => $remarks]);
+    }
+}
+
+if (! function_exists('confirmCompletion')) {
+    function confirmCompletion(int $o, array $ids, bool $withSignOff = true): \Illuminate\Testing\TestResponse
+    {
+        if ($withSignOff && $ids !== []) {
+            coordinatorSignOff($o, $ids);
+        }
+
         return test()->actingAs(userHakim())->post("/completion/$o", ['enrolments' => $ids]);
     }
 }
@@ -454,7 +511,7 @@ if (! function_exists('confirmedAcr')) {
     function confirmedAcr(): object
     {
         $a = amirAcr();
-        test()->actingAs(userHakim())->post("/deposits/{$a->id}/confirm")->assertSessionHasNoErrors();
+        test()->actingAs(userNurul())->post("/deposits/{$a->id}/confirm")->assertSessionHasNoErrors();
 
         return $a;
     }
@@ -473,7 +530,7 @@ if (! function_exists('consentedAcr')) {
 if (! function_exists('depositOf')) {
     function depositOf(object $a, array $over = [])
     {
-        return test()->actingAs(userHakim())->post("/deposits/{$a->id}/record", $over + ['abc_reference' => 'ABC-2026-0042', 'deposit_date' => today()->toDateString(), 'credits' => '3', 'deposit_status' => 'successful']);
+        return test()->actingAs(userNurul())->post("/deposits/{$a->id}/record", $over + ['abc_reference' => 'ABC-2026-0042', 'deposit_date' => today()->toDateString(), 'credits' => '3', 'deposit_status' => 'successful']);
     }
 }
 

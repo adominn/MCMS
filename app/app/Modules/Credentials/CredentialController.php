@@ -34,12 +34,13 @@ final class CredentialController
                 'a.achieved_at',
                 'm.seq', 'm.name_en', 'm.slt_hours',
                 'v.name_en as course_name', 'v.id as version_id', 'mc.category as mc_category',
+                'v.badge_image_path',
                 'e.id as enrolment_id', 'e.reference as enrolment_ref'
             ])
             ->get();
 
         return view('credentials.wallet', [
-            'rows' => (clone $base)->join('credentials as c', 'c.enrolment_id', '=', 'e.id')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->orderByDesc('c.id')->get(['c.id', 'c.number', 'c.public_code', 'c.status', 'c.content', 'c.issued_at', 'u.name as lecturer_name']),
+            'rows' => (clone $base)->join('credentials as c', 'c.enrolment_id', '=', 'e.id')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->orderByDesc('c.id')->get(['c.id', 'c.number', 'c.public_code', 'c.status', 'c.content', 'c.issued_at', 'u.name as lecturer_name', 'v.badge_image_path']),
             'badges' => $badges,
         ]);
     }
@@ -240,7 +241,9 @@ final class CredentialController
 
     public function index(Request $request)
     {
-        $ids = $request->user()->scopedPtjIds('deputy_dean');
+        $ids = $request->user()->hasAnyRole('records_custodian', 'records_depositor', 'codl_admin')
+            ? null
+            : $request->user()->scopedPtjIds('deputy_dean');
         $scope = fn ($b) => $b->when($ids !== null, fn ($q) => $q->whereIn('m.ptj_id', $ids));
         $join = fn ($b) => $b->join('offerings as o', 'o.id', '=', 'e.offering_id')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id');
 
@@ -296,15 +299,37 @@ final class CredentialController
         return redirect()->route('credentials.admin.show', $id)->with('status', 'Corrected. The same public link now shows the credential as Corrected, with the corrected name. The original is kept.');
     }
 
-    // FR-159: a new credential with a new ID, linked to the old one.
+    // FR-159: a new credential with a new ID, linked to the old one (REQ-AE-007, REQ-AE-008).
     public function replace(Request $request, int $id)
     {
         $c = $this->scoped($request, $id);
         abort_unless(in_array($c->status, ['valid', 'corrected'], true), 403, 'This credential can no longer be replaced.');
         $d = $request->validate(['reason' => 'required|string|min:5|max:500']);
+
+        // E8 pre-issuance check on replace()
+        $reasons = $this->issuer->checks($c->enrolment_id);
+        if (! empty($reasons)) {
+            return back()->withErrors(['replace' => 'Cannot replace credential: '.implode('; ', $reasons)]);
+        }
+
         $newId = DB::transaction(function () use ($c, $d, $request) {
             $code = $this->issuer->newCode();
-            $nid = DB::table('credentials')->insertGetId(['number' => 'TMP'.bin2hex(random_bytes(6)), 'public_code' => $code, 'enrolment_id' => $c->enrolment_id, 'content' => '{}', 'jwt' => '', 'kid' => '', 'replaces_id' => $c->id, 'issued_at' => now(), 'created_at' => now(), 'updated_at' => now()]);
+            $checklist = $this->issuer->checklistE8($c->enrolment_id);
+            $signoffs = json_decode($c->e10_signoffs ?? '[]', true) ?: [];
+            $nid = DB::table('credentials')->insertGetId([
+                'number' => 'TMP'.bin2hex(random_bytes(6)),
+                'public_code' => $code,
+                'enrolment_id' => $c->enrolment_id,
+                'content' => '{}',
+                'jwt' => '',
+                'kid' => '',
+                'replaces_id' => $c->id,
+                'e8_checklist' => json_encode($checklist),
+                'e10_signoffs' => json_encode($signoffs),
+                'issued_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
             $number = 'MCMS-C-'.now()->year.'-'.str_pad((string) $nid, 6, '0', STR_PAD_LEFT);
             $x = $this->issuer->content($c->enrolment_id, $number, $code, now(), json_decode($c->content, true)['holder']);
             [$jwt, $kid] = $this->issuer->sign($x, $number, $code);
@@ -395,8 +420,10 @@ final class CredentialController
     {
         $e = DB::table('enrolments as e')->join('offerings as o', 'o.id', '=', 'e.offering_id')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
             ->where('e.id', $enrolment)->first(['m.ptj_id', 'm.owner_id']) ?? abort(404);
-        $ids = $request->user()->scopedPtjIds('deputy_dean');
-        abort_unless($ids === null || in_array($e->ptj_id, $ids, true), 403, 'This credential belongs to another PTj.');
+        if (! $request->user()->hasAnyRole('records_custodian', 'records_depositor', 'codl_admin')) {
+            $ids = $request->user()->scopedPtjIds('deputy_dean');
+            abort_unless($ids === null || in_array($e->ptj_id, $ids, true), 403, 'This credential belongs to another PTj.');
+        }
         abort_if($e->owner_id === $request->user()->id, 403, 'You cannot change a credential of your own micro-credential.');
     }
 
@@ -414,7 +441,7 @@ final class CredentialController
                 'u.id as user_id', 'u.name as student_name', 'u.institution_id as matric_no', 'u.email as student_email',
                 'o.id as offering_id', 'o.cohort_name', 'o.start_date', 'o.end_date', 'o.delivery_mode',
                 'v.id as version_id', 'v.name_en as course_name_en', 'v.name_ms as course_name_ms', 'm.code as mc_code', 'm.category as mc_category',
-                'v.proposed_credit', 'v.planned_slt', 'v.proposed_mqf_level', 'lu.name as lecturer_name'
+                'v.proposed_credit', 'v.planned_slt', 'v.proposed_mqf_level', 'lu.name as lecturer_name', 'v.badge_image_path'
             ])
             ->first();
 

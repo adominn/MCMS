@@ -1,0 +1,109 @@
+URL: http://127.0.0.1:8110/public/catalogue
+FINAL: http://127.0.0.1:8110/public/catalogue
+STATUS: 200
+TITLE: Catalogue - UTeM Micro-Credential Management System
+H1: Catalogue
+---
+UTeM MCMS
+Public Verification & Credential Portal
+Sign in
+EN
+BM
+Home
+Catalogue
+Pathways to a degree
+How recognition works
+FAQ
+Verify a credential
+Home
+/
+Catalogue
+Catalogue
+8 offerings open for registration
+Filters
+Search
+Category
+All categories
+UMC
+SAMC
+MCE
+Faculty or centre
+All faculties
+FAIX - Fakulti Kecerdasan Buatan Dan Keselamatan Siber
+FPTT - Fakulti Pengurusan Teknologi Dan Teknousahawanan
+FTKE - Fakulti Teknologi Dan Kejuruteraan Elektrik
+FTKEK - Fakulti Teknologi Dan Kejuruteraan Elektronik Dan Komputer
+FTKIP - Fakulti Teknologi Dan Kejuruteraan Industri Dan Pembuatan
+FTKM - Fakulti Teknologi Dan Kejuruteraan Mekanikal
+FTMK - Fakulti Teknologi Maklumat Dan Komunikasi
+Delivery mode
+All modes
+Face to face
+Online
+Blended
+Other
+Field
+Language
+Starts after
+Highest fee (RM)
+Free only
+Search
+Clear filters
+8 offerings
+UTeM UMC
+UMC Electric Circuit Theory & Power Systems 2026/FTKE1
+FTKE · Assoc. Prof. Dr. Ahmad Razali · Online · English
+RM 180.00
+Open for registration
+Starts: 25/11/2026 · Ends: 15/02/2027
+View offering →
+UTeM UMC
+UMC Engineering Mechanics & Dynamics 2026/FTKM1
+FTKM · Ir. Ts. Dr. Mohd Hafizuddin bin Othman · Online · English
+RM 175.00
+Open for registration
+Starts: 25/11/2026 · Ends: 15/02/2027
+View offering →
+UTeM UMC
+UMC Embedded Internet of Things (IoT) Systems 2026/FTKEK1
+FTKEK · Assoc. Prof. Ts. Dr. Chong Mei Ling · Online · English
+RM 220.00
+Open for registration
+Starts: 25/11/2026 · Ends: 15/02/2027
+View offering →
+UTeM UMC
+UMC Manufacturing Processes & Automation 2026/FTKIP1
+FTKIP · Ir. Ts. Dr. Mohd Hafizuddin bin Othman · Online · English
+RM 190.00
+Open for registration
+Starts: 25/11/2026 · Ends: 15/02/2027
+View offering →
+UTeM UMC
+UMC Fundamental of Data Science 2026/FAIX1
+FAIX · Assoc. Prof. Ts. Dr. Chong Mei Ling · Online · English
+RM 250.00
+Open for registration
+Starts: 25/11/2026 · Ends: 15/02/2027
+View offering →
+5 items per page
+1–5 of 8 items Page 1 of 2
+‹ Prev
+1
+2
+Next ›
+UTeM Micro-credentials
+Centre for Open and Distance Learning (CODL)
+UTeM, Hang Tuah Jaya, 76100 Durian Tunggal, Melaka
+Learn
+All micro-credentials
+Degree pathways
+Recognition stages
+Help
+FAQ
+Verify a credential
+codl@utem.edu.my
+Policies
+Privacy notice (PDPA)
+Terms of use
+Accessibility
+UTeM Micro-Credential Management System (MCMS). Compliant with MQA & MoHE Good Practice Standards.

@@ -30,10 +30,10 @@ final class TaskController
     public function index(Request $request)
     {
         $user = $request->user();
-        if ($user->hasAnyRole('student') && ! $user->hasAnyRole('lecturer', 'deputy_dean', 'codl_admin', 'industry_expert')) {
+        if ($user->hasAnyRole('student') && ! $user->hasAnyRole('lecturer', 'deputy_dean', 'records_depositor', 'codl_admin', 'industry_expert')) {
             return $this->student($user);
         }
-        if ($user->hasAnyRole('industry_expert') && ! $user->hasAnyRole('student', 'lecturer', 'deputy_dean', 'codl_admin')) {
+        if ($user->hasAnyRole('industry_expert') && ! $user->hasAnyRole('student', 'lecturer', 'deputy_dean', 'records_depositor', 'codl_admin')) {
             return redirect()->route('reviews'); // the expert's home is the list of invitations (prototype: My review invitations)
         }
         $roles = $user->effectiveRoles();
@@ -51,7 +51,7 @@ final class TaskController
             'roles' => $roles, 'q' => $q, 'area' => $area, 'counts' => $counts, 'areas' => $areas, 'areaLabels' => self::AREA_LABELS, 'total' => $counts->sum(),
             'tasks' => $base()->when($area, fn ($b) => $b->where('area', $area))->orderBy('created_at')->paginate(10)->withQueryString(),
             'overdueBefore' => now()->subDays($days), 'days' => $days,
-            'kpis' => $user->hasAnyRole('lecturer') && ! $user->hasAnyRole('deputy_dean', 'codl_admin') ? $this->lecturerKpis($user) : null,
+            'kpis' => $user->hasAnyRole('lecturer') && ! $user->hasAnyRole('deputy_dean', 'records_depositor', 'codl_admin') ? $this->lecturerKpis($user) : null,
             'recent' => $this->visible($user)->whereNotNull('completed_at')->where('completed_at', '>=', now()->subDays(7))->orderByDesc('completed_at')->limit(5)->get(),
         ]);
     }
@@ -85,7 +85,7 @@ final class TaskController
 
             return $e;
         })->reject(fn ($e) => in_array($e->id, $waitingIds, true) || $e->percent >= 100)->values();
-        $achieved = DB::table('credentials as c')->join('enrolments as e', 'e.id', '=', 'c.enrolment_id')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->where('e.user_id', $user->id)->orderByDesc('c.id')->get(['c.id', 'c.number', 'c.public_code', 'c.status', 'c.issued_at', 'c.content', 'u.name as lecturer_name'])
+        $achieved = DB::table('credentials as c')->join('enrolments as e', 'e.id', '=', 'c.enrolment_id')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->where('e.user_id', $user->id)->orderByDesc('c.id')->get(['c.id', 'c.number', 'c.public_code', 'c.status', 'c.issued_at', 'c.content', 'u.name as lecturer_name', 'v.badge_image_path'])
             ->map(function ($c) {
                 $x = json_decode($c->content, true) ?: [];
                 $c->name = $x['name']['en'] ?? 'Credential';

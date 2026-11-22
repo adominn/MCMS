@@ -28,13 +28,19 @@ Route::middleware('auth')->group(function () {
 });
 Route::get('/lang/{lang}', [CatalogueController::class, 'lang'])->name('lang');
 
-Route::middleware(['auth', 'role:lecturer,deputy_dean'])->prefix('offerings')->group(function () {
-    Route::get('/', [OfferingController::class, 'index'])->name('offerings');
-    Route::get('/new', [OfferingController::class, 'create'])->name('offerings.new');
-    Route::post('/', [OfferingController::class, 'store'])->name('offerings.store');
-    Route::get('/{id}', [OfferingController::class, 'show'])->whereNumber('id')->name('offerings.show');
-    Route::post('/{id}/readiness', [OfferingController::class, 'readiness'])->whereNumber('id')->name('offerings.readiness');
-    Route::post('/{id}/confirm', [OfferingController::class, 'confirm'])->whereNumber('id')->name('offerings.confirm');
-    Route::post('/{id}/cancel', [OfferingController::class, 'cancel'])->whereNumber('id')->name('offerings.cancel');
-    Route::get('/{id}/participants', [OfferingController::class, 'participants'])->whereNumber('id')->name('offerings.participants');
+Route::middleware('auth')->prefix('offerings')->group(function () {
+    Route::middleware('role:lecturer,deputy_dean,ptj_authority')->group(function () {
+        Route::get('/', [OfferingController::class, 'index'])->name('offerings');
+        Route::get('/new', [OfferingController::class, 'create'])->name('offerings.new');
+        Route::post('/', [OfferingController::class, 'store'])->name('offerings.store');
+        Route::post('/{id}/readiness', [OfferingController::class, 'readiness'])->whereNumber('id')->name('offerings.readiness');
+        Route::post('/{id}/cancel', [OfferingController::class, 'cancel'])->whereNumber('id')->name('offerings.cancel');
+        Route::get('/{id}/participants', [OfferingController::class, 'participants'])->whereNumber('id')->name('offerings.participants');
+    });
+
+    Route::middleware('role:lecturer,deputy_dean,ptj_authority,codl_admin')->group(function () {
+        Route::get('/{id}', [OfferingController::class, 'show'])->whereNumber('id')->name('offerings.show');
+        Route::get('/{id}/readiness', [OfferingController::class, 'readinessPrint'])->whereNumber('id')->name('offerings.readiness.print');
+        Route::post('/{id}/confirm', [OfferingController::class, 'confirm'])->whereNumber('id')->name('offerings.confirm');
+    });
 });

@@ -18,7 +18,7 @@
 <!-- Header & Top Actions -->
 <div class="title" style="margin-bottom:20px">
   <div style="display:flex;align-items:flex-start;gap:16px">
-    <x-badge :category="$o->category ?? 'samc'" :size="48" />
+    <x-badge :category="$o->category ?? 'samc'" :size="48" :image="$o->badge_image_path ?? null" />
     <div>
       <h1 style="margin:0 0 4px">{{ $o->name_en }} &middot; {{ $o->cohort_name }}</h1>
       <div class="sub" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
