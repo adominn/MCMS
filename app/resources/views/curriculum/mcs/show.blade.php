@@ -49,7 +49,7 @@
             {{ __(['initial' => 'First version', 'minor' => 'Minor', 'material' => 'Material change', 'reoffer' => 'Re-offer'][$v->change_class] ?? $v->change_class) }}
             @if($v->change_summary)<span class="s" style="display:block;color:var(--muted);font-size:12px">{{ $v->change_summary }}</span>@endif
             @if(!empty($diffs[$v->id]))
-              <div style="margin-top:4px;font-size:11px;color:var(--text-secondary);"><span class="badge" style="background:#e0e0e0;padding:1px 5px;border-radius:2px;font-size:10px;text-transform:uppercase;font-weight:600;">Diff</span> {{ implode(' · ', $diffs[$v->id]) }}</div>
+              <div style="margin-top:4px;font-size:11px;color:var(--text-secondary);"><span class="badge" style="background:#e2e8f0;padding:1px 5px;border-radius:2px;font-size:10px;text-transform:uppercase;font-weight:600;">Diff</span> {{ implode(' · ', $diffs[$v->id]) }}</div>
             @endif
           </td>
           <td>@if($dec){{ __(str_replace('_', ' ', ucfirst($dec->decision))) }}, {{ $dec->meeting_ref }}@endif</td>

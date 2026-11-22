@@ -3,17 +3,17 @@
   
   @if($v->category === 'umc')
     @if($v->credit_model === 'separate_assessment')
-      <div style="background:var(--info-bg);border:1px solid var(--hairline);border-left:4px solid var(--accent, #0f62fe);padding:12px 14px;border-radius:2px;margin-bottom:16px;font-size:12.5px;color:var(--ink)">
+      <div style="background:var(--info-bg);border:1px solid var(--hairline);border-left:4px solid var(--accent, #0052ff);padding:12px 14px;border-radius:2px;margin-bottom:16px;font-size:12.5px;color:var(--ink)">
         <b>{{ __('Active Unbundling Model (c) Separate Learning & Assessment:') }}</b>
         {{ __('Please ensure integrated summative assessment components are mapped to the designated Assessment Module.') }}
       </div>
     @elseif($v->credit_model === 'credit_based')
-      <div style="background:var(--info-bg);border:1px solid var(--hairline);border-left:4px solid var(--accent, #0f62fe);padding:12px 14px;border-radius:2px;margin-bottom:16px;font-size:12.5px;color:var(--ink)">
+      <div style="background:var(--info-bg);border:1px solid var(--hairline);border-left:4px solid var(--accent, #0052ff);padding:12px 14px;border-radius:2px;margin-bottom:16px;font-size:12.5px;color:var(--ink)">
         <b>{{ __('Active Unbundling Model (a) Credit-Based:') }}</b>
         {{ __('Each module has its own credit value (≥ 40 hours SLT) and encompasses independent assessments.') }}
       </div>
     @elseif($v->credit_model === 'topic_based')
-      <div style="background:var(--info-bg);border:1px solid var(--hairline);border-left:4px solid var(--accent, #0f62fe);padding:12px 14px;border-radius:2px;margin-bottom:16px;font-size:12.5px;color:var(--ink)">
+      <div style="background:var(--info-bg);border:1px solid var(--hairline);border-left:4px solid var(--accent, #0052ff);padding:12px 14px;border-radius:2px;margin-bottom:16px;font-size:12.5px;color:var(--ink)">
         <b>{{ __('Active Unbundling Model (b) Topic-Based:') }}</b>
         {{ __('Modules are formed by learning topic clusters with flexible student learning time distribution.') }}
       </div>

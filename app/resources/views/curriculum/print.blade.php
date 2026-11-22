@@ -17,7 +17,7 @@
 @endphp
 
 <div style="margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:10px">
-  <div class="small muted" style="text-transform:uppercase;letter-spacing:0.5px;font-weight:600;color:var(--accent, #0f62fe);margin-bottom:2px">
+  <div class="small muted" style="text-transform:uppercase;letter-spacing:0.5px;font-weight:600;color:var(--accent, #0052ff);margin-bottom:2px">
     Appendix A &middot; Lampiran A (Garis Panduan Micro-Credential UTeM)
   </div>
   <h1 style="font-size:18pt;margin:0 0 4px">{{ $v->name_en ?: 'Untitled micro-credential' }}</h1>

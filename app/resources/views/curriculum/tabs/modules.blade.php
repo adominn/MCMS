@@ -8,10 +8,10 @@
     @endphp
 
     @if($course)
-      <div style="background:var(--info-bg);border:1px solid var(--hairline);border-left:4px solid var(--accent, #0f62fe);padding:12px 16px;border-radius:2px;margin-bottom:20px">
+      <div style="background:var(--info-bg);border:1px solid var(--hairline);border-left:4px solid var(--accent, #0052ff);padding:12px 16px;border-radius:2px;margin-bottom:20px">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
           <div>
-            <div style="font-size:11px;font-weight:700;color:var(--accent, #0f62fe);text-transform:uppercase;letter-spacing:0.5px">
+            <div style="font-size:11px;font-weight:700;color:var(--accent, #0052ff);text-transform:uppercase;letter-spacing:0.5px">
               {{ __('Parent Course Reference') }} &middot; {{ $course->programme }}
             </div>
             <div style="font-size:15px;font-weight:700;color:var(--ink);margin-top:2px">
@@ -47,7 +47,7 @@
       <div class="unbundling-cards-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:14px;margin-bottom:12px">
         
         {{-- (a) Model Penyahhimpunan Berasaskan Kredit --}}
-        <div class="unbundling-card {{ $activeModel === 'credit_based' ? 'active' : '' }}" style="border:2px solid {{ $activeModel === 'credit_based' ? '#0f62fe' : 'var(--hairline)' }};background:{{ $activeModel === 'credit_based' ? 'var(--info-bg)' : 'var(--card-bg)' }};padding:14px 16px;border-radius:3px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:10px;transition:all 0.15s ease;position:relative">
+        <div class="unbundling-card {{ $activeModel === 'credit_based' ? 'active' : '' }}" style="border:2px solid {{ $activeModel === 'credit_based' ? '#0052ff' : 'var(--hairline)' }};background:{{ $activeModel === 'credit_based' ? 'var(--info-bg)' : 'var(--card-bg)' }};padding:14px 16px;border-radius:3px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:10px;transition:all 0.15s ease;position:relative">
           <div>
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
               <span style="display:inline-flex;align-items:center;gap:6px">
@@ -58,7 +58,7 @@
                 {{ __('≥ 40h SLT / Module') }}
               </span>
             </div>
-            <div style="font-size:12px;font-weight:600;color:var(--accent, #0f62fe);margin-bottom:4px">
+            <div style="font-size:12px;font-weight:600;color:var(--accent, #0052ff);margin-bottom:4px">
               {{ __('Credit-Based Unbundling') }}
             </div>
             <p style="font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 6px">
@@ -71,7 +71,7 @@
         </div>
 
         {{-- (b) Model Penyahhimpunan Berasaskan Topik --}}
-        <div class="unbundling-card {{ $activeModel === 'topic_based' ? 'active' : '' }}" style="border:2px solid {{ $activeModel === 'topic_based' ? '#0f62fe' : 'var(--hairline)' }};background:{{ $activeModel === 'topic_based' ? 'var(--info-bg)' : 'var(--card-bg)' }};padding:14px 16px;border-radius:3px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:10px;transition:all 0.15s ease;position:relative">
+        <div class="unbundling-card {{ $activeModel === 'topic_based' ? 'active' : '' }}" style="border:2px solid {{ $activeModel === 'topic_based' ? '#0052ff' : 'var(--hairline)' }};background:{{ $activeModel === 'topic_based' ? 'var(--info-bg)' : 'var(--card-bg)' }};padding:14px 16px;border-radius:3px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:10px;transition:all 0.15s ease;position:relative">
           <div>
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
               <span style="display:inline-flex;align-items:center;gap:6px">
@@ -82,7 +82,7 @@
                 {{ __('Variable SLT') }}
               </span>
             </div>
-            <div style="font-size:12px;font-weight:600;color:var(--accent, #0f62fe);margin-bottom:4px">
+            <div style="font-size:12px;font-weight:600;color:var(--accent, #0052ff);margin-bottom:4px">
               {{ __('Topic-Based Unbundling') }}
             </div>
             <p style="font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 6px">
@@ -95,7 +95,7 @@
         </div>
 
         {{-- (c) Model Penyahhimpunan Pembelajaran dan Pentaksiran Berasingan --}}
-        <div class="unbundling-card {{ $activeModel === 'separate_assessment' ? 'active' : '' }}" style="border:2px solid {{ $activeModel === 'separate_assessment' ? '#0f62fe' : 'var(--hairline)' }};background:{{ $activeModel === 'separate_assessment' ? 'var(--info-bg)' : 'var(--card-bg)' }};padding:14px 16px;border-radius:3px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:10px;transition:all 0.15s ease;position:relative">
+        <div class="unbundling-card {{ $activeModel === 'separate_assessment' ? 'active' : '' }}" style="border:2px solid {{ $activeModel === 'separate_assessment' ? '#0052ff' : 'var(--hairline)' }};background:{{ $activeModel === 'separate_assessment' ? 'var(--info-bg)' : 'var(--card-bg)' }};padding:14px 16px;border-radius:3px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:10px;transition:all 0.15s ease;position:relative">
           <div>
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
               <span style="display:inline-flex;align-items:center;gap:6px">
@@ -106,7 +106,7 @@
                 {{ __('Integrated Assessment') }}
               </span>
             </div>
-            <div style="font-size:12px;font-weight:600;color:var(--accent, #0f62fe);margin-bottom:4px">
+            <div style="font-size:12px;font-weight:600;color:var(--accent, #0052ff);margin-bottom:4px">
               {{ __('Separate Learning & Assessment') }}
             </div>
             <p style="font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 6px">
@@ -170,7 +170,7 @@
           <td class="assessment-module-col" style="{{ $activeModel === 'separate_assessment' ? '' : 'display:none;' }}">
             <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;margin:0">
               <input type="checkbox" name="rows[{{ $m->id }}][is_assessment]" value="1" @checked($m->is_assessment) class="assessment-checkbox" aria-label="Module {{ $m->seq }} is the assessment module">
-              <span class="assessment-checkbox-label" style="font-weight:{{ $m->is_assessment ? '700' : 'normal' }};color:{{ $m->is_assessment ? '#6929c4' : '#525252' }}">
+              <span class="assessment-checkbox-label" style="font-weight:{{ $m->is_assessment ? '700' : 'normal' }};color:{{ $m->is_assessment ? '#6929c4' : '#475569' }}">
                 {{ $m->is_assessment ? __('Assessment') : __('Learning') }}
               </span>
             </label>
@@ -187,16 +187,16 @@
           <td></td>
           <td colspan="{{ $activeModel === 'separate_assessment' ? 5 : 4 }}" style="padding:10px 14px">
             <div style="margin-bottom:8px">
-              <label style="font-size:11px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:#525252;display:block;margin-bottom:3px">
+              <label style="font-size:11px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:#475569;display:block;margin-bottom:3px">
                 {{ __('Key Content / Kandungan Utama Modul (Appendix A5)') }}
               </label>
               <textarea name="rows[{{ $m->id }}][key_content]" rows="2" placeholder="{{ __('List syllabus topics, competencies, and core concepts for Module :seq...', ['seq' => $m->seq]) }}" style="font-size:12px;width:100%">{{ $m->key_content }}</textarea>
             </div>
 
             @php($modActs = ($activities[$m->id] ?? collect()))
-            <div style="border:1px solid #e0e0e0;background:#ffffff;padding:10px 12px;border-radius:2px">
+            <div style="border:1px solid #e2e8f0;background:#ffffff;padding:10px 12px;border-radius:2px">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-                <span style="font-size:11px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:#0f62fe">
+                <span style="font-size:11px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:#0052ff">
                   {{ __('Learning Activities & SLT Breakdown (Cl. 8.1, 8.3, 10.1)') }}
                   &bull; <span class="tag info" style="font-size:10px">{{ $modActs->sum('slt_hours') }}h / {{ $m->slt_hours }}h</span>
                 </span>
@@ -281,7 +281,7 @@
             </span>
           </td>
           <td class="assessment-module-col" style="{{ $activeModel === 'separate_assessment' ? '' : 'display:none;' }}">
-            <span id="slt-split-display" style="font-size:11px;color:#6f6f6f"></span>
+            <span id="slt-split-display" style="font-size:11px;color:#475569"></span>
           </td>
           <td></td>
         </tr>
@@ -297,7 +297,7 @@
   @endif
 
   @unless($locked)
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;padding-top:16px;border-top:1px solid #e0e0e0;flex-wrap:wrap;gap:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;padding-top:16px;border-top:1px solid #e2e8f0;flex-wrap:wrap;gap:12px">
       <button type="submit" name="action" value="add" class="btn ter sm" style="display:inline-flex;align-items:center;gap:6px">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
           <path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z"/>
@@ -306,7 +306,7 @@
       </button>
 
       <div style="display:flex;align-items:center;gap:8px">
-        <button type="submit" name="action" value="save" class="btn sm" style="background:#1e2a6e;color:#ffffff;font-weight:600">
+        <button type="submit" name="action" value="save" class="btn sm" style="background:#0b1a3d;color:#ffffff;font-weight:600">
           {{ __('Save Modules') }}
         </button>
       </div>
@@ -339,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
     modelCards.forEach(card => {
       const radio = card.querySelector('.model-radio');
       if (radio && radio.value === model) {
-        card.style.borderColor = 'var(--accent, #0f62fe)';
+        card.style.borderColor = 'var(--accent, #0052ff)';
         card.style.background = 'var(--info-bg)';
         card.classList.add('active');
         radio.checked = true;
@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const diff = parentSlt - sum;
     if (diff === 0) {
-      banner.style.background = '#defbe6';
+      banner.style.background = '#edfcf0';
       banner.style.border = '1px solid #a7f0ba';
       banner.style.color = '#0e6027';
       banner.innerHTML = `
@@ -464,7 +464,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (label) {
         label.textContent = this.checked ? @json(__('Assessment')) : @json(__('Learning'));
         label.style.fontWeight = this.checked ? '700' : 'normal';
-        label.style.color = this.checked ? '#6929c4' : '#525252';
+        label.style.color = this.checked ? '#6929c4' : '#475569';
       }
       recalcSLT();
     });

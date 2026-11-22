@@ -24,8 +24,8 @@
   <!-- Digital Badge Specification & Custom Artwork (Visible only when Digital Badge is ticked) -->
   <div id="badge-config-section" style="{{ $hasBadge ? '' : 'display:none;' }};margin-bottom:20px">
     <!-- Digital Badge Preview Card for Lecturer -->
-    <div class="card" style="border:1px solid var(--hairline);border-left:4px solid var(--accent, #0f62fe);padding:18px 20px;background:var(--card-bg);margin-bottom:16px">
-      <div style="font-size:11px;font-weight:700;color:var(--accent, #0f62fe);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">
+    <div class="card" style="border:1px solid var(--hairline);border-left:4px solid var(--accent, #0052ff);padding:18px 20px;background:var(--card-bg);margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--accent, #0052ff);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">
         {{ __('Open Badges 3.0 · Digital Badge Specification') }}
       </div>
       <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
