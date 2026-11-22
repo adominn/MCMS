@@ -30,12 +30,12 @@
     </div>
   </div>
 @else
-  <div style="margin-bottom:16px;border-bottom:2px solid #161616;padding-bottom:10px">
+  <div style="margin-bottom:16px;border-bottom:2px solid #090a0f;padding-bottom:10px">
     <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Universiti Teknikal Malaysia Melaka (UTeM)</div>
     <h1 style="font-size:14pt;font-weight:700;text-transform:uppercase;margin:4px 0 2px">
       Lampiran D: Senarai Evidens Quality Verification (QV) bagi Stand-Alone Micro-Credential (SAMC)
     </h1>
-    <div style="font-size:9.5pt;color:#525252">
+    <div style="font-size:9.5pt;color:#475569">
       Garis Panduan Micro-Credential UTeM Versi 1.0 (Klausa 11.2, 11.3, Lampiran D) &middot;
       Kitaran {{ $rec->cycle_no }} &middot; Status: <b>{{ config('qv.status')[$rec->status] ?? $rec->status }}</b> &middot;
       {{ __('Dijana pada') }} {{ now()->format('d/m/Y') }}
@@ -44,21 +44,21 @@
 @endif
 
 <style>
-  .sec-hd { font-size: 11pt; font-weight: 700; text-transform: uppercase; background: #e0e0e0; padding: 4px 8px; margin: 16px 0 8px; border-left: 3px solid #0f62fe; }
+  .sec-hd { font-size: 11pt; font-weight: 700; text-transform: uppercase; background: #e2e8f0; padding: 4px 8px; margin: 16px 0 8px; border-left: 3px solid #0052ff; }
   table.qv-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 10pt; }
   table.qv-table th, table.qv-table td { border: 1px solid #8d8d8d; padding: 5px 7px; vertical-align: top; }
-  table.qv-table th { background: #f4f4f4; font-weight: 600; text-align: left; }
+  table.qv-table th { background: #f1f5f9; font-weight: 600; text-align: left; }
   table.qv-grid { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 10pt; }
   table.qv-grid td { padding: 4px 7px; border: 1px solid #d1d1d1; vertical-align: top; }
-  table.qv-grid td.lbl { font-weight: 600; background: #f4f4f4; width: 24%; }
-  .check-box { display: inline-block; width: 11px; height: 11px; border: 1px solid #161616; vertical-align: middle; margin-right: 4px; text-align: center; line-height: 10px; font-size: 9px; }
-  .check-box.checked { background: #161616; color: #fff; font-weight: bold; }
+  table.qv-grid td.lbl { font-weight: 600; background: #f1f5f9; width: 24%; }
+  .check-box { display: inline-block; width: 11px; height: 11px; border: 1px solid #090a0f; vertical-align: middle; margin-right: 4px; text-align: center; line-height: 10px; font-size: 9px; }
+  .check-box.checked { background: #090a0f; color: #fff; font-weight: bold; }
   .tag { display: inline-block; padding: 1px 5px; font-size: 9pt; font-weight: 600; border-radius: 2px; }
-  .tag.ok { background: #defbe6; color: #0e6027; }
+  .tag.ok { background: #edfcf0; color: #0e6027; }
   .tag.warn { background: #fef0c7; color: #8f4700; }
-  .tag.muted { background: #f4f4f4; color: #525252; }
-  .tag.info { background: #edf5ff; color: #0043ce; }
-  .nota-box { border: 1.5px solid #0f62fe; background: #edf5ff; padding: 10px 14px; margin-top: 18px; font-size: 9.5pt; line-height: 1.45; }
+  .tag.muted { background: #f1f5f9; color: #475569; }
+  .tag.info { background: #edf4ff; color: #0043ce; }
+  .nota-box { border: 1.5px solid #0052ff; background: #edf4ff; padding: 10px 14px; margin-top: 18px; font-size: 9.5pt; line-height: 1.45; }
   .nota-box b { color: #0043ce; text-transform: uppercase; letter-spacing: 0.5px; }
   @media print { .page-break { page-break-before: always; } }
 </style>
@@ -393,10 +393,10 @@
     {{-- Role 1: Penyelaras SAMC (P1) --}}
     @php($s1 = $d10Signoffs['coordinator'] ?? null)
     <tr>
-      <td><strong>Penyelaras SAMC</strong><div style="font-size:9pt;color:#525252">(P1 Coordinator)</div></td>
+      <td><strong>Penyelaras SAMC</strong><div style="font-size:9pt;color:#475569">(P1 Coordinator)</div></td>
       <td>
         <strong>{{ $s1['name'] ?? $owner->name ?? 'Dr. Aina Zulkifli' }}</strong><br>
-        <span style="font-size:9pt;color:#525252">{{ $s1['position'] ?? ($owner->position ?? 'Penyelaras SAMC') }}</span>
+        <span style="font-size:9pt;color:#475569">{{ $s1['position'] ?? ($owner->position ?? 'Penyelaras SAMC') }}</span>
       </td>
       <td>
         <span class="tag ok">Disahkan</span>
@@ -408,10 +408,10 @@
     {{-- Role 2: Wakil PTj / Fakulti (P2) --}}
     @php($s2 = $d10Signoffs['faculty_rep'] ?? null)
     <tr>
-      <td><strong>Wakil PTj / Fakulti</strong><div style="font-size:9pt;color:#525252">(P2 Dean / Deputy Dean)</div></td>
+      <td><strong>Wakil PTj / Fakulti</strong><div style="font-size:9pt;color:#475569">(P2 Dean / Deputy Dean)</div></td>
       <td>
         <strong>{{ $s2['name'] ?? ($confirmer ? $confirmer->name : 'Hakim Rahman') }}</strong><br>
-        <span style="font-size:9pt;color:#525252">{{ $s2['position'] ?? ($confirmer ? ($confirmer->position ?? 'Timbalan Dekan (Akademik)') : 'Timbalan Dekan (Akademik), FTMK') }}</span>
+        <span style="font-size:9pt;color:#475569">{{ $s2['position'] ?? ($confirmer ? ($confirmer->position ?? 'Timbalan Dekan (Akademik)') : 'Timbalan Dekan (Akademik), FTMK') }}</span>
       </td>
       <td>
         <span class="tag ok">Disahkan</span>
@@ -423,10 +423,10 @@
     {{-- Role 3: Pihak Jaminan Kualiti / Urus Setia (P4) --}}
     @php($s3 = $d10Signoffs['qa_authority'] ?? null)
     <tr>
-      <td><strong>Pihak Jaminan Kualiti / Urus Setia</strong><div style="font-size:9pt;color:#525252">(P4 QA Authority / Secretariat)</div></td>
+      <td><strong>Pihak Jaminan Kualiti / Urus Setia</strong><div style="font-size:9pt;color:#475569">(P4 QA Authority / Secretariat)</div></td>
       <td>
         <strong>{{ $s3['name'] ?? 'Jawatankuasa Jaminan Kualiti' }}</strong><br>
-        <span style="font-size:9pt;color:#525252">{{ $s3['position'] ?? 'Pegawai Jaminan Kualiti' }}</span>
+        <span style="font-size:9pt;color:#475569">{{ $s3['position'] ?? 'Pegawai Jaminan Kualiti' }}</span>
       </td>
       <td>
         <span class="tag ok">Disahkan</span>

@@ -201,8 +201,8 @@
        Addressed strictly to applicant ($a->user_name); real actor & dates only.
        Single-language output driven strictly by system locale toggle (EN / BM).
      ========================================================================= --}}
-  <div style="margin-bottom:10px;border-bottom:2px solid #1e2a6e;padding-bottom:8px">
-    <h1 style="font-size:14.5pt;font-weight:400;margin:0 0 2px;color:#161616">{{ __('Credit Transfer Decision Letter') }}</h1>
+  <div style="margin-bottom:10px;border-bottom:2px solid #0b1a3d;padding-bottom:8px">
+    <h1 style="font-size:14.5pt;font-weight:400;margin:0 0 2px;color:#090a0f">{{ __('Credit Transfer Decision Letter') }}</h1>
     <div style="font-size:8.8pt;line-height:1.45;color:#262626">
       @if($isMs)
         Tuan/Puan <b>{{ $applicantName }}</b>, dokumen rasmi ini merekodkan permohonan pemindahan kredit (<b>{{ $a->reference }}</b>, dihantar pada {{ \Carbon\Carbon::parse($a->applied_at)->format('d/m/Y') }}) bagi program <b>{{ $a->programme_name }} ({{ $a->programme }})</b> di {{ $a->institution ?: 'UTeM' }}, penilaian kesetaraan kursus, dan keputusan rasmi fakulti penerima.
@@ -221,7 +221,7 @@
     </div>
     <div class="print-kpi-cell">
       <div class="print-kpi-lbl">{{ __('Application Ref') }}</div>
-      <div class="print-kpi-val" style="font-family:var(--mono);color:#1e2a6e !important">{{ $a->reference }}</div>
+      <div class="print-kpi-val" style="font-family:var(--mono);color:#0b1a3d !important">{{ $a->reference }}</div>
       <div class="print-kpi-sub">{{ __('Target:') }} {{ $a->programme }} ({{ $a->institution ?: 'UTeM' }})</div>
     </div>
     <div class="print-kpi-cell">

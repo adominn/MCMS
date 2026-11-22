@@ -97,7 +97,7 @@
 <!-- Carbon Horizontal Navigation Tabs -->
 <div data-tabs style="margin-bottom:24px">
   <nav class="tabs" style="margin-bottom:16px;border-bottom:1px solid var(--rule);display:flex;gap:24px" role="tablist">
-    <button type="button" class="tab-btn active" data-tab="tab-indicators" style="padding:10px 4px;font-weight:600;font-size:14px;background:none;border:none;border-bottom:2px solid var(--accent, #1e2a6e);color:var(--accent, #1e2a6e);cursor:pointer">
+    <button type="button" class="tab-btn active" data-tab="tab-indicators" style="padding:10px 4px;font-weight:600;font-size:14px;background:none;border:none;border-bottom:2px solid var(--accent, #0b1a3d);color:var(--accent, #0b1a3d);cursor:pointer">
       {{ __('Quality Indicators') }} ({{ count($ind['rows']) }})
     </button>
     <button type="button" class="tab-btn" data-tab="tab-outcomes" style="padding:10px 4px;font-weight:600;font-size:14px;background:none;border:none;border-bottom:2px solid transparent;color:var(--ink-muted);cursor:pointer">
@@ -199,7 +199,7 @@
         <tbody>
         @forelse($ind['outcomes'] as $lo)
           <tr>
-            <td><strong style="color:var(--accent, #1e2a6e)">{{ $lo['code'] }}</strong></td>
+            <td><strong style="color:var(--accent, #0b1a3d)">{{ $lo['code'] }}</strong></td>
             <td>{{ $lo['text'] }}</td>
             <td class="num" style="font-size:15px;font-weight:700">
               {{ $lo['share'] !== null ? $lo['share'].'%' : 'n/a' }}
@@ -263,7 +263,7 @@
         @if(($ind['feedback']['count'] ?? 0) > 0)
           <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;margin-bottom:20px">
             @foreach($ind['feedback']['areas'] as $areaKey => $score)
-              <div style="background:var(--bg-subtle, #f4f4f4);padding:14px 18px;border:1px solid var(--rule)">
+              <div style="background:var(--bg-subtle, #f1f5f9);padding:14px 18px;border:1px solid var(--rule)">
                 <div class="s muted">{{ __(config('monitoring.feedback_areas')[$areaKey] ?? ucfirst($areaKey)) }}</div>
                 <div style="font-size:24px;font-weight:700;color:var(--ink);margin:4px 0">
                   {{ $score !== null ? number_format($score, 1) : 'n/a' }} <span class="s muted" style="font-size:13px;font-weight:400">/ 5.0</span>
@@ -283,7 +283,7 @@
             <h3 style="font-size:14px;font-weight:700;margin:20px 0 10px">{{ __('Learner Comments & Suggestions') }}</h3>
             <div style="display:flex;flex-direction:column;gap:10px">
               @foreach($ind['feedback']['comments'] as $cmt)
-                <div style="padding:12px 16px;background:var(--bg-subtle, #fbfbfb);border-left:3px solid var(--accent, #1e2a6e);font-size:13px;line-height:1.5">
+                <div style="padding:12px 16px;background:var(--bg-subtle, #fbfbfb);border-left:3px solid var(--accent, #0b1a3d);font-size:13px;line-height:1.5">
                   &ldquo;{{ $cmt }}&rdquo;
                 </div>
               @endforeach
@@ -315,7 +315,7 @@
       </div>
       <div class="bd">
         @if($record)
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding:12px 16px;background:var(--bg-subtle, #f4f4f4);border:1px solid var(--rule)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding:12px 16px;background:var(--bg-subtle, #f1f5f9);border:1px solid var(--rule)">
             <div>
               <strong>{{ __('CQI Record Reference:') }} {{ $record->reference }}</strong>
               <div class="s muted">{{ __('Status:') }} {{ ucfirst($record->status) }} &middot; {{ __('Opened on:') }} {{ \Carbon\Carbon::parse($record->created_at)->format('d/m/Y') }}</div>
@@ -386,8 +386,8 @@ document.addEventListener('DOMContentLoaded', function() {
     tabButtons.forEach(function(btn) {
       var isTarget = btn.getAttribute('data-tab') === targetId;
       btn.classList.toggle('active', isTarget);
-      btn.style.borderBottomColor = isTarget ? 'var(--accent, #1e2a6e)' : 'transparent';
-      btn.style.color = isTarget ? 'var(--accent, #1e2a6e)' : 'var(--ink-muted)';
+      btn.style.borderBottomColor = isTarget ? 'var(--accent, #0b1a3d)' : 'transparent';
+      btn.style.color = isTarget ? 'var(--accent, #0b1a3d)' : 'var(--ink-muted)';
     });
 
     tabPanes.forEach(function(pane) {

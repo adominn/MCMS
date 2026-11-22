@@ -8,7 +8,7 @@
       $modelKey = $v->credit_model;
       $modelMeta = config("proposals.unbundling_models.$modelKey");
     @endphp
-    <div style="background:var(--surface);border:1px solid var(--hairline);border-left:3px solid var(--accent, #0f62fe);padding:10px 14px;border-radius:2px;margin:10px 0">
+    <div style="background:var(--surface);border:1px solid var(--hairline);border-left:3px solid var(--accent, #0052ff);padding:10px 14px;border-radius:2px;margin:10px 0">
       <div style="font-size:12.5px;margin-bottom:4px">
         <b>{{ __('Parent course:') }}</b> {{ $course->code }} {{ $course->name }} &middot; {{ $course->credit }} {{ __('credits') }} &middot; {{ $course->slt_hours }} h SLT &middot; {{ $course->programme }}
       </div>

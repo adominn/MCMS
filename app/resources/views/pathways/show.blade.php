@@ -132,14 +132,14 @@
           <div style="background:#8ab4f8;width:{{ $headroomPct }}%;height:100%" title="{{ __('Allowable Articulation Headroom') }}: {{ max(0, round($maxTransferCredits - $mappedCredits, 1)) }} cr ({{ round($headroomPct, 1) }}%)"></div>
         @endif
         {{-- Mandatory direct UTeM home study in neutral dark grey --}}
-        <div style="background:#525252;width:{{ $homePct }}%;height:100%" title="{{ __('Mandatory Direct UTeM Study') }}: {{ $minHomeCredits }} cr (30%)"></div>
+        <div style="background:#475569;width:{{ $homePct }}%;height:100%" title="{{ __('Mandatory Direct UTeM Study') }}: {{ $minHomeCredits }} cr (30%)"></div>
       </div>
     </div>
 
     {{-- Legend for Capacity Bar --}}
     <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;font-size:12px;color:var(--ink-muted);margin-bottom:14px">
       <div style="display:inline-flex;align-items:center;gap:6px">
-        <span style="display:inline-block;width:10px;height:10px;background:var(--primary, #1e2a6e);border-radius:1px"></span>
+        <span style="display:inline-block;width:10px;height:10px;background:var(--primary, #0b1a3d);border-radius:1px"></span>
         <span><b>{{ __('Currently mapped') }}:</b> {{ $mappedCredits }} cr ({{ $pct }}%)</span>
       </div>
       <div style="display:inline-flex;align-items:center;gap:6px">
@@ -147,7 +147,7 @@
         <span><b>{{ __('Allowable articulation headroom') }}:</b> {{ max(0, round($maxTransferCredits - $mappedCredits, 1)) }} cr (up to 70%)</span>
       </div>
       <div style="display:inline-flex;align-items:center;gap:6px">
-        <span style="display:inline-block;width:10px;height:10px;background:#525252;border-radius:1px"></span>
+        <span style="display:inline-block;width:10px;height:10px;background:#475569;border-radius:1px"></span>
         <span><b>{{ __('Mandatory direct UTeM study') }}:</b> &ge; {{ $minHomeCredits }} cr (30% floor)</span>
       </div>
     </div>
@@ -532,7 +532,7 @@
         <input id="note" name="note" type="text" placeholder="Optional notes on mapping">
       </div>
       <div>
-        <button type="submit" class="btn" style="width:100%;justify-content:center;background:var(--primary, #1e2a6e);color:#ffffff">{{ __('Save mapping') }}</button>
+        <button type="submit" class="btn" style="width:100%;justify-content:center;background:var(--primary, #0b1a3d);color:#ffffff">{{ __('Save mapping') }}</button>
       </div>
     </div>
   </div>
@@ -558,7 +558,7 @@
         <input id="approved_on" name="approved_on" type="date" value="{{ today()->toDateString() }}" required>
       </div>
     </div>
-    <button type="submit" class="btn" style="background:var(--primary, #1e2a6e);color:#ffffff">{{ __('Record approval') }}</button>
+    <button type="submit" class="btn" style="background:var(--primary, #0b1a3d);color:#ffffff">{{ __('Record approval') }}</button>
   </div>
 </form>
 @endif

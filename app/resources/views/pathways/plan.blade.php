@@ -40,8 +40,8 @@
         <div style="font-size:15px;font-weight:600;color:var(--ink);margin-top:2px">{{ $s->total_credits }} {{ __('credits') }}</div>
       </div>
       <div>
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--primary, #1e2a6e);letter-spacing:0.5px">{{ __('Direct UTeM Share') }}</div>
-        <div style="font-size:15px;font-weight:600;color:var(--primary, #1e2a6e);margin-top:2px">{{ mcms_num($s->utem_percent) }}% <span class="muted small">(&ge; {{ $min }}% required)</span></div>
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--primary, #0b1a3d);letter-spacing:0.5px">{{ __('Direct UTeM Share') }}</div>
+        <div style="font-size:15px;font-weight:600;color:var(--primary, #0b1a3d);margin-top:2px">{{ mcms_num($s->utem_percent) }}% <span class="muted small">(&ge; {{ $min }}% required)</span></div>
       </div>
       <div>
         <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--ink-muted);letter-spacing:0.5px">{{ __('Articulated Outside') }}</div>

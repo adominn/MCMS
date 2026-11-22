@@ -47,9 +47,9 @@
     </div>
 
     <!-- Clear Guided Status Banner: What This Plan Means & Who Evaluated It -->
-    <div style="background:var(--bg-subtle, #f4f4f4);border-bottom:1px solid var(--rule);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
+    <div style="background:var(--bg-subtle, #f1f5f9);border-bottom:1px solid var(--rule);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
       <div style="display:flex;align-items:center;gap:12px">
-        <div style="width:36px;height:36px;background:var(--accent, #1e2a6e);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700">
+        <div style="width:36px;height:36px;background:var(--accent, #0b1a3d);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700">
           ✓
         </div>
         <div>
@@ -97,7 +97,7 @@
               <!-- Multi-segment progress visual -->
               <div style="height:12px;width:100%;background:var(--hairline);display:flex;overflow:hidden;margin-bottom:12px">
                 <div style="width:{{ max(3, $progressPercent) }}%;background:#24a148" title="{{ $earnedCredits }} credits from micro-credentials"></div>
-                <div style="width:{{ max(0, min(100 - $progressPercent, 30)) }}%;background:#0f62fe;opacity:0.3" title="{{ $minUtemCredits }} credits minimum directly at UTeM"></div>
+                <div style="width:{{ max(0, min(100 - $progressPercent, 30)) }}%;background:#0052ff;opacity:0.3" title="{{ $minUtemCredits }} credits minimum directly at UTeM"></div>
               </div>
 
               <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-muted)">
@@ -106,7 +106,7 @@
                   <span>{{ __('Micro-credentials mapped') }}: <strong>{{ $earnedCredits }} cr</strong></span>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px">
-                  <span style="display:inline-block;width:10px;height:10px;background:#0f62fe;opacity:0.5"></span>
+                  <span style="display:inline-block;width:10px;height:10px;background:#0052ff;opacity:0.5"></span>
                   <span>{{ __('Required directly at UTeM (30%)') }}: <strong>&ge; {{ $minUtemCredits }} cr</strong></span>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px">
@@ -173,7 +173,7 @@
                           <div class="s muted">{{ __('Mapped credential') }}</div>
                         </td>
                         <td>
-                          <div style="font-weight:600;color:var(--accent, #1e2a6e)">{{ $i->course_code }}</div>
+                          <div style="font-weight:600;color:var(--accent, #0b1a3d)">{{ $i->course_code }}</div>
                         </td>
                         <td class="num">
                           <strong>{{ mcms_num($i->credits) }} {{ __('credits') }}</strong>
@@ -237,11 +237,11 @@
           </div>
 
           <!-- Collaborative Responsibilities Explanation -->
-          <div class="panel" style="margin-top:20px;background:var(--bg-subtle, #f4f4f4)">
+          <div class="panel" style="margin-top:20px;background:var(--bg-subtle, #f1f5f9)">
             <div class="hd"><h2 style="margin:0;font-size:14px">{{ __('Student & Faculty Collaboration') }}</h2></div>
             <div class="bd" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:13px;line-height:1.5">
               <div>
-                <strong style="color:var(--accent, #1e2a6e);display:block;margin-bottom:4px">
+                <strong style="color:var(--accent, #0b1a3d);display:block;margin-bottom:4px">
                   {{ __('Role of Academic Advisor / Faculty:') }}
                 </strong>
                 <ul style="margin:0;padding-left:18px;color:var(--ink-muted)">
@@ -252,7 +252,7 @@
                 </ul>
               </div>
               <div>
-                <strong style="color:var(--accent, #1e2a6e);display:block;margin-bottom:4px">
+                <strong style="color:var(--accent, #0b1a3d);display:block;margin-bottom:4px">
                   {{ __('Your Next Steps as Student:') }}
                 </strong>
                 <ul style="margin:0;padding-left:18px;color:var(--ink-muted)">
@@ -269,13 +269,13 @@
         <!-- Sidebar Column (Right - 32%) -->
         <div style="flex:1;min-width:280px">
           <!-- Academic Advisor Contact Card -->
-          <div class="panel" style="margin-bottom:20px;border-top:3px solid var(--accent, #1e2a6e)">
+          <div class="panel" style="margin-bottom:20px;border-top:3px solid var(--accent, #0b1a3d)">
             <div class="hd">
               <h2 style="margin:0;font-size:14px">{{ __('Academic Advisor') }}</h2>
             </div>
             <div class="bd">
               <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-                <div style="width:40px;height:40px;background:#0f62fe;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">
+                <div style="width:40px;height:40px;background:#0052ff;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">
                   {{ mb_substr($s->decider_name ?? 'Advisor', 0, 2) }}
                 </div>
                 <div>
@@ -365,7 +365,7 @@
   <div class="panel" style="margin-bottom:24px">
     <div class="bd col" style="padding:32px 28px">
       <div style="max-width:800px">
-        <div style="font-size:12px;font-weight:600;color:var(--primary, #1e2a6e);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">{{ __('Stackable Degree Articulation') }}</div>
+        <div style="font-size:12px;font-weight:600;color:var(--primary, #0b1a3d);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">{{ __('Stackable Degree Articulation') }}</div>
         <h2 style="font-size:20px;font-weight:700;margin:0 0 8px;color:var(--ink)">{{ __('You do not have an active degree plan yet') }}</h2>
         <p class="muted" style="font-size:14px;line-height:1.6;margin:0 0 24px">
           {{ __('A stackable degree study plan maps eligible micro-credentials into a target UTeM bachelor programme. Under Malaysian Qualifications Agency (MQA) regulations and UTeM Senate policy, plans are formulated collaboratively with your Faculty Academic Advisor to verify course equivalence and institutional residency requirements.') }}
@@ -373,8 +373,8 @@
 
         <!-- 4-Step Interactive Flow Breakdown -->
         <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;margin-bottom:28px">
-          <div style="background:var(--bg-subtle, #f4f4f4);border:1px solid var(--rule);padding:16px;border-top:3px solid var(--accent, #1e2a6e)">
-            <div style="font-size:12px;font-weight:700;color:var(--accent, #1e2a6e);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">
+          <div style="background:var(--bg-subtle, #f1f5f9);border:1px solid var(--rule);padding:16px;border-top:3px solid var(--accent, #0b1a3d)">
+            <div style="font-size:12px;font-weight:700;color:var(--accent, #0b1a3d);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">
               {{ __('Step 1') }}
             </div>
             <strong style="display:block;font-size:14px;margin-bottom:6px;color:var(--ink)">{{ __('Explore Pathways') }}</strong>
@@ -383,8 +383,8 @@
             </p>
           </div>
 
-          <div style="background:var(--bg-subtle, #f4f4f4);border:1px solid var(--rule);padding:16px;border-top:3px solid var(--accent, #1e2a6e)">
-            <div style="font-size:12px;font-weight:700;color:var(--accent, #1e2a6e);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">
+          <div style="background:var(--bg-subtle, #f1f5f9);border:1px solid var(--rule);padding:16px;border-top:3px solid var(--accent, #0b1a3d)">
+            <div style="font-size:12px;font-weight:700;color:var(--accent, #0b1a3d);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">
               {{ __('Step 2') }}
             </div>
             <strong style="display:block;font-size:14px;margin-bottom:6px;color:var(--ink)">{{ __('Earn Credentials') }}</strong>
@@ -393,8 +393,8 @@
             </p>
           </div>
 
-          <div style="background:var(--bg-subtle, #f4f4f4);border:1px solid var(--rule);padding:16px;border-top:3px solid var(--accent, #1e2a6e)">
-            <div style="font-size:12px;font-weight:700;color:var(--accent, #1e2a6e);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">
+          <div style="background:var(--bg-subtle, #f1f5f9);border:1px solid var(--rule);padding:16px;border-top:3px solid var(--accent, #0b1a3d)">
+            <div style="font-size:12px;font-weight:700;color:var(--accent, #0b1a3d);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">
               {{ __('Step 3') }}
             </div>
             <strong style="display:block;font-size:14px;margin-bottom:6px;color:var(--ink)">{{ __('Faculty Advising') }}</strong>
@@ -403,8 +403,8 @@
             </p>
           </div>
 
-          <div style="background:var(--bg-subtle, #f4f4f4);border:1px solid var(--rule);padding:16px;border-top:3px solid var(--accent, #1e2a6e)">
-            <div style="font-size:12px;font-weight:700;color:var(--accent, #1e2a6e);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">
+          <div style="background:var(--bg-subtle, #f1f5f9);border:1px solid var(--rule);padding:16px;border-top:3px solid var(--accent, #0b1a3d)">
+            <div style="font-size:12px;font-weight:700;color:var(--accent, #0b1a3d);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">
               {{ __('Step 4') }}
             </div>
             <strong style="display:block;font-size:14px;margin-bottom:6px;color:var(--ink)">{{ __('Credit Transfer') }}</strong>

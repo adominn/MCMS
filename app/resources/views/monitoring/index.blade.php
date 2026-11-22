@@ -18,7 +18,7 @@
 {{-- Carbon Horizontal Navigation Tabs --}}
 <div data-tabs style="margin-bottom:24px">
   <nav class="tabs" style="margin-bottom:20px;border-bottom:1px solid var(--rule);display:flex;gap:24px" role="tablist">
-    <button type="button" class="tab-btn active" data-tab="tab-cohorts" style="padding:10px 4px;font-weight:600;font-size:14px;background:none;border:none;border-bottom:2px solid var(--accent, #1e2a6e);color:var(--accent, #1e2a6e);cursor:pointer">
+    <button type="button" class="tab-btn active" data-tab="tab-cohorts" style="padding:10px 4px;font-weight:600;font-size:14px;background:none;border:none;border-bottom:2px solid var(--accent, #0b1a3d);color:var(--accent, #0b1a3d);cursor:pointer">
       {{ __('Cohort Indicators') }} ({{ count($offerings) }})
     </button>
     <button type="button" class="tab-btn" data-tab="tab-actions" style="padding:10px 4px;font-weight:600;font-size:14px;background:none;border:none;border-bottom:2px solid transparent;color:var(--ink-muted);cursor:pointer">
@@ -31,7 +31,7 @@
 
   {{-- ===================== TAB 1: COHORT INDICATORS ===================== --}}
   <div id="tab-cohorts" class="tab-pane">
-    <div class="note info" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;border-left:4px solid var(--primary);background:var(--info-bg, #e8eaf6)">
+    <div class="note info" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;border-left:4px solid var(--primary);background:var(--info-bg, #edf4ff)">
       <div style="font-size:20px;color:var(--primary);flex:none">
         <svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor"><path d="M1 6l7-3 7 3-7 3zM4 8v3c2 1.5 6 1.5 8 0V8"/></svg>
       </div>
@@ -345,8 +345,8 @@ document.addEventListener('DOMContentLoaded', function() {
     tabButtons.forEach(function(btn) {
       var isTarget = btn.getAttribute('data-tab') === targetId;
       btn.classList.toggle('active', isTarget);
-      btn.style.borderBottomColor = isTarget ? 'var(--accent, #1e2a6e)' : 'transparent';
-      btn.style.color = isTarget ? 'var(--accent, #1e2a6e)' : 'var(--ink-muted)';
+      btn.style.borderBottomColor = isTarget ? 'var(--accent, #0b1a3d)' : 'transparent';
+      btn.style.color = isTarget ? 'var(--accent, #0b1a3d)' : 'var(--ink-muted)';
     });
 
     tabPanes.forEach(function(pane) {

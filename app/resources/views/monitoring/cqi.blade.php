@@ -150,7 +150,7 @@
 
       {{-- Edit C2 Access Issues Form --}}
       @if($isOwner && $r->status !== 'confirmed')
-        <div class="bd" style="border-top:1px solid var(--border);background:var(--s1, #f4f4f4);padding:10px 14px">
+        <div class="bd" style="border-top:1px solid var(--border);background:var(--s1, #f1f5f9);padding:10px 14px">
           <form method="post" action="{{ route('cqi.access_issues', $r->id) }}" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
             @csrf
             <span style="font-size:12px;font-weight:600">{{ __('Update Indicator #6 (Access issues):') }}</span>
@@ -185,7 +185,7 @@
         @if($ind['feedback']['count'] > 0 && !empty($ind['feedback']['areas']))
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
             @foreach($ind['feedback']['areas'] as $areaKey => $score)
-              <div style="background:var(--s1, #f4f4f4);padding:8px 10px;display:flex;align-items:center;justify-content:space-between">
+              <div style="background:var(--s1, #f1f5f9);padding:8px 10px;display:flex;align-items:center;justify-content:space-between">
                 <span style="font-size:12px;font-weight:500">{{ __(config('monitoring.feedback_areas')[$areaKey] ?? ucfirst($areaKey)) }}</span>
                 <b style="color:var(--primary);font-size:13px">{{ $score !== null ? number_format((float)$score, 1) : '–' }}</b>
               </div>
@@ -203,7 +203,7 @@
 
         @php($previewComments = array_slice($ind['feedback']['comments'], 0, 2))
         @forelse($previewComments as $cmt)
-          <div style="margin:6px 0;padding:8px 12px;border-left:3px solid var(--primary);background:var(--s1, #f4f4f4);font-size:13px;font-style:italic">
+          <div style="margin:6px 0;padding:8px 12px;border-left:3px solid var(--primary);background:var(--s1, #f1f5f9);font-size:13px;font-style:italic">
             &ldquo;{{ $cmt }}&rdquo;
           </div>
         @empty
@@ -316,7 +316,7 @@
     </div>
 
     @if($isOwner && $r->status !== 'confirmed')
-      <div class="bd" style="border-top:1px solid var(--border);padding:14px 16px;background:var(--s1, #f4f4f4)">
+      <div class="bd" style="border-top:1px solid var(--border);padding:14px 16px;background:var(--s1, #f1f5f9)">
         <h4 style="margin:0 0 10px">{{ __('Update Stakeholder Feedback (Appendix C4)') }}</h4>
         <form method="post" action="{{ route('cqi.feedback', $r->id) }}">
           @csrf
@@ -813,12 +813,12 @@
 @endif
 
 {{-- ===================== NOTA PENTING (LAMPIRAN C) ===================== --}}
-<div class="panel" style="margin-top:24px;background:#edf5ff;border:1.5px solid #0f62fe">
+<div class="panel" style="margin-top:24px;background:#edf4ff;border:1.5px solid #0052ff">
   <div class="bd" style="padding:16px 20px">
     <div style="font-weight:700;font-size:12px;color:#0043ce;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">
       {{ __('NOTA PENTING (Lampiran C)') }}
     </div>
-    <p style="margin:0;font-size:13px;line-height:1.5;color:#161616">
+    <p style="margin:0;font-size:13px;line-height:1.5;color:#090a0f">
       {{ __('CQI hendaklah berasaskan evidens dan tidak terhad kepada skor kepuasan peserta. Analisis hendaklah mengambil kira pencapaian hasil pembelajaran, prestasi pentaksiran, data penyertaan/penyempurnaan, isu pelaksanaan dan maklum balas pihak berkepentingan. Perubahan signifikan yang terhasil daripada CQI hendaklah melalui mekanisme semakan, kelulusan atau Quality Verification semula yang berkaitan sebelum dilaksanakan.') }}
     </p>
   </div>
@@ -836,14 +836,14 @@
     </div>
     <div class="mb" style="overflow-y:auto;flex:1;padding:20px">
       @forelse($ind['feedback']['comments'] as $cmt)
-        <div style="margin-bottom:12px;padding:12px 16px;border-left:3px solid var(--primary);background:var(--s1, #f4f4f4);font-size:13px;line-height:1.5">
+        <div style="margin-bottom:12px;padding:12px 16px;border-left:3px solid var(--primary);background:var(--s1, #f1f5f9);font-size:13px;line-height:1.5">
           &ldquo;{{ $cmt }}&rdquo;
         </div>
       @empty
         <p class="muted" style="text-align:center;padding:24px">{{ __('No written comments submitted for this cohort.') }}</p>
       @endforelse
     </div>
-    <div class="mf" style="display:flex;justify-content:flex-end;padding:12px 20px;border-top:1px solid var(--border);background:var(--s1, #f4f4f4)">
+    <div class="mf" style="display:flex;justify-content:flex-end;padding:12px 20px;border-top:1px solid var(--border);background:var(--s1, #f1f5f9)">
       <button type="button" class="btn ter sm" data-close>{{ __('Close') }}</button>
     </div>
   </div>

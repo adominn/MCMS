@@ -7,37 +7,37 @@
   <style>
     @page { size: A4 portrait; margin: 14mm 14mm 16mm 14mm; }
     * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 11px; line-height: 1.45; color: #161616; background: #fff; margin: 0; padding: 20px; }
-    .print-bar { display: flex; justify-content: space-between; align-items: center; background: #f4f4f4; border: 1px solid #e0e0e0; padding: 8px 14px; margin-bottom: 20px; font-size: 12px; }
-    .btn { display: inline-block; padding: 5px 12px; background: #0f62fe; color: #fff; text-decoration: none; font-weight: 500; font-size: 11px; cursor: pointer; border: 1px solid #0f62fe; }
-    .btn-outline { background: #fff; color: #161616; border-color: #8d8d8d; margin-left: 6px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 11px; line-height: 1.45; color: #090a0f; background: #fff; margin: 0; padding: 20px; }
+    .print-bar { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 8px 14px; margin-bottom: 20px; font-size: 12px; }
+    .btn { display: inline-block; padding: 5px 12px; background: #0052ff; color: #fff; text-decoration: none; font-weight: 500; font-size: 11px; cursor: pointer; border: 1px solid #0052ff; }
+    .btn-outline { background: #fff; color: #090a0f; border-color: #8d8d8d; margin-left: 6px; }
     @media print { .print-bar { display: none !important; } body { padding: 0; } }
 
-    .header-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; border-bottom: 2px solid #161616; padding-bottom: 8px; }
+    .header-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; border-bottom: 2px solid #090a0f; padding-bottom: 8px; }
     .header-table td { vertical-align: top; }
-    .inst-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #161616; letter-spacing: 0.5px; }
-    .doc-badge { text-align: right; font-size: 10px; font-weight: 700; color: #525252; }
-    .doc-badge span { display: inline-block; border: 1px solid #161616; padding: 2px 6px; font-size: 11px; font-weight: 700; color: #161616; background: #f4f4f4; }
+    .inst-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #090a0f; letter-spacing: 0.5px; }
+    .doc-badge { text-align: right; font-size: 10px; font-weight: 700; color: #475569; }
+    .doc-badge span { display: inline-block; border: 1px solid #090a0f; padding: 2px 6px; font-size: 11px; font-weight: 700; color: #090a0f; background: #f1f5f9; }
     h1 { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 4px 0 2px; letter-spacing: 0.5px; }
-    .subtitle { font-size: 10px; color: #525252; margin-bottom: 12px; }
+    .subtitle { font-size: 10px; color: #475569; margin-bottom: 12px; }
 
-    .sec-title { font-size: 11px; font-weight: 700; text-transform: uppercase; background: #e0e0e0; padding: 4px 8px; margin: 14px 0 6px; border-left: 3px solid #0f62fe; }
+    .sec-title { font-size: 11px; font-weight: 700; text-transform: uppercase; background: #e2e8f0; padding: 4px 8px; margin: 14px 0 6px; border-left: 3px solid #0052ff; }
     table.data-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 10.5px; }
     table.data-table th, table.data-table td { border: 1px solid #8d8d8d; padding: 4px 6px; vertical-align: top; }
-    table.data-table th { background: #f4f4f4; font-weight: 600; text-align: left; }
+    table.data-table th { background: #f1f5f9; font-weight: 600; text-align: left; }
     table.grid-form { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 10.5px; }
     table.grid-form td { padding: 3px 6px; border: 1px solid #d1d1d1; vertical-align: top; }
-    table.grid-form td.label { font-weight: 600; background: #f4f4f4; width: 22%; }
+    table.grid-form td.label { font-weight: 600; background: #f1f5f9; width: 22%; }
     .tag { display: inline-block; padding: 1px 5px; font-size: 9.5px; font-weight: 600; border-radius: 2px; }
-    .tag.ok { background: #defbe6; color: #0e6027; }
+    .tag.ok { background: #edfcf0; color: #0e6027; }
     .tag.warn { background: #fef0c7; color: #8f4700; }
     .tag.err { background: #ffebee; color: #b71c1c; }
-    .tag.info { background: #edf5ff; color: #0043ce; }
+    .tag.info { background: #edf4ff; color: #0043ce; }
 
-    .nota-box { border: 1.5px solid #0f62fe; background: #edf5ff; padding: 8px 12px; margin-top: 14px; font-size: 10px; line-height: 1.45; }
+    .nota-box { border: 1.5px solid #0052ff; background: #edf4ff; padding: 8px 12px; margin-top: 14px; font-size: 10px; line-height: 1.45; }
     .nota-box b { color: #0043ce; text-transform: uppercase; letter-spacing: 0.5px; }
-    .check-box { display: inline-block; width: 11px; height: 11px; border: 1px solid #161616; vertical-align: middle; margin-right: 4px; text-align: center; line-height: 10px; font-size: 9px; }
-    .check-box.checked { background: #161616; color: #fff; font-weight: bold; }
+    .check-box { display: inline-block; width: 11px; height: 11px; border: 1px solid #090a0f; vertical-align: middle; margin-right: 4px; text-align: center; line-height: 10px; font-size: 9px; }
+    .check-box.checked { background: #090a0f; color: #fff; font-weight: bold; }
     .page-break { page-break-before: always; }
   </style>
 </head>
@@ -60,8 +60,8 @@
       </td>
       <td class="doc-badge">
         <span>LAMPIRAN C</span>
-        <div style="margin-top:4px;font-size:9.5px;color:#525252">Ref: {{ $r->reference }}</div>
-        <div style="font-size:9.5px;color:#525252">Tarikh: {{ \Carbon\Carbon::parse($r->created_at)->format('d/m/Y') }}</div>
+        <div style="margin-top:4px;font-size:9.5px;color:#475569">Ref: {{ $r->reference }}</div>
+        <div style="font-size:9.5px;color:#475569">Tarikh: {{ \Carbon\Carbon::parse($r->created_at)->format('d/m/Y') }}</div>
       </td>
     </tr>
   </table>
@@ -203,7 +203,7 @@
           </td>
         </tr>
       @empty
-        <tr><td colspan="6" style="text-align:center;color:#525252">Tiada pemetaan hasil pembelajaran.</td></tr>
+        <tr><td colspan="6" style="text-align:center;color:#475569">Tiada pemetaan hasil pembelajaran.</td></tr>
       @endforelse
     </tbody>
   </table>
@@ -313,7 +313,7 @@
           </td>
         </tr>
       @empty
-        <tr><td colspan="6" style="text-align:center;color:#525252">Tiada isu didaftarkan.</td></tr>
+        <tr><td colspan="6" style="text-align:center;color:#475569">Tiada isu didaftarkan.</td></tr>
       @endforelse
     </tbody>
   </table>
@@ -354,7 +354,7 @@
           </tr>
         @endforeach
       @empty
-        <tr><td colspan="6" style="text-align:center;color:#525252">Tiada tindakan CQI direkodkan.</td></tr>
+        <tr><td colspan="6" style="text-align:center;color:#475569">Tiada tindakan CQI direkodkan.</td></tr>
       @endforelse
     </tbody>
   </table>
@@ -392,7 +392,7 @@
           @endif
         @endforeach
       @empty
-        <tr><td colspan="6" style="text-align:center;color:#525252">Tiada penilaian keberkesanan tindakan direkodkan lagi.</td></tr>
+        <tr><td colspan="6" style="text-align:center;color:#475569">Tiada penilaian keberkesanan tindakan direkodkan lagi.</td></tr>
       @endforelse
     </tbody>
   </table>
@@ -462,10 +462,10 @@
       {{-- Role 1: Penyelaras Micro-Credential (P1) --}}
       @php($s1 = $c10Signoffs['coordinator'] ?? null)
       <tr>
-        <td><strong>Penyelaras Micro-Credential</strong><div style="font-size:9.5px;color:#525252">(P1 Coordinator)</div></td>
+        <td><strong>Penyelaras Micro-Credential</strong><div style="font-size:9.5px;color:#475569">(P1 Coordinator)</div></td>
         <td>
           <strong>{{ $s1['name'] ?? $offering->owner_name ?? '–' }}</strong><br>
-          <span style="font-size:9.5px;color:#525252">{{ $s1['position'] ?? 'Penyelaras Kursus' }}</span>
+          <span style="font-size:9.5px;color:#475569">{{ $s1['position'] ?? 'Penyelaras Kursus' }}</span>
         </td>
         <td>
           @if($r->status === 'submitted' || $r->status === 'confirmed' || !empty($s1['signed_at']))
@@ -482,10 +482,10 @@
       @php($s2 = $c10Signoffs['ptj_rep'] ?? null)
       @php($confirmer = $r->confirmed_by ? \App\Models\User::find($r->confirmed_by) : null)
       <tr>
-        <td><strong>Wakil PTj / Fakulti</strong><div style="font-size:9.5px;color:#525252">(P2 Dean / Deputy Dean)</div></td>
+        <td><strong>Wakil PTj / Fakulti</strong><div style="font-size:9.5px;color:#475569">(P2 Dean / Deputy Dean)</div></td>
         <td>
           <strong>{{ $s2['name'] ?? ($confirmer ? $confirmer->name : '–') }}</strong><br>
-          <span style="font-size:9.5px;color:#525252">{{ $s2['position'] ?? ($confirmer ? ($confirmer->position ?? 'Timbalan Dekan (Akademik)') : 'Timbalan Dekan (Akademik)') }}</span>
+          <span style="font-size:9.5px;color:#475569">{{ $s2['position'] ?? ($confirmer ? ($confirmer->position ?? 'Timbalan Dekan (Akademik)') : 'Timbalan Dekan (Akademik)') }}</span>
         </td>
         <td>
           @if($r->status === 'confirmed' || !empty($s2['signed_at']))
@@ -501,10 +501,10 @@
       {{-- Role 3: Pihak Jaminan Kualiti / Berkuasa jika berkenaan (P4) --}}
       @php($s3 = $c10Signoffs['qa_authority'] ?? null)
       <tr>
-        <td><strong>Pihak Jaminan Kualiti / Berkuasa</strong><div style="font-size:9.5px;color:#525252">(P4 QA Committee / CODL)</div></td>
+        <td><strong>Pihak Jaminan Kualiti / Berkuasa</strong><div style="font-size:9.5px;color:#475569">(P4 QA Committee / CODL)</div></td>
         <td>
           <strong>{{ $s3['name'] ?? ($r->status === 'confirmed' ? 'Jawatankuasa Jaminan Kualiti' : '–') }}</strong><br>
-          <span style="font-size:9.5px;color:#525252">{{ $s3['position'] ?? 'Pegawai Jaminan Kualiti' }}</span>
+          <span style="font-size:9.5px;color:#475569">{{ $s3['position'] ?? 'Pegawai Jaminan Kualiti' }}</span>
         </td>
         <td>
           @if(!empty($s3['status']) && $s3['status'] === 'tb')
