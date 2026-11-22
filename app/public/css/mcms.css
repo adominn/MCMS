@@ -1814,3 +1814,312 @@ td .tag.overdue, td .tag.ok, td .tag.warn, td .tag.err, td .tag.info {
     border-color: #000000 !important;
   }
 }
+
+/* ==========================================================================
+   Linear Stepper Flow (Authority: design-samples/linear-precision/preview.html)
+   ========================================================================== */
+.linear-stepper {
+  display: grid;
+  grid-template-columns: repeat(var(--stepper-cols, 4), 1fr);
+  margin: 16px 0;
+  position: relative;
+}
+.linear-stepper::before {
+  content: '';
+  position: absolute;
+  top: 13px;
+  left: 36px;
+  right: 36px;
+  height: 1px;
+  background: var(--line-hairline, #e2e8f0);
+  z-index: 1;
+}
+.stepper-step {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.step-node {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--line-hairline, #e2e8f0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink-muted, #64748b);
+  margin-bottom: 6px;
+}
+.stepper-step.completed .step-node {
+  background: var(--ink, #090a0f);
+  border-color: var(--ink, #090a0f);
+  color: #ffffff;
+}
+.stepper-step.active .step-node {
+  background: var(--primary, #0052ff);
+  border-color: var(--primary, #0052ff);
+  color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.25);
+}
+.stepper-step.active .step-label {
+  color: var(--primary, #0052ff);
+}
+.step-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink, #090a0f);
+}
+.step-meta {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  color: var(--ink-subtle, #94a3b8);
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   Sidebar Protruding Pull-Tab (Authority: design-samples/linear-precision/preview.html)
+   ========================================================================== */
+.side {
+  position: sticky;
+  top: 48px;
+  overflow: visible !important;
+}
+.side-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+}
+.side-inner::-webkit-scrollbar { width: 4px; }
+.side-inner::-webkit-scrollbar-track { background: transparent; }
+.side-inner::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.10); border-radius: 9999px; }
+.side-inner::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.24); }
+
+.sidebar-pull-tab {
+  position: absolute;
+  top: 50%;
+  right: -18px;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 52px;
+  background: #ffffff;
+  border: none;
+  border-radius: 0 24px 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0b1a3d;
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: 3px 0 14px rgba(0, 0, 0, 0.28);
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  padding: 0;
+  outline: none;
+}
+.sidebar-pull-tab:hover {
+  background: #ffffff;
+  width: 34px;
+  right: -22px;
+  box-shadow: 5px 0 20px rgba(0, 0, 0, 0.35);
+}
+.pull-tab-icon {
+  font-size: 13px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0b1a3d;
+  transition: transform 0.2s ease;
+}
+html.side-collapsed .sidebar-pull-tab .pull-tab-icon {
+  transform: rotate(180deg);
+}
+@media (max-width: 900px) {
+  .sidebar-pull-tab {
+    display: none !important;
+  }
+}
+
+/* Topbar theme toggle icon switching */
+html[data-theme="dark"] #theme-toggle-btn .icon-theme-light {
+  display: none !important;
+}
+html[data-theme="dark"] #theme-toggle-btn .icon-theme-dark {
+  display: block !important;
+}
+html[data-theme="light"] #theme-toggle-btn .icon-theme-light {
+  display: block !important;
+}
+html[data-theme="light"] #theme-toggle-btn .icon-theme-dark {
+  display: none !important;
+}
+
+/* ==========================================================================
+   Linear-Precision Dark Theme
+   Authority: design-samples/linear-precision/preview-dark.html & preview.html
+   ========================================================================== */
+[data-theme="dark"], body.theme-dark {
+  color-scheme: dark;
+
+  /* Canvas & Surfaces */
+  --color-canvas: #07090e;
+  --color-canvas-subtle: #0b0f17;
+  --color-surface-1: #101522;
+  --color-surface-2: #182030;
+  --color-surface-contrast: #ffffff;
+
+  /* Sidebar & Header */
+  --color-sidebar-bg: #07122a;
+  --color-header-bg: #07090e;
+
+  /* Electric Primary (Dark mode tuned: #3880ff) */
+  --color-primary: #3880ff;
+  --color-primary-hover: #5492ff;
+  --color-primary-pressed: #2468e8;
+  --color-primary-deep: #0f1c36;
+  --color-primary-tint: rgba(56, 128, 255, 0.14);
+  --color-primary-line: rgba(56, 128, 255, 0.38);
+  --color-primary-glow: rgba(56, 128, 255, 0.25);
+
+  /* High-Contrast Crisp Ink Typography */
+  --color-ink: #f8fafc;
+  --color-ink-muted: #94a3b8;
+  --color-ink-subtle: #64748b;
+  --color-ink-inverse: #07090e;
+
+  /* Precision Lines */
+  --color-line-hairline: #1c2436;
+  --color-line-strong: #334155;
+  --color-line-accent: #3880ff;
+  --color-card-border: #334155;
+
+  /* Semantics */
+  --color-success: #10b981;
+  --color-success-tint: rgba(16, 185, 129, 0.14);
+  --color-success-border: rgba(16, 185, 129, 0.4);
+
+  --color-warning: #f59e0b;
+  --color-warning-tint: rgba(245, 158, 11, 0.14);
+  --color-warning-border: rgba(245, 158, 11, 0.4);
+
+  --color-error: #f43f5e;
+  --color-error-tint: rgba(244, 63, 94, 0.14);
+  --color-error-border: rgba(244, 63, 94, 0.4);
+
+  --color-info: #3880ff;
+  --color-info-tint: rgba(56, 128, 255, 0.14);
+  --color-info-border: rgba(56, 128, 255, 0.4);
+
+  /* Legacy aliases override */
+  --card-bg: #101522;
+  --card-outline: #334155;
+  --panel-bg: #101522;
+  --table-bg: #101522;
+  --table-header-bg: #182030;
+  --pop-bg: #101522;
+  --ok-ink: #34d399;
+  --warn-ink: #fbbf24;
+  --err-ink: #f87171;
+  --info-ink: #60a5fa;
+  --line-hairline: #1c2436;
+  --line-strong: #334155;
+}
+
+[data-theme="dark"] body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+[data-theme="dark"] header.top {
+  background: var(--color-header-bg);
+  border-bottom: 1px solid var(--color-line-hairline);
+}
+
+[data-theme="dark"] .card,
+[data-theme="dark"] .panel,
+[data-theme="dark"] .section-card,
+[data-theme="dark"] .modal {
+  background: var(--card-bg);
+  border-color: var(--color-line-hairline);
+  color: var(--color-ink);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: #0b0f17;
+  color: #f8fafc;
+  border-color: #1c2436;
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus {
+  border-color: var(--color-primary);
+  background: #101522;
+}
+
+[data-theme="dark"] .btn.secondary,
+[data-theme="dark"] .btn.ter {
+  background: #182030;
+  color: #f8fafc;
+  border-color: #334155;
+}
+
+[data-theme="dark"] .btn.secondary:hover,
+[data-theme="dark"] .btn.ter:hover {
+  background: #222d42;
+  color: #ffffff;
+}
+
+[data-theme="dark"] table th {
+  background: var(--table-header-bg);
+  color: var(--color-ink);
+  border-bottom-color: var(--color-line-hairline);
+}
+
+[data-theme="dark"] table td {
+  border-bottom-color: var(--color-line-hairline);
+}
+
+[data-theme="dark"] .pop {
+  background: var(--pop-bg);
+  border-color: var(--color-line-hairline);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="dark"] .pop .mi {
+  color: var(--color-ink);
+}
+
+[data-theme="dark"] .pop .mi:hover {
+  background: rgba(56, 128, 255, 0.15);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .tabs a {
+  color: var(--color-ink-muted);
+}
+
+[data-theme="dark"] .tabs a.on {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+[data-theme="dark"] .stepper-step.completed .step-node {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #07090e;
+}

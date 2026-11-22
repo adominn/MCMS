@@ -534,6 +534,21 @@
       sideCollapseBtn.addEventListener('click', toggleDesktop);
     }
 
+    var pullTabBtn = $('#btnSidebarPullTab');
+    if (pullTabBtn) {
+      pullTabBtn.addEventListener('click', toggleDesktop);
+    }
+
+    window.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        var tag = (document.activeElement && document.activeElement.tagName) || '';
+        if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') {
+          e.preventDefault();
+          toggleDesktop();
+        }
+      }
+    });
+
     if (backdrop) {
       backdrop.addEventListener('click', closeMobile);
     }
@@ -547,9 +562,40 @@
     });
   }
 
-  /* ---------- light theme enforcement (v3 linear-precision, Decision D1) ---------- */
+  /* ---------- theme handling (Linear-Precision Light & Dark) ---------- */
   function setupTheme() {
-    document.documentElement.setAttribute('data-theme', 'light');
+    try {
+      var saved = localStorage.getItem('mcms_theme');
+      if (saved === 'dark' || saved === 'light') {
+        document.documentElement.setAttribute('data-theme', saved);
+        if (saved === 'dark') document.body.classList.add('theme-dark');
+        else document.body.classList.remove('theme-dark');
+      }
+    } catch (e) {}
+
+    var toggleBtns = $$('#theme-toggle-btn');
+    toggleBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        var next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        if (next === 'dark') document.body.classList.add('theme-dark');
+        else document.body.classList.remove('theme-dark');
+        try { localStorage.setItem('mcms_theme', next); } catch (e) {}
+
+        var tokenMeta = $('meta[name="csrf-token"]');
+        var token = tokenMeta ? tokenMeta.getAttribute('content') : '';
+        fetch('/theme', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ theme: next })
+        }).catch(function () {});
+      });
+    });
   }
 
   document.addEventListener('DOMContentLoaded', function () {

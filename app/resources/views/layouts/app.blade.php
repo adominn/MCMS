@@ -1,5 +1,9 @@
+@php
+  $currentTheme = session('ui_theme', auth()->user()?->theme_preference ?? 'auto');
+  $themeAttr = ($currentTheme === 'dark') ? 'dark' : 'light';
+@endphp
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="{{ $themeAttr }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -224,9 +228,11 @@
       @guest
         <a class="btn sm" href="{{ route('signin') }}">{{ __('Sign in') }}</a>
         <form method="post" action="{{ route('language') }}" class="lang" aria-label="Language" style="margin-left:8px">@csrf<button type="submit" name="lang" value="en" class="{{ app()->getLocale() === 'en' ? 'on' : 'off' }}">EN</button><button type="submit" name="lang" value="ms" class="{{ app()->getLocale() === 'ms' ? 'on' : 'off' }}">BM</button></form>
+        <button type="button" class="iconbtn" id="theme-toggle-btn" aria-label="{{ __('Toggle light / dark theme') }}" title="{{ __('Toggle light / dark theme') }}" style="margin-left:4px"><svg viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" class="icon-theme-light" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/></svg><svg viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" class="icon-theme-dark" aria-hidden="true" style="display:none"><path d="M13.5 9.5A6 6 0 116.5 2.5a4.8 4.8 0 007 7z"/></svg></button>
       @endguest
       @auth
         <form method="post" action="{{ route('language') }}" class="lang" style="margin-right:4px" aria-label="Language">@csrf<button type="submit" name="lang" value="en" class="{{ app()->getLocale() === 'en' ? 'on' : 'off' }}" aria-pressed="{{ app()->getLocale() === 'en' ? 'true' : 'false' }}">EN</button><button type="submit" name="lang" value="ms" class="{{ app()->getLocale() === 'ms' ? 'on' : 'off' }}" aria-pressed="{{ app()->getLocale() === 'ms' ? 'true' : 'false' }}">BM</button></form>
+        <button type="button" class="iconbtn" id="theme-toggle-btn" aria-label="{{ __('Toggle light / dark theme') }}" title="{{ __('Toggle light / dark theme') }}" style="margin-right:4px"><svg viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" class="icon-theme-light" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/></svg><svg viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" class="icon-theme-dark" aria-hidden="true" style="display:none"><path d="M13.5 9.5A6 6 0 116.5 2.5a4.8 4.8 0 007 7z"/></svg></button>
         @if(!$isPublicRoute)
         <a class="iconbtn" href="{{ route('help') }}" title="Help" aria-label="Help"><svg viewBox="0 0 16 16" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M6 6.2a2 2 0 013.9.6c0 1.3-1.9 1.6-1.9 2.8M8 11.6v.1"/></svg></a>
         <div class="anchor">
@@ -309,23 +315,34 @@
   <div class="body">
     @auth
     @if(!$isPublicRoute)
-    <nav class="side" aria-label="Main">
-      @foreach(collect($nav)->groupBy(0) as $group => $items)
-        @if($group !== 'General' && $group !== 'Messages')<div class="grp">{{ __($group) }}</div>@endif
-        @foreach($items as $i)
-          <a href="{{ isset($i[5]) ? route($i[2], $i[5]) : route($i[2]) }}" @if(request()->routeIs(...$i[3])) aria-current="page" @endif title="{{ __($i[1]) }}"><svg viewBox="0 0 16 16" aria-hidden="true">{!! $icons[$i[4]] !!}</svg><span class="lbl">{{ __($i[1]) }}</span>@if($i[1] === 'Notifications' && $unread)<span class="c">{{ $unread }}</span>@elseif($i[2] === 'tasks' && $tasksOpen)<span class="c">{{ $tasksOpen }}</span>@elseif(($counts[$i[2]] ?? 0) > 0)<span class="c">{{ $counts[$i[2]] }}</span>@endif</a>
+    <nav class="side" id="appSidebar" aria-label="Main">
+      <!-- Protruding pull-tab handle sticking out on the right edge -->
+      <button type="button" class="sidebar-pull-tab" id="btnSidebarPullTab" aria-label="{{ __('Toggle sidebar') }}" title="{{ __('Toggle sidebar') }}">
+        <span class="pull-tab-icon" id="pullTabIcon">
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 3l-5 5 5 5"/>
+          </svg>
+        </span>
+      </button>
+
+      <div class="side-inner">
+        @foreach(collect($nav)->groupBy(0) as $group => $items)
+          @if($group !== 'General' && $group !== 'Messages')<div class="grp">{{ __($group) }}</div>@endif
+          @foreach($items as $i)
+            <a href="{{ isset($i[5]) ? route($i[2], $i[5]) : route($i[2]) }}" @if(request()->routeIs(...$i[3])) aria-current="page" @endif title="{{ __($i[1]) }}"><svg viewBox="0 0 16 16" aria-hidden="true">{!! $icons[$i[4]] !!}</svg><span class="lbl">{{ __($i[1]) }}</span>@if($i[1] === 'Notifications' && $unread)<span class="c">{{ $unread }}</span>@elseif($i[2] === 'tasks' && $tasksOpen)<span class="c">{{ $tasksOpen }}</span>@elseif(($counts[$i[2]] ?? 0) > 0)<span class="c">{{ $counts[$i[2]] }}</span>@endif</a>
+          @endforeach
         @endforeach
-      @endforeach
-      <div class="side-foot" style="margin-top:auto;padding-top:12px;border-top:1px solid var(--blue-60)">
-        <button type="button" class="side-collapse-btn" id="side-collapse-btn" aria-label="{{ __('Collapse sidebar') }}" title="{{ __('Collapse sidebar') }}">
-          <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-collapse" aria-hidden="true">
-            <path d="M11 3l-5 5 5 5M6 3l-5 5 5 5"/>
-          </svg>
-          <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-expand" aria-hidden="true" style="display:none">
-            <path d="M5 3l5 5-5 5M10 3l5 5-5 5"/>
-          </svg>
-          <span class="lbl">{{ __('Collapse sidebar') }}</span>
-        </button>
+        <div class="side-foot" style="margin-top:auto;padding-top:12px;border-top:1px solid var(--blue-60)">
+          <button type="button" class="side-collapse-btn" id="side-collapse-btn" aria-label="{{ __('Collapse sidebar') }}" title="{{ __('Collapse sidebar') }}">
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-collapse" aria-hidden="true">
+              <path d="M11 3l-5 5 5 5M6 3l-5 5 5 5"/>
+            </svg>
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-expand" aria-hidden="true" style="display:none">
+              <path d="M5 3l5 5-5 5M10 3l5 5-5 5"/>
+            </svg>
+            <span class="lbl">{{ __('Collapse sidebar') }}</span>
+          </button>
+        </div>
       </div>
     </nav>
     <div class="side-backdrop" id="side-backdrop"></div>

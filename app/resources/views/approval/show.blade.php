@@ -27,6 +27,39 @@
   </div>
 </div>
 
+@php
+  $proposalSteps = [
+    [
+      'label' => __('1. Submission'),
+      'meta' => $v->submitted_at ? \Carbon\Carbon::parse($v->submitted_at)->format('d M Y') : ($v->created_at ? \Carbon\Carbon::parse($v->created_at)->format('d M Y') : '—'),
+      'status' => in_array($v->status, ['submitted', 'in_review', 'endorsed', 'approved']) ? 'completed' : 'active',
+      'num' => '01',
+    ],
+    [
+      'label' => __('2. Dean Endorsement'),
+      'meta' => in_array($v->status, ['endorsed', 'approved']) ? ($v->endorsed_at ? \Carbon\Carbon::parse($v->endorsed_at)->format('d M Y') : __('Endorsed')) : (in_array($v->status, ['submitted', 'in_review']) ? __('In Progress') : __('Pending')),
+      'status' => in_array($v->status, ['endorsed', 'approved']) ? 'completed' : (in_array($v->status, ['submitted', 'in_review']) ? 'active' : 'pending'),
+      'num' => '02',
+    ],
+    [
+      'label' => __('3. CODL Verification'),
+      'meta' => $v->status === 'approved' ? __('Verified') : ($v->status === 'endorsed' ? __('In Progress') : __('Pending')),
+      'status' => $v->status === 'approved' ? 'completed' : ($v->status === 'endorsed' ? 'active' : 'pending'),
+      'num' => '03',
+    ],
+    [
+      'label' => __('4. Senate Endorsement'),
+      'meta' => $v->status === 'approved' ? ($v->approved_at ? \Carbon\Carbon::parse($v->approved_at)->format('d M Y') : __('Approved')) : __('Pending'),
+      'status' => $v->status === 'approved' ? 'completed' : 'pending',
+      'num' => '04',
+    ],
+  ];
+@endphp
+
+<div class="panel" style="margin-bottom:20px;padding:16px 20px">
+  <x-stepper :steps="$proposalSteps" />
+</div>
+
 @php($blocks = count($checks['blocking']))
 @if(in_array($v->status, ['submitted', 'in_review']))
   <div class="note {{ $blocks ? 'warn' : 'info' }}" style="margin-bottom:20px">
