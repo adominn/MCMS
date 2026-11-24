@@ -188,7 +188,7 @@
           <td colspan="{{ $activeModel === 'separate_assessment' ? 5 : 4 }}" style="padding:10px 14px">
             <div style="margin-bottom:8px">
               <label style="font-size:11px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:#475569;display:block;margin-bottom:3px">
-                {{ __('Key Content / Kandungan Utama Modul (Appendix A5)') }}
+                {{ __('Key Content') }}
               </label>
               <textarea name="rows[{{ $m->id }}][key_content]" rows="2" placeholder="{{ __('List syllabus topics, competencies, and core concepts for Module :seq...', ['seq' => $m->seq]) }}" style="font-size:12px;width:100%">{{ $m->key_content }}</textarea>
             </div>
@@ -197,7 +197,7 @@
             <div style="border:1px solid #e2e8f0;background:#ffffff;padding:10px 12px;border-radius:2px">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
                 <span style="font-size:11px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:#0052ff">
-                  {{ __('Learning Activities & SLT Breakdown (Cl. 8.1, 8.3, 10.1)') }}
+                  {{ __('Learning Activities & SLT Breakdown') }}
                   &bull; <span class="tag info" style="font-size:10px">{{ $modActs->sum('slt_hours') }}h / {{ $m->slt_hours }}h</span>
                 </span>
                 @unless($locked)

@@ -23,9 +23,23 @@ final class PathwayController
     public function index(Request $request)
     {
         $rows = $this->pathways($request)->orderByDesc('w.id')->get();
+        $isDeanOrAbove = $request->user()->hasAnyRole('deputy_dean', 'ptj_authority', 'academic_authority');
+        $plans = $isDeanOrAbove
+            ? DB::table('stackable_plans as s')
+                ->join('users as u', 'u.id', '=', 's.user_id')
+                ->join('programmes as p', 'p.id', '=', 's.programme_id')
+                ->when($this->scope($request) !== null, fn ($q) => $q->whereIn('p.ptj_id', $this->scope($request)))
+                ->orderByDesc('s.id')
+                ->get(['s.*', 'u.name', 'p.code'])
+            : collect([]);
 
-        return view('pathways.index', ['rows' => $rows, 'programmes' => $this->programmes($request), 'status' => config('pathways.status'),
-            'plans' => DB::table('stackable_plans as s')->join('users as u', 'u.id', '=', 's.user_id')->join('programmes as p', 'p.id', '=', 's.programme_id')->when($this->scope($request) !== null, fn ($q) => $q->whereIn('p.ptj_id', $this->scope($request)))->orderByDesc('s.id')->get(['s.*', 'u.name', 'p.code'])]);
+        return view('pathways.index', [
+            'rows' => $rows,
+            'programmes' => $this->programmes($request),
+            'status' => config('pathways.status'),
+            'plans' => $plans,
+            'isDeanOrAbove' => $isDeanOrAbove,
+        ]);
     }
 
     public function store(Request $request)
@@ -374,22 +388,413 @@ final class PathwayController
 
     public function mine(Request $request)
     {
+        $userId = $request->user()->id;
+
         $plans = DB::table('stackable_plans as s')
             ->join('programmes as p', 'p.id', '=', 's.programme_id')
             ->leftJoin('ptjs as ptj', 'ptj.id', '=', 'p.ptj_id')
-            ->leftJoin('users as decider', 'decider.id', '=', 's.decided_by')
-            ->where('s.user_id', $request->user()->id)
+            ->where('s.user_id', $userId)
             ->orderByDesc('s.id')
             ->get([
-                's.*', 'p.code', 'p.name as programme_name', 'p.total_credits',
+                's.*', 'p.code', 'p.name as programme_name', 'p.total_credits', 'p.mqf_level', 'p.mode',
                 'ptj.name as faculty_name', 'ptj.code as faculty_code',
-                'decider.name as decider_name', 'decider.email as decider_email',
             ])
             ->each(fn ($s) => $s->checks = DB::table('plan_requirements')->where('stackable_plan_id', $s->id)->get());
 
+        $earnedMcIds = DB::table('enrolments as e')
+            ->join('offerings as o', 'o.id', '=', 'e.offering_id')
+            ->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
+            ->where('e.user_id', $userId)
+            ->where('e.status', 'completed')
+            ->pluck('v.micro_credential_id')
+            ->unique()
+            ->values()
+            ->all();
+
+        $enrolledMcIds = DB::table('enrolments as e')
+            ->join('offerings as o', 'o.id', '=', 'e.offering_id')
+            ->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
+            ->where('e.user_id', $userId)
+            ->where('e.status', 'enrolled')
+            ->pluck('v.micro_credential_id')
+            ->unique()
+            ->values()
+            ->all();
+
         $detail = $plans->mapWithKeys(fn ($s) => [$s->id => $this->planView($s)]);
 
-        return view('pathways.mine', ['plans' => $plans, 'detail' => $detail, 'planStatus' => config('pathways.plan_status'), 'decisions' => config('pathways.decision')]);
+        return view('pathways.mine', [
+            'plans' => $plans,
+            'detail' => $detail,
+            'earnedMcIds' => $earnedMcIds,
+            'enrolledMcIds' => $enrolledMcIds,
+            'planStatus' => config('pathways.plan_status'),
+            'decisions' => config('pathways.decision'),
+        ]);
+    }
+
+    public function planChoose(Request $request)
+    {
+        $userId = $request->user()->id;
+
+        $allPathways = DB::table('pathways as w')
+            ->join('programmes as p', 'p.id', '=', 'w.programme_id')
+            ->leftJoin('ptjs as ptj', 'ptj.id', '=', 'p.ptj_id')
+            ->where('w.status', 'published')
+            ->orderBy('p.code')
+            ->get([
+                'w.*', 'p.code as programme_code', 'p.name as programme_name',
+                'p.mqf_level', 'p.total_credits', 'p.mode', 'ptj.name as faculty_name', 'ptj.code as faculty_code',
+            ]);
+
+        $pathwayIds = $allPathways->pluck('id')->all();
+        $itemsByPathway = DB::table('pathway_items as i')
+            ->join('parent_courses as c', 'c.id', '=', 'i.parent_course_id')
+            ->join('mc_versions as v', fn ($j) => $j->on('v.micro_credential_id', '=', 'i.micro_credential_id')
+                ->whereRaw('v.version_no = (select max(version_no) from mc_versions where micro_credential_id = i.micro_credential_id)'))
+            ->whereIn('i.pathway_id', $pathwayIds ?: [0])
+            ->get(['i.*', 'c.code as course_code', 'c.name as course_name', 'v.name_en'])
+            ->groupBy('pathway_id');
+
+        $earnedMcIds = DB::table('enrolments as e')
+            ->join('offerings as o', 'o.id', '=', 'e.offering_id')
+            ->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
+            ->where('e.user_id', $userId)
+            ->where('e.status', 'completed')
+            ->pluck('v.micro_credential_id')
+            ->unique()
+            ->values()
+            ->all();
+
+        $enrolledMcIds = DB::table('enrolments as e')
+            ->join('offerings as o', 'o.id', '=', 'e.offering_id')
+            ->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
+            ->where('e.user_id', $userId)
+            ->where('e.status', 'enrolled')
+            ->pluck('v.micro_credential_id')
+            ->unique()
+            ->values()
+            ->all();
+
+        $activePathwayIds = DB::table('stackable_plans')
+            ->where('user_id', $userId)
+            ->pluck('pathway_id')
+            ->all();
+
+        // Enrich each pathway with match metrics & level bucket
+        $enriched = $allPathways->map(function ($w) use ($itemsByPathway, $earnedMcIds, $enrolledMcIds, $activePathwayIds) {
+            $items = $itemsByPathway->get($w->id, collect());
+            $earnedItems = $items->filter(fn ($i) => in_array($i->micro_credential_id, $earnedMcIds, true));
+            $enrolledItems = $items->filter(fn ($i) => ! in_array($i->micro_credential_id, $earnedMcIds, true) && in_array($i->micro_credential_id, $enrolledMcIds, true));
+
+            $w->items = $items;
+            $w->total_count = $items->count();
+            $w->earned_count = $earnedItems->count();
+            $w->enrolled_count = $enrolledItems->count();
+            $w->earned_credits = (float) $earnedItems->sum('credits');
+            $w->mapped_credits = (float) $items->sum('credits');
+            $w->match_ratio = $w->total_count > 0 ? ($w->earned_count / $w->total_count) : 0.0;
+            $w->is_selected = in_array($w->id, $activePathwayIds, true);
+            $w->level_bucket = match ((int) $w->mqf_level) {
+                4 => 'diploma',
+                6 => 'bachelor',
+                7, 8 => 'master',
+                default => 'other',
+            };
+
+            return $w;
+        });
+
+        // Level counts for tabs
+        $levelCounts = [
+            'all' => $enriched->count(),
+            'bachelor' => $enriched->where('level_bucket', 'bachelor')->count(),
+            'master' => $enriched->where('level_bucket', 'master')->count(),
+            'diploma' => $enriched->where('level_bucket', 'diploma')->count(),
+        ];
+
+        $faculties = $enriched->pluck('faculty_name', 'faculty_code')->filter()->sortKeys();
+        $selectedPathways = $enriched->where('is_selected', true)->values();
+
+        // Apply filters
+        $level = trim((string) $request->query('level', ''));
+        $faculty = trim((string) $request->query('faculty', ''));
+        $q = trim((string) $request->query('q', ''));
+        $selectedOnly = $request->boolean('selected');
+        $sort = trim((string) $request->query('sort', 'best_match'));
+
+        $filtered = $enriched
+            ->when($level !== '' && $level !== 'all', fn ($c) => $c->where('level_bucket', $level))
+            ->when($faculty !== '', fn ($c) => $c->where('faculty_code', $faculty))
+            ->when($selectedOnly, fn ($c) => $c->where('is_selected', true))
+            ->when($q !== '', function ($c) use ($q) {
+                $needle = mb_strtolower($q);
+
+                return $c->filter(function ($w) use ($needle) {
+                    if (str_contains(mb_strtolower($w->programme_code.' '.$w->programme_name.' '.($w->faculty_name ?? '')), $needle)) {
+                        return true;
+                    }
+
+                    return $w->items->contains(fn ($i) => str_contains(mb_strtolower($i->name_en.' '.$i->course_code.' '.$i->course_name), $needle));
+                });
+            });
+
+        // Sort: selected first unless alphabetical/credits chosen
+        $sorted = match ($sort) {
+            'name' => $filtered->sortBy('programme_name', SORT_NATURAL | SORT_FLAG_CASE)->values(),
+            'credits' => $filtered->sortByDesc('total_credits')->values(),
+            default => $filtered->sortBy([
+                ['is_selected', 'desc'],
+                ['match_ratio', 'desc'],
+                ['earned_credits', 'desc'],
+                ['programme_code', 'asc'],
+            ])->values(),
+        };
+
+        // Central Rule D-67 threshold from config/ui.php
+        $perPage = (int) config('ui.bounded.cards_per_page_desktop', 12);
+        $page = max(1, (int) $request->query('page', 1));
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $sorted->forPage($page, $perPage)->values(),
+            $sorted->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return view('pathways.choose', [
+            'pathways' => $paginator,
+            'selectedPathways' => $selectedPathways,
+            'levelCounts' => $levelCounts,
+            'faculties' => $faculties,
+            'level' => $level ?: 'all',
+            'faculty' => $faculty,
+            'q' => $q,
+            'selectedOnly' => $selectedOnly,
+            'sort' => $sort,
+            'maxCompare' => (int) config('ui.bounded.max_compare_programmes', 3),
+            'minHomePercent' => $this->settings->get('stackable.min_home_credit_percent'),
+        ]);
+    }
+
+    /** Dedicated 4-tab Pathway Detail View (Option A, Rule D-67) */
+    public function planDetail(Request $request, int $id)
+    {
+        $userId = $request->user()->id;
+
+        $pw = DB::table('pathways as w')
+            ->join('programmes as p', 'p.id', '=', 'w.programme_id')
+            ->leftJoin('ptjs as ptj', 'ptj.id', '=', 'p.ptj_id')
+            ->where('w.id', $id)
+            ->where('w.status', 'published')
+            ->first([
+                'w.*', 'p.code as programme_code', 'p.name as programme_name',
+                'p.mqf_level', 'p.total_credits', 'p.mode', 'ptj.name as faculty_name', 'ptj.code as faculty_code',
+            ]) ?? abort(404);
+
+        $items = DB::table('pathway_items as i')
+            ->join('parent_courses as c', 'c.id', '=', 'i.parent_course_id')
+            ->join('mc_versions as v', fn ($j) => $j->on('v.micro_credential_id', '=', 'i.micro_credential_id')
+                ->whereRaw('v.version_no = (select max(version_no) from mc_versions where micro_credential_id = i.micro_credential_id)'))
+            ->where('i.pathway_id', $pw->id)
+            ->orderBy('c.code')
+            ->get(['i.*', 'c.code as course_code', 'c.name as course_name', 'v.name_en']);
+
+        $earnedMcIds = DB::table('enrolments as e')
+            ->join('offerings as o', 'o.id', '=', 'e.offering_id')
+            ->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
+            ->where('e.user_id', $userId)
+            ->where('e.status', 'completed')
+            ->pluck('v.micro_credential_id')
+            ->unique()
+            ->values()
+            ->all();
+
+        $enrolledMcIds = DB::table('enrolments as e')
+            ->join('offerings as o', 'o.id', '=', 'e.offering_id')
+            ->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
+            ->where('e.user_id', $userId)
+            ->where('e.status', 'enrolled')
+            ->pluck('v.micro_credential_id')
+            ->unique()
+            ->values()
+            ->all();
+
+        $existingPlan = DB::table('stackable_plans')
+            ->where('user_id', $userId)
+            ->where('pathway_id', $pw->id)
+            ->first();
+
+        $hasFullCurriculum = DB::table('programme_versions')
+            ->where('programme_id', $pw->programme_id)
+            ->where('status', 'active')
+            ->exists();
+
+        return view('pathways.detail', [
+            'pw' => $pw,
+            'items' => $items,
+            'earnedMcIds' => $earnedMcIds,
+            'enrolledMcIds' => $enrolledMcIds,
+            'existingPlan' => $existingPlan,
+            'hasFullCurriculum' => $hasFullCurriculum,
+            'initialRows' => (int) config('ui.bounded.table_rows_initial', 10),
+            'minHomePercent' => (float) ($this->settings->get('stackable.min_home_credit_percent') ?: 30),
+        ]);
+    }
+
+    public function planSelfStore(Request $request)
+    {
+        $d = $request->validate([
+            'pathway_id' => 'required|integer',
+            'items' => 'nullable|array',
+            'items.*' => 'integer',
+        ]);
+
+        $userId = $request->user()->id;
+
+        $w = DB::table('pathways as w')
+            ->join('programmes as p', 'p.id', '=', 'w.programme_id')
+            ->where('w.id', $d['pathway_id'])
+            ->where('w.status', 'published')
+            ->select('w.*', 'p.code as programme', 'p.name as programme_name', 'p.total_credits', 'p.mode')
+            ->first() ?? abort(404, 'Plans are made against a published mapping.');
+
+        if (DB::table('stackable_plans')->where('user_id', $userId)->where('pathway_id', $w->id)->exists()) {
+            return redirect()->route('plan.mine')->with('status', 'This degree pathway is already in your plan.');
+        }
+
+        // Block switching to another programme if already formally admitted to an active (non-awarded) programme
+        $activeAdmission = DB::table('admissions as a')
+            ->join('programmes as p', 'p.id', '=', 'a.programme_id')
+            ->where('a.user_id', $userId)
+            ->where('a.programme_id', '!=', $w->programme_id)
+            ->get(['a.*', 'p.code as programme_code'])
+            ->first(function ($adm) use ($userId) {
+                $planIds = DB::table('stackable_plans')
+                    ->where('user_id', $userId)
+                    ->where('programme_id', $adm->programme_id)
+                    ->pluck('id');
+
+                return $planIds->isEmpty() || ! DB::table('qualification_awards')->whereIn('stackable_plan_id', $planIds)->exists();
+            });
+
+        if ($activeAdmission) {
+            return redirect()->route('plan.mine')->withErrors([
+                'pathway_id' => "You are currently admitted to {$activeAdmission->programme_code} (Intake {$activeAdmission->intake}). You cannot select another degree pathway while actively enrolled.",
+            ]);
+        }
+
+        $allItemIds = DB::table('pathway_items')->where('pathway_id', $w->id)->pluck('id')->map(fn ($v) => (int) $v)->all();
+        $itemIds = ! empty($d['items']) ? array_map('intval', $d['items']) : $allItemIds;
+
+        $f = $this->plans->figures($w, $itemIds, 0.0);
+        if ($itemIds !== [] && $f['items']->count() !== count(array_unique($itemIds))) {
+            throw ValidationException::withMessages(['items' => 'Choose credentials from this mapping.']);
+        }
+
+        $delivery = strtolower((string) $w->mode) === 'odl' ? 'odl' : 'conventional';
+        $residency = (int) ($this->settings->get('stackable.residency_semesters') ?: 1);
+
+        DB::transaction(function () use ($w, $itemIds, $f, $delivery, $residency, $userId) {
+            // Replace any previous un-admitted, un-awarded self-service planning tracker so switching truly switches
+            $replaceableIds = DB::table('stackable_plans as sp')
+                ->where('sp.user_id', $userId)
+                ->whereNotExists(fn ($q) => $q->select(DB::raw(1))->from('qualification_awards as qa')->whereColumn('qa.stackable_plan_id', 'sp.id'))
+                ->whereNotExists(fn ($q) => $q->select(DB::raw(1))->from('admissions as ad')->whereColumn('ad.user_id', 'sp.user_id')->whereColumn('ad.programme_id', 'sp.programme_id'))
+                ->pluck('sp.id')
+                ->all();
+
+            if ($replaceableIds !== []) {
+                DB::table('plan_requirements')->whereIn('stackable_plan_id', $replaceableIds)->delete();
+                DB::table('stackable_plans')->whereIn('id', $replaceableIds)->delete();
+            }
+
+            $id = DB::table('stackable_plans')->insertGetId([
+                'reference' => 'TMP'.bin2hex(random_bytes(8)),
+                'user_id' => $userId,
+                'pathway_id' => $w->id,
+                'programme_id' => $w->programme_id,
+                'item_ids' => json_encode($itemIds),
+                'other_credits' => 0,
+                'transfer_credits' => $f['transfer'],
+                'utem_percent' => $f['percent'],
+                'residency_semesters' => $delivery === 'odl' ? 0 : $residency,
+                'delivery_method' => $delivery,
+                'remaining' => json_encode([]),
+                'setting_version_id' => $this->minVersion(),
+                'status' => 'needs_review',
+                'created_by' => $userId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            DB::table('stackable_plans')->where('id', $id)->update(['reference' => 'SP-'.now()->year.'-'.str_pad((string) $id, 6, '0', STR_PAD_LEFT)]);
+            $this->plans->record($id);
+            $this->audit->record('plan.created', ['type' => 'StackablePlan', 'id' => $id], after: ['pathway_id' => $w->id, 'utem_percent' => $f['percent']]);
+        });
+
+        return redirect()->route('plan.mine')->with('status', 'Degree pathway added to your plan.');
+    }
+
+    public function planSelfEdit(Request $request, int $id)
+    {
+        DB::table('stackable_plans')->where('id', $id)->where('user_id', $request->user()->id)->first() ?? abort(404);
+
+        return redirect()->route('plan.choose');
+    }
+
+    public function planSelfUpdate(Request $request, int $id)
+    {
+        $s = DB::table('stackable_plans')->where('id', $id)->where('user_id', $request->user()->id)->first() ?? abort(404);
+        $d = $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*' => 'integer',
+            'other_credits' => 'nullable|numeric|min:0|max:200',
+            'residency_semesters' => 'nullable|integer|min:0|max:12',
+            'delivery_method' => 'nullable|in:conventional,odl',
+        ], ['items.required' => 'Choose at least one mapped credential.']);
+
+        $w = DB::table('pathways as w')->join('programmes as p', 'p.id', '=', 'w.programme_id')->where('w.id', $s->pathway_id)->select('w.*', 'p.total_credits')->first() ?? abort(404);
+        $f = $this->plans->figures($w, $d['items'], (float) ($d['other_credits'] ?? $s->other_credits ?? 0));
+        if ($f['items']->count() !== count(array_unique($d['items']))) {
+            throw ValidationException::withMessages(['items' => 'Choose credentials from this mapping.']);
+        }
+
+        DB::transaction(function () use ($s, $d, $f, $id) {
+            DB::table('stackable_plans')->where('id', $id)->update([
+                'item_ids' => json_encode(array_map('intval', $d['items'])),
+                'other_credits' => $d['other_credits'] ?? $s->other_credits ?? 0,
+                'transfer_credits' => $f['transfer'],
+                'utem_percent' => $f['percent'],
+                'residency_semesters' => $d['residency_semesters'] ?? $s->residency_semesters ?? 1,
+                'delivery_method' => $d['delivery_method'] ?? $s->delivery_method ?? 'conventional',
+                'status' => 'needs_review',
+                'decision' => null,
+                'updated_at' => now(),
+            ]);
+            $this->plans->record($id);
+            $this->audit->record('plan.updated', ['type' => 'StackablePlan', 'id' => $id], after: ['utem_percent' => $f['percent']]);
+        });
+
+        return redirect()->route('plan.mine')->with('status', 'Your degree plan has been updated.');
+    }
+
+    public function planSelfDestroy(Request $request, int $id)
+    {
+        $s = DB::table('stackable_plans')->where('id', $id)->where('user_id', $request->user()->id)->first() ?? abort(404);
+        if (DB::table('qualification_awards')->where('stackable_plan_id', $id)->exists()) {
+            return redirect()->route('plan.mine')->withErrors(['plan' => 'A degree plan with an awarded qualification cannot be removed.']);
+        }
+        if (DB::table('admissions')->where('user_id', $s->user_id)->where('programme_id', $s->programme_id)->exists()) {
+            return redirect()->route('plan.mine')->withErrors(['plan' => 'A degree plan linked to an active programme admission cannot be removed.']);
+        }
+
+        DB::transaction(function () use ($id, $s) {
+            DB::table('plan_requirements')->where('stackable_plan_id', $id)->delete();
+            DB::table('stackable_plans')->where('id', $id)->delete();
+            $this->audit->record('plan.deleted', ['type' => 'StackablePlan', 'id' => $id], before: ['reference' => $s->reference]);
+        });
+
+        return redirect()->route('plan.mine')->with('status', 'Degree plan removed. You can select a new degree pathway anytime.');
     }
 
     // ---- shared

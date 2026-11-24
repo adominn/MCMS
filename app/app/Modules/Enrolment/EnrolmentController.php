@@ -138,9 +138,13 @@ final class EnrolmentController
         $payment = DB::table('payments')->where('enrolment_id', $id)->where('status', 'succeeded')->first();
         $allPayments = DB::table('payments')->where('enrolment_id', $id)->orderByDesc('id')->get();
         $log = DB::table('enrolment_status_log')->where('enrolment_id', $id)->orderBy('id')->get();
+        $outcomes = DB::table('learning_outcomes')->where('mc_version_id', $e->mc_version_id)->orderBy('sort_order')->get();
+        $assessments = DB::table('assessment_components')->where('mc_version_id', $e->mc_version_id)->orderBy('id')->get();
 
         return view('student.enrolment', [
             'modules' => $modules,
+            'outcomes' => $outcomes,
+            'assessments' => $assessments,
             'e' => $e,
             'o' => $o,
             'labels' => config('enrolment.status'),
@@ -330,6 +334,7 @@ final class EnrolmentController
         return DB::table('offerings as o')
             ->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
             ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+            ->leftJoin('ptjs as j', 'j.id', '=', 'm.ptj_id')
             ->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
             ->leftJoin('parent_courses as p', 'p.id', '=', 'v.parent_course_id')
             ->where('o.id', $id)
@@ -341,13 +346,17 @@ final class EnrolmentController
                 'v.proposed_credit',
                 'v.proposed_mqf_level',
                 'v.delivery_mode as version_delivery_mode',
+                'v.delivery_language',
                 'v.qv_status',
                 'v.qv_valid_until',
                 'p.code as parent_course_code',
                 'p.name as parent_course_name',
                 'm.code as mc_code',
                 'm.category',
+                'j.code as ptj_code',
+                'j.name as ptj_name',
                 'u.name as lecturer_name',
+                'u.email as lecturer_email',
             ]) ?? abort(404);
     }
 }

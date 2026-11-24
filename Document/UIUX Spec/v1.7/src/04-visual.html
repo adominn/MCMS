@@ -1,0 +1,61 @@
+<!-- ===================== 3. VISUAL DESIGN SYSTEM ===================== -->
+<h1>3. Visual Design System</h1>
+<p>MCMS strictly implements the <b>Linear-Precision v3</b> design specification (DESIGN.md): modern geometric typography (<i>Plus Jakarta Sans</i>), crisp black card outlines (<code>#090a0f</code>), high-contrast Deep Cobalt Navy navigation (<code>#0b1a3d</code>), Electric Cobalt accents (<code>#0052ff</code>), an accessible protruding pull-tab latch handle, multi-state linear progress steppers, and a native dual Light / Dark theme architecture. {{fig:shelldark}} and {{fig:shellcollapsed}} show the operational interface across themes and states.</p>
+<figure data-f="shelldark"><img src="./img/sys_dark_theme_dashboard.png" style="width:100%;border:1px solid #334155"><figcaption>Linear-Precision v3 dual-theme architecture: instant Dark Mode toggle rendering deep background tones (<code>#070d19</code>), elevated dark slate panels (<code>#0f172a</code>), and Electric Cobalt accents (<code>sys_dark_theme_dashboard.png</code>).</figcaption></figure>
+<figure data-f="shellcollapsed"><img src="./img/sys_sidebar_collapsed.png" style="width:100%;border:1px solid #090a0f"><figcaption>Protruding white pull-tab latch handle (<code>#btnSidebarPullTab</code>) with animated flipping chevron mounted on the Deep Cobalt Navy sidebar boundary, allowing frictionless collapsing and expansion to maximise analytical viewport width (<code>sys_sidebar_collapsed.png</code>).</figcaption></figure>
+
+<h2>3.1 Colour &amp; Theme Matrix</h2>
+<p class="tcap" data-t="colours">Linear-Precision v3 colour tokens</p>
+<script type="text/tbl" data-h="Token role|Light mode value|Dark mode value|Usage" data-w="24%|18%|18%|40%">
+Brand Primary | #0052ff | #3b82f6 | Electric Cobalt: primary actions, focus rings, selected pill badges, active stepper glow
+Sidebar Navy | #0b1a3d | #060d1f | Deep Cobalt Navy: persistent sidebar background, brand anchor
+Canvas Background | #f8fafc | #070d19 | Global workspace background behind panels and tables
+Card Surface | #ffffff | #0f172a | Crisp card surfaces, table containers, modal bodies
+Card Outlines | #090a0f | #2d3748 | Precision high-contrast card outlines and dividing hairlines
+Ink (Text Primary) | #090a0f | #f8fafc | Headings, primary metrics, active tab labels
+Muted (Text Secondary) | #475569 | #94a3b8 | Metadata, input labels, table column headers, helper text
+Success / Warning / Danger | #10b981 / #f59e0b / #ef4444 | #10b981 / #f59e0b / #ef4444 | Semantic operational states, outcome seals, integrity flags
+</script>
+
+<h2>3.2 Typography</h2>
+<p><i>Plus Jakarta Sans</i> is the primary geometric typeface; <i>JetBrains Mono</i> / <i>IBM Plex Mono</i> is used strictly for identifiers, cryptographic hashes, verification codes, and tabular values. Every metric in forms, KPI strips, and financial summaries uses tabular figures.</p>
+<script type="text/tbl" data-h="Role|Size and weight|Use" data-w="24%|22%|54%">
+Page title | 28 / 700 | One per screen, sentence case, tight letter-spacing
+KPI value | 28 / 600 | Figures in a KPI strip; high contrast
+Section title | 16 / 600 | Panel and section headings
+Body, cells, navigation | 14 / 400, tracking 0.16 px | Primary UI copy and data tables
+Labels, meta, table headers | 12 / 500 | Uppercase tracked 0.5px or sentence case muted
+Verification code | 14 / 500 Mono | Crockford Base32 credential identifier
+Documents | 11 pt body, 20 pt bold title | Carbon A4 printable documents (Section 8)
+</script>
+
+<h2>3.3 Linear Process Stepper</h2>
+<p>Multi-step institutional governance processes (such as Curriculum Proposal Endorsement and Credit Transfer Equivalence Evaluation) employ the <code>.linear-stepper</code> component ({{fig:stepperdemo}}):</p>
+<ul>
+  <li><b>Completed step</b>: Solid black circular badge (<code>#090a0f</code>) enclosing a white checkmark icon (<code>&#10003;</code>), linked by a crisp solid progress line.</li>
+  <li><b>Active step</b>: Electric Cobalt glowing circular badge (<code>#0052ff</code>) with subtle radial pulse ring, displaying the 2-digit numeral (e.g. <code>03</code>) and bold blue stage title.</li>
+  <li><b>Pending step</b>: Light outline circle with muted 2-digit numeral (e.g. <code>04</code>) and muted label indicating future workflow requirements.</li>
+</ul>
+<figure data-f="stepperdemo"><img src="./img/p1_proposal_workspace.png" style="width:100%;border:1px solid #090a0f"><figcaption>Linear Process Stepper in action on the Proposal Workspace: Step 01 Submission (Complete), Step 02 Dean Endorsement (Complete), Step 03 CODL Verification (Active Glowing), and Step 04 Senate Endorsement (Pending) (<code>p1_proposal_workspace.png</code>).</figcaption></figure>
+
+<h2>3.4 Layout, Shell &amp; Protruding Pull-Tab</h2>
+<script type="text/tbl" data-h="Region|Specification" data-w="22%|78%">
+Top bar (52 px, sticky) | Product brand · global role-scoped search · single-click EN/BM language switcher · theme toggle (Light / Dark mode) · help link · notification bell with unread badge · user persona profile menu
+Side navigation (250 px, Deep Cobalt Navy) | Grouped route navigation with outline icons and live badge counts; current item highlighted with Electric Cobalt pill. Features protruding white pull-tab latch handle (<code>#btnSidebarPullTab</code>) for effortless one-click expansion/collapse
+Content area (max 1440 px) | Breadcrumb · page title with status tags · linear process stepper (when applicable) · KPI summary cards · data panels
+Public site | Responsive navigation (Home, Catalogue, Pathways to a degree, How it works, FAQ, Public Credential Verification), persona sign-in, and dark footer with legal/PDPA notices
+</script>
+
+<h2>3.5 Components Catalogue</h2>
+<p class="tcap" data-t="comps">Linear-Precision v3 component catalogue</p>
+<script type="text/tbl" data-h="Component|Specification" data-w="22%|78%" data-cls="small">
+Buttons | 40 px high, 6 px micro-radius. Primary (Electric Cobalt <code>#0052ff</code>, one per view), secondary (crisp ink outline), ghost (borderless text), danger (crimson). Disabled states display clear rationale (e.g. "Submit · 1 check failing").
+Linear Stepper | <code>&lt;x-stepper&gt;</code> rendering multi-stage lifecycle with completed checkmarks, glowing 2-digit active state, and pending outline stages.
+Protruding Latch Handle | White rounded pull-tab protruding 18px past the sidebar boundary, containing a centered flipping chevron icon that toggles sidebar width between 250px and 64px.
+Status seals &amp; tags | Crisp semantic tags with light pastel backgrounds and dark saturated text; strictly reserved for operational states, outcomes, and eligibility. Generic icons and emojis are strictly prohibited per D-53.
+Precision Inputs | Labels positioned above in 12 px muted weight, crisp 1 px border on white or dark canvas, Electric Cobalt 2 px focus ring.
+Choice cards | Interactive radio/checkbox containers with crisp outlines, bold title, and one-line policy consequence.
+Data tables | 12 px muted uppercase-tracked headers, crisp row dividers, right-aligned numeric data, instant client/server pagination with search filtering.
+Tabs | Clean horizontal segment controls with Electric Cobalt active indicator pill and counter badges.
+A4 Document Viewers | Structured Carbon printouts formatted for standard A4 output with 4-column KPI strip, barcode/QR verification seals, and bilingual metadata.
+</script>

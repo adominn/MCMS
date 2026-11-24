@@ -9,11 +9,12 @@ use Illuminate\Support\Facades\DB;
 // MD-15 traceability (FR-trace) and the minimum cohort records (FR-cohortrec, Appendix H5).
 final class Trace
 {
-    /** The chain from development to monitoring for one enrolment. @return array{stages: list<array>, subjects: list<array{0: string, 1: string}>} */
-    public function chain(int $enrolmentId): array
+    /** The chain from development to monitoring for one enrolment, with links scoped to the viewer's permitted routes. @return array{stages: list<array>, subjects: list<array{0: string, 1: string}>} */
+    public function chain(int $enrolmentId, ?\App\Models\User $viewer = null): array
     {
         $e = DB::table('enrolments')->find($enrolmentId);
         $v = DB::table('mc_versions')->find($e->mc_version_id);
+        $mc = DB::table('micro_credentials')->find($v->micro_credential_id);
         $o = DB::table('offerings')->find($e->offering_id);
         $user = DB::table('users')->find($e->user_id);
         $dec = DB::table('approval_decisions')->where('mc_version_id', $v->id)->orderBy('id')->get();
@@ -27,17 +28,32 @@ final class Trace
         $name = fn (?int $id) => $id ? DB::table('users')->where('id', $id)->value('name') : null;
         $d = fn ($x) => $x ? \Carbon\Carbon::parse($x)->format('d/m/Y') : '';
 
+        $isOwnerLec = $viewer && $viewer->hasAnyRole('lecturer') && (int) ($mc->owner_id ?? 0) === (int) $viewer->id;
+        $canApproval = ! $viewer || $viewer->hasAnyRole('deputy_dean', 'ptj_authority', 'codl_admin', 'academic_authority', 'qa_officer');
+        $canOffering = ! $viewer || $viewer->hasAnyRole('lecturer', 'deputy_dean', 'ptj_authority', 'codl_admin');
+        $canVerifyRes = ! $viewer || $viewer->hasAnyRole('deputy_dean', 'ptj_authority');
+        $canCredAdmin = ! $viewer || $viewer->hasAnyRole('records_custodian', 'records_depositor', 'deputy_dean', 'ptj_authority');
+        $canDeposit = ! $viewer || $viewer->hasAnyRole('abc_depositor', 'records_depositor');
+        $canTransfer = ! $viewer || $viewer->hasAnyRole('codl_admin', 'academic_authority', 'deputy_dean', 'ptj_authority', 'qa_officer');
+        $canCqi = ! $viewer || $viewer->hasAnyRole('lecturer', 'deputy_dean', 'qa_officer', 'codl_admin', 'ptj_authority', 'academic_authority');
+
+        $devLink = $isOwnerLec ? "/proposals/{$v->id}" : ($canApproval ? "/approvals/{$v->id}" : null);
+        $assessLink = $canVerifyRes ? "/results/{$o->id}" : ($isOwnerLec ? "/offerings/{$o->id}/results" : null);
+        $credLink = $cred->isNotEmpty()
+            ? ($canCredAdmin ? '/credentials/'.$cred->first()->id : (! empty($cred->first()->public_code) ? '/public/verify/'.$cred->first()->public_code : null))
+            : null;
+
         $stages = [
-            ['key' => 'development', 'label' => 'Development', 'present' => (bool) $v->submitted_at, 'text' => $v->submitted_at ? "Version {$v->version_no} of {$v->name_en} submitted on {$d($v->submitted_at)}" : 'Not submitted', 'link' => "/proposals/{$v->id}"],
-            ['key' => 'approval', 'label' => 'Approval', 'present' => $dec->isNotEmpty(), 'text' => $dec->isNotEmpty() ? $dec->map(fn ($x) => ucfirst($x->stage).': '.str_replace('_', ' ', $x->decision).($x->meeting_ref ? " ({$x->meeting_ref})" : ''))->implode('; ') : 'No decision recorded', 'link' => "/approvals/{$v->id}"],
-            ['key' => 'offering', 'label' => 'Offering', 'present' => true, 'text' => "Cohort {$o->cohort_name}, {$o->status}, {$d($o->start_date)} to {$d($o->end_date)}", 'link' => "/offerings/{$o->id}"],
+            ['key' => 'development', 'label' => 'Development', 'present' => (bool) $v->submitted_at, 'text' => $v->submitted_at ? "Version {$v->version_no} of {$v->name_en} submitted on {$d($v->submitted_at)}" : 'Not submitted', 'link' => $devLink],
+            ['key' => 'approval', 'label' => 'Approval', 'present' => $dec->isNotEmpty(), 'text' => $dec->isNotEmpty() ? $dec->map(fn ($x) => ucfirst($x->stage).': '.str_replace('_', ' ', $x->decision).($x->meeting_ref ? " ({$x->meeting_ref})" : ''))->implode('; ') : 'No decision recorded', 'link' => $canApproval ? "/approvals/{$v->id}" : null],
+            ['key' => 'offering', 'label' => 'Offering', 'present' => true, 'text' => "Cohort {$o->cohort_name}, {$o->status}, {$d($o->start_date)} to {$d($o->end_date)}", 'link' => $canOffering ? "/offerings/{$o->id}" : null],
             ['key' => 'learning', 'label' => 'Learning', 'present' => true, 'text' => "Enrolment {$e->reference}, status {$e->status}", 'link' => null],
-            ['key' => 'assessment', 'label' => 'Assessment', 'present' => $results->isNotEmpty(), 'text' => $results->isNotEmpty() ? $results->where('status', 'verified')->count().' of '.$results->count().' results verified' : 'No result yet', 'link' => "/results/{$o->id}"],
+            ['key' => 'assessment', 'label' => 'Assessment', 'present' => $results->isNotEmpty(), 'text' => $results->isNotEmpty() ? $results->where('status', 'verified')->count().' of '.$results->count().' results verified' : 'No result yet', 'link' => $assessLink],
             ['key' => 'achievement', 'label' => 'Achievement', 'present' => (bool) ($ach && $ach->completion_status), 'text' => $ach && $ach->completion_status ? 'Completion confirmed on '.$d($ach->completed_on).' by '.$name($ach->confirmed_by) : 'Not completed', 'link' => "/records/{$e->id}"],
-            ['key' => 'credential', 'label' => 'Credential', 'present' => $cred->isNotEmpty(), 'text' => $cred->isNotEmpty() ? $cred->map(fn ($c) => "{$c->number} ({$c->status})")->implode('; ') : 'No credential', 'link' => $cred->isNotEmpty() ? '/credentials/'.$cred->first()->id : null],
-            ['key' => 'acr', 'label' => 'ACR and ABC', 'present' => (bool) $acr, 'text' => $acr ? "{$acr->reference} ({$acr->status})".($dep ? ", ABC reference {$dep->abc_reference}, credit {$dep->credit_status}" : ', not deposited') : 'No Academic Credit Record', 'link' => $acr ? "/deposits/{$acr->id}" : null],
-            ['key' => 'transfer', 'label' => 'Transfer and use of credit', 'present' => $lines->isNotEmpty(), 'text' => $lines->isNotEmpty() ? $lines->map(fn ($l) => "{$l->reference} ({$l->app_status}), approved ".rtrim(rtrim((string) ($l->credits_approved ?? 0), '0'), '.'))->implode('; ') : 'None', 'link' => $lines->isNotEmpty() ? '/transfers/'.$lines->first()->transfer_application_id : null],
-            ['key' => 'cqi', 'label' => 'Monitoring and CQI', 'present' => $cqi->isNotEmpty(), 'text' => $cqi->isNotEmpty() ? $cqi->map(fn ($c) => "{$c->reference} ({$c->status})")->implode('; ') : 'No quality review yet', 'link' => $cqi->isNotEmpty() ? '/cqi/'.$cqi->first()->id : null],
+            ['key' => 'credential', 'label' => 'Credential', 'present' => $cred->isNotEmpty(), 'text' => $cred->isNotEmpty() ? $cred->map(fn ($c) => "{$c->number} ({$c->status})")->implode('; ') : 'No credential', 'link' => $credLink],
+            ['key' => 'acr', 'label' => 'ACR and ABC', 'present' => (bool) $acr, 'text' => $acr ? "{$acr->reference} ({$acr->status})".($dep ? ", ABC reference {$dep->abc_reference}, credit {$dep->credit_status}" : ', not deposited') : 'No Academic Credit Record', 'link' => ($acr && $canDeposit) ? "/deposits/{$acr->id}" : null],
+            ['key' => 'transfer', 'label' => 'Transfer and use of credit', 'present' => $lines->isNotEmpty(), 'text' => $lines->isNotEmpty() ? $lines->map(fn ($l) => "{$l->reference} ({$l->app_status}), approved ".rtrim(rtrim((string) ($l->credits_approved ?? 0), '0'), '.'))->implode('; ') : 'None', 'link' => ($lines->isNotEmpty() && $canTransfer) ? '/transfers/'.$lines->first()->transfer_application_id : null],
+            ['key' => 'cqi', 'label' => 'Monitoring and CQI', 'present' => $cqi->isNotEmpty(), 'text' => $cqi->isNotEmpty() ? $cqi->map(fn ($c) => "{$c->reference} ({$c->status})")->implode('; ') : 'No quality review yet', 'link' => ($cqi->isNotEmpty() && $canCqi) ? '/cqi/'.$cqi->first()->id : null],
         ];
         $subjects = array_values(array_filter([['McVersion', (string) $v->id], ['Offering', (string) $o->id], ['Enrolment', (string) $e->id], $acr ? ['Acr', (string) $acr->id] : null, $dep ? ['AbcDeposit', (string) $dep->id] : null,
             ...$cred->map(fn ($c) => ['Credential', (string) $c->id])->all(), ...$lines->map(fn ($l) => ['TransferApplication', (string) $l->transfer_application_id])->unique()->all(), ...$cqi->map(fn ($c) => ['CqiRecord', (string) $c->id])->all()]));
@@ -97,7 +113,6 @@ final class Trace
             ['seq' => 7, 'label' => 'Participant feedback', 'label_ms' => 'Maklum Balas Peserta & Pemantauan', 'location' => 'feedback_responses', 'owner' => 'P1 / P2'] + $has(DB::table('feedback_responses')->where('offering_id', $o->id)->exists(), DB::table('feedback_responses')->where('offering_id', $o->id)->count().' feedback responses', 'None'),
             ['seq' => 8, 'label' => 'Quality review (CQI) record', 'label_ms' => 'Laporan Semakan Kualiti & CQI', 'location' => 'cqi_records', 'owner' => 'P1 / P2 / P4'] + $has(DB::table('cqi_records')->where('offering_id', $o->id)->exists(), 'Record kept', 'No quality review'),
             ['seq' => 9, 'label' => 'ACR & ABC credit deposits', 'label_ms' => 'ACR & Deposit ABC bagi Peserta Layak', 'location' => 'acrs, abc_deposits', 'owner' => 'P6 / P7'] + $has($hasAcr, ($acrCount ? "$acrCount ACR(s)" : '0 ACR').($abcCount ? ", $abcCount ABC deposit(s)" : ''), 'No ACR or ABC deposit recorded'),
-            ['seq' => 10, 'label' => 'Changes, corrections & incidents log', 'label_ms' => 'Rekod Perubahan, Pembetulan & Insiden', 'location' => 'discrepancies, audit_events', 'owner' => 'P2 / P5 / P6'] + $has(true, ($discCount ? "$discCount discrepancy/correction(s), " : '')."$auditCount audit event(s) logged", 'No logged changes'),
             ['seq' => 10, 'label' => 'Changes, corrections & incidents log', 'label_ms' => 'Rekod Perubahan, Pembetulan & Insiden', 'location' => 'discrepancies, audit_events', 'owner' => 'P2 / P5 / P6'] + $has(true, ($discCount ? "$discCount discrepancy/correction(s), " : '')."$auditCount audit event(s) logged", 'No logged changes'),
         ];
     }

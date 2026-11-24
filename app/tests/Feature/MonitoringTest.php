@@ -354,23 +354,24 @@ it('renders Appendix C CQI printout and enforces C1-C10 sections, 8 domains, C9 
     // Verify Print View (both ?print=1 and /print)
     $res1 = $this->actingAs($this->aina)->get("/cqi/$id?print=1");
     $res1->assertOk()
-        ->assertSee('Lampiran C')
-        ->assertSee('LAMPIRAN C')
-        ->assertSee('C1. Maklumat Penawaran dan Tempoh Pemantauan')
-        ->assertSee('C2. Ringkasan Prestasi Kohort')
-        ->assertSee('C3. Analisis Pencapaian Hasil Pembelajaran')
-        ->assertSee('C4. Maklum Balas Peserta dan Pihak Berkepentingan')
-        ->assertSee('C5. Pemantauan Kualiti Pelaksanaan (8 Domain)')
-        ->assertSee('C6. Isu, Analisis Punca dan Tahap Keutamaan')
-        ->assertSee('C7. Pelan Tindakan CQI')
-        ->assertSee('C8. Penilaian Keberkesanan CQI')
-        ->assertSee('C9. Keputusan Semakan Penawaran')
-        ->assertSee('C10. Pengesahan dan Rekod CQI (3 Peranan)')
-        ->assertSee('NOTA PENTING (Lampiran C)')
+        ->assertDontSee('Lampiran C')
+        ->assertDontSee('LAMPIRAN C')
+        ->assertSee('Quality Assurance, Monitoring and Continuous Quality Improvement (CQI) Report')
+        ->assertSee('1. Offering Information and Monitoring Period')
+        ->assertSee('2. Cohort Performance Summary')
+        ->assertSee('3. Learning Outcome Attainment Analysis')
+        ->assertSee('4. Participant and Stakeholder Feedback')
+        ->assertSee('5. Implementation Quality Domains (8 Domains)')
+        ->assertSee('6. Issues, Root Cause Analysis, and Priority Level')
+        ->assertSee('7. CQI Action Plan')
+        ->assertSee('8. CQI Effectiveness Evaluation')
+        ->assertSee('9. Offering Review Decision')
+        ->assertSee('10. Confirmation and CQI Sign-Off (3 Roles)')
+        ->assertSee('Important Notice:')
         ->assertSee('Module 2 Practical Assessment Gap')
         ->assertSee('Hakim Rahman')
         ->assertSee('Farid Hashim');
 
     $res2 = $this->actingAs($this->hakim)->get("/cqi/$id/print");
-    $res2->assertOk()->assertSee('NOTA PENTING (Lampiran C)');
+    $res2->assertOk()->assertSee('Important Notice:')->assertDontSee('Lampiran C');
 });

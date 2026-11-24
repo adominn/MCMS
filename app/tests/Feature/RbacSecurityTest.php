@@ -140,15 +140,16 @@ it('verifies CODL admin role route access and zero academic authority (Decision 
     $this->actingAs($admin)->get('/admin/audit')->assertOk();
     $this->actingAs($admin)->get('/records/retention')->assertOk();
     $this->actingAs($admin)->get('/records/reports')->assertOk();
+    $this->actingAs($admin)->get('/approvals')->assertOk();
+    $this->actingAs($admin)->get('/transfers')->assertOk();
+    $this->actingAs($admin)->get('/pathways')->assertOk();
 
-    // Zero academic decision authority: Forbidden (403)
+    // Faculty teaching/assessment/deposit operations remain Forbidden (403)
     $this->actingAs($admin)->get('/proposals')->assertForbidden();
     $this->actingAs($admin)->get('/micro-credentials')->assertForbidden();
-    $this->actingAs($admin)->get('/approvals')->assertForbidden();
     $this->actingAs($admin)->get('/results')->assertForbidden();
     $this->actingAs($admin)->get('/credentials')->assertForbidden();
     $this->actingAs($admin)->get('/deposits')->assertForbidden();
-    $this->actingAs($admin)->get('/transfers')->assertForbidden();
     $this->actingAs($admin)->get('/suspensions')->assertForbidden();
     $this->actingAs($admin)->get('/enrolments')->assertForbidden();
     $this->actingAs($admin)->get('/my-credit')->assertForbidden();
@@ -213,9 +214,10 @@ it('verifies records custodian (P6 / Registry) role route access and separation 
     // Accessible registry & credentials pages
     $this->actingAs($registry)->get('/credentials')->assertOk();
     $this->actingAs($registry)->get('/records/reports')->assertOk();
-    $this->actingAs($registry)->get('/results')->assertOk();
 
-    // Forbidden ABC deposit page per Note H separation of duties (403)
+    // Forbidden academic verification, ABC deposit, and admin pages per Note H separation of duties (403)
+    $this->actingAs($registry)->get('/results')->assertForbidden();
+    $this->actingAs($registry)->get('/transfers')->assertForbidden();
     $this->actingAs($registry)->get('/deposits')->assertForbidden();
     $this->actingAs($registry)->get('/admin/users')->assertForbidden();
     $this->actingAs($registry)->get('/proposals/new')->assertForbidden();

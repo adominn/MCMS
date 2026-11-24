@@ -14,10 +14,10 @@ use App\Modules\Records\AuditRecorder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-// DD-02 proposals and approval, DD-03 review, DD-04 Senate decision, DD-05 decision pack (MD-03).
+// DD-02 proposals and approval, DD-03 review, DD-04 Senate decision, DD-05 decision pack (MD-03, D-66).
 final class ApprovalController
 {
-    public const STATUS = ['draft' => 'Draft', 'submitted' => 'Submitted', 'in_review' => 'In review', 'returned' => 'Returned for amendment', 'endorsed' => 'Endorsed', 'approved' => 'Approved', 'not_approved' => 'Not approved', 'superseded' => 'Superseded'];
+    public const STATUS = ['draft' => 'Draft', 'submitted' => 'Submitted', 'in_review' => 'In review', 'returned' => 'Returned for amendment', 'endorsed' => 'Endorsed', 'codl_verified' => 'CODL verified', 'approved' => 'Approved', 'not_approved' => 'Not approved', 'superseded' => 'Superseded'];
 
     public function __construct(private Settings $settings, private AuditRecorder $audit, private Notifier $notifier, private ProposalChecker $checker, private \App\Modules\Offering\OfferingStatus $offerings) {}
 
@@ -124,16 +124,46 @@ final class ApprovalController
         }
 
         DB::transaction(function () use ($id, $v, $request) {
-            DB::table('approval_decisions')->insert(['mc_version_id' => $id, 'stage' => 'endorsement', 'decision' => 'endorsed', 'decided_by' => $request->user()->id, 'decided_role' => 'deputy_dean', 'verified_category' => $v->category, 'comments' => $request->input('comments'), 'created_at' => now()]);
+            $endorserRole = $request->user()->currentRole()?->value === 'ptj_authority' ? 'ptj_authority' : 'deputy_dean';
+            DB::table('approval_decisions')->insert(['mc_version_id' => $id, 'stage' => 'endorsement', 'decision' => 'endorsed', 'decided_by' => $request->user()->id, 'decided_role' => $endorserRole, 'verified_category' => $v->category, 'comments' => $request->input('comments'), 'created_at' => now()]);
             DB::table('mc_versions')->where('id', $id)->update(['status' => 'endorsed', 'updated_at' => now()]);
             DB::table('micro_credentials')->where('id', $v->micro_credential_id)->update(['category_status' => 'verified', 'category_confirmed_by' => $request->user()->id, 'category_confirmed_at' => now()]);
             $this->audit->record('proposal.endorsed', ['type' => 'McVersion', 'id' => $id], before: ['status' => 'in_review'], after: ['status' => 'endorsed', 'verified_category' => $v->category]); // EV-12
             Tasks::close('decide', $id);
-            Tasks::open('codl_admin', 'senate', $id, 'Record Senate decision: '.$v->name_en, "/approvals/$id/senate", area: 'proposals');
+            Tasks::close('proposal_decide', $id);
+            Tasks::open('codl_admin', 'codl_verify', $id, 'Verify endorsed proposal: '.$v->name_en, "/approvals/$id", area: 'proposals');
             $this->notifier->send(User::find($v->owner_id), 'proposal.endorsed', ['name' => User::find($v->owner_id)->name, 'title' => $v->name_en], dedupe: "endorsed-$id");
         });
 
-        return redirect()->route('approvals.show', $id)->with('status', 'Endorsed. The category is verified. A task to record the Senate decision is created.');
+        return redirect()->route('approvals.show', $id)->with('status', 'Endorsed by Deputy Dean. Forwarded to CODL for verification and Senate approval.');
+    }
+
+    /** Stage 3 (D-66): CODL verifies the endorsed proposal before final Senate approval. */
+    public function verify(Request $request, int $id)
+    {
+        abort_unless($request->user()->hasAnyRole('codl_admin'), 403, 'CODL verification of endorsed micro-credential proposals is handled by CODL.');
+        $v = $this->version($request, $id);
+        abort_unless($v->status === 'endorsed', 403, 'CODL verification can be recorded only after Deputy Dean endorsement.');
+        $d = $request->validate(['comments' => 'nullable|string|max:1000']);
+
+        DB::transaction(function () use ($id, $v, $d, $request) {
+            DB::table('approval_decisions')->insert([
+                'mc_version_id' => $id,
+                'stage' => 'codl_verification',
+                'decision' => 'verified',
+                'decided_by' => $request->user()->id,
+                'decided_role' => 'codl_admin',
+                'verified_category' => $v->category,
+                'comments' => $d['comments'] ?? null,
+                'created_at' => now(),
+            ]);
+            DB::table('mc_versions')->where('id', $id)->update(['status' => 'codl_verified', 'updated_at' => now()]);
+            $this->audit->record('proposal.codl_verified', ['type' => 'McVersion', 'id' => $id], before: ['status' => 'endorsed'], after: ['status' => 'codl_verified'], reason: $d['comments'] ?? null);
+            Tasks::close('codl_verify', $id);
+            Tasks::open('academic_authority', 'senate', $id, 'Record Senate decision: '.$v->name_en, "/approvals/$id/senate", area: 'proposals');
+        });
+
+        return redirect()->route('approvals.show', $id)->with('status', 'CODL verification recorded. Ready for Senate approval.');
     }
 
     public function sendBack(Request $request, int $id, string $how)
@@ -154,6 +184,7 @@ final class ApprovalController
             $this->audit->record($return ? 'proposal.returned' : 'proposal.not_supported', ['type' => 'McVersion', 'id' => $id], before: ['status' => $v->status], after: ['status' => $return ? 'returned' : 'not_approved'], reason: $d['reason']); // EV-11, EV-13
             Tasks::close('assign_reviewers', $id);
             Tasks::close('decide', $id);
+            Tasks::close('proposal_decide', $id);
             if ($v->supersedes_id && ! $return) {
                 $this->offerings->releaseForChange($v->micro_credential_id, 'The change was not supported.');
             }
@@ -173,40 +204,56 @@ final class ApprovalController
         return view('approval.pack', ProposalSummary::load($id) + [
             'assign' => $assign, 'checks' => $this->checker->check($id), 'labels' => self::STATUS,
             'comments' => DB::table('review_comments')->where('mc_version_id', $id)->orderBy('id')->get(),
-            'endorsement' => DB::table('approval_decisions as d')->join('users as u', 'u.id', '=', 'd.decided_by')->where('d.mc_version_id', $id)->where('d.stage', 'endorsement')->where('d.decision', 'endorsed')->orderByDesc('d.id')->first(['d.*', 'u.name as by']),
+            'endorsement' => DB::table('approval_decisions as d')->join('users as u', 'u.id', '=', 'd.decided_by')->where('d.mc_version_id', $id)->where('d.stage', 'endorsement')->where('d.decision', 'endorsed')->orderByDesc('d.id')->first(['d.*', 'u.name as by', 'u.position as by_position']),
+            'codlVerification' => DB::table('approval_decisions as d')->join('users as u', 'u.id', '=', 'd.decided_by')->where('d.mc_version_id', $id)->where('d.stage', 'codl_verification')->where('d.decision', 'verified')->orderByDesc('d.id')->first(['d.*', 'u.name as by', 'u.position as by_position']),
         ]);
     }
 
     public function senateForm(Request $request, int $id)
     {
         $v = $this->version($request, $id, act: false);
+        $configuredSenateRole = $this->route('approval.route.senate');
+        $allowedSenateRoles = in_array($configuredSenateRole, ['academic_authority', 'codl_admin'], true)
+            ? ['academic_authority', 'codl_admin']
+            : [$configuredSenateRole];
+        abort_unless($request->user()->hasAnyRole(...$allowedSenateRoles), 403, 'Final Senate decisions are now recorded by CODL and the Academic Authority (Senate).');
         $e = DB::table('approval_decisions')->where('mc_version_id', $id)->where('decision', 'endorsed')->orderByDesc('id')->first();
+        $codlV = DB::table('approval_decisions as d')->join('users as u', 'u.id', '=', 'd.decided_by')->where('d.mc_version_id', $id)->where('d.stage', 'codl_verification')->where('d.decision', 'verified')->orderByDesc('d.id')->first(['d.*', 'u.name as by']);
 
-        return view('approval.senate', ['v' => $v, 'endorsedOn' => $e?->created_at, 'labels' => self::STATUS]);
+        return view('approval.senate', ['v' => $v, 'endorsedOn' => $e?->created_at, 'codlVerification' => $codlV, 'labels' => self::STATUS]);
     }
 
-    // D-11: the Senate does not use MCMS; the deputy dean records its decision with the meeting reference.
+    // D-66: Senate (academic_authority) and CODL Secretariat (codl_admin) record the Senate decision with meeting reference.
     public function senate(Request $request, int $id)
     {
         $v = $this->version($request, $id);
-        abort_unless($request->user()->hasAnyRole($this->route('approval.route.senate')), 403, 'The role that records the decision is set in the settings.');
-        abort_unless($v->status === 'endorsed', 403, 'The Senate decision is recorded after endorsement.');
+        $configuredSenateRole = $this->route('approval.route.senate');
+        $allowedSenateRoles = in_array($configuredSenateRole, ['academic_authority', 'codl_admin'], true)
+            ? ['academic_authority', 'codl_admin']
+            : [$configuredSenateRole];
+        abort_unless($request->user()->hasAnyRole(...$allowedSenateRoles), 403, 'Final Senate decisions are now recorded by CODL and the Academic Authority (Senate).');
+        abort_unless(in_array($v->status, ['endorsed', 'codl_verified'], true), 403, 'The Senate decision is recorded after endorsement.');
         $check = $this->checker->check($id);
         abort_if(! empty($check['blocking']), 422, 'Cannot record Senate decision: the proposal has unresolved blocking curriculum errors.');
         $endorsed = DB::table('approval_decisions')->where('mc_version_id', $id)->where('decision', 'endorsed')->orderByDesc('id')->value('created_at');
+        $minMeetingDate = \Carbon\Carbon::parse($endorsed ?: ($v->submitted_at ?: ($v->created_at ?: today())))->toDateString();
         $d = $request->validate([
-            'meeting_ref' => 'required|string|max:60', 'meeting_date' => 'required|date|before_or_equal:today|after_or_equal:'.\Carbon\Carbon::parse($endorsed)->toDateString(),
+            'meeting_ref' => 'required|string|max:60', 'meeting_date' => 'required|date|before_or_equal:today|after_or_equal:'.$minMeetingDate,
             'decision' => 'required|in:approved,approved_conditions,not_approved,returned,deferred', 'conditions' => 'nullable|required_if:decision,approved_conditions|string|max:2000', 'comments' => 'required|string|min:5|max:2000',
             'transition_rule' => [\Illuminate\Validation\Rule::requiredIf($v->supersedes_id && in_array($request->input('decision'), ['approved', 'approved_conditions'], true)), 'nullable', 'in:finish_old,move_new,equivalence'],
             'transition_note' => 'nullable|required_if:transition_rule,equivalence|string|max:1000',
         ], ['meeting_date.after_or_equal' => 'The meeting date cannot be before the endorsement.', 'transition_rule.required' => 'Record what happens to participants enrolled on the old version.']);
-        $status = ['approved' => 'approved', 'approved_conditions' => 'approved', 'not_approved' => 'not_approved', 'returned' => 'returned', 'deferred' => 'endorsed'][$d['decision']];
+        $status = ['approved' => 'approved', 'approved_conditions' => 'approved', 'not_approved' => 'not_approved', 'returned' => 'returned', 'deferred' => $v->status][$d['decision']];
 
         DB::transaction(function () use ($id, $v, $d, $request, $status) {
-            $decisionRole = $request->user()->hasAnyRole('codl_admin') ? 'codl_admin' : 'deputy_dean';
+            $curRole = $request->user()->currentRole()?->value;
+            $decisionRole = in_array($curRole, ['academic_authority', 'codl_admin', 'lecturer', 'deputy_dean', 'ptj_authority'], true)
+                ? $curRole
+                : ($request->user()->hasAnyRole('academic_authority') ? 'academic_authority' : ($request->user()->hasAnyRole('codl_admin') ? 'codl_admin' : 'deputy_dean'));
             $decisionId = DB::table('approval_decisions')->insertGetId(['mc_version_id' => $id, 'stage' => 'senate', 'decision' => $d['decision'], 'decided_by' => $request->user()->id, 'decided_role' => $decisionRole, 'meeting_ref' => $d['meeting_ref'], 'meeting_date' => $d['meeting_date'], 'comments' => $d['comments'], 'conditions' => $d['conditions'] ?? null, 'created_at' => now()]);
             if ($d['decision'] !== 'deferred') {
                 DB::table('mc_versions')->where('id', $id)->update(['status' => $status, 'updated_at' => now()]);
+                Tasks::close('codl_verify', $id);
                 Tasks::close('senate', $id);
             }
             if ($status === 'approved') {

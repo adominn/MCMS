@@ -261,7 +261,7 @@ final class ResultsController
                 }
 
                 if ($cred = DB::table('credentials')->where('enrolment_id', $r->enrolment_id)->whereIn('status', ['valid', 'corrected'])->first()) {
-                    Tasks::open('deputy_dean', 'credential_correction', $cred->id, 'Check the credential after a result change: '.$cred->number, "/credentials/{$cred->id}", $o->ptj_id, area: 'credentials');
+                    Tasks::open('records_custodian', 'credential_correction', $cred->id, 'Check the credential after a result change: '.$cred->number, "/credentials/{$cred->id}", $o->ptj_id, area: 'credentials');
                 }
             }
             $this->audit->record($d['decision'] === 'approve' ? 'result.change_approved' : 'result.change_rejected', ['type' => 'AssessmentResult', 'id' => $r->id], before: ['score' => $r->score], after: ['score' => $d['decision'] === 'approve' ? $q->new_score : $r->score], reason: $d['note']); // EV-30

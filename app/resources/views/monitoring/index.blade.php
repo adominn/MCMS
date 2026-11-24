@@ -245,6 +245,7 @@
                 @endif
               </td>
               <td>
+                @if(auth()->user()?->hasAnyRole('deputy_dean', 'ptj_authority', 'qa_officer', 'academic_authority') && (int) ($p->owner_id ?? 0) !== (int) auth()->id())
                 <form method="post" action="{{ route('reviews.periodic', $p->id) }}" class="row" style="gap:8px;align-items:center">
                   @csrf
                   <select name="outcome" aria-label="Outcome for {{ $p->name }}" style="max-width:180px">
@@ -255,6 +256,9 @@
                   <input type="text" name="note" aria-label="Note for {{ $p->name }}" placeholder="Note" style="flex:1">
                   <button type="submit" class="btn sm" aria-label="Record review outcome for {{ $p->name }}">{{ __('Record') }}</button>
                 </form>
+                @else
+                  <span class="muted s">{{ __('Recorded by Deputy Dean or Quality Assurance Officer') }}</span>
+                @endif
               </td>
             </tr>
           @empty

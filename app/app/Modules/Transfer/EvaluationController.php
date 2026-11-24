@@ -14,17 +14,45 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-// DD-21, DD-22: the deputy dean of the receiving faculty checks validity, evaluates equivalence on learning outcomes and decides. Admission is a separate fact (BR-34).
+// D-61, D-66: CODL evaluates credit transfer validity and 9-criterion outcome equivalence for Senate approval; Deputy Dean monitors own PTj read-only.
 final class EvaluationController
 {
     public function __construct(private Settings $settings, private AuditRecorder $audit, private Notifier $notifier, private CreditLedger $ledger) {}
 
+    public static function authorityLabel(?string $authority): string
+    {
+        return match ($authority) {
+            'codl_admin' => 'CODL & UTeM Senate',
+            'academic_authority' => 'UTeM Senate (Academic Authority)',
+            'deputy_dean' => 'Deputy Dean (Legacy Record)',
+            'ptj_authority' => 'Faculty Authority (Legacy Record)',
+            null, '' => 'CODL & UTeM Senate',
+            default => $authority,
+        };
+    }
+
     public function index(Request $request)
     {
         $rows = $this->scoped($request)->orderByDesc('t.id')->get();
-        $ptjs = $request->user()->hasAnyRole('codl_admin', 'academic_authority') ? null : $request->user()->scopedPtjIds('deputy_dean');
-        $inUse = DB::table('transfer_lines as l')->join('transfer_applications as t', 't.id', '=', 'l.transfer_application_id')->join('abc_deposits as d', 'd.id', '=', 'l.abc_deposit_id')->join('programmes as p', 'p.id', '=', 't.programme_id')->join('users as u', 'u.id', '=', 't.user_id')
-            ->where('d.credit_status', 'provisional')->when($ptjs !== null, fn ($q) => $q->whereIn('p.ptj_id', $ptjs))->get(['l.id', 't.reference', 'u.name', 'l.credits_approved', 'p.code as programme']);
+        $ptjs = $request->user()->hasAnyRole('codl_admin', 'academic_authority', 'qa_officer') ? null : $request->user()->scopedPtjIds('deputy_dean');
+        $inUse = DB::table('transfer_lines as l')
+            ->join('transfer_applications as t', 't.id', '=', 'l.transfer_application_id')
+            ->join('abc_deposits as d', 'd.id', '=', 'l.abc_deposit_id')
+            ->join('acrs as ac', 'ac.id', '=', 'l.acr_id')
+            ->join('mc_versions as v', 'v.id', '=', 'l.mc_version_id')
+            ->join('programmes as p', 'p.id', '=', 't.programme_id')
+            ->join('users as u', 'u.id', '=', 't.user_id')
+            ->join('parent_courses as c', 'c.id', '=', 'l.parent_course_id')
+            ->where('d.credit_status', 'provisional')
+            ->when($ptjs !== null, fn ($q) => $q->whereIn('p.ptj_id', $ptjs))
+            ->orderBy('t.reference')
+            ->orderBy('l.id')
+            ->get([
+                'l.id', 't.id as application_id', 't.reference', 'u.name', 'u.institution_id',
+                'l.credits_approved', 'l.credits_requested', 'p.code as programme',
+                'c.code as course_code', 'c.name as course_name',
+                'v.name_en as mc_name', 'ac.reference as acr_reference',
+            ]);
         $admissions = DB::table('admissions as a')->join('users as u', 'u.id', '=', 'a.user_id')->join('programmes as p', 'p.id', '=', 'a.programme_id')
             ->when($ptjs !== null, fn ($q) => $q->whereIn('p.ptj_id', $ptjs))
             ->orderByDesc('a.id')->limit(10)->get(['a.*', 'u.name', 'p.code']);
@@ -36,6 +64,7 @@ final class EvaluationController
     {
         $a = $this->scoped($request)->where('t.id', $id)->first() ?? abort(404);
         $lines = Transfers::lines($id);
+        Transfers::autoCheck($a, $lines);
         $req = $lines->mapWithKeys(fn ($l) => [$l->id => (float) $l->credits_requested])->all();
 
         return view('transfer.decide', [
@@ -79,6 +108,14 @@ final class EvaluationController
             'verifications' => $verifications,
             'status' => config('transfer.status'),
         ]);
+    }
+
+    public function document(Request $request, int $id, string $filename)
+    {
+        $a = $this->scoped($request)->where('t.id', $id)->first() ?? abort(404);
+        $lines = Transfers::lines($id);
+
+        return Transfers::renderDocument($request, $a, $lines, $filename);
     }
 
     /** FR-ctvalidity. A failed check ends in Not approved, and changes nothing about the credit (BR-33). */
@@ -159,7 +196,7 @@ final class EvaluationController
                 'decided_by_name' => $request->user()->name,
                 'decided_by_position' => $request->user()->position,
                 'decided_on' => today(),
-                'authority' => $this->authority(),
+                'authority' => $this->actorAuthority($request),
                 'conditions' => $d['request'],
                 'created_at' => now(),
             ]);
@@ -255,7 +292,7 @@ final class EvaluationController
             $minHome = (int) (app(\App\Modules\Core\Settings::class)->get('stackable.min_home_credit_percent') ?? 30);
             $utemMaxTransfer = $p->total_credits * (100 - $minHome) / 100;
             if ($total > $utemMaxTransfer) {
-                throw ValidationException::withMessages(['credits' => "UTeM minimum direct-credit requirement (Guide Cl. 14.5.1): $total credits would leave fewer than {$minHome}% of {$p->total_credits} graduating credits earned directly at UTeM (maximum transferable: {$utemMaxTransfer} credits)."]);
+                throw ValidationException::withMessages(['credits' => "UTeM minimum direct-credit requirement: $total credits would leave fewer than {$minHome}% of {$p->total_credits} graduating credits earned directly at UTeM (maximum transferable: {$utemMaxTransfer} credits)."]);
             }
 
             // 3. Non-transferable courses
@@ -321,7 +358,52 @@ final class EvaluationController
         $d['what'] === 'completed' ? $this->ledger->redeem($l->abc_deposit_id, $d['evidence_ref'], $d['abc_updated_on'] ?? null, $d['abc_update_ref'] ?? null, $request->user()->id, $credits)
             : $this->ledger->release($l->abc_deposit_id, $d['evidence_ref'], $d['abc_updated_on'] ?? null, $d['abc_update_ref'] ?? null, $request->user()->id, $credits);
 
-        return back()->with('status', $d['what'] === 'completed' ? 'Recorded. The credit is Redeemed.' : 'Recorded. The credit returns to Available if it is still valid, otherwise Expired.');
+        return redirect()->route('transfers', ['tab' => 'held'])->with('status', $d['what'] === 'completed' ? 'Recorded. The credit is Redeemed.' : 'Recorded. The credit returns to Available if it is still valid, otherwise Expired.');
+    }
+
+    /** Bulk programme completion / withdrawal redemption across 1 application or an entire graduating cohort. */
+    public function redeemBulk(Request $request)
+    {
+        $d = $request->validate([
+            'line_ids' => 'required|array|min:1',
+            'line_ids.*' => 'integer',
+            'evidence_ref' => 'required|string|max:200',
+            'abc_updated_on' => 'nullable|date',
+            'abc_update_ref' => 'nullable|string|max:60',
+            'what' => 'required|in:completed,not_completed',
+            'return_to' => 'nullable|in:held,show',
+            'application_id' => 'nullable|integer',
+        ], [
+            'line_ids.required' => 'Select at least one held application or credit line.',
+        ]);
+
+        $lineIds = array_values(array_unique(array_map('intval', $d['line_ids'])));
+        $count = 0;
+        $totalCr = 0.0;
+
+        DB::transaction(function () use ($request, $lineIds, $d, &$count, &$totalCr) {
+            foreach ($lineIds as $lid) {
+                $l = $this->line($request, $lid);
+                $credits = (float) ($l->credits_approved ?: $l->credits_requested);
+                if ($d['what'] === 'completed') {
+                    $this->ledger->redeem($l->abc_deposit_id, $d['evidence_ref'], $d['abc_updated_on'] ?? null, $d['abc_update_ref'] ?? null, $request->user()->id, $credits);
+                } else {
+                    $this->ledger->release($l->abc_deposit_id, $d['evidence_ref'], $d['abc_updated_on'] ?? null, $d['abc_update_ref'] ?? null, $request->user()->id, $credits);
+                }
+                $count++;
+                $totalCr += $credits;
+            }
+        });
+
+        $msg = $d['what'] === 'completed'
+            ? "Recorded for {$count} credit line(s) (".mcms_num($totalCr).' cr): Redeemed.'
+            : "Recorded for {$count} credit line(s) (".mcms_num($totalCr).' cr): Released back to Available (if valid) or Expired.';
+
+        if (($d['return_to'] ?? null) === 'show' && ! empty($d['application_id'])) {
+            return redirect()->route('transfers.show', [(int) $d['application_id'], 'tab' => 'admission'])->with('status', $msg);
+        }
+
+        return redirect()->route('transfers', ['tab' => 'held'])->with('status', $msg);
     }
 
     /** BR-34: admission is a fact of its own. A transfer approval never creates it. */
@@ -347,7 +429,7 @@ final class EvaluationController
             'decided_by_name' => $request->user()->name,
             'decided_by_position' => $request->user()->position,
             'decided_on' => $on ?? today(),
-            'authority' => $request->user()->hasRole('codl_admin') ? 'codl_admin' : ($request->user()->hasRole('academic_authority') ? 'academic_authority' : 'deputy_dean'),
+            'authority' => $this->actorAuthority($request),
             'decision_ref' => $ref,
             'conditions' => $conditions,
             'warnings' => json_encode($warnings),
@@ -364,9 +446,23 @@ final class EvaluationController
         return (string) $this->settings->get('approval.route.transfer');
     }
 
+    private function actorAuthority(Request $request): string
+    {
+        $cur = $request->user()->currentRole()?->value;
+        if (in_array($cur, ['academic_authority', 'codl_admin'], true)) {
+            return $cur;
+        }
+
+        return $request->user()->hasAnyRole('academic_authority') ? 'academic_authority' : 'codl_admin';
+    }
+
     private function editable(Request $request, int $id, array $statuses): object
     {
-        abort_unless($request->user()->hasAnyRole($this->authority(), 'codl_admin', 'deputy_dean', 'ptj_authority', 'academic_authority'), 403, 'The role that decides credit transfer is set in the settings.');
+        $configured = $this->authority();
+        $allowed = in_array($configured, ['codl_admin', 'academic_authority'], true)
+            ? ['codl_admin', 'academic_authority']
+            : [$configured];
+        abort_unless($request->user()->hasAnyRole(...$allowed), 403, 'Credit transfer evaluation and approval are now handled by CODL and the Academic Authority (Senate).');
         $a = $this->scoped($request)->where('t.id', $id)->first() ?? abort(404);
         abort_unless(in_array($a->status, $statuses, true), 422, 'This application is not at that step.');
 
@@ -383,7 +479,7 @@ final class EvaluationController
 
     private function scoped(Request $request)
     {
-        $ids = $request->user()->hasAnyRole('codl_admin', 'academic_authority', 'records_custodian', 'abc_depositor', 'records_depositor')
+        $ids = $request->user()->hasAnyRole('codl_admin', 'academic_authority', 'qa_officer', 'records_custodian', 'abc_depositor', 'records_depositor')
             ? null
             : $request->user()->scopedPtjIds('deputy_dean');
 

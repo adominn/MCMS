@@ -475,6 +475,14 @@ class ComprehensiveTestingSeeder extends Seeder
             ['code' => 'BADGE-SSDLC-M1-02', 'external_date' => '2026-09-21', 'external_id' => 'OB-2026-9832', 'external_url' => 'https://badges.utem.edu.my/ob3/9832', 'id' => 12, 'issued_at' => '2026-09-21 10:00:00', 'module_achievement_id' => 16],
             ['code' => 'BADGE-SSDLC-M2-02', 'external_date' => '2026-10-20', 'external_id' => 'OB-2026-9833', 'external_url' => 'https://badges.utem.edu.my/ob3/9833', 'id' => 13, 'issued_at' => '2026-10-20 10:00:00', 'module_achievement_id' => 17],
             ['code' => 'BADGE-SSDLC-M1-03', 'external_date' => '2026-09-25', 'external_id' => 'OB-2026-9834', 'external_url' => 'https://badges.utem.edu.my/ob3/9834', 'id' => 14, 'issued_at' => '2026-09-25 10:00:00', 'module_achievement_id' => 18],
+            ['code' => 'BADGE-DS-M1-04', 'external_date' => '2026-06-27', 'external_id' => 'OB-2026-9824', 'external_url' => 'https://badges.utem.edu.my/ob3/9824', 'id' => 15, 'issued_at' => '2026-06-27 10:00:00', 'module_achievement_id' => 10],
+            ['code' => 'BADGE-DS-M2-04', 'external_date' => '2026-08-20', 'external_id' => 'OB-2026-9825', 'external_url' => 'https://badges.utem.edu.my/ob3/9825', 'id' => 16, 'issued_at' => '2026-08-20 10:00:00', 'module_achievement_id' => 11],
+            ['code' => 'BADGE-DS-M1-05', 'external_date' => '2026-06-28', 'external_id' => 'OB-2026-9826', 'external_url' => 'https://badges.utem.edu.my/ob3/9826', 'id' => 17, 'issued_at' => '2026-06-28 10:00:00', 'module_achievement_id' => 12],
+            ['code' => 'BADGE-DS-M2-05', 'external_date' => '2026-08-20', 'external_id' => 'OB-2026-9827', 'external_url' => 'https://badges.utem.edu.my/ob3/9827', 'id' => 18, 'issued_at' => '2026-08-20 10:00:00', 'module_achievement_id' => 13],
+            ['code' => 'BADGE-OOP-M1-01', 'external_date' => '2026-08-15', 'external_id' => 'OB-2026-9840', 'external_url' => 'https://badges.utem.edu.my/ob3/9840', 'id' => 19, 'issued_at' => '2026-08-15 10:00:00', 'module_achievement_id' => 19],
+            ['code' => 'BADGE-OOP-M2-01', 'external_date' => '2026-09-30', 'external_id' => 'OB-2026-9841', 'external_url' => 'https://badges.utem.edu.my/ob3/9841', 'id' => 20, 'issued_at' => '2026-09-30 10:00:00', 'module_achievement_id' => 20],
+            ['code' => 'BADGE-OOP-M1-02', 'external_date' => '2026-08-16', 'external_id' => 'OB-2026-9842', 'external_url' => 'https://badges.utem.edu.my/ob3/9842', 'id' => 21, 'issued_at' => '2026-08-16 10:00:00', 'module_achievement_id' => 21],
+            ['code' => 'BADGE-OOP-M2-02', 'external_date' => '2026-09-30', 'external_id' => 'OB-2026-9843', 'external_url' => 'https://badges.utem.edu.my/ob3/9843', 'id' => 22, 'issued_at' => '2026-09-30 10:00:00', 'module_achievement_id' => 22],
         ]);
 
         // Table: discrepancies (4 records)
@@ -1666,8 +1674,8 @@ class ComprehensiveTestingSeeder extends Seeder
             ['area' => 'review', 'assignee_role' => 'industry_expert', 'completed_at' => NULL, 'created_at' => '2026-11-03 09:00:00', 'id' => 6, 'kind' => 'review_submit', 'link' => '/reviews/9', 'ptj_id' => 1, 'ref_id' => 9, 'subject_ref' => 'MC-FTMK-010', 'title' => 'Submit Industry Expert Review: Cloud Security Posture & DevSecOps Automation', 'user_id' => 15],
             ['area' => 'approval', 'assignee_role' => 'deputy_dean', 'completed_at' => NULL, 'created_at' => '2026-10-29 15:00:00', 'id' => 7, 'kind' => 'proposal_decide', 'link' => '/approvals/12', 'ptj_id' => 1, 'ref_id' => 12, 'subject_ref' => 'MC-FTMK-011', 'title' => 'Record Approval Decision: Enterprise API Architecture & Microservices Governance', 'user_id' => 10],
             ['area' => 'cqi', 'assignee_role' => 'deputy_dean', 'completed_at' => NULL, 'created_at' => '2026-10-28 10:00:00', 'id' => 8, 'kind' => 'cqi_confirm', 'link' => '/cqi/4', 'ptj_id' => 1, 'ref_id' => 4, 'subject_ref' => 'CQI-2026-0004', 'title' => 'Confirm Cohort CQI Report: Secure SDLC 2026/1-SSDLC', 'user_id' => 10],
-            ['area' => 'acr', 'assignee_role' => 'deputy_dean', 'completed_at' => NULL, 'created_at' => '2026-10-26 10:00:00', 'id' => 9, 'kind' => 'acr_confirm', 'link' => '/deposits/9', 'ptj_id' => 1, 'ref_id' => 9, 'subject_ref' => 'ACR-2026-0009', 'title' => 'Confirm Academic Credit Record: Sharifah Puteri (SSDLC)', 'user_id' => 10],
-            ['area' => 'transfer', 'assignee_role' => 'deputy_dean', 'completed_at' => NULL, 'created_at' => '2026-10-30 10:00:00', 'id' => 10, 'kind' => 'transfer_decide', 'link' => '/transfers/2', 'ptj_id' => 1, 'ref_id' => 2, 'subject_ref' => 'TR-2026-0002', 'title' => 'Evaluate Credit Transfer Application: Bee Tan (TR-2026-0002)', 'user_id' => 10],
+            ['area' => 'deposits', 'assignee_role' => 'abc_depositor', 'completed_at' => NULL, 'created_at' => '2026-10-26 10:00:00', 'id' => 9, 'kind' => 'acr_confirm', 'link' => '/deposits/9', 'ptj_id' => 1, 'ref_id' => 9, 'subject_ref' => 'ACR-2026-0009', 'title' => 'Confirm Academic Credit Record: Sharifah Puteri (SSDLC)', 'user_id' => NULL],
+            ['area' => 'transfers', 'assignee_role' => 'codl_admin', 'completed_at' => NULL, 'created_at' => '2026-10-30 10:00:00', 'id' => 10, 'kind' => 'transfer_decide', 'link' => '/transfers/2', 'ptj_id' => 1, 'ref_id' => 2, 'subject_ref' => 'TR-2026-0002', 'title' => 'Evaluate Credit Transfer Application: Bee Tan (TR-2026-0002)', 'user_id' => 12],
             ['area' => 'pathway', 'assignee_role' => 'deputy_dean', 'completed_at' => NULL, 'created_at' => '2026-10-28 10:00:00', 'id' => 11, 'kind' => 'plan_decide', 'link' => '/plans/2', 'ptj_id' => 1, 'ref_id' => 2, 'subject_ref' => 'PLAN-2026-0002', 'title' => 'Assess Stackable Study Plan: Bee Tan (PLAN-2026-0002)', 'user_id' => 10],
             ['area' => 'acr', 'assignee_role' => 'student', 'completed_at' => NULL, 'created_at' => '2026-08-28 10:00:00', 'id' => 12, 'kind' => 'consent_give', 'link' => '/my-credit/5', 'ptj_id' => 1, 'ref_id' => 5, 'subject_ref' => 'ACR-2026-0005', 'title' => 'Give ABC Deposit Consent for Data Structures (ACR-2026-0005)', 'user_id' => 3],
             ['area' => 'records', 'assignee_role' => 'deputy_dean', 'completed_at' => NULL, 'created_at' => '2026-11-03 09:00:00', 'id' => 13, 'kind' => 'discrepancy_fix', 'link' => '/records/discrepancies', 'ptj_id' => 1, 'ref_id' => 4, 'subject_ref' => 'DISC-0004', 'title' => 'Resolve Credit Deposit Discrepancy on ACR-2026-0003', 'user_id' => 10],
@@ -2013,7 +2021,45 @@ class ComprehensiveTestingSeeder extends Seeder
             $audit->record($act, $subj, $bef, $aft, $reas, ['ip' => '10.41.164.20'], $actor);
         }
 
+        // Backfill coordinator sign-off on completed achievement records so P1->P2 history is consistent
+        $completedRecs = DB::table('achievement_records as ar')
+            ->join('mc_versions as v', 'v.id', '=', 'ar.mc_version_id')
+            ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+            ->where('ar.completion_status', 'complete')
+            ->whereNull('ar.coordinator_signed_at')
+            ->get(['ar.id', 'ar.confirmed_at', 'm.owner_id']);
+        foreach ($completedRecs as $cr) {
+            DB::table('achievement_records')->where('id', $cr->id)->update([
+                'coordinator_signed_by' => $cr->owner_id,
+                'coordinator_signed_at' => $cr->confirmed_at ? \Carbon\Carbon::parse($cr->confirmed_at)->subDay() : now(),
+                'coordinator_remarks' => 'All coursework and final assessments verified by Course Coordinator.',
+            ]);
+        }
+
+        // Backfill parent CLO mapping on approved UMC learning outcomes where omitted in seed fixtures
+        $umcLos = DB::table('learning_outcomes as lo')
+            ->join('mc_versions as v', 'v.id', '=', 'lo.mc_version_id')
+            ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+            ->join('parent_courses as pc', 'pc.id', '=', 'v.parent_course_id')
+            ->where('m.category', 'umc')
+            ->where('v.status', 'approved')
+            ->whereNull('lo.parent_clo_id')
+            ->get(['lo.id', 'lo.sort_order', 'pc.clos']);
+        foreach ($umcLos as $lo) {
+            $clos = array_values(array_filter(array_map('trim', explode(';', (string) $lo->clos))));
+            if (! empty($clos)) {
+                $idx = max(0, ((int) $lo->sort_order) - 1);
+                $cloIndex = min(count($clos), $idx + 1);
+                DB::table('learning_outcomes')->where('id', $lo->id)->update(['parent_clo_id' => $cloIndex]);
+            }
+        }
+
         DB::statement('SET @mcms_disable_triggers = 0;');
         DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
+
+        $this->call([
+            DegreeCurriculumSampleSeeder::class,
+            WalkthroughDemoSeeder::class,
+        ]);
     }
 }

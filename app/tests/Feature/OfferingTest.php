@@ -189,37 +189,35 @@ it('withdraws acceptance when the lecturer changes an item, tells the lecturer t
     $o = newCohort($v1);
     answerAll($o);
     sendChecklist($o);
-    $this->actingAs($this->hakim)->post("/offerings/$o/confirm", ['outcome' => 'not_ready', 'accept' => ['b2_01' => 1]]);
-    expect((bool) DB::table('readiness_items')->where('offering_id', $o)->where('item', 'b2_01')->value('accepted'))->toBeTrue()
+    $this->actingAs($this->hakim)->post("/offerings/$o/confirm", ['outcome' => 'not_ready', 'accept' => ['info_eligibility' => 1]]);
+    expect((bool) DB::table('readiness_items')->where('offering_id', $o)->where('item', 'info_eligibility')->value('accepted'))->toBeTrue()
         ->and(DB::table('tasks')->where('kind', 'readiness')->whereNull('completed_at')->exists())->toBeFalse()
         ->and(DB::table('notifications')->where('user_id', $this->aina->id)->where('template_key', 'decision.made')->where('channel', 'in_system')->orderByDesc('id')->value('body'))->toContain('Readiness: Not ready');
-    $this->actingAs($this->aina)->post("/offerings/$o/readiness", ['item' => ['b2_01' => ['status' => 'yes', 'note' => 'Updated evidence']], 'action' => 'save']);
-    expect((bool) DB::table('readiness_items')->where('offering_id', $o)->where('item', 'b2_01')->value('accepted'))->toBeFalse();
+    $this->actingAs($this->aina)->post("/offerings/$o/readiness", ['item' => ['info_eligibility' => ['status' => 'yes', 'note' => 'Updated evidence']], 'action' => 'save']);
+    expect((bool) DB::table('readiness_items')->where('offering_id', $o)->where('item', 'info_eligibility')->value('accepted'))->toBeFalse();
 });
 
 it('pre-fills the checklist of a new cohort from the last one (FR-88)', function () {
     [$o, $v1] = openCohort();
     $second = newCohort($v1, ['cohort_name' => '2027/2', 'start_date' => today()->addDays(120)->toDateString(), 'end_date' => today()->addDays(180)->toDateString(), 'reg_opens_on' => today()->addDays(60)->toDateString(), 'reg_closes_on' => today()->addDays(100)->toDateString()]);
-    $item = DB::table('readiness_items')->where('offering_id', $second)->where('item', 'b5_01')->first();
-    expect($item->status)->toBe('yes')->and($item->note)->toBe('Evidence for b5_01')->and((bool) $item->accepted)->toBeTrue()
+    $item = DB::table('readiness_items')->where('offering_id', $second)->where('item', 'protect_changes')->first();
+    expect($item->status)->toBe('yes')->and($item->note)->toBe('Evidence for protect_changes')->and((bool) $item->accepted)->toBeTrue()
         ->and(DB::table('offerings')->find($second)->status)->toBe('not_ready'); // still needs its own confirmation
 });
 
-it('renders Appendix B offering readiness printout with all sections and Nota Penting B (Guide Appendix B)', function () {
+it('renders plain-language offering readiness printout with automated checks, 4 sections, and important notice', function () {
     [$o, $v1] = openCohort();
     $res = $this->actingAs($this->hakim)->get("/offerings/$o/readiness?print=1");
     $res->assertOk()
-        ->assertSee('Appendix B')
-        ->assertSee('Lampiran B')
-        ->assertSee('B1. Maklumat Penawaran dan Kohort')
-        ->assertSee('B2. Ketelusan Maklumat Sebelum Pendaftaran')
-        ->assertSee('B3. Kesediaan Bahan, Platform dan Akses')
-        ->assertSee('B4. Kesediaan Pentaksiran dan Integriti')
-        ->assertSee('B5. Rekod Peserta dan Pencapaian')
-        ->assertSee('B6. Proses Penyempurnaan dan Pengeluaran Credential')
-        ->assertSee('B7. Makluman Perubahan dan Perlindungan Peserta')
-        ->assertSee('B8. Pengesahan Kesediaan Sebelum Penawaran')
-        ->assertSee('NOTA PENTING (Lampiran B)');
+        ->assertDontSee('Appendix B')
+        ->assertDontSee('Lampiran B')
+        ->assertSee('Offering Operational Readiness Report')
+        ->assertSee('Automated System Checks')
+        ->assertSee('Course Information & Support')
+        ->assertSee('Learning Materials & Platform')
+        ->assertSee('Assessment & Academic Integrity')
+        ->assertSee('Learner Protection & Contingency')
+        ->assertSee('Important Notice');
 
     // Support party (P5) confirmation recording
     $this->actingAs($this->farid)->post("/offerings/$o/confirm", ['outcome' => 'ready', 'conditions' => 'Platform verified'])->assertSessionHasNoErrors();
@@ -296,9 +294,44 @@ it('generates the recognition statement from the template and shows UMC credit f
         ->assertSee('separate decisions'); // FR-94
 });
 
+function approvedOwn(int $slt, array $over = []): int
+{
+    $v = newOwn($slt);
+    $mcId = (int) DB::table('mc_versions')->where('id', $v)->value('micro_credential_id');
+    DB::table('micro_credentials')->where('id', $mcId)->update(['category_status' => 'confirmed']);
+    DB::table('mc_versions')->where('id', $v)->update([
+        'name_ms' => $over['name_ms'] ?? 'Kursus Mikro Kendiri',
+        'need' => $over['need'] ?? 'Industry upskilling need',
+        'delivery_mode' => $over['delivery_mode'] ?? 'online',
+        'delivery_language' => $over['delivery_language'] ?? 'English',
+        'ip_confirmed' => 1,
+        'status' => 'approved',
+    ] + $over);
+    modules($v, [$slt]);
+    $modId = (int) DB::table('mc_modules')->where('mc_version_id', $v)->value('id');
+    $loId = DB::table('learning_outcomes')->insertGetId([
+        'mc_version_id' => $v,
+        'code' => 'LO1',
+        'text_en' => 'Apply core concepts',
+        'text_ms' => 'Mengaplikasikan konsep teras',
+        'sort_order' => 1,
+    ]);
+    $compId = DB::table('assessment_components')->insertGetId([
+        'mc_version_id' => $v,
+        'mc_module_id' => $modId,
+        'name_en' => 'Final Assessment',
+        'weight_percent' => 100,
+    ]);
+    DB::table('assessment_component_outcomes')->insert([
+        'assessment_component_id' => $compId,
+        'learning_outcome_id' => $loId,
+    ]);
+
+    return $v;
+}
+
 it('shows a SAMC with no credit, MQF or Quality Verification claim without a valid record (FR-89, D-17)', function () {
-    $v = newOwn(80);
-    DB::table('mc_versions')->where('id', $v)->update(['status' => 'approved', 'proposed_credit' => 2.0, 'proposed_mqf_level' => 4, 'qv_status' => 'will_apply']);
+    $v = approvedOwn(80, ['proposed_credit' => 2.0, 'proposed_mqf_level' => 4, 'qv_status' => 'will_apply']);
     $o = newCohort($v);
     answerAll($o);
     sendChecklist($o);
@@ -307,8 +340,7 @@ it('shows a SAMC with no credit, MQF or Quality Verification claim without a val
 });
 
 it('shows SAMC credit only while Quality Verification is valid to the cohort end date (FR-89)', function () {
-    $v = newOwn(80);
-    DB::table('mc_versions')->where('id', $v)->update(['status' => 'approved', 'proposed_credit' => 2.0, 'proposed_mqf_level' => 4, 'qv_status' => 'verified', 'qv_valid_until' => today()->addDays(365)->toDateString()]);
+    $v = approvedOwn(80, ['proposed_credit' => 2.0, 'proposed_mqf_level' => 4, 'qv_status' => 'verified', 'qv_valid_until' => today()->addDays(365)->toDateString()]);
     $o = newCohort($v);
     answerAll($o);
     sendChecklist($o);
@@ -319,8 +351,7 @@ it('shows SAMC credit only while Quality Verification is valid to the cohort end
 });
 
 it('shows an MCE as non-credit, without the separate-stages credit notice', function () {
-    $v = newOwn(20);
-    DB::table('mc_versions')->where('id', $v)->update(['status' => 'approved']);
+    $v = approvedOwn(20);
     $o = newCohort($v);
     answerAll($o);
     sendChecklist($o);
@@ -330,8 +361,7 @@ it('shows an MCE as non-credit, without the separate-stages credit notice', func
 
 it('searches and filters the catalogue (FR-92)', function () {
     [$o] = openCohort(['fee' => '150']);
-    $v = newOwn(80);
-    DB::table('mc_versions')->where('id', $v)->update(['status' => 'approved', 'name_en' => 'Cloud Native Development', 'discipline' => 'Cloud', 'delivery_language' => 'Bahasa Melayu']);
+    $v = approvedOwn(80, ['name_en' => 'Cloud Native Development', 'name_ms' => 'Pembangunan Awan Asli', 'discipline' => 'Cloud', 'delivery_language' => 'Bahasa Melayu']);
     $o2 = newCohort($v, ['delivery_mode' => 'blended', 'start_date' => today()->addDays(200)->toDateString(), 'end_date' => today()->addDays(260)->toDateString(), 'reg_opens_on' => today()->toDateString(), 'reg_closes_on' => today()->addDays(150)->toDateString(), 'cohort_name' => '2027/2']);
     answerAll($o2);
     sendChecklist($o2);

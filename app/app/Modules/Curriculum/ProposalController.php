@@ -17,7 +17,7 @@ final class ProposalController
 
     public function index(Request $request)
     {
-        abort_if($request->user()->hasRole('deputy_dean'), 403, 'A Deputy Dean cannot author micro-credential proposals due to Separation of Duties (D-52).');
+        abort_if($request->user()->hasRole('deputy_dean'), 403, 'A Deputy Dean cannot author micro-credential proposals due to separation of duties.');
         $f = $request->query('f', 'all');
         $base = DB::table('mc_versions as v')
             ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
@@ -53,7 +53,7 @@ final class ProposalController
     // The wizard: three questions, then the proposed category with its reason, then the create form.
     public function wizard(Request $request)
     {
-        abort_if($request->user()->hasRole('deputy_dean'), 403, 'A Deputy Dean cannot author micro-credential proposals due to Separation of Duties (D-52).');
+        abort_if($request->user()->hasRole('deputy_dean'), 403, 'A Deputy Dean cannot author micro-credential proposals due to separation of duties.');
         $origin = in_array($request->query('origin'), ['unbundled', 'own'], true) ? $request->query('origin') : null;
         $slt = is_numeric($request->query('slt')) ? max(0, (int) $request->query('slt')) : null;
         $credit = $request->query('credit') === 'yes';
@@ -70,7 +70,7 @@ final class ProposalController
 
     public function create(Request $request)
     {
-        abort_if($request->user()->hasRole('deputy_dean'), 403, 'A Deputy Dean cannot author micro-credential proposals due to Separation of Duties (D-52).');
+        abort_if($request->user()->hasRole('deputy_dean'), 403, 'A Deputy Dean cannot author micro-credential proposals due to separation of duties.');
         $d = $request->validate([
             'origin' => 'required|in:unbundled,own', 'slt' => 'nullable|integer|min:0|max:5000', 'credit' => 'nullable|in:yes,no',
             'ptj_id' => 'required|exists:ptjs,id', 'proposal_type' => 'required|in:new', // Revision and Re-offer start from an approved version, which arrives with approval
@@ -136,7 +136,9 @@ final class ProposalController
 
         $user = $request->user();
         if ($user->id !== $v->owner_id) {
-            if ($user->hasRole('deputy_dean')) {
+            if ($user->hasAnyRole('codl_admin', 'academic_authority', 'qa_officer')) {
+                // University-wide governance and quality assurance read access
+            } elseif ($user->hasAnyRole('deputy_dean', 'ptj_authority')) {
                 $ids = $user->scopedPtjIds('deputy_dean');
                 abort_unless($ids === null || in_array($v->ptj_id, $ids, true), 403, 'This proposal belongs to another PTj.');
             } else {
@@ -169,6 +171,14 @@ final class ProposalController
             ->orderByDesc('ad.id')
             ->first();
 
+        $codlVerification = DB::table('approval_decisions as ad')
+            ->join('users as u', 'u.id', '=', 'ad.decided_by')
+            ->where('ad.mc_version_id', $id)
+            ->where('ad.stage', 'codl_verification')
+            ->select('ad.*', 'u.name as decider_name', 'u.position as decider_position')
+            ->orderByDesc('ad.id')
+            ->first();
+
         $stage3 = DB::table('approval_decisions as ad')
             ->join('users as u', 'u.id', '=', 'ad.decided_by')
             ->where('ad.mc_version_id', $id)
@@ -185,6 +195,7 @@ final class ProposalController
             'dean' => $dean,
             'stage1' => $stage1,
             'stage2' => $stage2,
+            'codlVerification' => $codlVerification,
             'stage3' => $stage3,
             'proposer' => $proposer,
         ]);
@@ -273,7 +284,7 @@ final class ProposalController
             return $v->name_en;
         });
 
-        return redirect()->route('proposals.show', ['id' => $id, 'tab' => 'submit'])->with('status', "Submitted. The content is locked and the deputy dean has a task for \"$name\".");
+        return redirect()->route('proposals.show', ['id' => $id, 'tab' => 'submit'])->with('status', "Submitted. The content is locked and forwarded to the Deputy Dean and/or CODL for review (\"$name\").");
     }
 
     public function destroy(Request $request, int $id)
@@ -335,7 +346,7 @@ final class ProposalController
 
     private function own(Request $request, int $id): object
     {
-        abort_if($request->user()->hasRole('deputy_dean'), 403, 'A Deputy Dean cannot author micro-credential proposals due to Separation of Duties (D-52).');
+        abort_if($request->user()->hasRole('deputy_dean'), 403, 'A Deputy Dean cannot author micro-credential proposals due to separation of duties.');
         $v = DB::table('mc_versions as v')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->where('v.id', $id)
             ->first(['v.*', 'm.category', 'm.category_status', 'm.qv_planned', 'm.ptj_id', 'm.owner_id', 'm.origin']) ?? abort(404);
         abort_unless($v->owner_id === $request->user()->id, 403, 'This proposal belongs to another lecturer.');

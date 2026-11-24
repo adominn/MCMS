@@ -317,9 +317,11 @@
                       <a href="{{ route('proposals.print', $prop->id) }}" target="_blank" class="btn sm ter">
                         <span class="btn-lbl">{{ __('Proposal (A4)') }}</span> ↗
                       </a>
-                      <a href="{{ route('approvals.pack', $prop->id) }}?print=1" target="_blank" class="btn sm ter">
-                        <span class="btn-lbl">{{ __('Senate pack (A4)') }}</span> ↗
-                      </a>
+                      @if(auth()->user()->hasAnyRole('deputy_dean', 'ptj_authority', 'codl_admin', 'academic_authority', 'qa_officer'))
+                        <a href="{{ route('approvals.pack', $prop->id) }}?print=1" target="_blank" class="btn sm ter">
+                          <span class="btn-lbl">{{ __('Senate pack (A4)') }}</span> ↗
+                        </a>
+                      @endif
                     </div>
                   </td>
                 </tr>

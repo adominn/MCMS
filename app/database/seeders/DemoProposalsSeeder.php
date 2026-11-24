@@ -47,7 +47,7 @@ class DemoProposalsSeeder extends Seeder
         DB::table('reviews')->insert(['review_assignment_id' => $rc, 'ratings' => json_encode(array_map(fn () => ['rating' => 'satisfactory', 'comment' => null, 'blocking' => false], config('proposals.review_items'))), 'recommendation' => 'support', 'summary' => 'Ready for the Senate.', 'submitted_at' => now()->subDays(12)]);
         DB::table('approval_decisions')->insert(['mc_version_id' => $c, 'stage' => 'endorsement', 'decision' => 'endorsed', 'decided_by' => $hakim->id, 'decided_role' => 'deputy_dean', 'verified_category' => 'samc', 'created_at' => now()->subDays(8)]);
         DB::table('micro_credentials')->where('id', DB::table('mc_versions')->where('id', $c)->value('micro_credential_id'))->update(['category_status' => 'verified', 'category_confirmed_by' => $hakim->id, 'category_confirmed_at' => now()->subDays(8)]);
-        Tasks::open('deputy_dean', 'senate', $c, 'Record Senate decision: Applied Data Analytics', "/approvals/$c/senate", $ftmk);
+        Tasks::open('codl_admin', 'codl_verify', $c, 'Verify endorsed proposal: Applied Data Analytics', "/approvals/$c");
     }
 
     protected function proposal(User $owner, int $ptj, string $title, string $status, $submitted): int

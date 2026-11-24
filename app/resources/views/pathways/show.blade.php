@@ -11,12 +11,16 @@
     <h1>Pathway {{ $w->reference }}</h1>
     <div class="sub">{{ $w->programme }} &mdash; {{ $w->programme_name }}</div>
   </div>
-  <div class="act" style="display:flex;align-items:center;gap:8px">
-    <a class="btn sec sm" href="{{ route('public.pathways.print', $w->id) }}" target="_blank">{{ __('Print Lampiran G') }}</a>
-    <a class="btn ter sm" href="{{ route('pathways') }}">&larr; {{ __('All pathways') }}</a>
-    <span class="tag {{ $w->status === 'published' ? 'ok' : ($w->status === 'approved' ? 'info' : 'warn') }}">
-      <strong id="pw-status">{{ $status[$w->status] ?? ucfirst(str_replace('_', ' ', $w->status)) }}</strong>
-    </span>
+  <div class="act-bar">
+    <div class="act-left">
+      <a class="btn ter sm" href="{{ route('pathways') }}">&larr; {{ __('All pathways') }}</a>
+    </div>
+    <div class="act-right">
+      <a class="btn sec sm" href="{{ route('public.pathways.print', $w->id) }}" target="_blank">{{ __('Print pathway report') }}</a>
+      <span class="tag {{ $w->status === 'published' ? 'ok' : ($w->status === 'approved' ? 'info' : 'warn') }}">
+        <strong id="pw-status">{{ $status[$w->status] ?? ucfirst(str_replace('_', ' ', $w->status)) }}</strong>
+      </span>
+    </div>
   </div>
 </div>
 
@@ -233,7 +237,7 @@
 <div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
   <div class="hd" style="display:flex;justify-content:space-between;align-items:center">
     <div>
-      <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('G4: Pemetaan kepada Hasil Pembelajaran Program (PLO)') }}</h2>
+      <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Mapping to Programme Learning Outcomes (PLO)') }}</h2>
       <div class="muted small">{{ __('Programme Learning Outcomes mapping and contribution') }}</div>
     </div>
   </div>
@@ -267,7 +271,7 @@
 <div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
   <div class="hd" style="display:flex;justify-content:space-between;align-items:center">
     <div>
-      <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('G5: Pemetaan kepada Body of Knowledge (BoK)') }}</h2>
+      <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Mapping to Body of Knowledge (BoK)') }}</h2>
       <div class="muted small">{{ __('Domain coverage, contributing micro-credentials and gap actions') }}</div>
     </div>
   </div>
@@ -283,7 +287,7 @@
     </thead>
     <tbody>
       @forelse($g5 ?? [] as $bKey => $bRow)
-        @php($cov = $bRow['coverage'] ?? 'none')
+        @php $cov = $bRow['coverage'] ?? 'none'; @endphp
         <tr>
           <td><strong>{{ $bRow['domain'] ?? $bKey }}</strong></td>
           <td>{{ $bRow['requirement'] ?? '-' }}</td>
@@ -306,7 +310,7 @@
 <div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
   <div class="hd" style="display:flex;justify-content:space-between;align-items:center">
     <div>
-      <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('G8: Baki Keperluan Program yang Perlu Disempurnakan (7 Komponen)') }}</h2>
+      <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Remaining Programme Requirements (7 Components)') }}</h2>
       <div class="muted small">{{ __('Remaining degree curriculum requirements and fulfillment methods') }}</div>
     </div>
   </div>
@@ -322,7 +326,7 @@
     </thead>
     <tbody>
       @foreach($g8 ?? [] as $rKey => $rRow)
-        @php($st = $rRow['status'] ?? 'todo')
+        @php $st = $rRow['status'] ?? 'todo'; @endphp
         <tr>
           <td><strong>{{ $rRow['name'] ?? ucfirst($rKey) }}</strong></td>
           <td>
@@ -342,7 +346,7 @@
 {{-- G9. Ringkasan Analisis Kredit dan Jurang --}}
 <div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
   <div class="hd">
-    <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('G9: Ringkasan Analisis Kredit dan Jurang') }}</h2>
+    <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Summary of Credit and Gap Analysis') }}</h2>
   </div>
   <table style="width:100%;font-size:13px">
     <tbody>
@@ -373,7 +377,7 @@
 {{-- G11. Pengesahan Pemetaan (3 Peranan) --}}
 <div class="panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
   <div class="hd">
-    <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('G11: Pengesahan Pemetaan (3 Peranan)') }}</h2>
+    <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Mapping Sign-Off (3 Roles)') }}</h2>
   </div>
   <table style="width:100%;font-size:13px">
     <thead>
@@ -386,7 +390,7 @@
       </tr>
     </thead>
     <tbody>
-      @php($s1 = $g11['coordinator'] ?? null)
+      @php $s1 = $g11['coordinator'] ?? null; @endphp
       <tr>
         <td><strong>Penyelaras Program Stackable</strong><br><span class="muted small">(P1 Coordinator)</span></td>
         <td>
@@ -397,7 +401,7 @@
         <td>{{ !empty($s1['signed_at']) ? \Carbon\Carbon::parse($s1['signed_at'])->format('d/m/Y') : now()->format('d/m/Y') }}</td>
         <td>{{ $s1['remarks'] ?? 'Pemetaan disahkan lengkap' }}</td>
       </tr>
-      @php($s2 = $g11['faculty_rep'] ?? null)
+      @php $s2 = $g11['faculty_rep'] ?? null; @endphp
       <tr>
         <td><strong>Wakil Fakulti / Timbalan Dekan</strong><br><span class="muted small">(P2 Faculty Rep)</span></td>
         <td>
@@ -408,7 +412,7 @@
         <td>{{ !empty($s2['signed_at']) ? \Carbon\Carbon::parse($s2['signed_at'])->format('d/m/Y') : now()->format('d/m/Y') }}</td>
         <td>{{ $s2['remarks'] ?? 'Kelulusan Senat direkodkan' }}</td>
       </tr>
-      @php($s3 = $g11['qa_assessor'] ?? null)
+      @php $s3 = $g11['qa_assessor'] ?? null; @endphp
       <tr>
         <td><strong>Penilai Kesetaraan / Urus Setia QA</strong><br><span class="muted small">(P3/P4 Assessor)</span></td>
         <td>
@@ -424,8 +428,8 @@
 
   {{-- NOTA PENTING LAMPIRAN G --}}
   <div style="border-top:1px solid var(--hairline);padding:14px 16px;background:var(--surface);font-size:13px;line-height:1.45">
-    <b style="color:var(--primary);text-transform:uppercase;letter-spacing:0.5px">NOTA PENTING (Lampiran G):</b><br>
-    Laluan Stackable Degree bukan proses menjumlahkan kredit semata-mata. Pemetaan ini menetapkan kesetaraan kurikulum yang berpotensi untuk pemindahan kredit, namun pemindahan sebenar tertakluk kepada permohonan individu, kelulusan Fakulti, pemenuhan sekurang-kurangnya 30% kredit disempurnakan terus di UTeM sebagai institusi penganugerah, dan sekurang-kurangnya satu (1) semester residensi bagi program mod konvensional.
+    <b style="color:var(--primary);text-transform:uppercase;letter-spacing:0.5px">{{ __('Important Notice:') }}</b><br>
+    {{ __('Stackable degree pathways are not an automatic credit-accumulation process. Mapping establishes curriculum equivalence for potential credit exemption, while actual exemption remains subject to individual application, Faculty approval, completion of at least 30% of credits directly at UTeM as the awarding institution, and at least one (1) semester of residency for conventional-mode programmes.') }}
   </div>
 </div>
 
@@ -539,7 +543,13 @@
 </form>
 @endif
 
-@if(auth()->user()->hasAnyRole('deputy_dean') && in_array($w->status, ['draft', 'review', 'in_review']))
+@php
+  $stackableRole = (string) app(\App\Modules\Core\Settings::class)->get('approval.route.stackable');
+  $canApprovePathway = in_array($stackableRole, ['academic_authority', 'codl_admin', ''], true)
+    ? auth()->user()->hasAnyRole('academic_authority', 'codl_admin')
+    : auth()->user()->hasAnyRole($stackableRole);
+@endphp
+@if($canApprovePathway && in_array($w->status, ['draft', 'review', 'in_review']))
 <form method="post" action="{{ route('pathways.approve', $w->id) }}" class="card panel" id="approve" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
   <div class="hd">
     <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Record the Senate approval') }}</h2>
@@ -563,7 +573,7 @@
 </form>
 @endif
 
-@if(auth()->user()->hasAnyRole('deputy_dean') && $w->status === 'approved')
+@if($canApprovePathway && $w->status === 'approved')
 <form method="post" action="{{ route('pathways.publish', $w->id) }}" class="card panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
   <div class="hd">
     <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Publish to participants') }}</h2>

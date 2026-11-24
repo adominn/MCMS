@@ -339,13 +339,15 @@ it('renders Appendix E specifications: certificate details, sheet with E10 sign-
         ->assertSee('Hasil Pembelajaran')
         ->assertSee('Timbalan Dekan (Akademik)');
 
-    // 2. Verify Printable Sheet includes Appendix E10 3-role sign-offs & Nota Penting E
+    // 2. Verify Printable Sheet includes plain-language 3-role sign-offs & Important Notice
     $resSheet = $this->actingAs($this->amir)->get("/my-credentials/{$c->id}/sheet")->assertOk();
-    $resSheet->assertSee('Appendix E10: Credential Specifications Sign-Off (3 Roles)')
+    $resSheet->assertSee('Credential Specifications Sign-Off')
         ->assertSee('Penyelaras Kursus / MC')
         ->assertSee('Wakil PTj / Timbalan Dekan')
         ->assertSee('Urus Setia Credential')
-        ->assertSee('NOTA PENTING (Lampiran E)');
+        ->assertSee('Important Notice:')
+        ->assertDontSee('Appendix E10')
+        ->assertDontSee('Lampiran E');
 
     // 3. Verify E8 Checklist Persistence on credentials table
     $credRow = DB::table('credentials')->where('id', $c->id)->first();

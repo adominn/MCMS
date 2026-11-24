@@ -202,8 +202,8 @@ it('persists F6 supporting documents checklist, evaluates F7 criterion-specific 
         ->assertDontSee('Direct outcome equivalent')
         ->assertDontSee('Evidence verified by faculty evaluator');
 
-    // Step 1 validity pass
-    $this->actingAs($this->hakim)->post("/transfers/{$app->id}/validity", [
+    // Step 1 validity pass (CODL)
+    $this->actingAs(userFarid())->post("/transfers/{$app->id}/validity", [
         'check' => ['authenticity' => 'pass', 'abc_status' => 'pass', 'qv_accreditation' => 'pass'],
         'note' => ['authenticity' => 'OK', 'abc_status' => 'OK', 'qv_accreditation' => 'OK'],
     ])->assertSessionHasNoErrors();
@@ -211,7 +211,7 @@ it('persists F6 supporting documents checklist, evaluates F7 criterion-specific 
     // Step 2 F7 evaluation using criterion-specific Guide options (adequate, matched, aligned, valid, current, met)
     $srcLo = DB::table('learning_outcomes')->where('mc_version_id', $line->mc_version_id)->value('id');
     $clos = array_values(array_filter(array_map('trim', explode(';', (string) DB::table('parent_courses')->where('id', $courseId)->value('clos')))));
-    $this->actingAs($this->hakim)->post("/transfers/{$app->id}/lines/{$line->id}", [
+    $this->actingAs(userFarid())->post("/transfers/{$app->id}/lines/{$line->id}", [
         'result' => [
             'credit_slt' => 'adequate',
             'mqf' => 'matched',
@@ -237,15 +237,15 @@ it('persists F6 supporting documents checklist, evaluates F7 criterion-specific 
         'note' => array_fill(0, count($clos), 'Matched via LO1'),
     ])->assertSessionHasNoErrors();
 
-    // F8: not_approved or partly MUST require conditions/justification
-    $this->actingAs($this->hakim)->post("/transfers/{$app->id}/decide", [
+    // F8: not_approved or partly MUST require conditions/justification (Senate)
+    $this->actingAs(userZulkifli())->post("/transfers/{$app->id}/decide", [
         'outcome' => 'not_approved',
         'decided_on' => today()->toDateString(),
         'credits' => [$line->id => 0],
     ])->assertSessionHasErrors('conditions');
 
-    // Approve transfer
-    $this->actingAs($this->hakim)->post("/transfers/{$app->id}/decide", [
+    // Approve transfer (Senate)
+    $this->actingAs(userZulkifli())->post("/transfers/{$app->id}/decide", [
         'outcome' => 'approved',
         'decision_ref' => 'FTMK-CT-2026/09',
         'decided_on' => today()->toDateString(),
@@ -258,7 +258,7 @@ it('persists F6 supporting documents checklist, evaluates F7 criterion-specific 
         ->assertSee('Full match')
         ->assertDontSee('Full match / Padanan penuh')
         ->assertSee('Adequate (Current)')
-        ->assertSee('Hakim Rahman');
+        ->assertSee(userZulkifli()->name);
 
     // CRITICAL F8 CHECK: When Deputy Dean (Hakim Rahman) prints /transfers/{id}/letter?print=1,
     // the letter MUST be addressed to "Dear <b>Amir Hakimi</b>" — NEVER "Dear Hakim Rahman"!
@@ -275,7 +275,7 @@ it('persists F6 supporting documents checklist, evaluates F7 criterion-specific 
         ->assertSee('Credit Transfer Decision') // F8
         ->assertSee('Single Redemption Status') // F9
         ->assertSee('Three-Party Verification &amp; Sign-Off', false) // F11
-        ->assertSee('Hakim Rahman') // real F8/F11 decider
+        ->assertSee(userZulkifli()->name) // real F8/F11 decider
         ->assertSee('Dr. Aina Zulkifli') // real F11 P1
         ->assertSee('Nurul Izzah'); // real F11 P6/P7
 
@@ -307,13 +307,13 @@ it('warns on both programme transfer limit and Guide Cl. 14.5.1 30% minimum UTeM
     $lines = Transfers::lines($app->id);
     $lineId = $lines->first()->id;
 
-    // 7.5 credits: below programme 80% cap (8.0), but ABOVE Guide Cl. 14.5.1 70% cap (7.0)
+    // 7.5 credits: below programme 80% cap (8.0), but ABOVE 70% cap (7.0)
     $w1 = Transfers::warnings($app, $lines, [$lineId => 7.5]);
-    expect(implode(' ', $w1))->toContain('Guide Cl. 14.5.1')->not->toContain('programme limit');
+    expect(implode(' ', $w1))->toContain('UTeM minimum direct-credit requirement')->not->toContain('programme limit');
 
-    // 8.5 credits: triggers BOTH programme cap AND Guide Cl. 14.5.1 UTeM 30% home-credit floor
+    // 8.5 credits: triggers BOTH programme cap AND UTeM 30% home-credit floor
     $w2 = Transfers::warnings($app, $lines, [$lineId => 8.5]);
-    expect(implode(' ', $w2))->toContain('programme limit')->toContain('Guide Cl. 14.5.1');
+    expect(implode(' ', $w2))->toContain('programme limit')->toContain('UTeM minimum direct-credit requirement');
 });
 
 // ---- Defense-in-Depth Safeguards: Prevent ACR creation or confirmation without P1 Course Coordinator verification

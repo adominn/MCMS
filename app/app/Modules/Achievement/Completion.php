@@ -177,7 +177,7 @@ final class Completion
         $waitingCoord = self::waitingCoordinator($offeringId);
         $openCoord = DB::table('tasks')->where('kind', 'coordinator_signoff')->where('ref_id', $offeringId)->whereNull('completed_at')->exists();
         if ($waitingCoord > 0 && ! $openCoord) {
-            Tasks::open('lecturer', 'coordinator_signoff', $offeringId, 'Coordinator sign-off (F11): '.$o->name_en.' '.$o->cohort_name, "/cohorts/$offeringId/signoff", $o->ptj_id, userId: $o->owner_id, area: 'results');
+            Tasks::open('lecturer', 'coordinator_signoff', $offeringId, 'Coordinator sign-off: '.$o->name_en.' '.$o->cohort_name, "/cohorts/$offeringId/signoff", $o->ptj_id, userId: $o->owner_id, area: 'results');
         } elseif ($waitingCoord === 0 && $openCoord) {
             Tasks::close('coordinator_signoff', $offeringId);
         }

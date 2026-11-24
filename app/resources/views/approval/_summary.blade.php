@@ -1,6 +1,6 @@
 <div class="card">
   <h2>{{ __('Proposal summary') }}</h2>
-  <p><b>{{ $v->name_en }}</b> / {{ $v->name_ms }}<br>
+  <p><b>{{ (app()->getLocale() === 'ms' && !empty($v->name_ms)) ? $v->name_ms : $v->name_en }}</b><br>
     {{ strtoupper($v->category) }} &middot; {{ $v->ptj_code }} &middot; {{ $v->owner_name }} &middot; {{ __($cfg['delivery_modes'][$v->delivery_mode] ?? '-') }}, {{ $v->delivery_language }}</p>
   <p><b>{{ __('Need:') }}</b> {{ $v->need }}</p>
   @if($course)

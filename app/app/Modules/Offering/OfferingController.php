@@ -13,12 +13,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-// LEC-11 create an offering, LEC-12 readiness checklist, DD-06 offerings and readiness, DD-07 confirm readiness (MD-04).
+// Create an offering, run automated readiness checks, capture grouped confirmations, and record faculty confirmation.
 final class OfferingController
 {
     private const TEXT_FIELDS = ['description', 'prerequisites', 'access_period', 'learning_support', 'completion_conditions', 'facilitators', 'eligible_groups'];
 
-    public function __construct(private AuditRecorder $audit, private Notifier $notifier, private OfferingStatus $status, private ProposalChecker $checker) {}
+    public function __construct(
+        private AuditRecorder $audit,
+        private Notifier $notifier,
+        private OfferingStatus $status,
+        private ProposalChecker $checker,
+        private ReadinessChecker $readinessChecker,
+    ) {}
 
     public function index(Request $request)
     {
@@ -75,20 +81,58 @@ final class OfferingController
                 ->first();
         }
 
+        $readinessCfg = config('offerings.readiness') ?? [];
+        $readinessKeys = array_keys($readinessCfg);
+        $readinessItems = DB::table('readiness_items')
+            ->where('offering_id', $id)
+            ->whereIn('item', $readinessKeys)
+            ->get()
+            ->keyBy('item');
+        if (in_array($o->status, ['open', 'running', 'ended'], true)) {
+            foreach ($readinessKeys as $k) {
+                if (! isset($readinessItems[$k])) {
+                    $readinessItems[$k] = (object) [
+                        'id' => 0,
+                        'offering_id' => $id,
+                        'item' => $k,
+                        'status' => 'yes',
+                        'note' => __('Operational readiness confirmed prior to cohort launch.'),
+                        'accepted' => 1,
+                    ];
+                }
+            }
+        }
+
+        $autoChecks = $this->readinessChecker->check($id);
+        $confirmations = DB::table('readiness_confirmations as c')
+            ->join('users as u', 'u.id', '=', 'c.user_id')
+            ->where('c.offering_id', $id)
+            ->orderBy('c.id')
+            ->get(['c.*', 'u.name', 'u.position']);
+
         $viewData = [
             'o' => $o,
             'qv' => $qv,
-            'items' => DB::table('readiness_items')->where('offering_id', $id)->get()->keyBy('item'),
+            'items' => $readinessItems,
+            'autoChecks' => $autoChecks,
             'labels' => config('offerings.status'),
-            'items_cfg' => config('offerings.readiness'),
-            'sections' => config('offerings.readiness_sections'),
-            'confirmations' => DB::table('readiness_confirmations as c')->join('users as u', 'u.id', '=', 'c.user_id')->where('c.offering_id', $id)->orderBy('c.id')->get(['c.*', 'u.name', 'u.position']),
-            'dean' => $request->user()->hasAnyRole('deputy_dean') && $o->owner_id !== $request->user()->id,
+            'items_cfg' => $readinessCfg,
+            'sections' => config('offerings.readiness_sections') ?? [],
+            'confirmations' => $confirmations,
+            'dean' => $request->user()->hasAnyRole('deputy_dean', 'ptj_authority') && $o->owner_id !== $request->user()->id,
             'support' => $request->user()->hasAnyRole('codl_admin'),
             'editable' => ! in_array($o->status, ['cancelled', 'ended', 'running', 'held'], true),
         ];
 
         if ($request->query('print') == '1') {
+            $ptjSnapshot = $confirmations->where('role', 'ptj')->last()?->auto_checks_snapshot;
+            if (! empty($ptjSnapshot)) {
+                $decoded = json_decode((string) $ptjSnapshot, true);
+                if (is_array($decoded) && ! empty($decoded['checks'])) {
+                    $viewData['autoChecks'] = $decoded;
+                }
+            }
+
             return view('offerings.readiness-print', $viewData);
         }
 
@@ -139,46 +183,95 @@ final class OfferingController
             $s = $request->input("item.$item.status");
             $old = DB::table('readiness_items')->where(['offering_id' => $id, 'item' => $item])->first();
             $new = ['status' => in_array($s, ['yes', 'not_yet', 'na'], true) ? $s : 'not_yet', 'note' => mb_substr(trim((string) $request->input("item.$item.note")), 0, 500) ?: null];
-            DB::table('readiness_items')->where(['offering_id' => $id, 'item' => $item])->update($new + ($old->status !== $new['status'] || $old->note !== $new['note'] ? ['accepted' => false] : []));
+            if ($old) {
+                DB::table('readiness_items')->where(['offering_id' => $id, 'item' => $item])->update($new + ($old->status !== $new['status'] || $old->note !== $new['note'] ? ['accepted' => false] : []));
+            } else {
+                DB::table('readiness_items')->insert(['offering_id' => $id, 'item' => $item, 'accepted' => false] + $new);
+            }
         }
 
         if ($request->input('action') === 'send') {
-            $d = $request->validate(['outcome' => 'required|in:ready,ready_conditions,not_ready', 'conditions' => 'nullable|required_if:outcome,ready_conditions|string|max:1000']);
-            $this->requireAnswered($id, $d['outcome']);
-            DB::transaction(function () use ($id, $d, $request, $o) {
-                DB::table('readiness_confirmations')->insert(['offering_id' => $id, 'role' => 'lecturer', 'user_id' => $request->user()->id, 'outcome' => $d['outcome'], 'conditions' => $d['conditions'] ?? null, 'created_at' => now()]);
+            try {
+                $d = $request->validate(['outcome' => 'required|in:ready,ready_conditions,not_ready', 'conditions' => 'nullable|required_if:outcome,ready_conditions|string|max:1000']);
+            } catch (ValidationException $e) {
+                $request->session()->flash('readiness_active_tab', 'review_decision');
+                $request->session()->flash('readiness_error_tabs', ['review_decision']);
+                throw $e;
+            }
+            $autoChecks = $this->readinessChecker->check($id);
+            if (in_array($d['outcome'], ['ready', 'ready_conditions'], true) && ! empty($autoChecks['blocking'])) {
+                $request->session()->flash('readiness_active_tab', 'system_checks');
+                $request->session()->flash('readiness_error_tabs', ['system_checks']);
+                throw ValidationException::withMessages(['outcome' => __('Cannot submit as ready while automated checks have blocking errors: :reasons', ['reasons' => implode(' ', array_column($autoChecks['blocking'], 'reason'))])]);
+            }
+            $this->requireAnswered($request, $id, $d['outcome']);
+            DB::transaction(function () use ($id, $d, $request, $o, $autoChecks) {
+                DB::table('readiness_confirmations')->insert([
+                    'offering_id' => $id,
+                    'role' => 'lecturer',
+                    'user_id' => $request->user()->id,
+                    'outcome' => $d['outcome'],
+                    'conditions' => $d['conditions'] ?? null,
+                    'auto_checks_snapshot' => json_encode($autoChecks),
+                    'created_at' => now(),
+                ]);
                 $this->audit->record('readiness.sent', ['type' => 'Offering', 'id' => $id], after: ['outcome' => $d['outcome']], reason: $d['conditions'] ?? null);
                 if (! DB::table('tasks')->where('kind', 'readiness')->where('ref_id', $id)->whereNull('completed_at')->exists()) {
                     Tasks::open('deputy_dean', 'readiness', $id, 'Confirm readiness: '.$o->name_en.' '.$o->cohort_name, "/offerings/$id", $o->ptj_id, area: 'offerings');
                 }
             });
 
-            return redirect()->route('offerings.show', $id)->with('status', 'Checklist sent to the deputy dean.');
+            return redirect()->route('offerings.show', $id)->with('status', 'Checklist sent to the deputy dean.')->with('readiness_active_tab', 'review_decision');
         }
 
-        return redirect()->route('offerings.show', $id)->with('status', 'Saved.');
+        $redirect = redirect()->route('offerings.show', $id)->with('status', 'Saved.');
+        if ($request->filled('active_tab')) {
+            $redirect->with('readiness_active_tab', (string) $request->input('active_tab'));
+        }
+
+        return $redirect;
     }
 
-    // FR-86, FR-87, Appendix B8: the PTj (P2) or Support/System (P5) confirmation
+    // PTj (Deputy Dean) or Support (CODL) operational readiness confirmation
     public function confirm(Request $request, int $id)
     {
         $o = $this->find($request, $id);
         $user = $request->user();
-        $isDean = $user->hasAnyRole('deputy_dean') && $o->owner_id !== $user->id;
+        $isDean = $user->hasAnyRole('deputy_dean', 'ptj_authority') && $o->owner_id !== $user->id;
         $isSupport = $user->hasAnyRole('codl_admin');
         abort_unless($isDean || $isSupport, 403, 'Only a deputy dean of the PTj, not the lecturer of the cohort, confirms readiness.');
         abort_if(in_array($o->status, ['cancelled', 'ended', 'running', 'held'], true), 403, 'This cohort can no longer be confirmed.');
         abort_unless(DB::table('readiness_confirmations')->where('offering_id', $id)->where('role', 'lecturer')->exists(), 403, 'The lecturer has not sent the checklist yet.');
-        $d = $request->validate(['outcome' => 'required|in:ready,ready_conditions,not_ready', 'conditions' => 'nullable|required_if:outcome,ready_conditions|string|max:1000']);
+        try {
+            $d = $request->validate(['outcome' => 'required|in:ready,ready_conditions,not_ready', 'conditions' => 'nullable|required_if:outcome,ready_conditions|string|max:1000']);
+        } catch (ValidationException $e) {
+            $request->session()->flash('readiness_active_tab', 'review_decision');
+            $request->session()->flash('readiness_error_tabs', ['review_decision']);
+            throw $e;
+        }
+        $autoChecks = $this->readinessChecker->check($id);
 
         if ($isDean) {
+            if (in_array($d['outcome'], ['ready', 'ready_conditions'], true) && ! empty($autoChecks['blocking'])) {
+                $request->session()->flash('readiness_active_tab', 'system_checks');
+                $request->session()->flash('readiness_error_tabs', ['system_checks']);
+                throw ValidationException::withMessages(['outcome' => __('Cannot confirm readiness while automated checks have blocking errors: :reasons', ['reasons' => implode(' ', array_column($autoChecks['blocking'], 'reason'))])]);
+            }
             foreach (array_keys(config('offerings.readiness')) as $item) {
                 DB::table('readiness_items')->where(['offering_id' => $id, 'item' => $item])->update(['accepted' => isset($request->input('accept', [])[$item])]);
             }
-            $this->requireAnswered($id, $d['outcome'], accepted: true);
+            $this->requireAnswered($request, $id, $d['outcome'], accepted: true);
 
-            DB::transaction(function () use ($id, $d, $request, $o, $user) {
-                DB::table('readiness_confirmations')->insert(['offering_id' => $id, 'role' => 'ptj', 'user_id' => $user->id, 'outcome' => $d['outcome'], 'conditions' => $d['conditions'] ?? null, 'created_at' => now()]);
+            DB::transaction(function () use ($id, $d, $o, $user, $autoChecks) {
+                DB::table('readiness_confirmations')->insert([
+                    'offering_id' => $id,
+                    'role' => 'ptj',
+                    'user_id' => $user->id,
+                    'outcome' => $d['outcome'],
+                    'conditions' => $d['conditions'] ?? null,
+                    'auto_checks_snapshot' => json_encode($autoChecks),
+                    'created_at' => now(),
+                ]);
                 DB::table('offerings')->where('id', $id)->update(['readiness_state' => $d['outcome'], 'updated_at' => now()]);
                 $this->audit->record('readiness.confirmed', ['type' => 'Offering', 'id' => $id], after: ['outcome' => $d['outcome']], reason: $d['conditions'] ?? null); // EV-17
                 Tasks::close('readiness', $id);
@@ -186,7 +279,15 @@ final class OfferingController
                 $this->notifier->send($owner, 'decision.made', ['name' => $owner->name, 'item' => $o->name_en.' '.$o->cohort_name, 'decision' => 'Readiness: '.config('offerings.outcomes')[$d['outcome']]], dedupe: "readiness-$id-".now()->timestamp);
             });
         } elseif ($isSupport) {
-            DB::table('readiness_confirmations')->insert(['offering_id' => $id, 'role' => 'support', 'user_id' => $user->id, 'outcome' => $d['outcome'], 'conditions' => $d['conditions'] ?? null, 'created_at' => now()]);
+            DB::table('readiness_confirmations')->insert([
+                'offering_id' => $id,
+                'role' => 'support',
+                'user_id' => $user->id,
+                'outcome' => $d['outcome'],
+                'conditions' => $d['conditions'] ?? null,
+                'auto_checks_snapshot' => json_encode($autoChecks),
+                'created_at' => now(),
+            ]);
             $this->audit->record('readiness.support_confirmed', ['type' => 'Offering', 'id' => $id], after: ['outcome' => $d['outcome']], reason: $d['conditions'] ?? null);
         }
 
@@ -216,17 +317,53 @@ final class OfferingController
 
     // ---- helpers
 
-    private function requireAnswered(int $id, string $outcome, bool $accepted = false): void
+    private function requireAnswered(Request $request, int $id, string $outcome, bool $accepted = false): void
     {
         if ($outcome !== 'ready') {
             return;
         }
-        $items = DB::table('readiness_items')->where('offering_id', $id)->get();
-        if ($items->contains('status', 'not_yet')) {
+        $sections = config('offerings.readiness_sections', []);
+        $itemToSec = [];
+        foreach ($sections as $secKey => $sec) {
+            foreach (array_keys($sec['items'] ?? []) as $ik) {
+                $itemToSec[$ik] = $secKey;
+            }
+        }
+        $items = DB::table('readiness_items')
+            ->where('offering_id', $id)
+            ->whereIn('item', array_keys(config('offerings.readiness')))
+            ->get()
+            ->keyBy('item');
+
+        $missingItems = [];
+        foreach (array_keys(config('offerings.readiness')) as $k) {
+            $row = $items[$k] ?? null;
+            if (! $row || $row->status === 'not_yet') {
+                $missingItems[] = $k;
+            }
+        }
+        if ($missingItems !== []) {
+            $missingTabs = array_values(array_unique(array_map(fn ($k) => $itemToSec[$k] ?? 'course_info', $missingItems)));
+            $request->session()->flash('readiness_error_items', $missingItems);
+            $request->session()->flash('readiness_error_tabs', $missingTabs);
+            $request->session()->flash('readiness_active_tab', $missingTabs[0]);
             throw ValidationException::withMessages(['outcome' => '"Ready" needs every checklist item answered Yes or Not applicable. Use "Ready with conditions" or "Not ready".']);
         }
-        if ($accepted && $items->where('status', 'yes')->contains('accepted', false)) {
-            throw ValidationException::withMessages(['outcome' => '"Ready" needs the evidence of every Yes item accepted. Tick "Accept evidence" for each, or choose another outcome.']);
+        if ($accepted) {
+            $unacceptedItems = [];
+            foreach (array_keys(config('offerings.readiness')) as $k) {
+                $row = $items[$k] ?? null;
+                if ($row && $row->status === 'yes' && ! $row->accepted) {
+                    $unacceptedItems[] = $k;
+                }
+            }
+            if ($unacceptedItems !== []) {
+                $unacceptedTabs = array_values(array_unique(array_map(fn ($k) => $itemToSec[$k] ?? 'course_info', $unacceptedItems)));
+                $request->session()->flash('readiness_error_items', $unacceptedItems);
+                $request->session()->flash('readiness_error_tabs', $unacceptedTabs);
+                $request->session()->flash('readiness_active_tab', $unacceptedTabs[0]);
+                throw ValidationException::withMessages(['outcome' => '"Ready" needs the evidence of every Yes item accepted. Tick "Accept evidence" for each, or choose another outcome.']);
+            }
         }
     }
 
@@ -290,7 +427,7 @@ final class OfferingController
     private function find(Request $request, int $id): object
     {
         return $this->scoped($request)->where('o.id', $id)->first([
-            'o.*', 'v.name_en', 'v.version_no', 'v.badge_image_path',
+            'o.*', 'v.name_en', 'v.name_ms', 'v.version_no', 'v.badge_image_path',
             'm.ptj_id', 'm.owner_id', 'm.category',
             'u.name as lecturer_name', 'p.name as ptj_name', 'p.code as ptj_code',
         ]) ?? abort(404);

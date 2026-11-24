@@ -124,8 +124,32 @@ Release 1 (increments 1.1 to 1.4, modules MD-00 to MD-15) and the four-act PRD S
 - Agents: use the `scout` agent (Haiku) to dig, `planner` (Opus) to plan or review, `builder` (Sonnet) to implement, for non-trivial work; skip them for small edits.
 - Memory notes exist under `C:\Users\Adomin\.claude\projects\C--Users-Adomin-Documents-Intern-CODL-MC-ABC-System\memory\`.
 
+1. **Decision Log updates since initial handover**:
+   - **D-64**: Prohibition of Guide/Appendix/Lampiran/Clause references in any user-facing UI, PDF, receipt, email, or notification.
+   - **D-65**: Automated `ReadinessChecker` plus 15 grouped Assisted/Manual confirmations across 4 collapsible sections.
+   - **D-66**: Role Governance Alignment (DD endorses MC proposals & retains P2 faculty confirmations + read-only transfer monitor; CODL verifies MC proposals, evaluates credit transfers, and assists Senate recording; Senate/`academic_authority` approves MC proposals, credit transfers, stackable pathways, and record disposal; contextual 403 handoffs).
+
 ## 7. First steps for the new session
 
 1. Read this file, `CLAUDE.md`, `app/README.md`, `DESIGN.md`, and `graphify-out/GRAPH_REPORT.md`; run `/graphify --update`.
 2. Start Docker, `docker compose up -d db` in `app`, run Pest once, then `npx playwright test` and `npm run test:scenario`; fix anything red.
 3. Serve the app (`php artisan serve --port=8110`) and the prototype (port 8731); take screenshots of the student pages next to the prototype and continue with section 5A.
+
+
+---
+
+## Decision D-67 & Tracked Data Cleanup Backlog
+
+### Decision D-67: Bounded Page & Progressive Disclosure
+- Centralized thresholds in `app/config/ui.php` (`12` cards/page desktop, `6` mobile, `0` tables inside cards, `10` initial table rows, `1` search bar).
+- Pathway Selector (`/my-plan/choose`) redesigned to **Option A**: pinned Selected Pathway banner, Level tabs (`Bachelor`, `Master's`, `Diploma`), single search + filters, compact summary cards, Compare Tray (2–3 programmes), and dedicated 4-tab Detail Page (`/my-plan/pathways/{id}`).
+- Phase 4 follow-up backlog (not mixed into Phases 1–3): apply D-67 tabs/pagination to `monitoring/cqi.blade.php`, `creditbank/acr.blade.php`, `transfer/decide.blade.php`, `transfer/show.blade.php`, `pathways/show.blade.php`, `quality/package.blade.php`, and `records/documents.blade.php`.
+
+### Tracked Seed Data Mismatches Against FTMK Handbook (To Confirm — Do Not Forget)
+Left untouched during layout redesign; confirm and clean up in a dedicated data task:
+1. `BITS 1123` labelled *Data Structures* (handbook: `BITS 1123` = *Computer Organisation and Architecture*; *Data Structure and Algorithm* = `BITP 1123`).
+2. `BITS 1124` labelled *Algorithms* / 3 cr, mapped to *Cloud Native Development* (code not in handbook; *Algorithm Analysis* = `BITP 2113`).
+3. `BITS 1125` labelled *Databases* / 3 cr (code not in handbook; *Database* = `BITP 1323`).
+4. `BITD 1123` labelled *Object-Oriented Programming* (code not in handbook; *Object-Oriented Programming* = `BITP 3113`).
+5. `BITS 2313` labelled *Computer Networks and Distributed Systems*, mapped to *SSDLC* (handbook: `BITS 2313` = *Local Area Network*; *Data Communication & Networking* = `BITS 1313`).
+6. `BAIX 3113` (undergraduate `3xxx` code) mapped under `MTDL` (MQF 7 Master's).

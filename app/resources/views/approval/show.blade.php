@@ -1,7 +1,15 @@
 @extends('layouts.app')
 @section('title', $v->name_en)
 @section('content')
-@php($inReview = $v->status === 'in_review')
+@php
+  $inReview = $v->status === 'in_review';
+  $isDdApprover = auth()->user()->hasAnyRole('deputy_dean', 'ptj_authority');
+  $isCodl = auth()->user()->hasAnyRole('codl_admin');
+  $configuredSenateRole = (string) app(\App\Modules\Core\Settings::class)->get('approval.route.senate');
+  $canRecordSenate = in_array($configuredSenateRole, ['academic_authority', 'codl_admin', ''], true)
+    ? auth()->user()->hasAnyRole('academic_authority', 'codl_admin')
+    : auth()->user()->hasAnyRole($configuredSenateRole);
+@endphp
 <x-breadcrumb :crumbs="[
   'Proposals and approval' => route('approvals'),
   $v->name_en => null,
@@ -13,44 +21,63 @@
     <div class="sub">
       <x-cat :c="$v->category" /> &middot;
       {{ __('Category :status', ['status' => __(['proposed' => 'proposed', 'verified' => 'verified', 'confirmed' => 'confirmed'][$v->category_status] ?? $v->category_status)]) }} &middot;
-      <x-pill :s="__($labels[$v->status] ?? ucfirst($v->status))" /> &middot;
+      <x-pill :s="__($labels[$v->status] ?? ucfirst(str_replace('_', ' ', $v->status)))" /> &middot;
       {{ __('Version :num', ['num' => $v->version_no]) }}@if($v->supersedes_id) ({{ __(['revision' => 'Revision', 'reoffer' => 'Re-offer'][$v->proposal_type] ?? ucfirst($v->proposal_type)) }} {{ __('of version :num', ['num' => $v->version_no - 1]) }})@endif
     </div>
   </div>
-  <div class="act" style="gap:8px">
-    <a class="btn ter sm" href="{{ route('approvals') }}">&larr; {{ __('All proposals') }}</a>
-    <a class="btn ter sm" href="{{ route('proposals.print', $v->id) }}" target="_blank">{{ __('Print proposal') }}</a>
-    <a class="btn ter sm" href="{{ route('approvals.pack', $v->id) }}">{{ __('Decision pack') }}</a>
-    @if($v->status === 'endorsed')
-      <a class="btn sm" href="{{ route('approvals.senate', $v->id) }}">{{ __('Record Senate decision') }}</a>
-    @endif
+  <div class="act-bar">
+    <div class="act-left">
+      <a class="btn ter sm" href="{{ route('approvals') }}">&larr; {{ __('All proposals') }}</a>
+    </div>
+    <div class="act-right">
+      <a class="btn ter sm" href="{{ route('proposals.print', $v->id) }}" target="_blank">{{ __('Print proposal') }}</a>
+      <a class="btn ter sm" href="{{ route('approvals.pack', $v->id) }}">{{ __('Decision pack') }}</a>
+      @if($canRecordSenate && in_array($v->status, ['endorsed', 'codl_verified'], true))
+        <a class="btn sm" href="{{ route('approvals.senate', $v->id) }}">{{ __('Record Senate decision') }}</a>
+      @endif
+    </div>
   </div>
 </div>
 
 @php
+  $endorsedDate = !empty($v->endorsed_at) ? \Carbon\Carbon::parse($v->endorsed_at)->format('d M Y') : null;
+  if (!$endorsedDate && in_array($v->status, ['endorsed', 'codl_verified', 'approved'])) {
+    $eDec = \Illuminate\Support\Facades\DB::table('approval_decisions')->where('mc_version_id', $v->id)->where('stage', 'endorsement')->where('decision', 'endorsed')->orderByDesc('id')->first();
+    $endorsedDate = $eDec ? \Carbon\Carbon::parse($eDec->meeting_date ?: $eDec->created_at)->format('d M Y') : null;
+  }
+
+  $cDec = \Illuminate\Support\Facades\DB::table('approval_decisions')->where('mc_version_id', $v->id)->where('stage', 'codl_verification')->where('decision', 'verified')->orderByDesc('id')->first();
+  $codlVerifiedDate = $cDec ? \Carbon\Carbon::parse($cDec->meeting_date ?: $cDec->created_at)->format('d M Y') : null;
+
+  $approvedDate = !empty($v->approved_at) ? \Carbon\Carbon::parse($v->approved_at)->format('d M Y') : null;
+  if (!$approvedDate && $v->status === 'approved') {
+    $sDec = \Illuminate\Support\Facades\DB::table('approval_decisions')->where('mc_version_id', $v->id)->where('stage', 'senate')->whereIn('decision', ['approved', 'approved_conditions'])->orderByDesc('id')->first();
+    $approvedDate = $sDec ? \Carbon\Carbon::parse($sDec->meeting_date ?: $sDec->created_at)->format('d M Y') : (!empty($v->effective_date) ? \Carbon\Carbon::parse($v->effective_date)->format('d M Y') : null);
+  }
+
   $proposalSteps = [
     [
-      'label' => __('1. Submission'),
-      'meta' => $v->submitted_at ? \Carbon\Carbon::parse($v->submitted_at)->format('d M Y') : ($v->created_at ? \Carbon\Carbon::parse($v->created_at)->format('d M Y') : '—'),
-      'status' => in_array($v->status, ['submitted', 'in_review', 'endorsed', 'approved']) ? 'completed' : 'active',
+      'label' => __('1. Lecturer Submission'),
+      'meta' => !empty($v->submitted_at) ? \Carbon\Carbon::parse($v->submitted_at)->format('d M Y') : (!empty($v->created_at) ? \Carbon\Carbon::parse($v->created_at)->format('d M Y') : '—'),
+      'status' => in_array($v->status, ['submitted', 'in_review', 'endorsed', 'codl_verified', 'approved']) ? 'completed' : 'active',
       'num' => '01',
     ],
     [
-      'label' => __('2. Dean Endorsement'),
-      'meta' => in_array($v->status, ['endorsed', 'approved']) ? ($v->endorsed_at ? \Carbon\Carbon::parse($v->endorsed_at)->format('d M Y') : __('Endorsed')) : (in_array($v->status, ['submitted', 'in_review']) ? __('In Progress') : __('Pending')),
-      'status' => in_array($v->status, ['endorsed', 'approved']) ? 'completed' : (in_array($v->status, ['submitted', 'in_review']) ? 'active' : 'pending'),
+      'label' => __('2. Deputy Dean Endorsement'),
+      'meta' => in_array($v->status, ['endorsed', 'codl_verified', 'approved']) ? ($endorsedDate ?: __('Endorsed')) : (in_array($v->status, ['submitted', 'in_review']) ? __('In Progress') : __('Pending')),
+      'status' => in_array($v->status, ['endorsed', 'codl_verified', 'approved']) ? 'completed' : (in_array($v->status, ['submitted', 'in_review']) ? 'active' : 'pending'),
       'num' => '02',
     ],
     [
       'label' => __('3. CODL Verification'),
-      'meta' => $v->status === 'approved' ? __('Verified') : ($v->status === 'endorsed' ? __('In Progress') : __('Pending')),
-      'status' => $v->status === 'approved' ? 'completed' : ($v->status === 'endorsed' ? 'active' : 'pending'),
+      'meta' => in_array($v->status, ['codl_verified', 'approved']) ? ($codlVerifiedDate ?: __('Verified')) : ($v->status === 'endorsed' ? __('In Progress') : __('Pending')),
+      'status' => in_array($v->status, ['codl_verified', 'approved']) ? 'completed' : ($v->status === 'endorsed' ? 'active' : 'pending'),
       'num' => '03',
     ],
     [
-      'label' => __('4. Senate Endorsement'),
-      'meta' => $v->status === 'approved' ? ($v->approved_at ? \Carbon\Carbon::parse($v->approved_at)->format('d M Y') : __('Approved')) : __('Pending'),
-      'status' => $v->status === 'approved' ? 'completed' : 'pending',
+      'label' => __('4. Senate Approval'),
+      'meta' => $v->status === 'approved' ? ($approvedDate ?: __('Approved')) : ($v->status === 'codl_verified' ? __('In Progress') : __('Pending')),
+      'status' => $v->status === 'approved' ? 'completed' : ($v->status === 'codl_verified' ? 'active' : 'pending'),
       'num' => '04',
     ],
   ];
@@ -65,8 +92,10 @@
   <div class="note {{ $blocks ? 'warn' : 'info' }}" style="margin-bottom:20px">
     @if($blocks)
       <b>{{ $blocks }} {{ $blocks === 1 ? __('blocking error') : __('blocking errors') }}</b> {{ __('to fix before this proposal can be endorsed.') }}
-    @else
+    @elseif($isDdApprover)
       {{ __('No blocking errors. Open the comments and record your endorsement once academic reviews are in.') }}
+    @else
+      {{ __('No blocking errors. Waiting for peer reviews and Deputy Dean endorsement.') }}
     @endif
   </div>
 @endif
@@ -130,7 +159,7 @@
     </table>
   </div>
 
-  @if(in_array($v->status, ['submitted', 'in_review']))
+  @if($isDdApprover && in_array($v->status, ['submitted', 'in_review']))
     <div class="bd" style="border-top:1px solid var(--border)">
       <form method="post" action="{{ route('approvals.assign', $v->id) }}">
         @csrf
@@ -227,7 +256,7 @@
             @if($c->resolve_reason)
               <div class="muted s">{{ __('Resolved: :reason', ['reason' => $c->resolve_reason]) }}</div>
             @endif
-            @if($c->status === 'answered')
+            @if($isDdApprover && $c->status === 'answered')
               <form method="post" action="{{ route('approvals.resolve', [$v->id, $c->id]) }}" class="row" style="gap:6px;align-items:center;margin-top:6px">
                 @csrf
                 <input type="text" name="reason" placeholder="{{ __('Reason') }}" required minlength="5" aria-label="Reason to resolve comment {{ $c->id }}" style="font-size:12px;padding:4px 8px">
@@ -246,7 +275,7 @@
   </div>
 </div>
 
-@if(in_array($v->status, ['submitted', 'in_review']))
+@if($isDdApprover && in_array($v->status, ['submitted', 'in_review']))
   <div class="panel" style="margin-bottom:24px">
     <div class="hd"><h2>{{ __('Decision') }}</h2></div>
     <div class="bd">
@@ -302,6 +331,43 @@
   </div>
 @endif
 
+@if($v->status === 'endorsed')
+  <div class="panel" style="margin-bottom:24px" id="codl-verification">
+    <div class="hd"><h2>{{ __('CODL Verification') }}</h2></div>
+    <div class="bd">
+      @if($isCodl)
+        <form method="post" action="{{ route('approvals.verify', $v->id) }}">
+          @csrf
+          <p class="muted s" style="margin-top:0">
+            {{ __('Faculty endorsement is recorded. Verify category compliance, readiness structure, and documentation completeness before Senate approval.') }}
+          </p>
+          <div class="field" style="margin-bottom:16px;max-width:540px">
+            <label for="verify-comments">{{ __('Verification remarks (optional)') }}</label>
+            <input type="text" id="verify-comments" name="comments" placeholder="{{ __('CODL verification remarks for Senate') }}">
+          </div>
+          <button type="submit" class="btn">{{ __('Confirm CODL Verification') }}</button>
+        </form>
+      @else
+        <p class="muted" style="margin:0"><span class="tag warn">{{ __('Pending CODL verification before final Senate decision') }}</span></p>
+      @endif
+    </div>
+  </div>
+@endif
+
+@if($v->status === 'codl_verified')
+  <div class="panel" style="margin-bottom:24px">
+    <div class="hd"><h2>{{ __('Senate Approval') }}</h2></div>
+    <div class="bd">
+      @if($canRecordSenate)
+        <p class="muted s" style="margin-top:0">{{ __('Faculty endorsement and CODL verification are complete. Record the formal Senate decision.') }}</p>
+        <a class="btn sm" href="{{ route('approvals.senate', $v->id) }}">{{ __('Record Senate decision') }}</a>
+      @else
+        <p class="muted" style="margin:0"><span class="tag info">{{ __('Verified by CODL; waiting for Senate approval decision') }}</span></p>
+      @endif
+    </div>
+  </div>
+@endif
+
 <div class="panel">
   <div class="hd"><h2>{{ __('Decisions') }}</h2></div>
   <div class="bd" style="padding:0">
@@ -319,7 +385,7 @@
       <tbody>
       @forelse($decisions as $d)
         <tr>
-          <td><b>{{ $d->stage === 'senate' ? __('Senate') : __('Endorsement') }}</b></td>
+          <td><b>{{ match($d->stage) { 'senate' => __('Senate'), 'codl_verification' => __('CODL Verification'), default => __('Endorsement') } }}</b></td>
           <td>
             <x-pill :s="__(str_replace('_', ' ', ucfirst($d->decision)))" />
             @if($d->verified_category) <span class="muted s">({{ __('category :cat verified', ['cat' => strtoupper($d->verified_category)]) }})</span> @endif

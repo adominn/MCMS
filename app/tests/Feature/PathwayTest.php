@@ -66,7 +66,7 @@ function publishedPathway(array $courses = ['BITS 1123', 'BITS 1124', 'BITS 1125
     foreach ($courses as $c) {
         mapItem($pw, $mc, $c)->assertSessionHasNoErrors();
     }
-    test()->actingAs(test()->hakim)->post("/pathways/$pw/approve", ['approval_ref' => 'Senate 9/2026', 'approved_on' => today()->toDateString()])->assertSessionHasNoErrors();
+    test()->actingAs(userZulkifli())->post("/pathways/$pw/approve", ['approval_ref' => 'Senate 9/2026', 'approved_on' => today()->toDateString()])->assertSessionHasNoErrors();
     test()->post("/pathways/$pw/publish")->assertSessionHasNoErrors();
 
     return [$pw, $mc, DB::table('pathway_items')->where('pathway_id', $pw)->orderBy('id')->pluck('id')->all()];
@@ -124,10 +124,11 @@ it('needs the authority to approve before publishing, and the lecturer cannot (F
     newPathway();
     $pw = (int) DB::table('pathways')->max('id');
     $this->post("/pathways/$pw/approve", ['approval_ref' => 'X', 'approved_on' => today()->toDateString()])->assertForbidden();
-    $this->actingAs($this->hakim)->post("/pathways/$pw/approve", ['approval_ref' => 'X', 'approved_on' => today()->toDateString()])->assertStatus(422); // nothing mapped
+    $this->actingAs($this->hakim)->post("/pathways/$pw/approve", ['approval_ref' => 'X', 'approved_on' => today()->toDateString()])->assertForbidden();
+    $this->actingAs(userZulkifli())->post("/pathways/$pw/approve", ['approval_ref' => 'X', 'approved_on' => today()->toDateString()])->assertStatus(422); // nothing mapped
     $this->actingAs($this->aina);
     mapItem($pw, $mc, 'BITS 1123');
-    $this->actingAs($this->hakim)->post("/pathways/$pw/publish")->assertStatus(422); // not approved yet
+    $this->actingAs(userZulkifli())->post("/pathways/$pw/publish")->assertStatus(422); // not approved yet
     $this->post("/pathways/$pw/approve", ['approved_on' => today()->toDateString()])->assertSessionHasErrors('approval_ref');
     $this->post("/pathways/$pw/approve", ['approval_ref' => 'Senate 9/2026', 'approved_on' => today()->toDateString()])->assertSessionHasNoErrors();
     expect(DB::table('pathways')->find($pw)->status)->toBe('approved');
@@ -279,6 +280,7 @@ it('uses a published mapping only, and keeps a plan inside the faculty (FR-sppla
     $fke->roleAssignments()->create(['role' => 'deputy_dean', 'scope_type' => 'ptj', 'ptj_id' => DB::table('ptjs')->where('code', 'FTKE')->value('id')]);
     $this->actingAs($fke)->get('/plans/'.DB::table('stackable_plans')->value('id'))->assertNotFound();
     $this->actingAs($this->farid)->get('/pathways')->assertForbidden();
+    $this->actingAs($this->farid)->post('/plans/'.DB::table('stackable_plans')->value('id').'/decision', [])->assertForbidden();
 });
 
 it('tells the participant the truth about their pathway (FR-spinfo)', function () {
@@ -312,20 +314,22 @@ it('renders Appendix G specifications: G4 PLO, G5 BoK table, G8 7-component rema
 
     // Verify Pathway Show view
     $res = $this->actingAs($this->hakim)->get("/pathways/$pw")->assertOk();
-    $res->assertSee('G4: Pemetaan kepada Hasil Pembelajaran Program (PLO)')
-        ->assertSee('G5: Pemetaan kepada Body of Knowledge (BoK)')
-        ->assertSee('G8: Baki Keperluan Program yang Perlu Disempurnakan (7 Komponen)')
-        ->assertSee('G9: Ringkasan Analisis Kredit dan Jurang')
-        ->assertSee('G11: Pengesahan Pemetaan (3 Peranan)')
+    $res->assertSee('Mapping to Programme Learning Outcomes (PLO)')
+        ->assertSee('Mapping to Body of Knowledge (BoK)')
+        ->assertSee('Remaining Programme Requirements (7 Components)')
+        ->assertSee('Summary of Credit and Gap Analysis')
+        ->assertSee('Mapping Sign-Off (3 Roles)')
         ->assertSee('Penyelaras Program Stackable')
-        ->assertSee('NOTA PENTING (Lampiran G)');
+        ->assertSee('Important Notice:')
+        ->assertDontSee('Lampiran G');
 
-    // Verify Print view (Lampiran G)
+    // Verify Print view
     $printRes = $this->get("/public/pathways/$pw/print")->assertOk();
-    $printRes->assertSee('G4. Pemetaan kepada Hasil Pembelajaran Program (PLO)')
-        ->assertSee('G5. Pemetaan kepada Body of Knowledge (BoK)')
-        ->assertSee('G8. Baki Keperluan Program yang Perlu Disempurnakan (7 Komponen)')
-        ->assertSee('G9. Ringkasan Analisis Kredit dan Jurang')
-        ->assertSee('G11. Pengesahan Pemetaan (3 Peranan)')
-        ->assertSee('NOTA PENTING (Lampiran G)');
+    $printRes->assertSee('Mapping to Programme Learning Outcomes (PLO)')
+        ->assertSee('Mapping to Body of Knowledge (BoK)')
+        ->assertSee('Remaining Programme Requirements (7 Components)')
+        ->assertSee('Summary of Credit and Gap Analysis')
+        ->assertSee('Mapping Sign-Off (3 Roles)')
+        ->assertSee('Important Notice:')
+        ->assertDontSee('Lampiran G');
 });

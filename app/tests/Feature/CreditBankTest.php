@@ -187,7 +187,7 @@ it('shows the credit ledger with the total and the note that credits are not aut
     deposited();
     $this->actingAs($this->amir)->get('/my-credit')->assertOk()->assertSee('Available')->assertSee('not automatically accepted by any programme')->assertSee('storage only');
     $this->actingAs($this->amir)->get('/my-credit')->assertSeeInOrder(['id="total"', '3']);
-    $this->actingAs($this->amir)->get('/my-credit?print=1')->assertOk()->assertSee('Lampiran F5: Penyata Pengumpulan Kredit Akademik (ABC)')->assertSee('Amir Hakimi');
+    $this->actingAs($this->amir)->get('/my-credit?print=1')->assertOk()->assertSee('Academic Bank of Credit (ABC) Accumulation Statement')->assertSee('Amir Hakimi')->assertDontSee('Lampiran F5');
     $this->actingAs($this->amir)->post('/deposits/1/record', [])->assertForbidden();
 });
 

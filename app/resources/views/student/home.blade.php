@@ -2,7 +2,7 @@
 @section('title', __('My learning'))
 @section('content')
 <div class="title">
-  <div><h1>{{ __('My learning') }}</h1><div class="sub">{{ auth()->user()->name }}@if(auth()->user()->institution_id) &middot; {{ auth()->user()->institution_id }}@endif</div></div>
+  <div><h1>{{ __('My learning') }}</h1><div class="sub">{{ auth()->user()->name }}@if(auth()->user()->institution_id) &middot; {{ auth()->user()->institution_id }}@endif &middot; <span class="tag">{{ __('Student (P8)') }}</span></div></div>
   <div class="act"><a class="btn" href="{{ route('catalogue') }}">{{ __('Find a micro-credential') }}</a></div>
 </div>
 
@@ -110,17 +110,28 @@
 
     <section class="panel" id="track" aria-labelledby="h-track">
       <div class="hd">
-        <h2 id="h-track">{{ __('Your recognition track') }}</h2>
-        <div class="small muted" style="font-size:12px;margin-top:2px">{{ __('Cumulative academic journey across all courses') }}</div>
+        <h2 id="h-track">{{ __('Recognition summary') }}</h2>
+        <div class="small muted" style="font-size:12px;margin-top:2px">{{ __('Cumulative totals across all courses') }}</div>
       </div>
       <div class="bd">
-        <div class="track">
-          <div class="stp {{ $track['modules'] ? 'done' : '' }}"><b>{{ __('Learn') }}</b>{{ $track['modules'] }} {{ __('modules') }}</div>
-          <div class="stp {{ $track['credentials'] ? 'done' : '' }}"><b>{{ __('Credential') }}</b>{{ $track['credentials'] }} {{ __('issued') }}</div>
-          <div class="stp {{ $track['consent'] ? 'now' : '' }}"><b>{{ __('Consent') }}</b>{{ $track['consent'] }} {{ __('open') }}</div>
-          <div class="stp {{ $track['transfer'] ? 'now' : '' }}"><b>{{ __('Transfer') }}</b>{{ $track['transfer'] ? $track['transfer'].' '.__('open') : __('Decision due') }}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+          <div style="padding:12px;background:var(--color-canvas-subtle, #f8fafc);border:1px solid var(--color-line-hairline, #e2e8f0);border-radius:var(--radius-sm, 4px)">
+            <div class="s muted" style="font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em">{{ __('Modules completed') }}</div>
+            <div style="font-size:20px;font-weight:700;color:var(--color-ink, #090a0f);font-variant-numeric:tabular-nums;margin-top:2px">{{ $track['modules'] }}</div>
+          </div>
+          <div style="padding:12px;background:var(--color-canvas-subtle, #f8fafc);border:1px solid var(--color-line-hairline, #e2e8f0);border-radius:var(--radius-sm, 4px)">
+            <div class="s muted" style="font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em">{{ __('Credentials issued') }}</div>
+            <div style="font-size:20px;font-weight:700;color:var(--color-ink, #090a0f);font-variant-numeric:tabular-nums;margin-top:2px">{{ $track['credentials'] }}</div>
+          </div>
+          <div style="padding:12px;background:var(--color-canvas-subtle, #f8fafc);border:1px solid var(--color-line-hairline, #e2e8f0);border-radius:var(--radius-sm, 4px)">
+            <div class="s muted" style="font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em">{{ __('Open consents') }}</div>
+            <div style="font-size:20px;font-weight:700;color:var(--color-ink, #090a0f);font-variant-numeric:tabular-nums;margin-top:2px">{{ $track['consent'] }}</div>
+          </div>
+          <div style="padding:12px;background:var(--color-canvas-subtle, #f8fafc);border:1px solid var(--color-line-hairline, #e2e8f0);border-radius:var(--radius-sm, 4px)">
+            <div class="s muted" style="font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em">{{ __('Open transfers') }}</div>
+            <div style="font-size:20px;font-weight:700;color:var(--color-ink, #090a0f);font-variant-numeric:tabular-nums;margin-top:2px">{{ $track['transfer'] }}</div>
+          </div>
         </div>
-        <p class="s" style="margin:0 0 10px">{{ __('Each step is a separate decision.') }}</p>
         <a class="btn ter sm" href="{{ route('credit') }}">{{ __('Credit ledger') }} &rarr;</a>
       </div>
     </section>

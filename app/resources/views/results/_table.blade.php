@@ -8,6 +8,12 @@
   });
 @endphp
 <style>
+  .gradebook-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--hairline, #393939);
+    background: var(--table-bg, #1e1e1e);
+  }
   .gradebook-table {
     width: 100%;
     border-collapse: separate;
@@ -47,17 +53,114 @@
     min-width: 28px;
     text-align: right;
   }
+  .results-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface, #1e2433);
+    border: 1px solid var(--hairline, #393939);
+    border-bottom: none;
+  }
+  .results-sort-btn {
+    all: unset;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    width: 100%;
+    min-height: 38px;
+    font: inherit;
+    color: inherit;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .results-sort-btn:hover {
+    color: var(--primary, #0052ff) !important;
+  }
+  .results-sort-btn:focus-visible {
+    outline: 2px solid var(--primary, #0052ff);
+    outline-offset: -2px;
+  }
+  .results-sort-btn .sort-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--muted, #8d8d8d);
+    flex-shrink: 0;
+  }
+  th.sorted .results-sort-btn .sort-icon {
+    color: var(--primary, #0052ff);
+  }
+  .results-filter-btn {
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .results-filter-btn.on {
+    background: var(--primary, #0052ff) !important;
+    color: #ffffff !important;
+    border-color: var(--primary, #0052ff) !important;
+  }
 </style>
 
-<div class="table-wrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--hairline, #393939);background:var(--table-bg, #1e1e1e)">
+{{-- Search & Filter Toolbar --}}
+<div class="results-toolbar">
+  <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:240px;max-width:440px">
+    <div style="position:relative;flex:1;display:flex;align-items:center">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="position:absolute;left:10px;color:var(--muted);pointer-events:none" aria-hidden="true">
+        <circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/>
+      </svg>
+      <input type="search"
+             id="results-search-input"
+             placeholder="{{ __('Search participant name, matrix ID...') }}"
+             aria-label="{{ __('Search participants in results') }}"
+             autocomplete="off"
+             style="width:100%;height:34px;padding:0 30px 0 32px;font-size:13px;border:1px solid var(--border);border-radius:6px;background:var(--card-bg, #ffffff);color:var(--ink)">
+      <button type="button"
+              id="results-search-clear"
+              title="{{ __('Clear search') }}"
+              style="position:absolute;right:8px;background:none;border:none;cursor:pointer;color:var(--muted);display:none;padding:2px"
+              aria-label="{{ __('Clear search') }}">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div class="filter-group" style="display:inline-flex;align-items:center;gap:6px">
+      <span class="small muted" style="font-size:12px;font-weight:500">{{ __('Filter:') }}</span>
+      <div class="btn-group" role="group" aria-label="{{ __('Filter by result status') }}" style="display:inline-flex;border:1px solid var(--border);border-radius:6px;overflow:hidden">
+        <button type="button" class="btn sm results-filter-btn on" data-filter="all" style="padding:4px 10px;font-size:12px;height:28px;border-radius:0;border:none">{{ __('All') }}</button>
+        <button type="button" class="btn sm ter results-filter-btn" data-filter="missing" style="padding:4px 10px;font-size:12px;height:28px;border-radius:0;border:none;border-left:1px solid var(--border)">{{ __('Missing') }}</button>
+        <button type="button" class="btn sm ter results-filter-btn" data-filter="pass" style="padding:4px 10px;font-size:12px;height:28px;border-radius:0;border:none;border-left:1px solid var(--border)">{{ __('Pass') }}</button>
+        <button type="button" class="btn sm ter results-filter-btn" data-filter="fail" style="padding:4px 10px;font-size:12px;height:28px;border-radius:0;border:none;border-left:1px solid var(--border)">{{ __('Fail') }}</button>
+        <button type="button" class="btn sm ter results-filter-btn" data-filter="held" style="padding:4px 10px;font-size:12px;height:28px;border-radius:0;border:none;border-left:1px solid var(--border)">{{ __('Held') }}</button>
+      </div>
+    </div>
+    <span id="results-count-badge" class="tag" style="font-size:12px;padding:3px 8px;font-weight:500">
+      {{ __(':count participants', ['count' => $enrol->count()]) }}
+    </span>
+  </div>
+</div>
+
+<div class="gradebook-table-wrap table-wrap">
 <table class="gradebook-table">
   <thead>
     <tr class="group-row">
       <th rowspan="2" style="position:sticky;left:0;z-index:3;background:var(--surface, #262626);min-width:200px;border-right:1px solid var(--hairline, #393939)">
-        {{ __('Participant') }}
+        <button type="button" class="results-sort-btn" data-sort="name">
+          <span>{{ __('Participant') }}</span>
+          <span class="sort-icon" aria-hidden="true"><svg class="si" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg></span>
+        </button>
       </th>
       <th rowspan="2" style="text-align:center;min-width:75px;border-right:1px solid var(--hairline, #393939)">
-        {{ __('Progress') }}
+        <button type="button" class="results-sort-btn" data-sort="progress" style="justify-content:center">
+          <span>{{ __('Progress') }}</span>
+          <span class="sort-icon" aria-hidden="true"><svg class="si" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg></span>
+        </button>
       </th>
       @foreach($groupedComps as $groupKey => $groupItems)
         @php
@@ -79,8 +182,18 @@
           </div>
         </th>
       @endforeach
-      <th rowspan="2" class="num" style="text-align:right;min-width:70px;border-left:1px solid var(--hairline, #393939)">{{ __('Final') }}</th>
-      <th rowspan="2" style="text-align:center;min-width:110px">{{ __('Result') }}</th>
+      <th rowspan="2" class="num" style="text-align:right;min-width:75px;border-left:1px solid var(--hairline, #393939)">
+        <button type="button" class="results-sort-btn" data-sort="final" style="justify-content:flex-end">
+          <span>{{ __('Final') }}</span>
+          <span class="sort-icon" aria-hidden="true"><svg class="si" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg></span>
+        </button>
+      </th>
+      <th rowspan="2" style="text-align:center;min-width:110px">
+        <button type="button" class="results-sort-btn" data-sort="result" style="justify-content:center">
+          <span>{{ __('Result') }}</span>
+          <span class="sort-icon" aria-hidden="true"><svg class="si" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg></span>
+        </button>
+      </th>
       @if($flag ?? false)
         <th rowspan="2" style="min-width:140px;border-left:1px solid var(--hairline, #393939)">{{ __('Integrity') }}</th>
       @endif
@@ -88,12 +201,17 @@
     <tr class="sub-row">
       @foreach($groupedComps as $groupKey => $groupItems)
         @foreach($groupItems as $c)
-          <th class="gradebook-col-mod" style="min-width:160px;vertical-align:top">
-            <div style="color:var(--ink, #f1f5f9);font-size:13px;line-height:1.3">{{ $c->name_en }}</div>
-            <div class="muted s" style="margin-top:4px;display:flex;align-items:center;gap:6px">
-              <span class="tag" style="font-size:10px;padding:0 4px">{{ mcms_num($c->weight_percent) }}%</span>
-              <span>{{ __('Pass') }}: {{ mcms_num($c->pass_mark) }}/{{ mcms_num($c->max_mark) }}</span>
-            </div>
+          <th class="gradebook-col-mod" style="min-width:160px;vertical-align:top;padding:6px 10px">
+            <button type="button" class="results-sort-btn" data-sort="comp" data-cid="{{ $c->id }}" style="all:unset;cursor:pointer;display:block;width:100%;box-sizing:border-box">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
+                <span style="color:var(--ink, #f1f5f9);font-size:13px;line-height:1.3;font-weight:600">{{ $c->name_en }}</span>
+                <span class="sort-icon" aria-hidden="true" style="margin-top:2px;flex-shrink:0"><svg class="si" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg></span>
+              </div>
+              <div class="muted s" style="margin-top:4px;display:flex;align-items:center;gap:6px">
+                <span class="tag" style="font-size:10px;padding:0 4px">{{ mcms_num($c->weight_percent) }}%</span>
+                <span>{{ __('Pass') }}: {{ mcms_num($c->pass_mark) }}/{{ mcms_num($c->max_mark) }}</span>
+              </div>
+            </button>
           </th>
         @endforeach
       @endforeach
@@ -124,8 +242,15 @@
         $allPassed = false;
       }
       $roundedFinal = round($weightedSum);
+      $resultStatus = $isHeld ? 'held' : ($hasMissing ? 'missing' : ($allPassed ? 'pass' : 'fail'));
     @endphp
-    <tr>
+    <tr class="gradebook-row"
+        data-eid="{{ $e->id }}"
+        data-name="{{ strtolower($e->name) }}"
+        data-id="{{ strtolower($e->institution_id) }}"
+        data-progress="{{ (float) ($e->progress_percent ?? -1) }}"
+        data-final="{{ $hasMissing ? -1 : $roundedFinal }}"
+        data-result="{{ $resultStatus }}">
       <td style="position:sticky;left:0;z-index:2;background:var(--table-bg, #1e1e1e);border-right:1px solid var(--hairline, #393939)">
         <div style="font-weight:600;color:var(--ink, #f1f5f9)">{{ $e->name }}</div>
         <div class="muted s" style="margin-top:2px">{{ $e->institution_id }}</div>
@@ -139,7 +264,7 @@
       @foreach($groupedComps as $groupKey => $groupItems)
         @foreach($groupItems as $c)
           @php($r = $results[$e->id][$c->id] ?? null)
-          <td class="gradebook-col-mod">
+          <td class="gradebook-col-mod" data-cid="{{ $c->id }}">
             @if($editable ?? false)
               @if($r && $r->status === 'verified')
                 <div class="gradebook-score-box">
@@ -229,6 +354,246 @@
   @empty
     <tr><td colspan="{{ 4 + $comps->count() + (($flag ?? false) ? 1 : 0) }}" class="muted" style="text-align:center;padding:24px">{{ __('No enrolled participants.') }}</td></tr>
   @endforelse
+    <tr id="results-empty-row" style="display:none">
+      <td colspan="{{ 4 + $comps->count() + (($flag ?? false) ? 1 : 0) }}" class="muted" style="text-align:center;padding:32px 16px">
+        <div style="font-size:14px;font-weight:600;color:var(--ink, #f1f5f9)">{{ __('No matching participants found') }}</div>
+        <div class="s muted" style="margin-top:4px">
+          {{ __('Try checking your search query or clear the filter.') }}
+          <button type="button" class="btn ghost sm" id="results-clear-btn" style="margin-left:6px;padding:2px 8px;font-size:12px">{{ __('Clear search') }}</button>
+        </div>
+      </td>
+    </tr>
   </tbody>
 </table>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const tableWrap = document.querySelector('.gradebook-table-wrap');
+  if (!tableWrap) return;
+  const table = tableWrap.querySelector('.gradebook-table');
+  if (!table) return;
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return;
+
+  const searchInput = document.getElementById('results-search-input');
+  const searchClear = document.getElementById('results-search-clear');
+  const countBadge = document.getElementById('results-count-badge');
+  const filterBtns = document.querySelectorAll('.results-filter-btn');
+  const sortBtns = table.querySelectorAll('.results-sort-btn');
+  const emptyRow = document.getElementById('results-empty-row');
+  const clearBtn = document.getElementById('results-clear-btn');
+
+  let currentSearch = '';
+  let currentFilter = 'all';
+  let currentSort = null; // { col: 'name'|'progress'|'final'|'result'|'comp', cid: id, dir: 'asc'|'desc' }
+
+  // 1. FILTERING
+  function applyFilters() {
+    const q = currentSearch.trim().toLowerCase();
+    const rows = Array.from(tbody.querySelectorAll('tr.gradebook-row'));
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const name = (row.dataset.name || '').toLowerCase();
+      const id = (row.dataset.id || '').toLowerCase();
+      const result = (row.dataset.result || '').toLowerCase();
+
+      const matchesSearch = !q || name.includes(q) || id.includes(q);
+      const matchesFilter = (currentFilter === 'all') || (result === currentFilter);
+
+      if (matchesSearch && matchesFilter) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    if (emptyRow) {
+      emptyRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
+    }
+
+    if (countBadge) {
+      if (visibleCount === rows.length) {
+        countBadge.textContent = `${rows.length} {{ __('participants') }}`;
+      } else {
+        countBadge.textContent = `${visibleCount} / ${rows.length} {{ __('participants') }}`;
+      }
+    }
+  }
+
+  // 2. SORTING
+  function getRowValue(row, col, cid) {
+    if (col === 'name') {
+      return (row.dataset.name || '').trim();
+    }
+    if (col === 'progress') {
+      const p = parseFloat(row.dataset.progress);
+      return isNaN(p) ? -1 : p;
+    }
+    if (col === 'final') {
+      const fin = parseFloat(row.dataset.final);
+      return isNaN(fin) ? -1 : fin;
+    }
+    if (col === 'result') {
+      const order = { 'pass': 1, 'missing': 2, 'fail': 3, 'held': 4 };
+      return order[row.dataset.result] || 99;
+    }
+    if (col === 'comp') {
+      const input = row.querySelector(`input.mark-input[data-cid="${cid}"]`);
+      if (input) {
+        const val = input.value.trim();
+        return val === '' || isNaN(val) ? -1 : parseFloat(val);
+      }
+      const valSpan = row.querySelector(`td[data-cid="${cid}"] .gradebook-score-val`);
+      if (valSpan) {
+        const v = parseFloat(valSpan.textContent.trim());
+        return isNaN(v) ? -1 : v;
+      }
+      return -1;
+    }
+    return '';
+  }
+
+  function applySort() {
+    if (!currentSort) return;
+    const rows = Array.from(tbody.querySelectorAll('tr.gradebook-row'));
+    if (!rows.length) return;
+
+    const { col, cid, dir } = currentSort;
+    const factor = dir === 'asc' ? 1 : -1;
+
+    rows.sort((a, b) => {
+      const valA = getRowValue(a, col, cid);
+      const valB = getRowValue(b, col, cid);
+
+      if (typeof valA === 'number' && typeof valB === 'number') {
+        if (valA !== valB) {
+          return (valA - valB) * factor;
+        }
+      } else {
+        const strA = String(valA);
+        const strB = String(valB);
+        const cmp = strA.localeCompare(strB);
+        if (cmp !== 0) {
+          return cmp * factor;
+        }
+      }
+      return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+    });
+
+    rows.forEach(r => tbody.appendChild(r));
+    if (emptyRow) tbody.appendChild(emptyRow);
+  }
+
+  function updateSortIcons() {
+    sortBtns.forEach(btn => {
+      const col = btn.dataset.sort;
+      const cid = btn.dataset.cid;
+      const icon = btn.querySelector('.sort-icon');
+      const th = btn.closest('th');
+
+      const isActive = currentSort && currentSort.col === col && (col !== 'comp' || currentSort.cid === cid);
+
+      if (th) {
+        th.classList.toggle('sorted', !!isActive);
+      }
+
+      if (icon) {
+        if (!isActive) {
+          icon.innerHTML = `<svg class="si" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.4"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg>`;
+        } else if (currentSort.dir === 'asc') {
+          icon.innerHTML = `<svg class="si" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--primary, #0052ff)" stroke-width="2.2"><path d="M4 10l4-4 4 4"/></svg>`;
+        } else {
+          icon.innerHTML = `<svg class="si" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--primary, #0052ff)" stroke-width="2.2"><path d="M4 6l4 4 4 4"/></svg>`;
+        }
+      }
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', function () {
+      currentSearch = this.value;
+      if (searchClear) searchClear.style.display = currentSearch ? 'block' : 'none';
+      applyFilters();
+    });
+    searchInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') e.preventDefault();
+    });
+  }
+
+  if (searchClear) {
+    searchClear.addEventListener('click', function () {
+      if (searchInput) searchInput.value = '';
+      currentSearch = '';
+      searchClear.style.display = 'none';
+      applyFilters();
+      if (searchInput) searchInput.focus();
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function () {
+      if (searchInput) searchInput.value = '';
+      currentSearch = '';
+      currentFilter = 'all';
+      if (searchClear) searchClear.style.display = 'none';
+      filterBtns.forEach(b => b.classList.toggle('on', b.dataset.filter === 'all'));
+      applyFilters();
+    });
+  }
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', function () {
+      filterBtns.forEach(b => b.classList.remove('on'));
+      this.classList.add('on');
+      currentFilter = this.dataset.filter || 'all';
+      applyFilters();
+    });
+  });
+
+  sortBtns.forEach(btn => {
+    btn.addEventListener('click', function () {
+      const col = this.dataset.sort;
+      const cid = this.dataset.cid || null;
+
+      if (currentSort && currentSort.col === col && currentSort.cid === cid) {
+        currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort = { col, cid, dir: 'asc' };
+      }
+
+      applySort();
+      updateSortIcons();
+    });
+  });
+
+  // Keep row dataset in sync with live input changes
+  table.addEventListener('input', function (e) {
+    if (e.target.matches('input.mark-input')) {
+      const eid = e.target.dataset.eid;
+      const row = tbody.querySelector(`tr.gradebook-row[data-eid="${eid}"]`);
+      if (row) {
+        setTimeout(() => {
+          const finEl = document.getElementById('fin-' + eid);
+          const rsEl = document.getElementById('rs-' + eid);
+          if (finEl) {
+            const txt = finEl.textContent.trim();
+            row.dataset.final = (txt === '-' || isNaN(txt)) ? -1 : parseFloat(txt);
+          }
+          if (rsEl) {
+            const txt = rsEl.textContent.trim().toLowerCase();
+            if (txt.includes('pass')) row.dataset.result = 'pass';
+            else if (txt.includes('missing')) row.dataset.result = 'missing';
+            else if (txt.includes('fail')) row.dataset.result = 'fail';
+            else if (txt.includes('held')) row.dataset.result = 'held';
+          }
+        }, 10);
+      }
+    }
+  });
+
+  updateSortIcons();
+});
+</script>

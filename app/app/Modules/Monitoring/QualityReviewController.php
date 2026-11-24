@@ -50,7 +50,11 @@ final class QualityReviewController
             'owner' => $request->user(),
             'actions' => DB::table('cqi_actions as a')->join('cqi_records as r', 'r.id', '=', 'a.cqi_record_id')->join('offerings as o', 'o.id', '=', 'r.offering_id')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->whereIn('v.micro_credential_id', $mcs->pluck('id'))->whereIn('a.status', ['not_started', 'in_progress', 'done'])->orderBy('a.due_on')->get(['a.*', 'r.reference', 'v.name_en']),
             'qv' => $mcs->map(fn ($m) => ['name' => $m->name_en, 'standing' => Qv::standing($m->id)])->filter(fn ($x) => $x['standing']),
-            'due' => DB::table('periodic_reviews as p')->whereIn('p.micro_credential_id', $mcs->pluck('id'))->whereNull('p.completed_on')->orderBy('p.due_on')->get()->each(fn ($p) => $p->name = $mcs->firstWhere('id', $p->micro_credential_id)->name_en),
+            'due' => DB::table('periodic_reviews as p')->whereIn('p.micro_credential_id', $mcs->pluck('id'))->whereNull('p.completed_on')->orderBy('p.due_on')->get()->each(function ($p) use ($mcs) {
+                $mcRow = $mcs->firstWhere('id', $p->micro_credential_id);
+                $p->name = $mcRow->name_en;
+                $p->owner_id = $mcRow->owner_id ?? null;
+            }),
             'suspensions' => DB::table('suspensions as s')->whereIn('s.micro_credential_id', $mcs->pluck('id'))->orderByDesc('s.id')->get()->each(fn ($s) => $s->name = $mcs->firstWhere('id', $s->micro_credential_id)->name_en),
         ]);
     }

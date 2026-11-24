@@ -3,7 +3,7 @@
 use App\Modules\Curriculum\ProposalController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/proposals/{id}/print', [ProposalController::class, 'print'])->whereNumber('id')->middleware(['auth', 'role:lecturer,deputy_dean,ptj_authority,academic_authority,qa_officer'])->name('proposals.print');
+Route::get('/proposals/{id}/print', [ProposalController::class, 'print'])->whereNumber('id')->middleware(['auth', 'role:lecturer,deputy_dean,ptj_authority,codl_admin,academic_authority,qa_officer'])->name('proposals.print');
 
 Route::middleware(['auth', 'role:lecturer'])->prefix('proposals')->group(function () {
     Route::get('/', [ProposalController::class, 'index'])->name('proposals');

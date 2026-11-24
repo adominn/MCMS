@@ -74,15 +74,15 @@
     ],
     $isDeposited && $a->credit_status === 'available' => [
       __('Stage 07: Credit deposited in ABC and Available for transfer until :date', ['date' => $a->credit_expiry ? \Carbon\Carbon::parse($a->credit_expiry)->format('d/m/Y') : __('Not yet recorded')]),
-      $mine ? __('Apply for credit transfer into a UTeM programme when ready. Deposit is storage only, not transfer.') : __('Participant may apply for credit transfer; receiving Deputy Dean evaluates equivalence (F7/F8).'),
-      $mine ? __('You (Participant) / Receiving Deputy Dean') : __('Receiving Deputy Dean'),
-      'P3',
+      $mine ? __('Apply for credit transfer into a UTeM programme when ready. Deposit is storage only, not transfer.') : __('Participant may apply for credit transfer; CODL evaluates equivalence and Senate decides approval.'),
+      $mine ? __('You (Participant) / CODL & Senate') : __('CODL & Senate'),
+      'CODL/Senate',
     ],
     $isDeposited && $a->credit_status === 'provisional' => [
       __('Stage 08: Credit is Provisionally Redeemed toward an approved transfer application'),
       __('Credit is locked under the Single Redemption Principle until programme completion or release is recorded.'),
-      __('Receiving Deputy Dean / Registry'),
-      'P3/P7',
+      __('CODL & Senate / Registry'),
+      'CODL/P6',
     ],
     $isDeposited && $a->credit_status === 'redeemed' => [
       __('Stage 08: Credit is permanently Redeemed toward a qualification (Single Redemption complete)'),
@@ -92,9 +92,9 @@
     ],
     default => [
       __('Stage 08: ABC credit status — :st', ['st' => $a->credit_status ? __($creditStatus[$a->credit_status] ?? ucfirst($a->credit_status)) : __($acrStatus[$a->status] ?? ucfirst($a->status))]),
-      __('Review credit validity or re-evaluation requirements with the receiving faculty.'),
-      __('Receiving Deputy Dean / Registry'),
-      'P3/P6',
+      __('Review credit validity or re-evaluation requirements with CODL and Registry.'),
+      __('CODL & Senate / Registry'),
+      'CODL/P6',
     ],
   };
 
@@ -907,7 +907,7 @@
           </td>
         </tr>
         <tr>
-          <th>{{ __('Depositor Officer (P7)') }}</th>
+          <th>{{ __('Depositor Officer') }}</th>
           <td colspan="3">
             @if($a->deposited_by_name)
               <span class="val-strong">{{ $a->deposited_by_name }}</span>@if($a->deposited_by_position) &mdash; <span class="muted">{{ $a->deposited_by_position }}</span>@endif

@@ -1,10 +1,10 @@
 @extends('layouts.app')
-@section('title', __('Coordinator completion sign-off (F11)'))
+@section('title', __('Coordinator completion sign-off'))
 @section('content')
 <x-breadcrumb :crumbs="[
   'Cohorts and results' => route('offerings'),
   $o->name_en . ' ' . $o->cohort_name => route('offerings.show', $o->id),
-  'Coordinator sign-off (F11)' => null,
+  'Coordinator sign-off' => null,
 ]" />
 
 <div class="title">
@@ -34,8 +34,8 @@
           <tr>
             <th style="width:44px;text-align:center"></th>
             <th style="width:24%">{{ __('Participant') }}</th>
-            <th style="width:16%">{{ __('P1 Sign-off (F11 Row 1)') }}</th>
-            <th style="width:16%">{{ __('P2 Completion') }}</th>
+            <th style="width:16%">{{ __('Coordinator Sign-off') }}</th>
+            <th style="width:16%">{{ __('Faculty Completion') }}</th>
             <th>{{ __('Academic & assessment requirements') }}</th>
           </tr>
         </thead>
@@ -58,6 +58,9 @@
                 <div class="s muted" style="margin-top:4px">{{ $e->coordinator_name ?? __('Recorded') }}</div>
                 <div class="s muted">{{ \Carbon\Carbon::parse($e->coordinator_signed_at)->format('d/m/Y H:i') }}</div>
                 @if($e->coordinator_remarks)<div class="s muted">{{ $e->coordinator_remarks }}</div>@endif
+              @elseif($e->confirmed_at || $e->status === 'completed')
+                <span class="tag ok">{{ __('Completed') }}</span>
+                <div class="s muted" style="margin-top:4px">{{ __('Completion already confirmed') }}</div>
               @elseif($e->check['met'] && $e->status === 'enrolled')
                 <span class="tag warn">{{ __('Awaiting your sign-off') }}</span>
               @else

@@ -93,7 +93,7 @@ class DatabaseSeeder extends Seeder
             ['reviewer.declined', 'notification', false, 'A reviewer declared a conflict of interest', 'Reviewer declined: {title}', 'Hello {name}, {reviewer} declared a conflict of interest and left the review of "{title}". Please assign another reviewer.', 'Penilai menarik diri: {title}', 'Salam {name}, {reviewer} mengisytiharkan konflik kepentingan dan menarik diri daripada penilaian "{title}". Sila tetapkan penilai lain.'],
             ['review.submitted', 'notification', false, 'A review was submitted', 'Review submitted: {title}', 'Hello {name}, {reviewer} submitted a review of "{title}": {recommendation}.', 'Penilaian dihantar: {title}', 'Salam {name}, {reviewer} telah menghantar penilaian "{title}": {recommendation}.'],
             ['proposal.returned', 'notification', true, 'A proposal was returned for amendment', 'Returned for amendment: {title}', 'Hello {name}, "{title}" is returned for amendment. Reason: {reason}. It is unlocked.', 'Dikembalikan untuk pindaan: {title}', 'Salam {name}, "{title}" dikembalikan untuk pindaan. Sebab: {reason}. Ia dibuka semula.'],
-            ['proposal.endorsed', 'notification', true, 'A proposal was endorsed', 'Endorsed: {title}', 'Hello {name}, "{title}" is endorsed and waits for the Senate decision.', 'Disokong: {title}', 'Salam {name}, "{title}" telah disokong dan menunggu keputusan Senat.'],
+            ['proposal.endorsed', 'notification', true, 'A proposal was endorsed', 'Endorsed: {title}', 'Hello {name}, "{title}" has been endorsed by the Deputy Dean and forwarded to CODL for verification and Senate approval.', 'Disokong: {title}', 'Salam {name}, "{title}" telah disokong oleh Timbalan Dekan dan dimajukan kepada CODL untuk semakan serta kelulusan Senat.'],
             ['change.minor', 'notification', false, 'A minor change was recorded', 'Minor change recorded: {title}', 'Hello {name}, {owner} recorded a minor change to "{title}": {summary}. Please acknowledge it.', 'Perubahan kecil direkodkan: {title}', 'Salam {name}, {owner} merekodkan perubahan kecil bagi "{title}": {summary}. Sila akui.'],
             ['enrolment.registered', 'notification', false, 'A registration waits for payment', 'Please pay to complete your registration: {title}', 'Hello {name}, your place in "{title}" is held while you pay RM {fee}. Open "Registrations and payments" to pay.', 'Sila bayar untuk melengkapkan pendaftaran: {title}', 'Salam {name}, tempat anda dalam "{title}" dikekalkan sementara anda membayar RM {fee}. Buka "Pendaftaran dan bayaran" untuk membayar.'],
             ['payment.confirmed', 'notification', true, 'A payment was received', 'Payment received: {reference}', 'Hello {name}, we received RM {amount} for registration {reference} (payment reference {payment}).', 'Bayaran diterima: {reference}', 'Salam {name}, kami menerima RM {amount} untuk pendaftaran {reference} (rujukan bayaran {payment}).'],
@@ -145,10 +145,16 @@ class DatabaseSeeder extends Seeder
         if (DB::table('tasks')->exists()) {
             return;
         }
-        $areas = ['proposals' => 'Endorse proposal', 'offerings' => 'Confirm readiness', 'results' => 'Verify results', 'credentials' => 'Confirm completion', 'deposits' => 'Record ABC deposit', 'transfers' => 'Decide transfer'];
+        $areas = [
+            'proposals' => ['deputy_dean', 'Endorse proposal'],
+            'offerings' => ['deputy_dean', 'Confirm readiness'],
+            'results' => ['deputy_dean', 'Verify results'],
+            'credentials' => ['deputy_dean', 'Confirm completion'],
+            'deposits' => ['abc_depositor', 'Record ABC deposit'],
+            'transfers' => ['codl_admin', 'Evaluate transfer'],
+        ];
         $n = 0;
-        foreach ($areas as $area => $verb) {
-            $assignee = 'deputy_dean';
+        foreach ($areas as $area => [$assignee, $verb]) {
             foreach (range(1, 4) as $i) {
                 $n++;
                 DB::table('tasks')->insert(['assignee_role' => $assignee, 'area' => $area, 'title' => "$verb: sample item $n", 'subject_ref' => strtoupper(substr($area, 0, 3))."-$n", 'created_at' => now()->subDays(($n * 2) % 26 + 1)]);

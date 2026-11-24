@@ -34,29 +34,37 @@
       </div>
     </div>
   </div>
-  <div class="act" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-    <a href="{{ route('monitoring') }}" class="btn sec sm">
-      <span class="btn-lbl">&larr; {{ __('Back to Quality review') }}</span>
-    </a>
-    @if($record)
-      <a href="{{ route('cqi.show', $record->id) }}" class="btn primary sm" title="{{ __('Open formal CQI Record') }}">
-        <span class="btn-lbl">{{ __('Open CQI Record :ref', ['ref' => $record->reference]) }}</span> &rarr;
+  <div class="act-bar">
+    <div class="act-left">
+      <a href="{{ route('monitoring') }}" class="btn ter sm">
+        <span class="btn-lbl">&larr; {{ __('Back to Quality review') }}</span>
       </a>
-    @elseif($isLecturer && $isOwner)
-      <form method="post" action="{{ route('cqi.store') }}" style="display:inline;margin:0">
-        @csrf
-        <input type="hidden" name="offering_id" value="{{ $o->id }}">
-        <button type="submit" class="btn primary sm" aria-label="Start a quality review of {{ $o->name_en }} {{ $o->cohort_name }}">
-          <span class="btn-lbl">{{ __('Start Quality Review') }}</span> &rsaquo;
-        </button>
-      </form>
-    @endif
-    <a href="{{ route('offerings.participants', $o->id) }}" class="btn ter sm" title="{{ __('View enrolled participants') }}">
-      <span class="btn-lbl">{{ __('Participants (:count)', ['count' => $ind['participants']]) }}</span>
-    </a>
-    <a href="{{ route('offerings.show', $o->id) }}" class="btn ter sm" title="{{ __('View cohort offering details') }}">
-      <span class="btn-lbl">{{ __('Offering settings') }}</span>
-    </a>
+    </div>
+    <div class="act-right">
+      @if($record)
+        <a href="{{ route('cqi.show', $record->id) }}" class="btn primary sm" title="{{ __('Open formal CQI Record') }}">
+          <span class="btn-lbl">{{ __('Open CQI Record :ref', ['ref' => $record->reference]) }}</span> &rarr;
+        </a>
+      @elseif($isLecturer && $isOwner)
+        <form method="post" action="{{ route('cqi.store') }}" style="display:inline;margin:0">
+          @csrf
+          <input type="hidden" name="offering_id" value="{{ $o->id }}">
+          <button type="submit" class="btn primary sm" aria-label="Start a quality review of {{ $o->name_en }} {{ $o->cohort_name }}">
+            <span class="btn-lbl">{{ __('Start Quality Review') }}</span> &rsaquo;
+          </button>
+        </form>
+      @endif
+      @if(auth()->user()?->hasAnyRole('lecturer', 'deputy_dean', 'ptj_authority'))
+        <a href="{{ route('offerings.participants', $o->id) }}" class="btn ter sm" title="{{ __('View enrolled participants') }}">
+          <span class="btn-lbl">{{ __('Participants (:count)', ['count' => $ind['participants']]) }}</span>
+        </a>
+      @endif
+      @if(auth()->user()?->hasAnyRole('lecturer', 'deputy_dean', 'ptj_authority', 'codl_admin'))
+        <a href="{{ route('offerings.show', $o->id) }}" class="btn ter sm" title="{{ __('View cohort offering details') }}">
+          <span class="btn-lbl">{{ __('Offering settings') }}</span>
+        </a>
+      @endif
+    </div>
   </div>
 </div>
 

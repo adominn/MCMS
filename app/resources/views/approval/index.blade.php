@@ -4,7 +4,7 @@
 <div class="title">
   <div>
     <h1>{{ __('Proposals and approval') }}</h1>
-    <div class="sub">{{ __('Endorse proposals, check their category and record Senate decisions.') }}</div>
+    <div class="sub">{{ __('Deputy Dean endorses proposals; CODL verifies compliance; Senate grants final approval.') }}</div>
   </div>
 </div>
 

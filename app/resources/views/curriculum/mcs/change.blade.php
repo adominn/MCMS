@@ -88,13 +88,13 @@
           <div>
             <b>{{ __('Material change') }}</b>
             <p class="muted s" style="margin:4px 0 0">
-              {{ __('Creates version :num in draft. Requires full faculty review and Senate approval before taking effect.', ['num' => $current->version_no + 1]) }}
+              {{ __('Creates version :num in draft. Requires Deputy Dean, CODL, and Senate approval before taking effect.', ['num' => $current->version_no + 1]) }}
             </p>
           </div>
           <div style="border-top:1px solid var(--border);padding-top:12px">
             <b>{{ __('Minor change') }}</b>
             <p class="muted s" style="margin:4px 0 0">
-              {{ __('Logged directly to the quality record. The deputy dean acknowledges the change; no new version is created.') }}
+              {{ __('Logged directly to the quality record. The Deputy Dean and/or CODL acknowledges the change; no new version is created.') }}
             </p>
           </div>
           <div style="border-top:1px solid var(--border);padding-top:12px">

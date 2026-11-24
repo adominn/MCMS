@@ -24,7 +24,9 @@
   <a href="{{ route('records.audit') }}">{{ __('Audit trail') }}</a>
   <a href="{{ route('reports') }}">{{ __('Reports') }}</a>
   <a href="{{ route('discrepancies') }}" aria-current="page">{{ __('Discrepancy log') }}</a>
-  <a href="{{ route('retention') }}">{{ __('Retention') }}</a>
+  @if(auth()->user()->hasAnyRole('codl_admin', 'deputy_dean', 'ptj_authority', 'academic_authority', 'records_custodian', 'records_depositor'))
+    <a href="{{ route('retention') }}">{{ __('Retention') }}</a>
+  @endif
 </nav>
 
 <div class="panel">
@@ -39,7 +41,7 @@
           <th style="width:100px">{{ __('Found') }}</th>
           <th>{{ __('Mismatch') }}</th>
           <th style="width:96px">{{ __('Status') }}</th>
-          <th>{{ __('Correction, Source Check & Approver (F10)') }}</th>
+          <th>{{ __('Correction, Source Check & Approver') }}</th>
         </tr>
       </thead>
       <tbody>

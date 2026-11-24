@@ -14,9 +14,13 @@
       {{ $o->results_submitted_at ? __('Submitted on :date', ['date' => \Carbon\Carbon::parse($o->results_submitted_at)->format('d/m/Y H:i')]) : __('Not submitted by the lecturer yet') }}
     </div>
   </div>
-  <div class="act" style="gap:8px;display:flex;align-items:center">
-    <a class="btn ter sm" href="{{ route('completion.show', $o->id) }}">{{ __('Completion overview') }}</a>
-    <a class="btn ghost sm" href="{{ route('results') }}">&larr; {{ __('All cohorts') }}</a>
+  <div class="act-bar">
+    <div class="act-left">
+      <a class="btn ghost sm" href="{{ route('results') }}">&larr; {{ __('All cohorts') }}</a>
+    </div>
+    <div class="act-right">
+      <a class="btn ter sm" href="{{ route('completion.show', $o->id) }}">{{ __('Completion overview') }}</a>
+    </div>
   </div>
 </div>
 

@@ -38,7 +38,7 @@ final class RetentionController
 
     public function lift(Request $request, int $id)
     {
-        abort_if($request->user()->hasRole('codl_admin') && ! $request->user()->hasAnyRole('deputy_dean', 'ptj_authority', 'academic_authority', 'records_custodian'), 403, 'Platform administrators cannot unilaterally lift retention holds (Cl. 18.10, REQ-C18-010).');
+        abort_if($request->user()->hasRole('codl_admin') && ! $request->user()->hasAnyRole('deputy_dean', 'ptj_authority', 'academic_authority', 'records_custodian'), 403, 'Platform administrators cannot unilaterally lift retention holds.');
         $h = DB::table('retention_holds')->where('id', $id)->whereNull('lifted_at')->first() ?? abort(404);
         DB::table('retention_holds')->where('id', $id)->update(['lifted_by' => $request->user()->id, 'lifted_at' => now()]);
         $this->audit->record('retention.hold_lifted', ['type' => 'RetentionHold', 'id' => $id]);

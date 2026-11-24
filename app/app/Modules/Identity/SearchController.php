@@ -32,7 +32,7 @@ class SearchController
             } elseif ($user->hasRole('deputy_dean') && ! $user->hasRole('codl_admin') && $ptjIds !== null) {
                 $mcsQuery->whereIn('m.ptj_id', $ptjIds);
             }
-            $mcs = $mcsQuery->orderBy('v.name_en')->limit(50)->get(['m.id', 'm.code', 'm.category', 'v.name_en', 'v.status', 'u.name as lecturer_name']);
+            $mcs = $mcsQuery->orderBy('v.name_en')->limit(50)->get(['m.id', 'm.owner_id', 'm.code', 'm.category', 'v.id as version_id', 'v.name_en', 'v.status', 'u.name as lecturer_name']);
 
             $cohortsQuery = DB::table('offerings as o')
                 ->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
@@ -81,29 +81,32 @@ class SearchController
             $post = 'Participant';
             $roleLabel = 'Participant';
         } elseif ($u->hasRole('deputy_dean')) {
-            $post = 'Deputy Dean (Academic)'.($ptjCode ? ', '.$ptjCode : '');
-            $roleLabel = 'Deputy Dean (Academic'.($ptjCode ? ', '.$ptjCode : '').')';
+            $post = 'Deputy Dean (Faculty Authority)'.($ptjCode ? ', '.$ptjCode : '');
+            $roleLabel = 'Deputy Dean (Faculty Authority'.($ptjCode ? ', '.$ptjCode : '').')';
         } elseif ($u->hasRole('academic_authority')) {
-            $post = 'Senate Academic Representative / PBA (P3)';
-            $roleLabel = 'Academic Authority / Senate (P3)';
+            $post = 'Academic Authority (Senate)';
+            $roleLabel = 'Academic Authority (Senate)';
         } elseif ($u->hasRole('qa_officer')) {
-            $post = 'Quality Assurance Officer, PKA (P4)';
-            $roleLabel = 'Quality Assurance Officer (P4)';
+            $post = 'Quality Assurance Officer';
+            $roleLabel = 'Quality Assurance Officer';
         } elseif ($u->hasRole('records_custodian')) {
-            $post = 'Records & Credential Custodian, Registry (P6)';
-            $roleLabel = 'Records & Credential Custodian (P6)';
+            $post = 'Records & Credential Custodian';
+            $roleLabel = 'Records & Credential Custodian';
         } elseif ($u->hasRole('abc_depositor')) {
-            $post = 'Authorized Records & ABC Depositor Officer (P6/P7)';
-            $roleLabel = 'Authorized Records & ABC Depositor (P6/P7)';
+            $post = 'Authorized ABC Depositor';
+            $roleLabel = 'Authorized ABC Depositor';
+        } elseif ($u->hasRole('records_depositor')) {
+            $post = 'Records & ABC Officer';
+            $roleLabel = 'Records & ABC Officer';
         } elseif ($u->hasRole('lecturer')) {
-            $post = 'Senior Lecturer'.($ptjCode ? ', '.$ptjCode : '');
-            $roleLabel = 'Lecturer'.($ptjCode ? ' ('.$ptjCode.')' : '').'; Reviewer when invited';
+            $post = 'Course Coordinator / Lecturer'.($ptjCode ? ', '.$ptjCode : '');
+            $roleLabel = 'Course Coordinator / Lecturer'.($ptjCode ? ' ('.$ptjCode.')' : '').'; Reviewer when invited';
         } elseif ($u->hasRole('codl_admin')) {
             $post = 'CODL Administrator';
             $roleLabel = 'CODL Administrator';
         } elseif ($u->hasRole('industry_expert') || $u->hasRole('reviewer')) {
-            $post = 'Industry Expert, External Reviewer';
-            $roleLabel = 'Industry Expert, External Reviewer';
+            $post = 'Industry Expert / External Reviewer';
+            $roleLabel = 'Industry Expert / External Reviewer';
         } else {
             $post = $firstAssignment ? $firstAssignment->role->label() : 'User';
             $roleLabel = $post;

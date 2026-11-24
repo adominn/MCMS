@@ -48,7 +48,8 @@
       wrap.appendChild(tbl);
     }
 
-    var state = { q: '', per: 10, page: 1, col: -1, dir: 1 };
+    var defaultPer = parseInt(tbl.getAttribute('data-per-page') || '10', 10) || 10;
+    var state = { q: '', per: defaultPer, page: 1, col: -1, dir: 1 };
     var types = [];
     var showSearch = !tbl.hasAttribute('data-no-search');
     var hasServerPager = tbl.hasAttribute('data-no-paginate') ||
@@ -151,7 +152,8 @@
       rows.forEach(function (r) { r.hidden = true; });
       list.slice(showPager ? from : 0, showPager ? from + state.per : undefined).forEach(function (r) { r.hidden = false; });
       if (list.length) { if (none.parentNode) { none.remove(); } } else { body.appendChild(none); }
-      count.textContent = rows.length === list.length ? rows.length + ' rows' : list.length + ' of ' + rows.length + ' rows';
+      var rowWord = function (n) { return n === 1 ? 'row' : 'rows'; };
+      count.textContent = rows.length === list.length ? rows.length + ' ' + rowWord(rows.length) : list.length + ' of ' + rows.length + ' ' + rowWord(rows.length);
       range.textContent = list.length ? (from + 1) + '–' + Math.min(from + state.per, list.length) + ' of ' + list.length : '0 of 0';
       pg.textContent = 'Page ' + state.page + ' of ' + pages;
       prev.disabled = state.page <= 1; next.disabled = state.page >= pages;
@@ -345,7 +347,11 @@
     var aliases = { 'notifications': 'notif', 'sessions': 'security', 'signin': 'security' };
     if (aliases[target]) { target = aliases[target]; }
     var targetPane = target ? $('[data-pane="' + target + '"]', root) : null;
-    open(targetPane ? target : (root.hasAttribute('data-auto') ? first.getAttribute('data-pane') : btns[0].getAttribute('data-tab')));
+    var defaultTab = root.getAttribute('data-default-tab');
+    var fallback = (defaultTab && $('[data-pane="' + defaultTab + '"]', root))
+      ? defaultTab
+      : (root.hasAttribute('data-auto') ? first.getAttribute('data-pane') : btns[0].getAttribute('data-tab'));
+    open(targetPane ? target : fallback);
   }
 
   /* ---------- auto-filtering forms (data-auto-filter): live update without clicking apply ---------- */
@@ -598,8 +604,362 @@
     });
   }
 
+  /* ---------- shared tabbed checklist controller (WAI-ARIA tabs + live progress + zero data loss) ---------- */
+  function initChecklistTabs(root) {
+    var tabButtons = $$('[data-tab-btn]', root);
+    var panels = $$('[data-tab-panel]', root);
+    if (!tabButtons.length || !panels.length) { return; }
+
+    var mobileSelect = $('[data-tab-select]', root);
+    var mobileStepEl = $('[data-mobile-step]', root);
+    var liveRegion = $('[data-tab-live]', root);
+    var overallCountEl = $('[data-overall-count]', root);
+    var overallBarEl = $('[data-overall-bar]', root);
+    var dirtyNotice = $('[data-dirty-notice]', root);
+    var dirtyBadge = $('[data-dirty-badge]', root);
+    var tabsShell = $('[data-tabs-shell]', root);
+    var tabsBar = $('[data-tabs-bar]', root);
+    var scrollLeftBtn = $('[data-tabs-scroll="left"]', root);
+    var scrollRightBtn = $('[data-tabs-scroll="right"]', root);
+    var reducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    var tabKeys = tabButtons.map(function (b) { return b.getAttribute('data-tab-btn'); });
+    var isDirty = false;
+    var submitting = false;
+
+    function panelByKey(key) {
+      return panels.find(function (p) { return p.getAttribute('data-tab-panel') === key; }) || null;
+    }
+
+    function updateScrollControls() {
+      if (!tabsShell || !tabsBar) { return; }
+      var maxScroll = tabsBar.scrollWidth - tabsBar.clientWidth;
+      var overflowing = maxScroll > 2;
+      var canLeft = overflowing && tabsBar.scrollLeft > 2;
+      var canRight = overflowing && tabsBar.scrollLeft < (maxScroll - 2);
+      tabsShell.classList.toggle('is-overflowing', overflowing);
+      tabsShell.classList.toggle('can-scroll-left', canLeft);
+      tabsShell.classList.toggle('can-scroll-right', canRight);
+      if (scrollLeftBtn) { scrollLeftBtn.hidden = !canLeft; }
+      if (scrollRightBtn) { scrollRightBtn.hidden = !canRight; }
+    }
+
+    if (scrollLeftBtn && tabsBar) {
+      scrollLeftBtn.addEventListener('click', function () {
+        var step = Math.max(160, Math.round(tabsBar.clientWidth * 0.6));
+        try { tabsBar.scrollBy({ left: -step, behavior: reducedMotion ? 'auto' : 'smooth' }); } catch (e) { tabsBar.scrollLeft -= step; }
+      });
+    }
+    if (scrollRightBtn && tabsBar) {
+      scrollRightBtn.addEventListener('click', function () {
+        var step = Math.max(160, Math.round(tabsBar.clientWidth * 0.6));
+        try { tabsBar.scrollBy({ left: step, behavior: reducedMotion ? 'auto' : 'smooth' }); } catch (e) { tabsBar.scrollLeft += step; }
+      });
+    }
+    if (tabsBar) {
+      tabsBar.addEventListener('scroll', updateScrollControls, { passive: true });
+      if (window.ResizeObserver) {
+        try {
+          var ro = new ResizeObserver(updateScrollControls);
+          ro.observe(tabsBar);
+        } catch (e) {}
+      }
+      window.addEventListener('resize', updateScrollControls, { passive: true });
+    }
+
+    function scrollTabIntoBar(btn, smooth) {
+      if (!tabsBar || !btn) { return; }
+      var barRect = tabsBar.getBoundingClientRect();
+      var btnRect = btn.getBoundingClientRect();
+      if (barRect.width <= 0) { return; }
+      var leftDiff = btnRect.left - barRect.left;
+      var rightDiff = btnRect.right - barRect.right;
+      var targetLeft = null;
+      if (leftDiff < 8) {
+        targetLeft = Math.max(0, tabsBar.scrollLeft + leftDiff - 12);
+      } else if (rightDiff > -8) {
+        targetLeft = tabsBar.scrollLeft + rightDiff + 12;
+      }
+      if (targetLeft !== null) {
+        try {
+          tabsBar.scrollTo({ left: targetLeft, behavior: (smooth && !reducedMotion) ? 'smooth' : 'auto' });
+        } catch (e) {
+          tabsBar.scrollLeft = targetLeft;
+        }
+      }
+    }
+
+    function activate(key, opts) {
+      opts = opts || {};
+      if (tabKeys.indexOf(key) === -1) { key = tabKeys[0]; }
+      tabButtons.forEach(function (btn) {
+        var k = btn.getAttribute('data-tab-btn');
+        var active = k === key;
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
+        btn.setAttribute('tabindex', active ? '0' : '-1');
+        if (active && opts.scrollTab !== false) {
+          scrollTabIntoBar(btn, opts.smoothScroll !== false);
+        }
+        if (active && opts.focusTab) {
+          btn.focus();
+        }
+      });
+      panels.forEach(function (p) {
+        var active = p.getAttribute('data-tab-panel') === key;
+        p.hidden = !active;
+      });
+      if (mobileSelect && mobileSelect.value !== key) {
+        mobileSelect.value = key;
+      }
+      if (mobileStepEl) {
+        var stepIdx = tabKeys.indexOf(key) + 1;
+        var tpl = mobileStepEl.getAttribute('data-step-template');
+        if (tpl && stepIdx > 0) {
+          mobileStepEl.textContent = tpl.replace(':current', String(stepIdx));
+        }
+      }
+      $$('[data-active-tab-input]', root).forEach(function (inp) {
+        inp.value = key;
+      });
+      if (opts.updateHash !== false) {
+        try {
+          if (history && history.replaceState) {
+            history.replaceState(null, '', '#tab=' + encodeURIComponent(key));
+          }
+        } catch (e) {}
+      }
+      if (liveRegion && opts.announce) {
+        var activeBtn = tabButtons.find(function (b) { return b.getAttribute('data-tab-btn') === key; });
+        if (activeBtn) {
+          var lbl = $('.ct-label', activeBtn);
+          var sr = $('[data-tab-sr]', activeBtn);
+          liveRegion.textContent = (lbl ? lbl.textContent.trim() : key) + (sr ? sr.textContent : '') + ' — shown';
+        }
+      }
+      if (opts.scrollPanel) {
+        var activePanel = panelByKey(key);
+        if (activePanel && activePanel.scrollIntoView) {
+          try { activePanel.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' }); } catch (e) {}
+        }
+      }
+      if (window.requestAnimationFrame) {
+        window.requestAnimationFrame(updateScrollControls);
+      } else {
+        updateScrollControls();
+      }
+    }
+
+    function recomputeProgress() {
+      var overallDone = 0;
+      var overallTotal = 0;
+      panels.forEach(function (panel) {
+        var key = panel.getAttribute('data-tab-panel');
+        if (panel.getAttribute('data-countable') !== '1') { return; }
+        var rows = $$('[data-checklist-row]', panel);
+        var total = rows.length;
+        var done = 0;
+        var hasErr = false;
+        rows.forEach(function (row) {
+          var mode = row.getAttribute('data-row-mode') || 'readonly';
+          var rowDone = false;
+          if (mode === 'status') {
+            var sel = $('select', row);
+            rowDone = sel ? (sel.value !== 'not_yet') : (row.getAttribute('data-row-done') === '1');
+          } else if (mode === 'accept') {
+            var cb = $('input[type="checkbox"]', row);
+            if (cb) {
+              rowDone = !!cb.checked;
+            } else {
+              rowDone = row.getAttribute('data-row-done') === '1';
+            }
+          } else if (mode === 'qv') {
+            if (row.getAttribute('data-row-linked') === '1') {
+              rowDone = true;
+            } else {
+              var qSel = $('select', row);
+              rowDone = qSel ? (qSel.value !== 'not_yet') : (row.getAttribute('data-row-done') === '1');
+            }
+          } else {
+            rowDone = row.getAttribute('data-row-done') === '1';
+          }
+          if (rowDone) {
+            done++;
+            if (row.classList.contains('row-err')) {
+              row.classList.remove('row-err');
+            }
+          }
+          if (row.classList.contains('row-err')) {
+            hasErr = true;
+          }
+        });
+        overallDone += done;
+        overallTotal += total;
+
+        var indState = hasErr ? 'err' : (done === total ? 'complete' : (done > 0 ? 'in-progress' : 'not-started'));
+        var badge = $('[data-tab-badge="' + key + '"]', root);
+        var ind = $('[data-tab-ind="' + key + '"]', root);
+        var srEl = $('[data-tab-sr="' + key + '"]', root);
+        var btn = tabButtons.find(function (b) { return b.getAttribute('data-tab-btn') === key; });
+
+        if (ind && total > 0) {
+          ind.classList.remove('is-not-started', 'is-in-progress', 'is-complete', 'is-warn', 'is-err', 'is-ready', 'is-disabled');
+          ind.classList.add('is-' + indState);
+        }
+        if (badge && total > 0) {
+          badge.textContent = done + '/' + total;
+          badge.classList.remove('is-ok', 'is-warn', 'is-err', 'is-n', 'is-ready');
+          if (hasErr) {
+            badge.classList.add('is-err');
+          }
+          // Completed check tabs display the quiet green checkmark only (count stays in DOM & sr-only)
+          badge.hidden = (indState === 'complete');
+        }
+        if (srEl && total > 0) {
+          var srText = hasErr
+            ? ', requires attention, ' + done + ' of ' + total
+            : (done === total
+              ? ', complete, ' + done + ' of ' + total
+              : (done > 0 ? ', in progress, ' + done + ' of ' + total : ', not started, 0 of ' + total));
+          srEl.textContent = srText;
+        }
+        if (btn) {
+          btn.classList.toggle('has-err', hasErr);
+        }
+        if (mobileSelect) {
+          var opt = $('option[value="' + key + '"]', mobileSelect);
+          if (opt && opt.getAttribute('data-base-label')) {
+            opt.textContent = opt.getAttribute('data-base-label') + ' (' + done + '/' + total + ')';
+          }
+        }
+      });
+
+      if (overallCountEl && overallTotal > 0) {
+        var suffix = overallCountEl.getAttribute('data-count-suffix') || '';
+        overallCountEl.textContent = overallDone + ' / ' + overallTotal + (suffix ? ' ' + suffix : '');
+      }
+      if (overallBarEl && overallTotal > 0) {
+        var pct = Math.round((overallDone / overallTotal) * 100);
+        overallBarEl.style.width = pct + '%';
+        overallBarEl.classList.toggle('is-complete', overallDone === overallTotal);
+      }
+    }
+
+    function markDirty(fromEvidence) {
+      isDirty = true;
+      if (dirtyBadge) { dirtyBadge.hidden = false; }
+      if (fromEvidence && dirtyNotice) { dirtyNotice.hidden = false; }
+    }
+
+    tabButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        activate(btn.getAttribute('data-tab-btn'), { announce: true });
+      });
+      btn.addEventListener('keydown', function (e) {
+        var idx = tabKeys.indexOf(btn.getAttribute('data-tab-btn'));
+        var targetIdx = -1;
+        if (e.key === 'ArrowRight') { targetIdx = (idx + 1) % tabKeys.length; }
+        else if (e.key === 'ArrowLeft') { targetIdx = (idx - 1 + tabKeys.length) % tabKeys.length; }
+        else if (e.key === 'Home') { targetIdx = 0; }
+        else if (e.key === 'End') { targetIdx = tabKeys.length - 1; }
+        if (targetIdx !== -1) {
+          e.preventDefault();
+          activate(tabKeys[targetIdx], { focusTab: true, announce: true });
+        }
+      });
+    });
+
+    if (mobileSelect) {
+      mobileSelect.addEventListener('change', function () {
+        activate(mobileSelect.value, { announce: true });
+      });
+    }
+
+    $$('[data-tab-prev]', root).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var cur = btn.closest('[data-tab-panel]');
+        var idx = cur ? tabKeys.indexOf(cur.getAttribute('data-tab-panel')) : 0;
+        if (idx > 0) { activate(tabKeys[idx - 1], { announce: true, scrollPanel: true }); }
+      });
+    });
+
+    $$('[data-tab-next]', root).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var cur = btn.closest('[data-tab-panel]');
+        var idx = cur ? tabKeys.indexOf(cur.getAttribute('data-tab-panel')) : 0;
+        if (idx >= 0 && idx < tabKeys.length - 1) { activate(tabKeys[idx + 1], { announce: true, scrollPanel: true }); }
+      });
+    });
+
+    $$('[data-accept-tab]', root).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var key = btn.getAttribute('data-accept-tab');
+        var panel = panelByKey(key);
+        if (!panel) { return; }
+        var boxes = $$('input[type="checkbox"][name^="accept["]', panel);
+        var allChecked = boxes.length > 0 && boxes.every(function (b) { return b.checked; });
+        boxes.forEach(function (b) { b.checked = !allChecked; });
+        markDirty(false);
+        recomputeProgress();
+      });
+    });
+
+    $$('[data-jump-tab]', document).forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        var key = link.getAttribute('data-jump-tab');
+        if (tabKeys.indexOf(key) !== -1) {
+          e.preventDefault();
+          activate(key, { announce: true, scrollPanel: true });
+        }
+      });
+    });
+
+    root.addEventListener('change', function (e) {
+      var target = e.target;
+      if (!target || target.matches('[data-tab-select]')) { return; }
+      if (target.matches('select, input, textarea')) {
+        var inEvidence = !!target.closest('[data-evidence-panel="1"]');
+        markDirty(inEvidence);
+        recomputeProgress();
+      }
+    });
+
+    $$('form', root).forEach(function (f) {
+      f.addEventListener('submit', function () {
+        submitting = true;
+        isDirty = false;
+      });
+    });
+    if (root.closest('form')) {
+      root.closest('form').addEventListener('submit', function () {
+        submitting = true;
+        isDirty = false;
+      });
+    }
+
+    window.addEventListener('beforeunload', function (e) {
+      if (isDirty && !submitting) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
+    // Determine initial tab: server error priority > URL hash > server-computed default tab
+    var initialKey = root.getAttribute('data-default-tab') || tabKeys[0];
+    var hasServerErr = root.getAttribute('data-has-server-error') === '1';
+    if (!hasServerErr && location.hash && location.hash.indexOf('#tab=') === 0) {
+      var hashKey = decodeURIComponent(location.hash.slice(5));
+      if (tabKeys.indexOf(hashKey) !== -1) {
+        initialKey = hashKey;
+      }
+    }
+
+    recomputeProgress();
+    activate(initialKey, { updateHash: false, scrollTab: true, smoothScroll: false });
+    updateScrollControls();
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     $$('[data-tabs]').forEach(tabs);
+    $$('[data-checklist-tabs]').forEach(initChecklistTabs);
     $$('main table').forEach(enhance);
     rowLinks();
     switches();

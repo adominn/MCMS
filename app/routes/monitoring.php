@@ -28,12 +28,15 @@ Route::middleware(['auth', 'role:lecturer,deputy_dean,qa_officer,codl_admin,ptj_
     Route::post('/cqi/{id}/signoff', [CqiController::class, 'signoff'])->whereNumber('id')->name('cqi.signoff');
 });
 
+Route::middleware(['auth', 'role:deputy_dean,ptj_authority,codl_admin,academic_authority,qa_officer'])->group(function () {
+    Route::get('/suspensions/{id}/print', [QualityReviewController::class, 'printSuspension'])->whereNumber('id')->name('suspensions.print');
+});
+
 Route::middleware(['auth', 'role:deputy_dean,ptj_authority'])->group(function () {
     Route::post('/cqi/{id}/confirm', [CqiController::class, 'confirm'])->whereNumber('id')->name('cqi.confirm');
     Route::post('/cqi/{id}/c9-decision', [CqiController::class, 'c9Decision'])->whereNumber('id')->name('cqi.c9_decision');
     Route::post('/cqi/actions/{action}/close', [CqiController::class, 'close'])->whereNumber('action')->name('cqi.close');
     Route::get('/suspensions', [QualityReviewController::class, 'suspensions'])->name('suspensions');
-    Route::get('/suspensions/{id}/print', [QualityReviewController::class, 'printSuspension'])->whereNumber('id')->name('suspensions.print');
     Route::post('/suspensions', [QualityReviewController::class, 'decide'])->name('suspensions.decide');
     Route::post('/suspensions/{id}/lift', [QualityReviewController::class, 'lift'])->whereNumber('id')->name('suspensions.lift');
 });

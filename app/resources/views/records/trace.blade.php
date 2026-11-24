@@ -18,7 +18,7 @@
 <p class="muted">{{ __('From development to monitoring, with what is on record at each stage. A stage that is empty has not happened yet, or its record is missing.') }}</p>
 <ol id="chain" class="chain">
 @foreach($stages as $s)
-  <li data-stage="{{ $s['key'] }}" class="{{ $s['present'] ? 'present' : 'absent' }}"><strong>{{ $s['label'] }}</strong>: {{ $s['present'] ? 'On record' : 'Not on record' }}. {{ $s['text'] }}@if($s['link'] && $s['present']) <a href="{{ $s['link'] }}">Open</a>@endif</li>
+  <li data-stage="{{ $s['key'] }}" class="{{ $s['present'] ? 'present' : 'absent' }}"><strong>{{ $s['label'] }}</strong>: {{ $s['present'] ? 'On record' : 'Not on record' }}. {{ $s['text'] }}@if($s['link'] && $s['present'] && ($s['key'] !== 'acr' || auth()->user()->hasAnyRole('abc_depositor', 'records_depositor'))) <a href="{{ $s['link'] }}">Open</a>@endif</li>
 @endforeach
 </ol>
 <h2>{{ __('Audit trail of these records') }}</h2>

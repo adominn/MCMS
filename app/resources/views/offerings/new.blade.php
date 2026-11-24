@@ -166,15 +166,15 @@
             </p>
           </div>
           <div style="border-top:1px solid var(--border);padding-top:10px">
-            <b>{{ __('2. Complete checklist') }}</b>
+            <b>{{ __('2. Review automated checks & confirmations') }}</b>
             <p class="muted s" style="margin:2px 0 0">
-              {{ __('The lecturer fills evidence notes for all 6 operational readiness areas and sends the checklist to the deputy dean.') }}
+              {{ __('Resolve any automated readiness issues, confirm the 4 operational sections, and send the checklist to DD and/or CODL.') }}
             </p>
           </div>
           <div style="border-top:1px solid var(--border);padding-top:10px">
-            <b>{{ __('3. Deputy dean approval') }}</b>
+            <b>{{ __('3. DD and/or CODL confirmation') }}</b>
             <p class="muted s" style="margin:2px 0 0">
-              {{ __('The deputy dean reviews the evidence and records the readiness decision. Once confirmed, the cohort opens automatically on the registration opening date.') }}
+              {{ __('The Deputy Dean and/or CODL reviews the evidence and records the readiness decision. Once confirmed, the cohort opens automatically on the registration opening date.') }}
             </p>
           </div>
         </div>

@@ -39,13 +39,101 @@ final class QvController
             Qv::syncLinks($rec->id, $mc);
         }
         $conds = Qv::conditions($mc, $this->settings);
+        $isOwner = $this->isOwner($request, $m);
+        $canActQv = $request->user()->hasAnyRole('deputy_dean', 'ptj_authority', 'qa_officer') && ! $isOwner;
 
         return view('quality.show', [
             'm' => $m, 'v' => Qv::latestVersion($mc), 'rec' => $rec, 'conds' => $conds, 'met' => collect($conds)->every('ok'),
             'evidence' => $rec ? DB::table('qv_evidence')->where('qv_record_id', $rec->id)->get()->keyBy('item') : collect(),
+            'evidenceTabs' => $this->evidenceTabs(),
             'history' => DB::table('qv_records')->where('micro_credential_id', $mc)->orderByDesc('cycle_no')->get(),
-            'standing' => Qv::standing($mc), 'isOwner' => $this->isOwner($request, $m), 'maxYears' => $this->settings->get('qv.max_validity_years'),
+            'standing' => Qv::standing($mc), 'isOwner' => $isOwner, 'canActQv' => $canActQv, 'maxYears' => $this->settings->get('qv.max_validity_years'),
         ]);
+    }
+
+    /** Structured 6-domain evidence tabs mapping both legacy summary keys and detailed items (D-64 plain language). */
+    private function evidenceTabs(): array
+    {
+        $checklist = config('qv.checklist', []);
+        $sections = config('qv.sections', []);
+        $defs = [
+            'eligibility' => [
+                'section' => 'D2',
+                'legacy' => null,
+                'short_en' => 'Eligibility',
+                'short_ms' => 'Kelayakan',
+                'title_en' => 'Basic Eligibility for Quality Verification',
+                'title_ms' => 'Kelayakan Asas Pengesahan Kualiti',
+                'desc_en' => 'Verify basic SAMC eligibility conditions and supporting eligibility evidence.',
+                'desc_ms' => 'Sahkan syarat kelayakan asas SAMC dan eviden kelayakan sokongan.',
+            ],
+            'academic_design' => [
+                'section' => 'D3',
+                'legacy' => 'academic_design',
+                'short_en' => 'Academic Design',
+                'short_ms' => 'Reka Bentuk',
+                'title_en' => 'Academic Design Evidence',
+                'title_ms' => 'Eviden Reka Bentuk Akademik',
+                'desc_en' => 'Learning outcomes, content mapping, SLT calculation, and proposed credit/MQF justification.',
+                'desc_ms' => 'Hasil pembelajaran, pemetaan kandungan, pengiraan SLT serta justifikasi kredit dan tahap MQF.',
+            ],
+            'assessment' => [
+                'section' => 'D4',
+                'legacy' => 'assessment_achievement',
+                'short_en' => 'Assessment',
+                'short_ms' => 'Pentaksiran',
+                'title_en' => 'Assessment & Attainment Evidence',
+                'title_ms' => 'Eviden Pentaksiran & Pencapaian',
+                'desc_en' => 'Assessment plan, rubrics, sample learner work, cohort marks, attainment analysis, and integrity controls.',
+                'desc_ms' => 'Pelan pentaksiran, rubrik, sampel hasil kerja, rekod markah kohort, analisis pencapaian dan integriti.',
+            ],
+            'delivery_support' => [
+                'section' => 'D5',
+                'legacy' => 'delivery_support',
+                'short_en' => 'Delivery',
+                'short_ms' => 'Penyampaian',
+                'title_en' => 'Delivery & Participant Support Evidence',
+                'title_ms' => 'Eviden Penyampaian & Sokongan Peserta',
+                'desc_en' => 'Pre-registration details, learning materials, platform access, engagement, support, and feedback.',
+                'desc_ms' => 'Maklumat prapendaftaran, bahan pembelajaran, akses platform, penglibatan, sokongan dan maklum balas.',
+            ],
+            'quality_cqi' => [
+                'section' => 'D6',
+                'legacy' => 'quality_cqi',
+                'short_en' => 'Quality & CQI',
+                'short_ms' => 'Kualiti & CQI',
+                'title_en' => 'Quality Assurance & CQI Evidence',
+                'title_ms' => 'Eviden Jaminan Kualiti & CQI',
+                'desc_en' => 'Pre-offering reviews, monitoring records, CQI action plans, effectiveness evaluation, and version control.',
+                'desc_ms' => 'Semakan prapenawaran, rekod pemantauan, pelan tindakan CQI, penilaian keberkesanan dan kawalan versi.',
+            ],
+            'digital_credential' => [
+                'section' => 'D7',
+                'legacy' => 'credential',
+                'short_en' => 'Credential',
+                'short_ms' => 'Kredensial',
+                'title_en' => 'Digital Credential Evidence',
+                'title_ms' => 'Eviden Kredensial Digital',
+                'desc_en' => 'Credential format, metadata, verified credit/MQF display rules, authenticity verification, and audit trail.',
+                'desc_ms' => 'Format kredensial, metadata, paparan kredit/MQF terverifikasi, mekanisme pengesahan dan jejak audit.',
+            ],
+        ];
+
+        $out = [];
+        foreach ($defs as $key => $meta) {
+            $items = [];
+            if ($meta['legacy'] && array_key_exists($meta['legacy'], $checklist)) {
+                $items[$meta['legacy']] = $checklist[$meta['legacy']];
+            }
+            foreach (array_keys($sections[$meta['section']]['items'] ?? []) as $ik) {
+                if (array_key_exists($ik, $checklist)) {
+                    $items[$ik] = $checklist[$ik];
+                }
+            }
+            $out[$key] = $meta + ['items' => $items];
+        }
+
+        return $out;
     }
 
     /** Begin a cycle. Anyone who may see a confirmed SAMC here can keep evidence (FR-165), but only the lecturer who owns it opens one. */
@@ -80,7 +168,12 @@ final class QvController
         }
         $this->touchBack($rec);
 
-        return back()->with('status', 'Evidence checklist saved.');
+        $redirect = back()->with('status', 'Evidence checklist saved.');
+        if ($request->filled('active_tab')) {
+            $redirect->with('qv_active_tab', (string) $request->input('active_tab'));
+        }
+
+        return $redirect;
     }
 
     /** Appendix D8: what changed since the last verification, and what each change needs (FR-167). */
@@ -95,13 +188,15 @@ final class QvController
             abort_unless(array_key_exists($a, config('qv.review_actions')), 422);
             $out[$c] = ['action' => $a, 'note' => trim((string) $request->input("note.$c"))];
             if ($a !== 'none' && $out[$c]['note'] === '') {
+                $request->session()->flash('qv_active_tab', 'changes_submission');
+                $request->session()->flash('qv_error_tabs', ['changes_submission']);
                 throw ValidationException::withMessages(["note.$c" => 'Describe the change to '.mb_strtolower(config('qv.components')[$c]).'.']);
             }
         }
         DB::table('qv_records')->where('id', $rec->id)->update(['change_review' => json_encode($out), 'updated_at' => now()]);
         $this->touchBack($rec);
 
-        return back()->with('status', 'Material change review saved.');
+        return back()->with('status', 'Material change review saved.')->with('qv_active_tab', 'changes_submission');
     }
 
     /** The lecturer records the readiness decision (FR-168). It counts only once the deputy dean confirms it. */
@@ -110,15 +205,23 @@ final class QvController
         $m = $this->mc($request, $mc);
         abort_unless($this->isOwner($request, $m), 403);
         $rec = $this->editable($mc);
-        $d = $request->validate([
-            'decision' => 'required|in:ready,ready_minor,not_ready',
-            'missing' => 'nullable|string|max:2000',
-            'target_date' => 'nullable|date|after:today',
-            'required_actions' => 'nullable|string|max:2000',
-            'qvc_mechanism' => 'nullable|string|max:100',
-            'evidence_cohort' => 'nullable|string|max:100',
-        ]);
+        try {
+            $d = $request->validate([
+                'decision' => 'required|in:ready,ready_minor,not_ready',
+                'missing' => 'nullable|string|max:2000',
+                'target_date' => 'nullable|date|after:today',
+                'required_actions' => 'nullable|string|max:2000',
+                'qvc_mechanism' => 'nullable|string|max:100',
+                'evidence_cohort' => 'nullable|string|max:100',
+            ]);
+        } catch (ValidationException $e) {
+            $request->session()->flash('qv_active_tab', 'changes_submission');
+            $request->session()->flash('qv_error_tabs', ['changes_submission']);
+            throw $e;
+        }
         if ($d['decision'] === 'not_ready' && trim((string) ($d['missing'] ?? '')) === '') {
+            $request->session()->flash('qv_active_tab', 'changes_submission');
+            $request->session()->flash('qv_error_tabs', ['changes_submission']);
             throw ValidationException::withMessages(['missing' => 'Name the critical evidence that is missing.']);
         }
 
@@ -146,10 +249,10 @@ final class QvController
             'status' => 'preparing',
             'updated_at' => now(),
         ]);
-        Tasks::open('deputy_dean', 'qv_confirm', $rec->id, 'Confirm the Quality Verification readiness decision: '.$m->name_en, "/quality/$mc", $m->ptj_id, area: 'credentials');
+        Tasks::open('deputy_dean', 'qv_confirm', $rec->id, 'Confirm the Quality Verification readiness decision: '.$m->name_en, "/quality/$mc", $m->ptj_id, area: 'qv_monitoring');
         $this->audit->record('qv.readiness_recorded', ['type' => 'QvRecord', 'id' => $rec->id], after: ['decision' => $d['decision']]); // EV-38
 
-        return back()->with('status', 'Readiness decision recorded. The deputy dean must confirm it.');
+        return back()->with('status', 'Readiness decision recorded. The deputy dean must confirm it.')->with('qv_active_tab', 'changes_submission');
     }
 
     /** The deputy dean confirms. "Ready to submit" needs the basic conditions too (FR-164), whatever was recorded. */
@@ -162,7 +265,10 @@ final class QvController
         $conds = Qv::conditions($mc, $this->settings);
         $ready = in_array($rec->readiness_decision, ['ready', 'ready_minor'], true);
         if ($ready && ! collect($conds)->every('ok')) {
-            return back()->withErrors(['qv' => 'Not ready to submit: '.collect($conds)->where('ok', false)->pluck('text')->implode('; ').'.']);
+            return back()
+                ->with('qv_active_tab', 'eligibility')
+                ->with('qv_error_tabs', ['eligibility'])
+                ->withErrors(['qv' => 'Not ready to submit: '.collect($conds)->where('ok', false)->pluck('text')->implode('; ').'.']);
         }
 
         $signoffs = json_decode($rec->d10_signoffs ?? '[]', true) ?: [];
@@ -185,7 +291,7 @@ final class QvController
         Tasks::close('qv_confirm', $rec->id);
         $this->audit->record('qv.readiness_confirmed', ['type' => 'QvRecord', 'id' => $rec->id], after: ['decision' => $rec->readiness_decision, 'status' => $ready ? 'ready' : 'preparing']);
 
-        return back()->with('status', $ready ? 'Confirmed. The micro-credential is ready to submit.' : 'Confirmed as not ready. It stays in preparation.');
+        return back()->with('status', $ready ? 'Confirmed. The micro-credential is ready to submit.' : 'Confirmed as not ready. It stays in preparation.')->with('qv_active_tab', 'changes_submission');
     }
 
     /** DOC-11: the submission package as a page (Appendix D). */
@@ -237,9 +343,9 @@ final class QvController
         if ($d['role'] === 'coordinator') {
             abort_unless($this->isOwner($request, $m), 403, 'Hanya penyelaras SAMC boleh menandatangani peranan ini.');
         } elseif ($d['role'] === 'faculty_rep') {
-            abort_unless($u->hasAnyRole('deputy_dean', 'admin'), 403, 'Hanya wakil Fakulti / Timbalan Dekan boleh menandatangani peranan ini.');
+            abort_unless($u->hasAnyRole('deputy_dean', 'ptj_authority'), 403, 'Hanya wakil Fakulti / Timbalan Dekan boleh menandatangani peranan ini.');
         } elseif ($d['role'] === 'qa_authority') {
-            abort_unless($u->hasAnyRole('qa_officer', 'codl_admin', 'admin'), 403, 'Hanya pihak Jaminan Kualiti / Urus Setia boleh menandatangani peranan ini.');
+            abort_unless($u->hasAnyRole('qa_officer', 'codl_admin'), 403, 'Hanya pihak Jaminan Kualiti / Urus Setia boleh menandatangani peranan ini.');
         }
 
         $signoffs = json_decode($rec->d10_signoffs ?? '[]', true) ?: [];
@@ -318,6 +424,8 @@ final class QvController
         $max = (int) $this->settings->get('qv.max_validity_years');
         $maxValidUntil = \Carbon\Carbon::parse($d['valid_from'])->addYearsNoOverflow($max)->toDateString();
         if (\Carbon\Carbon::parse($d['valid_until'])->toDateString() > $maxValidUntil) {
+            $request->session()->flash('qv_active_tab', 'changes_submission');
+            $request->session()->flash('qv_error_tabs', ['changes_submission']);
             throw ValidationException::withMessages(['valid_until' => "Quality Verification can be valid for at most $max years from its start (until $maxValidUntil). Check the dates."]); // BR-02
         }
 
@@ -401,7 +509,7 @@ final class QvController
     {
         $q = DB::table('micro_credentials as m')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->where('m.category', 'samc')->where('m.category_status', 'confirmed')->whereExists(fn ($w) => $w->select(DB::raw(1))->from('mc_versions as v')->whereColumn('v.micro_credential_id', 'm.id')->whereIn('v.status', ['approved', 'superseded']));
         $u = $request->user();
-        if ($u->hasAnyRole('codl_admin', 'qa_officer', 'admin')) {
+        if ($u->hasAnyRole('codl_admin', 'qa_officer', 'academic_authority')) {
             // University-wide access
         } elseif ($u->hasAnyRole('deputy_dean') && ! $u->hasAnyRole('lecturer')) {
             $ids = $u->scopedPtjIds('deputy_dean');

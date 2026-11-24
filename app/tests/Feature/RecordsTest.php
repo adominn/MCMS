@@ -203,10 +203,11 @@ it('lists what has passed its period and disposes of it only with approval, leav
     expect($c['notifications']['count'])->toBe(1)->and($c['notifications']['years'])->toBe(2);
     $this->actingAs($this->farid)->get('/records/retention')->assertOk()->assertSee('Notification log');
     $this->post('/records/retention/notifications/dispose')->assertForbidden(); // CODL does not approve
+    $this->actingAs($this->hakim)->post('/records/retention/notifications/dispose')->assertForbidden(); // Deputy Dean no longer approves disposal
     $before = DB::table('audit_events')->count();
-    $this->actingAs($this->hakim)->post('/records/retention/notifications/dispose')->assertSessionHasNoErrors();
+    $this->actingAs(userZulkifli())->post('/records/retention/notifications/dispose')->assertSessionHasNoErrors();
     $r = DB::table('disposal_records')->first();
-    expect($r->row_count)->toBe(1)->and($r->approved_by)->toBe($this->hakim->id)->and(DB::table('notifications')->where('subject', 'old')->exists())->toBeFalse()->and(DB::table('notifications')->where('subject', 'new')->exists())->toBeTrue()
+    expect($r->row_count)->toBe(1)->and($r->approved_by)->toBe(userZulkifli()->id)->and(DB::table('notifications')->where('subject', 'old')->exists())->toBeFalse()->and(DB::table('notifications')->where('subject', 'new')->exists())->toBeTrue()
         ->and(DB::table('audit_events')->where('action', 'disposal.approved')->exists())->toBeTrue()->and(DB::table('audit_events')->count())->toBeGreaterThan($before);
     $this->post('/records/retention/credentials/dispose')->assertNotFound(); // academic records are never listed
 });
@@ -215,7 +216,7 @@ it('stops disposal while a hold is on (FR-hold)', function () {
     DB::table('notifications')->insert(['user_id' => $this->amir->id, 'channel' => 'in_system', 'locale' => 'en', 'status' => 'sent', 'template_key' => 'x', 'subject' => 'old', 'body' => 'old', 'created_at' => now()->subYears(3)]);
     $this->actingAs($this->farid)->post('/records/retention/holds', ['category' => 'notifications', 'reason' => 'Under audit'])->assertSessionHasNoErrors();
     $this->post('/records/retention/holds', ['category' => 'notifications', 'reason' => 'again'])->assertStatus(422);
-    $this->actingAs($this->hakim)->post('/records/retention/notifications/dispose')->assertStatus(422);
+    $this->actingAs(userZulkifli())->post('/records/retention/notifications/dispose')->assertStatus(422);
     expect(DB::table('notifications')->where('subject', 'old')->exists())->toBeTrue();
     $h = DB::table('retention_holds')->value('id');
     $this->post("/records/retention/holds/$h/lift")->assertSessionHasNoErrors();

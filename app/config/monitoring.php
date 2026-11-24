@@ -4,39 +4,39 @@
 return [
     // Appendix C5: 8 Implementation Quality Domains
     'domains' => [
-        'lo_alignment' => 'Keselarasan kandungan dengan hasil pembelajaran (Content alignment with learning outcomes)',
-        'slt_adequacy' => 'Kecukupan SLT dan beban pembelajaran (SLT adequacy and learning workload)',
-        'materials_quality' => 'Kualiti bahan dan aktiviti pembelajaran (Quality of learning materials and activities)',
-        'assessment_validity' => 'Kesahan dan kebolehpercayaan pentaksiran (Assessment validity and reliability)',
-        'integrity_identity' => 'Integriti pentaksiran / pengesahan identiti (Assessment integrity and identity verification)',
-        'platform_support' => 'Platform, akses dan sokongan peserta (Platform, access and participant support)',
-        'record_accuracy' => 'Ketepatan rekod dan pengeluaran credential (Record accuracy and credential issuance)',
-        'qv_status' => 'Status QV / kredit / MQF jika berkenaan (QV, credit, and MQF status if applicable)',
+        'lo_alignment' => 'Content alignment with learning outcomes',
+        'slt_adequacy' => 'SLT adequacy and learning workload',
+        'materials_quality' => 'Quality of learning materials and activities',
+        'assessment_validity' => 'Assessment validity and reliability',
+        'integrity_identity' => 'Assessment integrity and identity verification',
+        'platform_support' => 'Platform, access and participant support',
+        'record_accuracy' => 'Record accuracy and credential issuance',
+        'qv_status' => 'QV, credit, and MQF status if applicable',
     ],
 
     'domain_statuses' => [
-        'memuaskan' => 'Memuaskan (Satisfactory)',
-        'perlu_tindakan' => 'Perlu Tindakan (Needs Action)',
-        'tb' => 'Tidak Berkaitan (Not Applicable)',
+        'memuaskan' => 'Satisfactory',
+        'perlu_tindakan' => 'Needs action',
+        'tb' => 'Not applicable',
     ],
 
     // Appendix C4: 4 Feedback & Stakeholder Sources
     'feedback_sources' => [
         'learners' => [
-            'label' => 'Peserta (Learners)',
-            'aspect' => 'Kandungan, aktiviti, pentaksiran, platform, sokongan',
+            'label' => 'Learners',
+            'aspect' => 'Content, activities, assessment, platform, support',
         ],
         'instructors' => [
-            'label' => 'Pengajar / Fasilitator (Instructors / Facilitators)',
-            'aspect' => 'Reka bentuk dan pelaksanaan',
+            'label' => 'Instructors / Facilitators',
+            'aspect' => 'Design and delivery',
         ],
         'industry' => [
-            'label' => 'Industri / Majikan / Profesional (Industry / Employers / Professionals)',
-            'aspect' => 'Relevansi dan kompetensi',
+            'label' => 'Industry / Employers / Professionals',
+            'aspect' => 'Relevance and competency',
         ],
         'system_data' => [
-            'label' => 'Data sistem / rekod operasi (System data / operational records)',
-            'aspect' => 'Akses, penyertaan, penyempurnaan',
+            'label' => 'System data / operational records',
+            'aspect' => 'Access, participation, completion',
         ],
     ],
 
@@ -83,23 +83,23 @@ return [
     ],
 
     'priority' => [
-        'high' => 'High (Tinggi)',
-        'medium' => 'Medium (Sederhana)',
-        'low' => 'Low (Rendah)',
+        'high' => 'High',
+        'medium' => 'Medium',
+        'low' => 'Low',
     ],
 
     'action_status' => [
-        'not_started' => 'Not started (Belum)',
-        'in_progress' => 'In progress (Proses)',
-        'done' => 'Done (Selesai - effectiveness pending)',
-        'closed' => 'Closed (Ditutup)',
-        'carried' => 'Carried to the next cycle (Dibawa ke kitaran seterusnya)',
+        'not_started' => 'Not started',
+        'in_progress' => 'In progress',
+        'done' => 'Done (effectiveness pending)',
+        'closed' => 'Closed',
+        'carried' => 'Carried to next cycle',
     ],
 
     'effectiveness' => [
-        'effective' => 'Effective (Berkesan)',
-        'partly' => 'Partly effective (Sebahagian)',
-        'not_effective' => 'Not effective (Tidak Berkesan)',
+        'effective' => 'Effective',
+        'partly' => 'Partly effective',
+        'not_effective' => 'Not effective',
     ],
 
     'confirmations' => [
@@ -118,38 +118,38 @@ return [
 
     // Appendix C9: 5 Review Decisions
     'c9_decisions' => [
-        'continue_no_change' => 'Teruskan tanpa perubahan signifikan (Continue without significant change)',
-        'continue_minor_cqi' => 'Teruskan dengan CQI kecil (Continue with minor CQI)',
-        'content_review_needed' => 'Semakan kandungan/pentaksiran diperlukan (Content/assessment review needed)',
-        'reapproval_needed' => 'Perlu semakan/kelulusan semula (Review and re-approval needed)',
-        'consider_suspension' => 'Pertimbang penggantungan/penamatan (Consider suspension or termination)',
+        'continue_no_change' => 'Continue without significant change',
+        'continue_minor_cqi' => 'Continue with minor CQI',
+        'content_review_needed' => 'Content/assessment review needed',
+        'reapproval_needed' => 'Review and re-approval needed',
+        'consider_suspension' => 'Consider suspension or termination',
     ],
 
     // Appendix C9: 8 Affected Components
     'c9_affected_components' => [
-        'learning_outcomes' => 'Hasil Pembelajaran (Learning Outcomes)',
-        'slt_credits' => 'SLT / Kredit (SLT / Credits)',
-        'mqf_qv_level' => 'Tahap MQF / QV (MQF / QV Level)',
-        'core_content' => 'Kandungan Teras (Core Content)',
-        'key_assessment' => 'Pentaksiran Utama (Key Assessment)',
-        'delivery_mode' => 'Mod Penyampaian (Delivery Mode)',
+        'learning_outcomes' => 'Learning Outcomes',
+        'slt_credits' => 'SLT / Credits',
+        'mqf_qv_level' => 'MQF / QV Level',
+        'core_content' => 'Core Content',
+        'key_assessment' => 'Key Assessment',
+        'delivery_mode' => 'Delivery Mode',
         'credentials' => 'Credential',
-        'provider_partners' => 'Penyedia / Rakan Kerjasama (Providers / Partners)',
+        'provider_partners' => 'Providers / Partners',
     ],
 
     // Appendix C10: 3 Sign-Off Roles
     'c10_roles' => [
         'coordinator' => [
             'code' => 'P1',
-            'title' => 'Penyelaras Micro-Credential (MC Coordinator)',
+            'title' => 'MC Coordinator',
         ],
         'ptj_rep' => [
             'code' => 'P2',
-            'title' => 'Wakil PTj / Fakulti (PTj / Faculty Representative)',
+            'title' => 'PTj / Faculty Representative',
         ],
         'qa_authority' => [
             'code' => 'P4',
-            'title' => 'Pihak Jaminan Kualiti / Berkuasa jika berkenaan (QA / University Authority)',
+            'title' => 'QA / University Authority',
         ],
     ],
 

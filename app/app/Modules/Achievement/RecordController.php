@@ -35,7 +35,7 @@ final class RecordController
         $rec = Completion::record($enrolmentId);
         $e = DB::table('enrolments as e')->join('offerings as o', 'o.id', '=', 'e.offering_id')->join('users as u', 'u.id', '=', 'e.user_id')->join('mc_versions as v', 'v.id', '=', 'e.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as lu', 'lu.id', '=', 'm.owner_id')->leftJoin('ptjs as p', 'p.id', '=', 'm.ptj_id')->where('e.id', $enrolmentId)
             ->first(['e.*', 'o.cohort_name', 'o.start_date', 'o.end_date', 'o.delivery_mode', 'v.name_en', 'v.name_ms', 'v.version_no', 'v.proposed_credit', 'v.badge_image_path', 'm.category', 'p.name as ptj_name', 'p.code as ptj_code', 'u.name as person', 'u.institution_id', 'lu.name as lecturer_name']);
-        $achieved = DB::table('module_achievements as a')->join('digital_badges as b', 'b.module_achievement_id', '=', 'a.id')->where('a.enrolment_id', $enrolmentId)->get(['a.mc_module_id', 'a.achieved_at', 'b.code', 'b.external_id'])->keyBy('mc_module_id');
+        $achieved = DB::table('module_achievements as a')->leftJoin('digital_badges as b', 'b.module_achievement_id', '=', 'a.id')->where('a.enrolment_id', $enrolmentId)->get(['a.mc_module_id', 'a.achieved_at', 'b.code', 'b.external_id'])->keyBy('mc_module_id');
         $acr = DB::table('acrs')->where('achievement_record_id', $rec->id)->first(['id', 'reference', 'status', 'confirmed_at', 'credits']);
 
         return [

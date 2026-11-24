@@ -85,7 +85,7 @@ it('decides the category from the three answers and explains why', function () {
 
 it('shows the proposed category with its reason on the wizard page (FR-27)', function () {
     $this->actingAs($this->aina)->get('/proposals/new?origin=own&slt=30&credit=no')
-        ->assertSee('Proposed category: MCE')->assertSee('non-credit')->assertSee('until your deputy dean verifies it');
+        ->assertSee('Proposed category: MCE')->assertSee('non-credit')->assertSee('until verified by the Deputy Dean and/or CODL');
     $this->actingAs($this->aina)->get('/proposals/new?origin=unbundled&slt=120')->assertSee('Proposed category: UMC')->assertSee('Parent course');
 });
 
@@ -476,6 +476,25 @@ it('saves A3 category justification, A5 module content and activities, and A10 f
     // Check blocking error when activity SLT exceeds module SLT
     $check = app(ProposalChecker::class)->check($id);
     expect(array_column($check['blocking'], 'fr'))->toContain('FR-36');
+});
+
+it('renders approved proposals in workspace with stepper without undefined property errors', function () {
+    $u = User::whereHas('roleAssignments', fn ($q) => $q->where('role', 'lecturer'))->first();
+    $ptjId = DB::table('ptjs')->value('id');
+    $mc = DB::table('micro_credentials')->insertGetId([
+        'category' => 'samc', 'category_status' => 'confirmed', 'origin' => 'own', 'qv_planned' => 0,
+        'ptj_id' => $ptjId, 'owner_id' => $u->id, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    $vid = DB::table('mc_versions')->insertGetId([
+        'micro_credential_id' => $mc, 'version_no' => 1, 'proposal_type' => 'new', 'status' => 'approved',
+        'name_en' => 'Test Approved MC', 'updated_by' => $u->id, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+
+    $res = $this->actingAs($u)->get("/proposals/$vid");
+    $res->assertOk()
+        ->assertSee('Submission')
+        ->assertSee('Deputy Dean Endorsement')
+        ->assertSee('Senate Approval');
 });
 
 

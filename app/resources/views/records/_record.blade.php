@@ -20,13 +20,13 @@
     </div>
     @if(!empty($d['acr']))
       @php
-        $acrLink = auth()->user()->hasAnyRole('student') && ! auth()->user()->hasAnyRole('lecturer', 'deputy_dean', 'codl_admin')
+        $acrLink = auth()->user()->hasAnyRole('student') && ! auth()->user()->hasAnyRole('lecturer', 'deputy_dean', 'ptj_authority', 'academic_authority', 'qa_officer', 'codl_admin', 'records_custodian', 'abc_depositor', 'records_depositor')
           ? route('credit.acr', $d['acr']->id)
-          : (auth()->user()->hasAnyRole('deputy_dean') ? route('deposits.show', $d['acr']->id) : null);
+          : (auth()->user()->hasAnyRole('abc_depositor', 'records_depositor') ? route('deposits.show', $d['acr']->id) : null);
       @endphp
       @if($acrLink)
         <a href="{{ $acrLink }}" class="btn ghost sm" style="white-space:nowrap">
-          {{ __('View ACR (:credits cr) &rarr;', ['credits' => $d['acr']->credits]) }}
+          <span class="btn-lbl">{{ __('View ACR') }} ({{ $d['acr']->credits }} {{ __('cr') }})</span> &rarr;
         </a>
       @else
         <span class="tag info" style="white-space:nowrap">
@@ -105,21 +105,21 @@
               @foreach($d['modules'] as $m)
                 <tr>
                   <td>
-                    @if($m->achieved)
+                    @php
+                      $modName = (app()->getLocale() === 'ms' && !empty($m->name_ms)) ? $m->name_ms : $m->name;
+                    @endphp
+                    @if($m->achieved && !empty($m->achieved->code))
                       <a href="{{ route('verify.show', $m->achieved->code) }}" target="_blank" style="font-weight:700;color:var(--ink);text-decoration:none">
-                        <span style="color:var(--primary);text-decoration:underline">{{ $m->seq }}. {{ $m->name }}</span>
+                        <span style="color:var(--primary);text-decoration:underline">{{ $m->seq }}. {{ $modName }}</span>
                         <span style="font-size:11px;color:var(--muted)">&nearr;</span>
                       </a>
                     @else
-                      <strong style="color:var(--ink)">{{ $m->seq }}. {{ $m->name }}</strong>
-                    @endif
-                    @if(!empty($m->name_ms))
-                      <div class="s muted" style="margin-top:2px">{{ $m->name_ms }}</div>
+                      <strong style="color:var(--ink)">{{ $m->seq }}. {{ $modName }}</strong>
                     @endif
                   </td>
                   <td class="num">{{ $m->slt_hours ?? '—' }}</td>
                   <td>
-                    @if($m->achieved)
+                    @if($m->achieved && !empty($m->achieved->code))
                       <div style="display:flex;align-items:center;gap:10px">
                         <a href="{{ route('verify.show', $m->achieved->code) }}" target="_blank" title="{{ __('View digital badge verification') }}" style="display:inline-flex;align-items:center;text-decoration:none">
                           <x-badge :category="$d['e']->category" :size="36" :image="$d['e']->badge_image_path ?? null" />
@@ -131,6 +131,13 @@
                           @if(!empty($m->achieved->external_id))
                             <div class="s muted" style="font-size:11px">UCreds {{ $m->achieved->external_id }}</div>
                           @endif
+                        </div>
+                      </div>
+                    @elseif($m->achieved)
+                      <div style="display:flex;align-items:center;gap:10px">
+                        <x-badge :category="$d['e']->category" :size="36" :image="$d['e']->badge_image_path ?? null" />
+                        <div>
+                          <span class="muted" style="font-size:12px">{{ __('Badge issuance pending') }}</span>
                         </div>
                       </div>
                     @else
@@ -290,10 +297,10 @@
               </div>
               @if(isset($cr->id))
                 @php
-                  $isStudent = auth()->user()->hasAnyRole('student') && ! auth()->user()->hasAnyRole('lecturer', 'deputy_dean', 'codl_admin');
+                  $isStudent = auth()->user()->hasAnyRole('student') && ! auth()->user()->hasAnyRole('lecturer', 'deputy_dean', 'ptj_authority', 'academic_authority', 'qa_officer', 'codl_admin', 'records_custodian', 'abc_depositor', 'records_depositor');
                   $credLink = $isStudent
                     ? route('credentials.show', $cr->id)
-                    : (auth()->user()->hasAnyRole('deputy_dean')
+                    : (auth()->user()->hasAnyRole('records_custodian', 'records_depositor', 'deputy_dean', 'ptj_authority')
                       ? route('credentials.admin.show', $cr->id)
                       : (!empty($cr->public_code) ? route('public.verify.show', $cr->public_code) : null));
                 @endphp
@@ -338,13 +345,14 @@
                 </div>
               @endif
               @php
-                $acrLinkSide = auth()->user()->hasAnyRole('student') && ! auth()->user()->hasAnyRole('lecturer', 'deputy_dean', 'codl_admin')
+                $isDepositor = auth()->user()->hasAnyRole('abc_depositor', 'records_depositor');
+                $acrLinkSide = auth()->user()->hasAnyRole('student') && ! auth()->user()->hasAnyRole('lecturer', 'deputy_dean', 'ptj_authority', 'academic_authority', 'qa_officer', 'codl_admin', 'records_custodian', 'abc_depositor', 'records_depositor')
                   ? route('credit.acr', $d['acr']->id)
-                  : (auth()->user()->hasAnyRole('deputy_dean') ? route('deposits.show', $d['acr']->id) : null);
+                  : ($isDepositor ? route('deposits.show', $d['acr']->id) : null);
               @endphp
               @if($acrLinkSide)
                 <a href="{{ $acrLinkSide }}" class="btn ghost sm" style="width:100%;justify-content:center;margin-top:10px">
-                  {{ auth()->user()->hasAnyRole('deputy_dean') ? __('View in Deposit Queue & ABC') : __('View in Credit Ledger & ABC') }} &rarr;
+                  {{ $isDepositor ? __('View in Deposit Queue & ABC') : __('View in Credit Ledger & ABC') }} &rarr;
                 </a>
               @endif
             </div>
@@ -488,8 +496,7 @@
         @foreach($d['modules'] as $m)
           <tr>
             <td>
-              <b>{{ $m->seq }}. {{ $m->name }}</b>
-              @if(!empty($m->name_ms))<div class="small muted">{{ $m->name_ms }}</div>@endif
+              <b>{{ $m->seq }}. {{ (app()->getLocale() === 'ms' && !empty($m->name_ms)) ? $m->name_ms : $m->name }}</b>
             </td>
             <td class="num">{{ $m->slt_hours ?? '-' }}</td>
             <td>

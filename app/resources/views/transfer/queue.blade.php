@@ -3,7 +3,8 @@
 @section('content')
 @php
   $pendingCount = $rows->whereIn('status', ['submitted', 'under_eval'])->count();
-  $isDd = false;
+  $canEvaluate = auth()->user()->hasAnyRole('codl_admin', 'academic_authority');
+  $isDd = ! $canEvaluate && auth()->user()->hasAnyRole('deputy_dean', 'ptj_authority');
 @endphp
 
 <div class="title">
@@ -68,64 +69,278 @@
   </div>
 
   <div data-pane="held" @if(!count($inUse)) data-empty @endif>
+    @php
+      $canRedeem = auth()->user()->hasAnyRole('codl_admin', 'academic_authority', 'abc_depositor', 'records_depositor');
+      $heldApps = $inUse->groupBy('application_id')->map(function ($group) {
+          $first = $group->first();
+          return (object) [
+              'application_id' => $first->application_id,
+              'reference' => $first->reference,
+              'programme' => $first->programme ?? '',
+              'name' => $first->name,
+              'institution_id' => $first->institution_id ?? '',
+              'line_ids' => $group->pluck('id')->all(),
+              'course_codes' => $group->pluck('course_code')->unique()->values()->all(),
+              'courses' => $group->map(fn ($x) => (object) [
+                  'course_code' => $x->course_code,
+                  'course_name' => $x->course_name,
+                  'mc_name' => $x->mc_name ?? '',
+                  'acr_reference' => $x->acr_reference ?? '',
+                  'credits' => (float) ($x->credits_approved ?: ($x->credits_requested ?? 0)),
+              ])->values(),
+              'line_count' => $group->count(),
+              'total_credits' => (float) $group->sum(fn ($x) => $x->credits_approved ?: ($x->credits_requested ?? 0)),
+          ];
+      })->values();
+      $heldProgrammes = $heldApps->pluck('programme')->filter()->unique()->sort()->values();
+    @endphp
     <div class="panel">
-      <div class="hd">
-        <h2>{{ __('Single redemption ledger (Provisionally redeemed credits)') }}</h2>
-        <span class="r"><span class="tag warn">{{ count($inUse) }} {{ __('held') }}</span></span>
+      <div class="hd" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <h2 style="margin:0">{{ __('Single redemption ledger (Provisionally redeemed credits)') }}</h2>
+        <span class="tag warn">{{ $heldApps->count() }} {{ $heldApps->count() === 1 ? __('application') : __('applications') }} &middot; {{ count($inUse) }} {{ count($inUse) === 1 ? __('course') : __('courses') }}</span>
       </div>
-      <div class="table-wrap">
-        <table id="in-use">
-          <thead>
-            <tr>
-              <th>{{ __('Application') }}</th>
-              <th>{{ __('Participant') }}</th>
-              <th style="text-align:right">{{ __('Credits') }}</th>
-              <th>{{ __('Programme completion / non-completion & ABC update') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-          @forelse($inUse as $x)
-            <tr>
-              <td>
-                <b><code>{{ $x->reference }}</code></b>
-                <div class="muted small">{{ $x->programme ?? '' }}</div>
-              </td>
-              <td>{{ $x->name }}</td>
-              <td style="text-align:right;font-weight:600">{{ mcms_num($x->credits_approved ?: ($x->credits_requested ?? 0)) }} cr</td>
-              <td>
-                <form method="post" action="{{ route('transfers.redeem', $x->id) }}" style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end">
-                  @csrf
-                  <div style="display:inline-flex;flex-direction:column;gap:2px">
-                    <label for="ev-{{ $x->id }}" class="small muted">{{ __('Evidence reference') }} *</label>
-                    <input id="ev-{{ $x->id }}" name="evidence_ref" type="text" placeholder="{{ __('Grad / withdrawal ref') }}" required style="width:150px;min-height:32px;padding:4px 8px;font-size:12px">
-                  </div>
-                  <div style="display:inline-flex;flex-direction:column;gap:2px">
-                    <label for="what-{{ $x->id }}" class="small muted">{{ __('Outcome') }} *</label>
-                    <select id="what-{{ $x->id }}" name="what" aria-label="Outcome for {{ $x->reference }}" style="min-height:32px;padding:4px 8px;font-size:12px">
-                      <option value="completed">{{ __('Programme completed (Redeem)') }}</option>
-                      <option value="not_completed">{{ __('Withdrawn or not completed (Release)') }}</option>
-                    </select>
-                  </div>
-                  <div style="display:inline-flex;flex-direction:column;gap:2px">
-                    <label for="abcon-{{ $x->id }}" class="small muted">{{ __('ABC updated on') }}</label>
-                    <input id="abcon-{{ $x->id }}" name="abc_updated_on" type="date" aria-label="ABC updated date for {{ $x->reference }}" style="width:136px;min-height:32px;padding:4px 8px;font-size:12px">
-                  </div>
-                  <div style="display:inline-flex;flex-direction:column;gap:2px">
-                    <label for="abcref-{{ $x->id }}" class="small muted">{{ __('ABC update ref') }}</label>
-                    <input id="abcref-{{ $x->id }}" name="abc_update_ref" type="text" placeholder="{{ __('ABC update ref') }}" aria-label="ABC update reference for {{ $x->reference }}" style="width:135px;min-height:32px;padding:4px 8px;font-size:12px">
-                  </div>
-                  <div>
-                    <button type="submit" class="btn ter sm">{{ __('Record') }}</button>
-                  </div>
-                </form>
-              </td>
-            </tr>
-          @empty
-            <tr><td colspan="4" class="muted" style="text-align:center;padding:24px">{{ __('No credit is held.') }}</td></tr>
-          @endforelse
-          </tbody>
-        </table>
-      </div>
+
+      @if($heldApps->isNotEmpty() && $canRedeem)
+        <form method="post" action="{{ route('transfers.redeem.bulk') }}" id="bulk-redeem-form">
+          @csrf
+          <input type="hidden" name="return_to" value="held">
+
+          {{-- Bulk Action Bar for Cohort / Multi-Student Redemption --}}
+          <div style="padding:12px 16px;background:var(--color-canvas-subtle, #f8fafc);border-bottom:1px solid var(--color-line-hairline, #e2e8f0);display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
+            <div style="display:inline-flex;flex-direction:column;gap:2px;flex:1;min-width:170px">
+              <label for="bulk-ev" class="small muted">{{ __('Evidence reference (e.g. Senate graduation list)') }} *</label>
+              <input id="bulk-ev" name="evidence_ref" type="text" placeholder="{{ __('e.g. SENATE/GRAD/2026-BITS') }}" required style="width:100%;min-height:34px;padding:4px 8px;font-size:12.5px">
+            </div>
+            <div style="display:inline-flex;flex-direction:column;gap:2px;min-width:210px">
+              <label for="bulk-what" class="small muted">{{ __('Outcome') }} *</label>
+              <select id="bulk-what" name="what" style="min-height:34px;padding:4px 8px;font-size:12.5px">
+                <option value="completed">{{ __('Programme completed (Redeem)') }}</option>
+                <option value="not_completed">{{ __('Withdrawn or not completed (Release)') }}</option>
+              </select>
+            </div>
+            <div style="display:inline-flex;flex-direction:column;gap:2px">
+              <label for="bulk-abcon" class="small muted">{{ __('ABC updated on') }}</label>
+              <input id="bulk-abcon" name="abc_updated_on" type="date" style="width:140px;min-height:34px;padding:4px 8px;font-size:12.5px">
+            </div>
+            <div style="display:inline-flex;flex-direction:column;gap:2px">
+              <label for="bulk-abcref" class="small muted">{{ __('ABC update ref') }}</label>
+              <input id="bulk-abcref" name="abc_update_ref" type="text" placeholder="{{ __('Optional ref') }}" style="width:140px;min-height:34px;padding:4px 8px;font-size:12.5px">
+            </div>
+            <div>
+              <button type="submit" class="btn primary sm" id="bulk-redeem-btn" disabled>{{ __('Record for selected (0)') }}</button>
+            </div>
+          </div>
+
+          {{-- Search, Programme Filter & Sort Bar for Bulk Selection --}}
+          <div style="padding:10px 16px;background:#ffffff;border-bottom:1px solid var(--color-card-border, #090a0f);display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between">
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex:1">
+              <input id="held-search" type="search" placeholder="{{ __('Search student, matric, ref, or course...') }}" aria-label="{{ __('Search held applications') }}" style="min-width:240px;flex:1;max-width:360px;min-height:32px;padding:4px 10px;font-size:12.5px">
+              <select id="held-prog-filter" aria-label="{{ __('Filter by programme') }}" style="min-height:32px;padding:4px 8px;font-size:12.5px">
+                <option value="">{{ __('All programmes') }}</option>
+                @foreach($heldProgrammes as $pc)
+                  <option value="{{ $pc }}">{{ $pc }}</option>
+                @endforeach
+              </select>
+              <select id="held-sort" aria-label="{{ __('Sort applications') }}" style="min-height:32px;padding:4px 8px;font-size:12.5px">
+                <option value="ref_asc">{{ __('Sort: Reference (A–Z)') }}</option>
+                <option value="name_asc">{{ __('Sort: Participant (A–Z)') }}</option>
+                <option value="credits_desc">{{ __('Sort: Credits (High–Low)') }}</option>
+                <option value="courses_desc">{{ __('Sort: Courses (High–Low)') }}</option>
+              </select>
+            </div>
+            <span class="s muted" id="held-visible-count">{{ $heldApps->count() }} {{ $heldApps->count() === 1 ? __('row') : __('rows') }}</span>
+          </div>
+
+          <div id="bulk-line-inputs"></div>
+
+          <div class="table-wrap">
+            <table id="in-use" data-no-search style="margin:0">
+              <thead>
+                <tr>
+                  <th style="width:38px">
+                    <input type="checkbox" id="held-select-all" aria-label="{{ __('Select all visible applications') }}">
+                  </th>
+                  <th>{{ __('Application') }}</th>
+                  <th>{{ __('Participant') }}</th>
+                  <th>{{ __('Courses Held') }}</th>
+                  <th style="text-align:right">{{ __('Total Credits') }}</th>
+                </tr>
+              </thead>
+              <tbody id="held-tbody">
+                @foreach($heldApps as $appRow)
+                  @php
+                    $searchBlob = strtolower($appRow->reference.' '.$appRow->programme.' '.$appRow->name.' '.$appRow->institution_id.' '.implode(' ', $appRow->course_codes).' '.$appRow->courses->pluck('course_name')->implode(' ').' '.$appRow->courses->pluck('mc_name')->implode(' '));
+                  @endphp
+                  <tr data-held-row
+                      data-prog="{{ $appRow->programme }}"
+                      data-ref="{{ strtolower($appRow->reference) }}"
+                      data-name="{{ strtolower($appRow->name) }}"
+                      data-credits="{{ $appRow->total_credits }}"
+                      data-courses="{{ $appRow->line_count }}"
+                      data-search="{{ $searchBlob }}">
+                    <td style="vertical-align:top;padding-top:12px">
+                      <input type="checkbox" class="held-app-chk" data-lines='@json($appRow->line_ids)' aria-label="Select {{ $appRow->reference }}">
+                    </td>
+                    <td style="vertical-align:top">
+                      <a href="{{ route('transfers.show', $appRow->application_id) }}?tab=admission" style="font-weight:600"><code>{{ $appRow->reference }}</code></a>
+                      <div class="muted small">{{ $appRow->programme }}</div>
+                    </td>
+                    <td style="vertical-align:top">
+                      <strong>{{ $appRow->name }}</strong>
+                      @if($appRow->institution_id)
+                        <div class="s muted"><code>{{ $appRow->institution_id }}</code></div>
+                      @endif
+                    </td>
+                    <td style="vertical-align:top">
+                      <details>
+                        <summary style="cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap">
+                          <span class="tag info" style="font-size:11px">{{ $appRow->line_count }} {{ $appRow->line_count === 1 ? __('course') : __('courses') }}</span>
+                          <span class="s muted" style="font-family:var(--mono)">{{ implode(', ', $appRow->course_codes) }}</span>
+                          <span class="s" style="color:var(--color-primary, #0052ff);font-weight:600">{{ __('Details') }}</span>
+                        </summary>
+                        <div style="margin-top:8px;border:1px solid var(--color-line-hairline, #e2e8f0);border-radius:4px;background:#ffffff;padding:8px 10px">
+                          @foreach($appRow->courses as $c)
+                            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:4px 0;{{ !$loop->last ? 'border-bottom:1px solid #f1f5f9;' : '' }}font-size:12px">
+                              <div>
+                                <strong style="font-family:var(--mono)">{{ $c->course_code }}</strong> {{ $c->course_name }}
+                                <div class="s muted" style="font-size:11px">{{ $c->mc_name }} @if($c->acr_reference)&middot; <code>{{ $c->acr_reference }}</code>@endif</div>
+                              </div>
+                              <span style="font-weight:600;white-space:nowrap">{{ mcms_num($c->credits) }} cr</span>
+                            </div>
+                          @endforeach
+                        </div>
+                      </details>
+                    </td>
+                    <td style="text-align:right;font-weight:700;vertical-align:top">{{ mcms_num($appRow->total_credits) }} cr</td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+        </form>
+
+        <script>
+        (function () {
+          var form = document.getElementById('bulk-redeem-form');
+          var selectAll = document.getElementById('held-select-all');
+          var progFilter = document.getElementById('held-prog-filter');
+          var searchInp = document.getElementById('held-search');
+          var sortSel = document.getElementById('held-sort');
+          var tbody = document.getElementById('held-tbody');
+          var visCount = document.getElementById('held-visible-count');
+          var btn = document.getElementById('bulk-redeem-btn');
+          var container = document.getElementById('bulk-line-inputs');
+          if (!form || !btn || !container || !tbody) return;
+
+          function allRows() {
+            return Array.prototype.slice.call(tbody.querySelectorAll('tr[data-held-row]'));
+          }
+
+          function visibleChks() {
+            return allRows()
+              .filter(function (tr) { return tr.style.display !== 'none'; })
+              .map(function (tr) { return tr.querySelector('.held-app-chk'); })
+              .filter(Boolean);
+          }
+
+          function syncSelection() {
+            var vis = visibleChks();
+            var checked = vis.filter(function (c) { return c.checked; });
+            var allLineIds = [];
+            checked.forEach(function (c) {
+              try {
+                var ids = JSON.parse(c.getAttribute('data-lines') || '[]');
+                ids.forEach(function (id) { allLineIds.push(id); });
+              } catch (e) {}
+            });
+            container.innerHTML = '';
+            allLineIds.forEach(function (id) {
+              var inp = document.createElement('input');
+              inp.type = 'hidden';
+              inp.name = 'line_ids[]';
+              inp.value = String(id);
+              container.appendChild(inp);
+            });
+            btn.disabled = allLineIds.length === 0;
+            btn.textContent = '{{ __("Record for selected") }} (' + checked.length + ' · ' + allLineIds.length + ' {{ __("courses") }})';
+            if (selectAll) {
+              selectAll.checked = vis.length > 0 && checked.length === vis.length;
+            }
+            if (visCount) {
+              visCount.textContent = vis.length + ' ' + (vis.length === 1 ? '{{ __("row") }}' : '{{ __("rows") }}');
+            }
+          }
+
+          function applyFilterAndSort() {
+            var q = (searchInp ? searchInp.value : '').trim().toLowerCase();
+            var p = progFilter ? progFilter.value : '';
+            var rows = allRows();
+
+            rows.forEach(function (tr) {
+              var matchProg = !p || tr.getAttribute('data-prog') === p;
+              var matchQ = !q || (tr.getAttribute('data-search') || '').indexOf(q) !== -1;
+              var show = matchProg && matchQ;
+              tr.style.display = show ? '' : 'none';
+              if (!show) {
+                var c = tr.querySelector('.held-app-chk');
+                if (c) c.checked = false;
+              }
+            });
+
+            if (sortSel) {
+              var mode = sortSel.value;
+              rows.sort(function (a, b) {
+                if (mode === 'name_asc') return (a.getAttribute('data-name') || '').localeCompare(b.getAttribute('data-name') || '');
+                if (mode === 'credits_desc') return parseFloat(b.getAttribute('data-credits') || '0') - parseFloat(a.getAttribute('data-credits') || '0');
+                if (mode === 'courses_desc') return parseInt(b.getAttribute('data-courses') || '0', 10) - parseInt(a.getAttribute('data-courses') || '0', 10);
+                return (a.getAttribute('data-ref') || '').localeCompare(b.getAttribute('data-ref') || '');
+              });
+              rows.forEach(function (tr) { tbody.appendChild(tr); });
+            }
+            syncSelection();
+          }
+
+          if (selectAll) {
+            selectAll.addEventListener('change', function () {
+              visibleChks().forEach(function (c) { c.checked = selectAll.checked; });
+              syncSelection();
+            });
+          }
+          form.querySelectorAll('.held-app-chk').forEach(function (c) {
+            c.addEventListener('change', syncSelection);
+          });
+          if (progFilter) progFilter.addEventListener('change', applyFilterAndSort);
+          if (searchInp) searchInp.addEventListener('input', applyFilterAndSort);
+          if (sortSel) sortSel.addEventListener('change', applyFilterAndSort);
+          syncSelection();
+        })();
+        </script>
+      @else
+        <div class="table-wrap">
+          <table id="in-use" style="margin:0">
+            <thead>
+              <tr>
+                <th>{{ __('Application') }}</th>
+                <th>{{ __('Participant') }}</th>
+                <th>{{ __('Courses Held') }}</th>
+                <th style="text-align:right">{{ __('Total Credits') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @forelse($heldApps as $appRow)
+                <tr>
+                  <td><b><code>{{ $appRow->reference }}</code></b><div class="muted small">{{ $appRow->programme }}</div></td>
+                  <td>{{ $appRow->name }}</td>
+                  <td>{{ $appRow->line_count }} {{ $appRow->line_count === 1 ? __('course') : __('courses') }} ({{ implode(', ', $appRow->course_codes) }})</td>
+                  <td style="text-align:right;font-weight:600">{{ mcms_num($appRow->total_credits) }} cr</td>
+                </tr>
+              @empty
+                <tr><td colspan="4" class="muted" style="text-align:center;padding:24px">{{ __('No credit is held.') }}</td></tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+      @endif
     </div>
   </div>
 

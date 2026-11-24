@@ -27,20 +27,136 @@ final class TransferController
 
     public function create(Request $request)
     {
-        $deposits = DB::table('abc_deposits as d')->join('acrs as a', 'a.id', '=', 'd.acr_id')->join('mc_versions as v', 'v.id', '=', 'a.mc_version_id')->where('a.user_id', $request->user()->id)->whereNotNull('d.credit_status')
-            ->get(['d.*', 'a.reference as acr_reference', 'a.mc_version_id', 'v.name_en'])->map(function ($d) {
+        $programmes = DB::table('programmes')->orderBy('code')->get();
+        $courses = DB::table('parent_courses')
+            ->where(fn ($q) => $q->whereNull('status')->orWhere('status', '!=', 'withdrawn'))
+            ->orderBy('code')
+            ->get();
+
+        // Published pathway mappings: [programme_id][micro_credential_id] => parent_course_id
+        $pathwayMaps = [];
+        $progCourseIds = [];
+        $pwRows = DB::table('pathway_items as i')
+            ->join('pathways as w', 'w.id', '=', 'i.pathway_id')
+            ->where('w.status', 'published')
+            ->get(['w.programme_id', 'i.micro_credential_id', 'i.parent_course_id']);
+        foreach ($pwRows as $r) {
+            $pathwayMaps[(int) $r->programme_id][(int) $r->micro_credential_id] = (int) $r->parent_course_id;
+            $progCourseIds[(int) $r->programme_id][] = (int) $r->parent_course_id;
+        }
+
+        // Approved course equivalences: [source_course_id][target_programme_id] => target_course_id
+        $equivMaps = [];
+        $eqRows = DB::table('course_equivalences')
+            ->where('status', 'approved')
+            ->whereIn('equivalence_type', ['exact', 'partial', 'conditional'])
+            ->get(['source_course_id', 'target_course_id', 'target_programme_id']);
+        foreach ($eqRows as $er) {
+            if ($er->target_programme_id) {
+                $equivMaps[(int) $er->source_course_id][(int) $er->target_programme_id] = (int) $er->target_course_id;
+            }
+        }
+
+        // Non-transferable course codes per programme
+        $nonTransferable = [];
+        foreach ($programmes as $p) {
+            $raw = (string) ($p->non_transferable ?? '');
+            $decoded = json_decode($raw, true);
+            $list = is_array($decoded) ? $decoded : array_filter(array_map('trim', explode(',', $raw)));
+            $nonTransferable[(int) $p->id] = array_map(fn ($v) => strtoupper(trim((string) $v)), $list);
+        }
+
+        // Courses placed in each programme's active curriculum version
+        $plRows = DB::table('programme_course_placements as pl')
+            ->join('programme_versions as pv', 'pv.id', '=', 'pl.programme_version_id')
+            ->where('pv.status', 'active')
+            ->get(['pv.programme_id', 'pl.parent_course_id']);
+        foreach ($plRows as $pl) {
+            $progCourseIds[(int) $pl->programme_id][] = (int) $pl->parent_course_id;
+        }
+        foreach ($courses as $c) {
+            if ($c->programme_id) {
+                $progCourseIds[(int) $c->programme_id][] = (int) $c->id;
+            }
+        }
+        foreach ($progCourseIds as $pid => $cids) {
+            $progCourseIds[$pid] = array_values(array_unique($cids));
+        }
+
+        $defaultProgId = (int) (old('programme_id') ?: ($programmes->firstWhere('code', 'BITS')->id ?? $programmes->first()->id ?? 0));
+
+        $deposits = DB::table('abc_deposits as d')
+            ->join('acrs as a', 'a.id', '=', 'd.acr_id')
+            ->join('mc_versions as v', 'v.id', '=', 'a.mc_version_id')
+            ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+            ->where('a.user_id', $request->user()->id)
+            ->whereNotNull('d.credit_status')
+            ->get(['d.*', 'a.reference as acr_reference', 'a.mc_version_id', 'a.mqf_level as acr_mqf_level', 'v.micro_credential_id', 'v.parent_course_id', 'v.name_en', 'm.category as mc_category'])
+            ->map(function ($d) use ($programmes, $courses, $pathwayMaps, $equivMaps, $nonTransferable, $progCourseIds, $defaultProgId) {
                 $d->why = $this->ledger->whyNot($d);
                 $d->expired = $d->credit_status === 'expired' || $d->credit_expiry < today()->toDateString();
                 $d->busy = $this->activeLine($d->id);
                 if ($d->busy) {
                     $d->why = 'This credit is already in an application that is still being evaluated ('.$d->busy->reference.'). Wait for its decision.';
                 }
-                $d->selectable = ! $d->why || ($d->expired && $d->credit_status !== 'provisional' && $d->credit_status !== 'redeemed' && ! $d->busy); // expired credit is selectable with a flag (FR-ctavailable)
+                $d->selectable = ! $d->why || ($d->expired && $d->credit_status !== 'provisional' && $d->credit_status !== 'redeemed' && ! $d->busy);
+
+                // Auto-detect closest transferable course per programme
+                $suggestions = [];
+                foreach ($programmes as $p) {
+                    $pid = (int) $p->id;
+                    $blocked = $nonTransferable[$pid] ?? [];
+                    $matchId = null;
+
+                    // 1. Exact published pathway mapping
+                    if (isset($pathwayMaps[$pid][(int) $d->micro_credential_id])) {
+                        $matchId = $pathwayMaps[$pid][(int) $d->micro_credential_id];
+                    }
+                    // 2. Approved course equivalence from UMC parent course
+                    elseif ($d->parent_course_id && isset($equivMaps[(int) $d->parent_course_id][$pid])) {
+                        $matchId = $equivMaps[(int) $d->parent_course_id][$pid];
+                    }
+                    // 3. UMC parent course itself if transferable
+                    elseif ($d->parent_course_id) {
+                        $pc = $courses->firstWhere('id', (int) $d->parent_course_id);
+                        if ($pc && ! in_array(strtoupper($pc->code), $blocked, true)) {
+                            $matchId = (int) $pc->id;
+                        }
+                    }
+                    // 4. Closest title similarity match among transferable courses (preferring programme courses)
+                    if (! $matchId) {
+                        $bestScore = 0.0;
+                        $inProg = $progCourseIds[$pid] ?? [];
+                        foreach ($courses as $c) {
+                            if (in_array(strtoupper($c->code), $blocked, true)) {
+                                continue;
+                            }
+                            similar_text(mb_strtolower($d->name_en), mb_strtolower($c->name), $pct);
+                            $score = $pct + (in_array((int) $c->id, $inProg, true) ? 15.0 : 0.0);
+                            if ($score > $bestScore) {
+                                $bestScore = $score;
+                                $matchId = (int) $c->id;
+                            }
+                        }
+                    }
+                    if ($matchId) {
+                        $suggestions[$pid] = $matchId;
+                    }
+                }
+
+                $d->suggestions = $suggestions;
+                $d->suggested_course_id = $suggestions[$defaultProgId] ?? ($courses->first()->id ?? null);
 
                 return $d;
             });
 
-        return view('transfer.create', ['deposits' => $deposits, 'programmes' => DB::table('programmes')->orderBy('code')->get(), 'courses' => DB::table('parent_courses')->orderBy('code')->get()]);
+        return view('transfer.create', [
+            'deposits' => $deposits,
+            'programmes' => $programmes,
+            'courses' => $courses,
+            'nonTransferable' => $nonTransferable,
+            'progCourseIds' => $progCourseIds,
+        ]);
     }
 
     public function store(Request $request)
@@ -73,12 +189,23 @@ final class TransferController
         }
         $documentsText = $docSummaryParts !== [] ? implode('; ', $docSummaryParts) : null;
 
+        $prog = DB::table('programmes')->find($d['programme_id']);
+        $rawBlocked = (string) ($prog->non_transferable ?? '');
+        $decBlocked = json_decode($rawBlocked, true);
+        $blockedCodes = array_map(
+            fn ($v) => strtoupper(trim((string) $v)),
+            is_array($decBlocked) ? $decBlocked : array_filter(array_map('trim', explode(',', $rawBlocked)))
+        );
+
         $lines = [];
         foreach (array_unique(array_map('intval', $d['deposits'])) as $did) {
             $dep = DB::table('abc_deposits as d')->join('acrs as a', 'a.id', '=', 'd.acr_id')->join('mc_versions as v', 'v.id', '=', 'a.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
-                ->where('d.id', $did)->where('a.user_id', $request->user()->id)->first(['d.*', 'a.mc_version_id', 'v.version_no', 'm.category']) ?? abort(404);
+                ->where('d.id', $did)->where('a.user_id', $request->user()->id)->first(['d.*', 'a.mc_version_id', 'a.mqf_level as acr_mqf_level', 'v.version_no', 'v.name_en', 'm.category']) ?? abort(404);
             if ($dep->category === 'mce') {
                 throw ValidationException::withMessages(['deposits' => 'A Micro-Credential Eksekutif cannot be used directly for credit transfer.']); // BR-32
+            }
+            if ($dep->acr_mqf_level && $prog->mqf_level && (int) $dep->acr_mqf_level < (int) $prog->mqf_level) {
+                throw ValidationException::withMessages(['deposits' => "{$dep->name_en} is MQF {$dep->acr_mqf_level}, which is below {$prog->code}'s requirement (MQF {$prog->mqf_level})."]);
             }
             if ($busy = $this->activeLine($did)) {
                 throw ValidationException::withMessages(['deposits' => "This credit is already in application {$busy->reference}, which is still being evaluated. Wait for its decision."]); // FR-rdconflict, first
@@ -90,18 +217,42 @@ final class TransferController
             if ($expired && in_array($dep->credit_status, ['provisional', 'redeemed'], true)) {
                 throw ValidationException::withMessages(['deposits' => $this->ledger->whyNot($dep)]);
             }
-            $course = DB::table('parent_courses')->where('id', (int) ($d['course'][$did] ?? 0))->where('programme_id', $d['programme_id'])->first();
+            $courseId = (int) ($d['course'][$did] ?? 0);
+            $progId = (int) $d['programme_id'];
+            $course = DB::table('parent_courses')
+                ->where('id', $courseId)
+                ->where(function ($q) use ($progId) {
+                    $q->where('programme_id', $progId)
+                        ->orWhereExists(fn ($sub) => $sub->select(DB::raw(1))
+                            ->from('programme_course_placements as pl')
+                            ->join('programme_versions as pv', 'pv.id', '=', 'pl.programme_version_id')
+                            ->whereColumn('pl.parent_course_id', 'parent_courses.id')
+                            ->where('pv.programme_id', $progId)
+                            ->where('pv.status', 'active'))
+                        ->orWhereExists(fn ($sub) => $sub->select(DB::raw(1))
+                            ->from('pathway_items as pi')
+                            ->join('pathways as pw', 'pw.id', '=', 'pi.pathway_id')
+                            ->whereColumn('pi.parent_course_id', 'parent_courses.id')
+                            ->where('pw.programme_id', $progId)
+                            ->where('pw.status', 'published'));
+                })
+                ->first();
             if (! $course) {
                 throw ValidationException::withMessages(['course' => 'Choose a course of the target programme for each credit.']);
+            }
+            if (in_array(strtoupper((string) $course->code), $blockedCodes, true)) {
+                throw ValidationException::withMessages(['course' => "{$course->code} is listed as non-transferable for {$prog->code}."]);
             }
             $cr = (float) ($d['credits'][$did] ?? 0);
             if ($cr <= 0 || $cr > (float) $dep->credits) {
                 throw ValidationException::withMessages(['credits' => 'Credits requested must be more than 0 and not more than the credit you hold ('.(float) $dep->credits.').']);
             }
+            if ($cr > (float) $course->credit) {
+                throw ValidationException::withMessages(['credits' => "Credits requested for {$course->code} ({$cr}) cannot exceed the course credit value ({$course->credit})."]);
+            }
             $lines[] = [$dep, $course, $cr, $expired];
         }
-        $app = DB::transaction(function () use ($d, $lines, $request, $checklistPayload, $documentsText) {
-            $prog = DB::table('programmes')->find($d['programme_id']);
+        $app = DB::transaction(function () use ($d, $lines, $request, $checklistPayload, $documentsText, $prog) {
             $id = DB::table('transfer_applications')->insertGetId([
                 'reference' => 'TMP'.bin2hex(random_bytes(8)),
                 'user_id' => $request->user()->id,
@@ -156,26 +307,102 @@ final class TransferController
             ? DB::table('acr_verifications')->whereIn('acr_id', $acrIds)->orderBy('id')->get()
             : collect();
 
+        $targetCourseIds = $lines->pluck('parent_course_id')->unique()->filter()->all();
+        $approvedEquivalences = $targetCourseIds
+            ? DB::table('course_equivalences as e')
+                ->join('parent_courses as sc', 'sc.id', '=', 'e.source_course_id')
+                ->whereIn('e.target_course_id', $targetCourseIds)
+                ->where('e.status', 'approved')
+                ->get(['e.*', 'sc.code as source_code', 'sc.name as source_name'])
+                ->groupBy('target_course_id')
+            : collect();
+
         return view('transfer.show', [
             'a' => $a,
             'lines' => $lines,
             'decision' => $decision,
             'redemptions' => $redemptions,
             'verifications' => $verifications,
+            'approvedEquivalences' => $approvedEquivalences,
             'status' => config('transfer.status'),
         ]);
     }
 
-    /** The participant answers a request for more evidence (More evidence needed returns to Submitted). */
+    public function document(Request $request, int $id, string $filename)
+    {
+        $a = DB::table('transfer_applications as t')
+            ->join('programmes as p', 'p.id', '=', 't.programme_id')
+            ->join('users as u', 'u.id', '=', 't.user_id')
+            ->where('t.id', $id)
+            ->where('t.user_id', $request->user()->id)
+            ->first(['t.*', 'p.code as programme', 'p.name as programme_name', 'u.name as user_name', 'u.institution_id', 'u.email as user_email']) ?? abort(404);
+        $lines = Transfers::lines($id);
+
+        return Transfers::renderDocument($request, $a, $lines, $filename);
+    }
+
+    /** The participant answers a request for more evidence (returns to under_eval if validity already passed, else submitted). */
     public function evidence(Request $request, int $id)
     {
         $a = DB::table('transfer_applications')->where('id', $id)->where('user_id', $request->user()->id)->first() ?? abort(404);
         abort_unless($a->status === 'more_evidence', 422, 'No evidence is requested for this application.');
-        $d = $request->validate(['documents' => 'required|string|max:2000']);
-        DB::transaction(function () use ($a, $d) {
-            DB::table('transfer_applications')->where('id', $a->id)->update(['status' => 'submitted', 'documents' => trim($a->documents."\n".$d['documents']), 'updated_at' => now()]);
+        $d = $request->validate([
+            'documents' => 'nullable|required_without:files|string|max:2000',
+            'files' => 'nullable|array|max:5',
+            'files.*' => 'file|mimes:pdf,png,jpg,jpeg,doc,docx|max:10240',
+        ], [
+            'documents.required_without' => 'Describe what you are adding, provide a link, or upload at least one file.',
+        ]);
+
+        $storedNames = [];
+        $targetDir = storage_path('app/transfers/'.$a->id);
+        if ($request->hasFile('files')) {
+            if (! is_dir($targetDir)) {
+                mkdir($targetDir, 0755, true);
+            }
+            foreach ($request->file('files') as $file) {
+                if (! $file || ! $file->isValid()) {
+                    continue;
+                }
+                $orig = basename((string) $file->getClientOriginalName());
+                $safe = preg_replace('/[^A-Za-z0-9._ -]/', '_', $orig) ?: ('evidence_'.time().'.'.$file->getClientOriginalExtension());
+                $candidate = $safe;
+                $n = 1;
+                while (file_exists($targetDir.DIRECTORY_SEPARATOR.$candidate)) {
+                    $ext = pathinfo($safe, PATHINFO_EXTENSION);
+                    $base = pathinfo($safe, PATHINFO_FILENAME);
+                    $candidate = $base.'_'.$n.($ext ? '.'.$ext : '');
+                    $n++;
+                }
+                $file->move($targetDir, $candidate);
+                $storedNames[] = $candidate;
+            }
+        }
+
+        $noteText = trim((string) ($d['documents'] ?? ''));
+        $checklist = json_decode((string) ($a->document_checklist ?? ''), true) ?: ['items' => [], 'other' => null, 'notes' => null];
+        $existingFiles = is_array($checklist['uploaded_files'] ?? null) ? $checklist['uploaded_files'] : [];
+        if ($storedNames !== []) {
+            $checklist['uploaded_files'] = array_values(array_unique(array_merge($existingFiles, $storedNames)));
+            if (! in_array('other', $checklist['items'] ?? [], true)) {
+                $checklist['items'][] = 'other';
+            }
+        }
+        if ($noteText !== '') {
+            $checklist['notes'] = trim(((string) ($checklist['notes'] ?? ''))."\n".$noteText);
+        }
+
+        $summaryAdd = trim(implode('; ', array_filter([$noteText, $storedNames !== [] ? 'Uploaded: '.implode(', ', $storedNames) : ''])));
+        $nextStatus = ! empty($a->validity) ? 'under_eval' : 'submitted';
+
+        DB::transaction(function () use ($a, $checklist, $summaryAdd, $nextStatus) {
+            DB::table('transfer_applications')->where('id', $a->id)->update([
+                'status' => $nextStatus,
+                'documents' => trim(((string) $a->documents)."\n".$summaryAdd),
+                'document_checklist' => json_encode($checklist),
+                'updated_at' => now(),
+            ]);
             Tasks::close('transfer_evidence', $a->id);
-            $ptj = DB::table('programmes')->where('id', $a->programme_id)->value('ptj_id');
             Tasks::open('codl_admin', 'transfer_eval', $a->id, "Evaluate credit transfer {$a->reference}: evidence added", "/transfers/{$a->id}", area: 'transfers');
         });
 

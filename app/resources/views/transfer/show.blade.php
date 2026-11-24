@@ -11,7 +11,7 @@
   $isMs = app()->getLocale() === 'ms';
   $fmtNum = fn ($v) => mcms_num($v);
   $decided = in_array($a->status, ['approved', 'partly', 'not_approved'], true);
-  $isStudent = auth()->user()->hasAnyRole('student') && ! auth()->user()->hasAnyRole('deputy_dean', 'codl_admin');
+  $isStudent = auth()->user()->hasAnyRole('student') && ! auth()->user()->hasAnyRole('deputy_dean', 'ptj_authority', 'academic_authority', 'codl_admin', 'qa_officer');
   $backUrl = $isStudent ? route('transfer') : route('transfers');
   $backLabel = $isStudent ? __('All applications') : __('Credit transfer queue');
 
@@ -34,15 +34,15 @@
   [$whereTxt, $nextTxt, $whoTxt, $roleCode] = match ($a->status) {
     'submitted' => [
       __('Stage 07: Transfer application submitted on :date', ['date' => \Carbon\Carbon::parse($a->applied_at)->format('d/m/Y')]),
-      __('Receiving faculty Deputy Dean checks ACR authenticity and ABC status, then evaluates learning outcomes.'),
-      __('Receiving Faculty Deputy Dean'),
-      'P3',
+      __('CODL checks ACR authenticity and ABC status, then evaluates learning outcomes for Senate decision.'),
+      __('CODL & Senate'),
+      'CODL',
     ],
     'under_eval' => [
       __('Stage 07: Record validity verified — under course equivalence evaluation'),
-      __('Receiving faculty Deputy Dean completes the 9-criterion evaluation and issues an official decision letter.'),
-      __('Receiving Faculty Deputy Dean'),
-      'P3',
+      __('CODL completes the 9-criterion evaluation and Senate issues an official decision letter.'),
+      __('CODL & Senate'),
+      'CODL/Senate',
     ],
     'more_evidence' => [
       __('Stage 07: Additional supporting evidence requested by evaluator'),
@@ -55,8 +55,8 @@
       $a->status === 'not_approved'
         ? __('Your ACR, credentials, and ABC credit remain unchanged and Available for future applications.')
         : __('Approved credits are Provisionally Redeemed until programme completion is recorded. Print your official decision letter for your records.'),
-      __('Receiving Faculty Deputy Dean / Registry'),
-      'P3/P7',
+      __('CODL & Senate / Registry'),
+      'Senate/P7',
     ],
   };
 @endphp
@@ -72,14 +72,18 @@
       <h1>{{ __('Transfer Application') }} {{ $a->reference }}</h1>
       <div class="sub">{{ $applicantName }} (<code>{{ $applicantId }}</code>) &middot; {{ $a->programme }} {{ $a->programme_name }} &middot; {{ __('applied') }} {{ \Carbon\Carbon::parse($a->applied_at)->format('d/m/Y') }}</div>
     </div>
-    <div class="act" style="align-items:center;display:flex;gap:8px">
-      <a class="btn ter sm" href="{{ $backUrl }}">&larr; {{ $backLabel }}</a>
-      <span class="tag {{ $a->status === 'approved' ? 'ok' : (in_array($a->status, ['submitted', 'under_eval'], true) ? 'info' : ($a->status === 'partly' ? 'warn' : 'err')) }}" id="app-status">
-        {{ __($status[$a->status] ?? ucfirst($a->status)) }}
-      </span>
-      @if($decided)
-        <a href="{{ request()->fullUrlWithQuery(['print' => 1]) }}" class="btn ter" target="_blank">{{ __('Decision letter (PDF)') }}</a>
-      @endif
+    <div class="act-bar">
+      <div class="act-left">
+        <a class="btn ter sm" href="{{ $backUrl }}">&larr; {{ $backLabel }}</a>
+      </div>
+      <div class="act-right">
+        <span class="tag {{ $a->status === 'approved' ? 'ok' : (in_array($a->status, ['submitted', 'under_eval'], true) ? 'info' : ($a->status === 'partly' ? 'warn' : 'err')) }}" id="app-status">
+          {{ __($status[$a->status] ?? ucfirst($a->status)) }}
+        </span>
+        @if($decided)
+          <a href="{{ request()->fullUrlWithQuery(['print' => 1]) }}" class="btn ter" target="_blank">{{ __('Decision letter (PDF)') }}</a>
+        @endif
+      </div>
     </div>
   </div>
 
@@ -105,13 +109,17 @@
             <div class="note warn" style="margin-bottom:16px">
               <div>{{ __('The evaluator asked for more evidence before deciding:') }} {{ $a->evidence_request }}</div>
             </div>
-            <form method="post" action="{{ route('transfer.evidence', $a->id) }}">
+            <form method="post" action="{{ route('transfer.evidence', $a->id) }}" enctype="multipart/form-data">
               @csrf
               <div style="margin-bottom:14px">
-                <label for="documents">{{ __('What you are adding') }}</label>
-                <textarea id="documents" name="documents" rows="3" required placeholder="{{ __('Describe what you are adding or provide reference links...') }}"></textarea>
+                <label for="evidence_files">{{ __('Upload supporting files') }} <span class="muted small">({{ __('PDF, PNG, JPG, DOC, DOCX — max 10 MB each') }})</span></label>
+                <input id="evidence_files" name="files[]" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" style="width:100%;padding:8px;border:1px solid var(--color-card-border, #090a0f);border-radius:4px;background:#ffffff">
               </div>
-              <button type="submit" class="btn">{{ __('Send evidence') }}</button>
+              <div style="margin-bottom:14px">
+                <label for="documents">{{ __('Notes or reference links') }} <span class="muted small">({{ __('Optional if uploading files') }})</span></label>
+                <textarea id="documents" name="documents" rows="3" placeholder="{{ __('Describe what you are adding or provide reference links...') }}">{{ old('documents') }}</textarea>
+              </div>
+              <button type="submit" class="btn primary">{{ __('Send evidence') }}</button>
             </form>
           </div>
         </div>
@@ -135,7 +143,13 @@
                 <tr>
                   <td>
                     <b>{{ $l->source_name }}</b>@if($l->source_version_no) <span class="tag info small">v{{ $l->source_version_no }}</span>@endif<br>
-                    <span class="muted small"><code>{{ $l->acr_reference }}</code></span>
+                    @if($isStudent && !empty($l->acr_id))
+                      <a href="{{ route('credit.acr', $l->acr_id) }}" target="_blank" title="{{ __('View Academic Credit Record (ACR)') }}" style="display:inline-flex;align-items:center;gap:4px;margin-top:2px;font-weight:600;color:var(--primary)">
+                        <code>{{ $l->acr_reference }}</code> &nearr;
+                      </a>
+                    @else
+                      <span class="muted small"><code>{{ $l->acr_reference }}</code></span>
+                    @endif
                   </td>
                   <td>
                     <b>{{ $l->course_code }}</b> {{ $l->course_name }}
@@ -154,26 +168,8 @@
         </div>
       </div>
 
-      @if($docChecklist || $a->documents)
-        <div class="panel" style="margin-bottom:20px">
-          <div class="hd"><h2>{{ __('Supporting Documents Checklist') }}</h2></div>
-          <div class="bd">
-            @if($docChecklist)
-              <div class="checklist-grid" style="margin-bottom:8px">
-                @foreach(config('transfer.documents_checklist') as $k => $lbl)
-                  @php $ticked = in_array($k, $checkedDocs, true); @endphp
-                  <div style="padding:6px 10px;border:1px solid var(--hairline);background:{{ $ticked ? 'var(--ok-bg)' : 'var(--surface)' }};font-size:12.5px">
-                    <b>[{{ $ticked ? 'X' : ' ' }}]</b> {{ __($lbl) }}
-                  </div>
-                @endforeach
-              </div>
-              @if(!empty($docChecklist['other']))<div class="small"><b>{{ __('Other:') }}</b> {{ $docChecklist['other'] }}</div>@endif
-              @if(!empty($docChecklist['notes']))<div class="small muted" style="margin-top:4px">{{ $docChecklist['notes'] }}</div>@endif
-            @else
-              <p style="white-space:pre-line;margin:0">{{ $a->documents }}</p>
-            @endif
-          </div>
-        </div>
+      @if($docChecklist || $a->documents || $lines->isNotEmpty())
+        <x-transfer-evidence :a="$a" :lines="$lines" routeName="transfer.document" idPrefix="student" />
       @endif
     </div>
 
@@ -181,7 +177,7 @@
       <div class="panel">
         <div class="hd"><h2>{{ __('What this means') }}</h2></div>
         <div class="bd">
-          <p class="small" style="margin:0 0 12px">{{ __('The decision is made by the receiving programme. It does not admit you to the programme, and a refusal does not change your Academic Credit Record, badges, certificates or credentials.') }}</p>
+          <p class="small" style="margin:0 0 12px">{{ __('The decision is evaluated by CODL and approved by Senate. It does not admit you to the programme, and a refusal does not change your Academic Credit Record, badges, certificates or credentials.') }}</p>
           <p class="small" style="margin:0 0 12px">{{ __('If a line is not approved, your ACR and credit stay as they were. An approved transfer holds credit as Provisionally Redeemed until programme graduation.') }}</p>
           @if($decided)
             <a href="{{ request()->fullUrlWithQuery(['print' => 1]) }}" class="btn ter sm" target="_blank" style="width:100%;justify-content:center">{{ __('Print Decision Letter (A4)') }}</a>
@@ -205,9 +201,9 @@
     <h1 style="font-size:14.5pt;font-weight:400;margin:0 0 2px;color:#090a0f">{{ __('Credit Transfer Decision Letter') }}</h1>
     <div style="font-size:8.8pt;line-height:1.45;color:#262626">
       @if($isMs)
-        Tuan/Puan <b>{{ $applicantName }}</b>, dokumen rasmi ini merekodkan permohonan pemindahan kredit (<b>{{ $a->reference }}</b>, dihantar pada {{ \Carbon\Carbon::parse($a->applied_at)->format('d/m/Y') }}) bagi program <b>{{ $a->programme_name }} ({{ $a->programme }})</b> di {{ $a->institution ?: 'UTeM' }}, penilaian kesetaraan kursus, dan keputusan rasmi fakulti penerima.
+        Tuan/Puan <b>{{ $applicantName }}</b>, dokumen rasmi ini merekodkan permohonan pemindahan kredit (<b>{{ $a->reference }}</b>, dihantar pada {{ \Carbon\Carbon::parse($a->applied_at)->format('d/m/Y') }}) bagi program <b>{{ $a->programme_name }} ({{ $a->programme }})</b> di {{ $a->institution ?: 'UTeM' }}, penilaian kesetaraan kursus oleh CODL, dan keputusan rasmi Senat UTeM.
       @else
-        Dear <b>{{ $applicantName }}</b>, this official document records the credit transfer application (<b>{{ $a->reference }}</b>, submitted {{ \Carbon\Carbon::parse($a->applied_at)->format('d/m/Y') }}) for <b>{{ $a->programme_name }} ({{ $a->programme }})</b> at {{ $a->institution ?: 'UTeM' }}, its course equivalence evaluation, and the receiving faculty's official decision.
+        Dear <b>{{ $applicantName }}</b>, this official document records the credit transfer application (<b>{{ $a->reference }}</b>, submitted {{ \Carbon\Carbon::parse($a->applied_at)->format('d/m/Y') }}) for <b>{{ $a->programme_name }} ({{ $a->programme }})</b> at {{ $a->institution ?: 'UTeM' }}, its course equivalence evaluation by CODL, and the official Senate decision.
       @endif
     </div>
   </div>
@@ -238,7 +234,7 @@
 
   @if(!$decided)
     <div class="print-note-box">
-      <b>{{ __('Draft — Decision Not Yet Issued:') }}</b> {{ __('The receiving faculty authority has not recorded a final decision on this application yet.') }}
+      <b>{{ __('Draft — Decision Not Yet Issued:') }}</b> {{ __('CODL and Senate have not recorded a final decision on this application yet.') }}
     </div>
   @endif
 
@@ -347,7 +343,7 @@
       </tfoot>
     </table>
     <div class="print-note-box">
-      <b>{{ __('Non-Admission & Unchanged Records Notice:') }}</b> {{ __('Credit transfer approval does not imply admission to :prog. Admission is recorded separately by Pejabat Pendaftar. If any line is not approved, your Academic Credit Record, credentials, and ABC credit remain unchanged and available. Appeals may be directed to the receiving Faculty Deputy Dean (Academic) or CODL (codl@utem.edu.my).', ['prog' => $a->programme]) }}
+      <b>{{ __('Non-Admission & Unchanged Records Notice:') }}</b> {{ __('Credit transfer approval does not imply admission to :prog. Admission is recorded separately by Pejabat Pendaftar. If any line is not approved, your Academic Credit Record, credentials, and ABC credit remain unchanged and available. Appeals may be directed to CODL and the Academic Authority (codl@utem.edu.my).', ['prog' => $a->programme]) }}
     </div>
   </div>
 
@@ -429,8 +425,16 @@
           </td>
         </tr>
         <tr>
-          <td><b>{{ __('Faculty Academic Authority') }}</b></td>
-          <td>@if($deciderName)<b>{{ $deciderName }}</b>@if($deciderPosition)<div class="bm">{{ $isMs && $decision?->decided_by ? (\Illuminate\Support\Facades\DB::table('users')->where('id', $decision->decided_by)->value('position_ms') ?: $deciderPosition) : $deciderPosition }}</div>@endif @else<span class="not-recorded">{{ __('Not yet recorded') }}</span>@endif</td>
+          <td><b>{{ __('CODL & Senate Academic Authority') }}</b></td>
+          <td>
+            @if($deciderName)
+              <b>{{ $deciderName }}</b>
+              @if($deciderPosition)<div class="bm">{{ $isMs && $decision?->decided_by ? (\Illuminate\Support\Facades\DB::table('users')->where('id', $decision->decided_by)->value('position_ms') ?: $deciderPosition) : $deciderPosition }}</div>@endif
+              @if(!empty($decision?->authority))<div class="bm">{{ __(\App\Modules\Transfer\EvaluationController::authorityLabel($decision->authority)) }}</div>@endif
+            @else
+              <span class="not-recorded">{{ __('Not yet recorded') }}</span>
+            @endif
+          </td>
           <td><span class="print-check {{ $decided && $deciderName ? 'checked' : '' }}"></span>{{ $decided && $deciderName ? __('Confirmed') : __('Pending') }}</td>
           <td>{{ $decidedDate ?? __('Not yet recorded') }}</td>
           <td>{{ $decision?->decision_ref ? __('Ref:') . ' ' . $decision->decision_ref : ($decision?->conditions ?: '—') }}</td>

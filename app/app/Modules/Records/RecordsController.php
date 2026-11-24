@@ -71,7 +71,7 @@ final class RecordsController
     public function traceShow(Request $request, int $enrolment)
     {
         $this->enrolments($request)->where('e.id', $enrolment)->first() ?? abort(404);
-        $c = $this->trace->chain($enrolment);
+        $c = $this->trace->chain($enrolment, $request->user());
 
         return view('records.trace', $c + ['audit' => $this->trace->audit($c['subjects'])]);
     }
@@ -183,17 +183,17 @@ final class RecordsController
         $batches = $u->hasAnyRole('abc_depositor', 'records_depositor') ? DB::table('abc_batches')
             ->when($ptjs !== null, fn ($b) => $b->whereIn('ptj_id', $ptjs))
             ->orderByDesc('id')->limit(10)->get() : collect();
-        $suspensions = $u->hasAnyRole('deputy_dean') ? DB::table('suspensions as s')
+        $suspensions = $u->hasAnyRole('deputy_dean', 'ptj_authority', 'codl_admin', 'academic_authority', 'qa_officer') ? DB::table('suspensions as s')
             ->join('micro_credentials as m', 'm.id', '=', 's.micro_credential_id')
             ->join('mc_versions as v', fn ($j) => $j->on('v.micro_credential_id', '=', 'm.id')->whereRaw('v.version_no = (select max(version_no) from mc_versions where micro_credential_id = m.id)'))
             ->when($ptjs !== null, fn ($b) => $b->whereIn('m.ptj_id', $ptjs))
             ->orderByDesc('s.id')->limit(5)->get(['s.*', 'v.name_en']) : collect();
-        $proposals = $u->hasAnyRole('lecturer', 'deputy_dean') ? DB::table('mc_versions as v')
+        $proposals = $u->hasAnyRole('lecturer', 'deputy_dean', 'ptj_authority', 'codl_admin', 'academic_authority', 'qa_officer') ? DB::table('mc_versions as v')
             ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
             ->when($ptjs !== null, fn ($b) => $b->whereIn('m.ptj_id', $ptjs))
             ->when($owner, fn ($b) => $b->where('m.owner_id', $owner))
             ->orderByDesc('v.id')->limit(5)->get(['v.id', 'v.name_en', 'v.version_no', 'v.status', 'm.category']) : collect();
-        $transfers = $u->hasAnyRole('deputy_dean') ? DB::table('transfer_applications as t')
+        $transfers = $u->hasAnyRole('deputy_dean', 'ptj_authority', 'codl_admin', 'academic_authority', 'qa_officer') ? DB::table('transfer_applications as t')
             ->join('users as u', 'u.id', '=', 't.user_id')
             ->join('programmes as p', 'p.id', '=', 't.programme_id')
             ->when($ptjs !== null, fn ($b) => $b->whereIn('p.ptj_id', $ptjs))
@@ -210,8 +210,8 @@ final class RecordsController
             'proposals' => $proposals,
             'transfers' => $transfers,
             'kinds' => Reports::KINDS,
-            'reports' => $u->hasAnyRole('lecturer', 'deputy_dean', 'records_custodian', 'abc_depositor', 'records_depositor', 'codl_admin'),
-            'dean' => $u->hasAnyRole('deputy_dean'),
+            'reports' => $u->hasAnyRole('lecturer', 'deputy_dean', 'ptj_authority', 'academic_authority', 'qa_officer', 'records_custodian', 'abc_depositor', 'records_depositor', 'codl_admin'),
+            'dean' => $u->hasAnyRole('deputy_dean', 'ptj_authority', 'codl_admin', 'academic_authority', 'qa_officer'),
             'depositor' => $u->hasAnyRole('abc_depositor', 'records_depositor'),
             'codl' => $codl,
             'ucredsImports' => $ucredsImports,
@@ -224,7 +224,7 @@ final class RecordsController
     /** @return array{0: list<int>|null, 1: int|null} PTj ids and an owner limit */
     private function scope(User $u): array
     {
-        if ($u->hasAnyRole('codl_admin')) {
+        if ($u->hasAnyRole('codl_admin', 'academic_authority', 'qa_officer')) {
             return [null, null];
         }
         if ($u->hasAnyRole('abc_depositor', 'records_custodian', 'records_depositor')) {

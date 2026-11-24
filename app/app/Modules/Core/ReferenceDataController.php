@@ -113,7 +113,7 @@ final class ReferenceDataController
                             DB::table('periodic_reviews')->insert([
                                 'micro_credential_id' => $umc->id,
                                 'due_on' => today()->toDateString(),
-                                'note' => 'Triggered by parent course/programme update (Cl. 11.5)',
+                                'note' => 'Triggered by parent course/programme update',
                                 'created_at' => now(),
                                 'updated_at' => now(),
                             ]);

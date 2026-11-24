@@ -1,7 +1,7 @@
 @extends((request()->boolean('print') || request()->has('print')) ? 'layouts.print' : 'layouts.app')
 @section('title', __('Credit ledger and ABC'))
-@section('doc_title', 'PENYATA PENGUMPULAN KREDIT AKADEMIK (ABC)')
-@section('doc_bm', 'Lampiran F5 — Garis Panduan Micro-Credential UTeM')
+@section('doc_title', __('Academic Bank of Credit (ABC) Accumulation Statement'))
+@section('doc_bm', __('Penyata Pengumpulan Kredit Akademik (ABC)'))
 @section('doc_ref', 'ABC-LEDGER-' . (auth()->user()->institution_id ?? auth()->id()))
 @section('doc_file', 'penyata-kredit-abc.pdf')
 @section('content')
@@ -17,11 +17,11 @@
   <div style="margin-bottom:16px;border-bottom:2px solid #090a0f;padding-bottom:10px">
     <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Universiti Teknikal Malaysia Melaka (UTeM)</div>
     <h1 style="font-size:14pt;font-weight:700;text-transform:uppercase;margin:4px 0 2px">
-      Lampiran F5: Penyata Pengumpulan Kredit Akademik (ABC)
+      {{ __('Academic Bank of Credit (ABC) Accumulation Statement') }}
     </h1>
     <div style="font-size:9.5pt;color:#475569">
-      Nama Pelajar: <b>{{ auth()->user()->name }}</b> &middot; No. Matrik: <b>{{ auth()->user()->institution_id ?? '-' }}</b> &middot;
-      {{ __('Dijana pada') }} {{ now()->format('d/m/Y') }}
+      {{ __('Student Name:') }} <b>{{ auth()->user()->name }}</b> &middot; {{ __('Matric No.:') }} <b>{{ auth()->user()->institution_id ?? '-' }}</b> &middot;
+      {{ __('Generated on') }} {{ now()->format('d/m/Y') }}
     </div>
   </div>
 @else
@@ -40,10 +40,9 @@
 @endif
 
 <div class="note warn" style="margin-bottom:20px;font-size:10pt;line-height:1.5">
-  <b>{{ __('Academic Bank of Credit Notice (Appendix F5):') }}</b>
-  {{ __('Credits stored in the Academic Bank of Credit (ABC) are for storage only and are not automatically accepted by any programme for credit transfer or graduation. Credit transfer is subject to faculty evaluation and university approval.') }}
-  <div style="margin-top:4px;font-size:9pt;color:var(--muted)">
-    {{ __('Kredit yang disimpan di dalam Bank Kredit Akademik (ABC) adalah bagi tujuan penyimpanan rekod sahaja (storage only) dan tidak diterima secara automatik oleh mana-mana program pengajian UTeM.') }}
+  <div>
+    <b>{{ __('Academic Bank of Credit Notice:') }}</b>
+    {{ __('Credits stored in the Academic Bank of Credit (ABC) are for storage only and are not automatically accepted by any programme for credit transfer or graduation. Credit transfer is subject to faculty evaluation and university approval.') }}
   </div>
 </div>
 

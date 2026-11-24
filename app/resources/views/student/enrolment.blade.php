@@ -19,10 +19,14 @@
       <x-pill :s="$labels[$e->status]" />
     </div>
   </div>
-  <div class="act" style="gap:8px">
-    <a class="btn ter sm" href="{{ route('enrolments') }}">&larr; {{ __('All registrations') }}</a>
+  <div class="act-bar">
+    <div class="act-left">
+      <a class="btn ter sm" href="{{ route('enrolments') }}">&larr; {{ __('All registrations') }}</a>
+    </div>
     @if($e->status === 'completed')
-      <a class="btn ter sm" href="{{ route('feedback.show', $e->id) }}">{{ __('Give feedback') }}</a>
+      <div class="act-right">
+        <a class="btn ter sm" href="{{ route('feedback.show', $e->id) }}">{{ __('Give feedback') }}</a>
+      </div>
     @endif
   </div>
 </div>
@@ -52,15 +56,76 @@
 @endif
 
 <div class="cols">
-  <!-- Left Column: Modules & Badges, Terms, Log -->
+  <!-- Left Column: Micro-Credential Overview, Modules & Badges, Outcomes, Assessments, Log -->
   <div>
+    {{-- Micro-Credential & Cohort Overview Card --}}
+    @php
+      $catUpper = strtoupper((string) ($o->category ?? 'MC'));
+      $delivery = $o->delivery_mode ?: ($o->version_delivery_mode ?: null);
+      $totSlt = $o->planned_slt ?: $modules->sum('slt_hours');
+    @endphp
+    <div class="panel" style="margin-bottom:20px">
+      <div class="hd" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <h2 style="margin:0">{{ __('Micro-Credential Details') }}</h2>
+        <div style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <span class="tag info">{{ $catUpper }}</span>
+          @if(!empty($o->proposed_mqf_level))
+            <span class="tag neutral">MQF {{ $o->proposed_mqf_level }}</span>
+          @endif
+          @if(!empty($o->proposed_credit))
+            <span class="tag neutral">{{ mcms_num($o->proposed_credit) }} {{ __('cr') }}</span>
+          @endif
+        </div>
+      </div>
+      <div class="bd" style="padding:14px 18px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:14px 18px">
+          <div>
+            <div class="s muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">{{ __('Lecturer / Coordinator') }}</div>
+            <div style="font-weight:600;color:var(--color-ink, #090a0f)">{{ $o->lecturer_name ?: '—' }}</div>
+            @if(!empty($o->lecturer_email))
+              <div class="s muted" style="font-size:12px">{{ $o->lecturer_email }}</div>
+            @endif
+          </div>
+          <div>
+            <div class="s muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">{{ __('Offering Dates') }}</div>
+            <div style="font-weight:600;color:var(--color-ink, #090a0f)">
+              @if(!empty($o->start_date) && !empty($o->end_date))
+                {{ \Carbon\Carbon::parse($o->start_date)->format('d/m/Y') }} &ndash; {{ \Carbon\Carbon::parse($o->end_date)->format('d/m/Y') }}
+              @elseif(!empty($o->start_date))
+                {{ __('Starts') }} {{ \Carbon\Carbon::parse($o->start_date)->format('d/m/Y') }}
+              @else
+                —
+              @endif
+            </div>
+            <div class="s muted" style="font-size:12px">{{ __('Cohort:') }} <code>{{ $o->cohort_name }}</code></div>
+          </div>
+          <div>
+            <div class="s muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">{{ __('Faculty / PTj') }}</div>
+            <div style="font-weight:600;color:var(--color-ink, #090a0f)">{{ $o->ptj_code ? $o->ptj_code.' — '.$o->ptj_name : 'UTeM' }}</div>
+            @if(!empty($o->parent_course_code))
+              <div class="s muted" style="font-size:12px">{{ __('Parent course:') }} <code>{{ $o->parent_course_code }}</code> {{ $o->parent_course_name }}</div>
+            @endif
+          </div>
+          <div>
+            <div class="s muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">{{ __('Delivery & Workload') }}</div>
+            <div style="font-weight:600;color:var(--color-ink, #090a0f)">
+              {{ $delivery ? ucfirst(str_replace('_', ' ', (string) $delivery)) : __('Online') }}@if(!empty($o->delivery_language)) &middot; {{ $o->delivery_language }}@endif
+            </div>
+            <div class="s muted" style="font-size:12px">
+              {{ $totSlt }} {{ __('SLT hours') }} &middot; {{ __('Enrolled:') }} {{ \Carbon\Carbon::parse($e->created_at)->format('d/m/Y') }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Modules Table -->
     <div class="panel">
       <div class="hd">
         <h2>{{ __('Modules') }}</h2>
         <span class="r">{{ $e->progress_percent !== null ? __(':percent% done on the learning platform', ['percent' => $e->progress_percent]) : '' }}</span>
       </div>
-      <table>
+      <table data-no-search data-no-paginate>
         <thead>
           <tr>
             <th>{{ __('Module') }}</th>
@@ -74,10 +139,7 @@
         @forelse($modules as $m)
           <tr>
             <td>
-              <strong>{{ $m->seq }}. {{ $m->name_en }}</strong>
-              @if(!empty($m->name_ms))
-                <div class="s muted">{{ $m->name_ms }}</div>
-              @endif
+              <strong>{{ $m->seq }}. {{ (app()->getLocale() === 'ms' && !empty($m->name_ms)) ? $m->name_ms : $m->name_en }}</strong>
             </td>
             <td class="num">{{ $m->slt_hours }}</td>
             <td>
@@ -111,16 +173,49 @@
       </table>
     </div>
 
-    <!-- The Wording You Acknowledged -->
-    <details class="fold" style="margin-top:16px">
-      <summary>
-        <b>{{ __('The wording you acknowledged') }}</b> 
-        <span class="muted small">{{ __('kept as you saw it when you registered') }}</span>
-      </summary>
-      <div class="bd">
-        <p style="white-space:pre-line">{{ $e->ack_text }}</p>
-      </div>
-    </details>
+    <!-- Learning Outcomes & Assessment Breakdown (Collapsible — Rule D-67) -->
+    @if(!empty($outcomes) && $outcomes->isNotEmpty())
+      <details class="fold" style="margin-top:16px">
+        <summary>
+          <b>{{ __('Learning Outcomes') }}</b>
+          <span class="muted small">{{ $outcomes->count() }} {{ $outcomes->count() === 1 ? __('outcome') : __('outcomes') }}</span>
+        </summary>
+        <div class="bd">
+          <ul style="margin:0;padding-left:18px;line-height:1.6">
+            @foreach($outcomes as $lo)
+              <li style="margin-bottom:4px"><strong>{{ $lo->code }}:</strong> {{ (app()->getLocale() === 'ms' && !empty($lo->text_ms)) ? $lo->text_ms : $lo->text_en }}</li>
+            @endforeach
+          </ul>
+        </div>
+      </details>
+    @endif
+
+    @if(!empty($assessments) && $assessments->isNotEmpty())
+      <details class="fold">
+        <summary>
+          <b>{{ __('Assessment Components') }}</b>
+          <span class="muted small">{{ $assessments->count() }} {{ $assessments->count() === 1 ? __('component') : __('components') }} &middot; {{ mcms_num($assessments->sum('weight_percent')) }}%</span>
+        </summary>
+        <div class="bd" style="padding:0">
+          <table data-no-search data-no-paginate style="margin:0">
+            <thead>
+              <tr>
+                <th>{{ __('Component') }}</th>
+                <th class="num" style="width:110px">{{ __('Weight (%)') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach($assessments as $ac)
+                <tr>
+                  <td>{{ (app()->getLocale() === 'ms' && !empty($ac->name_ms)) ? $ac->name_ms : $ac->name_en }}</td>
+                  <td class="num">{{ mcms_num($ac->weight_percent) }}%</td>
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </details>
+    @endif
 
     <!-- History Log -->
     <details class="fold">

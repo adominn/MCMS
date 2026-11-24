@@ -103,7 +103,7 @@
 <div class="note" style="margin-top:16px">
   <div>
     <b>{{ __('Separation of responsibilities') }}:</b>
-    {{ __('CODL assigns who can act. It does not make academic decisions: the deputy dean approves, verifies and confirms; roles listed here only decide who may see and do those things.') }}
+    {{ __('Role governance follows distinct institutional checks: Deputy Deans endorse faculty proposals and operational readiness; CODL manages platform administration, verifies proposals, and evaluates credit transfers; Academic Authority (Senate) grants final approval; Records Custodian and Authorized ABC Depositor maintain credentials and credit bank records.') }}
   </div>
 </div>
 @endsection

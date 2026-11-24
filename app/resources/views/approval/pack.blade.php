@@ -113,16 +113,21 @@
     </div>
   </div>
 
-  <div style="display:flex;gap:40px;margin-top:30px;padding-top:20px;border-top:1px solid var(--border)">
+  <div style="display:flex;gap:28px;margin-top:30px;padding-top:20px;border-top:1px solid var(--border)">
     <div style="flex:1;text-align:center">
       <div style="height:40px;border-bottom:1px solid var(--text)"></div>
       <div style="font-weight:600;margin-top:6px">{{ $v->owner_name ?? 'Proposer' }}</div>
-      <div class="small muted">Proposer</div>
+      <div class="small muted">{{ __('Proposer') }}</div>
     </div>
     <div style="flex:1;text-align:center">
       <div style="height:40px;border-bottom:1px solid var(--text)"></div>
       <div style="font-weight:600;margin-top:6px">{{ $endorsement->by ?? 'Deputy Dean (Academic)' }}</div>
-      <div class="small muted">Deputy Dean (Academic)</div>
+      <div class="small muted">{{ __('Deputy Dean (Academic)') }}</div>
+    </div>
+    <div style="flex:1;text-align:center">
+      <div style="height:40px;border-bottom:1px solid var(--text)"></div>
+      <div style="font-weight:600;margin-top:6px">{{ $codlVerification->by ?? 'Centre for Open and Distance Learning (CODL)' }}</div>
+      <div class="small muted">{{ __('CODL Verification & Secretariat') }}</div>
     </div>
   </div>
 @endif

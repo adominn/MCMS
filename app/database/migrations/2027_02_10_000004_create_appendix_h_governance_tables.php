@@ -58,7 +58,7 @@ return new class extends Migration
                 ],
                 [
                     'reference' => 'GA-2026-002',
-                    'item' => 'Enforce mandatory 30% direct home study floor for Stackable Degree pathways (Cl. 14.5.1)',
+                    'item' => 'Enforce mandatory 30% direct home study floor for Stackable Degree pathways',
                     'responsible_role' => 'academic_authority',
                     'target_date' => '2026-12-15',
                     'status' => 'selesai',
@@ -69,7 +69,7 @@ return new class extends Migration
                 ],
                 [
                     'reference' => 'GA-2026-003',
-                    'item' => 'Complete Appendix H5 minimum cohort records audit across all active FTMK offerings',
+                    'item' => 'Complete minimum cohort records audit across all active FTMK offerings',
                     'responsible_role' => 'qa_officer',
                     'target_date' => '2026-12-31',
                     'status' => 'proses',

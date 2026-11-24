@@ -75,7 +75,7 @@ final class UserAdminController
             ];
             if (in_array($d['role'], $academicOrRegistryRoles, true)) {
                 throw ValidationException::withMessages([
-                    'role' => __('Administrators cannot assign academic, quality, or registry authority roles to their own account (Appendix H, Cl. 15.2.3).'),
+                    'role' => __('Administrators cannot assign academic, quality, or registry authority roles to their own account.'),
                 ]);
             }
         }

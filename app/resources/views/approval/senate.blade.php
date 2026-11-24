@@ -17,7 +17,7 @@
   </div>
 </div>
 
-@if($v->status !== 'endorsed')
+@if(! in_array($v->status, ['endorsed', 'codl_verified'], true))
   <div class="note warn" role="alert">
     <b>{{ __('Not endorsed:') }}</b> {{ __('The Senate decision is recorded after endorsement. This proposal is currently :status.', ['status' => strtolower($labels[$v->status] ?? $v->status)]) }}
   </div>
@@ -33,10 +33,14 @@
         <div class="hd"><h2>{{ __('Senate meeting details') }}</h2></div>
         <div class="bd">
           <p class="muted s" style="margin-top:0">
-            @if(auth()->user()?->hasRole('codl_admin'))
-              {{ __('The Senate does not use MCMS directly. As CODL administrator, you record its formal decision from meeting minutes. Endorsed by faculty on :date.', ['date' => \Carbon\Carbon::parse($endorsedOn)->format('d/m/Y')]) }}
+            @php($minDateStr = \Carbon\Carbon::parse($endorsedOn ?: ($v->submitted_at ?: ($v->created_at ?: today())))->format('d/m/Y'))
+            @if(auth()->user()?->currentRole()?->value === 'academic_authority')
+              {{ __('Record the formal Senate decision and meeting minutes below. Endorsed by faculty on :date.', ['date' => $minDateStr]) }}
             @else
-              {{ __('The Senate does not use MCMS directly. As deputy dean, you record its formal decision from meeting minutes. Endorsed by faculty on :date.', ['date' => \Carbon\Carbon::parse($endorsedOn)->format('d/m/Y')]) }}
+              {{ __('The Senate does not use MCMS directly. As CODL Secretariat, record its formal decision from meeting minutes. Endorsed by faculty on :date.', ['date' => $minDateStr]) }}
+            @endif
+            @if(!empty($codlVerification))
+              {{ __('Verified by CODL (:by) on :vdate.', ['by' => $codlVerification->by, 'vdate' => \Carbon\Carbon::parse($codlVerification->created_at)->format('d/m/Y')]) }}
             @endif
           </p>
 
@@ -47,7 +51,7 @@
 
           <div class="field" style="margin-bottom:16px;max-width:240px">
             <label for="meeting_date">{{ __('Meeting date') }}</label>
-            <input type="date" id="meeting_date" name="meeting_date" min="{{ \Carbon\Carbon::parse($endorsedOn)->toDateString() }}" max="{{ today()->toDateString() }}" required>
+            <input type="date" id="meeting_date" name="meeting_date" min="{{ \Carbon\Carbon::parse($endorsedOn ?: ($v->submitted_at ?: ($v->created_at ?: today())))->toDateString() }}" max="{{ today()->toDateString() }}" required>
           </div>
 
           <div class="field" style="margin-bottom:16px;max-width:320px">

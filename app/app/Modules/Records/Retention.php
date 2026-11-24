@@ -25,8 +25,8 @@ final class Retention
         return [
             [
                 'no' => 1,
-                'class_en' => 'MC Curriculum & Approval Documents (Appendix A, Senate decisions, LO mapping)',
-                'class_ms' => 'Dokumen Kurikulum & Kelulusan MC (Lampiran A, kelulusan Senat, pemetaan LO)',
+                'class_en' => 'MC Curriculum & Approval Documents (Proposal, Senate decisions, LO mapping)',
+                'class_ms' => 'Dokumen Kurikulum & Kelulusan MC (Cadangan, kelulusan Senat, pemetaan LO)',
                 'owner' => 'P2 (PTj / Fakulti) & P3 (PBA / Senat)',
                 'creator' => 'P1 (Penyelaras MC)',
                 'retention' => 'Kekal sepanjang kitaran hayat versi aktif (Perpetual active lifecycle)',
@@ -34,8 +34,8 @@ final class Retention
             ],
             [
                 'no' => 2,
-                'class_en' => 'Offering Operational Readiness (Appendix B checklists, facilities, LMS setup)',
-                'class_ms' => 'Kesiapsiagaan Operasi Penawaran (Lampiran B, semakan fasiliti, LMS)',
+                'class_en' => 'Offering Operational Readiness (Readiness checklists, facilities, LMS setup)',
+                'class_ms' => 'Kesiapsiagaan Operasi Penawaran (Senarai semak kesediaan, fasiliti, LMS)',
                 'owner' => 'P2 (PTj / Fakulti)',
                 'creator' => 'P1 (Penyelaras), P2 & P5 (CODL)',
                 'retention' => '5 Tahun selepas kohort selesai (5 Years post-cohort)',
@@ -79,11 +79,11 @@ final class Retention
             ],
             [
                 'no' => 7,
-                'class_en' => 'Academic Credit Records (ACR) (Official credit statements, Appendix F templates, verifier sign-offs)',
-                'class_ms' => 'Rekod Kredit Akademik / ACR (Penyata kredit rasmi, Lampiran F, tandatangan pengesah)',
+                'class_en' => 'Academic Credit Records (ACR) (Official credit statements, ACR templates, verifier sign-offs)',
+                'class_ms' => 'Rekod Kredit Akademik / ACR (Penyata kredit rasmi, templat ACR, tandatangan pengesah)',
                 'owner' => 'P6 (Unit Rekod / Penjaga Rekod)',
                 'creator' => 'P1, P2 & P6',
-                'retention' => 'Kekal selaras Cl. 12.8 (Perpetual institutional archive)',
+                'retention' => 'Kekal (Perpetual institutional archive)',
                 'access' => 'Terhad / Rasmi (Official Academic Record)',
             ],
             [
@@ -106,8 +106,8 @@ final class Retention
             ],
             [
                 'no' => 10,
-                'class_en' => 'CQI Reports & Monitoring (Appendix C dossiers, stakeholder feedback analysis, improvement action plans)',
-                'class_ms' => 'Laporan CQI & Pemantauan (Lampiran C, analisis maklum balas pemegang taruh, pelan tindakan)',
+                'class_en' => 'CQI Reports & Monitoring (Quality review dossiers, stakeholder feedback analysis, improvement action plans)',
+                'class_ms' => 'Laporan CQI & Pemantauan (Dossier semakan kualiti, analisis maklum balas pemegang taruh, pelan tindakan)',
                 'owner' => 'P2 (PTj) & P4 (Pegawai QA)',
                 'creator' => 'P1 (Penyelaras MC)',
                 'retention' => '5 Tahun / 2 kitaran semakan (5 Years / 2 review cycles)',
@@ -115,8 +115,8 @@ final class Retention
             ],
             [
                 'no' => 11,
-                'class_en' => 'Quality Verification (QV) Packages (Appendix D dossiers, evidence portfolios, QVC panel decisions)',
-                'class_ms' => 'Pakej Verifikasi Kualiti / QV (Lampiran D, portfolio bukti, keputusan panel QVC)',
+                'class_en' => 'Quality Verification (QV) Packages (QV dossiers, evidence portfolios, QVC panel decisions)',
+                'class_ms' => 'Pakej Verifikasi Kualiti / QV (Dossier QV, portfolio bukti, keputusan panel QVC)',
                 'owner' => 'P2 (PTj) & P4 (Jaminan Kualiti)',
                 'creator' => 'P1, P2 & P4',
                 'retention' => 'Sepanjang tempoh sah QV (3 tahun) + 5 tahun arkib',

@@ -50,7 +50,7 @@ function validated(int $app, bool $pass = true)
 {
     $r = $pass ? 'pass' : 'fail';
 
-    return test()->actingAs(test()->hakim)->post("/transfers/$app/validity", ['check' => ['authenticity' => 'pass', 'abc_status' => 'pass', 'qv_accreditation' => $r], 'note' => ['qv_accreditation' => 'checked']]);
+    return test()->actingAs(userFarid())->post("/transfers/$app/validity", ['check' => ['authenticity' => 'pass', 'abc_status' => 'pass', 'qv_accreditation' => $r], 'note' => ['qv_accreditation' => 'checked']]);
 }
 }
 
@@ -84,7 +84,7 @@ function evaluated(int $app, int $line, array $matches = ['full', 'full', 'full'
         $p['source'][$i] = $src;
     }
 
-    return test()->actingAs(test()->hakim)->post("/transfers/$app/lines/$line", $p);
+    return test()->actingAs(userFarid())->post("/transfers/$app/lines/$line", $p);
 }
 }
 
@@ -94,7 +94,7 @@ function decision(int $app, array $over = [])
 {
     $lines = DB::table('transfer_lines')->where('transfer_application_id', $app)->get();
 
-    return test()->actingAs(test()->hakim)->post("/transfers/$app/decide", $over + ['outcome' => 'approved', 'decision_ref' => 'FTMK 4/2026', 'decided_on' => today()->toDateString(), 'credits' => $lines->mapWithKeys(fn ($l) => [$l->id => (float) $l->credits_requested])->all()]);
+    return test()->actingAs(userZulkifli())->post("/transfers/$app/decide", $over + ['outcome' => 'approved', 'decision_ref' => 'FTMK 4/2026', 'decided_on' => today()->toDateString(), 'credits' => $lines->mapWithKeys(fn ($l) => [$l->id => (float) $l->credits_requested])->all()]);
 }
 }
 
@@ -164,7 +164,7 @@ it('needs the full evaluation before any credit is approved (FR-ctequiv)', funct
     [$app, $line] = applied();
     validated($app);
     decision($app)->assertSessionHasErrors('outcome');
-    $this->post("/transfers/$app/lines/$line", ['result' => ['mqf' => 'equivalent']])->assertSessionHasErrors();
+    $this->actingAs($this->farid)->post("/transfers/$app/lines/$line", ['result' => ['mqf' => 'equivalent']])->assertSessionHasErrors();
 });
 
 it('approves on matched outcomes, holds the credit as Provisionally redeemed and does not admit (FR-rdprov, BR-34)', function () {
@@ -175,7 +175,7 @@ it('approves on matched outcomes, holds the credit as Provisionally redeemed and
     $t = DB::table('transfer_applications')->find($app);
     $dec = DB::table('transfer_decisions')->where('transfer_application_id', $app)->first();
     expect($t->status)->toBe('approved')->and(DB::table('abc_deposits')->find($dep->id)->credit_status)->toBe('provisional')->and((float) DB::table('transfer_lines')->find($line)->credits_approved)->toBe(3.0)
-        ->and($dec->authority)->toBe('deputy_dean')->and($dec->decided_by)->toBe($this->hakim->id)->and($dec->decision_ref)->toBe('FTMK 4/2026')
+        ->and($dec->authority)->toBe('academic_authority')->and($dec->decided_by)->toBe(userZulkifli()->id)->and($dec->decision_ref)->toBe('FTMK 4/2026')
         ->and(DB::table('redemption_events')->where('transfer_line_id', $line)->where('event', 'provisional')->exists())->toBeTrue()
         ->and(DB::table('admissions')->count())->toBe(0)
         ->and(DB::table('notifications')->where('user_id', $this->amir->id)->where('template_key', 'transfer.decided')->exists())->toBeTrue()
@@ -275,7 +275,7 @@ it('rejects evaluate with na on criteria that do not allow TB or with empty find
     $closCount = count(array_filter(explode(';', (string) DB::table('parent_courses')->where('id', ds1123())->value('clos'))));
 
     // 'na' on credit_slt is not allowed by Guide F7
-    $this->actingAs($this->hakim)->post("/transfers/$app/lines/$line", [
+    $this->actingAs($this->farid)->post("/transfers/$app/lines/$line", [
         'result' => [
             'credit_slt' => 'na',
             'mqf' => 'matched',
@@ -292,7 +292,7 @@ it('rejects evaluate with na on criteria that do not allow TB or with empty find
     ])->assertSessionHasErrors('result.credit_slt');
 
     // Empty finding on any criterion is rejected
-    $this->actingAs($this->hakim)->post("/transfers/$app/lines/$line", [
+    $this->actingAs($this->farid)->post("/transfers/$app/lines/$line", [
         'result' => [
             'credit_slt' => 'adequate',
             'mqf' => 'matched',
@@ -318,13 +318,13 @@ it('rejects evaluate with na on criteria that do not allow TB or with empty find
     ])->assertSessionHasErrors('finding.credit_slt');
 });
 
-it('returns the application to Submitted when the applicant adds evidence (FR-ctapply)', function () {
+it('returns the application to Under evaluation when validity passed and the applicant adds evidence (FR-ctapply)', function () {
     [$app] = applied();
     validated($app);
     $this->post("/transfers/$app/more-evidence", ['request' => 'Send the assessment rubric'])->assertSessionHasNoErrors();
     expect(DB::table('transfer_applications')->find($app)->status)->toBe('more_evidence')->and(DB::table('tasks')->where('kind', 'transfer_evidence')->where('user_id', $this->amir->id)->whereNull('completed_at')->exists())->toBeTrue();
     $this->actingAs($this->amir)->post("/transfer/$app/evidence", ['documents' => 'Rubric attached'])->assertSessionHasNoErrors();
-    expect(DB::table('transfer_applications')->find($app)->status)->toBe('submitted')->and(DB::table('transfer_applications')->find($app)->documents)->toContain('Rubric attached');
+    expect(DB::table('transfer_applications')->find($app)->status)->toBe('under_eval')->and(DB::table('transfer_applications')->find($app)->documents)->toContain('Rubric attached');
 });
 
 // ---- authority (FR-ctauthority, D-12)
@@ -336,7 +336,8 @@ it('lets the target programme authority decide, not a student or another faculty
     $fke = User::create(['name' => 'Dean FKE', 'email' => 'fke@utem.example.test']);
     $fke->roleAssignments()->create(['role' => 'deputy_dean', 'scope_type' => 'ptj', 'ptj_id' => DB::table('ptjs')->where('code', 'FTKE')->value('id')]);
     $this->actingAs($fke)->get("/transfers/$app")->assertNotFound();
-    $this->post("/transfers/$app/validity", [])->assertNotFound();
+    $this->post("/transfers/$app/validity", [])->assertForbidden();
+    $this->actingAs($this->hakim)->post("/transfers/$app/decide", [])->assertForbidden();
 });
 
 // ---- after the decision (FR-rdfinal, FR-rdrelease, FR-ctadmission, FR-ctversion)
@@ -349,7 +350,7 @@ it('records programme completion and non-completion by hand with the evidence re
     $this->post("/transfers/lines/$line/redeem", ['what' => 'completed'])->assertSessionHasErrors('evidence_ref');
     $this->post("/transfers/lines/$line/redeem", ['what' => 'not_completed', 'evidence_ref' => 'Withdrawal letter'])->assertSessionHasNoErrors();
     expect(DB::table('abc_deposits')->find($dep->id)->credit_status)->toBe('available')->and(DB::table('redemption_events')->where('event', 'released')->value('evidence_ref'))->toBe('Withdrawal letter');
-    app(CreditLedger::class)->provisional($dep->id, $line, $this->hakim->id);
+    app(CreditLedger::class)->provisional($dep->id, $line, userZulkifli()->id);
     $this->post("/transfers/lines/$line/redeem", ['what' => 'completed', 'evidence_ref' => 'Graduation list', 'abc_update_ref' => 'ABC-9'])->assertSessionHasNoErrors();
     expect(DB::table('abc_deposits')->find($dep->id)->credit_status)->toBe('redeemed');
 });
@@ -357,7 +358,7 @@ it('records programme completion and non-completion by hand with the evidence re
 it('records admission as a fact of its own (FR-ctadmission)', function () {
     [$app] = applied();
     expect(DB::table('admissions')->count())->toBe(0);
-    $this->actingAs($this->hakim)->post("/transfers/$app/admission", ['intake' => '2027/1'])->assertSessionHasErrors('evidence_ref');
+    $this->actingAs($this->farid)->post("/transfers/$app/admission", ['intake' => '2027/1'])->assertSessionHasErrors('evidence_ref');
     $this->post("/transfers/$app/admission", ['intake' => '2027/1', 'evidence_ref' => 'Registrar letter'])->assertSessionHasNoErrors();
     expect(DB::table('admissions')->count())->toBe(1)->and(DB::table('transfer_applications')->find($app)->status)->toBe('submitted'); // admission does not decide the transfer
 });
@@ -378,5 +379,45 @@ it('renders credit selection & mapping with wrapped table and fully visible cour
         ->assertSee('id="credits"', false)
         ->assertSee('Course requested')
         ->assertSee('Credits requested')
-        ->assertSee('min-width:240px', false);
+        ->assertSee('class="course-combo"', false);
+});
+
+it('allows participant and evaluator to view and print transfer supporting documents including syllabus and ACR', function () {
+    [$app, $line, $dep] = applied(['documents' => 'acr-2026-0001.pdf;syllabus-ds.pdf']);
+
+    // Amir Hakimi views his transfer application page
+    $res = $this->actingAs($this->amir)->get("/transfer/$app");
+    $res->assertOk()
+        ->assertSee('Supporting Evidence Submitted')
+        ->assertSee('syllabus-ds.pdf')
+        ->assertSee('Preview')
+        ->assertSee('Print / PDF')
+        ->assertSee('doc-modal-');
+
+    // Amir views the syllabus document
+    $docRes = $this->actingAs($this->amir)->get("/transfer/$app/document/syllabus-ds.pdf");
+    $docRes->assertOk()
+        ->assertSee('Course &amp; Module Content Outline', false)
+        ->assertSee('Data Structures')
+        ->assertSee('VERIFIED MCMS RECORD');
+
+    // Amir accesses print mode with autoprint
+    $printRes = $this->actingAs($this->amir)->get("/transfer/$app/document/syllabus-ds.pdf?print=1&autoprint=1");
+    $printRes->assertOk()
+        ->assertSee('window.print()', false);
+
+    // Another student cannot view Amir's transfer document
+    $other = User::create(['name' => 'Stranger Student', 'email' => 'stranger@example.test']);
+    $other->roleAssignments()->create(['role' => 'student', 'scope_type' => 'global']);
+    $this->actingAs($other)->get("/transfer/$app/document/syllabus-ds.pdf")->assertNotFound();
+
+    // Deputy Dean read-only monitor and CODL evaluator can view the document
+    $evalRes = $this->actingAs($this->hakim)->get("/transfers/$app/document/syllabus-ds.pdf");
+    $evalRes->assertOk()
+        ->assertSee('Course &amp; Module Content Outline', false)
+        ->assertSee('Data Structures');
+    $this->actingAs($this->farid)->get("/transfers/$app/document/syllabus-ds.pdf")
+        ->assertOk()
+        ->assertSee('Course &amp; Module Content Outline', false)
+        ->assertSee('Data Structures');
 });

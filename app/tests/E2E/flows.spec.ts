@@ -33,7 +33,7 @@ test('FL-01 A student signs in without a second step', async ({ page }) => {
 
 test('FL-00 Tour the deputy dean task queue', async ({ page }) => {
   await signIn(page, 'Hakim Rahman', true);
-  await expect(page.getByRole('link', { name: 'All (24)' })).toHaveAttribute('aria-current', 'page');
+  await expect(page.getByRole('link', { name: 'All (16)' })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByText('Overdue').first()).toBeVisible(); // oldest waiting items are flagged in words
 
   await page.getByRole('link', { name: 'Results (4)' }).click(); // tabs filter by area and the counts follow
@@ -50,9 +50,9 @@ test('FL-00 Tour the deputy dean task queue', async ({ page }) => {
 
   await page.goto('/tasks'); // ten to a page, sortable, searchable
   await expect(page.locator('tbody tr:visible')).toHaveCount(10);
-  await expect(page.getByText('Page 1 of 3')).toBeVisible();
+  await expect(page.getByText('Page 1 of 2')).toBeVisible();
   await page.getByRole('button', { name: 'Next page' }).click();
-  await expect(page.getByText('Page 2 of 3')).toBeVisible();
+  await expect(page.getByText('Page 2 of 2')).toBeVisible();
 });
 
 test('FL-17 Assign a scoped role and change a setting', async ({ page }) => {
@@ -196,9 +196,9 @@ test.describe('Review and approval', () => {
   });
 
   test('FL-04 Endorse a proposal, then record the Senate decision', async ({ page }) => {
-    await signIn(page, 'Hakim Rahman', true); // 1. two proposal tasks
+    await signIn(page, 'Hakim Rahman', true); // 1. Deputy Dean reviews faculty proposal (no Senate task in DD queue)
     await page.getByRole('link', { name: /^Proposals \(/ }).click();
-    await expect(page.getByRole('link', { name: 'Record Senate decision: Applied Data Analytics' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Record Senate decision: Applied Data Analytics' })).toHaveCount(0);
     await page.getByRole('link', { name: 'Decide on proposal: Database Systems' }).click();
 
     await page.getByLabel(/I have checked the category/).check(); // 2. endorse is refused while blocking comments are open
@@ -229,15 +229,26 @@ test.describe('Review and approval', () => {
     await second.getByRole('button', { name: 'Mark resolved' }).click();
     await page.getByLabel(/I have checked the category/).check();
     await page.getByRole('button', { name: 'Endorse', exact: true }).click();
-    await expect(page.getByRole('status')).toContainText('Endorsed. The category is verified.');
+    await expect(page.getByRole('status')).toContainText('Endorsed by Deputy Dean. Forwarded to CODL for verification and Senate approval.');
     await expect(page.getByRole('row', { name: /Endorsement.*Endorsed.*category SAMC verified/ })).toBeVisible();
 
     await page.getByRole('link', { name: 'Decision pack' }).click(); // 5. the decision pack shows the endorsement
     await expect(page.getByText('Verified by Hakim Rahman')).toBeVisible();
+    await page.locator('.who-btn').click();
+    await page.getByRole('button', { name: 'Sign out' }).click();
 
-    await page.goto('/approvals?status=endorsed'); // 6. record what the Senate decided
+    await signIn(page, 'Farid Hashim', true); // 6. CODL verifies the endorsed proposal
+    await page.goto('/approvals?status=endorsed');
     await page.getByRole('link', { name: 'Applied Data Analytics' }).click();
-    await page.getByRole('link', { name: 'Record Senate decision' }).click();
+    await page.getByRole('button', { name: 'Confirm CODL Verification' }).click();
+    await expect(page.getByRole('status')).toContainText('CODL verification recorded.');
+    await page.locator('.who-btn').click();
+    await page.getByRole('button', { name: 'Sign out' }).click();
+
+    await signIn(page, 'Prof. Dr. Zulkifli Ahmad', true); // 7. Senate records the final decision
+    await page.goto('/approvals?status=codl_verified');
+    await page.getByRole('link', { name: 'Applied Data Analytics' }).click();
+    await page.getByRole('link', { name: 'Record Senate decision' }).first().click();
     await page.getByLabel('Senate meeting reference').fill('Senate 8/2026');
     const d = new Date(); d.setDate(d.getDate() - 2);
     await page.getByLabel('Meeting date').fill(d.toISOString().slice(0, 10));
@@ -247,8 +258,10 @@ test.describe('Review and approval', () => {
     await page.getByRole('button', { name: 'Record decision' }).click();
     await expect(page.getByRole('status')).toContainText('No credit, Quality Verification or transfer status is set');
 
-    await page.goto('/approvals'); // 7. both proposals show their new status
+    await page.goto('/approvals?status=endorsed'); // 8. both proposals show their new status
     await expect(page.getByRole('row', { name: /Database Systems.*Endorsed/ })).toBeVisible();
+    await page.goto('/approvals?status=approved');
+    await page.getByRole('searchbox', { name: 'Search this table' }).fill('Applied Data Analytics');
     await expect(page.getByRole('row', { name: /Applied Data Analytics.*Approved/ })).toBeVisible();
   });
   test('Versions: a minor change is acknowledged, a material change makes version 2', async ({ page }) => {
@@ -308,29 +321,61 @@ test.describe('Review and approval', () => {
     await expect(page.getByRole('status')).toContainText('Cohort created');
     await expect(page.getByText('Not ready').first()).toBeVisible();
 
-    const selects = page.locator('select[name^="item["]');
-    const selectCount = await selects.count();
-    for (let i = 0; i < selectCount - 1; i++) {
-      await selects.nth(i).selectOption('yes');
+    // 2. Walk through tabbed readiness sections; verify edits persist across tab switches, keyboard nav & mobile layout
+    await expect(page.locator('#tab-course_info')).toHaveAttribute('aria-selected', 'true');
+    const secTabs = ['course_info', 'materials_platform', 'assessment_integrity', 'learner_protection'];
+    for (let t = 0; t < secTabs.length; t++) {
+      const key = secTabs[t];
+      const panel = page.locator(`#panel-${key}`);
+      await expect(panel).toBeVisible();
+      const selects = panel.locator('select[name^="item["]');
+      const count = await selects.count();
+      const limit = key === 'learner_protection' ? count - 1 : count; // leave final item unanswered to test hidden-tab validation
+      for (let i = 0; i < limit; i++) {
+        await selects.nth(i).selectOption('yes');
+      }
+      if (key === 'course_info') {
+        await panel.locator('input[name$="[note]"]').first().fill('Facilitator qualification evidence uploaded');
+      }
+      await panel.locator('[data-tab-next]').click();
     }
-    await page.getByRole('button', { name: 'Send the checklist' }).click();
-    await expect(page.getByText('"Ready" needs every checklist item answered')).toBeVisible();
 
-    await selects.nth(selectCount - 1).selectOption('yes');
-    await page.locator('input[name$="[note]"]').first().fill('Facilitator qualification evidence uploaded');
-    await page.getByRole('button', { name: 'Send the checklist' }).click();
+    // Verify switching back to first tab kept unsaved edits intact, plus keyboard navigation
+    await page.locator('#tab-course_info').click();
+    await expect(page.locator('#panel-course_info input[name$="[note]"]').first()).toHaveValue('Facilitator qualification evidence uploaded');
+    await page.locator('#tab-course_info').focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(page.locator('#tab-materials_platform')).toHaveAttribute('aria-selected', 'true');
+    await page.keyboard.press('End');
+    await expect(page.locator('#tab-review_decision')).toHaveAttribute('aria-selected', 'true');
+
+    // Submit from Review & Decision with hidden unanswered item on Learner Protection -> blocked & auto-jumps to Learner Protection
+    await page.locator('#panel-review_decision').getByRole('button', { name: 'Send the checklist' }).click();
+    await expect(page.getByText('"Ready" needs every checklist item answered')).toBeVisible();
+    await expect(page.locator('#tab-learner_protection')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('#panel-learner_protection tr.row-err')).toHaveCount(1);
+
+    // Fix the remaining item, verify mobile viewport section switcher, then submit
+    await page.locator('#panel-learner_protection select[name^="item["]').last().selectOption('yes');
+    await page.setViewportSize({ width: 375, height: 812 });
+    await expect(page.locator('#offering-tab-select')).toBeVisible();
+    await page.locator('#offering-tab-select').selectOption('review_decision');
+    await expect(page.locator('#panel-review_decision')).toBeVisible();
+    await page.setViewportSize({ width: 1280, height: 800 });
+
+    await page.locator('#panel-review_decision').getByRole('button', { name: 'Send the checklist' }).click();
     await expect(page.getByRole('status')).toContainText('Checklist sent to the deputy dean');
     await page.locator('.who-btn').click();
     await page.getByRole('button', { name: 'Sign out' }).click();
 
-    await signIn(page, 'Hakim Rahman', true); // 3. the deputy dean accepts the evidence and records the decision
+    await signIn(page, 'Hakim Rahman', true); // 3. the deputy dean accepts evidence across tabs and records the decision
     await page.getByRole('link', { name: /^Offerings \(/ }).click();
     await page.getByRole('link', { name: 'Confirm readiness: Applied Data Analytics 2027/1' }).click();
-    const accepts = page.locator('input[type="checkbox"][name^="accept["]');
-    const acceptCount = await accepts.count();
-    for (let i = 0; i < acceptCount; i++) {
-      await accepts.nth(i).check();
+    for (const key of secTabs) {
+      await page.locator(`#tab-${key}`).click();
+      await page.locator(`#panel-${key}`).getByRole('button', { name: 'Accept all verified in this tab' }).click();
     }
+    await page.locator('#tab-review_decision').click();
     await page.locator('select#outcome').selectOption('ready');
     await page.getByRole('button', { name: 'Record decision' }).click();
     await expect(page.getByRole('status')).toContainText('Readiness confirmed');
@@ -621,6 +666,8 @@ test.describe('Quality Verification', () => {
     await page.getByRole('link', { name: 'Lean Six Sigma Yellow Belt' }).click();
     await expect(page.locator('#conditions')).toContainText('Not met: Completed cohorts with verified evidence: 0');
     await page.getByRole('button', { name: 'Start a Quality Verification cycle' }).click();
+    await expect(page.locator('#tab-eligibility')).toHaveAttribute('aria-selected', 'true');
+    await page.locator('#tab-changes_submission').click();
     await page.locator('#decision').selectOption('ready');
     await page.getByRole('button', { name: 'Record decision' }).click();
     await expect(page.getByText('Waiting for the deputy dean to confirm')).toBeVisible();
@@ -630,23 +677,34 @@ test.describe('Quality Verification', () => {
     await signIn(page, 'Hakim Rahman', true);
     await page.getByRole('link', { name: /^(QV evidence|Quality Verification)$/ }).click();
     await page.getByRole('link', { name: 'Lean Six Sigma Yellow Belt' }).click();
+    await page.locator('#tab-changes_submission').click();
     await page.getByRole('button', { name: 'Confirm readiness decision' }).click();
     await expect(page.getByRole('alert')).toContainText('Not ready to submit');
+    await expect(page.locator('#tab-eligibility')).toHaveAttribute('aria-selected', 'true');
+    await page.locator('#tab-changes_submission').click();
     await expect(page.locator('#submit-off')).toContainText('Submission needs the status Ready to submit');
     await expect(page.getByRole('button', { name: 'Record submission' })).toBeDisabled();
     await page.locator('.who-btn').click();
     await page.getByRole('button', { name: 'Sign out' }).click();
 
-    // Step 1: the lecturer keeps evidence for the SAMC that has a completed cohort
+    // Step 1: the lecturer keeps evidence across domain tabs for the SAMC that has a completed cohort
     await signIn(page, 'Dr. Aina Zulkifli');
     await page.getByRole('link', { name: /^(QV evidence|Quality Verification)$/ }).click();
     await page.getByRole('link', { name: 'Cloud Native Development' }).click();
     await page.getByRole('button', { name: 'Start a Quality Verification cycle' }).click();
-    await expect(page.locator('#evidence')).toContainText('Available (linked from MCMS)');
+    await page.locator('#tab-academic_design').click();
+    await expect(page.locator('#panel-academic_design')).toContainText('Available (linked from MCMS)');
+    // Edit on Quality & CQI tab, switch to Digital Credential and back -> edit preserved before Save
+    await page.locator('#tab-quality_cqi').click();
     await page.locator('#st-quality_cqi').selectOption('available');
     await page.getByLabel('File reference for Quality assurance and CQI: feedback and improvement records').fill('cqi-2026-1.pdf');
-    await page.getByRole('button', { name: 'Save checklist' }).click();
+    await page.locator('#tab-digital_credential').click();
+    await page.locator('#tab-quality_cqi').click();
+    await expect(page.locator('#st-quality_cqi')).toHaveValue('available');
+    await expect(page.getByLabel('File reference for Quality assurance and CQI: feedback and improvement records')).toHaveValue('cqi-2026-1.pdf');
+    await page.locator('#panel-quality_cqi').getByRole('button', { name: 'Save checklist' }).click();
     await expect(page.getByRole('status')).toContainText('Evidence checklist saved');
+    await page.locator('#tab-changes_submission').click();
     await page.locator('#decision').selectOption('ready');
     await page.getByRole('button', { name: 'Record decision' }).click();
     await page.locator('.who-btn').click();
@@ -656,6 +714,7 @@ test.describe('Quality Verification', () => {
     await signIn(page, 'Hakim Rahman', true);
     await page.getByRole('link', { name: /^(QV evidence|Quality Verification)$/ }).click();
     await page.getByRole('link', { name: 'Cloud Native Development' }).click();
+    await expect(page.locator('#tab-changes_submission')).toHaveAttribute('aria-selected', 'true');
     await page.getByRole('button', { name: 'Confirm readiness decision' }).click();
     await expect(page.locator('#cycle')).toContainText('Ready to submit');
     await page.getByLabel('Date submitted').fill(iso(0));
@@ -691,7 +750,7 @@ test.describe('Credit bank', () => {
   test('FL-11 Confirm the ACR, consent, record the ABC deposit, see the ledger', async ({ page }) => {
     // Step 1: the records depositor reviews the generated record and confirms it; nothing on it can be edited
     await signIn(page, 'Nurul Izzah');
-    await page.getByRole('link', { name: /^ACR (&|and) ABC deposits$/ }).click();
+    await page.getByRole('link', { name: /^ACR (&|and) ABC deposits/ }).click();
     await page.getByRole('row', { name: /Data Structures.*Amir Hakimi/ }).getByRole('link', { name: 'Review' }).click();
     await expect(page.locator('#acr')).toContainText('Amir Hakimi');
     await expect(page.getByText('cannot be edited').first()).toBeVisible();
@@ -715,7 +774,7 @@ test.describe('Credit bank', () => {
 
     // Step 3: the records depositor finds it in the queue and records the deposit
     await signIn(page, 'Nurul Izzah');
-    await page.getByRole('link', { name: /^ACR (&|and) ABC deposits$/ }).click();
+    await page.getByRole('link', { name: /^ACR (&|and) ABC deposits/ }).click();
     await page.getByRole('button', { name: /^Deposit queue/ }).click();
     await page.getByRole('row', { name: /Data Structures.*Amir Hakimi/ }).getByRole('link', { name: 'Record deposit' }).click();
     await page.getByLabel('ABC reference').fill('ABC-2026-0042');
@@ -772,14 +831,20 @@ test.describe('Credit transfer', () => {
     await page.locator('.who-btn').click();
     await page.getByRole('button', { name: 'Sign out' }).click();
 
-    // Step 2: the deputy dean checks validity, compares outcomes one by one and approves
-    await signIn(page, 'Hakim Rahman', true);
-    await page.getByRole('link', { name: /^Credit transfer( evaluation)?( \d+)?$/ }).click();
+    // Step 2: CODL checks validity and evaluates outcomes, then Senate approves
+    await signIn(page, 'Farid Hashim', true);
+    await page.getByRole('link', { name: /^Credit transfer(s| evaluation| decisions)?( \d+)?$/ }).click();
     await page.getByRole('row', { name: /Amir Hakimi/ }).getByRole('link', { name: 'Open' }).click();
     await validity(page);
     await evaluate(page, ['full', 'full', 'full']);
     await expect(page.locator('.line-lo')).toContainText('Equivalent');
-    await page.locator('#decision_ref').fill('FTMK 4/2026');
+    await page.locator('.who-btn').click();
+    await page.getByRole('button', { name: 'Sign out' }).click();
+
+    await signIn(page, 'Prof. Dr. Zulkifli Ahmad', true);
+    await page.getByRole('link', { name: /^Credit transfer(s| evaluation| decisions)?( \d+)?$/ }).click();
+    await page.getByRole('row', { name: /Amir Hakimi/ }).getByRole('link', { name: 'Open' }).click();
+    await page.locator('#decision_ref').fill('SEN-CT 4/2026');
     await page.getByRole('button', { name: 'Record decision' }).click();
     await expect(page.getByRole('status')).toContainText('provisionally redeemed');
     await expect(page.locator('#app-status')).toHaveText('Approved');
@@ -803,13 +868,19 @@ test.describe('Credit transfer', () => {
     await page.getByRole('button', { name: 'Submit application' }).click();
     await page.locator('.who-btn').click();
     await page.getByRole('button', { name: 'Sign out' }).click();
-    await signIn(page, 'Hakim Rahman', true);
-    await page.getByRole('link', { name: /^Credit transfer( evaluation)?( \d+)?$/ }).click();
+    await signIn(page, 'Farid Hashim', true);
+    await page.getByRole('link', { name: /^Credit transfer(s| evaluation| decisions)?( \d+)?$/ }).click();
     await page.getByRole('row', { name: /Bee Tan.*Submitted/ }).getByRole('link', { name: 'Open' }).click();
     await validity(page);
     await evaluate(page, ['full', 'full', 'none']);
     await expect(page.locator('.line-lo')).toContainText('Approved is blocked');
-    await page.locator('#decision_ref').fill('FTMK 5/2026');
+    await page.locator('.who-btn').click();
+    await page.getByRole('button', { name: 'Sign out' }).click();
+
+    await signIn(page, 'Prof. Dr. Zulkifli Ahmad', true);
+    await page.getByRole('link', { name: /^Credit transfer(s| evaluation| decisions)?( \d+)?$/ }).click();
+    await page.getByRole('row', { name: /Bee Tan.*Under eval/i }).getByRole('link', { name: 'Open' }).click();
+    await page.locator('#decision_ref').fill('SEN-CT 5/2026');
     await page.getByRole('button', { name: 'Record decision' }).click();
     await expect(page.getByRole('alert')).toContainText('not matched by the micro-credential');
     await page.locator('#outcome').selectOption('not_approved');

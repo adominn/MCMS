@@ -27,7 +27,7 @@
   </div>
   <div class="card">
     <h3 style="margin-top:0">{{ __('Credit transfer') }}</h3>
-    <div class="muted small">{{ __('The receiving programme\'s faculty evaluates learning outcome equivalence course-by-course and decides approval.') }}</div>
+    <div class="muted small">{{ __('CODL evaluates learning outcome equivalence course-by-course and the UTeM Senate decides final approval.') }}</div>
   </div>
   <div class="card">
     <h3 style="margin-top:0">{{ __('Stackable pathway') }}</h3>
@@ -80,7 +80,7 @@
       @elseif($u?->hasRole('deputy_dean'))
         <div class="check">
           <span class="dot ok"></span>
-          <div class="grow"><b>{{ __('Task queue') }}</b><span class="s" style="display:block;font-size:12px;color:var(--muted)">{{ __('Process endorsement requests, mark verifications, and ABC deposit submissions.') }}</span></div>
+          <div class="grow"><b>{{ __('Task queue') }}</b><span class="s" style="display:block;font-size:12px;color:var(--muted)">{{ __('Process MC proposal endorsements, cohort readiness confirmations, and result verifications.') }}</span></div>
         </div>
         <div class="check">
           <span class="dot ok"></span>
@@ -88,7 +88,7 @@
         </div>
         <div class="check">
           <span class="dot ok"></span>
-          <div class="grow"><b>{{ __('Credit transfer evaluation') }}</b><span class="s" style="display:block;font-size:12px;color:var(--muted)">{{ __('Evaluate course-level learning outcome matches for applicant transfers.') }}</span></div>
+          <div class="grow"><b>{{ __('Credit transfer monitor') }}</b><span class="s" style="display:block;font-size:12px;color:var(--muted)">{{ __('Monitor incoming credit transfers for your faculty programmes (evaluated by CODL and approved by Senate).') }}</span></div>
         </div>
       @elseif($u?->hasRole('industry_expert') || $u?->hasRole('reviewer'))
         <div class="check">
@@ -98,7 +98,7 @@
       @elseif($u?->hasRole('codl_admin'))
         <div class="check">
           <span class="dot ok"></span>
-          <div class="grow"><b>{{ __('Administration & governance') }}</b><span class="s" style="display:block;font-size:12px;color:var(--muted)">{{ __('Manage system settings, roles, reference data, and integration adapters.') }}</span></div>
+          <div class="grow"><b>{{ __('Administration & governance') }}</b><span class="s" style="display:block;font-size:12px;color:var(--muted)">{{ __('Manage system settings, roles, reference data, proposal verification, credit transfer evaluation, and integration adapters.') }}</span></div>
         </div>
       @else
         <div class="check">

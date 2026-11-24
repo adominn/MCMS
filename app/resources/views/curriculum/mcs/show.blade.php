@@ -14,9 +14,15 @@
       <div class="sub">{{ __('version :num', ['num' => $head->version_no]) }}@if($head->planned_slt) &middot; {{ $head->planned_slt }} h {{ __('learning time') }} @endif &middot; <x-pill :s="__($statusLabels[$head->status] ?? ucfirst($head->status))" /></div>
     </div>
   </div>
-  <div class="act" style="gap:8px;display:flex;align-items:center">
-    <a class="btn ter sm" href="{{ route('mcs') }}">&larr; {{ __('All micro-credentials') }}</a>
-    @if($current && !$open)<a class="btn ter" href="{{ route('mcs.change', $m->id) }}">{{ __('Request a change') }}</a>@endif
+  <div class="act-bar">
+    <div class="act-left">
+      <a class="btn ter sm" href="{{ route('mcs') }}">&larr; {{ __('All micro-credentials') }}</a>
+    </div>
+    @if($current && !$open)
+      <div class="act-right">
+        <a class="btn ter" href="{{ route('mcs.change', $m->id) }}">{{ __('Request a change') }}</a>
+      </div>
+    @endif
   </div>
 </div>
 @if($open)<div class="note info">{{ __('Version :num is in progress (:status). A new change waits until it is decided.', ['num' => $open->version_no, 'status' => strtolower($statusLabels[$open->status] ?? $open->status)]) }} <a href="{{ route('proposals.show', $open->id) }}">{{ __('Open it') }}</a></div>@endif
@@ -95,9 +101,8 @@
 </div>
 
 <div class="note info" style="margin-top:20px">
-  <b>{{ __('NOTA PENTING (Lampiran A):') }}</b> {{ __('Kelulusan penawaran MC, penganugerahan credential, penyediaan ACR, deposit ke ABC dan pemindahan kredit merupakan proses yang berbeza dan tertakluk kepada ketetapan serta kelulusan pihak berkuasa yang berkaitan. Kelulusan penawaran tidak menjamin pemindahan kredit atau kemasukan ke program akademik UTeM secara automatik.') }}
-  <div class="small muted" style="margin-top:4px">
-    <b>{{ __('IMPORTANT NOTICE (Appendix A):') }}</b> {{ __('MC offering approval, credential award, ACR preparation, ABC deposit, and credit transfer are distinct processes subject to the requirements and approvals of respective authorities. Offering approval does not guarantee automatic credit transfer or admission into UTeM degree programmes.') }}
+  <div>
+    <b>{{ __('Important Notice:') }}</b> {{ __('MC offering approval, credential award, ACR preparation, ABC deposit, and credit transfer are distinct processes subject to the requirements and approvals of respective authorities. Offering approval does not guarantee automatic credit transfer or admission into UTeM degree programmes.') }}
   </div>
 </div>
 @endsection

@@ -16,10 +16,14 @@
       @if($locked)&middot; <span class="tag ok">{{ __('Submitted for verification') }}</span> {{ \Carbon\Carbon::parse($locked)->format('d/m/Y H:i') }}@else&middot; <span class="tag warn">{{ __('Draft') }}</span>@endif
     </div>
   </div>
-  <div class="act">
-    <a class="btn ter sm" href="{{ route('completion.signoff.show', $o->id) }}">{{ __('Coordinator sign-off') }} &rarr;</a>
-    <a class="btn ter sm" href="{{ route('offerings.participants', $o->id) }}">{{ __('Participants') }}</a>
-    <a class="btn ter sm" href="{{ route('offerings.show', $o->id) }}">&larr; {{ __('Back to cohort') }}</a>
+  <div class="act-bar">
+    <div class="act-left">
+      <a class="btn ter sm" href="{{ route('offerings.show', $o->id) }}">&larr; {{ __('Back to cohort') }}</a>
+    </div>
+    <div class="act-right">
+      <a class="btn ter sm" href="{{ route('completion.signoff.show', $o->id) }}">{{ __('Coordinator sign-off') }} &rarr;</a>
+      <a class="btn ter sm" href="{{ route('offerings.participants', $o->id) }}">{{ __('Participants') }}</a>
+    </div>
   </div>
 </div>
 

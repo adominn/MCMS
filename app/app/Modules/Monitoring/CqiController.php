@@ -364,7 +364,7 @@ final class CqiController
 
         $this->audit->record('cqi.decision_recorded', ['type' => 'CqiRecord', 'id' => $id], after: ['decision' => $d['c9_decision']]);
 
-        return back()->with('status', 'Offering review decision (Appendix C9) saved.');
+        return back()->with('status', 'Offering review decision saved.');
     }
 
     public function submit(Request $request, int $id)
@@ -409,7 +409,7 @@ final class CqiController
         $r = $this->dean($request, $id);
         abort_unless($r->status === 'submitted', 422, 'The record is not waiting for confirmation.');
         if (collect(array_keys(config('monitoring.confirmations')))->contains(fn ($k) => ! $request->boolean("confirm.$k"))) {
-            throw ValidationException::withMessages(['confirm' => 'Tick every confirmation of Appendix C10.']);
+            throw ValidationException::withMessages(['confirm' => 'Tick every confirmation statement before confirming.']);
         }
         if (DB::table('cqi_actions')->where('cqi_record_id', $id)->where('status', 'done')->exists()) {
             throw ValidationException::withMessages(['confirm' => 'An action is done but its effectiveness is not closed yet. Evaluate and close it first.']);

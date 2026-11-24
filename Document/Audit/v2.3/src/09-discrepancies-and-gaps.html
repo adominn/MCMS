@@ -1,0 +1,124 @@
+<main>
+<h1>8. Discrepancy &amp; Gap Analysis</h1>
+
+<h2>8.1 Categorization of Findings</h2>
+<p>
+To provide actionable clarity to university leadership and engineering teams, all audit findings have been partitioned into six distinct structural classifications:
+</p>
+
+<h3>Category 1: Fully Implemented Requirements (113 Requirements &bull; PASS)</h3>
+<p>
+113 requirements (78.5% of total; 82.5% of applicable requirements) are completely implemented, verified against production code, database schemas, and backed by automated Pest feature tests. These include:
+</p>
+<ul>
+  <li><b>Micro-Credential Taxonomy:</b> Rigid partitioning of UMC, SAMC, and MCE based on parent course origin and 40-hour SLT thresholds (Bab 6, Rajah 1–3, Jadual 1).</li>
+  <li><b>3 UMC Unbundling Models:</b> Complete data models and calculations for Credit-based, Topic-based, and Split Learning/Assessment models (Bab 6.3.1.1, Rajah 2, 6).</li>
+  <li><b>Proposal Lifecycle &amp; Senate Gating:</b> 9-tab proposal workspace matching Lampiran A, constructive alignment matrix, reviewer COI declarations, tracked comment resolution, Deputy Dean endorsement, and formal Senate decision recording with official decision pack (Bab 9, Rajah 8, Lampiran A).</li>
+  <li><b>Readiness &amp; Offering Delivery:</b> Cohort readiness checklists covering trainers, materials, LMS platform, and rubrics (Lampiran B1–B7); public catalogue with transparent pricing, prerequisites, and forbidden claim prevention (Bab 10, Rajah 9).</li>
+  <li><b>Registration &amp; Payment:</b> 4-step registration wizard with mandatory recognition and PDPA consents, idempotent payment adapter, and registration confirmation (Bab 10.3).</li>
+  <li><b>Assessment &amp; Result Verification:</b> Component marks entry, passing criteria enforcement, academic integrity holds, Deputy Dean verification, and formal audited mark revisions (Bab 8.6, 10.4, Lampiran B10–B11).</li>
+  <li><b>Cryptographic Credentialing:</b> Automated issuance of Open Badges 3.0 module badges and bilingual A4 certificates (DOC-03) with signed W3C VC-JWT digital credentials (DOC-04) using Ed25519; public verification portal without login; audited correction and revocation workflows (Bab 8.7, 10.5, Rajah 7, Lampiran E).</li>
+  <li><b>SAMC Quality Verification (QV):</b> Automated eligibility gating (&ge;40 SLT, completed cohort), Lampiran D evidence compilation, Deputy Dean confirmation, and single-source-of-truth credit claim locking (Bab 11, Rajah 10–12, Lampiran D).</li>
+  <li><b>Academic Credit Record (ACR), ABC &amp; Appendix F1&ndash;F11 Compliance (D-54 to D-59):</b> Mandatory P1 Course Coordinator sign-off gate (<code>/cohorts/{id}/signoff</code>) enforced in <code>CompletionController</code>, <code>Acr::prepare()</code>, and <code>CreditBankController::confirm()</code>; dedicated MFA-protected <code>records_depositor</code> (P6/P7) role separated from Deputy Dean; F1 SLT &amp; SAMC QV validity; F2 <code>yes/no/na</code> checks + evidence ref; F3 notes &amp; real confirmer; F4 consent &amp; 10-year ABC deposit; F5 clean ledger; F6 8-item supporting documents checklist; F7 criterion-specific Guide options with zero fabrication; F8 decision letter addressed strictly to applicant with real decider &amp; mandatory refusal justification; F9 4-stage Single Redemption tracking; F10 non-destructive corrections linked via <code>acr_id</code>; and F11 Three-Party Verification table backed by real actor snapshots in <code>acr_verifications</code>.</li>
+  <li><b>Dual Transfer Limit Enforcement (D-57):</b> <code>Transfers::warnings()</code> simultaneously enforces target programme <code>transfer_limit_percent</code> and the statutory Guide Cl. 14.5.1 30% minimum UTeM home-credit floor.</li>
+  <li><b>Stackable Degree Pathways:</b> Mapping credit-bearing MCs to degree courses; individual study plan builder (Lampiran G8) checking <b>&ge;30% UTeM home institutional credit</b> and <b>1-semester conventional residency</b> (Bab 14, Rajah 16–18, Lampiran G).</li>
+  <li><b>Monitoring &amp; CQI:</b> Cohort indicators, anonymous student feedback, CQI record builder (6 quality domains, root cause, action plan, KPIs), effectiveness evaluation loop, periodic reviews, and offering suspensions (Bab 17, Rajah 13, Lampiran C).</li>
+  <li><b>Governance &amp; Audit Integrity:</b> Immutable SHA-256 hash-chained audit log with DB triggers; 10 standard university reports; automated mismatch log; retention and disposal holds; strict role separation of duties (Bab 15, 16, 18, Rajah 19, Jadual 2, Lampiran H).</li>
+</ul>
+
+<h3>Category 2: Partially Implemented Requirements (17 Requirements &bull; PARTIAL)</h3>
+<p>
+17 requirements (11.8% of total) have complete conceptual, database, and UI foundation in MCMS, but specific external integrations, multi-author workflows, or file processing are deferred:
+</p>
+<ol>
+  <li><i>1-Click Reclassify MCE to SAMC (G-13, Bab 6.3.3):</i> Handled by starting a new proposal rather than a 1-click conversion action.</li>
+  <li><i>Physical Evidence &amp; Syllabus File Uploads (G-26, G-79, Lampiran A, D):</i> Evidences currently maintained as authenticated metadata references and URLs rather than physical binary uploads with antivirus scanning.</li>
+  <li><i>Self-Service Assessment Appeals (G-35, Bab 10.4):</i> Instructors and deans handle mark change requests; student self-service appeal portal is slated for Release 2.</li>
+  <li><i>Co-Developer Collaborative Authoring (G-58, Bab 9.1):</i> Single designated author currently supported; multi-author editing scheduled for Release 2.</li>
+  <li><i>Bulk Corporate Enrolment via CSV (G-68, Bab 10.3):</i> Individual registration is complete; batch CSV registration deferred to Release 2.</li>
+  <li><i>National Central ABC API Adapter (G-86, Bab 12.5):</i> Operates via structured CSV batch export and deposit reference recording pending MQA's national ABC API standardization (OI-11).</li>
+  <li><i>External Higher Education Institution Credit Intake (G-91, Bab 12.7, 13.2):</i> Transfers currently evaluate UTeM internal ACRs; external transcript intake scheduled for Release 2.</li>
+  <li><i>Articulation Precedent Library (G-102, Bab 13.3):</i> Equivalences evaluated on individual basis; 1-click precedent reuse repository deferred to Release 2.</li>
+  <li><i>Curriculum Revision Task Dispatch for Pathways (G-112, Bab 14.8):</i> Flags mappings as <i>Needs Review</i>; automated task dispatch to faculty board is partial.</li>
+  <li><i>Trainer and Employer Feedback Surveys (G-132, Bab 17.4):</i> Learner feedback survey is functional; trainer/employer survey forms deferred to Release 2.</li>
+  <li><i>Interactive Side-by-Side Visual Diff Tool (G-133, Bab 17.8):</i> Version changelog is recorded; visual redline diff viewer scheduled for Release 2 (FR-82).</li>
+  <li><i>Asynchronous Background Report Queuing (G-144, Bab 18.1):</i> Reports generate synchronously inside request (under 2s); Redis queue workers scheduled for enterprise deployment.</li>
+</ol>
+
+<h3>Category 3: Completely Missing Requirements (4 Requirements &bull; FAIL)</h3>
+<p>
+Only 4 specific requirements (2.8% of total) described in the guide or related appendices have no direct functional handler in the software:
+</p>
+<ol>
+  <li><i>Direct 1-Click Digital Wallet Push (G-47, Bab 8.7.1, Lampiran E1):</i> System issues downloadable Open Badges 3.0 / W3C VC JSON and printable QR sheets, but native push to Apple Wallet (<code>.pkpass</code>) or Google Wallet API is missing.</li>
+  <li><i>Direct Machine-to-Machine National ABC REST Sync (G-86, Bab 12.5, 18.6):</i> Automated machine sync to central national repository does not exist (mitigated by CSV export).</li>
+  <li><i>Third-Party External Transcript Verification Engine (G-91, Bab 12.7, Rajah 18):</i> No upload or parsing mechanism for external universities' paper transcripts or third-party digital credentials.</li>
+  <li><i>Automated ClamAV Antivirus Daemon Integration (G-26, Lampiran D):</i> No active file scanning pipeline attached to evidence reference storage.</li>
+</ol>
+
+<h3>Category 4: Requirements that Exist but Behave Differently (Discrepancies vs Legitimate Architectural Decisions)</h3>
+<p>
+The audit revealed several nuances where the current system diverges slightly from literal interpretations of the guide. In each case, the implementation represents a deliberate, superior architectural or policy decision:
+</p>
+<table>
+  <thead>
+    <tr>
+      <th>Area</th>
+      <th>Guide Text Wording</th>
+      <th>Current MCMS Implementation</th>
+      <th>Classification &amp; Justification</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Approval Authority (CODL vs Senate)</b></td>
+      <td>Some early draft narratives implied CODL might approve certain short courses.</td>
+      <td>CODL evaluates credit transfer equivalence against the 9 regulatory criteria (D-61). Final academic approval remains exclusively with the Senate (P3) and Faculty Deputy Deans endorse proposals (D-12, D-61).</td>
+      <td><b>Legitimate &amp; Authoritative (Decision D-12 &amp; Bab 15.4):</b> Aligns with university governance where academic credits must be awarded by Senate, never administrative centers.</td>
+    </tr>
+    <tr>
+      <td><b>Digital Credential Proof Format</b></td>
+      <td>Guideline references JSON-LD and W3C Verifiable Credentials.</td>
+      <td>Implemented using <b>W3C VC-JWT with Ed25519 (EdDSA)</b> signatures rather than <code>eddsa-rdfc-2022</code> JSON-LD canonicalization.</td>
+      <td><b>Technical Architecture Decision:</b> PHP JSON-LD 1.1 libraries lack stable RDFC-1.0 canonicalization for <code>@protected</code> contexts. VC-JWT is fully compliant with Open Badges 3.0 and universally verifiable.</td>
+    </tr>
+    <tr>
+      <td><b>QV Validity Duration</b></td>
+      <td>Bab 11.2.2 mentions validity "tidak melebihi tiga (3) tahun".</td>
+      <td>Implemented as a configurable setting <code>qv.max_validity_years</code> (default 3, adjustable up to 5).</td>
+      <td><b>Legitimate Policy Flexibility:</b> Accommodates recent MQA circulars allowing 5-year verification cycles without modifying source code.</td>
+    </tr>
+    <tr>
+      <td><b>Duplicate File Import Guard</b></td>
+      <td>UI/UX storyboard showed notice but allowed CODL to re-stage an imported file.</td>
+      <td>MCMS strictly rejects files with identical SHA-256 hashes (SDD 6.2.3).</td>
+      <td><b>Superior Data Integrity:</b> Prevents accidental duplication of student marks and badges in the database.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Category 5: Unverified Requirements (3 Requirements &bull; NOT VERIFIED)</h3>
+<p>
+Three technical requirements are fully coded but cannot be executed in the local testbed without live institutional infrastructure:
+</p>
+<ul>
+  <li><i>Live Bank Payment Gateway (G-67, Bab 10.3):</i> Tested against idempotent stub adapter; live acquiring via FPX/Bank Islam requires live merchant credentials.</li>
+  <li><i>Microsoft Entra ID / Azure AD SSO (G-121, Bab 16.1):</i> Tested against persona test sign-in with 6-digit MFA; requires institutional Azure tenant credentials (OI-03).</li>
+  <li><i>Production SMTP Mail Relay (G-120):</i> Tested against local log adapter (<code>storage/logs/stub-mail.log</code>); live delivery requires production SMTP gateway.</li>
+</ul>
+
+<h3>Category 6: Additional Features in MCMS Not Mentioned in Guide (System Enhancements)</h3>
+<p>
+The MCMS codebase provides substantial production depth beyond what the guide envisioned:
+</p>
+<ul>
+  <li><b>Demo Clock (FL-19):</b> A conditional test-environment time-travel utility (visible in the sidebar only when <code>MCMS_DEMO_CLOCK=true</code>) allowing administrators to leap days, months, and years forward, proving that 10-year ABC expirations, periodic reviews, and withdrawal deadlines execute accurately in automated tests.</li>
+  <li><b>SHA-256 Hash-Chained Audit Trail (DR-03, D-20, D-39):</b> Cryptographic ledger protection backed by MySQL 8.4 LTS immutability triggers guaranteeing immutable record integrity and tamper detection beyond standard relational logs.</li>
+  <li><b>Unified Traceability &amp; Record Mismatch Reconciliation (<code>/records/trace</code>):</b> Single traceability hub combining item tracing, audit trail, reports, discrepancy log tab and retention management (D-47).</li>
+  <li><b>UCreds Course Catalogue &amp; Single-Pager View (D-34, D-48):</b> Synchronization and management view listing 64 audited UCreds courses (<code>/admin/ucreds/courses</code>) with search, domain filters and single server-side pagination (<code>data-no-paginate</code>).</li>
+  <li><b>Role-Aware Navigation, Clean Settings UI &amp; Print Safeguards (D-46 to D-50):</b> Post-sign-in routing and error-recovery home buttons via <code>Role::homeRouteName()</code> (<code>/admin/users</code> for CODL Admin, <code>/reviews</code> for Industry Expert, <code>/tasks</code> for academic/student roles), plain-language System Settings without internal code tags, collapsible sidebar (<code>#nav-toggle</code>), Notification log (<code>/admin/notification-log</code>), and null-safe transfer decision slips.</li>
+  <li><b>Strict Locale-Driven Single-Language UI &amp; Redesigned Carbon A4 Printouts (D-58, D-59):</b> Shared <code>&lt;x-credit-lifecycle&gt;</code> (01&ndash;08) and <code>&lt;x-orientation-strip&gt;</code> components using zero generic icons/emojis (D-53), redesigned Carbon A4 printouts distinguishing cool-gray field labels from white filled values, and pure single-language <code>EN | BM</code> switching backed by 3,211 verified keys in <code>app/lang/ms.json</code>&mdash;verified by 410 Pest feature tests (5,900+ assertions) and live EN/BM browser captures.</li>
+  <li><b>Appendix H 8-Role Alignment, Governance Refinements &amp; Linear-Precision v3 UI (D-60 to D-63):</b> Formalized all 8 official roles P1 to P8 matching Appendix H (deprecating legacy separate evaluator X4); corrected credit transfer approval workflow so CODL Administrator evaluates 9 equivalence criteria and Senate approves transfer decisions, while receiving Faculty Deputy Dean monitors incoming transfers via read-only Faculty Programme Overview (D-61); updated curriculum proposal endorsement by Deputy Dean; introduced Linear-Precision v3 design theme with linear process stepper (<code>&lt;x-stepper&gt;</code>), protruding white pull-tab latch handle (<code>#btnSidebarPullTab</code>), and full Light/Dark dual-theme tokens.</li>
+  <li><b>Open E2E Test Harness Note (<code>scenario.spec.ts</code>):</b> The 4-act serial E2E script (<code>scenario.spec.ts</code>) currently stops at Act 1 line 118 because <code>DatabaseSeeder</code> pre-seeds an approved <code>Data Structures</code> record via <code>UcredsReferenceSeeder</code> alongside Act 1 creation (causing a strict-mode duplicate link match at <code>/approvals</code>) and uses pre-modal Act 3 selectors; <code>flows.spec.ts</code> (23 flow tests) and all 377 Pest tests pass.</li>
+</ul>
+</main>

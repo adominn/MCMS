@@ -229,7 +229,7 @@ it('needs the category to be verified, then endorses and hands the Senate task o
     expect(DB::table('mc_versions')->where('id', $id)->value('status'))->toBe('endorsed')
         ->and($d->stage)->toBe('endorsement')->and($d->verified_category)->toBe('umc')->and($d->decided_by)->toBe($this->hakim->id)
         ->and(DB::table('micro_credentials')->value('category_status'))->toBe('verified')
-        ->and(DB::table('tasks')->where('kind', 'senate')->where('ref_id', $id)->whereNull('completed_at')->exists())->toBeTrue()
+        ->and(DB::table('tasks')->where('kind', 'codl_verify')->where('ref_id', $id)->whereNull('completed_at')->exists())->toBeTrue()
         ->and(DB::table('tasks')->where('kind', 'decide')->whereNull('completed_at')->exists())->toBeFalse()
         ->and(DB::table('notifications')->where('user_id', $this->aina->id)->where('template_key', 'proposal.endorsed')->exists())->toBeTrue();
 });
@@ -282,7 +282,7 @@ it('records an approval with the meeting reference and fixes the category, setti
     senate($id)->assertSessionHasNoErrors();
     $d = DB::table('approval_decisions')->where('stage', 'senate')->first();
     expect(DB::table('mc_versions')->where('id', $id)->value('status'))->toBe('approved')
-        ->and($d->meeting_ref)->toBe('Senate 8/2026')->and($d->decided_by)->toBe($this->hakim->id)->and($d->decided_role)->toBe('deputy_dean')
+        ->and($d->meeting_ref)->toBe('Senate 8/2026')->and($d->decided_by)->toBe(userZulkifli()->id)->and($d->decided_role)->toBe('academic_authority')
         ->and(DB::table('micro_credentials')->value('category_status'))->toBe('confirmed')
         ->and(DB::table('audit_events')->where('action', 'senate.decision_recorded')->exists())->toBeTrue()
         ->and(DB::table('notifications')->where('user_id', $this->aina->id)->where('template_key', 'decision.made')->where('channel', 'in_system')->value('body'))->toContain('Senate 8/2026')
@@ -295,9 +295,10 @@ it('records an approval with the meeting reference and fixes the category, setti
 
 it('records the other Senate outcomes: conditions, not approved, returned, deferred', function () {
     $id = endorsed();
+    $this->actingAs(userFarid())->post("/approvals/$id/verify", ['comments' => 'Verified by CODL'])->assertSessionHasNoErrors();
     senate($id, ['decision' => 'approved_conditions'])->assertSessionHasErrors('conditions');
     senate($id, ['decision' => 'deferred'])->assertSessionHasNoErrors();
-    expect(DB::table('mc_versions')->where('id', $id)->value('status'))->toBe('endorsed')->and(DB::table('tasks')->where('kind', 'senate')->whereNull('completed_at')->exists())->toBeTrue();
+    expect(DB::table('mc_versions')->where('id', $id)->value('status'))->toBe('codl_verified')->and(DB::table('tasks')->where('kind', 'senate')->whereNull('completed_at')->exists())->toBeTrue();
     senate($id, ['decision' => 'approved_conditions', 'conditions' => 'Add a data protection note'])->assertSessionHasNoErrors();
     expect(DB::table('mc_versions')->where('id', $id)->value('status'))->toBe('approved')->and(DB::table('approval_decisions')->where('decision', 'approved_conditions')->value('conditions'))->toBe('Add a data protection note');
 
@@ -326,19 +327,24 @@ it('records a Senate decision only after endorsement, not dated before it, with 
     $id = inReviewWithReview();
     senate($id)->assertForbidden(); // not endorsed yet
     $this->actingAs($this->hakim)->post("/approvals/$id/endorse", ['category_verified' => 1]);
+    $this->actingAs($this->hakim)->get("/approvals/$id/senate")
+        ->assertForbidden()
+        ->assertSee('CODL and Academic Authority')
+        ->assertDontSee('You cannot open this page');
     senate($id, ['meeting_date' => today()->subDays(3)->toDateString()])->assertSessionHasErrors('meeting_date');
     senate($id, ['meeting_ref' => ''])->assertSessionHasErrors('meeting_ref');
     senate($id, ['meeting_date' => today()->addDay()->toDateString()])->assertSessionHasErrors('meeting_date');
-    $this->actingAs($this->hakim)->get("/approvals/$id/senate")->assertSee('does not set any credit');
+    $this->actingAs(userZulkifli())->get("/approvals/$id/senate")->assertSee('does not set any credit');
 });
 
 it('takes the approving role from the settings and never from the administrator (FR-16, D-12)', function () {
     $id = endorsed();
     $admin = User::where('name', 'Farid Hashim')->first();
-    $this->actingAs($admin)->post('/admin/settings/approval.route.senate', ['value' => 'codl_admin', 'reason' => 'Trying to give it to CODL'])->assertSessionHasErrors('value');
-    $this->actingAs($admin)->post("/approvals/$id/senate", ['meeting_ref' => 'x', 'meeting_date' => today()->toDateString(), 'decision' => 'approved', 'comments' => 'trying it'])->assertForbidden();
+    $this->actingAs($admin)->post('/admin/settings/approval.route.senate', ['value' => 'student', 'reason' => 'Trying to give it to a student'])->assertSessionHasErrors('value');
+    $this->actingAs($this->hakim)->post("/approvals/$id/senate", ['meeting_ref' => 'x', 'meeting_date' => today()->toDateString(), 'decision' => 'approved', 'comments' => 'trying it'])->assertForbidden();
     $this->actingAs($admin)->post('/admin/settings/approval.route.senate', ['value' => 'lecturer', 'reason' => 'Moves to another academic role']);
-    senate($id)->assertForbidden(); // Hakim no longer holds the configured role
+    senate($id)->assertForbidden(); // Academic Authority no longer holds the configured role
+    $this->actingAs($admin)->post("/approvals/$id/senate", ['meeting_ref' => 'x', 'meeting_date' => today()->toDateString(), 'decision' => 'approved', 'comments' => 'trying it'])->assertForbidden();
     expect(app(Settings::class)->get('approval.route.senate'))->toBe('lecturer');
 });
 

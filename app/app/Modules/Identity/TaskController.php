@@ -30,10 +30,11 @@ final class TaskController
     public function index(Request $request)
     {
         $user = $request->user();
-        if ($user->hasAnyRole('student') && ! $user->hasAnyRole('lecturer', 'deputy_dean', 'records_depositor', 'codl_admin', 'industry_expert')) {
+        $staffRoles = ['lecturer', 'deputy_dean', 'ptj_authority', 'academic_authority', 'qa_officer', 'records_custodian', 'abc_depositor', 'records_depositor', 'codl_admin', 'industry_expert', 'reviewer'];
+        if ($user->hasAnyRole('student') && ! $user->hasAnyRole(...$staffRoles)) {
             return $this->student($user);
         }
-        if ($user->hasAnyRole('industry_expert') && ! $user->hasAnyRole('student', 'lecturer', 'deputy_dean', 'records_depositor', 'codl_admin')) {
+        if ($user->hasAnyRole('industry_expert', 'reviewer') && ! $user->hasAnyRole('student', 'lecturer', 'deputy_dean', 'ptj_authority', 'academic_authority', 'qa_officer', 'records_custodian', 'abc_depositor', 'records_depositor', 'codl_admin')) {
             return redirect()->route('reviews'); // the expert's home is the list of invitations (prototype: My review invitations)
         }
         $roles = $user->effectiveRoles();
@@ -41,9 +42,17 @@ final class TaskController
         $base = fn () => $this->visible($user)->whereNull('completed_at')
             ->when($q !== '', fn ($b) => $b->where('title', db_like(), "%$q%"));
         $counts = $base()->selectRaw('area, count(*) as n')->groupBy('area')->pluck('n', 'area');
-        $areas = $user->hasAnyRole('lecturer', 'deputy_dean')
-            ? self::AREAS
-            : array_intersect_key(self::AREAS, $counts->filter(fn ($n) => $n > 0)->all());
+        $areas = match (true) {
+            $user->hasAnyRole('deputy_dean', 'ptj_authority') => array_intersect_key(
+                self::AREA_LABELS,
+                array_flip(array_unique(array_merge(['proposals', 'offerings', 'results', 'qv_monitoring'], $counts->filter(fn ($n) => $n > 0)->keys()->all())))
+            ),
+            $user->hasAnyRole('lecturer') => array_intersect_key(
+                self::AREA_LABELS,
+                array_flip(array_unique(array_merge(['proposals', 'offerings', 'results'], $counts->filter(fn ($n) => $n > 0)->keys()->all())))
+            ),
+            default => array_intersect_key(self::AREA_LABELS, $counts->filter(fn ($n) => $n > 0)->all()),
+        };
         $area = array_key_exists((string) $request->query('area'), $areas) ? $request->query('area') : null;
         $days = (int) $this->settings->get('alerts.decision_overdue_days');
 
@@ -51,7 +60,7 @@ final class TaskController
             'roles' => $roles, 'q' => $q, 'area' => $area, 'counts' => $counts, 'areas' => $areas, 'areaLabels' => self::AREA_LABELS, 'total' => $counts->sum(),
             'tasks' => $base()->when($area, fn ($b) => $b->where('area', $area))->orderBy('created_at')->paginate(10)->withQueryString(),
             'overdueBefore' => now()->subDays($days), 'days' => $days,
-            'kpis' => $user->hasAnyRole('lecturer') && ! $user->hasAnyRole('deputy_dean', 'records_depositor', 'codl_admin') ? $this->lecturerKpis($user) : null,
+            'kpis' => $user->hasAnyRole('lecturer') && ! $user->hasAnyRole('deputy_dean', 'ptj_authority', 'academic_authority', 'qa_officer', 'records_custodian', 'abc_depositor', 'records_depositor', 'codl_admin') ? $this->lecturerKpis($user) : null,
             'recent' => $this->visible($user)->whereNotNull('completed_at')->where('completed_at', '>=', now()->subDays(7))->orderByDesc('completed_at')->limit(5)->get(),
         ]);
     }
@@ -64,7 +73,7 @@ final class TaskController
 
         return [
             'Approved' => (clone $v)->where('x.status', 'approved')->count(),
-            'In review or pending' => (clone $v)->whereIn('x.status', ['submitted', 'in_review', 'endorsed', 'pending_approval'])->count(),
+            'In review or pending' => (clone $v)->whereIn('x.status', ['submitted', 'in_review', 'endorsed', 'codl_verified', 'pending_approval'])->count(),
             'Drafts' => (clone $v)->whereIn('x.status', ['draft', 'returned'])->count(),
             'Open or upcoming offerings' => DB::table('offerings as o')->join('mc_versions as x', 'x.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'x.micro_credential_id')
                 ->where('m.owner_id', $user->id)->whereIn('o.status', ['open', 'ready', 'draft'])->count(),
@@ -154,7 +163,7 @@ final class TaskController
                 return (object) [
                     'id' => 'transfer-'.$t->id,
                     'title' => __('Add evidence to your transfer application :ref', ['ref' => $t->reference]),
-                    'subtitle' => $t->evidence_request ?: __('Additional evidence requested by faculty evaluation.'),
+                    'subtitle' => $t->evidence_request ?: __('Additional evidence requested during credit transfer evaluation.'),
                     'link' => route('transfer.show', $t->id),
                     'action_label' => __('Add evidence'),
                     'dot_class' => 'warn',
@@ -213,19 +222,42 @@ final class TaskController
     public function visible(\App\Models\User $user)
     {
         $effectiveRoles = $user->effectiveRoles();
-        $roleValues = $effectiveRoles->map(fn (Role $r) => $r->value)->all();
-        if ($roleValues === []) {
+        $expanded = $this->expandRoleAliases($effectiveRoles->map(fn (Role $r) => $r->value)->all());
+        if ($expanded === []) {
             return DB::table('tasks')->whereRaw('1 = 0');
         }
 
-        return DB::table('tasks')->where(function ($q) use ($user, $effectiveRoles, $roleValues) {
+        return DB::table('tasks')->where(function ($q) use ($user, $effectiveRoles, $expanded) {
             $q->orWhere(fn ($w) => $w->where('user_id', $user->id)
-                ->where(fn ($x) => $x->whereNull('assignee_role')->orWhereIn('assignee_role', $roleValues))); // a task for me in an active/effective role
+                ->where(fn ($x) => $x->whereNull('assignee_role')->orWhereIn('assignee_role', $expanded))); // a task for me in an active/effective role
             foreach ($effectiveRoles as $r) {
+                $aliases = $this->expandRoleAliases([$r->value]);
                 $ids = $user->scopedPtjIds($r->value);
-                $q->orWhere(fn ($w) => $w->where('assignee_role', $r->value)->whereNull('user_id')->when($ids !== null, fn ($x) => $x->where(fn ($y) => $y->whereNull('ptj_id')->orWhereIn('ptj_id', $ids))));
+                $q->orWhere(fn ($w) => $w->whereIn('assignee_role', $aliases)->whereNull('user_id')->when($ids !== null, fn ($x) => $x->where(fn ($y) => $y->whereNull('ptj_id')->orWhereIn('ptj_id', $ids))));
+                // Both Academic Authority (P3) and CODL Secretariat (P5) share visibility of open Senate tasks (D-66).
+                if ($r->value === 'codl_admin') {
+                    $q->orWhere(fn ($w) => $w->where('assignee_role', 'academic_authority')->whereIn('kind', ['senate', 'transfer_senate'])->whereNull('user_id'));
+                }
             }
         });
+    }
+
+    /** Expand canonical role aliases so tasks created under legacy or paired slugs remain visible. @param list<string> $roles @return list<string> */
+    private function expandRoleAliases(array $roles): array
+    {
+        $out = $roles;
+        foreach ($roles as $role) {
+            if ($role === 'deputy_dean') {
+                $out[] = 'ptj_authority';
+            } elseif ($role === 'ptj_authority') {
+                $out[] = 'deputy_dean';
+            } elseif ($role === 'records_depositor') {
+                $out[] = 'records_custodian';
+                $out[] = 'abc_depositor';
+            }
+        }
+
+        return array_values(array_unique($out));
     }
 
     public function show(Request $request, int $id)

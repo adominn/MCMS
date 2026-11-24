@@ -228,7 +228,7 @@ if (! function_exists('endorsed')) {
 if (! function_exists('senate')) {
     function senate(int $id, array $over = []): \Illuminate\Testing\TestResponse
     {
-        return test()->actingAs(userHakim())->post("/approvals/$id/senate", $over + ['meeting_ref' => 'Senate 8/2026', 'meeting_date' => today()->toDateString(), 'decision' => 'approved', 'comments' => 'Approved as presented in the minutes.']);
+        return test()->actingAs(userZulkifli())->post("/approvals/$id/senate", $over + ['meeting_ref' => 'Senate 8/2026', 'meeting_date' => today()->toDateString(), 'decision' => 'approved', 'comments' => 'Approved as presented in the minutes.']);
     }
 }
 

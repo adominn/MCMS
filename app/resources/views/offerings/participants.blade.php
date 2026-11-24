@@ -14,9 +14,13 @@
       {{ __(':taken of :cap places taken', ['taken' => $taken, 'cap' => $o->capacity]) }}
     </div>
   </div>
-  <div class="act">
-    <a class="btn ter sm" href="{{ route('offerings.participants', ['id' => $o->id, 'status' => $status, 'export' => 'csv']) }}">{{ __('Export CSV') }}</a>
-    <a class="btn ter sm" href="{{ route('offerings.show', $o->id) }}">&larr; {{ __('Back to the cohort') }}</a>
+  <div class="act-bar">
+    <div class="act-left">
+      <a class="btn ter sm" href="{{ route('offerings.show', $o->id) }}">&larr; {{ __('Back to the cohort') }}</a>
+    </div>
+    <div class="act-right">
+      <a class="btn ter sm" href="{{ route('offerings.participants', ['id' => $o->id, 'status' => $status, 'export' => 'csv']) }}">{{ __('Export CSV') }}</a>
+    </div>
   </div>
 </div>
 <nav class="tabs" aria-label="Status">

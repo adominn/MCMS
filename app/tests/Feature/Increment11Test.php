@@ -302,9 +302,10 @@ it('shows each adapter with its mode, last run and the notification log (FR-25, 
 
 it('lists only the tasks of the signed-in roles, filtered by area and search, 10 to a page', function () {
     $hakim = who('Hakim Rahman');
-    $this->actingAs($hakim)->get('/tasks')->assertOk()->assertSee('All (24)')->assertSee('Results (4)')->assertDontSee('Answer review comments');
+    $this->actingAs($hakim)->get('/tasks')->assertOk()->assertSee('All (16)')->assertSee('Results (4)')->assertDontSee('Answer review comments');
     $this->actingAs($hakim)->get('/tasks?area=results')->assertSee('Verify results')->assertDontSee('Record ABC deposit');
-    $this->actingAs($hakim)->get('/tasks?q=deposit')->assertSee('All (4)')->assertSee('Record ABC deposit');
+    $this->actingAs(who('Nurul Izzah'))->get('/tasks?q=deposit')->assertSee('All (4)')->assertSee('Record ABC deposit');
+    $this->actingAs(who('Farid Hashim'))->get('/tasks')->assertSee('Evaluate transfer');
     // paging, sorting and search of the list run in the browser (UI/UX 4.5); the Playwright flow FL-00 covers them
     $this->actingAs(who('Dr. Aina Zulkifli'))->get('/tasks')->assertSee('Answer review comments')->assertDontSee('Verify results');
 });

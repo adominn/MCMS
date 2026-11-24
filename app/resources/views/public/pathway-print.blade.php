@@ -62,14 +62,14 @@
 
 <div style="margin-top:20px;border-top:1px solid var(--border, #090a0f);padding-top:12px;font-size:8.5pt;color:var(--muted);line-height:1.4">
   <b>{{ __('Academic Governance & Regulatory Notice:') }}</b>
-  {{ __('No micro-credential leads to a degree automatically, however many are accumulated. Credit exemption is subject to faculty approval, valid Academic Bank of Credit (ABC) deposits within 10 years of ABC deposit date (Cl. 12.8), and compliance with the 30% UTeM minimum home-credit requirement.') }}
+  {{ __('No micro-credential leads to a degree automatically, however many are accumulated. Credit exemption is subject to faculty approval, valid Academic Bank of Credit (ABC) deposits within 10 years of deposit date, and compliance with the 30% UTeM minimum home-credit requirement.') }}
 </div>
 
 <div class="page-break" style="page-break-before:always;margin-top:24px"></div>
 
 {{-- G4. Pemetaan kepada Hasil Pembelajaran Program (PLO) --}}
 <h2 style="font-size:11pt;border-bottom:1.5px solid #0052ff;padding-bottom:3px;margin:16px 0 8px;text-transform:uppercase">
-  G4. Pemetaan kepada Hasil Pembelajaran Program (PLO)
+  {{ __('Mapping to Programme Learning Outcomes (PLO)') }}
 </h2>
 <table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:9pt">
   <thead>
@@ -98,7 +98,7 @@
 
 {{-- G5. Pemetaan kepada Body of Knowledge (BoK) --}}
 <h2 style="font-size:11pt;border-bottom:1.5px solid #0052ff;padding-bottom:3px;margin:16px 0 8px;text-transform:uppercase">
-  G5. Pemetaan kepada Body of Knowledge (BoK)
+  {{ __('Mapping to Body of Knowledge (BoK)') }}
 </h2>
 <table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:9pt">
   <thead>
@@ -132,7 +132,7 @@
 
 {{-- G8. Baki Keperluan Program yang Perlu Disempurnakan (7 Komponen) --}}
 <h2 style="font-size:11pt;border-bottom:1.5px solid #0052ff;padding-bottom:3px;margin:16px 0 8px;text-transform:uppercase">
-  G8. Baki Keperluan Program yang Perlu Disempurnakan (7 Komponen)
+  {{ __('Remaining Programme Requirements (7 Components)') }}
 </h2>
 <table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:9pt">
   <thead>
@@ -162,7 +162,7 @@
 
 {{-- G9. Ringkasan Analisis Kredit dan Jurang --}}
 <h2 style="font-size:11pt;border-bottom:1.5px solid #0052ff;padding-bottom:3px;margin:16px 0 8px;text-transform:uppercase">
-  G9. Ringkasan Analisis Kredit dan Jurang
+  {{ __('Summary of Credit and Gap Analysis') }}
 </h2>
 <table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:9pt">
   <tbody>
@@ -191,58 +191,58 @@
 
 {{-- G11. Pengesahan Pemetaan (3 Peranan) --}}
 <h2 style="font-size:11pt;border-bottom:1.5px solid #0052ff;padding-bottom:3px;margin:16px 0 8px;text-transform:uppercase">
-  G11. Pengesahan Pemetaan (3 Peranan)
+  {{ __('Mapping Sign-Off (3 Roles)') }}
 </h2>
 <table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:9pt">
   <thead>
     <tr style="background:#f1f5f9">
-      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:25%">Peranan</th>
-      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:30%">Nama / Jawatan</th>
-      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:15%">Status</th>
-      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:15%">Tarikh</th>
-      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:15%">Catatan</th>
+      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:25%">{{ __('Role') }}</th>
+      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:30%">{{ __('Name / Position') }}</th>
+      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:15%">{{ __('Status') }}</th>
+      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:15%">{{ __('Date') }}</th>
+      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:15%">{{ __('Remarks') }}</th>
     </tr>
   </thead>
   <tbody>
     @php($s1 = $g11['coordinator'] ?? null)
     <tr>
-      <td style="border:1px solid #8d8d8d;padding:4px 6px"><strong>Penyelaras Program Stackable</strong><br><span style="font-size:8pt;color:#475569">(P1 Coordinator)</span></td>
+      <td style="border:1px solid #8d8d8d;padding:4px 6px"><strong>Penyelaras Program Stackable</strong><br><span style="font-size:8pt;color:#475569">({{ __('Coordinator') }})</span></td>
       <td style="border:1px solid #8d8d8d;padding:4px 6px">
         <strong>{{ $s1['name'] ?? 'Penyelaras Program Stackable' }}</strong><br>
         <span style="font-size:8pt;color:#475569">{{ $s1['position'] ?? 'Penyelaras Program' }}</span>
       </td>
-      <td style="border:1px solid #8d8d8d;padding:4px 6px"><span style="color:#0e6027;font-weight:600">Disahkan</span></td>
+      <td style="border:1px solid #8d8d8d;padding:4px 6px"><span style="color:#0e6027;font-weight:600">{{ __('Confirmed') }}</span></td>
       <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ !empty($s1['signed_at']) ? \Carbon\Carbon::parse($s1['signed_at'])->format('d/m/Y') : now()->format('d/m/Y') }}</td>
-      <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ $s1['remarks'] ?? 'Pemetaan disahkan lengkap' }}</td>
+      <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ $s1['remarks'] ?? __('Pemetaan disahkan lengkap') }}</td>
     </tr>
     @php($s2 = $g11['faculty_rep'] ?? null)
     <tr>
-      <td style="border:1px solid #8d8d8d;padding:4px 6px"><strong>Wakil Fakulti / Timbalan Dekan</strong><br><span style="font-size:8pt;color:#475569">(P2 Faculty Rep)</span></td>
+      <td style="border:1px solid #8d8d8d;padding:4px 6px"><strong>{{ __('Senate Academic Authority / Faculty') }}</strong><br><span style="font-size:8pt;color:#475569">({{ __('Academic Approval') }})</span></td>
       <td style="border:1px solid #8d8d8d;padding:4px 6px">
-        <strong>{{ $s2['name'] ?? 'Timbalan Dekan (Akademik)' }}</strong><br>
-        <span style="font-size:8pt;color:#475569">{{ $s2['position'] ?? 'Timbalan Dekan (Akademik)' }}</span>
+        <strong>{{ $s2['name'] ?? 'Academic Authority (Senate)' }}</strong><br>
+        <span style="font-size:8pt;color:#475569">{{ $s2['position'] ?? 'Senate Academic Representative' }}</span>
       </td>
-      <td style="border:1px solid #8d8d8d;padding:4px 6px"><span style="color:#0e6027;font-weight:600">Disahkan</span></td>
+      <td style="border:1px solid #8d8d8d;padding:4px 6px"><span style="color:#0e6027;font-weight:600">{{ __('Confirmed') }}</span></td>
       <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ !empty($s2['signed_at']) ? \Carbon\Carbon::parse($s2['signed_at'])->format('d/m/Y') : now()->format('d/m/Y') }}</td>
-      <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ $s2['remarks'] ?? 'Kelulusan Senat direkodkan' }}</td>
+      <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ $s2['remarks'] ?? __('Kelulusan Senat direkodkan') }}</td>
     </tr>
     @php($s3 = $g11['qa_assessor'] ?? null)
     <tr>
-      <td style="border:1px solid #8d8d8d;padding:4px 6px"><strong>Penilai Kesetaraan / Urus Setia QA</strong><br><span style="font-size:8pt;color:#475569">(P3/P4 Assessor)</span></td>
+      <td style="border:1px solid #8d8d8d;padding:4px 6px"><strong>{{ __('Quality Assurance / Equivalence Reviewer') }}</strong><br><span style="font-size:8pt;color:#475569">({{ __('QA / Assessor') }})</span></td>
       <td style="border:1px solid #8d8d8d;padding:4px 6px">
         <strong>{{ $s3['name'] ?? 'Pegawai Penilai Kesetaraan' }}</strong><br>
         <span style="font-size:8pt;color:#475569">{{ $s3['position'] ?? 'Pegawai Penilai Kesetaraan' }}</span>
       </td>
-      <td style="border:1px solid #8d8d8d;padding:4px 6px"><span style="color:#0e6027;font-weight:600">Disahkan</span></td>
+      <td style="border:1px solid #8d8d8d;padding:4px 6px"><span style="color:#0e6027;font-weight:600">{{ __('Confirmed') }}</span></td>
       <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ !empty($s3['signed_at']) ? \Carbon\Carbon::parse($s3['signed_at'])->format('d/m/Y') : now()->format('d/m/Y') }}</td>
-      <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ $s3['remarks'] ?? 'Pematuhan standard MQF' }}</td>
+      <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ $s3['remarks'] ?? __('Pematuhan standard MQF') }}</td>
     </tr>
   </tbody>
 </table>
 
 {{-- NOTA PENTING LAMPIRAN G --}}
 <div style="border:1.5px solid #0052ff;background:#edf4ff;padding:10px 14px;margin-top:14px;font-size:9.5pt;line-height:1.45">
-  <b style="color:#0043ce;text-transform:uppercase;letter-spacing:0.5px">NOTA PENTING (Lampiran G):</b><br>
-  Laluan Stackable Degree bukan proses menjumlahkan kredit semata-mata. Pemetaan ini menetapkan kesetaraan kurikulum yang berpotensi untuk pemindahan kredit, namun pemindahan sebenar tertakluk kepada permohonan individu, kelulusan Fakulti, pemenuhan sekurang-kurangnya 30% kredit disempurnakan terus di UTeM sebagai institusi penganugerah, dan sekurang-kurangnya satu (1) semester residensi bagi program mod konvensional.
+  <b style="color:#0043ce;text-transform:uppercase;letter-spacing:0.5px">{{ __('Important Notice:') }}</b><br>
+  {{ __('Stackable degree pathways are not an automatic credit-accumulation process. Mapping establishes curriculum equivalence for potential credit exemption, while actual exemption remains subject to individual application, Faculty approval, completion of at least 30% of credits directly at UTeM as the awarding institution, and at least one (1) semester of residency for conventional-mode programmes.') }}
 </div>
 @endsection

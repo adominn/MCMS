@@ -1,0 +1,151 @@
+<!-- Aligned with live Laravel routes (Version next iteration v1.5) -->
+<h2>6.6 Screen Inventory</h2>
+<p>Screen and printable-document inventory by role, pairing each prototype screen ID with its live Laravel URL path (routes with braces take a record identifier; Appendices B and C capture 170 live screen/tab/dialog states and 17 A4 documents).</p>
+<h3>Common and sign-in</h3>
+<p class="tcap" data-t="inv-cmn">Screens for Common and sign-in (10)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+CMN-01 | Test persona selector | <code>/signin</code> (modal in non-production)
+CMN-02 | Sign in | <code>/signin</code>
+CMN-03 | Verify it is you (MFA) | <code>/signin/mfa</code>
+CMN-04 | Account not recognised | <code>/signin</code> (refusal/guidance state)
+CMN-05 | Test sign-in submission | <code>/signin/stub</code>
+CMN-06 | My profile | <code>/profile</code>
+CMN-07 | Notifications | <code>/notifications</code>
+CMN-08 | Help | <code>/help</code>
+CMN-09 | Search | <code>/search</code>
+CMN-10 | Access denied / Not found (403 / 404) | Error handlers
+</script>
+<h3>Public website</h3>
+<p class="tcap" data-t="inv-pub">Screens for Public website (11)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+PUB-01 | Micro-credentials at UTeM | <code>/public</code>
+PUB-02 | Catalogue | <code>/public/catalogue</code> (or <code>/catalogue</code>)
+PUB-03 | Offering | <code>/public/offering/{id}</code>
+PUB-04 | Pathways to a degree | <code>/public/pathways</code>
+PUB-05 | How recognition works | <code>/public/how</code>
+PUB-06 | FAQ | <code>/public/faq</code>
+PUB-07 | Verify a credential | <code>/verify</code> (or <code>/public/verify</code>)
+PUB-08 | Verification result | <code>/verify/{code}</code>
+PUB-09 | Privacy notice | <code>/public/privacy</code>
+PUB-10 | Terms of use | <code>/public/terms</code>
+PUB-11 | Accessibility statement | <code>/public/accessibility</code>
+</script>
+<h3>Student (P8)</h3>
+<p class="tcap" data-t="inv-st">Screens for Student (P8) (14)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+ST-01 | My learning | <code>/tasks</code>
+ST-02 | Find a micro-credential | <code>/catalogue</code>
+ST-03 | Register | <code>/register/{offering}</code>
+ST-04 | Registrations and payments | <code>/enrolments</code>
+ST-05 | Registration | <code>/enrolments/{id}</code>
+ST-06 | Achievement record | <code>/my-record</code>
+ST-07 | Credentials | <code>/my-credentials</code>
+ST-08 | Credential | <code>/my-credentials/{id}</code>
+ST-09 | Credit ledger and ABC | <code>/my-credit</code>
+ST-10 | Academic Credit Record | <code>/my-credit/{id}</code>
+ST-11 | Credit transfer | <code>/transfer</code>
+ST-12 | New transfer application | <code>/transfer/new</code>
+ST-13 | Transfer application | <code>/transfer/{id}</code>
+ST-14 | Stackable plan | <code>/my-plan</code>
+</script>
+<h3>Lecturer (P1)</h3>
+<p class="tcap" data-t="inv-lec">Screens for Lecturer (P1) (18)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+LEC-01 | My micro-credentials (and My tasks) | <code>/micro-credentials</code> (<code>/tasks</code>)
+LEC-02 | Micro-credential | <code>/micro-credentials/{mc}</code>
+LEC-03 | Proposals and versions | <code>/proposals</code>
+LEC-04 | New proposal | <code>/proposals/new</code>
+LEC-05 | Proposal workspace | <code>/proposals/{id}</code>
+LEC-06 | Request a change | <code>/micro-credentials/{mc}/change</code>
+LEC-07 | Reviews for colleagues | <code>/reviews</code>
+LEC-08 | Review a proposal | <code>/reviews/{assignment}</code>
+LEC-09 | Cohorts and results | <code>/offerings</code>
+LEC-10 | Cohort results | <code>/offerings/{id}/results</code>
+LEC-11 | Create an offering | <code>/offerings/new</code>
+LEC-12 | Readiness checklist | <code>/offerings/{id}</code>
+LEC-13 | Quality review (CQI) | <code>/monitoring</code>
+LEC-14 | Quality review record | <code>/cqi/{id}</code>
+LEC-15 | QV evidence | <code>/quality</code>
+LEC-16 | QV evidence | <code>/quality/{mc}</code>
+LEC-17 | Reports | <code>/records/reports</code>
+LEC-18 | Report | <code>/records/reports/{kind}</code>
+</script>
+<h3>Industry expert (X2)</h3>
+<p class="tcap" data-t="inv-ext">Screens for Industry expert (X2) (2)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+EXT-01 | My review invitations | <code>/reviews</code>
+EXT-02 | Comment on a proposal | <code>/reviews/{assignment}</code>
+</script>
+<h3>Deputy dean (P2)</h3>
+<p class="tcap" data-t="inv-dd">Screens for Deputy dean (P2) (29)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+DD-01 | Task queue | <code>/tasks</code>
+DD-02 | Proposals and approval | <code>/approvals</code>
+DD-03 | Proposal review | <code>/approvals/{id}</code>
+DD-04 | Record Senate decision | <code>/approvals/{id}/senate</code>
+DD-05 | Decision pack | <code>/approvals/{id}/pack</code>
+DD-06 | Offerings and readiness | <code>/offerings</code>
+DD-07 | Confirm readiness | <code>/offerings/{id}</code>
+DD-08 | Results and completion | <code>/results</code>
+DD-09 | Verify results | <code>/results/{id}</code>
+DD-10 | Confirm completion | <code>/completion/{id}</code>
+DD-11 | Credentials | <code>/credentials</code>
+DD-12 | Credential | <code>/credentials/{id}</code>
+DD-13 | Quality, QV and review | <code>/quality</code> (CQI at <code>/monitoring</code>)
+DD-14 | QV record | <code>/quality/{mc}</code>
+DD-15 | Quality review | <code>/cqi/{id}</code>
+DD-16 | Periodic review | <code>/monitoring</code>
+DD-17 | Suspension or termination | <code>/suspensions</code>
+DD-18 | ACR and ABC deposits | <code>/deposits</code>
+DD-19 | Confirm ACR | <code>/deposits/{id}</code>
+DD-20 | Record ABC deposit | <code>/deposits/{id}</code>
+DD-21 | Credit transfer | <code>/transfers</code>
+DD-22 | Transfer decision | <code>/transfers/{id}</code>
+DD-23 | Stackable pathways | <code>/pathways</code>
+DD-24 | Pathway mapping | <code>/pathways/{id}</code>
+DD-25 | Individual stackable plan | <code>/plans/{id}</code>
+DD-26 | Reports | <code>/records/reports</code>
+DD-27 | Report | <code>/records/reports/{kind}</code>
+DD-28 | Traceability (with Discrepancy log, Audit &amp; Retention tabs) | <code>/records/trace</code>
+DD-29 | Trace a participant | <code>/records/trace/{enrolment}</code>
+</script>
+<h3>CODL system administrator (S1/P5)</h3>
+<p class="tcap" data-t="inv-codl">Screens for CODL system administrator (S1/P5) (15)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+CODL-01 | Users and roles (CODL home) | <code>/admin/users</code>
+CODL-02 | User | <code>/admin/users/{user}</code>
+CODL-03 | Reference data | <code>/admin/reference/{entity}</code>
+CODL-04 | Settings (and Setting history) | <code>/admin/settings</code>
+CODL-05 | Templates | <code>/admin/templates</code>
+CODL-06 | Template | <code>/admin/templates/{key}</code>
+CODL-07 | UCreds exchange | <code>/admin/ucreds</code>
+CODL-07B | UCreds content catalogue (64 courses, single pagination) | <code>/admin/ucreds/courses</code>
+CODL-08 | Adapter status | <code>/admin/adapters</code>
+CODL-09 | Notification log | <code>/admin/notification-log</code>
+CODL-10 | Audit trail | <code>/admin/audit</code>
+CODL-11 | Reports | <code>/records/reports</code>
+CODL-12 | Report | <code>/records/reports/{kind}</code>
+CODL-13 | Retention | <code>/records/retention</code>
+CODL-14 | Demo clock (test environments when enabled only) | <code>/admin/demo-clock</code>
+</script>
+<h3>Printable documents</h3>
+<p class="tcap" data-t="inv-doc">Screens for Printable documents (17)</p>
+<script type="text/tbl" data-h="ID|Screen|Route" data-w="12%|46%|42%" data-cls="small">
+DOC-01 | Payment receipt | <code>/enrolments/{id}/receipt</code>
+DOC-02 | Enrolment confirmation | <code>/enrolments/{id}/confirmation</code>
+DOC-03 | Certificate | <code>/my-credentials/{id}/certificate</code>
+DOC-04 | Digital credential | <code>/my-credentials/{id}/sheet</code>
+DOC-05 | Achievement record | <code>/my-record?print=1</code>
+DOC-06 | Academic Credit Record | <code>/my-credit/{id}?print=1</code>
+DOC-07 | Proposal print | <code>/proposals/{id}/print</code>
+DOC-08 | Senate decision pack | <code>/approvals/{id}/pack?print=1</code>
+DOC-09 | Report | <code>/records/reports/{kind}/print</code>
+DOC-10 | ABC deposit export | <code>/deposits/batches/{id}</code>
+DOC-11 | QV submission package | <code>/quality/{mc}/package?print=1</code>
+DOC-12 | Credit transfer decision letter | <code>/transfer/{id}?print=1</code>
+DOC-13 | Suspension notice | <code>/suspensions/{id}/print</code>
+DOC-14 | Import validation report | <code>/admin/ucreds/imports/{id}?print=1</code>
+DOC-15 | UCreds enrolment export | <code>/admin/ucreds/export/{offering}/manifest</code>
+DOC-16 | Audit trail export | <code>/records/audit/print</code>
+DOC-17 | Documents and PDFs | <code>/documents</code>
+</script>

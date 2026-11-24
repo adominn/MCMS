@@ -10,7 +10,7 @@
   <div>
     <h1>{{ $v->name_en ?: __('Untitled proposal') }}</h1>
     <div class="sub">
-      {{ __('Appendix A') }} &middot; {{ __('Version :num', ['num' => $v->version_no]) }}@if($v->proposal_type !== 'new') &middot; {{ __(['revision' => 'Revision', 'reoffer' => 'Re-offer'][$v->proposal_type] ?? ucfirst($v->proposal_type)) }}@endif &middot;
+      {{ __('Micro-credential proposal') }} &middot; {{ __('Version :num', ['num' => $v->version_no]) }}@if($v->proposal_type !== 'new') &middot; {{ __(['revision' => 'Revision', 'reoffer' => 'Re-offer'][$v->proposal_type] ?? ucfirst($v->proposal_type)) }}@endif &middot;
       <span id="stamp" class="muted">{{ $locked ? __('Locked') : __('Autosaved') }}</span>
     </div>
   </div>
@@ -43,29 +43,44 @@
 @endif
 
 @php
+  $endorsedDate = !empty($v->endorsed_at) ? \Carbon\Carbon::parse($v->endorsed_at)->format('d M Y') : null;
+  if (!$endorsedDate && in_array($v->status, ['endorsed', 'codl_verified', 'approved'])) {
+    $eDec = \Illuminate\Support\Facades\DB::table('approval_decisions')->where('mc_version_id', $v->id)->where('stage', 'endorsement')->where('decision', 'endorsed')->orderByDesc('id')->first();
+    $endorsedDate = $eDec ? \Carbon\Carbon::parse($eDec->meeting_date ?: $eDec->created_at)->format('d M Y') : null;
+  }
+
+  $cDec = \Illuminate\Support\Facades\DB::table('approval_decisions')->where('mc_version_id', $v->id)->where('stage', 'codl_verification')->where('decision', 'verified')->orderByDesc('id')->first();
+  $codlVerifiedDate = $cDec ? \Carbon\Carbon::parse($cDec->meeting_date ?: $cDec->created_at)->format('d M Y') : null;
+
+  $approvedDate = !empty($v->approved_at) ? \Carbon\Carbon::parse($v->approved_at)->format('d M Y') : null;
+  if (!$approvedDate && $v->status === 'approved') {
+    $sDec = \Illuminate\Support\Facades\DB::table('approval_decisions')->where('mc_version_id', $v->id)->where('stage', 'senate')->whereIn('decision', ['approved', 'approved_conditions'])->orderByDesc('id')->first();
+    $approvedDate = $sDec ? \Carbon\Carbon::parse($sDec->meeting_date ?: $sDec->created_at)->format('d M Y') : (!empty($v->effective_date) ? \Carbon\Carbon::parse($v->effective_date)->format('d M Y') : null);
+  }
+
   $proposalSteps = [
     [
-      'label' => __('1. Submission'),
-      'meta' => $v->submitted_at ? \Carbon\Carbon::parse($v->submitted_at)->format('d M Y') : ($v->created_at ? \Carbon\Carbon::parse($v->created_at)->format('d M Y') : '—'),
-      'status' => in_array($v->status, ['submitted', 'in_review', 'endorsed', 'approved']) ? 'completed' : 'active',
+      'label' => __('1. Lecturer Submission'),
+      'meta' => !empty($v->submitted_at) ? \Carbon\Carbon::parse($v->submitted_at)->format('d M Y') : (!empty($v->created_at) ? \Carbon\Carbon::parse($v->created_at)->format('d M Y') : '—'),
+      'status' => in_array($v->status, ['submitted', 'in_review', 'endorsed', 'codl_verified', 'approved']) ? 'completed' : 'active',
       'num' => '01',
     ],
     [
-      'label' => __('2. Dean Endorsement'),
-      'meta' => in_array($v->status, ['endorsed', 'approved']) ? ($v->endorsed_at ? \Carbon\Carbon::parse($v->endorsed_at)->format('d M Y') : __('Endorsed')) : (in_array($v->status, ['submitted', 'in_review']) ? __('In Progress') : __('Pending')),
-      'status' => in_array($v->status, ['endorsed', 'approved']) ? 'completed' : (in_array($v->status, ['submitted', 'in_review']) ? 'active' : 'pending'),
+      'label' => __('2. Deputy Dean Endorsement'),
+      'meta' => in_array($v->status, ['endorsed', 'codl_verified', 'approved']) ? ($endorsedDate ?: __('Endorsed')) : (in_array($v->status, ['submitted', 'in_review']) ? __('In Progress') : __('Pending')),
+      'status' => in_array($v->status, ['endorsed', 'codl_verified', 'approved']) ? 'completed' : (in_array($v->status, ['submitted', 'in_review']) ? 'active' : 'pending'),
       'num' => '02',
     ],
     [
       'label' => __('3. CODL Verification'),
-      'meta' => $v->status === 'approved' ? __('Verified') : ($v->status === 'endorsed' ? __('In Progress') : __('Pending')),
-      'status' => $v->status === 'approved' ? 'completed' : ($v->status === 'endorsed' ? 'active' : 'pending'),
+      'meta' => in_array($v->status, ['codl_verified', 'approved']) ? ($codlVerifiedDate ?: __('Verified')) : ($v->status === 'endorsed' ? __('In Progress') : __('Pending')),
+      'status' => in_array($v->status, ['codl_verified', 'approved']) ? 'completed' : ($v->status === 'endorsed' ? 'active' : 'pending'),
       'num' => '03',
     ],
     [
-      'label' => __('4. Senate Endorsement'),
-      'meta' => $v->status === 'approved' ? ($v->approved_at ? \Carbon\Carbon::parse($v->approved_at)->format('d M Y') : __('Approved')) : __('Pending'),
-      'status' => $v->status === 'approved' ? 'completed' : 'pending',
+      'label' => __('4. Senate Approval'),
+      'meta' => $v->status === 'approved' ? ($approvedDate ?: __('Approved')) : ($v->status === 'codl_verified' ? __('In Progress') : __('Pending')),
+      'status' => $v->status === 'approved' ? 'completed' : ($v->status === 'codl_verified' ? 'active' : 'pending'),
       'num' => '04',
     ],
   ];

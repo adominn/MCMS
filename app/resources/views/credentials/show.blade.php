@@ -29,13 +29,17 @@
       </div>
     </div>
   </div>
-  <div class="act" style="align-items:center;gap:8px">
-    <a class="btn ter sm" href="{{ route('credentials.wallet') }}">&larr; {{ __('All credentials') }}</a>
-    <span class="tag {{ $live ? 'ok' : 'err' }}">{{ __($label) }}</span>
-    @if($live)
-      <a class="btn" href="{{ route('credentials.certificate', $c->id) }}">{{ __('Download certificate (PDF)') }}</a>
-      <a class="btn ter" href="{{ route('credentials.sheet', $c->id) }}">{{ __('Printable sheet') }}</a>
-    @endif
+  <div class="act-bar">
+    <div class="act-left">
+      <a class="btn ter sm" href="{{ route('credentials.wallet') }}">&larr; {{ __('All credentials') }}</a>
+    </div>
+    <div class="act-right">
+      <span class="tag {{ $live ? 'ok' : 'err' }}">{{ __($label) }}</span>
+      @if($live)
+        <a class="btn" href="{{ route('credentials.certificate', $c->id) }}">{{ __('Download certificate (PDF)') }}</a>
+        <a class="btn ter" href="{{ route('credentials.sheet', $c->id) }}">{{ __('Printable sheet') }}</a>
+      @endif
+    </div>
   </div>
 </div>
 
@@ -197,15 +201,15 @@
             @foreach($modules as $m)
               <tr>
                 <td>
+                  @php
+                    $mTitle = (app()->getLocale() === 'ms' && !empty($m->name_ms)) ? $m->name_ms : $m->name_en;
+                  @endphp
                   @if(!empty($m->badge_code))
                     <a href="{{ route('verify.show', $m->badge_code) }}" target="_blank" style="font-weight:700;color:var(--ink);text-decoration:none" title="{{ __('View module badge and verification details') }}">
-                      <span style="color:var(--primary);text-decoration:underline">{{ $m->seq }}. {{ $m->name_en }}</span> <span style="font-size:11px;color:var(--muted)">&nearr;</span>
+                      <span style="color:var(--primary);text-decoration:underline">{{ $m->seq }}. {{ $mTitle }}</span> <span style="font-size:11px;color:var(--muted)">&nearr;</span>
                     </a>
                   @else
-                    <strong>{{ $m->seq }}. {{ $m->name_en }}</strong>
-                  @endif
-                  @if(!empty($m->name_ms))
-                    <div class="s muted">{{ $m->name_ms }}</div>
+                    <strong>{{ $m->seq }}. {{ $mTitle }}</strong>
                   @endif
                 </td>
                 <td class="num">{{ $m->slt_hours }}</td>

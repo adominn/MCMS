@@ -11,14 +11,18 @@
     <h1>Plan {{ $s->reference }}</h1>
     <div class="sub">{{ $s->user_name }} &mdash; {{ $s->code }} {{ $s->programme_name }}</div>
   </div>
-  <div class="act" style="align-items:center;gap:8px">
-    <a class="btn ter sm" href="{{ route('pathways') }}">&larr; {{ __('All pathways') }}</a>
-    <span class="tag {{ $s->status === 'suitable' ? 'ok' : ($s->status === 'not_yet' ? 'warn' : 'info') }}">
-      <strong id="plan-status">{{ $planStatus[$s->status] }}</strong>
-    </span>
-    @if($s->decision)
-      <span class="tag info">{{ $decisions[$s->decision] }}</span>
-    @endif
+  <div class="act-bar">
+    <div class="act-left">
+      <a class="btn ter sm" href="{{ route('pathways') }}">&larr; {{ __('All pathways') }}</a>
+    </div>
+    <div class="act-right">
+      <span class="tag {{ $s->status === 'suitable' ? 'ok' : ($s->status === 'not_yet' ? 'warn' : 'info') }}">
+        <strong id="plan-status">{{ $planStatus[$s->status] }}</strong>
+      </span>
+      @if($s->decision)
+        <span class="tag info">{{ $decisions[$s->decision] }}</span>
+      @endif
+    </div>
   </div>
 </div>
 
@@ -78,7 +82,7 @@
   <div class="bd">
     <ul style="margin:0;padding-left:18px">
       @foreach($remaining as $r)
-        <li style="margin-bottom:4px"><b>{{ $kinds[$r['kind']] }}:</b> {{ $r['name'] }} <span class="muted">({{ $statuses[$r['status']] }})</span></li>
+        <li style="margin-bottom:4px"><b>{{ __($kinds[$r['kind']]) }}:</b> {{ $r['name'] }} <span class="muted">({{ __($statuses[$r['status']]) }})</span></li>
       @endforeach
     </ul>
   </div>
@@ -138,7 +142,7 @@
           <tr>
             <td style="padding:6px;border-bottom:1px solid var(--hairline)">
               <input type="hidden" name="remaining[{{ $n }}][kind]" value="{{ $r['kind'] }}">
-              {{ $kinds[$r['kind']] ?? ucfirst($r['kind']) }}
+              {{ __($kinds[$r['kind']] ?? ucfirst($r['kind'])) }}
             </td>
             <td style="padding:6px;border-bottom:1px solid var(--hairline)">
               <input type="text" name="remaining[{{ $n }}][name]" value="{{ $r['name'] }}" style="width:100%;max-width:320px">

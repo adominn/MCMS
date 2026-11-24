@@ -325,25 +325,27 @@ it('renders Appendix D official SAMC QV evidence package with D1-D10, 48 items, 
 
     // Verify package web view
     $res = $this->actingAs($this->aina)->get("/quality/$mc/package")->assertOk();
-    $res->assertSee('D1. Maklumat SAMC dan Status Permohonan')
-        ->assertSee('D2. Kelayakan Asas SAMC untuk QV')
-        ->assertSee('D3. Evidens Reka Bentuk Akademik')
-        ->assertSee('D4. Evidens Pentaksiran dan Pencapaian')
-        ->assertSee('D5. Evidens Pelaksanaan dan Sokongan Peserta')
-        ->assertSee('D6. Evidens Jaminan Kualiti dan CQI')
-        ->assertSee('D7. Evidens Digital Credential')
-        ->assertSee('D8. Semakan Perubahan Signifikan (9 Komponen)')
-        ->assertSee('D9. Keputusan Semakan Kesediaan Dalaman')
-        ->assertSee('D10. Pengesahan (3 Peranan)')
+    $res->assertSee('1. SAMC Information and Application Status')
+        ->assertSee('2. Basic SAMC Eligibility for QV')
+        ->assertSee('3. Academic Design Evidence')
+        ->assertSee('4. Assessment and Attainment Evidence')
+        ->assertSee('5. Delivery and Participant Support Evidence')
+        ->assertSee('6. Quality Assurance and CQI Evidence')
+        ->assertSee('7. Digital Credential Evidence')
+        ->assertSee('8. Material Change Review (9 Components)')
+        ->assertSee('9. Internal Readiness Review Decision')
+        ->assertSee('10. Confirmation (3 Roles)')
         ->assertSee('Dr. Aina Zulkifli')
         ->assertSee('Hakim Rahman')
         ->assertSee('Farid Hashim')
-        ->assertSee('NOTA PENTING (Lampiran D)');
+        ->assertSee('Important Notice:')
+        ->assertDontSee('Lampiran D');
 
     // Verify print view
     $printRes = $this->actingAs($this->hakim)->get("/quality/$mc/package?print=1")->assertOk();
-    $printRes->assertSee('Lampiran D: Senarai Evidens Quality Verification (QV) bagi Stand-Alone Micro-Credential (SAMC)')
-        ->assertSee('NOTA PENTING (Lampiran D)');
+    $printRes->assertSee('Quality Verification (QV) Evidence Package for Stand-Alone Micro-Credential (SAMC)')
+        ->assertSee('Important Notice:')
+        ->assertDontSee('Lampiran D');
 
     // Verify database persistence of D9/D10 and category in qv_evidence
     $q = Qv::open($mc);

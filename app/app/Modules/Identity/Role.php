@@ -26,17 +26,17 @@ enum Role: string
         $isMs = str_starts_with($locale, 'ms');
 
         return match ($this) {
-            self::Student => $isMs ? 'Peserta (P8)' : 'Participant (P8)',
-            self::Lecturer => $isMs ? 'Penyelaras MC / Pemilik Akademik (P1)' : 'MC Coordinator / Academic Owner (P1)',
-            self::Reviewer => $isMs ? 'Penilai / Penyemak Kandungan' : 'Academic Content Reviewer',
-            self::DeputyDean, self::PtjAuthority => $isMs ? 'Pihak Berkuasa PTj / Fakulti (P2)' : 'PTj / Faculty Authority (P2)',
-            self::AcademicAuthority => $isMs ? 'Pihak Berkuasa Akademik (P3)' : 'Academic Authority (P3)',
-            self::QaOfficer => $isMs ? 'Pihak Jaminan Kualiti (P4)' : 'Quality Assurance Authority (P4)',
-            self::CodlAdmin => $isMs ? 'Pihak Platform / Sokongan Teknikal (P5)' : 'Platform & Technical Support (P5)',
-            self::RecordsCustodian => $isMs ? 'Pihak Rekod / Credential (P6)' : 'Records & Credential Custodian (P6)',
-            self::AbcDepositor => $isMs ? 'Pihak ABC / Depositor Diberi Kuasa (P7)' : 'Authorized ABC Depositor (P7)',
-            self::RecordsDepositor => $isMs ? 'Pegawai Rekod & ABC (P6/P7)' : 'Records & ABC Officer (P6/P7)',
-            self::IndustryExpert => $isMs ? 'Pakar Luar / Industri (SME)' : 'Industry Expert / SME',
+            self::Student => $isMs ? 'Peserta' : 'Participant',
+            self::Lecturer => $isMs ? 'Penyelaras Kursus / Pensyarah' : 'Course Coordinator / Lecturer',
+            self::Reviewer => $isMs ? 'Penyemak Kandungan Akademik' : 'Academic Content Reviewer',
+            self::DeputyDean, self::PtjAuthority => $isMs ? 'Timbalan Dekan (Kuasa Fakulti)' : 'Deputy Dean (Faculty Authority)',
+            self::AcademicAuthority => $isMs ? 'Pihak Berkuasa Akademik (Senat)' : 'Academic Authority (Senate)',
+            self::QaOfficer => $isMs ? 'Pegawai Jaminan Kualiti' : 'Quality Assurance Officer',
+            self::CodlAdmin => $isMs ? 'Pentadbir CODL' : 'CODL Administrator',
+            self::RecordsCustodian => $isMs ? 'Penjaga Rekod & Kredensial' : 'Records & Credential Custodian',
+            self::AbcDepositor => $isMs ? 'Pendeposit ABC Diberi Kuasa' : 'Authorized ABC Depositor',
+            self::RecordsDepositor => $isMs ? 'Pegawai Rekod & ABC' : 'Records & ABC Officer',
+            self::IndustryExpert => $isMs ? 'Pakar Industri' : 'Industry Expert',
         };
     }
 

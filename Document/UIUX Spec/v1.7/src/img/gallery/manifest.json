@@ -1,0 +1,1726 @@
+{
+  "generated_at": "2026-11-11T02:42:12.632Z",
+  "base_url": "http://localhost:8110",
+  "core_pngs": [
+    "signin-main.png",
+    "personas.png",
+    "pub-home.png",
+    "pub-offering.png",
+    "pub-verify.png",
+    "pub-revoked.png",
+    "shell-dd-queue.png",
+    "shell-collapsed.png",
+    "menu-notif.png",
+    "dd-proposal.png",
+    "dd-readiness.png",
+    "dd-verify.png",
+    "modal-danger.png",
+    "dd-transfer.png",
+    "lec-home.png",
+    "validation.png",
+    "lec-cohort.png",
+    "profile.png",
+    "modal-confirm.png",
+    "menu-user.png",
+    "lec-review.png",
+    "st-home.png",
+    "st-register.png",
+    "st-ledger.png",
+    "st-acr.png",
+    "doc-certificate.png",
+    "table-pager.png",
+    "codl-users.png",
+    "codl-settings.png",
+    "codl-ucreds.png",
+    "codl-ucreds-courses.png",
+    "doc-report.png"
+  ],
+  "screens": [
+    {
+      "id": "CMN-02",
+      "section": "B.1",
+      "label": "CMN-02 Sign in",
+      "route": "/signin",
+      "file": "cmn-02.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-01",
+      "section": "B.1",
+      "label": "CMN-01 Test persona selector",
+      "route": "/signin (modal)",
+      "file": "cmn-01.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-01",
+      "section": "B.2",
+      "label": "PUB-01 Micro-credentials at UTeM",
+      "route": "/public",
+      "file": "pub-01.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-02",
+      "section": "B.2",
+      "label": "PUB-02 Public catalogue",
+      "route": "/public/catalogue",
+      "file": "pub-02.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-03",
+      "section": "B.2",
+      "label": "PUB-03 Public offering (Cloud Native Development 2027/1)",
+      "route": "/public/offering/3",
+      "file": "pub-03.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-04",
+      "section": "B.2",
+      "label": "PUB-04 Pathways to a degree",
+      "route": "/public/pathways",
+      "file": "pub-04.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-05",
+      "section": "B.2",
+      "label": "PUB-05 How recognition works",
+      "route": "/public/how",
+      "file": "pub-05.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-06",
+      "section": "B.2",
+      "label": "PUB-06 Frequently asked questions",
+      "route": "/public/faq",
+      "file": "pub-06.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-06-t1",
+      "section": "B.2",
+      "label": "PUB-06 FAQ: Tab: Credit & ACR 4",
+      "route": "/public/faq?tab=credit-acr",
+      "file": "pub-06-tab-1.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-06-t2",
+      "section": "B.2",
+      "label": "PUB-06 FAQ: Tab: Registering & fees 3",
+      "route": "/public/faq?tab=registering-fees",
+      "file": "pub-06-tab-2.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-06-t3",
+      "section": "B.2",
+      "label": "PUB-06 FAQ: Tab: Verification & privacy 3",
+      "route": "/public/faq?tab=verification-privacy",
+      "file": "pub-06-tab-3.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-07",
+      "section": "B.2",
+      "label": "PUB-07 Verify a credential",
+      "route": "/public/verify",
+      "file": "pub-07.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-08",
+      "section": "B.2",
+      "label": "PUB-08 Verification result: Valid (CND01-7K9MJ)",
+      "route": "/public/verify/CND01-7K9MJ",
+      "file": "pub-08.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-08B",
+      "section": "B.2",
+      "label": "PUB-08 Verification result: Corrected (CND02-8M3NP)",
+      "route": "/public/verify/CND02-8M3NP",
+      "file": "pub-08-corrected.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-08C",
+      "section": "B.2",
+      "label": "PUB-08 Verification result: Revoked (SEC03-2P6RW)",
+      "route": "/public/verify/SEC03-2P6RW",
+      "file": "pub-08-revoked.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-08D",
+      "section": "B.2",
+      "label": "PUB-08 Verification result: Code not found (ZZZZ-0000)",
+      "route": "/public/verify/ZZZZ-0000",
+      "file": "pub-08-notfound.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-09",
+      "section": "B.2",
+      "label": "PUB-09 Privacy notice",
+      "route": "/public/privacy",
+      "file": "pub-09.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-10",
+      "section": "B.2",
+      "label": "PUB-10 Terms of use",
+      "route": "/public/terms",
+      "file": "pub-10.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "PUB-11",
+      "section": "B.2",
+      "label": "PUB-11 Accessibility statement",
+      "route": "/public/accessibility",
+      "file": "pub-11.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-10",
+      "section": "B.1",
+      "label": "CMN-10 Page not found (404)",
+      "route": "/page-does-not-exist-404",
+      "file": "cmn-10-404.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-03",
+      "section": "B.1",
+      "label": "CMN-03 Verify it is you (MFA)",
+      "route": "/signin/mfa",
+      "file": "cmn-03.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-01",
+      "section": "B.6",
+      "label": "DD-01 Task queue",
+      "route": "/tasks",
+      "file": "dd-01.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-11",
+      "section": "B.1",
+      "label": "Shell with collapsible navy sidebar",
+      "route": "/tasks (collapsed)",
+      "file": "cmn-collapsed.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-M1",
+      "section": "B.6",
+      "label": "Deputy dean: Notifications menu",
+      "route": "/tasks (notices)",
+      "file": "menu-dd-notif.jpg",
+      "kind": "menu",
+      "category": "screen"
+    },
+    {
+      "id": "DD-M2",
+      "section": "B.6",
+      "label": "Deputy dean: Profile menu",
+      "route": "/tasks (profile menu)",
+      "file": "menu-dd-user.jpg",
+      "kind": "menu",
+      "category": "screen"
+    },
+    {
+      "id": "DD-01-proposals",
+      "section": "B.6",
+      "label": "DD-01 Task queue: Filter proposals",
+      "route": "/tasks?area=proposals",
+      "file": "dd-01-proposals.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-01-results",
+      "section": "B.6",
+      "label": "DD-01 Task queue: Filter results",
+      "route": "/tasks?area=results",
+      "file": "dd-01-results.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-01-transfers",
+      "section": "B.6",
+      "label": "DD-01 Task queue: Filter transfers",
+      "route": "/tasks?area=transfers",
+      "file": "dd-01-transfers.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-08",
+      "section": "B.1",
+      "label": "CMN-08 Help and glossary",
+      "route": "/help",
+      "file": "cmn-08.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-09",
+      "section": "B.1",
+      "label": "CMN-09 Global search (Deputy Dean)",
+      "route": "/search?q=Data",
+      "file": "cmn-09.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-02",
+      "section": "B.6",
+      "label": "DD-02 Proposals and approval",
+      "route": "/approvals",
+      "file": "dd-02.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-02-t1",
+      "section": "B.6",
+      "label": "DD-02 Proposals: Tab: Submitted (1)",
+      "route": "http://localhost:8110/approvals?status=submitted",
+      "file": "dd-02-tab-1.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-02-t2",
+      "section": "B.6",
+      "label": "DD-02 Proposals: Tab: In review (1)",
+      "route": "http://localhost:8110/approvals?status=in_review",
+      "file": "dd-02-tab-2.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-02-t3",
+      "section": "B.6",
+      "label": "DD-02 Proposals: Tab: Returned for amendment (1)",
+      "route": "http://localhost:8110/approvals?status=returned",
+      "file": "dd-02-tab-3.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-02-t4",
+      "section": "B.6",
+      "label": "DD-02 Proposals: Tab: Endorsed (0)",
+      "route": "http://localhost:8110/approvals?status=endorsed",
+      "file": "dd-02-tab-4.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-02-t5",
+      "section": "B.6",
+      "label": "DD-02 Proposals: Tab: Approved (8)",
+      "route": "http://localhost:8110/approvals?status=approved",
+      "file": "dd-02-tab-5.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-02-t6",
+      "section": "B.6",
+      "label": "DD-02 Proposals: Tab: Not approved (1)",
+      "route": "http://localhost:8110/approvals?status=not_approved",
+      "file": "dd-02-tab-6.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-02-t7",
+      "section": "B.6",
+      "label": "DD-02 Proposals: Tab: Superseded (0)",
+      "route": "http://localhost:8110/approvals?status=superseded",
+      "file": "dd-02-tab-7.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-03",
+      "section": "B.6",
+      "label": "DD-03 Proposal review and endorsement (Cyber Security Ops)",
+      "route": "/approvals/4",
+      "file": "dd-03.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-04",
+      "section": "B.6",
+      "label": "DD-04 Record Senate decision (Enterprise API Architecture)",
+      "route": "/approvals/12/senate",
+      "file": "dd-04.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-05",
+      "section": "B.6",
+      "label": "DD-05 Decision pack (Applied Data Analytics)",
+      "route": "/approvals/6/pack",
+      "file": "dd-05.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-05B",
+      "section": "B.6",
+      "label": "DD-05B Change request review",
+      "route": "/changes/1",
+      "file": "dd-05b.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-06",
+      "section": "B.6",
+      "label": "DD-06 Offerings and readiness",
+      "route": "/offerings",
+      "file": "dd-06.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-07",
+      "section": "B.6",
+      "label": "DD-07 Confirm readiness (Applied Data Analytics 2027/1-ADA)",
+      "route": "/offerings/18",
+      "file": "dd-07.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-07P",
+      "section": "B.6",
+      "label": "DD-07 Destructive dialog: Cancel cohort?",
+      "route": "/offerings/18 (cancel modal)",
+      "file": "dd-07-pop-cancel.jpg",
+      "kind": "pop",
+      "category": "screen"
+    },
+    {
+      "id": "DD-08",
+      "section": "B.6",
+      "label": "DD-08 Results and completion",
+      "route": "/results",
+      "file": "dd-08.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-09",
+      "section": "B.6",
+      "label": "DD-09 Verify results (Data Structures 2026/2)",
+      "route": "/results/2",
+      "file": "dd-09.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-10",
+      "section": "B.6",
+      "label": "DD-10 Confirm completion (Cloud Native Development 2026/1)",
+      "route": "/completion/1",
+      "file": "dd-10.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-11",
+      "section": "B.6",
+      "label": "DD-11 Credentials register",
+      "route": "/credentials",
+      "file": "dd-11.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-12",
+      "section": "B.6",
+      "label": "DD-12 Credential detail (UTEM-MC-2026-0001)",
+      "route": "/credentials/1",
+      "file": "dd-12.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-12P",
+      "section": "B.6",
+      "label": "DD-12 Destructive dialog: Revoke credential?",
+      "route": "/credentials/1 (revoke modal)",
+      "file": "dd-12-pop-revoke.jpg",
+      "kind": "pop",
+      "category": "screen"
+    },
+    {
+      "id": "DD-13",
+      "section": "B.6",
+      "label": "DD-13 Quality, QV and periodic review",
+      "route": "/quality",
+      "file": "dd-13.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-14",
+      "section": "B.6",
+      "label": "DD-14 Quality Verification record (Cloud Native Development)",
+      "route": "/quality/2",
+      "file": "dd-14.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-13M",
+      "section": "B.6",
+      "label": "DD-13B Quality review & CQI monitoring",
+      "route": "/monitoring",
+      "file": "dd-13b.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-13M-t1",
+      "section": "B.6",
+      "label": "DD-13B Monitoring: Tab: Open Improvement Actions (1)",
+      "route": "/monitoring?tab=tab-actions",
+      "file": "dd-13b-tab-1.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-13M-t2",
+      "section": "B.6",
+      "label": "DD-13B Monitoring: Tab: Periodic Reviews & Governance (11)",
+      "route": "/monitoring?tab=tab-periodic",
+      "file": "dd-13b-tab-2.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-15",
+      "section": "B.6",
+      "label": "DD-15 Cohort CQI review (CQI-2026-0004)",
+      "route": "/cqi/4",
+      "file": "dd-15.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-17",
+      "section": "B.6",
+      "label": "DD-17 Suspensions and terminations",
+      "route": "/suspensions",
+      "file": "dd-17.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-18",
+      "section": "B.6",
+      "label": "DD-18 ACR and ABC deposits",
+      "route": "/deposits",
+      "file": "dd-18.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-18-t1",
+      "section": "B.6",
+      "label": "DD-18 Deposits: Tab: Deposit queue 1",
+      "route": "/deposits?tab=queue",
+      "file": "dd-18-tab-1.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-18-t2",
+      "section": "B.6",
+      "label": "DD-18 Deposits: Tab: Waiting for consent 1",
+      "route": "/deposits?tab=waiting",
+      "file": "dd-18-tab-2.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-18-t3",
+      "section": "B.6",
+      "label": "DD-18 Deposits: Tab: Deposited 6",
+      "route": "/deposits?tab=deposited",
+      "file": "dd-18-tab-3.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-19",
+      "section": "B.6",
+      "label": "DD-19 Confirm ACR (ACR-2026-0009)",
+      "route": "/deposits/9",
+      "file": "dd-19.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-21",
+      "section": "B.6",
+      "label": "DD-21 Credit transfer queue",
+      "route": "/transfers",
+      "file": "dd-21.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-22",
+      "section": "B.6",
+      "label": "DD-22 Transfer evaluation & decision (TR-2026-0005)",
+      "route": "/transfers/5",
+      "file": "dd-22.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-23",
+      "section": "B.6",
+      "label": "DD-23 Stackable degree pathways",
+      "route": "/pathways",
+      "file": "dd-23.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-23-t1",
+      "section": "B.6",
+      "label": "DD-23 Pathways: Tab: Individual Student Plans (2)",
+      "route": "/pathways?tab=plans",
+      "file": "dd-23-tab-1.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-24",
+      "section": "B.6",
+      "label": "DD-24 Pathway mapping (PW-BITD-2026-01)",
+      "route": "/pathways/2",
+      "file": "dd-24.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-25",
+      "section": "B.6",
+      "label": "DD-25 Individual stackable plan assessment (PLAN-2026-0002)",
+      "route": "/plans/2",
+      "file": "dd-25.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-26",
+      "section": "B.6",
+      "label": "DD-26 Reports index",
+      "route": "/records/reports",
+      "file": "dd-26.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-27",
+      "section": "B.6",
+      "label": "DD-27 Report: Credentials issued",
+      "route": "/records/reports/credentials",
+      "file": "dd-27.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-28",
+      "section": "B.6",
+      "label": "DD-28 Traceability and discrepancy scanner",
+      "route": "/records/trace",
+      "file": "dd-28.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-29",
+      "section": "B.6",
+      "label": "DD-29 Trace a learner record (Amir Hakimi)",
+      "route": "/records/trace/1",
+      "file": "dd-29.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-30",
+      "section": "B.6",
+      "label": "DD-30 Institutional records audit trail",
+      "route": "/records/audit",
+      "file": "dd-30.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-31",
+      "section": "B.6",
+      "label": "DD-31 Record discrepancy scanner",
+      "route": "/records/discrepancies",
+      "file": "dd-31.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-32-t1",
+      "section": "B.6",
+      "label": "DD-32 Official Documents Hub: Tab: Governance & Senate Packs (8)",
+      "route": "/documents?tab=governance",
+      "file": "dd-32-tab-1.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-32-t2",
+      "section": "B.6",
+      "label": "DD-32 Official Documents Hub: Tab: External Exchange & ABC (6)",
+      "route": "/documents?tab=exchange",
+      "file": "dd-32-tab-2.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "DD-32-t3",
+      "section": "B.6",
+      "label": "DD-32 Official Documents Hub: Tab: Audit & Compliance",
+      "route": "/documents?tab=audit",
+      "file": "dd-32-tab-3.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-00",
+      "section": "B.4",
+      "label": "LEC-00 My tasks (Lecturer home)",
+      "route": "/tasks",
+      "file": "lec-00.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-M1",
+      "section": "B.4",
+      "label": "Lecturer: Notifications menu",
+      "route": "/tasks (notices)",
+      "file": "menu-lec-notif.jpg",
+      "kind": "menu",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-01",
+      "section": "B.4",
+      "label": "LEC-01 My micro-credentials",
+      "route": "/micro-credentials",
+      "file": "lec-01.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-02",
+      "section": "B.4",
+      "label": "LEC-02 Micro-credential detail (Data Structures)",
+      "route": "/micro-credentials/1",
+      "file": "lec-02.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-02-t1",
+      "section": "B.4",
+      "label": "LEC-02 Micro-credential detail: Tab: Cohorts 2",
+      "route": "/micro-credentials/1?tab=cohorts",
+      "file": "lec-02-tab-1.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-02-t2",
+      "section": "B.4",
+      "label": "LEC-02 Micro-credential detail: Tab: Change requests 1",
+      "route": "/micro-credentials/1?tab=changes",
+      "file": "lec-02-tab-2.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-02-t3",
+      "section": "B.4",
+      "label": "LEC-02 Micro-credential detail: Tab: Re-offer",
+      "route": "/micro-credentials/1?tab=reoffer",
+      "file": "lec-02-tab-3.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-06",
+      "section": "B.4",
+      "label": "LEC-06 Request a change (Data Structures)",
+      "route": "/micro-credentials/1/change",
+      "file": "lec-06.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-03",
+      "section": "B.4",
+      "label": "LEC-03 Proposals and versions",
+      "route": "/proposals",
+      "file": "lec-03.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-03-t1",
+      "section": "B.4",
+      "label": "LEC-03 Proposals: Tab: Draft 0",
+      "route": "http://localhost:8110/proposals?f=draft",
+      "file": "lec-03-tab-1.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-03-t2",
+      "section": "B.4",
+      "label": "LEC-03 Proposals: Tab: Returned 1",
+      "route": "http://localhost:8110/proposals?f=returned",
+      "file": "lec-03-tab-2.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-03-t3",
+      "section": "B.4",
+      "label": "LEC-03 Proposals: Tab: Submitted 1",
+      "route": "http://localhost:8110/proposals?f=submitted",
+      "file": "lec-03-tab-3.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-03-t4",
+      "section": "B.4",
+      "label": "LEC-03 Proposals: Tab: In review 0",
+      "route": "http://localhost:8110/proposals?f=in_review",
+      "file": "lec-03-tab-4.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-03-t5",
+      "section": "B.4",
+      "label": "LEC-03 Proposals: Tab: Pending approval 0",
+      "route": "http://localhost:8110/proposals?f=pending_approval",
+      "file": "lec-03-tab-5.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-03-t6",
+      "section": "B.4",
+      "label": "LEC-03 Proposals: Tab: Approved 8",
+      "route": "http://localhost:8110/proposals?f=approved",
+      "file": "lec-03-tab-6.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-04",
+      "section": "B.4",
+      "label": "LEC-04 New proposal wizard",
+      "route": "/proposals/new",
+      "file": "lec-04.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-05",
+      "section": "B.4",
+      "label": "LEC-05 Proposal workspace (Algorithmic Modelling)",
+      "route": "/proposals/10",
+      "file": "lec-05.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-05-t1",
+      "section": "B.4",
+      "label": "LEC-05 Proposal workspace: Tab: Justification",
+      "route": "http://localhost:8110/proposals/10?tab=justification",
+      "file": "lec-05-tab-1.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-05-t2",
+      "section": "B.4",
+      "label": "LEC-05 Proposal workspace: Tab: Modules",
+      "route": "http://localhost:8110/proposals/10?tab=modules",
+      "file": "lec-05-tab-2.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-05-t3",
+      "section": "B.4",
+      "label": "LEC-05 Proposal workspace: Tab: Learning outcomes",
+      "route": "http://localhost:8110/proposals/10?tab=outcomes",
+      "file": "lec-05-tab-3.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-05-t4",
+      "section": "B.4",
+      "label": "LEC-05 Proposal workspace: Tab: Assessment",
+      "route": "http://localhost:8110/proposals/10?tab=assessment",
+      "file": "lec-05-tab-4.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-05-t5",
+      "section": "B.4",
+      "label": "LEC-05 Proposal workspace: Tab: Credential",
+      "route": "http://localhost:8110/proposals/10?tab=credential",
+      "file": "lec-05-tab-5.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-05-t6",
+      "section": "B.4",
+      "label": "LEC-05 Proposal workspace: Tab: Readiness",
+      "route": "http://localhost:8110/proposals/10?tab=readiness",
+      "file": "lec-05-tab-6.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-05-t7",
+      "section": "B.4",
+      "label": "LEC-05 Proposal workspace: Tab: Comments",
+      "route": "http://localhost:8110/proposals/10?tab=comments",
+      "file": "lec-05-tab-7.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-05-t8",
+      "section": "B.4",
+      "label": "LEC-05 Proposal workspace: Tab: Submit",
+      "route": "http://localhost:8110/proposals/10?tab=submit",
+      "file": "lec-05-tab-8.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-05V",
+      "section": "B.4",
+      "label": "LEC-05 Live SLT hours validation feedback beside the field",
+      "route": "/proposals/10?tab=modules (SLT check)",
+      "file": "lec-05-validation.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-07",
+      "section": "B.4",
+      "label": "LEC-07 Reviews for colleagues",
+      "route": "/reviews",
+      "file": "lec-07.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-08",
+      "section": "B.4",
+      "label": "LEC-08 Review a proposal (Cyber Security Operations)",
+      "route": "/reviews/1",
+      "file": "lec-08.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-09",
+      "section": "B.4",
+      "label": "LEC-09 Cohorts and results",
+      "route": "/offerings",
+      "file": "lec-09.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-10",
+      "section": "B.4",
+      "label": "LEC-10 Cohort results entry (Data Structures 2026/2)",
+      "route": "/offerings/2/results",
+      "file": "lec-10.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-10P",
+      "section": "B.4",
+      "label": "LEC-10B Cohort participants list",
+      "route": "/offerings/2/participants",
+      "file": "lec-10b.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-11",
+      "section": "B.4",
+      "label": "LEC-11 Create a new offering",
+      "route": "/offerings/new",
+      "file": "lec-11.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-12",
+      "section": "B.4",
+      "label": "LEC-12 Offering readiness checklist (ADA 2027/1-ADA)",
+      "route": "/offerings/18",
+      "file": "lec-12.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-13",
+      "section": "B.4",
+      "label": "LEC-13 Quality review (CQI)",
+      "route": "/monitoring",
+      "file": "lec-13.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-14",
+      "section": "B.4",
+      "label": "LEC-14 Quality review record (CQI-2026-0002)",
+      "route": "/cqi/2",
+      "file": "lec-14.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-15",
+      "section": "B.4",
+      "label": "LEC-15 QV evidence overview",
+      "route": "/quality",
+      "file": "lec-15.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-16",
+      "section": "B.4",
+      "label": "LEC-16 QV evidence record",
+      "route": "/quality/2",
+      "file": "lec-16.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-06",
+      "section": "B.1",
+      "label": "CMN-06 My profile",
+      "route": "/profile",
+      "file": "cmn-06.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-06-t1",
+      "section": "B.1",
+      "label": "CMN-06 My profile: Tab: Notifications",
+      "route": "/profile?tab=notif",
+      "file": "cmn-06-tab-1.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-06-t2",
+      "section": "B.1",
+      "label": "CMN-06 My profile: Tab: Sign-in and sessions",
+      "route": "/profile?tab=security",
+      "file": "cmn-06-tab-2.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-06-t3",
+      "section": "B.1",
+      "label": "CMN-06 My profile: Tab: My personal data",
+      "route": "/profile?tab=data",
+      "file": "cmn-06-tab-3.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-06T",
+      "section": "B.1",
+      "label": "CMN-06 Dialog: Idle timeout warning",
+      "route": "/profile#security (timeout modal)",
+      "file": "cmn-06-pop-timeout.jpg",
+      "kind": "pop",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-06D",
+      "section": "B.1",
+      "label": "CMN-06 Dialog: Request personal data correction",
+      "route": "/profile#data (modal)",
+      "file": "cmn-06-pop-data.jpg",
+      "kind": "pop",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-07",
+      "section": "B.1",
+      "label": "CMN-07 Notifications",
+      "route": "/notifications",
+      "file": "cmn-07.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-07-t1",
+      "section": "B.1",
+      "label": "CMN-07 Notifications: Tab: Unread 2",
+      "route": "http://localhost:8110/notifications?show=unread",
+      "file": "cmn-07-tab-1.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-07-t2",
+      "section": "B.1",
+      "label": "CMN-07 Notifications: Tab: Read 0",
+      "route": "http://localhost:8110/notifications?show=read",
+      "file": "cmn-07-tab-2.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "LEC-M2",
+      "section": "B.4",
+      "label": "Lecturer: Profile & account menu (Dr. Lim Wei Jie)",
+      "route": "/tasks (user menu)",
+      "file": "menu-lec-user.jpg",
+      "kind": "menu",
+      "category": "screen"
+    },
+    {
+      "id": "EXT-01",
+      "section": "B.5",
+      "label": "EXT-01 My review invitations (landing screen)",
+      "route": "/reviews",
+      "file": "ext-01.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "EXT-02",
+      "section": "B.5",
+      "label": "EXT-02 Proposal review COI declaration (Cloud Security Posture)",
+      "route": "/reviews/9",
+      "file": "ext-02.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "EXT-03",
+      "section": "B.5",
+      "label": "EXT-03 Submitted industry review (Applied Data Analytics)",
+      "route": "/reviews/3",
+      "file": "ext-03.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "EXT-M2",
+      "section": "B.5",
+      "label": "Industry expert: Profile menu",
+      "route": "/reviews (user menu)",
+      "file": "menu-ext-user.jpg",
+      "kind": "menu",
+      "category": "screen"
+    },
+    {
+      "id": "ST-01",
+      "section": "B.3",
+      "label": "ST-01 My learning (Student home)",
+      "route": "/tasks",
+      "file": "st-01.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-M1",
+      "section": "B.3",
+      "label": "Student: Notifications menu",
+      "route": "/tasks (notices)",
+      "file": "menu-st-notif.jpg",
+      "kind": "menu",
+      "category": "screen"
+    },
+    {
+      "id": "ST-M2",
+      "section": "B.3",
+      "label": "Student: Profile menu",
+      "route": "/tasks (user menu)",
+      "file": "menu-st-user.jpg",
+      "kind": "menu",
+      "category": "screen"
+    },
+    {
+      "id": "ST-02",
+      "section": "B.3",
+      "label": "ST-02 Find a micro-credential",
+      "route": "/catalogue",
+      "file": "st-02.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-03",
+      "section": "B.3",
+      "label": "ST-03 Register for a cohort (Lean Six Sigma Yellow Belt 2026/12)",
+      "route": "/register/4",
+      "file": "st-03.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-04",
+      "section": "B.3",
+      "label": "ST-04 Registrations and payments",
+      "route": "/enrolments",
+      "file": "st-04.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-04-t1",
+      "section": "B.3",
+      "label": "ST-04 Registrations: Tab: Payment History & Receipts (6)",
+      "route": "/enrolments?tab=tab-payments",
+      "file": "st-04-tab-1.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-05",
+      "section": "B.3",
+      "label": "ST-05 Registration detail (Cloud Native Development)",
+      "route": "/enrolments/1",
+      "file": "st-05.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-05B",
+      "section": "B.3",
+      "label": "ST-05B My results overview",
+      "route": "/my-results",
+      "file": "st-05b.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-05C",
+      "section": "B.3",
+      "label": "ST-05C Detailed module & assessment marks",
+      "route": "/my-results/1",
+      "file": "st-05c.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-06",
+      "section": "B.3",
+      "label": "ST-06 Achievement record",
+      "route": "/my-record",
+      "file": "st-06.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-07",
+      "section": "B.3",
+      "label": "ST-07 My credentials wallet",
+      "route": "/my-credentials",
+      "file": "st-07.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-07-t1",
+      "section": "B.3",
+      "label": "ST-07 My credentials wallet: Tab: Module Badges (7)",
+      "route": "/my-credentials?tab=tab-badges",
+      "file": "st-07-tab-1.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-08",
+      "section": "B.3",
+      "label": "ST-08 Digital credential detail (UTEM-MC-2026-0001)",
+      "route": "/my-credentials/1",
+      "file": "st-08.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-09",
+      "section": "B.3",
+      "label": "ST-09 Credit ledger and Academic Bank of Credit",
+      "route": "/my-credit",
+      "file": "st-09.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-10",
+      "section": "B.3",
+      "label": "ST-10 Academic Credit Record (ACR-2026-0001)",
+      "route": "/my-credit/1",
+      "file": "st-10.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-11",
+      "section": "B.3",
+      "label": "ST-11 Credit transfer applications",
+      "route": "/transfer",
+      "file": "st-11.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-12",
+      "section": "B.3",
+      "label": "ST-12 New credit transfer application",
+      "route": "/transfer/new",
+      "file": "st-12.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-13",
+      "section": "B.3",
+      "label": "ST-13 Transfer application status (TR-2026-0005)",
+      "route": "/transfer/5",
+      "file": "st-13.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-14",
+      "section": "B.3",
+      "label": "ST-14 My stackable degree plan",
+      "route": "/my-plan",
+      "file": "st-14.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "ST-15",
+      "section": "B.3",
+      "label": "ST-15 Learner feedback",
+      "route": "/feedback",
+      "file": "st-15.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-01",
+      "section": "B.7",
+      "label": "CODL-01 Users and roles (CODL landing page with pager & search)",
+      "route": "/admin/users",
+      "file": "codl-01.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-02",
+      "section": "B.7",
+      "label": "CODL-02 User detail and role assignments (Dr. Aina Zulkifli)",
+      "route": "/admin/users/6",
+      "file": "codl-02.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-03",
+      "section": "B.7",
+      "label": "CODL-03 Reference data (PTj)",
+      "route": "/admin/reference/ptj",
+      "file": "codl-03.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-03P",
+      "section": "B.7",
+      "label": "CODL-03B Reference data: Academic programmes",
+      "route": "/admin/reference/programme",
+      "file": "codl-03-prog.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-03C",
+      "section": "B.7",
+      "label": "CODL-03C Reference data: Parent courses",
+      "route": "/admin/reference/course",
+      "file": "codl-03-courses.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-04",
+      "section": "B.7",
+      "label": "CODL-04 System settings (plain-language rules, effective date & reason)",
+      "route": "/admin/settings",
+      "file": "codl-04.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-04H",
+      "section": "B.7",
+      "label": "CODL-04B Setting version history (slt.min_hours_umc_whole)",
+      "route": "/admin/settings/slt.min_hours_umc_whole",
+      "file": "codl-04-hist.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-05",
+      "section": "B.7",
+      "label": "CODL-05 Templates library (44 templates)",
+      "route": "/admin/templates",
+      "file": "codl-05.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-06",
+      "section": "B.7",
+      "label": "CODL-06 Edit template (role.assigned)",
+      "route": "/admin/templates/role.assigned",
+      "file": "codl-06.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-07",
+      "section": "B.7",
+      "label": "CODL-07 UCreds exchange (CSV imports & exports)",
+      "route": "/admin/ucreds",
+      "file": "codl-07.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-07B",
+      "section": "B.7",
+      "label": "CODL-07B UCreds content catalogue (64 courses, single pagination)",
+      "route": "/admin/ucreds/courses",
+      "file": "codl-07b.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-08",
+      "section": "B.7",
+      "label": "CODL-08 Adapter status & health",
+      "route": "/admin/adapters",
+      "file": "codl-08.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-09",
+      "section": "B.7",
+      "label": "CODL-09 Notification log (15 records)",
+      "route": "/admin/notification-log",
+      "file": "codl-09.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-10",
+      "section": "B.7",
+      "label": "CODL-10 System audit trail",
+      "route": "/admin/audit",
+      "file": "codl-10.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-11",
+      "section": "B.7",
+      "label": "CODL-11 CODL institutional reports",
+      "route": "/records/reports",
+      "file": "codl-11.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-12",
+      "section": "B.7",
+      "label": "CODL-12 Global search (users, settings, files)",
+      "route": "/search?q=slt",
+      "file": "codl-12-search.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-13",
+      "section": "B.7",
+      "label": "CODL-13 Records retention & disposal holds",
+      "route": "/records/retention",
+      "file": "codl-13.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CMN-10B",
+      "section": "B.1",
+      "label": "CMN-10B Role access boundary (403 Forbidden)",
+      "route": "/approvals",
+      "file": "cmn-10-403.jpg",
+      "kind": "",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-M1",
+      "section": "B.7",
+      "label": "CODL admin: Notifications menu",
+      "route": "/admin/users (notices)",
+      "file": "menu-codl-notif.jpg",
+      "kind": "menu",
+      "category": "screen"
+    },
+    {
+      "id": "CODL-M2",
+      "section": "B.7",
+      "label": "CODL admin: Profile menu",
+      "route": "/admin/users (user menu)",
+      "file": "menu-codl-user.jpg",
+      "kind": "menu",
+      "category": "screen"
+    }
+  ],
+  "documents": [
+    {
+      "id": "DOC-01",
+      "section": "C",
+      "label": "DOC-01 Payment receipt (A4)",
+      "route": "/enrolments/1/receipt",
+      "file": "doc-01-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-02",
+      "section": "C",
+      "label": "DOC-02 Enrolment confirmation (A4)",
+      "route": "/enrolments/1/confirmation",
+      "file": "doc-02-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-03",
+      "section": "C",
+      "label": "DOC-03 Certificate (A4)",
+      "route": "/my-credentials/1/certificate",
+      "file": "doc-03-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-04",
+      "section": "C",
+      "label": "DOC-04 Digital credential specification sheet (A4)",
+      "route": "/my-credentials/1/sheet",
+      "file": "doc-04-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-05",
+      "section": "C",
+      "label": "DOC-05 Student Achievement Record (A4)",
+      "route": "/my-record?print=1",
+      "file": "doc-05-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-06",
+      "section": "C",
+      "label": "DOC-06 Academic Credit Record (ACR-2026-0001)",
+      "route": "/my-credit/1?print=1",
+      "file": "doc-06-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-07",
+      "section": "C",
+      "label": "DOC-07 Proposal print dossier (Database Systems)",
+      "route": "/proposals/5/print",
+      "file": "doc-07-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-08",
+      "section": "C",
+      "label": "DOC-08 Senate decision pack (Applied Data Analytics)",
+      "route": "/approvals/6/pack?print=1",
+      "file": "doc-08-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-09",
+      "section": "C",
+      "label": "DOC-09 Standard report (Credentials issued, corrected & revoked)",
+      "route": "/records/reports/credentials/print",
+      "file": "doc-09-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-10",
+      "section": "C",
+      "label": "DOC-10 ABC deposit export batch (ABC-BATCH-2026-001)",
+      "route": "/deposits/batches/1",
+      "file": "doc-10-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-11",
+      "section": "C",
+      "label": "DOC-11 QV submission package (Applied Data Analytics)",
+      "route": "/quality/6/package?print=1",
+      "file": "doc-11-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-12",
+      "section": "C",
+      "label": "DOC-12 Credit transfer decision letter (TR-2026-0001)",
+      "route": "/transfer/1?print=1",
+      "file": "doc-12-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-13",
+      "section": "C",
+      "label": "DOC-13 Suspension notice (Cloud Native Development 2026/S1)",
+      "route": "/suspensions/1/print",
+      "file": "doc-13-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-14",
+      "section": "C",
+      "label": "DOC-14 Import validation report (cnd_cohort1_final_results.csv)",
+      "route": "/admin/ucreds/imports/1?print=1",
+      "file": "doc-14-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-15",
+      "section": "C",
+      "label": "DOC-15 UCreds enrolment export manifest (Cohort 2027/1-DBS)",
+      "route": "/admin/ucreds/export/17/manifest",
+      "file": "doc-15-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-16",
+      "section": "C",
+      "label": "DOC-16 Audit trail export with SHA-256 chain check",
+      "route": "/records/audit/print",
+      "file": "doc-16-p1.jpg",
+      "kind": "",
+      "category": "document"
+    },
+    {
+      "id": "DOC-17",
+      "section": "C",
+      "label": "DOC-17 Official Documents & Exports (Staff)",
+      "route": "/documents",
+      "file": "doc-17.jpg",
+      "kind": "",
+      "category": "document"
+    }
+  ],
+  "errors": []
+}

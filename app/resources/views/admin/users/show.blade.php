@@ -58,7 +58,7 @@
       <ul class="small muted" style="padding-left:18px;line-height:1.6">
         <li>{{ __('Whoever enters results cannot verify that cohort.') }}</li>
         <li>{{ __('Nobody may review or endorse their own proposal.') }}</li>
-        <li>{{ __('CODL administrators assign access; academic governance stays with the PTj deputy deans.') }}</li>
+        <li>{{ __('CODL assigns access and evaluates credit transfers; Deputy Deans endorse faculty proposals; Senate grants final academic approval.') }}</li>
       </ul>
     </div>
   </div>

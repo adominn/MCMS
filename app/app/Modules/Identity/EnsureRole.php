@@ -12,7 +12,16 @@ final class EnsureRole
 {
     public function handle(Request $request, Closure $next, string ...$roles)
     {
-        abort_unless($request->user()?->hasAnyRole(...$roles), 403, 'Your role cannot open this page.');
+        $user = $request->user();
+        if (! $user?->hasAnyRole(...$roles)) {
+            if ($redirect = AccessHandoff::redirectFor($request, $user)) {
+                return $redirect;
+            }
+
+            $handoff = AccessHandoff::resolve($request, $user);
+            $request->attributes->set('handoff', $handoff);
+            abort(403, $handoff['text']);
+        }
 
         return $next($request);
     }

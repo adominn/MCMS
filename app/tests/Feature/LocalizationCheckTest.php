@@ -29,7 +29,7 @@ it('renders the proposal workspace completely in Bahasa Melayu when BM is active
     $content = $response->getContent();
 
     $expectedStrings = [
-        'Lampiran A',
+        'Cadangan micro-credential',
         'Versi',
         'Disimpan secara automatik',
         'Maklumat asas',

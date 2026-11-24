@@ -20,10 +20,14 @@
       @endif
     </p>
   </div>
-  <div class="act" style="display:flex;gap:8px;align-items:center">
-    <a class="btn ter sm" href="{{ route('public.verify.show', $c->public_code) }}" target="_blank">{{ __('Public page') }}</a>
-    <a class="btn ter sm" href="{{ route('credentials.admin.sheet', $c->id) }}" target="_blank">{{ __('Printable sheet') }}</a>
-    <a class="btn ter sm" href="{{ route('credentials.admin') }}">&larr; {{ __('All credentials') }}</a>
+  <div class="act-bar">
+    <div class="act-left">
+      <a class="btn ter sm" href="{{ route('credentials.admin') }}">&larr; {{ __('All credentials') }}</a>
+    </div>
+    <div class="act-right">
+      <a class="btn ter sm" href="{{ route('public.verify.show', $c->public_code) }}" target="_blank">{{ __('Public page') }}</a>
+      <a class="btn ter sm" href="{{ route('credentials.admin.sheet', $c->id) }}" target="_blank">{{ __('Printable sheet') }}</a>
+    </div>
   </div>
 </div>
 @if($newer)<div class="status" role="status">{{ __('Replaced by') }} <a href="{{ route('credentials.admin.show', $newer->id) }}">{{ $newer->number }}</a>.</div>@endif
@@ -51,10 +55,7 @@
       @foreach($modules as $m)
         <tr>
           <td>
-            <strong>{{ $m->seq }}. {{ $m->name_en }}</strong>
-            @if(!empty($m->name_ms))
-              <div class="s muted">{{ $m->name_ms }}</div>
-            @endif
+            <strong>{{ $m->seq }}. {{ (app()->getLocale() === 'ms' && !empty($m->name_ms)) ? $m->name_ms : $m->name_en }}</strong>
           </td>
           <td class="num">{{ $m->slt_hours }}</td>
           <td>
@@ -86,7 +87,7 @@
 </div>
 @endif
 
-@if(in_array($c->status, ['valid', 'corrected']))
+@if(auth()->user()->hasAnyRole('records_custodian', 'records_depositor') && in_array($c->status, ['valid', 'corrected']))
 <form method="post" action="{{ route('credentials.correct', $c->id) }}" class="card" style="margin-top:16px">@csrf
   <h2>{{ __('Start correction') }}</h2><p class="muted s">{{ __('Only for a confirmed error. The original stays in the history.') }}</p>
   <label for="holder">{{ __('Name as it should read') }}</label><input type="text" id="holder" name="holder" value="{{ $x['holder'] }}" required>

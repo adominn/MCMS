@@ -144,7 +144,7 @@
             <h2 style="margin:0 0 10px;font-size:18px">{{ __('Proposed category: :cat', ['cat' => $categories[$result['category']]]) }}</h2>
             <p style="margin:0 0 14px;line-height:1.5">{{ $result['reason'] }}</p>
             <div class="note info" style="margin:0">
-              {{ __('The category stays "proposed" until your deputy dean verifies it, and is fixed by approval.') }}
+              {{ __('The category stays "proposed" until verified by the Deputy Dean and/or CODL, and is fixed upon Senate approval.') }}
             </div>
           </div>
         @else

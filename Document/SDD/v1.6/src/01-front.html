@@ -1,0 +1,58 @@
+<!-- ===================== COVER ===================== -->
+<section class="cover">
+  <p class="doc-title">Software Design Description (SDD)</p>
+  <p class="doc-sub">UTeM Micro-Credential Management System (MCMS)</p>
+  <h3>Document Control</h3>
+  <table>
+    <thead><tr><th colspan="2">Document Information</th></tr></thead>
+    <tbody>
+      <tr><td>Title</td><td>Software Design Description for the UTeM Micro-Credential Management System (MCMS)</td></tr>
+      <tr><td>Date</td><td>23 November 2026</td></tr>
+      <tr><td>Status</td><td>Draft (Version 1.6 &mdash; aligned with Appendix H 8 roles, CODL/Senate transfer governance, DD MC proposal endorsement, and Linear-Precision v3 dual-theme UI)</td></tr>
+      <tr><td>Version</td><td>1.6</td></tr>
+      <tr><td>Prepared for</td><td>Supervisor review; Centre for Open and Distance Learning (CODL), Universiti Teknikal Malaysia Melaka (assumed system owner)</td></tr>
+      <tr><td>Prepared by</td><td>Aliff, Intern</td></tr>
+      <tr><td>Reference</td><td>MCMS_SDD_V1.6_Nov_2026</td></tr>
+      <tr><td>Written against</td><td>Glossary and Decision Log v1.2 (MCMS_FND_V1.2_Nov_2026); Software Requirements Specification v1.6 (MCMS_SRS_V1.6_Nov_2026); Product Requirements Document v1.5 (MCMS_PRD_V1.5_Nov_2026); UI/UX Design Specification v1.7 (MCMS_UIUX_V1.7_Nov_2026)</td></tr>
+      <tr><td>Document set</td><td>Software Requirements Specification (SRS), Product Requirements Document (PRD), UI/UX Design Specification, Software Design Description (SDD) (this document), System Flow Map (D-30)</td></tr>
+    </tbody>
+  </table>
+  <div class="disclaimer">
+    <b>Disclaimer:</b>
+    This document is a working draft prepared by an intern as part of a concept and mock-up for a proposed system. It is not an official document of UTeM or CODL. Technology choices marked Assumed or Proposed have not been confirmed by the system owner. Unauthorised modification, distribution or misrepresentation is prohibited.
+  </div>
+</section>
+
+<section class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <div id="toc"></div>
+  <span class="tocend">TOCENDMARKER</span>
+</section>
+
+<main>
+<h1 class="notoc">Revision History</h1>
+<script type="text/tbl" data-h="Version|Date|Change" data-w="12%|18%|70%">
+1.0 | 27 Oct 2026 | First issue: architecture, technology, module, data, interface, process, security, quality and deployment design for Release 1, traced to the SRS v1.0 and the approved UI/UX Design Specification v1.1.
+1.1 | 27 Oct 2026 | Aligned with Glossary v0.6, SRS v1.1, PRD v1.1 and UI/UX Design Specification v1.2 after the cross-document review of 27 October 2026: Laravel 13 replaces Laravel 11 (AD-02); completion window setting added; cross-cutting requirements and the PRD build increments traced (11.2); Release 1 prototype and design prototype distinguished (D-31); assumptions DA-18 and DA-19 added; static public pages assigned to a module. No requirement, module, event or job ID changed.
+1.2 | 28 Oct 2026 | Updated after the Release 1 prototype was built and its four-act scenario (PRD Section 7, FL-19) passed: the credential proof is VC-JOSE (EdDSA) for Release 1 (AD-09, spike result); Pest 4 replaces Pest 3 (AD-17); the QV submission is held on the QV record, so qv_submissions is removed; the ABC batch keeps the records it exported; programme, settings and table additions listed in the new Section 12; the demo clock added as a test-environment screen (CODL-14). No requirement, module, event or job ID changed.
+1.3 | 06 Nov 2026 | Aligned with Glossary and Decision Log v0.9 (D-39 to D-44) and SRS v1.3: MySQL 8.4 LTS primary database engine migration with native triggers and connection pooling; VerifyController, CredentialUrl, and KeyStore updates for public certificate slip layout, direct .json and .jwt verifier downloads, and dynamic host/port resolution; separate programmatic JWKS endpoint (/.well-known/jwks.json); StubSignInController O365 format guide; modal dialog for degree articulation roadmap (+ Define mapping); and CODL institutional logo integration.
+1.4 | 11 Nov 2026 | Version next iteration alignment (D-46 to D-50, Glossary v1.0, SRS v1.4, PRD v1.3, UI/UX Spec v1.5): reconciled SDD Sections 1–12 with the running Release 1 runtime (MySQL 8.4 LTS primary with PostgreSQL 16 portability via db_like(); plain Blade, CSS tokens, and vanilla JS instead of Livewire/Vite; sync queue/scheduler in Release 1 with Redis/Horizon/MinIO/ClamAV noted as staging/Release 2 targets, D-49); added Role::homeRouteName(), User::homeUrl(), and StubSignInController role-aware landing (D-46) alongside role-scoped search (D-48); documented unified /records/trace tabs and collapsible sidebar (#nav-toggle, D-47), plain-language System Settings, Notification log (CODL-09) and 64-course UCreds content directory (CODL-07B) with single pagination (D-48), transfer slip print guard (D-50), and closed OI-02 under D-39.
+1.5 | 19 Nov 2026 | Full Appendix F1&ndash;F11 &amp; Appendix H compliance alignment (D-54 to D-59, Glossary v1.1, SRS v1.5, PRD v1.4, UI/UX Spec v1.6): added 4 reversible migrations (26 total, 93 tables) introducing <code>acr_verifications</code>, <code>users.position/position_ms</code>, <code>achievement_records.coordinator_*</code>, <code>acrs.slt_hours/notes</code>, <code>acr_checks.result/evidence_ref</code>, <code>transfer_applications.document_checklist</code>, <code>transfer_decisions.decided_by_name/position</code>, and <code>corrections.acr_id</code>; separated MFA-protected <code>records_depositor</code> (P6/P7) from Deputy Dean (P2/P3); enforced defense-in-depth P1 sign-off gates in <code>CompletionController</code>, <code>Acr::prepare()</code>, and <code>CreditBankController::confirm()</code>; added dual programme-cap + Cl. 14.5.1 30% UTeM home-credit floor warnings in <code>Transfers::warnings()</code>; added shared <code>&lt;x-credit-lifecycle&gt;</code> and <code>&lt;x-orientation-strip&gt;</code> Blade components, redesigned Carbon A4 print hierarchy, and strict locale-driven single-language <code>EN | BM</code> output (3,211 <code>ms.json</code> keys); verified 243 routes, 135 Blade views, and 410 passing Pest tests (5,900+ assertions).
+1.6 | 23 Nov 2026 | Full Appendix H alignment &amp; governance refinement (D-60 to D-63, Glossary v1.2, SRS v1.6, PRD v1.5, UI/UX Spec v1.7): formalized 8 official roles across the system; corrected credit transfer governance so CODL Administrator evaluates 9 equivalence criteria (Outcome-by-Outcome) and Senate approves transfer decisions (Appendix F8), while receiving Deputy Dean monitors via read-only Faculty Programme Overview; updated curriculum proposal endorsement (Appendix A / FL-02) by Deputy Dean; introduced Linear-Precision v3 UI architecture including &lt;x-stepper&gt; flow component, protruding white pull-tab latch handle #btnSidebarPullTab, and full Light/Dark dual-theme design system tokens.
+</script>
+
+<h1 class="notoc">Glossary</h1>
+<p>All terms of the Glossary and Decision Log v1.1 apply with exactly the same meaning. The table below adds only the technical terms used in this SDD.</p>
+<script type="text/tbl" data-h="Term|Definition" data-w="24%|76%">
+Action | A single-purpose class that performs one business operation of a module (for example VerifyResults), inside one database transaction.
+Adapter | An implementation of an integration interface for one external system. Each interface has a Stub, Manual and, later, Live adapter (AD-08).
+AD-XX / DA-XX | Architecture decision / design assumption of this SDD (Sections 1.6 and 11.3).
+Domain event (EV-XX) | A record that something happened in a module (for example CredentialIssued), published so other modules can react without reading its tables.
+Eloquent | Laravel's object-relational mapper.
+Horizon | Laravel's dashboard and supervisor for Redis queues (staging/Release 2 target architecture; Release 1 runs scheduler and sync jobs, AD-05).
+Job (JB-XX) | A unit of background work run by a queue worker or scheduler, for example issuing a batch of credentials.
+Livewire | A Laravel library for interactive server-rendered components (optional Release 2 path; Release 1 uses plain Blade templates with vanilla JavaScript, AD-04, D-49).
+MD-XX | A module of the modular monolith (Section 2.3).
+Policy | A Laravel class that decides whether a user may perform an action on a record (role, scope, separation of duties).
+ULID | Universally Unique Lexicographically Sortable Identifier, used as the internal primary key.
+</script>

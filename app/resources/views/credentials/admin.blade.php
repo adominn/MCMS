@@ -1,10 +1,19 @@
 @extends('layouts.app')
 @section('title', 'Credentials')
 @section('content')
+@php
+  $canManageCreds = auth()->user()->hasAnyRole('records_custodian', 'records_depositor');
+@endphp
 <div class="title">
   <div>
     <h1>{{ __('Credentials') }}</h1>
-    <div class="sub">{{ __('Credentials are issued by the system when you confirm completion and every check passes. Correct, replace or revoke an issued credential here.') }}</div>
+    <div class="sub">
+      @if($canManageCreds)
+        {{ __('Credentials are issued by the system when completion is confirmed and every check passes. Correct, replace, retry, or revoke an issued credential here.') }}
+      @else
+        {{ __('Read-only overview of issued credentials for your faculty. Issuance retries, corrections, replacements, and revocations are handled by the Records & Credential Custodian.') }}
+      @endif
+    </div>
   </div>
 </div>
 
@@ -18,10 +27,10 @@
       <table>
         <thead>
           <tr>
-            <th style="width:25%">{{ __('Participant') }}</th>
-            <th style="width:30%">{{ __('Cohort') }}</th>
-            <th style="width:35%">{{ __('Why') }}</th>
-            <th style="width:10%;text-align:right"></th>
+            <th style="width:24%">{{ __('Participant') }}</th>
+            <th style="width:28%">{{ __('Cohort') }}</th>
+            <th style="width:32%">{{ __('Why') }}</th>
+            <th style="width:16%;text-align:right"></th>
           </tr>
         </thead>
         <tbody>
@@ -37,10 +46,14 @@
               </ul>
             </td>
             <td style="text-align:right">
-              <form method="post" action="{{ route('credentials.retry', $f->enrolment_id) }}">
-                @csrf
-                <button type="submit" class="btn sm">{{ __('Check again') }}</button>
-              </form>
+              @if($canManageCreds)
+                <form method="post" action="{{ route('credentials.retry', $f->enrolment_id) }}">
+                  @csrf
+                  <button type="submit" class="btn sm">{{ __('Check again') }}</button>
+                </form>
+              @else
+                <span class="s muted">{{ __('Handled by Records & Credential Custodian') }}</span>
+              @endif
             </td>
           </tr>
         @endforeach

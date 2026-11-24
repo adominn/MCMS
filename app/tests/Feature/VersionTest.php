@@ -180,7 +180,7 @@ it('refuses to approve a replacing version without a transition rule, and asks f
     assign($v2, [$this->lim]);
     reviewDone($v2, $this->lim);
     $this->actingAs($this->hakim)->post("/approvals/$v2/endorse", ['category_verified' => 1]);
-    $this->actingAs($this->hakim)->get("/approvals/$v2/senate")->assertSee('replaces version 1');
+    $this->actingAs(userZulkifli())->get("/approvals/$v2/senate")->assertSee('replaces version 1');
     senate($v2)->assertSessionHasErrors('transition_rule');
     senate($v2, ['transition_rule' => 'equivalence'])->assertSessionHasErrors('transition_note');
     expect(DB::table('mc_versions')->where('id', $v1)->value('status'))->toBe('approved');
@@ -190,7 +190,7 @@ it('refuses to approve a replacing version without a transition rule, and asks f
 
 it('does not ask for a transition rule on a first version', function () {
     $v1 = endorsed();
-    $this->actingAs($this->hakim)->get("/approvals/$v1/senate")->assertDontSee('replaces version');
+    $this->actingAs(userZulkifli())->get("/approvals/$v1/senate")->assertDontSee('replaces version');
     senate($v1)->assertSessionHasNoErrors();
 });
 

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Retention & Record Governance (Appendix H)')
+@section('title', 'Retention & Record Governance')
 @section('content')
 <div class="ph">
   <div>
@@ -8,10 +8,10 @@
       'Retention and governance' => null,
     ]" />
     <div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0052ff;margin-bottom:2px">
-      {{ __('Appendix H / Lampiran H') }} &bull; {{ __('Governance, Roles & Record Ownership Matrix') }}
+      {{ __('Governance, Roles & Record Ownership Matrix') }}
     </div>
     <h1>{{ __('Retention, Record Ownership & Governance') }}</h1>
-    <div class="sub">{{ __('The 12 statutory record classes (H4), governance actions (H8), confirmations (H9), and operational disposal schedules.') }}</div>
+    <div class="sub">{{ __('The 12 statutory record classes, governance actions, confirmations, and operational disposal schedules.') }}</div>
   </div>
   <div class="act" style="gap:8px">
     <button type="button" onclick="window.print()" class="btn ghost sm">{{ __('Print Governance Matrix (A4)') }}</button>
@@ -23,7 +23,7 @@
   <div class="hd" style="display:flex;align-items:center;justify-content:space-between">
     <div>
       <div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0052ff">
-        {{ __('Appendix H4 / Lampiran H4') }}
+        {{ __('Statutory Record Classes') }}
       </div>
       <h2 style="margin:2px 0 0 0">{{ __('Record Ownership Matrix (12 Record Classes)') }}</h2>
     </div>
@@ -46,10 +46,7 @@
           <tr>
             <td style="color:#475569;font-weight:600">{{ $m['no'] }}</td>
             <td>
-              <div style="font-weight:600;color:#090a0f">{{ __($m['class_en']) }}</div>
-              @if(!empty($m['class_ms']) && app()->getLocale() !== 'ms')
-                <div class="small muted" style="font-style:italic">{{ $m['class_ms'] }}</div>
-              @endif
+              <div style="font-weight:600;color:#090a0f">{{ app()->getLocale() === 'ms' && !empty($m['class_ms']) ? $m['class_ms'] : __($m['class_en']) }}</div>
             </td>
             <td>
               <span class="tag info" style="font-size:11px">{{ $m['owner'] }}</span>
@@ -69,7 +66,7 @@
     </table>
   </div>
   <div class="foot" style="background:#f1f5f9;padding:12px 16px;border-top:1px solid #e2e8f0;font-size:12px;color:#475569">
-    <b>{{ __('Nota Penting H (Garis Panduan m/s 119):') }}</b> {{ __('Penyimpanan rekod pencapaian dalaman, pengeluaran kredensial/lencana digital, penyediaan ACR, dan pendepositan kredit ke dalam ABC adalah empat peringkat berbeza yang TIDAK BOLEH dicampuradukkan. Rekod akademik, kredensial, ACR, dan log audit adalah KEKAL dan tidak boleh dilupuskan sama sekali.') }}
+    <b>{{ __('Important Notice:') }}</b> {{ __('Internal achievement records, digital credential/badge issuance, ACR preparation, and credit deposit into ABC are four distinct governance stages that must never be conflated. Academic records, credentials, ACRs, and audit logs are permanent and must never be disposed of.') }}
   </div>
 </div>
 
@@ -78,7 +75,7 @@
   <div class="hd" style="display:flex;align-items:center;justify-content:space-between">
     <div>
       <div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0052ff">
-        {{ __('Appendix H8 / Lampiran H8') }}
+        {{ __('Governance Actions') }}
       </div>
       <h2 style="margin:2px 0 0 0">{{ __('Governance Action Register (Daftar Tindakan Tadbir Urus)') }}</h2>
     </div>
@@ -127,48 +124,48 @@
   <div class="hd">
     <div>
       <div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0052ff">
-        {{ __('Appendix H9 / Lampiran H9') }}
+        {{ __('Governance Confirmations') }}
       </div>
       <h2 style="margin:2px 0 0 0">{{ __('Governance Matrix Confirmation (Pengesahan Matriks Tadbir Urus)') }}</h2>
     </div>
   </div>
   <div class="bd" style="padding:16px">
     <p style="font-size:13px;line-height:1.6;margin:0 0 16px 0;color:#090a0f">
-      <i>{{ __('"Kami mengesahkan bahawa pengurusan rekod, kawalan capaian, pemisahan tugas (SoD), dan pemilikan rekod bagi penawaran micro-credential ini telah dilaksanakan sepenuhnya selaras dengan Garis Panduan Micro-Credential UTeM (Lampiran H)."') }}</i>
+      <i>{{ __('"We confirm that record management, access control, separation of duties (SoD), and record ownership for this micro-credential offering have been implemented in full compliance with UTeM academic governance requirements."') }}</i>
     </p>
 
     <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:16px">
-      <!-- Role 1: Academic Owner / Coordinator (P1) -->
+      <!-- Role 1: Academic Owner / Coordinator -->
       <div style="background:#ffffff;border:1px solid #e2e8f0;padding:12px 14px">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#475569;margin-bottom:4px">
-          {{ __('1. Academic Owner (P1)') }}
+          {{ __('1. Course Coordinator / Academic Owner') }}
         </div>
         <div style="font-weight:600;color:#090a0f">Dr. Aina Zulkifli</div>
-        <div class="small muted">{{ __('Course Coordinator / Senior Lecturer, FTMK') }}</div>
+        <div class="small muted">{{ __('Course Coordinator / Senior Lecturer') }}</div>
         <div style="margin-top:8px;font-size:11px;color:#0e6027;font-weight:600">
           &#10003; {{ __('Confirmed & Signed') }} ({{ now()->format('d/m/Y') }})
         </div>
       </div>
 
-      <!-- Role 2: PTj Authority / Dean (P2) -->
+      <!-- Role 2: PTj Authority / Deputy Dean -->
       <div style="background:#ffffff;border:1px solid #e2e8f0;padding:12px 14px">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#475569;margin-bottom:4px">
-          {{ __('2. PTj Authority (P2)') }}
+          {{ __('2. Faculty Authority (Deputy Dean)') }}
         </div>
         <div style="font-weight:600;color:#090a0f">Hakim Rahman</div>
-        <div class="small muted">{{ __('Deputy Dean (Academic), FTMK') }}</div>
+        <div class="small muted">{{ __('Deputy Dean (Academic)') }}</div>
         <div style="margin-top:8px;font-size:11px;color:#0e6027;font-weight:600">
           &#10003; {{ __('Confirmed & Signed') }} ({{ now()->format('d/m/Y') }})
         </div>
       </div>
 
-      <!-- Role 3: Academic Authority / Registry (P3 / P6) -->
+      <!-- Role 3: Academic Authority / Senate -->
       <div style="background:#ffffff;border:1px solid #e2e8f0;padding:12px 14px">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#475569;margin-bottom:4px">
-          {{ __('3. Academic Authority / Senate (P3)') }}
+          {{ __('3. Academic Authority / Senate') }}
         </div>
         <div style="font-weight:600;color:#090a0f">Prof. Dr. Zulkifli Ahmad</div>
-        <div class="small muted">{{ __('Senate Academic Representative / PBA (P3)') }}</div>
+        <div class="small muted">{{ __('Senate Academic Representative') }}</div>
         <div style="margin-top:8px;font-size:11px;color:#0e6027;font-weight:600">
           &#10003; {{ __('Confirmed & Signed') }} ({{ now()->format('d/m/Y') }})
         </div>
@@ -239,7 +236,7 @@
   </div>
   <div class="foot">
     <span class="small muted">
-      {{ __('Disposal is approved by the academic authority set in settings (:role), only after the retention period and only if no hold applies. Platform administrators (P5) cannot approve disposal.', ['role' => $approver]) }}
+      {{ __('Disposal is approved by the academic authority set in settings (:role), only after the retention period and only if no hold applies. CODL Administrators cannot approve disposal.', ['role' => $approver]) }}
     </span>
   </div>
 </div>

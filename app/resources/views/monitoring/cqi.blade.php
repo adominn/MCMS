@@ -13,23 +13,26 @@
   <div>
     <h1>{{ __('Quality review :ref', ['ref' => $r->reference]) }}</h1>
     <div class="sub">
-      {{ __('Continuous Quality Improvement (CQI) record for cohort performance and evaluation') }} &middot;
-      <span class="muted">{{ __('Lampiran C — Garis Panduan Micro-Credential UTeM') }}</span>
+      {{ __('Continuous Quality Improvement (CQI) record for cohort performance and evaluation') }}
     </div>
   </div>
-  <div class="act" style="display:inline-flex;align-items:center;gap:10px">
-    <a class="btn sec sm" href="{{ route('cqi.print', $r->id) }}" target="_blank">
-      {{ __('Print Appendix C') }}
-    </a>
-    <x-pill :s="__(['draft' => 'Draft', 'submitted' => 'Submitted to the deputy dean', 'confirmed' => 'Confirmed'][$r->status] ?? $r->status)" id="cqi-status" />
-    <a class="btn ter sm" href="{{ route('monitoring') }}">&larr; {{ __('All quality reviews') }}</a>
+  <div class="act-bar">
+    <div class="act-left">
+      <a class="btn ter sm" href="{{ route('monitoring') }}">&larr; {{ __('All quality reviews') }}</a>
+    </div>
+    <div class="act-right">
+      <a class="btn sec sm" href="{{ route('cqi.print', $r->id) }}" target="_blank">
+        {{ __('Print quality review') }}
+      </a>
+      <x-pill :s="__(['draft' => 'Draft', 'submitted' => 'Submitted to the deputy dean', 'confirmed' => 'Confirmed'][$r->status] ?? $r->status)" id="cqi-status" />
+    </div>
   </div>
 </div>
 
 {{-- ===================== C1. OFFERING INFORMATION ===================== --}}
 <div class="panel" style="margin-bottom:24px">
   <div class="hd">
-    <h2>C1. {{ __('Offering information and monitoring period') }}</h2>
+    <h2>1. {{ __('Offering information and monitoring period') }}</h2>
   </div>
   <div class="bd">
     <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:20px">
@@ -73,8 +76,8 @@
 {{-- ===================== C2. COHORT PERFORMANCE & C4. STAKEHOLDER FEEDBACK ===================== --}}
 <div style="margin-bottom:24px">
   <div style="margin-bottom:12px">
-    <h2 style="margin:0 0 4px">C2. {{ __('Cohort performance indicators') }}</h2>
-    <div class="muted s" style="font-size:13px">{{ __('Quantitative performance indicators across 6 dimensions per Guide Appendix C2.') }}</div>
+    <h2 style="margin:0 0 4px">2. {{ __('Cohort performance indicators') }}</h2>
+    <div class="muted s" style="font-size:13px">{{ __('Quantitative performance indicators across 6 core cohort dimensions.') }}</div>
   </div>
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(340px, 1fr));gap:20px;align-items:start">
@@ -155,8 +158,8 @@
             @csrf
             <span style="font-size:12px;font-weight:600">{{ __('Update Indicator #6 (Access issues):') }}</span>
             <select name="c2_access_issues_status" style="height:28px;font-size:12px">
-              <option value="tiada" @selected(($r->c2_access_issues_status ?? 'tiada') === 'tiada')>{{ __('Tiada (None)') }}</option>
-              <option value="ada" @selected(($r->c2_access_issues_status ?? '') === 'ada')>{{ __('Ada (Yes)') }}</option>
+              <option value="tiada" @selected(($r->c2_access_issues_status ?? 'tiada') === 'tiada')>{{ __('None') }}</option>
+              <option value="ada" @selected(($r->c2_access_issues_status ?? '') === 'ada')>{{ __('Yes') }}</option>
             </select>
             <input type="number" name="c2_access_issues_count" value="{{ $r->c2_access_issues_count ?? 0 }}" min="0" placeholder="{{ __('Count') }}" style="height:28px;width:70px;font-size:12px">
             <input type="text" name="c2_access_issues_notes" value="{{ $r->c2_access_issues_notes ?? '' }}" placeholder="{{ __('Remarks / technical issues notes...') }}" style="height:28px;flex:1;min-width:140px;font-size:12px">
@@ -217,7 +220,7 @@
   {{-- C3. Learning Outcome Attainment (Full Width) --}}
   <div class="panel" style="margin-top:20px">
     <div class="hd">
-      <h3>C3. {{ __('Learning outcome attainment') }}</h3>
+      <h3>3. {{ __('Learning outcome attainment') }}</h3>
     </div>
     <div class="bd" style="padding:0">
       <table>
@@ -260,16 +263,16 @@
         <form method="post" action="{{ route('cqi.c3_summary', $r->id) }}">
           @csrf
           <label for="c3_summary" style="font-weight:600;font-size:12px;text-transform:uppercase;color:var(--ink)">
-            {{ __('Rumusan Pencapaian Hasil Pembelajaran (C3 Summary):') }}
+            {{ __('Learning Outcomes Attainment Summary:') }}
           </label>
           <div class="muted s" style="margin-bottom:6px">{{ __('State whether learning outcomes are satisfactorily achieved and identify those needing improvement actions.') }}</div>
           <textarea id="c3_summary" name="c3_summary" rows="2" style="width:100%" placeholder="{{ __('Enter LO attainment interpretation and summary...') }}">{{ $r->c3_summary ?? '' }}</textarea>
           <div style="text-align:right;margin-top:6px">
-            <button type="submit" class="btn sm">{{ __('Save C3 Summary') }}</button>
+            <button type="submit" class="btn sm">{{ __('Save Attainment Summary') }}</button>
           </div>
         </form>
       @else
-        <div style="font-weight:600;font-size:12px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">{{ __('Rumusan Pencapaian Hasil Pembelajaran (C3):') }}</div>
+        <div style="font-weight:600;font-size:12px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">{{ __('Learning Outcomes Attainment Summary:') }}</div>
         <div>{{ $r->c3_summary ?? __('No overall summary recorded.') }}</div>
       @endif
     </div>
@@ -278,8 +281,8 @@
   {{-- C4. Maklum Balas Peserta dan Pihak Berkepentingan (4 Sources) --}}
   <div class="panel" style="margin-top:20px">
     <div class="hd">
-      <h3>C4. {{ __('Stakeholder feedback (4 sources: Learners, Instructors, Industry, System data)') }}</h3>
-      <div class="sub" style="font-size:13px;color:var(--muted)">{{ __('Analyze qualitative and quantitative input from all 4 stakeholder groups per Guide Appendix C4.') }}</div>
+      <h3>4. {{ __('Stakeholder feedback (4 sources: Learners, Instructors, Industry, System data)') }}</h3>
+      <div class="sub" style="font-size:13px;color:var(--muted)">{{ __('Analyze qualitative and quantitative input from all 4 stakeholder groups.') }}</div>
     </div>
     @php($c4Feedback = json_decode($r->c4_feedback ?? '[]', true) ?: [])
     <div class="bd" style="padding:0">
@@ -297,8 +300,8 @@
         @foreach(config('monitoring.feedback_sources') as $srcKey => $srcDef)
           @php($rowVal = $c4Feedback[$srcKey] ?? [])
           <tr>
-            <td><b>{{ $srcDef['label'] }}</b></td>
-            <td>{{ $srcDef['aspect'] }}</td>
+            <td><b>{{ __($srcDef['label']) }}</b></td>
+            <td>{{ __($srcDef['aspect']) }}</td>
             <td>
               @if($srcKey === 'learners' && $ind['feedback']['count'] > 0)
                 {{ __('Avg rating:') }} {{ round(collect($ind['feedback']['areas'])->filter()->avg(), 1) }}/5.0 ({{ $ind['feedback']['count'] }} {{ __('responses') }})
@@ -317,15 +320,15 @@
 
     @if($isOwner && $r->status !== 'confirmed')
       <div class="bd" style="border-top:1px solid var(--border);padding:14px 16px;background:var(--s1, #f1f5f9)">
-        <h4 style="margin:0 0 10px">{{ __('Update Stakeholder Feedback (Appendix C4)') }}</h4>
+        <h4 style="margin:0 0 10px">{{ __('Update Stakeholder Feedback') }}</h4>
         <form method="post" action="{{ route('cqi.feedback', $r->id) }}">
           @csrf
           <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:14px">
             @foreach(config('monitoring.feedback_sources') as $srcKey => $srcDef)
               @php($rowVal = $c4Feedback[$srcKey] ?? [])
               <div style="background:#fff;border:1px solid var(--border);padding:10px">
-                <div style="font-weight:600;font-size:12px;margin-bottom:6px">{{ $srcDef['label'] }}</div>
-                <div style="font-size:11px;color:var(--muted);margin-bottom:6px">{{ $srcDef['aspect'] }}</div>
+                <div style="font-weight:600;font-size:12px;margin-bottom:6px">{{ __($srcDef['label']) }}</div>
+                <div style="font-size:11px;color:var(--muted);margin-bottom:6px">{{ __($srcDef['aspect']) }}</div>
                 <input type="text" name="feedback[{{ $srcKey }}][findings]" value="{{ $rowVal['findings'] ?? '' }}" placeholder="{{ __('Key findings...') }}" style="width:100%;margin-bottom:6px;font-size:12px">
                 <input type="text" name="feedback[{{ $srcKey }}][issues_strengths]" value="{{ $rowVal['issues_strengths'] ?? '' }}" placeholder="{{ __('Issues / strengths...') }}" style="width:100%;margin-bottom:6px;font-size:12px">
                 <input type="text" name="feedback[{{ $srcKey }}][initial_action]" value="{{ $rowVal['initial_action'] ?? '' }}" placeholder="{{ __('Initial action...') }}" style="width:100%;font-size:12px">
@@ -346,7 +349,7 @@
 <form method="post" action="{{ route('cqi.domains', $r->id) }}" class="panel" id="domains" style="margin-bottom:24px">
   @csrf
   <div class="hd">
-    <h2>C5. {{ __('Implementation quality domains (8 domains per Guide Appendix C5)') }}</h2>
+    <h2>5. {{ __('Implementation quality domains (8 domains)') }}</h2>
     <div class="sub" style="font-size:13px;color:var(--muted)">{{ __('Evaluate curriculum alignment, SLT adequacy, materials, assessment validity, integrity, platform, records, and QV/credit status.') }}</div>
   </div>
   <div class="bd" style="padding:0">
@@ -370,18 +373,18 @@
             @if($isOwner && $r->status === 'draft')
               <select name="status[{{ $k }}]" aria-label="Status of {{ $label }}" style="width:100%">
                 <option value="">{{ __('Choose') }}</option>
-                <option value="memuaskan" @selected($dc && ($dc->status === 'memuaskan' || ($dc->met && $dc->status !== 'tb')))>{{ __('Memuaskan (Satisfactory)') }}</option>
-                <option value="perlu_tindakan" @selected($dc && ($dc->status === 'perlu_tindakan' || (! $dc->met && $dc->status !== 'tb')))>{{ __('Perlu Tindakan (Needs action)') }}</option>
-                <option value="tb" @selected($dc && $dc->status === 'tb')>{{ __('Tidak Berkaitan (TB)') }}</option>
+                <option value="memuaskan" @selected($dc && ($dc->status === 'memuaskan' || ($dc->met && $dc->status !== 'tb')))>{{ __('Satisfactory') }}</option>
+                <option value="perlu_tindakan" @selected($dc && ($dc->status === 'perlu_tindakan' || (! $dc->met && $dc->status !== 'tb')))>{{ __('Needs action') }}</option>
+                <option value="tb" @selected($dc && $dc->status === 'tb')>{{ __('Not applicable') }}</option>
               </select>
             @else
               @if($dc)
                 @if($dc->status === 'tb')
-                  <span class="tag info">{{ __('Tidak Berkaitan (TB)') }}</span>
+                  <span class="tag info">{{ __('Not applicable') }}</span>
                 @elseif($dc->status === 'memuaskan' || $dc->met)
-                  <span class="tag ok">{{ __('Memuaskan (Satisfactory)') }}</span>
+                  <span class="tag ok">{{ __('Satisfactory') }}</span>
                 @else
-                  <span class="tag overdue">{{ __('Perlu Tindakan (Needs action)') }}</span>
+                  <span class="tag overdue">{{ __('Needs action') }}</span>
                 @endif
               @else
                 <span class="muted s">{{ __('Not checked') }}</span>
@@ -410,7 +413,7 @@
 {{-- ===================== C6 & C7. ISSUES, ROOT CAUSE & CQI ACTION PLAN ===================== --}}
 <div style="margin-bottom:24px">
   <div style="margin-bottom:12px">
-    <h2 style="margin:0 0 4px">C6 & C7. {{ __('Issues, root cause and CQI action plan') }}</h2>
+    <h2 style="margin:0 0 4px">6. {{ __('Issues, root cause and CQI action plan') }}</h2>
     <div class="muted s" style="font-size:13px">{{ __('Traceability chain: Issue / Gap -> Evidence -> Root Cause -> Action -> Implementation -> Effectiveness Evaluation.') }}</div>
   </div>
 
@@ -427,7 +430,7 @@
       </div>
       <div class="bd" style="padding-top:8px;padding-bottom:12px">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:13px">
-          <div><span class="muted s">{{ __('Evidens:') }}</span> <b>{{ $i->evidence }}</b></div>
+          <div><span class="muted s">{{ __('Evidence:') }}</span> <b>{{ $i->evidence }}</b></div>
           <div><span class="muted s">{{ __('Root cause:') }}</span> <b>{{ $i->root_cause }}</b></div>
           <div><span class="muted s">{{ __('Impact:') }}</span> <b>{{ $i->impact }}</b></div>
         </div>
@@ -439,7 +442,7 @@
               <th style="width:40%">{{ __('Action') }}</th>
               <th style="width:20%">{{ __('Owner') }}</th>
               <th style="width:15%">{{ __('Due') }}</th>
-              <th style="width:25%">{{ __('Status & Effectiveness (C8)') }}</th>
+              <th style="width:25%">{{ __('Status & Effectiveness') }}</th>
               <th></th>
             </tr>
           </thead>
@@ -525,7 +528,7 @@
     <form method="post" action="{{ route('cqi.issue', $r->id) }}" class="panel card" id="new-issue" style="margin-top:20px">
       @csrf
       <div class="hd">
-        <h2>{{ __('Record an issue and an action (Appendix C6 & C7)') }}</h2>
+        <h2>{{ __('Record an issue and an action') }}</h2>
         <div class="sub" style="font-size:13px;color:var(--muted)">{{ __('Define the issue title, root cause, impact, priority, designated action owner, and success metrics.') }}</div>
       </div>
       <div class="bd">
@@ -533,7 +536,7 @@
 
           {{-- Row 1: Issue Title & Evidence --}}
           <div>
-            <label for="title" style="font-weight:600">{{ __('Issue Title / Summary (Isu / Jurang)') }}</label>
+            <label for="title" style="font-weight:600">{{ __('Issue Title / Summary') }}</label>
             <input id="title" name="title" aria-label="Issue Title" type="text" placeholder="{{ __('e.g., Module 2 Practical Mastery Gap') }}" style="width:100%">
           </div>
           <div>
@@ -608,7 +611,7 @@
 {{-- ===================== C9. OFFERING REVIEW DECISION ===================== --}}
 <div class="panel" style="margin-bottom:24px">
   <div class="hd">
-    <h2>C9. {{ __('Offering review decision (Keputusan Semakan Penawaran)') }}</h2>
+    <h2>7. {{ __('Offering review decision') }}</h2>
     <div class="sub" style="font-size:13px;color:var(--muted)">{{ __('Determine whether offering continues, requires minor CQI, curriculum review, re-approval, or suspension.') }}</div>
   </div>
   @php($c9Decision = $r->c9_decision ?? 'continue_no_change')
@@ -618,58 +621,58 @@
       <form method="post" action="{{ route('cqi.c9_decision', $r->id) }}">
         @csrf
         <div style="margin-bottom:14px">
-          <label style="font-weight:600;display:block;margin-bottom:6px">{{ __('Review Decision (Keputusan Semakan):') }}</label>
+          <label style="font-weight:600;display:block;margin-bottom:6px">{{ __('Review Decision:') }}</label>
           @foreach(config('monitoring.c9_decisions') as $dKey => $dLabel)
             <label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;cursor:pointer">
               <input type="radio" name="c9_decision" value="{{ $dKey }}" @checked($c9Decision === $dKey) required>
-              <span>{{ $dLabel }}</span>
+              <span>{{ __($dLabel) }}</span>
             </label>
           @endforeach
         </div>
 
         <div style="margin-bottom:14px">
-          <label style="font-weight:600;display:block;margin-bottom:6px">{{ __('Is there a Material Change? (Adakah terdapat Perubahan Signifikan?):') }}</label>
+          <label style="font-weight:600;display:block;margin-bottom:6px">{{ __('Is there a Material Change?:') }}</label>
           <label style="display:inline-flex;align-items:center;gap:6px;margin-right:20px;cursor:pointer">
             <input type="radio" name="c9_is_material_change" value="1" @checked($r->c9_is_material_change)>
-            <span>{{ __('Ya (Yes)') }}</span>
+            <span>{{ __('Yes') }}</span>
           </label>
           <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
             <input type="radio" name="c9_is_material_change" value="0" @checked(! $r->c9_is_material_change)>
-            <span>{{ __('Tidak (No)') }}</span>
+            <span>{{ __('No') }}</span>
           </label>
         </div>
 
         <div style="margin-bottom:14px">
-          <label style="font-weight:600;display:block;margin-bottom:6px">{{ __('If Yes, Affected Components (Komponen Terjejas):') }}</label>
+          <label style="font-weight:600;display:block;margin-bottom:6px">{{ __('If Yes, Affected Components:') }}</label>
           <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:6px">
             @foreach(config('monitoring.c9_affected_components') as $cKey => $cLabel)
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
                 <input type="checkbox" name="c9_affected_components[]" value="{{ $cKey }}" @checked(in_array($cKey, $affectedComps, true))>
-                <span style="font-size:12px">{{ $cLabel }}</span>
+                <span style="font-size:12px">{{ __($cLabel) }}</span>
               </label>
             @endforeach
           </div>
         </div>
 
         <div style="margin-bottom:14px">
-          <label for="c9_learner_implications" style="font-weight:600;display:block;margin-bottom:4px">{{ __('Implications for Existing Learners (Implikasi kepada Peserta Sedia Ada):') }}</label>
+          <label for="c9_learner_implications" style="font-weight:600;display:block;margin-bottom:4px">{{ __('Implications for Existing Learners:') }}</label>
           <textarea id="c9_learner_implications" name="c9_learner_implications" rows="2" style="width:100%" placeholder="{{ __('Describe learner transition arrangements if applicable...') }}">{{ $r->c9_learner_implications ?? '' }}</textarea>
         </div>
 
         <div style="margin-bottom:14px">
-          <label for="c9_follow_up_actions" style="font-weight:600;display:block;margin-bottom:4px">{{ __('Follow-up Actions (Tindakan Susulan):') }}</label>
+          <label for="c9_follow_up_actions" style="font-weight:600;display:block;margin-bottom:4px">{{ __('Follow-up Actions:') }}</label>
           <textarea id="c9_follow_up_actions" name="c9_follow_up_actions" rows="2" style="width:100%" placeholder="{{ __('Outline follow-up monitoring or approval steps...') }}">{{ $r->c9_follow_up_actions ?? '' }}</textarea>
         </div>
 
         <div style="text-align:right">
-          <button type="submit" class="btn sm">{{ __('Save Decision (C9)') }}</button>
+          <button type="submit" class="btn sm">{{ __('Save Review Decision') }}</button>
         </div>
       </form>
     @else
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
         <div>
           <div class="muted s" style="font-size:12px;font-weight:600;text-transform:uppercase">{{ __('Review Decision') }}</div>
-          <div style="font-weight:600;font-size:14px;margin-top:2px">{{ config('monitoring.c9_decisions')[$c9Decision] ?? $c9Decision }}</div>
+          <div style="font-weight:600;font-size:14px;margin-top:2px">{{ __(config('monitoring.c9_decisions')[$c9Decision] ?? $c9Decision) }}</div>
           <div style="margin-top:8px">
             <span class="tag {{ $r->c9_is_material_change ? 'overdue' : 'ok' }}">
               {{ $r->c9_is_material_change ? __('Material Change: Yes') : __('Material Change: No') }}
@@ -691,8 +694,8 @@
 {{-- ===================== C10. CONFIRMATION AND 3-ROLE SIGN-OFF ===================== --}}
 <div class="panel" style="margin-bottom:24px">
   <div class="hd">
-    <h2>C10. {{ __('Confirmation and CQI sign-off (3 roles)') }}</h2>
-    <div class="sub" style="font-size:13px;color:var(--muted)">{{ __('Sign-off by MC Coordinator (P1), PTj/Faculty Representative (P2), and QA/University Authority (P4).') }}</div>
+    <h2>8. {{ __('Confirmation and CQI sign-off (3 roles)') }}</h2>
+    <div class="sub" style="font-size:13px;color:var(--muted)">{{ __('Sign-off by MC Coordinator, PTj/Faculty Representative, and QA/University Authority.') }}</div>
   </div>
   @php($c10Signoffs = json_decode($r->c10_signoffs ?? '[]', true) ?: [])
   <div class="bd" style="padding:0">
@@ -710,14 +713,14 @@
         {{-- P1 Coordinator --}}
         @php($s1 = $c10Signoffs['coordinator'] ?? null)
         <tr>
-          <td><b>P1. {{ __('Penyelaras Micro-Credential') }}</b></td>
+          <td><b>P1. {{ __('MC Coordinator') }}</b></td>
           <td>
             <b>{{ $s1['name'] ?? $offering->owner_name ?? '–' }}</b><br>
             <span class="muted s">{{ $s1['position'] ?? __('Course Coordinator') }}</span>
           </td>
           <td>
             @if($r->status === 'submitted' || $r->status === 'confirmed' || !empty($s1['signed_at']))
-              <span class="tag ok">{{ __('Disahkan') }}</span>
+              <span class="tag ok">{{ __('Confirmed') }}</span>
             @else
               <span class="tag info">{{ __('Draft') }}</span>
             @endif
@@ -730,14 +733,14 @@
         @php($s2 = $c10Signoffs['ptj_rep'] ?? null)
         @php($confirmer = $r->confirmed_by ? \App\Models\User::find($r->confirmed_by) : null)
         <tr>
-          <td><b>P2. {{ __('Wakil PTj / Fakulti') }}</b></td>
+          <td><b>P2. {{ __('PTj / Faculty Representative') }}</b></td>
           <td>
             <b>{{ $s2['name'] ?? ($confirmer ? $confirmer->name : '–') }}</b><br>
-            <span class="muted s">{{ $s2['position'] ?? ($confirmer ? ($confirmer->position ?? 'Timbalan Dekan') : 'Timbalan Dekan (Akademik)') }}</span>
+            <span class="muted s">{{ $s2['position'] ?? ($confirmer ? ($confirmer->position ?? __('Deputy Dean')) : __('Deputy Dean (Academic)')) }}</span>
           </td>
           <td>
             @if($r->status === 'confirmed' || !empty($s2['signed_at']))
-              <span class="tag ok">{{ __('Disahkan') }}</span>
+              <span class="tag ok">{{ __('Confirmed') }}</span>
             @else
               <span class="tag info">{{ __('Awaiting Confirmation') }}</span>
             @endif
@@ -749,18 +752,18 @@
         {{-- P4 QA Authority --}}
         @php($s3 = $c10Signoffs['qa_authority'] ?? null)
         <tr>
-          <td><b>P4. {{ __('Pihak Jaminan Kualiti / Berkuasa') }}</b></td>
+          <td><b>P4. {{ __('QA / University Authority') }}</b></td>
           <td>
-            <b>{{ $s3['name'] ?? ($r->status === 'confirmed' ? 'Jawatankuasa Jaminan Kualiti' : '–') }}</b><br>
-            <span class="muted s">{{ $s3['position'] ?? __('Pegawai Jaminan Kualiti') }}</span>
+            <b>{{ $s3['name'] ?? ($r->status === 'confirmed' ? __('Quality Assurance Committee') : '–') }}</b><br>
+            <span class="muted s">{{ $s3['position'] ?? __('Quality Assurance Officer') }}</span>
           </td>
           <td>
             @if(!empty($s3['status']) && $s3['status'] === 'tb')
-              <span class="tag info">TB</span>
+              <span class="tag info">{{ __('Not applicable') }}</span>
             @elseif($r->status === 'confirmed' || !empty($s3['signed_at']))
-              <span class="tag ok">{{ __('Disahkan') }}</span>
+              <span class="tag ok">{{ __('Confirmed') }}</span>
             @else
-              <span class="tag info">{{ $offering->category === 'SAMC' ? __('Awaiting QA') : 'TB' }}</span>
+              <span class="tag info">{{ $offering->category === 'SAMC' ? __('Awaiting QA') : __('Not applicable') }}</span>
             @endif
           </td>
           <td>{{ !empty($s3['signed_at']) ? \Carbon\Carbon::parse($s3['signed_at'])->format('d/m/Y') : ($r->confirmed_at ? \Carbon\Carbon::parse($r->confirmed_at)->format('d/m/Y') : '–') }}</td>
@@ -791,7 +794,7 @@
   <form method="post" action="{{ route('cqi.confirm', $r->id) }}" class="panel card" id="confirm" style="margin-bottom:24px;border-left:4px solid #24a148">
     @csrf
     <div class="hd">
-      <h2>{{ __('Confirm the quality review record (Appendix C10)') }}</h2>
+      <h2>{{ __('Confirm the quality review record') }}</h2>
       <div class="sub" style="font-size:13px;color:var(--muted)">{{ __('Verify that quality domains and improvement actions meet faculty academic governance standards.') }}</div>
     </div>
     <div class="bd">
@@ -816,10 +819,10 @@
 <div class="panel" style="margin-top:24px;background:#edf4ff;border:1.5px solid #0052ff">
   <div class="bd" style="padding:16px 20px">
     <div style="font-weight:700;font-size:12px;color:#0043ce;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">
-      {{ __('NOTA PENTING (Lampiran C)') }}
+      {{ __('IMPORTANT NOTE') }}
     </div>
     <p style="margin:0;font-size:13px;line-height:1.5;color:#090a0f">
-      {{ __('CQI hendaklah berasaskan evidens dan tidak terhad kepada skor kepuasan peserta. Analisis hendaklah mengambil kira pencapaian hasil pembelajaran, prestasi pentaksiran, data penyertaan/penyempurnaan, isu pelaksanaan dan maklum balas pihak berkepentingan. Perubahan signifikan yang terhasil daripada CQI hendaklah melalui mekanisme semakan, kelulusan atau Quality Verification semula yang berkaitan sebelum dilaksanakan.') }}
+      {{ __('CQI must be evidence-based and not limited to participant satisfaction scores. Analysis must take into account learning outcome achievement, assessment performance, participation/completion data, implementation issues, and stakeholder feedback. Material changes resulting from CQI must undergo relevant review, approval, or re-Quality Verification before implementation.') }}
     </p>
   </div>
 </div>

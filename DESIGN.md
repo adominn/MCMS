@@ -134,8 +134,11 @@ description: "UTeM MCMS v3 Linear-Precision Design System: light-only pure white
 - **DO** keep `EN | BM` language toggle working across all screens.
 - **DO** use institutional spelling `"enroll"` / `"enrollment"`.
 - **DO** keep print views (`?print=1`) clean black-on-white with `0px` shadows and no sidebar/topbar chrome.
+- **DO** enforce **Rule D-67 (Bounded Page & Progressive Disclosure)**: no page may render unbounded content at once. All thresholds live in a single config file (`app/config/ui.php`): max **12 cards/page** desktop (**6** mobile), **0 tables inside repeating cards**, **10 initial table rows** (max 25), **1 global search bar** per screen, and **≤ 4 open sections** (use tabs, pagination, or dedicated detail pages).
+- **DO** use proper singular/plural wording (`1 row` vs `4 rows`, `1 micro-credential mapped` vs `4 micro-credentials mapped`).
 - **DON'T** re-introduce dark mode CSS blocks or theme toggle buttons.
 - **DON'T** use generic emojis (`⏱`, `🔒`, `⚖️`, `💡`, `👉`) or decorative SVGs (Rule D-53).
+- **DON'T** show regulatory guide references (`Appendix A–H`, `Lampiran A–H`, `B1.`–`H9` prefixes, `Cl.`/`Klausa`, `Garis Panduan`) anywhere in UI labels, checklists, headings, buttons, validation/error messages, PDFs/printouts, receipts, emails, or notifications (Rule D-64). Use plain, self-explanatory wording.
 - **DON'T** wrap badges, tags, or buttons in square brackets `[...]` (use `FTMK`, `MQF 6`, `UMC`, `SAMC`, `Sign In`).
 - **DON'T** add redundant context blocks ("Where is this / What happens next / Who is responsible").
 - **DON'T** modify element `id`, `name`, `data-*`, or `aria-label` hooks frozen in `docs/redesign-v3/SELECTOR_FREEZE.md`.

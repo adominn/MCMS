@@ -68,7 +68,7 @@ final class QvAlerts
             'updated_at' => now(),
         ]); // the claims stop here, not only by date
         $this->audit->record('qv.'.$to, ['type' => 'QvRecord', 'id' => $q->id], before: ['status' => $q->status], after: ['status' => $to], reason: $why, actorId: $by); // EV-42
-        Tasks::open('deputy_dean', 'qv_lapse', $q->id, 'Quality Verification ended, manage the affected participants: '.$title, '/quality/'.$q->micro_credential_id, $ptj, area: 'credentials');
+        Tasks::open('deputy_dean', 'qv_lapse', $q->id, 'Quality Verification ended, manage the affected participants: '.$title, '/quality/'.$q->micro_credential_id, $ptj, area: 'qv_monitoring');
         foreach ($this->recipients($q) as $u) {
             $this->notifier->send($u, 'qv.lapsed', ['name' => $u->name, 'title' => $title, 'why' => $why], dedupe: "qv-lapse-{$q->id}-$to");
         }
