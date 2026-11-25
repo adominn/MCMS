@@ -319,16 +319,6 @@
 
   {{-- CQI Effectiveness Evaluation --}}
   <div class="sec-title">8. {{ __('CQI Effectiveness Evaluation') }}</div>
-  @php
-    $evaluatedActions = [];
-    foreach ($issues as $iss) {
-      foreach ($actions[$iss->id] ?? [] as $act) {
-        if ($act->effectiveness || $act->status === 'closed' || $act->status === 'carried') {
-          $evaluatedActions[] = $act;
-        }
-      }
-    }
-  @endphp
   <table class="data-table">
     <thead>
       <tr>

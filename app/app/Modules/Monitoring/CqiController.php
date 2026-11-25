@@ -125,6 +125,9 @@ final class CqiController
         $enrolledCount = DB::table('enrolments')->where('offering_id', $r->offering_id)->count();
         $completedCount = DB::table('enrolments')->where('offering_id', $r->offering_id)->where('status', 'completed')->count();
 
+        $issues = DB::table('cqi_issues')->where('cqi_record_id', $id)->orderBy('id')->get();
+        $evaluatedActions = $actions->filter(fn ($a) => $a->effectiveness || in_array($a->status, ['closed', 'carried'], true))->values();
+
         return view('monitoring.cqi-print', [
             'r' => $r,
             'offering' => $offering,
@@ -132,8 +135,9 @@ final class CqiController
             'completedCount' => $completedCount,
             'ind' => $this->indicators->for($r->offering_id),
             'domains' => DB::table('quality_domain_checks')->where('cqi_record_id', $id)->get()->keyBy('domain'),
-            'issues' => DB::table('cqi_issues')->where('cqi_record_id', $id)->orderBy('id')->get(),
+            'issues' => $issues,
             'actions' => $actions->groupBy('cqi_issue_id'),
+            'evaluatedActions' => $evaluatedActions,
         ]);
     }
 
