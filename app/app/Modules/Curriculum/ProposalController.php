@@ -87,7 +87,7 @@ final class ProposalController
             ]);
             $vid = DB::table('mc_versions')->insertGetId([
                 'micro_credential_id' => $mc, 'proposal_type' => 'new', 'name_en' => $d['name_en'], 'planned_slt' => $d['slt'] ?? null,
-                'credit_sought' => ($d['credit'] ?? 'no') === 'yes', 'parent_course_id' => $d['origin'] === 'unbundled' ? $d['parent_course_id'] : null,
+                'credit_sought' => $r['category'] === 'mce' ? false : (($d['credit'] ?? 'no') === 'yes'), 'parent_course_id' => $d['origin'] === 'unbundled' ? $d['parent_course_id'] : null,
                 'updated_by' => $request->user()->id, 'created_at' => now(), 'updated_at' => now(),
             ]);
             $this->audit->record('proposal.created', ['type' => 'McVersion', 'id' => $vid], after: ['category' => $r['category'], 'category_status' => 'proposed', 'name_en' => $d['name_en']]);
@@ -98,6 +98,75 @@ final class ProposalController
         return redirect()->route('proposals.show', $vid)->with('status', 'Proposal created. The category is proposed until your deputy dean verifies it.');
     }
 
+    public function updateCategory(Request $request, int $id)
+    {
+        $v = $this->own($request, $id);
+        abort_unless(in_array($v->status, ['draft', 'returned'], true), 403, 'Category cannot be changed after submission.');
+        abort_if($v->category_status === 'confirmed', 403, 'Category has already been confirmed by the Deputy Dean.');
+
+        $d = $request->validate([
+            'origin' => 'required|in:unbundled,own',
+            'slt' => 'nullable|integer|min:0|max:5000',
+            'credit' => 'nullable|in:yes,no',
+            'parent_course_id' => 'nullable|required_if:origin,unbundled|exists:parent_courses,id',
+        ], [
+            'parent_course_id.required_if' => 'Choose a parent UTeM credit course for a UMC.',
+        ]);
+
+        $minSlt = (int) $this->settings->get('slt.min_hours_samc');
+        $creditSought = ($d['credit'] ?? 'no') === 'yes';
+        $r = CategoryRules::determine($d['origin'], (int) ($d['slt'] ?? 0), $creditSought, $minSlt);
+        $oldCategory = $v->category;
+        $newCategory = $r['category'];
+
+        DB::transaction(function () use ($v, $id, $d, $r, $creditSought, $oldCategory, $newCategory, $request) {
+            DB::table('micro_credentials')->where('id', $v->micro_credential_id)->update([
+                'category' => $newCategory,
+                'category_status' => 'proposed',
+                'origin' => $d['origin'],
+                'qv_planned' => $r['qv_planned'],
+                'updated_at' => now(),
+            ]);
+
+            $verUpdate = [
+                'planned_slt' => $d['slt'] !== null && $d['slt'] !== '' ? (int) $d['slt'] : null,
+                'credit_sought' => $newCategory === 'mce' ? false : $creditSought,
+                'parent_course_id' => $newCategory === 'umc' ? (int) $d['parent_course_id'] : null,
+                'updated_by' => $request->user()->id,
+                'updated_at' => now(),
+            ];
+
+            if ($newCategory !== 'umc') {
+                $verUpdate['credit_model'] = null;
+                DB::table('learning_outcomes')->where('mc_version_id', $id)->update(['parent_clo_id' => null]);
+            }
+            if ($newCategory === 'mce') {
+                $verUpdate['proposed_credit'] = null;
+                $verUpdate['proposed_mqf_level'] = null;
+                $verUpdate['qv_status'] = 'na';
+            } elseif ($newCategory === 'samc') {
+                $verUpdate['qv_status'] = $r['qv_planned'] ? 'will_apply' : 'not_applied';
+            } elseif ($newCategory === 'umc') {
+                $verUpdate['qv_status'] = 'na';
+            }
+
+            DB::table('mc_versions')->where('id', $id)->update($verUpdate);
+
+            $this->audit->record(
+                'proposal.category_changed',
+                ['type' => 'McVersion', 'id' => $id],
+                before: ['category' => $oldCategory, 'origin' => $v->origin],
+                after: ['category' => $newCategory, 'origin' => $d['origin'], 'qv_planned' => $r['qv_planned']]
+            );
+        });
+
+        $msg = $oldCategory === $newCategory
+            ? __('Category details updated (:cat — Proposed).', ['cat' => strtoupper($newCategory)])
+            : __('Category changed from :old to :new (Proposed). Incompatible fields were cleaned up automatically.', ['old' => strtoupper($oldCategory), 'new' => strtoupper($newCategory)]);
+
+        return redirect()->route('proposals.show', ['id' => $id, 'tab' => 'basics'])->with('status', $msg);
+    }
+
     public function show(Request $request, int $id)
     {
         $v = $this->own($request, $id);
@@ -105,22 +174,70 @@ final class ProposalController
         $data = ['v' => $v, 'tab' => $tab, 'tabs' => config('proposals.tabs'), 'cfg' => config('proposals'), 'checks' => $this->checker->check($id), 'locked' => ! in_array($v->status, ['draft', 'returned'], true),
             'returned' => $v->status === 'returned' ? DB::table('approval_decisions')->where('mc_version_id', $id)->whereIn('decision', ['returned'])->orderByDesc('id')->first() : null];
         $data += match ($tab) {
-            'modules' => [
-                'modules' => DB::table('mc_modules')->where('mc_version_id', $id)->orderBy('seq')->get(),
-                'course' => $v->parent_course_id ? DB::table('parent_courses as c')->leftJoin('programmes as p', 'p.id', '=', 'c.programme_id')->where('c.id', $v->parent_course_id)->first(['c.*', 'p.name as programme', 'p.accreditation_status']) : null,
-                'activities' => DB::table('mc_module_activities as a')->join('mc_modules as m', 'm.id', '=', 'a.mc_module_id')->where('m.mc_version_id', $id)->select('a.*')->orderBy('a.id')->get()->groupBy('mc_module_id'),
-                'los' => DB::table('learning_outcomes')->where('mc_version_id', $id)->orderBy('sort_order')->get(),
+            'basics' => [
+                'minSamcSlt' => (int) $this->settings->get('slt.min_hours_samc'),
+                'parentCourses' => DB::table('parent_courses as c')->leftJoin('programmes as p', 'p.id', '=', 'c.programme_id')->orderBy('c.code')->get(['c.id', 'c.code', 'c.name', 'c.credit', 'c.slt_hours', 'p.name as programme', 'p.accreditation_status']),
+                'canChangeCategory' => in_array($v->status, ['draft', 'returned'], true) && $v->category_status !== 'confirmed',
             ],
             'outcomes' => [
                 'los' => DB::table('learning_outcomes')->where('mc_version_id', $id)->orderBy('sort_order')->get(),
                 'course' => $v->parent_course_id ? DB::table('parent_courses')->find($v->parent_course_id) : null,
             ],
+            'modules' => [
+                'modules' => DB::table('mc_modules')->where('mc_version_id', $id)->orderBy('seq')->get(),
+                'course' => $v->parent_course_id ? DB::table('parent_courses as c')->leftJoin('programmes as p', 'p.id', '=', 'c.programme_id')->where('c.id', $v->parent_course_id)->first(['c.*', 'p.name as programme', 'p.accreditation_status']) : null,
+                'activities' => DB::table('mc_module_activities as a')->join('mc_modules as m', 'm.id', '=', 'a.mc_module_id')->where('m.mc_version_id', $id)->select('a.*')->orderBy('a.id')->get()->groupBy('mc_module_id'),
+                'los' => DB::table('learning_outcomes')->where('mc_version_id', $id)->orderBy('sort_order')->get(),
+                'minSamcSlt' => (int) $this->settings->get('slt.min_hours_samc'),
+            ],
             'assessment' => ['los' => DB::table('learning_outcomes')->where('mc_version_id', $id)->orderBy('sort_order')->get(),
                 'comps' => DB::table('assessment_components')->where('mc_version_id', $id)->orderBy('id')->get(),
                 'links' => DB::table('assessment_component_outcomes')->get()->groupBy('assessment_component_id'),
                 'modules' => DB::table('mc_modules')->where('mc_version_id', $id)->orderBy('seq')->get()],
-            'comments' => ['comments' => DB::table('review_comments as c')->join('users as u', 'u.id', '=', 'c.author_id')->where('c.mc_version_id', $id)->orderBy('c.id')->get(['c.*', 'u.name as author'])],
-            'readiness' => ['ready' => DB::table('proposal_readiness')->where('mc_version_id', $id)->get()->keyBy('item')],
+            'credential' => [
+                'modulesSlt' => (int) DB::table('mc_modules')->where('mc_version_id', $id)->sum('slt_hours'),
+                'modulesCount' => DB::table('mc_modules')->where('mc_version_id', $id)->count(),
+            ],
+            'comments' => ['comments' => DB::table('review_comments as c')
+                ->join('users as u', 'u.id', '=', 'c.author_id')
+                ->leftJoin('review_assignments as ra', 'ra.id', '=', 'c.review_assignment_id')
+                ->where('c.mc_version_id', $id)
+                ->orderByDesc('c.id')
+                ->get(['c.*', 'u.name as author', 'ra.status as assignment_status', 'ra.kind as assignment_kind'])],
+            'readiness' => (function () use ($id, $v) {
+                $comps = DB::table('assessment_components')->where('mc_version_id', $id)->get();
+                $compWeight = (float) $comps->sum('weight_percent');
+                $credTypes = json_decode((string) ($v->credential_types ?? '[]'), true) ?: [];
+                $ptjLecturers = DB::table('users as u')
+                    ->join('role_assignments as ra', 'ra.user_id', '=', 'u.id')
+                    ->where('ra.role', 'lecturer')
+                    ->where(fn ($q) => $q->whereNull('ra.ptj_id')->orWhere('ra.ptj_id', $v->ptj_id))
+                    ->distinct()
+                    ->orderBy('u.name')
+                    ->pluck('u.name')
+                    ->all();
+
+                $autoHints = [
+                    'assessment' => [
+                        'ready' => $comps->isNotEmpty() && abs($compWeight - 100.0) <= 0.001 && ! empty($v->feedback_method),
+                        'note' => $comps->count().' assessment component(s) totaling '.mcms_num($compWeight, 1).'% with rubric feedback defined.',
+                    ],
+                    'participant_info' => [
+                        'ready' => ! empty($v->name_en) && ! empty($v->target_group) && ! empty($v->delivery_mode) && ! empty($v->offering_period),
+                        'note' => 'Title, target group, delivery mode, and offering period specified in proposal.',
+                    ],
+                    'records' => [
+                        'ready' => ! empty($credTypes) && ! empty($v->verification_method),
+                        'note' => 'MCMS automated credential issuance and public verification portal configured.',
+                    ],
+                ];
+
+                return [
+                    'ready' => DB::table('proposal_readiness')->where('mc_version_id', $id)->get()->keyBy('item'),
+                    'autoHints' => $autoHints,
+                    'ptjLecturers' => $ptjLecturers,
+                ];
+            })(),
             default => [],
         };
 
@@ -232,10 +349,22 @@ final class ProposalController
             throw \Illuminate\Validation\ValidationException::withMessages($forbiddenErrors);
         }
 
+        if ($tab === 'justification' && $request->hasFile('evidence_files')) {
+            $request->validate([
+                'evidence_files' => 'array',
+                'evidence_files.*' => 'array|max:3',
+                'evidence_files.*.*' => 'file|mimes:pdf,png,jpg,jpeg,doc,docx|max:10240',
+            ], [
+                'evidence_files.*.max' => 'You can upload up to 3 files per evidence type.',
+                'evidence_files.*.*.mimes' => 'Evidence files must be PDF, PNG, JPG, DOC, or DOCX.',
+                'evidence_files.*.*.max' => 'Each evidence file must not exceed 10 MB.',
+            ]);
+        }
+
         DB::transaction(function () use ($request, $id, $tab) {
             match ($tab) {
-                'basics' => $this->update($id, $request, ['name_en', 'name_ms', 'discipline', 'target_group', 'delivery_mode', 'delivery_language', 'offering_period']),
-                'justification' => $this->update($id, $request, ['need', 'category_justification', 'existing_equivalents', 'recognition_potential', 'added_value', 'follow_up_action'], ['evidence_types' => array_values(array_intersect((array) $request->input('evidence_types'), array_keys(config('proposals.evidence_types'))))]),
+                'basics' => $this->update($id, $request, ['name_en', 'name_ms', 'discipline', 'target_group', 'delivery_mode', 'delivery_mode_other', 'delivery_language', 'offering_period']),
+                'justification' => $this->justification($id, $request),
                 'modules' => $this->modules($id, $request),
                 'outcomes' => $this->outcomes($id, $request),
                 'assessment' => $this->assessment($id, $request),
@@ -275,6 +404,7 @@ final class ProposalController
         $name = DB::transaction(function () use ($id, $v, $ip, $request, $c) {
             DB::table('mc_versions')->where('id', $id)->update(['status' => 'submitted', 'submitted_at' => now(), 'submit_response' => $ip['response'] ?? null, 'updated_by' => $request->user()->id, 'updated_at' => now()]); // content locks
             $this->audit->record('proposal.submitted', ['type' => 'McVersion', 'id' => $id], before: ['status' => $v->status], after: ['status' => 'submitted', 'warnings' => count($c['warnings'])], reason: $ip['response'] ?? null);
+            \App\Modules\Core\Tasks::close('amend', $id, $request->user()->id);
             \App\Modules\Core\Tasks::open('deputy_dean', 'assign_reviewers', $id, 'Assign reviewers: '.$v->name_en, "/approvals/$id", $v->ptj_id);
             foreach (DB::table('role_assignments as r')->join('users as u', 'u.id', '=', 'r.user_id')->where('r.role', 'deputy_dean')->where('u.status', 'active')
                 ->where(fn ($q) => $q->where('r.ptj_id', $v->ptj_id)->orWhere('r.scope_type', 'university'))->get(['u.id'])->unique('id') as $dd) {
@@ -342,7 +472,139 @@ final class ProposalController
         return redirect()->route('proposals')->with('status', __("Draft proposal \":title\" deleted.", ['title' => $title]));
     }
 
+    public function evidence(Request $request, int $id, string $filename)
+    {
+        $v = DB::table('mc_versions as v')
+            ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+            ->where('v.id', $id)
+            ->first(['v.id', 'v.evidence_files', 'm.owner_id', 'm.ptj_id']) ?? abort(404);
+
+        $u = $request->user();
+        $isOwner = $v->owner_id === $u->id;
+        $isAssignedReviewer = DB::table('review_assignments')
+            ->where('mc_version_id', $id)
+            ->where('reviewer_id', $u->id)
+            ->exists();
+        $isUnivAuthority = $u->hasAnyRole('codl_admin', 'academic_authority', 'qa_officer');
+        $ddPtjs = $u->hasAnyRole('deputy_dean', 'ptj_authority') ? $u->scopedPtjIds('deputy_dean') : [];
+        $isScopedDd = $u->hasAnyRole('deputy_dean', 'ptj_authority') && ($ddPtjs === null || in_array($v->ptj_id, $ddPtjs, true));
+
+        abort_unless($isOwner || $isAssignedReviewer || $isUnivAuthority || $isScopedDd, 403);
+
+        $safe = basename($filename);
+        $evData = ProposalChecker::parseEvidenceFiles($v->evidence_files ?? null);
+        $allFiles = array_merge($evData['legacy'], ...array_values($evData['by_type']));
+        abort_unless(in_array($safe, $allFiles, true), 404);
+
+        $path = storage_path('app/proposals/'.$id.'/evidence/'.$safe);
+        abort_unless(is_file($path), 404);
+
+        return response()->file($path);
+    }
+
     // ---- section writers
+
+    private function justification(int $id, Request $request): void
+    {
+        $validTypes = array_keys(config('proposals.evidence_types', []));
+        $row = [
+            'need' => ($s = trim(mb_substr((string) $request->input('need'), 0, 3000))) === '' ? null : $s,
+            'category_justification' => ($s = trim(mb_substr((string) $request->input('category_justification'), 0, 3000))) === '' ? null : $s,
+            'added_value' => ($s = trim(mb_substr((string) $request->input('added_value'), 0, 3000))) === '' ? null : $s,
+            'evidence_types' => json_encode(array_values(array_intersect((array) $request->input('evidence_types'), $validTypes))),
+        ];
+
+        // Preserve legacy columns if present in older records; only update if explicitly submitted.
+        foreach (['existing_equivalents', 'recognition_potential', 'follow_up_action'] as $legacyField) {
+            if ($request->has($legacyField)) {
+                $row[$legacyField] = ($s = trim(mb_substr((string) $request->input($legacyField), 0, 3000))) === '' ? null : $s;
+            }
+        }
+
+        $evData = ProposalChecker::parseEvidenceFiles(DB::table('mc_versions')->where('id', $id)->value('evidence_files'));
+        $byType = $evData['by_type'];
+        $legacy = $evData['legacy'];
+        $otherLabel = $evData['other_label'];
+
+        if ($request->has('evidence_other')) {
+            $otherLabel = ($s = trim(mb_substr((string) $request->input('evidence_other'), 0, 250))) === '' ? null : $s;
+        }
+
+        $targetDir = storage_path('app/proposals/'.$id.'/evidence');
+
+        if ($rm = trim((string) $request->input('remove_evidence_file', ''))) {
+            $rmType = null;
+            $rmFile = $rm;
+            if (str_contains($rm, '|')) {
+                [$rmType, $rmFile] = explode('|', $rm, 2);
+            }
+            $rmSafe = basename($rmFile);
+            if ($rmType === '_legacy') {
+                $legacy = array_values(array_filter($legacy, fn ($f) => $f !== $rmSafe));
+            } elseif ($rmType && isset($byType[$rmType])) {
+                $byType[$rmType] = array_values(array_filter($byType[$rmType], fn ($f) => $f !== $rmSafe));
+                if ($byType[$rmType] === []) {
+                    unset($byType[$rmType]);
+                }
+            }
+            $remainingAll = array_merge($legacy, ...array_values($byType));
+            if (! in_array($rmSafe, $remainingAll, true)) {
+                $rmPath = $targetDir.DIRECTORY_SEPARATOR.$rmSafe;
+                if (is_file($rmPath)) {
+                    @unlink($rmPath);
+                }
+            }
+        }
+
+        $uploadedByType = $request->file('evidence_files', []);
+        if (is_array($uploadedByType)) {
+            $allKnown = array_merge($legacy, ...array_values($byType));
+            foreach ($validTypes as $typeKey) {
+                $filesForType = $uploadedByType[$typeKey] ?? [];
+                if (! is_array($filesForType) || $filesForType === []) {
+                    continue;
+                }
+                if (! is_dir($targetDir)) {
+                    mkdir($targetDir, 0755, true);
+                }
+                foreach ($filesForType as $file) {
+                    if (! $file || ! $file->isValid()) {
+                        continue;
+                    }
+                    $orig = basename((string) $file->getClientOriginalName());
+                    $safe = preg_replace('/[^A-Za-z0-9._ -]/', '_', $orig) ?: ($typeKey.'_'.time().'.'.$file->getClientOriginalExtension());
+                    $candidate = $safe;
+                    $n = 1;
+                    while (file_exists($targetDir.DIRECTORY_SEPARATOR.$candidate) || in_array($candidate, $allKnown, true)) {
+                        $ext = pathinfo($safe, PATHINFO_EXTENSION);
+                        $base = pathinfo($safe, PATHINFO_FILENAME);
+                        $candidate = $base.'_'.$n.($ext ? '.'.$ext : '');
+                        $n++;
+                    }
+                    $file->move($targetDir, $candidate);
+                    $byType[$typeKey][] = $candidate;
+                    $allKnown[] = $candidate;
+                }
+            }
+        }
+
+        $payload = [];
+        foreach ($validTypes as $typeKey) {
+            if (! empty($byType[$typeKey])) {
+                $payload[$typeKey] = array_values($byType[$typeKey]);
+            }
+        }
+        if ($otherLabel !== null) {
+            $payload['other_label'] = $otherLabel;
+        }
+        if ($legacy !== []) {
+            $payload['legacy'] = array_values($legacy);
+        }
+
+        $row['evidence_files'] = $payload !== [] ? json_encode($payload) : null;
+
+        DB::table('mc_versions')->where('id', $id)->update($row + ['updated_by' => $request->user()->id, 'updated_at' => now()]);
+    }
 
     private function own(Request $request, int $id): object
     {
@@ -428,6 +690,10 @@ final class ProposalController
                 DB::table('mc_modules')->where('id', $mid)->update(['seq' => $i + 1]);
             }
         }
+        $sumSlt = (int) DB::table('mc_modules')->where('mc_version_id', $id)->sum('slt_hours');
+        if ($sumSlt > 0) {
+            DB::table('mc_versions')->where('id', $id)->update(['planned_slt' => $sumSlt]);
+        }
         $this->touch($id, $request);
     }
 
@@ -457,6 +723,10 @@ final class ProposalController
         if ($rm = $request->input('remove')) {
             DB::table('assessment_component_outcomes')->where('learning_outcome_id', $rm)->delete();
             DB::table('learning_outcomes')->where('id', $rm)->where('mc_version_id', $id)->delete();
+        }
+        $sumSlt = (int) DB::table('mc_modules')->where('mc_version_id', $id)->sum('slt_hours');
+        if ($sumSlt > 0) {
+            DB::table('mc_versions')->where('id', $id)->update(['planned_slt' => $sumSlt]);
         }
         $this->touch($id, $request);
     }
@@ -541,6 +811,10 @@ final class ProposalController
         foreach (array_keys(config('proposals.readiness')) as $item) {
             $s = $request->input("ready.$item.status");
             DB::table('proposal_readiness')->upsert([['mc_version_id' => $id, 'item' => $item, 'status' => in_array($s, ['yes', 'not_yet', 'na'], true) ? $s : 'not_yet', 'note' => mb_substr(trim((string) $request->input("ready.$item.note")), 0, 500) ?: null]], ['mc_version_id', 'item'], ['status', 'note']);
+        }
+        $sumSlt = (int) DB::table('mc_modules')->where('mc_version_id', $id)->sum('slt_hours');
+        if ($sumSlt > 0) {
+            DB::table('mc_versions')->where('id', $id)->update(['planned_slt' => $sumSlt]);
         }
         $this->touch($id, $request);
     }

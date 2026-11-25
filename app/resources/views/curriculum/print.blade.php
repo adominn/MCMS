@@ -57,7 +57,7 @@
       <dd>{{ $v->target_group ?: 'Students, industry practitioners, and lifelong learners' }}</dd>
 
       <dt style="font-size:9pt">{{ __('Mode and language') }}</dt>
-      <dd>{{ ucfirst($v->delivery_mode ?? 'Online, facilitated') }}, {{ ucfirst($v->delivery_language ?? 'English') }}</dd>
+      <dd>{{ __(config('proposals.delivery_modes.' . ($v->delivery_mode ?? ''), ucfirst($v->delivery_mode ?? 'Online, facilitated'))) }}@if(($v->delivery_mode ?? '') === 'other' && !empty($v->delivery_mode_other)) ({{ $v->delivery_mode_other }})@endif, {{ ucfirst($v->delivery_language ?? 'English') }}</dd>
 
       <dt style="font-size:9pt">{{ __('Offering period') }}</dt>
       <dd>{{ $v->offering_period ?: ($v->category === 'mce' ? '2 days' : '14 weeks') }}</dd>
@@ -77,19 +77,33 @@
       <dd>
         @php
           $evTypes = is_string($v->evidence_types) ? json_decode($v->evidence_types, true) : ($v->evidence_types ?? []);
+          $evData = \App\Modules\Curriculum\ProposalChecker::parseEvidenceFiles($v->evidence_files ?? null);
         @endphp
         @if(!empty($evTypes))
-          {{ implode(', ', array_map(fn($k) => config('proposals.evidence_types')[$k] ?? $k, (array)$evTypes)) }}
+          {{ implode(', ', array_map(fn($k) => (config('proposals.evidence_types')[$k] ?? $k) . ($k === 'other' && !empty($evData['other_label']) ? ' (' . $evData['other_label'] . ')' : ''), (array)$evTypes)) }}
         @else
           Industry advisory panel minutes, market survey, or department review.
+        @endif
+        @if(!empty($evData['by_type']) || !empty($evData['legacy']))
+          <div style="margin-top:4px;font-size:9pt">
+            <strong>{{ __('Attached evidence:') }}</strong>
+            @foreach($evData['by_type'] as $ek => $efList)
+              <div>&bull; {{ __(config("proposals.evidence_types.$ek", $ek)) }}: {{ implode(', ', $efList) }}</div>
+            @endforeach
+            @if(!empty($evData['legacy']))
+              <div>&bull; {{ implode(', ', $evData['legacy']) }}</div>
+            @endif
+          </div>
         @endif
       </dd>
 
       <dt style="font-size:9pt">{{ __('What is new / Added value') }}</dt>
       <dd>{{ $v->added_value ?: 'Flexible learning pathway and direct competency attainment.' }}</dd>
 
-      <dt style="font-size:9pt">{{ __('Relationship with Existing Courses') }}</dt>
-      <dd>{{ $v->existing_equivalents ?: ($isMs ? 'Tiada kursus bertindih secara langsung' : 'Standalone modular delivery without unnecessary overlap.') }}</dd>
+      @if(!empty($v->existing_equivalents))
+        <dt style="font-size:9pt">{{ __('Relationship with Existing Courses') }}</dt>
+        <dd>{{ $v->existing_equivalents }}</dd>
+      @endif
     </dl>
   </div>
 </div>
@@ -158,9 +172,9 @@
   </div>
 </div>
 
-{{-- 3. Learning outcomes --}}
+{{-- 5. Learning outcomes --}}
 <div class="panel" style="margin-bottom:16px">
-  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? 'Hasil Pembelajaran' : '3. Learning Outcomes' }}</h2></div>
+  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '5. Hasil Pembelajaran' : '5. Learning Outcomes' }}</h2></div>
   <div class="bd" style="padding:12px 16px">
     @if($los->isNotEmpty())
       <ol style="margin:0;padding-left:20px;font-size:10pt;line-height:1.6">
@@ -177,9 +191,9 @@
   </div>
 </div>
 
-{{-- 4. Modules and learning time (SLT) --}}
+{{-- 6. Modules and learning time (SLT) --}}
 <div class="panel" style="margin-bottom:16px">
-  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '5. Reka Bentuk Pembelajaran & Modul' : '5. Modules and Student Learning Time (SLT)' }}</h2></div>
+  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '6. Reka Bentuk Pembelajaran & Modul' : '6. Modules and Student Learning Time (SLT)' }}</h2></div>
   <div class="table-wrap">
     <table>
       <thead>
@@ -238,9 +252,9 @@
   </div>
 </div>
 
-{{-- 5. Assessment weightings --}}
+{{-- 7. Assessment weightings --}}
 <div class="panel" style="margin-bottom:16px">
-  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '6. Pentaksiran dan Standard Penyempurnaan' : '6. Assessment Weightings and Completion Standards' }}</h2></div>
+  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '7. Pentaksiran dan Standard Penyempurnaan' : '7. Assessment Weightings and Completion Standards' }}</h2></div>
   <div class="table-wrap">
     <table>
       <thead>
@@ -272,15 +286,15 @@
   </div>
 </div>
 
-{{-- 6. Alignment of outcomes to assessment --}}
+{{-- 8. Alignment of outcomes to assessment --}}
 <div class="panel" style="margin-bottom:16px">
-  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? 'Penjajaran Hasil Pembelajaran' : '6. Alignment of Outcomes to Assessment' }}</h2></div>
+  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '8. Penjajaran Hasil Pembelajaran kepada Pentaksiran' : '8. Alignment of Outcomes to Assessment' }}</h2></div>
   @if($los->isNotEmpty() && $comps->isNotEmpty())
     <div class="table-wrap">
-      <table>
+      <table data-matrix="1">
         <thead>
           <tr>
-            <th>{{ $isMs ? 'Hasil Pembelajaran' : 'Outcome' }}</th>
+            <th style="width:36%">{{ $isMs ? 'Hasil Pembelajaran' : 'Outcome' }}</th>
             @foreach($comps as $c)
               <th class="num">{{ $c->name_en }}</th>
             @endforeach
@@ -289,7 +303,7 @@
         <tbody>
           @foreach($los as $idx => $lo)
             <tr>
-              <td><b>LO{{ $idx + 1 }}</b>: {{ \Illuminate\Support\Str::limit(($isMs && $lo->text_ms) ? $lo->text_ms : ($lo->text_en ?: $lo->text_ms), 60) }}</td>
+              <td><b>LO{{ $idx + 1 }}</b>: {{ ($isMs && $lo->text_ms) ? $lo->text_ms : ($lo->text_en ?: $lo->text_ms) }}</td>
               @foreach($comps as $c)
                 @php
                   $linked = isset($links[$c->id]) && $links[$c->id]->contains('learning_outcome_id', $lo->id);
@@ -312,9 +326,9 @@
   @endif
 </div>
 
-{{-- 7. Credential design --}}
+{{-- 9. Credential design --}}
 <div class="panel" style="margin-bottom:16px">
-  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '7. Kredensial dan Pengiktirafan' : '7. Credential Design and Recognition' }}</h2></div>
+  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '9. Kredensial dan Pengiktirafan' : '9. Credential Design and Recognition' }}</h2></div>
   <div class="bd" style="padding:12px 16px">
     <dl class="dl" style="font-size:10pt;row-gap:6px">
       <dt style="font-size:9pt">{{ __('Credential Awarded') }}</dt>
@@ -350,9 +364,9 @@
   </div>
 </div>
 
-{{-- 8. Delivery --}}
+{{-- 10. Delivery --}}
 <div class="panel" style="margin-bottom:16px">
-  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? 'Mod & Jadual Pelaksanaan' : '8. Delivery Mode & Schedule' }}</h2></div>
+  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '10. Mod & Jadual Pelaksanaan' : '10. Delivery Mode & Schedule' }}</h2></div>
   <div class="bd" style="padding:12px 16px">
     <dl class="dl" style="font-size:10pt;row-gap:6px">
       <dt style="font-size:9pt">{{ __('Schedule') }}</dt>
@@ -364,9 +378,9 @@
   </div>
 </div>
 
-{{-- A8. Delivery Readiness Checklist --}}
+{{-- 11. Delivery Readiness Checklist --}}
 <div class="panel" style="margin-bottom:16px">
-  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '8. Kesediaan Pelaksanaan' : '8. Delivery Readiness Checklist' }}</h2></div>
+  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '11. Kesediaan Pelaksanaan' : '11. Delivery Readiness Checklist' }}</h2></div>
   <div class="table-wrap">
     <table>
       <thead>
@@ -416,17 +430,17 @@
   </div>
 </div>
 
-{{-- 9. Co-developers --}}
+{{-- 12. Co-developers --}}
 <div class="panel" style="margin-bottom:16px">
-  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? 'Rakan Kerjasama / Pembangun Bersama' : '9. Co-developers' }}</h2></div>
+  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '12. Rakan Kerjasama / Pembangun Bersama' : '12. Co-developers' }}</h2></div>
   <div class="bd" style="padding:12px 16px;font-size:10pt">
     {{ $isMs ? 'Tiada diisytiharkan. Micro-credential dibangunkan sepenuhnya oleh tenaga akademik UTeM.' : 'None declared. Micro-credential developed entirely in-house by UTeM faculty.' }}
   </div>
 </div>
 
-{{-- A9. Review and Approval Sign-Offs --}}
+{{-- 13. Review and Approval Sign-Offs --}}
 <div class="panel" style="margin-bottom:16px">
-  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '9. Semakan dan Kelulusan' : '9. Review and Approval Sign-Offs' }}</h2></div>
+  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '13. Semakan dan Kelulusan' : '13. Review and Approval Sign-Offs' }}</h2></div>
   <div class="table-wrap">
     <table>
       <thead>
@@ -480,7 +494,7 @@
           <td>{{ $stage2?->meeting_ref ?: ($stage2?->comments ?: '—') }}</td>
         </tr>
         {{-- Stage 3 --}}
-        @php($codlV = $codlVerification ?? null)
+        @php $codlV = $codlVerification ?? null; @endphp
         <tr>
           <td><b>{{ $isMs ? '3. Semakan CODL' : '3. CODL Verification' }}</b></td>
           <td>
@@ -529,9 +543,9 @@
   </div>
 </div>
 
-{{-- 10. Declarations and Signatures --}}
+{{-- 14. Declarations and Signatures --}}
 <div class="panel" style="margin-bottom:16px">
-  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '10. Kawalan Dokumen dan Perubahan' : '10. Declarations and Document Control' }}</h2></div>
+  <div class="hd"><h2 style="font-size:11pt">{{ $isMs ? '14. Kawalan Dokumen dan Perubahan' : '14. Declarations and Document Control' }}</h2></div>
   <div class="bd" style="padding:12px 16px">
     <dl class="dl" style="font-size:10pt;row-gap:6px;margin-bottom:16px">
       <dt style="font-size:9pt">{{ __('Document No. / Version') }}</dt>
@@ -596,5 +610,57 @@
     </div>
   @endif
 </div>
+
+@php
+  $allPrintEv = \App\Modules\Curriculum\ProposalChecker::parseEvidenceFiles($v->evidence_files ?? null);
+  $evAttachments = [];
+  foreach ($allPrintEv['by_type'] as $ek => $flist) {
+    $eLabel = __(config("proposals.evidence_types.$ek", $ek));
+    if ($ek === 'other' && !empty($allPrintEv['other_label'])) {
+      $eLabel .= ' (' . $allPrintEv['other_label'] . ')';
+    }
+    foreach ($flist as $fn) {
+      $evAttachments[] = ['category' => $eLabel, 'file' => $fn];
+    }
+  }
+  foreach ($allPrintEv['legacy'] as $fn) {
+    $evAttachments[] = ['category' => __('General Evidence'), 'file' => $fn];
+  }
+@endphp
+
+@if(!empty($evAttachments))
+  @php $evTotal = count($evAttachments); @endphp
+  @foreach($evAttachments as $idx => $att)
+    @php
+      $ext = strtolower(pathinfo($att['file'], PATHINFO_EXTENSION));
+      $fileUrl = route('proposals.evidence', [$v->id, $att['file']]);
+      $isImg = in_array($ext, ['png', 'jpg', 'jpeg', 'webp'], true);
+      $isPdf = $ext === 'pdf';
+      $attTitle = ($isMs ? 'Lampiran Bukti' : 'Supporting Evidence') . ' ' . ($idx + 1) . ' / ' . $evTotal . ' · ' . $att['category'];
+    @endphp
+    <div class="ev-attachment-block" data-page-break="1" data-att-title="{{ $attTitle }}" data-att-file="{{ $att['file'] }}">
+      <div class="ev-att-bar">
+        <div>
+          <strong>{{ $attTitle }}</strong>
+          <span class="muted"> &middot; {{ $att['file'] }}</span>
+        </div>
+        <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="no-print" style="font-size:8.5pt;font-weight:600">{{ __('Open file') }}</a>
+      </div>
+      @if($isImg)
+        <div class="ev-att-body">
+          <img src="{{ $fileUrl }}" alt="{{ $att['file'] }}" class="pdf-page-img">
+        </div>
+      @elseif($isPdf)
+        <div class="pdf-inline-render" data-pdf-url="{{ $fileUrl }}">
+          <div class="small muted" style="padding:12px">{{ $isMs ? 'Memuatkan halaman PDF...' : 'Rendering PDF pages...' }}</div>
+        </div>
+      @else
+        <div class="ev-att-body small muted" style="padding:12px">
+          {{ __('Attached document:') }} <strong>{{ $att['file'] }}</strong> ({{ strtoupper($ext) }})
+        </div>
+      @endif
+    </div>
+  @endforeach
+@endif
 
 @endsection

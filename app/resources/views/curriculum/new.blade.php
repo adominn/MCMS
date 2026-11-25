@@ -50,7 +50,7 @@
             <div class="help" style="font-size:12px;color:var(--muted);margin-top:4px">{{ __('A SAMC needs at least 40 h. Under 40 h is an MCE.') }}</div>
           </div>
 
-          <div class="field">
+          <div class="field" id="new-credit-wrap">
             <label>{{ __('3. Do you want a credit value or MQF level?') }}</label>
             <div class="row" style="gap:20px;margin-top:6px">
               <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer">
@@ -64,6 +64,9 @@
             </div>
             <div class="help" style="font-size:12px;color:var(--muted);margin-top:4px">{{ __('Credit and MQF level require Quality Verification (QV) for SAMC.') }}</div>
           </div>
+          <div id="new-mce-credit-note" class="help" style="display:none;font-size:12px;color:var(--muted);margin-top:4px">
+            {{ __('MCE is non-credit short learning (under 40 h SLT) and cannot carry a credit value or MQF level.') }}
+          </div>
 
           <div style="margin-top:20px">
             <button type="submit" class="btn">{{ __('Show the category') }}</button>
@@ -71,6 +74,29 @@
         </div>
       </div>
     </form>
+    <script>
+    (function () {
+      var sltEl = document.getElementById('slt');
+      var creditWrap = document.getElementById('new-credit-wrap');
+      var mceNote = document.getElementById('new-mce-credit-note');
+      var origins = document.querySelectorAll('input[name="origin"]');
+      var creditNo = document.querySelector('input[name="credit"][value="no"]');
+      function syncNewCreditVisibility() {
+        var checked = document.querySelector('input[name="origin"]:checked');
+        var origin = checked ? checked.value : '';
+        var sltRaw = sltEl ? sltEl.value.trim() : '';
+        var sltNum = sltRaw === '' ? null : parseInt(sltRaw, 10);
+        var isMce = (origin === 'own' && sltNum !== null && !isNaN(sltNum) && sltNum < 40);
+        var isUmc = (origin === 'unbundled');
+        if (creditWrap) creditWrap.style.display = (isMce || isUmc) ? 'none' : '';
+        if (mceNote) mceNote.style.display = isMce ? 'block' : 'none';
+        if (isMce && creditNo) creditNo.checked = true;
+      }
+      origins.forEach(function (r) { r.addEventListener('change', syncNewCreditVisibility); });
+      if (sltEl) sltEl.addEventListener('input', syncNewCreditVisibility);
+      syncNewCreditVisibility();
+    })();
+    </script>
 
     @if($result)
       <form method="post" action="{{ route('proposals.create') }}">

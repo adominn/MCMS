@@ -119,12 +119,31 @@ final class TaskController
         });
 
         // 2. Pending ACR consent (verified Academic Credit Record awaiting participant deposit decision)
+        // Exclude ACRs where learner explicitly declined, or postponed within the last 14 days.
         $pendingConsent = DB::table('acrs as a')
             ->join('mc_versions as v', 'v.id', '=', 'a.mc_version_id')
             ->where('a.user_id', $user->id)
             ->whereIn('a.status', ['verified', 'consent_declined'])
-            ->select('a.id', 'a.reference', 'v.name_en', 'a.created_at', 'a.confirmed_at')
+            ->select('a.id', 'a.reference', 'a.status', 'v.name_en', 'a.created_at', 'a.confirmed_at')
             ->get()
+            ->filter(function ($a) {
+                if ($a->status !== 'consent_declined') {
+                    return true;
+                }
+                $latest = DB::table('consents')->where('acr_id', $a->id)->orderByDesc('id')->first(['decision', 'decided_at']);
+                if (! $latest) {
+                    return true;
+                }
+                if ($latest->decision === 'declined') {
+                    return false;
+                }
+                if ($latest->decision === 'postponed' && $latest->decided_at && \Carbon\Carbon::parse($latest->decided_at)->gt(now()->subDays(14))) {
+                    return false;
+                }
+
+                return true;
+            })
+            ->values()
             ->map(function ($a) {
                 return (object) [
                     'id' => 'acr-'.$a->id,
@@ -254,6 +273,12 @@ final class TaskController
             } elseif ($role === 'records_depositor') {
                 $out[] = 'records_custodian';
                 $out[] = 'abc_depositor';
+            } elseif ($role === 'abc_depositor') {
+                $out[] = 'records_depositor';
+            } elseif ($role === 'industry_expert') {
+                $out[] = 'reviewer';
+            } elseif ($role === 'reviewer') {
+                $out[] = 'industry_expert';
             }
         }
 

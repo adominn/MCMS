@@ -21,6 +21,24 @@ final class Enrolments
         return DB::table('enrolments')->where('offering_id', $offeringId)->whereIn('status', config('enrolment.holds_place'))->count();
     }
 
+    public function effectiveParticipantGroup(User $u): string
+    {
+        $group = trim((string) ($u->participant_group ?? ''));
+        if ($group !== '') {
+            return $group;
+        }
+
+        $instId = strtoupper(trim((string) ($u->institution_id ?? '')));
+        if (preg_match('/^[BD]\d{6,}$/', $instId)) {
+            return 'undergraduate';
+        }
+        if (preg_match('/^[MP]\d{6,}$/', $instId)) {
+            return 'postgraduate';
+        }
+
+        return '';
+    }
+
     public function isGroupEligible(User $u, object $o): bool
     {
         if (empty($o->eligible_groups)) {
@@ -32,7 +50,7 @@ final class Enrolments
             return true;
         }
 
-        $userGroup = strtolower(trim((string) ($u->participant_group ?? '')));
+        $userGroup = strtolower($this->effectiveParticipantGroup($u));
         if ($userGroup === '') {
             return false;
         }
@@ -65,7 +83,8 @@ final class Enrolments
             $r[] = 'The cohort is full.';
         }
         if (! $this->isGroupEligible($u, $o)) {
-            $r[] = 'Your learner group (' . ($u->participant_group ?: 'unspecified') . ') is not eligible for this cohort (' . $o->eligible_groups . ').';
+            $groupLabel = $this->effectiveParticipantGroup($u) ?: 'unspecified';
+            $r[] = 'Your learner group (' . $groupLabel . ') is not eligible for this cohort (' . $o->eligible_groups . ').';
         }
 
         return $r;
@@ -108,7 +127,7 @@ final class Enrolments
                 'criterion' => 'Target learner group eligibility',
                 'details' => empty($o->eligible_groups) || str_contains(strtolower((string) $o->eligible_groups), 'all')
                     ? 'Open Entry / All learner groups'
-                    : ($groupOk ? 'Eligible (' . ($u->participant_group ?: 'General') . ')' : 'Restricted to ' . $o->eligible_groups),
+                    : ($groupOk ? 'Eligible (' . ($this->effectiveParticipantGroup($u) ?: 'General') . ')' : 'Restricted to ' . $o->eligible_groups),
             ],
         ];
     }

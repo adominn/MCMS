@@ -123,19 +123,19 @@
                 @if($canEndorse || $canVerify || $canApprove)
                   <td>
                     @if($canEndorse && in_array($eq->status, ['proposed', 'to_confirm', 'needs_review'], true))
-                      <form method="post" action="{{ route('equivalences.endorse', $eq->id) }}" style="display:flex;gap:6px;flex-wrap:wrap">
+                      <form method="post" action="{{ route('equivalences.endorse', $eq->id) }}" style="display:flex;gap:6px;flex-wrap:wrap" data-inplace>
                         @csrf
                         <button type="submit" name="action" value="endorse" class="btn primary sm">{{ __('Endorse (Faculty)') }}</button>
                         <button type="submit" name="action" value="reject" class="btn ter sm" style="color:var(--color-error, #da1e28)">{{ __('Return') }}</button>
                       </form>
                     @elseif($canVerify && $eq->status === 'dd_endorsed')
-                      <form method="post" action="{{ route('equivalences.verify', $eq->id) }}" style="display:flex;gap:6px;flex-wrap:wrap">
+                      <form method="post" action="{{ route('equivalences.verify', $eq->id) }}" style="display:flex;gap:6px;flex-wrap:wrap" data-inplace>
                         @csrf
                         <button type="submit" name="action" value="verify" class="btn primary sm">{{ __('Verify (CODL)') }}</button>
                         <button type="submit" name="action" value="reject" class="btn ter sm" style="color:var(--color-error, #da1e28)">{{ __('Return') }}</button>
                       </form>
                     @elseif($canApprove && $eq->status === 'codl_verified')
-                      <form method="post" action="{{ route('equivalences.approve', $eq->id) }}" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                      <form method="post" action="{{ route('equivalences.approve', $eq->id) }}" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center" data-inplace>
                         @csrf
                         <input name="approval_ref" type="text" placeholder="SENATE/2026/..." style="width:130px;height:32px;font-size:12px" required>
                         <button type="submit" name="action" value="approve" class="btn primary sm">{{ __('Approve (Senate)') }}</button>
@@ -158,7 +158,7 @@
   <!-- Tab 2: Propose Equivalence (Lecturer, DD, CODL) -->
   @if($canPropose)
     <div data-pane="propose" style="display:none">
-      <form method="post" action="{{ route('equivalences.store') }}" class="panel">
+      <form method="post" action="{{ route('equivalences.store') }}" class="panel" data-inplace>
         @csrf
         <div class="hd"><h2 style="margin:0;font-size:15px">{{ __('Propose Course Equivalence') }}</h2></div>
         <div class="bd" style="padding:20px;display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:16px">

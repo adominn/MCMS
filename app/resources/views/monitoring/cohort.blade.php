@@ -131,7 +131,7 @@
           <span class="s muted">{{ count($ind['rows']) }} {{ __('benchmarks') }}</span>
         </span>
       </div>
-      <table id="indicators-detail-table">
+      <table data-plain id="indicators-detail-table">
         <thead>
           <tr>
             <th style="min-width:280px">{{ __('Quality Indicator') }}</th>
@@ -195,7 +195,7 @@
         <h2 style="margin:0">{{ __('Course Learning Outcome (CLO) Attainment') }}</h2>
         <div class="s muted" style="margin-top:2px">{{ __('Percentage of cohort participants achieving pass mark in mapped assessment components.') }}</div>
       </div>
-      <table id="outcomes-table">
+      <table data-plain id="outcomes-table">
         <thead>
           <tr>
             <th style="width:100px">{{ __('CLO Code') }}</th>
@@ -234,7 +234,7 @@
         <h2 style="margin:0">{{ __('Modular Completion Progress') }}</h2>
         <div class="s muted" style="margin-top:2px">{{ __('Progress across micro-credential modules.') }}</div>
       </div>
-      <table id="modules-table">
+      <table data-plain id="modules-table">
         <thead>
           <tr>
             <th>{{ __('Module Name') }}</th>
@@ -334,7 +334,7 @@
           </div>
 
           <h3 style="font-size:14px;font-weight:700;margin:16px 0 8px">{{ __('Improvement Actions (:count)', ['count' => $actions->count()]) }}</h3>
-          <table>
+          <table data-plain>
             <thead>
               <tr>
                 <th>{{ __('Action Description') }}</th>

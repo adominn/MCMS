@@ -49,9 +49,10 @@
             <input type="text" id="meeting_ref" name="meeting_ref" required placeholder="{{ __('e.g. Senate 8/2026') }}">
           </div>
 
-          <div class="field" style="margin-bottom:16px;max-width:240px">
+          <div class="field" style="margin-bottom:16px;max-width:260px">
             <label for="meeting_date">{{ __('Meeting date') }}</label>
-            <input type="date" id="meeting_date" name="meeting_date" min="{{ \Carbon\Carbon::parse($endorsedOn ?: ($v->submitted_at ?: ($v->created_at ?: today())))->toDateString() }}" max="{{ today()->toDateString() }}" required>
+            <input type="date" id="meeting_date" name="meeting_date" value="{{ old('meeting_date', today()->toDateString()) }}" min="{{ \Carbon\Carbon::parse($endorsedOn ?: ($v->submitted_at ?: ($v->created_at ?: today())))->toDateString() }}" max="{{ today()->toDateString() }}" required>
+            <div class="small muted" style="margin-top:4px">{{ __('Must be on or after endorsement (:min) and not in the future.', ['min' => $minDateStr]) }}</div>
           </div>
 
           <div class="field" style="margin-bottom:16px;max-width:320px">

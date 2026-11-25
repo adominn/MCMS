@@ -10,9 +10,11 @@ Route::middleware(['auth', 'role:lecturer,reviewer,industry_expert'])->prefix('r
     Route::post('/{assignment}/coi', [ReviewController::class, 'coi'])->whereNumber('assignment')->name('reviews.coi');
     Route::post('/{assignment}/submit', [ReviewController::class, 'submit'])->whereNumber('assignment')->name('reviews.submit');
     Route::post('/{assignment}/comment', [ReviewController::class, 'comment'])->whereNumber('assignment')->name('reviews.comment');
+    Route::post('/facilitator/{invitation}/respond', [ReviewController::class, 'respondFacilitator'])->whereNumber('invitation')->name('reviews.facilitator.respond');
 });
 
 Route::middleware(['auth', 'role:lecturer'])->post('/proposals/{id}/comments/{comment}/respond', [ReviewController::class, 'respond'])->whereNumber(['id', 'comment'])->name('comments.respond');
+Route::middleware(['auth', 'role:lecturer'])->post('/proposals/{id}/comments/respond-all', [ReviewController::class, 'respondAll'])->whereNumber('id')->name('comments.respond_all');
 
 Route::middleware(['auth', 'role:deputy_dean,ptj_authority,codl_admin,academic_authority,qa_officer'])->prefix('approvals')->group(function () {
     Route::get('/', [ApprovalController::class, 'index'])->name('approvals');
@@ -23,6 +25,7 @@ Route::middleware(['auth', 'role:deputy_dean,ptj_authority,codl_admin,academic_a
 Route::middleware(['auth', 'role:deputy_dean,ptj_authority'])->prefix('approvals')->group(function () {
     Route::post('/{id}/reviewers', [ApprovalController::class, 'assign'])->whereNumber('id')->name('approvals.assign');
     Route::post('/{id}/comments/{comment}/resolve', [ApprovalController::class, 'resolve'])->whereNumber(['id', 'comment'])->name('approvals.resolve');
+    Route::post('/{id}/comments/resolve-all', [ApprovalController::class, 'resolveAll'])->whereNumber('id')->name('approvals.resolve_all');
     Route::post('/{id}/endorse', [ApprovalController::class, 'endorse'])->whereNumber('id')->name('approvals.endorse');
     Route::post('/{id}/{how}', [ApprovalController::class, 'sendBack'])->whereNumber('id')->whereIn('how', ['return', 'reject'])->name('approvals.sendback');
 });

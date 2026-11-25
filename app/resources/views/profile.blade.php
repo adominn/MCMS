@@ -41,6 +41,10 @@
             <dd>{{ $u->email }}</dd>
             <dt>{{ $staff ? __('Staff number') : __('Learner ID') }}</dt>
             <dd>{{ $u->institution_id ?: ('ID-'.$u->id) }}</dd>
+            @if(!$staff)
+              <dt>{{ __('Learner group') }}</dt>
+              <dd>{{ $u->participant_group ? ucfirst($u->participant_group) : __('Not set') }}</dd>
+            @endif
             <dt>{{ __('Roles') }}</dt>
             <dd>{{ $roleLabel }}<span class="sr">{{ __('My roles') }}</span></dd>
             <dt>{{ __('Source') }}</dt>
@@ -75,6 +79,32 @@
               <input type="text" id="pref-phone" name="phone" class="input" value="{{ old('phone', $u->phone) }}" placeholder="012-345 6789">
               <div class="help small muted" style="margin-top:4px;font-size:12px;color:var(--muted)">{{ __('Used only for urgent notices about your records') }}</div>
             </div>
+            @if(!$staff)
+            @php
+              $groupOptions = [
+                'undergraduate' => __('Undergraduate'),
+                'postgraduate' => __('Postgraduate'),
+                'alumni' => __('Alumni'),
+                'working professional' => __('Working professional'),
+                'UTeM staff' => __('UTeM staff'),
+                'public' => __('General public'),
+              ];
+              $currentGroup = old('participant_group', $u->participant_group ?? '');
+            @endphp
+            <div class="field">
+              <label for="pref-group">{{ __('Learner group') }}</label>
+              <select id="pref-group" name="participant_group" class="input" style="width:100%">
+                <option value="">{{ __('Select learner group') }}</option>
+                @foreach($groupOptions as $val => $lbl)
+                  <option value="{{ $val }}" @selected(strtolower((string) $currentGroup) === strtolower($val))>{{ $lbl }}</option>
+                @endforeach
+                @if($currentGroup !== '' && !collect(array_keys($groupOptions))->contains(fn ($k) => strtolower($k) === strtolower((string) $currentGroup)))
+                  <option value="{{ $currentGroup }}" selected>{{ $currentGroup }}</option>
+                @endif
+              </select>
+              <div class="help small muted" style="margin-top:4px;font-size:12px;color:var(--muted)">{{ __('Used to check cohort eligibility when you register.') }}</div>
+            </div>
+            @endif
             <div class="field">
               <label for="pref-cname">{{ __('Name on certificates') }}</label>
               <input type="text" id="pref-cname" name="name_on_certificate" class="input" value="{{ old('name_on_certificate', $u->name_on_certificate ?: $u->name) }}">
@@ -191,7 +221,7 @@
 
       <div class="panel grow" style="flex:1">
         <div class="hd"><h2>{{ __('Active sessions') }}</h2></div>
-        <table id="sessions">
+        <table data-plain id="sessions">
           <thead>
             <tr>
               <th>{{ __('Device') }}</th>

@@ -72,5 +72,5 @@ return [
         'cqi' => 'CQI Curriculum Evolution',
         'industry' => 'Industry Corporate Training',
     ],
-    'tabs' => ['basics' => 'Basic information', 'justification' => 'Justification', 'modules' => 'Modules', 'outcomes' => 'Learning outcomes', 'assessment' => 'Assessment', 'credential' => 'Credential', 'readiness' => 'Readiness', 'comments' => 'Comments', 'submit' => 'Submit'],
+    'tabs' => ['basics' => 'Basic information', 'justification' => 'Justification', 'outcomes' => 'Learning outcomes', 'modules' => 'Modules', 'assessment' => 'Assessment', 'credential' => 'Credential', 'readiness' => 'Readiness', 'comments' => 'Comments', 'submit' => 'Submit'],
 ];

@@ -75,10 +75,10 @@
   <thead>
     <tr style="background:#f1f5f9">
       <th style="border:1px solid #8d8d8d;padding:4px 6px;width:15%">PLO</th>
-      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:30%">Credential / Komponen</th>
-      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:15%">Sumbangan</th>
-      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:20%">Evidens Pencapaian</th>
-      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:20%">Jurang</th>
+      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:30%">{{ __('Credential / Component') }}</th>
+      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:15%">{{ __('Contribution') }}</th>
+      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:20%">{{ __('Achievement Evidence') }}</th>
+      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:20%">{{ __('Gap') }}</th>
     </tr>
   </thead>
   <tbody>
@@ -86,12 +86,12 @@
       <tr>
         <td style="border:1px solid #8d8d8d;padding:4px 6px"><strong>{{ $pRow['plo'] ?? $ploKey }}</strong></td>
         <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ $pRow['components'] ?? '-' }}</td>
-        <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ $pRow['contribution'] ?? 'Sokongan' }}</td>
-        <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ $pRow['evidence'] ?? 'Pentaksiran MC' }}</td>
-        <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ $pRow['gaps'] ?? 'Tiada jurang' }}</td>
+        <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ $pRow['contribution'] ?? __('Supporting') }}</td>
+        <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ $pRow['evidence'] ?? __('MC Assessment') }}</td>
+        <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ $pRow['gaps'] ?? __('No gap') }}</td>
       </tr>
     @empty
-      <tr><td colspan="5" style="border:1px solid #8d8d8d;padding:6px;text-align:center;color:#475569">Tiada pemetaan PLO khusus direkodkan.</td></tr>
+      <tr><td colspan="5" style="border:1px solid #8d8d8d;padding:6px;text-align:center;color:#475569">{{ __('No specific PLO mapping recorded.') }}</td></tr>
     @endforelse
   </tbody>
 </table>
@@ -103,11 +103,11 @@
 <table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:9pt">
   <thead>
     <tr style="background:#f1f5f9">
-      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:20%">Domain BoK</th>
-      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:25%">Keperluan Program</th>
-      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:25%">Credential / Kursus Menyumbang</th>
-      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:15%">Liputan</th>
-      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:15%">Jurang / Tindakan</th>
+      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:20%">{{ __('BoK Domain') }}</th>
+      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:25%">{{ __('Programme Requirement') }}</th>
+      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:25%">{{ __('Contributing Credential / Course') }}</th>
+      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:15%">{{ __('Coverage') }}</th>
+      <th style="border:1px solid #8d8d8d;padding:4px 6px;width:15%">{{ __('Gap / Action') }}</th>
     </tr>
   </thead>
   <tbody>
@@ -119,13 +119,13 @@
         <td style="border:1px solid #8d8d8d;padding:4px 6px">
           @php($cov = $bRow['coverage'] ?? 'none')
           <span style="font-weight:600;color:{{ $cov === 'full' ? '#0e6027' : ($cov === 'partial' ? '#8f4700' : '#da1e28') }}">
-            {{ ['full' => 'Lengkap', 'partial' => 'Sebahagian', 'none' => 'Tiada'][$cov] ?? ucfirst($cov) }}
+            {{ ['full' => __('Full'), 'partial' => __('Partial'), 'none' => __('None')][$cov] ?? ucfirst($cov) }}
           </span>
         </td>
         <td style="border:1px solid #8d8d8d;padding:4px 6px">{{ $bRow['gap_action'] ?? '-' }}</td>
       </tr>
     @empty
-      <tr><td colspan="5" style="border:1px solid #8d8d8d;padding:6px;text-align:center;color:#475569">Tiada pemetaan Body of Knowledge direkodkan.</td></tr>
+      <tr><td colspan="5" style="border:1px solid #8d8d8d;padding:6px;text-align:center;color:#475569">{{ __('No Body of Knowledge mapping recorded.') }}</td></tr>
     @endforelse
   </tbody>
 </table>

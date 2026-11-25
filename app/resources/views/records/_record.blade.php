@@ -91,7 +91,7 @@
           <span class="tag ok">{{ $nAch }} / {{ $nTot }} {{ __('Achieved') }}</span>
         </div>
         <div class="bd" style="padding:0">
-          <table>
+          <table data-plain>
             <thead>
               <tr>
                 <th style="min-width:200px">{{ __('Module') }}</th>
@@ -188,7 +188,7 @@
           @endif
         </div>
         <div class="bd" style="padding:0">
-          <table>
+          <table data-plain>
             <thead>
               <tr>
                 <th style="min-width:220px">{{ __('Assessment Component') }}</th>
@@ -482,7 +482,7 @@
     <div class="hd">
       <h2 style="font-size:12pt;margin:0">{{ __('Completed Modules & Earned Digital Badges') }}</h2>
     </div>
-    <table>
+    <table data-plain>
       <thead>
         <tr>
           <th>{{ __('Module') }}</th>
@@ -524,7 +524,7 @@
       <div class="hd">
         <h2 style="font-size:12pt;margin:0">{{ __('Verified Assessment Results') }}</h2>
       </div>
-      <table>
+      <table data-plain>
         <thead>
           <tr>
             <th>{{ __('Assessment') }}</th>

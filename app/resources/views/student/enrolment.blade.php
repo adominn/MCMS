@@ -125,7 +125,7 @@
         <h2>{{ __('Modules') }}</h2>
         <span class="r">{{ $e->progress_percent !== null ? __(':percent% done on the learning platform', ['percent' => $e->progress_percent]) : '' }}</span>
       </div>
-      <table data-no-search data-no-paginate>
+      <table data-plain data-no-search data-no-paginate>
         <thead>
           <tr>
             <th>{{ __('Module') }}</th>
@@ -197,7 +197,7 @@
           <span class="muted small">{{ $assessments->count() }} {{ $assessments->count() === 1 ? __('component') : __('components') }} &middot; {{ mcms_num($assessments->sum('weight_percent')) }}%</span>
         </summary>
         <div class="bd" style="padding:0">
-          <table data-no-search data-no-paginate style="margin:0">
+          <table data-plain data-no-search data-no-paginate style="margin:0">
             <thead>
               <tr>
                 <th>{{ __('Component') }}</th>
@@ -223,7 +223,7 @@
         <b>{{ __('History') }}</b> 
         <span class="muted small">{{ count($log) }} {{ count($log) === 1 ? __('change') : __('changes') }}</span>
       </summary>
-      <table>
+      <table data-plain>
         <thead>
           <tr>
             <th>{{ __('When') }}</th>

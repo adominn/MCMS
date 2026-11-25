@@ -75,7 +75,8 @@
     ],
     'lecturer' => [
       'proposals' => \Illuminate\Support\Facades\DB::table('micro_credentials as m')->join('mc_versions as v', 'v.micro_credential_id', '=', 'm.id')->where('m.owner_id', $u->id)->whereIn('v.status', ['draft', 'returned'])->count(),
-      'reviews' => \Illuminate\Support\Facades\DB::table('review_assignments')->where('reviewer_id', $u->id)->whereIn('status', ['invited', 'in_progress'])->count(),
+      'reviews' => \Illuminate\Support\Facades\DB::table('review_assignments')->where('reviewer_id', $u->id)->whereIn('status', ['invited', 'in_progress'])->count()
+        + (\Illuminate\Support\Facades\Schema::hasTable('offering_facilitators') ? \Illuminate\Support\Facades\DB::table('offering_facilitators')->where('user_id', $u->id)->where('status', 'invited')->count() : 0),
     ],
     default => [],
   };
@@ -87,11 +88,11 @@
       ['Learning', 'Registrations and payments', 'enrolments', ['enrolments*', 'register*'], 'cart'],
       ['Learning', 'My results', 'results.mine', ['results.mine*'], 'check'],
       ['Learning', 'Feedback', 'feedback', ['feedback*'], 'edit'],
-      ['Achievements', 'Credentials', 'credentials.wallet', ['credentials.wallet*', 'credentials.show*', 'credentials.certificate*', 'credentials.sheet*'], 'award'],
-      ['Achievements', 'Achievement record', 'records.mine', ['records.mine*'], 'doc'],
+      ['Achievements', 'Credentials', 'credentials.wallet', ['credentials.wallet*', 'credentials.show*', 'credentials.certificate*', 'credentials.download*', 'credentials.sheet*'], 'award'],
+      ['Achievements', 'Achievement record', 'records.mine', ['records.mine*', 'records.show*'], 'doc'],
       ['Credit', 'Credit ledger and ABC', 'credit', ['credit*'], 'bank'],
       ['Credit', 'Credit transfer', 'transfer', ['transfer*'], 'swap'],
-      ['Credit', 'My degree plan', 'plan.mine', ['plan.mine*'], 'cap'],
+      ['Credit', 'My degree plan', 'plan.mine', ['plan.*'], 'cap'],
       ['Credit', 'Degree programmes', 'programmes.index', ['programmes*', 'courses*'], 'list'],
       ['Credit', 'Course equivalences', 'equivalences', ['equivalences*'], 'swap'],
       ['General', 'Documents', 'documents', ['documents*'], 'doc'],
@@ -102,14 +103,14 @@
       ['Teaching', 'My micro-credentials', 'mcs', ['mcs*'], 'list'],
       ['Teaching', 'Proposals and versions', 'proposals', ['proposals*', 'comments.respond*'], 'edit'],
       ['Teaching', 'Cohorts and results', 'offerings', ['offerings*', 'results.cohort*', 'results.save*', 'results.flag*', 'completion.signoff*', 'cohorts.credits*'], 'cap'],
-      ['Teaching', 'Reviews for colleagues', 'reviews', ['reviews*'], 'check'],
-      ['Quality', 'Quality review (CQI)', 'monitoring', ['monitoring*', 'cqi*', 'reviews.periodic*'], 'chart'],
+      ['Teaching', 'Invitations & reviews', 'reviews', ['reviews*'], 'check'],
+      ['Quality', 'Quality review (CQI)', 'monitoring', ['monitoring*', 'cqi*', 'reviews.periodic*', 'suspensions*'], 'chart'],
       ['Quality', 'QV evidence', 'quality', ['quality*'], 'shield'],
       ['Quality', 'Stackable pathways', 'pathways', ['pathways*', 'plans*'], 'cap'],
       ['Quality', 'Degree programmes', 'programmes.index', ['programmes*', 'courses*'], 'list'],
       ['Quality', 'Course equivalences', 'equivalences', ['equivalences*'], 'swap'],
       ['Insight', 'Reports', 'reports', ['reports*'], 'chart'],
-      ['Insight', 'Traceability', 'trace', ['trace*', 'cohort.records*'], 'search'],
+      ['Insight', 'Traceability', 'trace', ['trace*', 'cohort.records*', 'records.show*'], 'search'],
       ['General', 'Documents', 'documents', ['documents*'], 'doc'],
       ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
     ],
@@ -121,12 +122,12 @@
       ['Academic Governance', 'Stackable pathways', 'pathways', ['pathways*', 'plans*'], 'cap'],
       ['Academic Governance', 'Degree programmes', 'programmes.index', ['programmes*', 'courses*'], 'list'],
       ['Academic Governance', 'Course equivalences', 'equivalences', ['equivalences*'], 'swap'],
-      ['Cohort Operations', 'Offerings and readiness', 'offerings', ['offerings*'], 'cap'],
+      ['Cohort Operations', 'Offerings and readiness', 'offerings', ['offerings*', 'cohorts.credits*'], 'cap'],
       ['Cohort Operations', 'Results and completion', 'results', ['results*', 'completion*'], 'check'],
       ['Credit & Certification', 'Credentials', 'credentials.admin', ['credentials.admin*'], 'award'],
       ['Credit & Certification', 'Credit transfer', 'transfers', ['transfers*'], 'swap'],
       ['Insight & Audit', 'Reports', 'reports', ['reports*'], 'chart'],
-      ['Insight & Audit', 'Traceability', 'trace', ['trace*', 'records.audit*', 'discrepancies*'], 'search'],
+      ['Insight & Audit', 'Traceability', 'trace', ['trace*', 'cohort.records*', 'records.show*', 'records.audit*', 'discrepancies*'], 'search'],
       ['General', 'Documents', 'documents', ['documents*'], 'doc'],
       ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
     ],
@@ -134,13 +135,14 @@
       ['Senate & Academic Decisions', 'Task queue', 'tasks', ['tasks*'], 'home'],
       ['Senate & Academic Decisions', 'Senate approvals', 'approvals', ['approvals*', 'changes*'], 'edit'],
       ['Senate & Academic Decisions', 'Credit transfer decisions', 'transfers', ['transfers*'], 'swap'],
+      ['Senate & Academic Decisions', 'ACR & ABC records', 'deposits', ['deposits*'], 'bank'],
       ['Senate & Academic Decisions', 'Stackable pathways', 'pathways', ['pathways*', 'plans*'], 'cap'],
       ['Senate & Academic Decisions', 'Degree programmes', 'programmes.index', ['programmes*', 'courses*'], 'list'],
       ['Senate & Academic Decisions', 'Course equivalences', 'equivalences', ['equivalences*'], 'swap'],
       ['Quality & Standards', 'Quality Verification', 'quality', ['quality*'], 'shield'],
       ['Quality & Standards', 'Quality review (CQI)', 'monitoring', ['monitoring*', 'cqi*', 'suspensions*'], 'chart'],
       ['Insight & Audit', 'Reports', 'reports', ['reports*'], 'chart'],
-      ['Insight & Audit', 'Traceability', 'trace', ['trace*', 'records.audit*', 'discrepancies*'], 'search'],
+      ['Insight & Audit', 'Traceability', 'trace', ['trace*', 'cohort.records*', 'records.show*', 'records.audit*', 'discrepancies*'], 'search'],
       ['General', 'Documents', 'documents', ['documents*'], 'doc'],
       ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
     ],
@@ -149,7 +151,8 @@
       ['Quality Assurance', 'Quality Verification (QV)', 'quality', ['quality*'], 'shield'],
       ['Quality Assurance', 'Quality review (CQI)', 'monitoring', ['monitoring*', 'cqi*', 'suspensions*'], 'chart'],
       ['Quality Assurance', 'Proposals review', 'approvals', ['approvals*'], 'edit'],
-      ['Insight & Audit', 'Cohort records', 'trace', ['trace*', 'cohort.records*'], 'search'],
+      ['Insight & Audit', 'ACR & ABC records', 'deposits', ['deposits*'], 'bank'],
+      ['Insight & Audit', 'Cohort records', 'trace', ['trace*', 'cohort.records*', 'records.show*'], 'search'],
       ['Insight & Audit', 'Reports', 'reports', ['reports*'], 'chart'],
       ['General', 'Documents', 'documents', ['documents*'], 'doc'],
       ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
@@ -158,8 +161,9 @@
       ['Registry & Credentials', 'Task queue', 'tasks', ['tasks*'], 'home'],
       ['Registry & Credentials', 'Credentials', 'credentials.admin', ['credentials.admin*'], 'award'],
       ['Registry & Credentials', 'Results & completion', 'results', ['results*', 'completion*'], 'check'],
+      ['Registry & Credentials', 'ACR & ABC records', 'deposits', ['deposits*'], 'bank'],
       ['Registry & Credentials', 'Discrepancies & corrections', 'discrepancies', ['discrepancies*'], 'check'],
-      ['Insight & Audit', 'Cohort records', 'trace', ['trace*', 'cohort.records*'], 'search'],
+      ['Insight & Audit', 'Cohort records', 'trace', ['trace*', 'cohort.records*', 'records.show*'], 'search'],
       ['Insight & Audit', 'Audit trail', 'records.audit', ['records.audit*'], 'list'],
       ['Insight & Audit', 'Reports', 'reports', ['reports*'], 'chart'],
       ['General', 'Documents', 'documents', ['documents*'], 'doc'],
@@ -169,7 +173,7 @@
       ['Credit Bank & ABC', 'Task queue', 'tasks', ['tasks*'], 'home'],
       ['Credit Bank & ABC', 'ACR & ABC deposits', 'deposits', ['deposits*'], 'bank'],
       ['Credit Bank & ABC', 'Discrepancies & corrections', 'discrepancies', ['discrepancies*'], 'check'],
-      ['Insight & Audit', 'Traceability', 'trace', ['trace*'], 'search'],
+      ['Insight & Audit', 'Traceability', 'trace', ['trace*', 'cohort.records*', 'records.show*'], 'search'],
       ['Insight & Audit', 'Audit trail', 'records.audit', ['records.audit*'], 'list'],
       ['Insight & Audit', 'Reports', 'reports', ['reports*'], 'chart'],
       ['General', 'Documents', 'documents', ['documents*'], 'doc'],
@@ -180,17 +184,19 @@
       ['Registry & ABC', 'Credentials', 'credentials.admin', ['credentials.admin*'], 'award'],
       ['Registry & ABC', 'ACR & ABC deposits', 'deposits', ['deposits*'], 'bank'],
       ['Registry & ABC', 'Discrepancies & corrections', 'discrepancies', ['discrepancies*'], 'check'],
-      ['Insight & Audit', 'Traceability', 'trace', ['trace*'], 'search'],
+      ['Insight & Audit', 'Traceability', 'trace', ['trace*', 'cohort.records*', 'records.show*'], 'search'],
       ['Insight & Audit', 'Audit trail', 'records.audit', ['records.audit*'], 'list'],
       ['Insight & Audit', 'Reports', 'reports', ['reports*'], 'chart'],
       ['General', 'Documents', 'documents', ['documents*'], 'doc'],
       ['General', 'Notifications', 'notifications', ['notifications*'], 'bell'],
     ],
     'codl_admin' => [
+      ['Academic Governance', 'Task queue', 'tasks', ['tasks*'], 'home'],
       ['Academic Governance', 'Proposals & Senate', 'approvals', ['approvals*', 'changes*'], 'edit'],
       ['Academic Governance', 'Degree programmes', 'programmes.index', ['programmes*', 'courses*'], 'list'],
       ['Academic Governance', 'Course equivalences', 'equivalences', ['equivalences*'], 'swap'],
       ['Credit & Certification', 'Credit transfers', 'transfers', ['transfers*'], 'swap'],
+      ['Credit & Certification', 'ACR & ABC records', 'deposits', ['deposits*'], 'bank'],
       ['Administration', 'Users and roles', 'users', ['users*'], 'users'],
       ['Administration', 'Reference data', 'reference', ['reference*'], 'list', 'ptj'],
       ['Administration', 'Settings', 'settings', ['settings*'], 'gear'],
@@ -200,7 +206,7 @@
       ['Data exchange', 'UCreds content', 'ucreds.courses', ['ucreds.courses*'], 'list'],
       ['Data exchange', 'Adapter status', 'adapters', ['adapters*'], 'gear'],
       ['Data exchange', 'Notification log', 'notification.log', ['notification.log*'], 'bell'],
-      ['Records', 'Audit trail', 'audit', ['audit*'], 'list'],
+      ['Records', 'Audit trail', 'audit', ['audit*', 'records.audit*'], 'list'],
       ['Records', 'Reports', 'reports', ['reports*'], 'chart'],
       ['Records', 'Retention', 'retention', ['retention*'], 'shield'],
       ['General', 'Documents', 'documents', ['documents*'], 'doc'],
@@ -213,19 +219,71 @@
     default => [],
   };
 @endphp
-@php $isPublicRoute = request()->routeIs('public.*', 'verify*'); @endphp
-<div class="app">
+@php
+  $isPublicRoute = request()->routeIs('public.*', 'verify*');
+  $hasSidebar = auth()->check() && !$isPublicRoute;
+@endphp
+<div class="app {{ $hasSidebar ? 'has-sidebar' : '' }}">
+  @if($hasSidebar)
+    <nav class="side" id="appSidebar" aria-label="Main">
+      <div class="side-brand-wrap">
+        <button type="button" class="iconbtn side-brand-toggle" id="side-brand-toggle" onclick="document.getElementById('btnSidebarPullTab')?.click()" aria-label="{{ __('Toggle sidebar') }}" title="{{ __('Toggle sidebar') }}">
+          <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+            <path d="M2.5 4h11M2.5 8h11M2.5 12h11"/>
+          </svg>
+        </button>
+        <a class="side-brand" href="{{ $homeUrl }}" title="UTeM MCMS">
+          <img src="{{ asset('images/LogoJawiUTeM_blue-01.png') }}" alt="UTeM" class="brand-logo">
+          <div class="side-brand-txt">
+            <b>UTeM MCMS</b>
+            <span>{{ __('Micro-Credential Management') }}</span>
+          </div>
+        </a>
+      </div>
+      <!-- Protruding pull-tab handle sticking out on the right edge -->
+      <button type="button" class="sidebar-pull-tab" id="btnSidebarPullTab" aria-label="{{ __('Toggle sidebar') }}" title="{{ __('Toggle sidebar') }}">
+        <span class="pull-tab-icon" id="pullTabIcon">
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 3l-5 5 5 5"/>
+          </svg>
+        </span>
+      </button>
+
+      <div class="side-inner">
+        @foreach(collect($nav)->groupBy(0) as $group => $items)
+          @if($group !== 'General' && $group !== 'Messages')<div class="grp">{{ __($group) }}</div>@endif
+          @foreach($items as $i)
+            <a href="{{ isset($i[5]) ? route($i[2], $i[5]) : route($i[2]) }}" @if(request()->routeIs(...$i[3])) aria-current="page" @endif title="{{ __($i[1]) }}"><svg viewBox="0 0 16 16" aria-hidden="true">{!! $icons[$i[4]] !!}</svg><span class="lbl">{{ __($i[1]) }}</span>@if($i[1] === 'Notifications' && $unread)<span class="c">{{ $unread }}</span>@elseif($i[2] === 'tasks' && $tasksOpen)<span class="c">{{ $tasksOpen }}</span>@elseif(($counts[$i[2]] ?? 0) > 0)<span class="c">{{ $counts[$i[2]] }}</span>@endif</a>
+          @endforeach
+        @endforeach
+        <div class="side-foot" style="margin-top:auto;padding-top:12px;border-top:1px solid var(--blue-60)">
+          <button type="button" class="side-collapse-btn" id="side-collapse-btn" aria-label="{{ __('Collapse sidebar') }}" title="{{ __('Collapse sidebar') }}">
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-collapse" aria-hidden="true">
+              <path d="M11 3l-5 5 5 5M6 3l-5 5 5 5"/>
+            </svg>
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-expand" aria-hidden="true" style="display:none">
+              <path d="M5 3l5 5-5 5M10 3l5 5-5 5"/>
+            </svg>
+            <span class="lbl">{{ __('Collapse sidebar') }}</span>
+          </button>
+        </div>
+      </div>
+    </nav>
+    <div class="side-backdrop" id="side-backdrop"></div>
+  @endif
+
+  <div class="app-main">
   <header class="top">
     @auth
       @if(!$isPublicRoute)
-      <button type="button" class="iconbtn nav-toggle" id="nav-toggle" aria-label="{{ __('Toggle navigation') }}" title="{{ __('Toggle navigation') }}">
+      <button type="button" class="iconbtn nav-toggle mobile-only-toggle" id="nav-toggle" aria-label="{{ __('Toggle navigation') }}" title="{{ __('Toggle navigation') }}">
         <svg viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
           <path d="M2.5 4h11M2.5 8h11M2.5 12h11"/>
         </svg>
       </button>
       @endif
     @endauth
-    <a class="brand" href="{{ $isPublicRoute ? route('public.home') : $homeUrl }}">
+    <a class="brand {{ $hasSidebar ? 'mobile-only-brand' : '' }}" href="{{ $isPublicRoute ? route('public.home') : $homeUrl }}">
       <img src="{{ asset('images/LogoJawiUTeM_blue-01.png') }}" alt="UTeM" class="brand-logo">
       <span class="brand-sep" aria-hidden="true"></span>
       <b>UTeM MCMS</b>
@@ -323,49 +381,24 @@
     </div>
   </header>
   <div class="body">
-    @auth
-    @if(!$isPublicRoute)
-    <nav class="side" id="appSidebar" aria-label="Main">
-      <!-- Protruding pull-tab handle sticking out on the right edge -->
-      <button type="button" class="sidebar-pull-tab" id="btnSidebarPullTab" aria-label="{{ __('Toggle sidebar') }}" title="{{ __('Toggle sidebar') }}">
-        <span class="pull-tab-icon" id="pullTabIcon">
-          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10 3l-5 5 5 5"/>
-          </svg>
-        </span>
-      </button>
-
-      <div class="side-inner">
-        @foreach(collect($nav)->groupBy(0) as $group => $items)
-          @if($group !== 'General' && $group !== 'Messages')<div class="grp">{{ __($group) }}</div>@endif
-          @foreach($items as $i)
-            <a href="{{ isset($i[5]) ? route($i[2], $i[5]) : route($i[2]) }}" @if(request()->routeIs(...$i[3])) aria-current="page" @endif title="{{ __($i[1]) }}"><svg viewBox="0 0 16 16" aria-hidden="true">{!! $icons[$i[4]] !!}</svg><span class="lbl">{{ __($i[1]) }}</span>@if($i[1] === 'Notifications' && $unread)<span class="c">{{ $unread }}</span>@elseif($i[2] === 'tasks' && $tasksOpen)<span class="c">{{ $tasksOpen }}</span>@elseif(($counts[$i[2]] ?? 0) > 0)<span class="c">{{ $counts[$i[2]] }}</span>@endif</a>
-          @endforeach
-        @endforeach
-        <div class="side-foot" style="margin-top:auto;padding-top:12px;border-top:1px solid var(--blue-60)">
-          <button type="button" class="side-collapse-btn" id="side-collapse-btn" aria-label="{{ __('Collapse sidebar') }}" title="{{ __('Collapse sidebar') }}">
-            <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-collapse" aria-hidden="true">
-              <path d="M11 3l-5 5 5 5M6 3l-5 5 5 5"/>
-            </svg>
-            <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-expand" aria-hidden="true" style="display:none">
-              <path d="M5 3l5 5-5 5M10 3l5 5-5 5"/>
-            </svg>
-            <span class="lbl">{{ __('Collapse sidebar') }}</span>
-          </button>
-        </div>
-      </div>
-    </nav>
-    <div class="side-backdrop" id="side-backdrop"></div>
-    @endif
-    @endauth
     <main>
       @if(session('status'))<div class="status" role="status">{{ session('status') }}</div>@endif
       @if(session('broken'))<div class="status error" role="alert">{{ session('broken') }}</div>@endif
-      @if($errors->any())<div class="status error" role="alert"><ul>@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
+      @if($errors->any())
+        @php $errCounts = array_count_values($errors->all()); @endphp
+        <div class="status error" role="alert">
+          <ul>
+            @foreach($errCounts as $e => $cnt)
+              <li>{{ $e }}@if($cnt > 1) ({{ $cnt }})@endif</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
       @yield('content')
     </main>
   </div>
+  </div>
 </div>
-<script src="{{ asset('js/mcms.js') }}" defer></script>
+<script src="{{ asset('js/mcms.js') }}?v={{ @filemtime(public_path('js/mcms.js')) }}" defer></script>
 </body>
 </html>

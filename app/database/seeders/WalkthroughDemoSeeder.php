@@ -65,6 +65,7 @@ class WalkthroughDemoSeeder extends Seeder
             ['Secure Software Development Lifecycle', 'ACR-HANA-2026-04', 'ABC-HANA-2026-04', 'UTEM-MC-2026-H04', 'HANA4-8K9M4', 2.0, 80, 'SAMC'],
         ];
 
+        $lecturerId = DB::table('users')->where('email', 'aina.zulkifli@utem.example.test')->value('id');
         $deputyId = DB::table('users')->where('email', 'hakim.rahman@utem.example.test')->value('id');
         $depositorId = DB::table('users')->where('email', 'nurul.izzah@utem.example.test')->value('id');
 
@@ -179,6 +180,44 @@ class WalkthroughDemoSeeder extends Seeder
                     'updated_at' => now()->subDays(11 - $idx),
                 ]);
             }
+
+            // Seed all 7 Appendix F2 Eligibility Checks if not yet present
+            if (! DB::table('acr_checks')->where('acr_id', $acrId)->exists()) {
+                $isUmc = $cat === 'UMC';
+                $compDate = now()->subDays(12 - $idx)->toDateString();
+                $checks = [
+                    ['category', true, 'yes', "Category {$cat}", "MC Category: {$cat}"],
+                    ['completed', true, 'yes', "Completion signed by Course Coordinator (P1) and confirmed on {$compDate}", "Achievement record #{$achId} ({$compDate})"],
+                    ['identity_results', true, 'yes', 'Identity and all results verified', 'ID: B032510099; all assessment results verified'],
+                    ['accredited_parent', true, $isUmc ? 'yes' : 'na', $isUmc ? 'Programme BITS: accredited' : 'Not applicable to a SAMC', $isUmc ? 'BITS (accredited)' : 'Not applicable (SAMC)'],
+                    ['qv_valid', true, $isUmc ? 'na' : 'yes', $isUmc ? 'Not applicable to a UMC' : 'Quality Verification valid on completion date', $isUmc ? 'Not applicable (UMC)' : 'QV verified & active'],
+                    ['credit_basis', true, 'yes', "{$credits} credit, MQF level 6 from ".($isUmc ? 'the approved parent course and programme' : 'the Quality Verification decision'), "{$credits} cr / MQF 6 / {$slt} SLT hrs"],
+                    ['traceable', true, 'yes', "Credential {$certNo}", "Credential {$certNo}"],
+                ];
+                foreach ($checks as [$key, $passed, $res, $detail, $evRef]) {
+                    DB::table('acr_checks')->insert([
+                        'acr_id' => $acrId,
+                        'enrolment_id' => $enrId,
+                        'check_key' => $key,
+                        'passed' => $passed,
+                        'result' => $res,
+                        'detail' => $detail,
+                        'evidence_ref' => $evRef,
+                        'checked_at' => now()->subDays(11 - $idx),
+                    ]);
+                }
+            }
+
+            // Seed Appendix F11 Three-Party Verification (Coordinator, Deputy Dean, Records/ABC Depositor)
+            if ($lecturerId) {
+                \App\Modules\CreditBank\Acr::recordVerification($acrId, 'coordinator', (int) $lecturerId, now()->subDays(12 - $idx), 'All coursework and assessments verified by Course Coordinator.');
+            }
+            if ($deputyId) {
+                \App\Modules\CreditBank\Acr::recordVerification($acrId, 'academic', (int) $deputyId, now()->subDays(11 - $idx), 'Completion confirmed by faculty academic authority.');
+            }
+            if ($depositorId) {
+                \App\Modules\CreditBank\Acr::recordVerification($acrId, 'records_abc', (int) $depositorId, now()->subDays(10 - $idx), 'ACR verified and confirmed by Registry / ABC officer.');
+            }
         }
     }
 
@@ -232,6 +271,8 @@ class WalkthroughDemoSeeder extends Seeder
             }
 
             DB::table('offerings')->where('id', $off->offering_id)->update([
+                'reg_opens_on' => today()->subDays(14)->toDateString(),
+                'reg_closes_on' => $today,
                 'start_date' => $today,
                 'end_date' => $end,
                 'status' => 'running',

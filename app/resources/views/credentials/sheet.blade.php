@@ -1,10 +1,11 @@
 @extends('layouts.print')
-@section('title', 'Digital Credential')
-@section('doc_title', 'Digital Credential')
+@section('title', __('Digital Credential'))
+@section('doc_title', __('Digital Credential'))
+@section('doc_bm', 'Kredensial Digital')
 @section('doc_ref', $c->number)
 @section('doc_file', $c->number . '.json')
 @section('doc_actions')
-  <a class="btn ter sm" href="{{ route('credentials.download', [$c->id, 'json']) }}">Download .json</a>
+  <a class="btn ter sm" href="{{ route('credentials.download', [$c->id, 'json']) }}">{{ __('Download .json') }}</a>
 @endsection
 @section('content')
 
@@ -90,17 +91,17 @@
       <dd>{{ $proofCreated }}</dd>
 
       <dt style="font-size:9pt">{{ __('Proof value') }}</dt>
-      <dd><code class="mono" style="font-size:8.5pt">{{ \Illuminate\Support\Str::limit($proofVal, 38) }}</code></dd>
+      <dd><code class="mono" style="font-size:8.5pt;overflow-wrap:anywhere;word-break:break-all">{{ $proofVal }}</code></dd>
     </dl>
   </div>
 </div>
 
 <div class="note warn" style="margin-bottom:20px;font-size:9.5pt">
-  Signed with an official UTeM key pair. Open Badges 3.0 compliant. No IC number, email or raw score is carried in the credential.
+  {{ __('Signed with an official UTeM key pair. Open Badges 3.0 compliant. No IC number, email or raw score is carried in the credential.') }}
 </div>
 
 <div class="sec-hd" style="font-size:11pt;font-weight:700;margin:16px 0 8px;text-transform:uppercase;border-left:3px solid #0052ff;padding-left:6px;background:#f1f5f9;padding-top:4px;padding-bottom:4px">{{ __('Credential Specifications Sign-Off') }}</div>
-<table style="width:100%;border-collapse:collapse;margin-bottom:12px;font-size:9pt">
+<table data-plain style="width:100%;border-collapse:collapse;margin-bottom:12px;font-size:9pt">
   <thead>
     <tr style="background:#f1f5f9">
       <th style="border:1px solid #8d8d8d;padding:5px 7px;text-align:left;width:25%">{{ __('Role') }}</th>
@@ -114,36 +115,36 @@
     @php($signoffs = json_decode($c->e10_signoffs ?? '[]', true) ?: [])
     @php($s1 = $signoffs['coordinator'] ?? null)
     <tr>
-      <td style="border:1px solid #8d8d8d;padding:5px 7px"><strong>Penyelaras Kursus / MC</strong><br><span style="font-size:8pt;color:#475569">(P1 Coordinator)</span></td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px"><strong>{{ __('Course / MC Coordinator') }}</strong></td>
       <td style="border:1px solid #8d8d8d;padding:5px 7px">
         <strong>{{ $s1['name'] ?? ($x['signatory'] ?? 'Dr. Aina Zulkifli') }}</strong><br>
-        <span style="font-size:8.5pt;color:#475569">{{ $s1['position'] ?? 'Penyelaras Kursus' }}</span>
+        <span style="font-size:8.5pt;color:#475569">{{ $s1['position'] ?? __('Course Coordinator') }}</span>
       </td>
       <td style="border:1px solid #8d8d8d;padding:5px 7px"><span class="tag ok">{{ __('Confirmed') }}</span></td>
       <td style="border:1px solid #8d8d8d;padding:5px 7px">{{ !empty($s1['signed_at']) ? \Carbon\Carbon::parse($s1['signed_at'])->format('d/m/Y') : $issued }}</td>
-      <td style="border:1px solid #8d8d8d;padding:5px 7px">{{ $s1['remarks'] ?? __('Pencapaian disahkan') }}</td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px">{{ $s1['remarks'] ?? __('Achievement verified') }}</td>
     </tr>
     @php($s2 = $signoffs['faculty_rep'] ?? null)
     <tr>
-      <td style="border:1px solid #8d8d8d;padding:5px 7px"><strong>Wakil PTj / Timbalan Dekan</strong><br><span style="font-size:8pt;color:#475569">({{ __('Faculty / Deputy Dean') }})</span></td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px"><strong>{{ __('Faculty Representative / Deputy Dean') }}</strong></td>
       <td style="border:1px solid #8d8d8d;padding:5px 7px">
         <strong>{{ $s2['name'] ?? ($x['signatory'] ?? 'Hakim Rahman') }}</strong><br>
-        <span style="font-size:8.5pt;color:#475569">{{ $s2['position'] ?? ($x['signatory_position'] ?? 'Timbalan Dekan (Akademik)') }}</span>
+        <span style="font-size:8.5pt;color:#475569">{{ $s2['position'] ?? ($x['signatory_position'] ?? __('Deputy Dean (Academic)')) }}</span>
       </td>
       <td style="border:1px solid #8d8d8d;padding:5px 7px"><span class="tag ok">{{ __('Confirmed') }}</span></td>
       <td style="border:1px solid #8d8d8d;padding:5px 7px">{{ !empty($s2['signed_at']) ? \Carbon\Carbon::parse($s2['signed_at'])->format('d/m/Y') : $issued }}</td>
-      <td style="border:1px solid #8d8d8d;padding:5px 7px">{{ $s2['remarks'] ?? __('Pengesahan penyempurnaan') }}</td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px">{{ $s2['remarks'] ?? __('Completion confirmed') }}</td>
     </tr>
     @php($s3 = $signoffs['credential_custodian'] ?? null)
     <tr>
-      <td style="border:1px solid #8d8d8d;padding:5px 7px"><strong>Urus Setia Credential</strong><br><span style="font-size:8pt;color:#475569">({{ __('Records Custodian') }})</span></td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px"><strong>{{ __('Credential Secretariat') }}</strong><br><span style="font-size:8pt;color:#475569">({{ __('Records Custodian') }})</span></td>
       <td style="border:1px solid #8d8d8d;padding:5px 7px">
-        <strong>{{ $s3['name'] ?? 'Urus Setia Credential UTeM' }}</strong><br>
-        <span style="font-size:8.5pt;color:#475569">{{ $s3['position'] ?? 'Pegawai Credential' }}</span>
+        <strong>{{ $s3['name'] ?? __('UTeM Credential Secretariat') }}</strong><br>
+        <span style="font-size:8.5pt;color:#475569">{{ $s3['position'] ?? __('Credential Officer') }}</span>
       </td>
       <td style="border:1px solid #8d8d8d;padding:5px 7px"><span class="tag ok">{{ __('Confirmed') }}</span></td>
       <td style="border:1px solid #8d8d8d;padding:5px 7px">{{ !empty($s3['signed_at']) ? \Carbon\Carbon::parse($s3['signed_at'])->format('d/m/Y') : $issued }}</td>
-      <td style="border:1px solid #8d8d8d;padding:5px 7px">{{ $s3['remarks'] ?? __('Pemeteraian kriptografi disahkan') }}</td>
+      <td style="border:1px solid #8d8d8d;padding:5px 7px">{{ $s3['remarks'] ?? __('Cryptographic seal verified') }}</td>
     </tr>
   </tbody>
 </table>
@@ -155,8 +156,8 @@
 
 <div style="page-break-before:always;margin-top:24px;padding-top:16px;border-top:1px dashed var(--border)">
   <h2 style="font-size:13pt;margin:0 0 8px">{{ __("Credential JSON") }}</h2>
-  <div class="small muted" style="margin-bottom:8px">W3C Verifiable Credential 2.0 / Open Badges 3.0 document representation:</div>
-  <pre class="mono" style="border:1px solid var(--border);padding:10px;font-size:7.5pt;line-height:1.3;background:#fafafa;white-space:pre-wrap;word-break:break-all;overflow-x:auto">{{ json_encode($vc, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) }}</pre>
+  <div class="small muted" style="margin-bottom:8px">{{ __('W3C Verifiable Credential 2.0 / Open Badges 3.0 document representation:') }}</div>
+  <pre class="mono" style="border:1px solid var(--border);padding:10px;font-size:7.5pt;line-height:1.3;background:#fafafa;white-space:pre-wrap;word-break:break-all">{{ json_encode($vc, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) }}</pre>
 </div>
 
 @endsection

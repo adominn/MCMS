@@ -78,7 +78,7 @@
           <h2>{{ $t('modules') }}</h2>
           <span class="r">{{ $t('slt') }}: {{ $modules->sum('slt_hours') }} {{ $lang === 'ms' ? 'Jam' : 'Hours' }}<span style="display:none">{{ $modules->sum('slt_hours') }} h</span></span>
         </div>
-        <table>
+        <table data-plain>
           <thead>
             <tr>
               <th style="width:48px">#</th>
@@ -118,7 +118,7 @@
 
       <div class="panel">
         <div class="hd"><h2>{{ $t('assessment') }}</h2></div>
-        <table>
+        <table data-plain>
           <thead>
             <tr>
               <th>{{ $lang === 'ms' ? 'Komponen Pentaksiran' : 'Assessment Component' }}</th>

@@ -128,7 +128,7 @@
       <div class="panel" style="margin-bottom:20px">
         <div class="hd"><h2>{{ __('Transfer Lines & Outcomes') }}</h2></div>
         <div class="table-wrap">
-          <table id="lines" style="margin:0; width:100%">
+          <table data-plain id="lines" style="margin:0; width:100%">
             <thead>
               <tr>
                 <th>{{ __('Credit used (ACR)') }}</th>
@@ -243,7 +243,7 @@
     <div class="print-sec-title">
       <span>{{ __('Application & Supporting Documents') }}</span>
     </div>
-    <table class="print-kv-table">
+    <table data-plain class="print-kv-table">
       <tbody>
         <tr>
           <th style="width:22%">{{ __('Applicant') }}</th>
@@ -280,7 +280,7 @@
     </div>
     @foreach($lines as $l)
       <div style="font-size:8.5pt;font-weight:600;margin:4px 0">{{ __('Course:') }} {{ $l->course_code }} {{ $l->course_name }} &larr; {{ $l->source_name }} (<code>{{ $l->acr_reference }}</code>)</div>
-      <table class="print-audit-table">
+      <table data-plain class="print-audit-table">
         <thead>
           <tr>
             <th style="width:34%">{{ __('Criterion') }}</th>
@@ -307,7 +307,7 @@
     <div class="print-sec-title">
       <span>{{ __('Credit Transfer Decision') }}</span>
     </div>
-    <table class="print-audit-table">
+    <table data-plain class="print-audit-table">
       <thead>
         <tr>
           <th style="width:4%">#</th>
@@ -352,7 +352,7 @@
     <div class="print-sec-title">
       <span>{{ __('Single Redemption Status') }}</span>
     </div>
-    <table class="print-audit-table">
+    <table data-plain class="print-audit-table">
       <thead>
         <tr>
           <th style="width:24%">{{ __('ACR & ABC Ref') }}</th>
@@ -390,7 +390,7 @@
     <div class="print-sec-title">
       <span>{{ __('Three-Party Verification & Sign-Off') }}</span>
     </div>
-    <table class="print-audit-table">
+    <table data-plain class="print-audit-table">
       <thead>
         <tr>
           <th style="width:24%">{{ __('Role') }}</th>

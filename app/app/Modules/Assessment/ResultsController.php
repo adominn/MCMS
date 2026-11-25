@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Assessment;
 
 use App\Models\User;
+use App\Modules\Achievement\Completion;
+use App\Modules\Achievement\Events\CompletionConfirmed;
 use App\Modules\Core\Tasks;
+use App\Modules\Enrolment\Enrolments;
 use App\Modules\Learning\Template;
 use App\Modules\Notifications\Notifier;
 use App\Modules\Records\AuditRecorder;
@@ -15,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 // LEC-10 cohort results, DD-08 results and completion, DD-09 verify results, the student's own results (MD-07).
 final class ResultsController
 {
-    public function __construct(private AuditRecorder $audit, private Notifier $notifier, private Verifier $verifier) {}
+    public function __construct(private AuditRecorder $audit, private Notifier $notifier, private Verifier $verifier, private Enrolments $enrol) {}
 
     // ---- the lecturer
 
@@ -85,14 +88,49 @@ final class ResultsController
             if ($missing) {
                 return redirect()->route('results.cohort', $id)->withErrors(['submit' => 'Some marks are missing: '.implode('; ', array_slice($missing, 0, 8)).(count($missing) > 8 ? '; and '.(count($missing) - 8).' more' : '').'. Enter them before you submit.']);
             }
-            DB::transaction(function () use ($id, $o) {
+            $signedCount = 0;
+            $includeSignOff = $request->boolean('include_coordinator_signoff');
+            $coordRemarks = trim((string) $request->input('coordinator_remarks', '')) ?: 'Verified and signed off by Course Coordinator upon results submission.';
+            DB::transaction(function () use ($id, $o, $request, $includeSignOff, $coordRemarks, &$signedCount) {
                 DB::table('offerings')->where('id', $id)->update(['results_submitted_at' => now()]);
+                if ($includeSignOff) {
+                    $comps = Template::components($o->mc_version_id);
+                    $enrolIds = DB::table('enrolments')->where('offering_id', $id)->where('status', 'enrolled')->pluck('id');
+                    foreach ($enrolIds as $eid) {
+                        $eid = (int) $eid;
+                        if (Completion::coordinatorSigned($eid)) {
+                            continue;
+                        }
+                        if (DB::table('integrity_cases')->where('enrolment_id', $eid)->where('status', 'open')->exists()) {
+                            continue;
+                        }
+                        $resByComp = DB::table('assessment_results')->where('enrolment_id', $eid)->get()->keyBy('assessment_component_id');
+                        $allPassed = $comps->isNotEmpty() && $comps->every(function ($c) use ($resByComp) {
+                            $r = $resByComp->get($c->id);
+
+                            return $r && $r->status !== 'held' && $r->score !== null && (float) $r->score >= (float) $c->pass_mark;
+                        });
+                        if (! $allPassed) {
+                            continue;
+                        }
+                        Completion::record($eid);
+                        DB::table('achievement_records')->where('enrolment_id', $eid)->update([
+                            'coordinator_signed_by' => $request->user()->id,
+                            'coordinator_signed_at' => now(),
+                            'coordinator_remarks' => $coordRemarks,
+                        ]);
+                        $this->audit->record('completion.coordinator_signed', ['type' => 'Enrolment', 'id' => $eid], after: ['coordinator_signed_by' => $request->user()->id, 'remarks' => $coordRemarks]);
+                        $signedCount++;
+                    }
+                }
                 Tasks::close('results_entry', $id);
                 Tasks::open('deputy_dean', 'verify_results', $id, 'Verify results: '.$o->name_en.' '.$o->cohort_name, "/results/$id", $o->ptj_id, area: 'results');
                 $this->audit->record('results.submitted', ['type' => 'Offering', 'id' => $id]);
             });
 
-            return redirect()->route('results.cohort', $id)->with('status', 'Submitted for verification. The deputy dean now has a task.');
+            $extra = $signedCount > 0 ? " Coordinator sign-off recorded for {$signedCount} passing participant(s)." : '';
+
+            return redirect()->route('results.cohort', $id)->with('status', 'Submitted for verification. The deputy dean now has a task.'.$extra);
         }
 
         return redirect()->route('results.cohort', $id)->with('status', $count ? "Saved $count marks." : 'Nothing changed.');
@@ -186,6 +224,46 @@ final class ResultsController
         foreach (DB::table('enrolments as e')->join('assessment_results as r', 'r.enrolment_id', '=', 'e.id')->where('e.offering_id', $id)->where('r.verification_evidence', $d['evidence'])->where('r.verified_at', '>=', now()->subMinute())->distinct()->pluck('e.user_id') as $uid) {
             $u = User::find($uid);
             $this->notifier->send($u, 'results.verified', ['name' => $u->name, 'title' => $o->name_en.' '.$o->cohort_name], dedupe: "verified-$id-$uid-".now()->timestamp);
+        }
+
+        // Streamlined 2-step flow: optionally confirm completion right away for eligible Coordinator-signed learners
+        $confirmed = [];
+        if ($request->boolean('confirm_completion')) {
+            $candidateIds = $enrolmentIds !== []
+                ? $enrolmentIds
+                : DB::table('enrolments')->where('offering_id', $id)->where('status', 'enrolled')->pluck('id')->map(fn ($v) => (int) $v)->all();
+
+            DB::transaction(function () use ($candidateIds, $id, $request, $o, &$confirmed) {
+                foreach (array_unique($candidateIds) as $eid) {
+                    $e = DB::table('enrolments')->where('id', $eid)->where('offering_id', $id)->first();
+                    if (! $e || $e->status !== 'enrolled' || ! Completion::check($eid)['met'] || ! Completion::coordinatorSigned($eid)) {
+                        continue;
+                    }
+                    Completion::record($eid);
+                    DB::table('achievement_records')->where('enrolment_id', $eid)->update([
+                        'completion_status' => 'complete',
+                        'completed_on' => today(),
+                        'final_result' => json_encode(Completion::finalResult($eid)),
+                        'confirmed_by' => $request->user()->id,
+                        'confirmed_at' => now(),
+                    ]);
+                    $this->enrol->setStatus($eid, 'completed', null, $request->user()->id);
+                    $this->audit->record('completion.confirmed', ['type' => 'Enrolment', 'id' => $eid], before: ['status' => 'enrolled'], after: ['status' => 'completed']);
+                    $u = User::find($e->user_id);
+                    $this->notifier->send($u, 'completion.confirmed', ['name' => $u->name, 'title' => $o->name_en.' '.$o->cohort_name], dedupe: "completed-$eid");
+                    $confirmed[] = $eid;
+                }
+                Completion::syncTask($id);
+            });
+            foreach ($confirmed as $eid) {
+                event(new CompletionConfirmed($eid, $request->user()->id));
+            }
+        }
+
+        if ($confirmed !== []) {
+            $issued = DB::table('credentials')->whereIn('enrolment_id', $confirmed)->count();
+
+            return redirect()->route('results.verify', $id)->with('status', "Verified {$r['verified']} results".($r['held'] ? " ({$r['held']} held results left out)" : '').". Completion confirmed for ".count($confirmed)." eligible participant(s), credentials issued: {$issued}.");
         }
 
         return redirect()->route('results.verify', $id)->with('status', "Verified {$r['verified']} results".($r['held'] ? " ({$r['held']} held results left out)" : '').". Module badges created: {$r['badges']}. Nothing is issued yet: completion is confirmed separately.");
@@ -486,12 +564,13 @@ final class ResultsController
         $user = $request->user();
         $o = DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('users as u', 'u.id', '=', 'm.owner_id')->where('o.id', $id)
             ->first(['o.*', 'v.name_en', 'v.badge_image_path', 'm.category', 'm.ptj_id', 'm.owner_id', 'u.name as lecturer_name']) ?? abort(404);
+        $isFacilitator = DB::table('offering_facilitators')->where('offering_id', $o->id)->where('user_id', $user->id)->where('status', 'accepted')->exists();
         if ($lecturer) {
-            abort_unless($o->owner_id === $user->id, 403, 'These are the results of another lecturer\'s cohort.');
+            abort_unless($o->owner_id === $user->id || $isFacilitator, 403, 'These are the results of another lecturer\'s cohort.');
         } else {
             $ids = $user->scopedPtjIds('deputy_dean');
             abort_unless($ids === null || in_array($o->ptj_id, $ids, true), 403, 'This cohort belongs to another PTj.');
-            abort_if($o->owner_id === $user->id, 403, 'You cannot verify the results of your own micro-credential.');
+            abort_if($o->owner_id === $user->id || $isFacilitator, 403, 'You cannot verify the results of a cohort you coordinate or facilitate.');
         }
 
         return $o;

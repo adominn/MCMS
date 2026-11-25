@@ -6,30 +6,125 @@
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var el = function (tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
   var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
-  var SORT = '<svg class="si" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg>';
+  /* ---------- tables: shared inline search + sort toolbar, rows per page, pager (D-73) ---------- */
+  var NON_SORTABLE_RE = /^(action|actions|tindakan|select all.*|pilih semua.*|download|muat turun|receipt|resit|no\.?|#|seq|notice\s*\/\s*action|notis\s*\/\s*tindakan|change setting|ubah tetapan)$/i;
+  var EMPTY_VAL_RE = /^(-|–|—|n\/a|t\/b|none|tiada|\s*)$/i;
+  var STATUS_RANK = {
+    'draft': 10, 'draf': 10, 'planned': 12, 'dirancang': 12,
+    'returned': 20, 'dikembalikan': 20, 'amend': 22, 'pinda': 22, 'needs amendment': 22, 'perlu pindaan': 22,
+    'pending': 25, 'menunggu': 25, 'pending check': 25, 'invited': 26, 'dijemput': 26, 'not started': 27, 'belum bermula': 27, 'not yet': 27,
+    'submitted': 30, 'dihantar': 30,
+    'in review': 40, 'dalam semakan': 40, 'under review': 40, 'in progress': 42, 'sedang berjalan': 42, 'running': 43, 'open': 45, 'terbuka': 45, 'answered': 46, 'dijawab': 46,
+    'endorsed': 50, 'disokong': 50, 'support': 52, 'sokong': 52, 'verified': 55, 'disahkan': 55, 'codl verified': 56, 'provisional': 57, 'held': 58, 'ditahan': 58,
+    'approved': 60, 'diluluskan': 60, 'approved with conditions': 62, 'active': 64, 'aktif': 64, 'published': 65, 'diterbitkan': 65,
+    'completed': 70, 'ended': 71, 'tamat': 70, 'closed': 71, 'ditutup': 71, 'confirmed': 72, 'resolved': 74, 'selesai': 74, 'passed': 75, 'lulus': 75, 'deposited': 76, 'didepositkan': 76, 'redeemed': 78,
+    'declined': 85, 'ditolak': 85, 'not supported': 86, 'tidak disokong': 86, 'do not support': 86, 'not approved': 87, 'failed': 88, 'gagal': 88, 'revoked': 90, 'dibatalkan': 90, 'archived': 95, 'diarkibkan': 95
+  };
+  var MONTHS = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, mei: 4, jun: 5, jul: 6, aug: 7, ogo: 7, sep: 8, oct: 9, okt: 9, nov: 10, dec: 11, dis: 11 };
 
-  /* ---------- tables: search, sortable headers, rows per page, pager (UI/UX 4.5) ---------- */
-  function key(txt, type) {
-    txt = txt.trim();
-    if (type === 'num') { return parseFloat(txt.replace(/[^0-9.\-]/g, '')) || 0; }
-    if (type === 'date') { var m = txt.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/); return m ? Date.UTC(+m[3], +m[2] - 1, +m[1]) : 0; }
-    return txt.toLowerCase();
+  function isMsLang() { return (document.documentElement.lang || '').toLowerCase().indexOf('ms') === 0; }
+  function tStr(en, ms) { return isMsLang() ? ms : en; }
+  function makeCollator() {
+    try { return new Intl.Collator(isMsLang() ? 'ms' : 'en', { numeric: true, sensitivity: 'base' }); }
+    catch (e) { return null; }
   }
-  function colType(rows, i) {
-    var cells = rows.map(function (r) { return (r.cells[i] ? r.cells[i].textContent.trim() : ''); }).filter(Boolean);
-    if (!cells.length) { return 'text'; }
-    if (cells.every(function (c) { return /\d{1,2}\/\d{1,2}\/\d{4}/.test(c); })) { return 'date'; }
-    if (cells.every(function (c) { return /^(RM\s*)?-?[\d,]+(\.\d+)?%?$/.test(c); })) { return 'num'; }
+  function parseDateMs(txt) {
+    var s = txt.trim();
+    if (!s || EMPTY_VAL_RE.test(s)) return null;
+    // dd/mm/yyyy (optional HH:MM)
+    var m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+    if (m) return Date.UTC(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0));
+    // yyyy-mm-dd
+    m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s](\d{1,2}):(\d{2}))?/);
+    if (m) return Date.UTC(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0));
+    // dd Mmm yyyy
+    m = s.match(/(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})/);
+    if (m) {
+      var mon = MONTHS[m[2].slice(0, 3).toLowerCase()];
+      if (mon != null) return Date.UTC(+m[3], mon, +m[1]);
+    }
+    return null;
+  }
+  function parseNumVal(txt) {
+    var s = txt.trim();
+    if (!s || EMPTY_VAL_RE.test(s)) return null;
+    var cleaned = s.replace(/,/g, '');
+    var m = cleaned.match(/-?\d+(?:\.\d+)?/);
+    return m ? parseFloat(m[0]) : null;
+  }
+  function parseStatusRank(txt) {
+    var s = txt.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (!s || EMPTY_VAL_RE.test(s)) return null;
+    if (STATUS_RANK[s] != null) return STATUS_RANK[s];
+    for (var k in STATUS_RANK) {
+      if (Object.prototype.hasOwnProperty.call(STATUS_RANK, k) && s.indexOf(k) > -1) {
+        return STATUS_RANK[k];
+      }
+    }
+    return null;
+  }
+  function cellRaw(row, i) {
+    var cell = row.cells[i];
+    if (!cell) return '';
+    if (cell.hasAttribute('data-sort-value')) return cell.getAttribute('data-sort-value') || '';
+    return cell.textContent.trim();
+  }
+  function extractKey(row, i, type) {
+    var raw = cellRaw(row, i);
+    if (!raw || EMPTY_VAL_RE.test(raw)) return { empty: true, val: null };
+    if (type === 'date') {
+      var d = parseDateMs(raw);
+      return d === null ? { empty: true, val: null } : { empty: false, val: d };
+    }
+    if (type === 'num') {
+      var n = parseNumVal(raw);
+      return n === null ? { empty: true, val: null } : { empty: false, val: n };
+    }
+    if (type === 'status') {
+      var rk = parseStatusRank(raw);
+      return rk !== null ? { empty: false, val: rk, fallback: raw } : { empty: false, val: 999, fallback: raw };
+    }
+    return { empty: false, val: raw };
+  }
+  function detectColType(th, rows, i) {
+    var explicit = th.getAttribute('data-sort-type');
+    if (explicit) return explicit;
+    var hdr = th.textContent.trim().toLowerCase();
+    var cells = rows.map(function (r) { return cellRaw(r, i); }).filter(function (c) { return c && !EMPTY_VAL_RE.test(c); });
+    if (/(status|result|decision|recommendation|integrity|keputusan|cadangan|integriti)/.test(hdr)) {
+      if (!cells.length || cells.some(function (c) { return parseStatusRank(c) !== null; })) return 'status';
+    }
+    if (/(date|submitted|updated|issued|due|expiry|when|time|last change|tarikh|dihantar|dikeluarkan|masa|period)/.test(hdr)) {
+      if (!cells.length || cells.some(function (c) { return parseDateMs(c) !== null; })) return 'date';
+    }
+    if (cells.length && cells.every(function (c) { return parseDateMs(c) !== null; })) return 'date';
+    if (/(credit|slt|hour|fee|amount|score|mark|weight|waiting|version|kredit|jam|yuran|markah|versi|rows|attempts)/.test(hdr)) {
+      if (!cells.length || cells.some(function (c) { return parseNumVal(c) !== null; })) return 'num';
+    }
+    if (cells.length && cells.every(function (c) { return /^(RM\s*)?-?[\d,]+(\.\d+)?(\s*(%|cr|h|hours|jam|days|hari))?$/i.test(c); })) return 'num';
     return 'text';
   }
+  function dirLabels(type) {
+    if (type === 'date') return { asc: tStr('Oldest first', 'Terlama dahulu'), desc: tStr('Newest first', 'Terbaharu dahulu'), defaultDir: -1 };
+    if (type === 'num') return { asc: tStr('Lowest first', 'Terendah dahulu'), desc: tStr('Highest first', 'Tertinggi dahulu'), defaultDir: -1 };
+    if (type === 'status') return { asc: tStr('Workflow order', 'Urutan aliran kerja'), desc: tStr('Reverse order', 'Urutan terbalik'), defaultDir: 1 };
+    return { asc: tStr('A to Z', 'A ke Z'), desc: tStr('Z to A', 'Z ke A'), defaultDir: 1 };
+  }
+
   function enhance(tbl) {
     var body = tbl.tBodies[0];
     if (!body || tbl.hasAttribute('data-plain') || tbl.closest('[data-plain]') || tbl.querySelector('[rowspan], tbody input:not([type=hidden]), tbody select, tbody textarea') || tbl.tHead === null) { return; }
-    var rows = $$('tr', body).filter(function (r) { return r.parentNode === body; });
+    var rows = $$('tr', body).filter(function (r) {
+      if (r.parentNode !== body) return false;
+      if (r.hasAttribute('data-empty-row')) return false;
+      if (r.cells.length === 1 && (r.cells[0].colSpan > 1 || r.cells[0].classList.contains('muted'))) return false;
+      return true;
+    });
     if (!rows.length) { return; }
-    if (rows.length === 1 && rows[0].cells.length === 1 && (rows[0].cells[0].colSpan > 1 || rows[0].cells[0].classList.contains('muted'))) { return; }
     if (tbl.dataset.enhanced) { return; }
     tbl.dataset.enhanced = '1';
+
+    rows.forEach(function (r, idx) { r.__mcmsOrigIdx = idx; });
 
     var hasWrap = tbl.parentNode.classList && tbl.parentNode.classList.contains('table-wrap');
     var wrap = hasWrap ? tbl.parentNode : tbl;
@@ -48,32 +143,616 @@
       wrap.appendChild(tbl);
     }
 
-    var defaultPer = parseInt(tbl.getAttribute('data-per-page') || '10', 10) || 10;
-    var state = { q: '', per: defaultPer, page: 1, col: -1, dir: 1 };
+    // Build list of meaningful, visible, sortable columns (headers remain plain non-clickable labels!)
+    var sortableCols = [];
     var types = [];
+    $$('th', tbl.tHead).forEach(function (th, i) {
+      var label = th.textContent.trim();
+      var type = detectColType(th, rows, i);
+      types[i] = type;
+      if (type === 'num') {
+        th.classList.add('num');
+        rows.forEach(function (r) { if (r.cells[i]) r.cells[i].classList.add('num'); });
+      }
+      if (!label || th.hasAttribute('data-nosort') || NON_SORTABLE_RE.test(label) || th.querySelector('input[type=checkbox]')) {
+        return;
+      }
+      // Also skip if column cells only contain buttons/links with no meaningful data
+      var allButtons = rows.length > 0 && rows.every(function (r) {
+        var c = r.cells[i];
+        return c && c.querySelector('button, .btn') && !c.textContent.replace(/open|view|review|edit|remove|delete|buka|lihat|semak/gi, '').trim();
+      });
+      if (allButtons) return;
+      sortableCols.push({ idx: i, label: label, type: type });
+    });
+
+    // Optional explicit default sort: data-default-sort="4:desc" or "Submitted:desc"
+    var defaultCol = -1, defaultDir = 1;
+    var defAttr = tbl.getAttribute('data-default-sort');
+    if (defAttr && sortableCols.length) {
+      var dp = defAttr.split(':');
+      var target = dp[0].trim();
+      var found = sortableCols.find(function (sc) {
+        return String(sc.idx) === target || sc.label.toLowerCase() === target.toLowerCase();
+      });
+      if (found) {
+        defaultCol = found.idx;
+        defaultDir = (dp[1] && dp[1].toLowerCase() === 'desc') ? -1 : (dp[1] && dp[1].toLowerCase() === 'asc' ? 1 : dirLabels(found.type).defaultDir);
+      }
+    }
+
+    var defaultPer = parseInt(tbl.getAttribute('data-per-page') || '10', 10) || 10;
+    var state = { q: '', per: defaultPer, page: 1, col: defaultCol, dir: defaultDir, filters: {} };
     var showSearch = !tbl.hasAttribute('data-no-search');
+    var showSort = sortableCols.length > 0 && !tbl.hasAttribute('data-no-sort');
     var hasServerPager = tbl.hasAttribute('data-no-paginate') ||
       !!host.querySelector('.pagination-bar, .pagination, [aria-label*="Pagination"]') ||
       !!(host.parentElement && host.parentElement.querySelector('.pagination-bar, .pagination')) ||
       !!(panel && panel.querySelector('.pagination-bar, .pagination'));
     var showPager = !hasServerPager && (rows.length > 5 || tbl.hasAttribute('data-paginated'));
 
-    var bar = el('div', 'tbar'), count = el('span', 'small muted');
+    // Build smart per-table filter definitions from sortable columns
+    function cellFilterVal(row, i, label) {
+      var cell = row.cells[i];
+      if (!cell) return '';
+      if (cell.hasAttribute('data-filter-value')) return (cell.getAttribute('data-filter-value') || '').trim();
+      if (/^(category|kategori)$/i.test(label)) {
+        var firstTag = cell.querySelector('.tag, .badge, .pill');
+        if (firstTag) return firstTag.textContent.trim();
+      }
+      return cell.textContent.replace(/\s+/g, ' ').trim();
+    }
+
+    function formatFilterCount(n, unitSpec) {
+      if (!unitSpec) return String(n);
+      var parts = unitSpec.split('|');
+      var singular = parts[0] || '';
+      var plural = parts[1] || singular;
+      return n + ' ' + (n === 1 ? singular : plural);
+    }
+
+    function normSearch(s) {
+      var str = String(s || '');
+      try { str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch (e) {}
+      return str.toLowerCase();
+    }
+
+    var FILTER_TAXONOMY_RE = /(status|category|type|kind|role|level|mqf|stage|outcome|decision|recommendation|part|faculty|ptj|domain|mode|channel|language|result|alert|cqi review|target status|verification|credit status|policy|adapter|consent|kategori|jenis|peranan|tahap|peringkat|keputusan|cadangan|fakulti|mod|saluran|bahasa|semakan)/i;
+    var FILTER_BLOCK_RE = /^(reference|ref|code|id|no\.?|number|micro-credential|proposal|title|name|cohort|programme|course|proposer|lecturer|participant|student|recipient|email|staff.*|matric.*|file.*|checksum|sha-?256|reason|note|remarks|comment|description|summary|scope|why|key metrics|metrics|who|by|action|rujukan|kod|tajuk|nama|kohort|program|kursus|pencadang|pensyarah|peserta|penerima|emel|fail|sebab|catatan|ulasan|ringkasan)$/i;
+
+    var filterCols = [];
+    var collator = makeCollator();
+    if (!tbl.hasAttribute('data-no-filter')) {
+      var ths = $$('th', tbl.tHead);
+      sortableCols.forEach(function (sc) {
+        var th = ths[sc.idx];
+        if (th && th.hasAttribute('data-nofilter')) return;
+        var forceType = th ? th.getAttribute('data-filter-type') : null;
+        if (forceType === 'none') return;
+        var unitSpec = th ? th.getAttribute('data-filter-unit') : null;
+
+        // 1. Dates -> always presets + date range, never a list of dates
+        if (forceType === 'date' || (!forceType && sc.type === 'date')) {
+          var hasAnyDate = rows.some(function (r) { return parseDateMs(cellRaw(r, sc.idx)) !== null; });
+          if (hasAnyDate) {
+            filterCols.push({ idx: sc.idx, label: sc.label, kind: 'date', priority: 4 });
+          }
+          return;
+        }
+        // 2. Numbers -> always Min / Max numeric range, never a chip list
+        if (forceType === 'num' || (!forceType && sc.type === 'num')) {
+          var numVals = [];
+          var minV = null, maxV = null;
+          rows.forEach(function (r) {
+            var n = parseNumVal(cellRaw(r, sc.idx));
+            if (n !== null) {
+              if (numVals.indexOf(n) === -1) numVals.push(n);
+              if (minV === null || n < minV) minV = n;
+              if (maxV === null || n > maxV) maxV = n;
+            }
+          });
+          if (numVals.length >= 2) {
+            filterCols.push({ idx: sc.idx, label: sc.label, kind: 'num', minHint: minV, maxHint: maxV, priority: 5 });
+          }
+          return;
+        }
+        // 3. Repeating taxonomy or explicit dropdown only; identifiers & free-text stay search-only
+        var isExplicitSelect = forceType === 'select' || forceType === 'dropdown';
+        var isTaxonomy = sc.type === 'status' || FILTER_TAXONOMY_RE.test(sc.label);
+        if (!isExplicitSelect && (FILTER_BLOCK_RE.test(sc.label.trim()) || !isTaxonomy)) {
+          return;
+        }
+
+        var valCounts = {};
+        var vals = [];
+        var maxLen = 0;
+        rows.forEach(function (r) {
+          var v = cellFilterVal(r, sc.idx, sc.label);
+          if (!v || EMPTY_VAL_RE.test(v)) return;
+          if (v.length > maxLen) maxLen = v.length;
+          if (!Object.prototype.hasOwnProperty.call(valCounts, v)) {
+            valCounts[v] = 0;
+            vals.push(v);
+          }
+          valCounts[v]++;
+        });
+        if (vals.length < 2 || vals.length > 25) return;
+        // Safety fallback: if a non-status column has 1 unique value per row on a larger table (>= 5 rows), keep search-only
+        if (!isExplicitSelect && sc.type !== 'status' && rows.length >= 5 && vals.length === rows.length) return;
+
+        if (sc.type === 'status') {
+          vals.sort(function (a, b) {
+            var ra = parseStatusRank(a), rb = parseStatusRank(b);
+            if (ra !== null && rb !== null && ra !== rb) return ra - rb;
+            if (ra !== null && rb === null) return -1;
+            if (ra === null && rb !== null) return 1;
+            return collator ? collator.compare(a, b) : a.localeCompare(b);
+          });
+        } else {
+          vals.sort(function (a, b) { return collator ? collator.compare(a, b) : a.localeCompare(b); });
+        }
+
+        var useDropdown = (forceType === 'dropdown') || vals.length > 8 || maxLen > 34;
+        var prio = (sc.type === 'status' || /(status|alert|outcome|decision|cqi review|target)/i.test(sc.label))
+          ? 1
+          : (useDropdown ? 3 : 2);
+        filterCols.push({
+          idx: sc.idx,
+          label: sc.label,
+          kind: useDropdown ? 'dropdown' : 'select',
+          options: vals.map(function (v) { return { val: v, count: valCounts[v] }; }),
+          unit: unitSpec,
+          priority: prio
+        });
+      });
+      filterCols.sort(function (a, b) { return (a.priority - b.priority) || (a.idx - b.idx); });
+    }
+    var showFilter = filterCols.length > 0;
+
+    // Build concise Search placeholder (max 2 primary columns so it never truncates) + full list in tooltip
+    var searchableCols = sortableCols.filter(function (sc) { return sc.type === 'text' || sc.type === 'status'; });
+    function defaultSearchPlaceholder() {
+      if (!searchableCols.length) return tStr('Search records...', 'Cari rekod...');
+      var names = searchableCols.slice(0, 2).map(function (sc) { return sc.label.toLowerCase(); });
+      if (names.length === 1) return tStr('Search ', 'Cari ') + names[0];
+      return tStr('Search ', 'Cari ') + names[0] + tStr(' or ', ' atau ') + names[1];
+    }
+
+    var bar = el('div', 'tbar'), count = el('span', 'small muted tbar-count');
+    var liveRegion = el('span', 'sr');
+    liveRegion.setAttribute('aria-live', 'polite');
+
     var searchWrap = el('div', 'tbar-search-wrap');
-    searchWrap.style.cssText = 'position:relative;display:inline-flex;align-items:center';
     var search = el('input', 'input');
     search.type = 'search';
-    search.setAttribute('aria-label', 'Search this table');
-    search.placeholder = tbl.getAttribute('data-search-placeholder') || 'Search records...';
+    var phText = tbl.getAttribute('data-search-placeholder') || defaultSearchPlaceholder();
+    search.setAttribute('aria-label', phText);
+    search.placeholder = phText;
+    if (searchableCols.length) {
+      search.title = tStr('Searches: ', 'Mencari: ') + searchableCols.map(function (sc) { return sc.label; }).join(', ');
+    }
     searchWrap.appendChild(search);
 
+    // Inline Sort control (D-73) — portaled to body so panel/modal overflow:hidden never clips it
+    var sortWrap = el('div', 'tbar-sort');
+    var sortBtn = el('button', 'tbar-sort-btn');
+    sortBtn.type = 'button';
+    sortBtn.setAttribute('aria-haspopup', 'true');
+    sortBtn.setAttribute('aria-expanded', 'false');
+    var sortMenu = el('div', 'tbar-sort-menu');
+    sortMenu.hidden = true;
+    sortMenu.setAttribute('role', 'dialog');
+    sortMenu.setAttribute('aria-label', tStr('Sort options', 'Pilihan susunan'));
+    sortWrap.appendChild(sortBtn);
+    document.body.appendChild(sortMenu);
+
+    // Inline Filter control (D-74) — portaled to body so panel/modal overflow:hidden never clips it
+    var filterWrap = el('div', 'tbar-filter');
+    var filterBtn = el('button', 'tbar-sort-btn tbar-filter-btn');
+    filterBtn.type = 'button';
+    filterBtn.setAttribute('aria-haspopup', 'true');
+    filterBtn.setAttribute('aria-expanded', 'false');
+    var filterMenu = el('div', 'tbar-sort-menu tbar-filter-menu');
+    filterMenu.hidden = true;
+    filterMenu.setAttribute('role', 'dialog');
+    filterMenu.setAttribute('aria-label', tStr('Filter options', 'Pilihan tapisan'));
+    filterWrap.appendChild(filterBtn);
+    document.body.appendChild(filterMenu);
+    var chipsBar = el('div', 'tbar-chips');
+    chipsBar.hidden = true;
+
+    function positionPopover(btn, menu) {
+      var r = btn.getBoundingClientRect();
+      var vw = window.innerWidth;
+      var vh = window.innerHeight;
+      menu.style.maxHeight = Math.max(200, vh - 24) + 'px';
+      menu.style.overflowY = 'auto';
+      var mw = menu.offsetWidth || 280;
+      var mh = menu.offsetHeight || 260;
+      var left = Math.max(12, Math.min(r.left, vw - mw - 12));
+      var spaceBelow = vh - r.bottom - 12;
+      var spaceAbove = r.top - 12;
+      var top;
+      if (spaceBelow >= mh || spaceBelow >= spaceAbove) {
+        top = r.bottom + 4;
+        if (top + mh > vh - 12) {
+          menu.style.maxHeight = Math.max(160, vh - top - 12) + 'px';
+        }
+      } else {
+        var availAbove = Math.max(160, spaceAbove - 4);
+        menu.style.maxHeight = availAbove + 'px';
+        top = Math.max(12, r.top - Math.min(mh, availAbove) - 4);
+      }
+      menu.style.left = Math.round(left) + 'px';
+      menu.style.top = Math.round(top) + 'px';
+    }
+
+    function activeFilterCount() {
+      var n = 0;
+      filterCols.forEach(function (fc) {
+        var f = state.filters[fc.idx];
+        if (!f) return;
+        if ((fc.kind === 'select' || fc.kind === 'dropdown') && f.values && f.values.length) n++;
+        else if (fc.kind === 'date' && (f.preset || f.from || f.to)) n++;
+        else if (fc.kind === 'num' && (f.min !== '' && f.min != null || f.max !== '' && f.max != null)) n++;
+      });
+      return n;
+    }
+
+    function datePresetLabel(p) {
+      var map = {
+        today: tStr('Today', 'Hari ini'),
+        '7d': tStr('Last 7 days', '7 hari lepas'),
+        '30d': tStr('Last 30 days', '30 hari lepas'),
+        year: tStr('This year', 'Tahun ini'),
+        has: tStr('Has date', 'Ada tarikh'),
+        empty: tStr('No date', 'Tiada tarikh')
+      };
+      return map[p] || p;
+    }
+
+    function renderFilterUI() {
+      if (!showFilter) return;
+      var cnt = activeFilterCount();
+      filterBtn.innerHTML = '<span class="tbar-sort-lbl">' + esc(cnt > 0 ? tStr('Filter', 'Tapis') + ' (' + cnt + ')' : tStr('Filter', 'Tapis')) + '</span><span class="tbar-sort-caret" aria-hidden="true">&#9662;</span>';
+      filterBtn.classList.toggle('active', cnt > 0);
+
+      // Active filter chips strip
+      if (cnt === 0) {
+        chipsBar.hidden = true;
+        chipsBar.innerHTML = '';
+      } else {
+        var ch = '';
+        filterCols.forEach(function (fc) {
+          var f = state.filters[fc.idx];
+          if (!f) return;
+          if ((fc.kind === 'select' || fc.kind === 'dropdown') && f.values && f.values.length) {
+            f.values.forEach(function (v) {
+              ch += '<span class="tbar-chip"><b>' + esc(fc.label) + ':</b> ' + esc(v) + ' <button type="button" class="tbar-chip-x" data-fcol="' + fc.idx + '" data-fval="' + esc(v) + '" aria-label="' + esc(tStr('Remove filter', 'Buang tapisan')) + '">&times;</button></span>';
+            });
+          } else if (fc.kind === 'date' && (f.preset || f.from || f.to)) {
+            var dtxt = f.preset ? datePresetLabel(f.preset) : ((f.from || '…') + ' – ' + (f.to || '…'));
+            ch += '<span class="tbar-chip"><b>' + esc(fc.label) + ':</b> ' + esc(dtxt) + ' <button type="button" class="tbar-chip-x" data-fcol="' + fc.idx + '" aria-label="' + esc(tStr('Remove filter', 'Buang tapisan')) + '">&times;</button></span>';
+          } else if (fc.kind === 'num' && ((f.min !== '' && f.min != null) || (f.max !== '' && f.max != null))) {
+            var ntxt = (f.min !== '' && f.min != null ? f.min : '…') + ' – ' + (f.max !== '' && f.max != null ? f.max : '…');
+            ch += '<span class="tbar-chip"><b>' + esc(fc.label) + ':</b> ' + esc(ntxt) + ' <button type="button" class="tbar-chip-x" data-fcol="' + fc.idx + '" aria-label="' + esc(tStr('Remove filter', 'Buang tapisan')) + '">&times;</button></span>';
+          }
+        });
+        ch += '<button type="button" class="tbar-sort-reset tbar-chips-clear">' + esc(tStr('Clear all', 'Kosongkan semua')) + '</button>';
+        chipsBar.innerHTML = ch;
+        chipsBar.hidden = false;
+      }
+    }
+
+    function renderFilterMenu() {
+      var html = '<div class="tbar-filter-body">';
+      filterCols.forEach(function (fc) {
+        var f = state.filters[fc.idx] || {};
+        html += '<div class="tbar-filter-group">';
+        html += '<div class="tbar-sort-sec">' + esc(fc.label) + '</div>';
+        if (fc.kind === 'select') {
+          var sel = f.values || [];
+          html += '<div class="tbar-filter-pills">';
+          fc.options.forEach(function (opt) {
+            var on = sel.indexOf(opt.val) > -1;
+            var cntTxt = formatFilterCount(opt.count, fc.unit);
+            html += '<label class="tbar-fpill' + (on ? ' on' : '') + '"><input type="checkbox" data-fcol="' + fc.idx + '" value="' + esc(opt.val) + '"' + (on ? ' checked' : '') + '><span>' + esc(opt.val) + '</span><span class="tbar-fpill-n">' + esc(fc.unit ? '(' + cntTxt + ')' : cntTxt) + '</span></label>';
+          });
+          html += '</div>';
+        } else if (fc.kind === 'dropdown') {
+          var dsel = f.values || [];
+          html += '<div class="tbar-fdrop" data-fdrop-col="' + fc.idx + '">';
+          if (fc.options.length > 4) {
+            html += '<input type="search" class="tbar-fdrop-search" placeholder="' + esc(tStr('Filter ', 'Tapis ') + fc.label.toLowerCase() + '...') + '">';
+          }
+          html += '<div class="tbar-fdrop-list">';
+          fc.options.forEach(function (opt) {
+            var on = dsel.indexOf(opt.val) > -1;
+            var cntTxt = formatFilterCount(opt.count, fc.unit);
+            html += '<label class="tbar-fdrop-opt' + (on ? ' on' : '') + '" data-opt-txt="' + esc(normSearch(opt.val)) + '"><input type="checkbox" data-fcol="' + fc.idx + '" value="' + esc(opt.val) + '"' + (on ? ' checked' : '') + '><span class="tbar-fdrop-lbl">' + esc(opt.val) + '</span><span class="tbar-fpill-n">' + esc(fc.unit ? '(' + cntTxt + ')' : cntTxt) + '</span></label>';
+          });
+          html += '</div></div>';
+        } else if (fc.kind === 'date') {
+          var presets = ['today', '7d', '30d', 'year', 'has', 'empty'];
+          html += '<div class="tbar-filter-pills">';
+          presets.forEach(function (p) {
+            var on = f.preset === p;
+            html += '<button type="button" class="tbar-fpill-btn' + (on ? ' on' : '') + '" data-fcol="' + fc.idx + '" data-preset="' + p + '">' + esc(datePresetLabel(p)) + '</button>';
+          });
+          html += '</div>';
+          html += '<div class="tbar-date-range">';
+          html += '<label><span>' + esc(tStr('From', 'Dari')) + '</span><input type="date" class="tbar-fdate" data-fcol="' + fc.idx + '" data-bound="from" value="' + esc(f.from || '') + '"></label>';
+          html += '<label><span>' + esc(tStr('To', 'Hingga')) + '</span><input type="date" class="tbar-fdate" data-fcol="' + fc.idx + '" data-bound="to" value="' + esc(f.to || '') + '"></label>';
+          html += '</div>';
+        } else if (fc.kind === 'num') {
+          html += '<div class="tbar-date-range">';
+          html += '<label><span>' + esc(tStr('Min', 'Min')) + '</span><input type="number" step="any" class="tbar-fnum" data-fcol="' + fc.idx + '" data-bound="min" placeholder="' + esc(fc.minHint != null ? fc.minHint : '') + '" value="' + esc(f.min != null ? f.min : '') + '"></label>';
+          html += '<label><span>' + esc(tStr('Max', 'Maks')) + '</span><input type="number" step="any" class="tbar-fnum" data-fcol="' + fc.idx + '" data-bound="max" placeholder="' + esc(fc.maxHint != null ? fc.maxHint : '') + '" value="' + esc(f.max != null ? f.max : '') + '"></label>';
+          html += '</div>';
+        }
+        html += '</div>';
+      });
+      html += '</div>';
+      if (activeFilterCount() > 0) {
+        html += '<div class="tbar-sort-foot"><button type="button" class="tbar-sort-reset tbar-filter-reset">' + esc(tStr('Clear filters', 'Kosongkan tapisan')) + '</button></div>';
+      }
+      filterMenu.innerHTML = html;
+    }
+
+    function openFilterMenu() {
+      closeSortMenu(false);
+      $$('.tbar-sort-menu:not([hidden])').forEach(function (m) {
+        if (m !== filterMenu) {
+          m.hidden = true;
+        }
+      });
+      $$('.tbar-sort-btn[aria-expanded="true"]').forEach(function (b) {
+        if (b !== filterBtn) b.setAttribute('aria-expanded', 'false');
+      });
+      renderFilterMenu();
+      filterMenu.hidden = false;
+      positionPopover(filterBtn, filterMenu);
+      filterBtn.setAttribute('aria-expanded', 'true');
+      var firstFocus = filterMenu.querySelector('input, button');
+      if (firstFocus) firstFocus.focus();
+    }
+    function closeFilterMenu(restoreFocus) {
+      if (filterMenu.hidden) return;
+      filterMenu.hidden = true;
+      filterBtn.setAttribute('aria-expanded', 'false');
+      if (restoreFocus) filterBtn.focus();
+    }
+
+    filterBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (filterMenu.hidden) openFilterMenu(); else closeFilterMenu(false);
+    });
+    filterMenu.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var pbtn = e.target.closest('.tbar-fpill-btn');
+      if (pbtn) {
+        var col = parseInt(pbtn.getAttribute('data-fcol'), 10);
+        var preset = pbtn.getAttribute('data-preset');
+        var cur = state.filters[col] || {};
+        if (cur.preset === preset) {
+          delete state.filters[col];
+        } else {
+          state.filters[col] = { preset: preset, from: '', to: '' };
+        }
+        state.page = 1;
+        draw(true);
+        renderFilterMenu();
+        return;
+      }
+      if (e.target.closest('.tbar-filter-reset')) {
+        state.filters = {};
+        state.page = 1;
+        draw(true);
+        closeFilterMenu(true);
+      }
+    });
+    filterMenu.addEventListener('change', function (e) {
+      var t = e.target;
+      if (!t || !t.hasAttribute('data-fcol')) return;
+      var col = parseInt(t.getAttribute('data-fcol'), 10);
+      if (t.type === 'checkbox') {
+        var cur = state.filters[col] && state.filters[col].values ? state.filters[col].values.slice() : [];
+        var val = t.value;
+        var pos = cur.indexOf(val);
+        if (t.checked && pos === -1) cur.push(val);
+        else if (!t.checked && pos > -1) cur.splice(pos, 1);
+        if (cur.length) state.filters[col] = { values: cur };
+        else delete state.filters[col];
+        state.page = 1;
+        draw(true);
+        renderFilterMenu();
+      } else if (t.classList.contains('tbar-fdate')) {
+        var bound = t.getAttribute('data-bound');
+        var curD = state.filters[col] ? Object.assign({}, state.filters[col]) : {};
+        curD.preset = '';
+        curD[bound] = t.value;
+        if (curD.from || curD.to) state.filters[col] = curD;
+        else delete state.filters[col];
+        state.page = 1;
+        draw(true);
+        renderFilterMenu();
+      } else if (t.classList.contains('tbar-fnum')) {
+        var nb = t.getAttribute('data-bound');
+        var curN = state.filters[col] ? Object.assign({}, state.filters[col]) : {};
+        curN[nb] = t.value;
+        if ((curN.min !== '' && curN.min != null) || (curN.max !== '' && curN.max != null)) state.filters[col] = curN;
+        else delete state.filters[col];
+        state.page = 1;
+        draw(true);
+      }
+    });
+    filterMenu.addEventListener('input', function (e) {
+      var t = e.target;
+      if (!t || !t.classList.contains('tbar-fdrop-search')) return;
+      var drop = t.closest('.tbar-fdrop');
+      if (!drop) return;
+      var q = normSearch(t.value.trim());
+      $$('.tbar-fdrop-opt', drop).forEach(function (opt) {
+        var txt = opt.getAttribute('data-opt-txt') || '';
+        opt.hidden = !!q && txt.indexOf(q) === -1;
+      });
+    });
+    filterMenu.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); closeFilterMenu(true); }
+    });
+    chipsBar.addEventListener('click', function (e) {
+      var x = e.target.closest('.tbar-chip-x');
+      if (x) {
+        var col = parseInt(x.getAttribute('data-fcol'), 10);
+        var val = x.getAttribute('data-fval');
+        if (val != null && state.filters[col] && state.filters[col].values) {
+          var next = state.filters[col].values.filter(function (v) { return v !== val; });
+          if (next.length) state.filters[col] = { values: next };
+          else delete state.filters[col];
+        } else {
+          delete state.filters[col];
+        }
+        state.page = 1;
+        draw(true);
+        if (!filterMenu.hidden) renderFilterMenu();
+        return;
+      }
+      if (e.target.closest('.tbar-chips-clear')) {
+        state.filters = {};
+        state.page = 1;
+        draw(true);
+        if (!filterMenu.hidden) renderFilterMenu();
+      }
+    });
+
+    function currentSortMeta() {
+      return sortableCols.find(function (sc) { return sc.idx === state.col; }) || null;
+    }
+    function sortSummaryText() {
+      var meta = currentSortMeta();
+      if (!meta) return tStr('Sort: Default', 'Susun: Lalai');
+      var dl = dirLabels(meta.type);
+      var dirTxt = state.dir > 0 ? dl.asc : dl.desc;
+      return tStr('Sort: ', 'Susun: ') + meta.label + ', ' + dirTxt.toLowerCase();
+    }
+    function renderSortMenu() {
+      var meta = currentSortMeta();
+      var activeType = meta ? meta.type : (sortableCols[0] ? sortableCols[0].type : 'text');
+      var dl = dirLabels(activeType);
+      var isDefault = (state.col === defaultCol && state.dir === defaultDir);
+
+      sortBtn.innerHTML = '<span class="tbar-sort-lbl">' + esc(sortSummaryText()) + '</span><span class="tbar-sort-caret" aria-hidden="true">&#9662;</span>';
+      sortBtn.classList.toggle('active', !isDefault);
+
+      var html = '<div class="tbar-sort-sec">' + esc(tStr('Sort by', 'Susun mengikut')) + '</div><div class="tbar-sort-list">';
+      sortableCols.forEach(function (sc) {
+        var checked = sc.idx === state.col;
+        html += '<label class="tbar-sort-opt' + (checked ? ' on' : '') + '"><input type="radio" name="mcms_sort_' + esc(storageKey) + '" value="' + sc.idx + '"' + (checked ? ' checked' : '') + '><span>' + esc(sc.label) + '</span></label>';
+      });
+      html += '</div>';
+
+      html += '<div class="tbar-sort-sec" style="margin-top:10px">' + esc(tStr('Direction', 'Arah')) + '</div>';
+      html += '<div class="tbar-sort-dir" role="group" aria-label="' + esc(tStr('Sort direction', 'Arah susunan')) + '">';
+      var firstDir = dl.defaultDir;
+      var secondDir = -dl.defaultDir;
+      var firstLbl = firstDir > 0 ? dl.asc : dl.desc;
+      var secondLbl = secondDir > 0 ? dl.asc : dl.desc;
+      html += '<button type="button" class="tbar-dir-btn' + (meta && state.dir === firstDir ? ' on' : '') + '" data-dir="' + firstDir + '">' + esc(firstLbl) + '</button>';
+      html += '<button type="button" class="tbar-dir-btn' + (meta && state.dir === secondDir ? ' on' : '') + '" data-dir="' + secondDir + '">' + esc(secondLbl) + '</button>';
+      html += '</div>';
+
+      if (!isDefault) {
+        html += '<div class="tbar-sort-foot"><button type="button" class="tbar-sort-reset">' + esc(tStr('Reset to default', 'Tetap semula')) + '</button></div>';
+      }
+      sortMenu.innerHTML = html;
+    }
+
+    function openSortMenu() {
+      closeFilterMenu(false);
+      $$('.tbar-sort-menu:not([hidden])').forEach(function (m) {
+        if (m !== sortMenu) {
+          m.hidden = true;
+        }
+      });
+      $$('.tbar-sort-btn[aria-expanded="true"]').forEach(function (b) {
+        if (b !== sortBtn) b.setAttribute('aria-expanded', 'false');
+      });
+      renderSortMenu();
+      sortMenu.hidden = false;
+      positionPopover(sortBtn, sortMenu);
+      sortBtn.setAttribute('aria-expanded', 'true');
+      var firstInput = sortMenu.querySelector('input:checked, input, button');
+      if (firstInput) firstInput.focus();
+    }
+    function closeSortMenu(restoreFocus) {
+      if (sortMenu.hidden) return;
+      sortMenu.hidden = true;
+      sortBtn.setAttribute('aria-expanded', 'false');
+      if (restoreFocus) sortBtn.focus();
+    }
+
+    sortBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (sortMenu.hidden) openSortMenu(); else closeSortMenu(false);
+    });
+    sortMenu.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var dirBtn = e.target.closest('.tbar-dir-btn');
+      if (dirBtn) {
+        if (state.col < 0 && sortableCols.length) state.col = sortableCols[0].idx;
+        state.dir = parseInt(dirBtn.getAttribute('data-dir'), 10) || 1;
+        state.page = 1;
+        draw(true);
+        renderSortMenu();
+        return;
+      }
+      if (e.target.closest('.tbar-sort-reset')) {
+        state.col = defaultCol;
+        state.dir = defaultDir;
+        state.page = 1;
+        draw(true);
+        closeSortMenu(true);
+      }
+    });
+    sortMenu.addEventListener('change', function (e) {
+      if (e.target && e.target.type === 'radio') {
+        var newCol = parseInt(e.target.value, 10);
+        var meta = sortableCols.find(function (sc) { return sc.idx === newCol; });
+        state.col = newCol;
+        state.dir = meta ? dirLabels(meta.type).defaultDir : 1;
+        state.page = 1;
+        draw(true);
+        renderSortMenu();
+      }
+    });
+    sortMenu.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); closeSortMenu(true); }
+    });
+    document.addEventListener('click', function (e) {
+      if (!sortWrap.contains(e.target) && !sortMenu.contains(e.target)) closeSortMenu(false);
+      if (!filterWrap.contains(e.target) && !filterMenu.contains(e.target)) closeFilterMenu(false);
+    });
+    window.addEventListener('resize', function () {
+      if (!sortMenu.hidden) positionPopover(sortBtn, sortMenu);
+      if (!filterMenu.hidden) positionPopover(filterBtn, filterMenu);
+    });
+    window.addEventListener('scroll', function (e) {
+      if (!sortMenu.hidden && (!e.target || !sortMenu.contains(e.target))) positionPopover(sortBtn, sortMenu);
+      if (!filterMenu.hidden && (!e.target || !filterMenu.contains(e.target))) positionPopover(filterBtn, filterMenu);
+    }, true);
+
     var hasOwn = !!host.querySelector('.toolbar, [role=search]') || !!(host.previousElementSibling && host.previousElementSibling.matches('form'));
-    if (showSearch && !hasOwn) {
-      bar.appendChild(searchWrap);
+    var showBar = (showSearch && !hasOwn) || showSort || showFilter;
+    if (showBar) {
+      if (showSearch && !hasOwn) bar.appendChild(searchWrap);
+      if (showFilter) bar.appendChild(filterWrap);
+      if (showSort) bar.appendChild(sortWrap);
       bar.appendChild(el('span', 'sp'));
       bar.lastChild.style.flex = '1';
       bar.appendChild(count);
+      bar.appendChild(liveRegion);
       host.insertBefore(bar, wrap);
+      if (showFilter) host.insertBefore(chipsBar, wrap);
     }
 
     var pager = el('div', 'pager');
@@ -81,15 +760,15 @@
     [5, 10, 25, 50].forEach(function (n) {
       var o = el('option', null, n);
       o.value = n;
-      if (n === 10) { o.selected = true; }
+      if (n === defaultPer) { o.selected = true; }
       per.appendChild(o);
     });
-    per.setAttribute('aria-label', 'Rows per page');
+    per.setAttribute('aria-label', tStr('Rows per page', 'Baris setiap halaman'));
     var range = el('span'), pg = el('span', 'sp'), prev = el('button', 'pb', '&lsaquo;'), next = el('button', 'pb', '&rsaquo;');
     prev.type = next.type = 'button';
-    prev.setAttribute('aria-label', 'Previous page');
-    next.setAttribute('aria-label', 'Next page');
-    var lbl = el('span', null, 'Rows per page');
+    prev.setAttribute('aria-label', tStr('Previous page', 'Halaman sebelumnya'));
+    next.setAttribute('aria-label', tStr('Next page', 'Halaman seterusnya'));
+    var lbl = el('span', null, tStr('Rows per page', 'Baris setiap halaman'));
     pager.appendChild(lbl);
     pager.appendChild(per);
     pager.appendChild(range);
@@ -99,13 +778,14 @@
     if (showPager) { host.appendChild(pager); }
 
     var none = el('tr');
-    none.innerHTML = '<td colspan="99" class="muted" style="text-align:center;padding:24px 16px"><div style="font-size:20px;margin-bottom:6px;opacity:0.4"><svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:middle"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg></div><strong>No matching records found</strong><div class="s muted" style="margin-top:4px">No records match your search query. <button type="button" class="btn ghost sm clear-search-btn" style="margin-left:6px;padding:2px 8px;font-size:12px">Clear search</button></div></td>';
+    none.innerHTML = '<td colspan="99" class="muted" style="text-align:center;padding:24px 16px"><strong>' + esc(tStr('No matching records found', 'Tiada rekod sepadan ditemui')) + '</strong><div class="s muted" style="margin-top:4px">' + esc(tStr('No records match your current search or filters.', 'Tiada rekod sepadan dengan carian atau tapisan anda.')) + ' <button type="button" class="btn ghost sm clear-search-btn" style="margin-left:6px;padding:2px 8px;font-size:12px">' + esc(tStr('Clear search & filters', 'Kosongkan carian & tapisan')) + '</button></div></td>';
     none.addEventListener('click', function (e) {
       if (e.target.closest('.clear-search-btn')) {
         search.value = '';
         state.q = '';
+        state.filters = {};
         state.page = 1;
-        draw();
+        draw(false);
         search.focus();
       }
     });
@@ -115,88 +795,242 @@
       var saved = JSON.parse(sessionStorage.getItem(storageKey));
       if (saved) {
         if (saved.q && showSearch && !hasOwn) { state.q = saved.q; search.value = saved.q; }
-        if (saved.col != null && saved.col > -1) { state.col = saved.col; state.dir = saved.dir || 1; }
+        if (saved.col != null && saved.col > -1 && sortableCols.some(function (sc) { return sc.idx === saved.col; })) {
+          state.col = saved.col;
+          state.dir = saved.dir === -1 ? -1 : 1;
+        }
+        if (saved.filters && typeof saved.filters === 'object' && showFilter) {
+          var validCols = {};
+          filterCols.forEach(function (fc) { validCols[fc.idx] = true; });
+          Object.keys(saved.filters).forEach(function (k) {
+            if (validCols[k]) state.filters[k] = saved.filters[k];
+          });
+        }
         if (saved.per != null) { state.per = saved.per; per.value = saved.per; }
         if (saved.page != null) { state.page = saved.page; }
       }
     } catch (e) {}
 
-    $$('th', tbl.tHead).forEach(function (th, i) {
-      if (!th.textContent.trim()) { return; }
-      types[i] = colType(rows, i);
-      if (types[i] === 'num') { th.classList.add('num'); rows.forEach(function (r) { if (r.cells[i]) { r.cells[i].classList.add('num'); } }); }
-      var b = el('button', 'sortbtn', esc(th.textContent.trim()) + SORT); b.type = 'button';
-      th.textContent = ''; th.appendChild(b); th.setAttribute('aria-sort', 'none');
-      b.addEventListener('click', function () {
-        state.dir = state.col === i ? -state.dir : 1; state.col = i; state.page = 1; draw();
-      });
-    });
-
-    function draw() {
-      var q = state.q.toLowerCase();
-      var list = rows.filter(function (r) { return !q || r.textContent.toLowerCase().indexOf(q) > -1; });
-      if (state.col > -1) {
-        var t = types[state.col];
-        list.sort(function (a, b) {
-          var x = key(a.cells[state.col] ? a.cells[state.col].textContent : '', t), y = key(b.cells[state.col] ? b.cells[state.col].textContent : '', t);
-          return (x < y ? -1 : x > y ? 1 : 0) * state.dir;
-        });
-        list.forEach(function (r) { body.appendChild(r); });
+    function rowMatchesFilters(r) {
+      if (!showFilter) return true;
+      var now = new Date();
+      var todayStart = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+      var todayEnd = todayStart + 86400000 - 1;
+      for (var i = 0; i < filterCols.length; i++) {
+        var fc = filterCols[i];
+        var f = state.filters[fc.idx];
+        if (!f) continue;
+        if ((fc.kind === 'select' || fc.kind === 'dropdown') && f.values && f.values.length) {
+          var rv = cellFilterVal(r, fc.idx, fc.label);
+          if (f.values.indexOf(rv) === -1) return false;
+        } else if (fc.kind === 'date' && (f.preset || f.from || f.to)) {
+          var ms = parseDateMs(cellRaw(r, fc.idx));
+          if (f.preset === 'empty') { if (ms !== null) return false; }
+          else if (f.preset === 'has') { if (ms === null) return false; }
+          else if (f.preset === 'today') { if (ms === null || ms < todayStart || ms > todayEnd) return false; }
+          else if (f.preset === '7d') { if (ms === null || ms < (todayStart - 6 * 86400000) || ms > todayEnd) return false; }
+          else if (f.preset === '30d') { if (ms === null || ms < (todayStart - 29 * 86400000) || ms > todayEnd) return false; }
+          else if (f.preset === 'year') {
+            var yStart = Date.UTC(now.getFullYear(), 0, 1);
+            var yEnd = Date.UTC(now.getFullYear(), 11, 31, 23, 59, 59);
+            if (ms === null || ms < yStart || ms > yEnd) return false;
+          } else {
+            if (ms === null) return false;
+            if (f.from) {
+              var fm = parseDateMs(f.from);
+              if (fm !== null && ms < fm) return false;
+            }
+            if (f.to) {
+              var tm = parseDateMs(f.to);
+              if (tm !== null && ms > tm + 86400000 - 1) return false;
+            }
+          }
+        } else if (fc.kind === 'num' && ((f.min !== '' && f.min != null) || (f.max !== '' && f.max != null))) {
+          var nv = parseNumVal(cellRaw(r, fc.idx));
+          if (nv === null) return false;
+          if (f.min !== '' && f.min != null && nv < parseFloat(f.min)) return false;
+          if (f.max !== '' && f.max != null && nv > parseFloat(f.max)) return false;
+        } else if (fc.kind === 'text' && f.q && f.q.trim()) {
+          var tv = cellFilterVal(r, fc.idx, fc.label).toLowerCase();
+          if (tv.indexOf(f.q.trim().toLowerCase()) === -1) return false;
+        }
       }
-      $$('th', tbl.tHead).forEach(function (th, i) {
-        th.setAttribute('aria-sort', i === state.col ? (state.dir > 0 ? 'ascending' : 'descending') : 'none'); th.classList.toggle('sorted', i === state.col);
+      return true;
+    }
+
+    function draw(announce) {
+      var q = normSearch(state.q.trim());
+      var list = rows.filter(function (r) {
+        if (q && normSearch(r.textContent).indexOf(q) === -1) return false;
+        return rowMatchesFilters(r);
       });
+      if (state.col > -1) {
+        var t = types[state.col] || 'text';
+        list.sort(function (a, b) {
+          var ka = extractKey(a, state.col, t);
+          var kb = extractKey(b, state.col, t);
+          // Empty values ALWAYS sort last, in both directions
+          if (ka.empty && kb.empty) return a.__mcmsOrigIdx - b.__mcmsOrigIdx;
+          if (ka.empty) return 1;
+          if (kb.empty) return -1;
+
+          var cmp = 0;
+          if (t === 'date' || t === 'num') {
+            cmp = ka.val < kb.val ? -1 : (ka.val > kb.val ? 1 : 0);
+          } else if (t === 'status') {
+            cmp = ka.val < kb.val ? -1 : (ka.val > kb.val ? 1 : 0);
+            if (cmp === 0 && ka.fallback && kb.fallback) {
+              cmp = collator ? collator.compare(ka.fallback, kb.fallback) : ka.fallback.localeCompare(kb.fallback);
+            }
+          } else {
+            cmp = collator ? collator.compare(ka.val, kb.val) : ka.val.localeCompare(kb.val);
+          }
+          if (cmp !== 0) return cmp * state.dir;
+          return a.__mcmsOrigIdx - b.__mcmsOrigIdx;
+        });
+      } else {
+        list.sort(function (a, b) { return a.__mcmsOrigIdx - b.__mcmsOrigIdx; });
+      }
+      list.forEach(function (r) { body.appendChild(r); });
+
+      if (showSort) {
+        renderSortMenu();
+      }
+      if (showFilter) {
+        renderFilterUI();
+      }
+      if (announce) {
+        liveRegion.textContent = (showSort ? sortSummaryText() + ' · ' : '') + list.length + ' ' + tStr('of', 'daripada') + ' ' + rows.length;
+      }
+
       var pages = Math.max(1, Math.ceil(list.length / state.per));
       state.page = Math.min(state.page, pages);
       var from = (state.page - 1) * state.per;
       rows.forEach(function (r) { r.hidden = true; });
       list.slice(showPager ? from : 0, showPager ? from + state.per : undefined).forEach(function (r) { r.hidden = false; });
       if (list.length) { if (none.parentNode) { none.remove(); } } else { body.appendChild(none); }
-      var rowWord = function (n) { return n === 1 ? 'row' : 'rows'; };
-      count.textContent = rows.length === list.length ? rows.length + ' ' + rowWord(rows.length) : list.length + ' of ' + rows.length + ' ' + rowWord(rows.length);
-      range.textContent = list.length ? (from + 1) + '–' + Math.min(from + state.per, list.length) + ' of ' + list.length : '0 of 0';
-      pg.textContent = 'Page ' + state.page + ' of ' + pages;
+      var rowWord = function (n) { return isMsLang() ? 'baris' : (n === 1 ? 'row' : 'rows'); };
+      count.textContent = rows.length === list.length
+        ? rows.length + ' ' + rowWord(rows.length)
+        : list.length + ' ' + tStr('of', 'daripada') + ' ' + rows.length + ' ' + rowWord(rows.length);
+      range.textContent = list.length ? (from + 1) + '–' + Math.min(from + state.per, list.length) + ' ' + tStr('of', 'daripada') + ' ' + list.length : '0 ' + tStr('of', 'daripada') + ' 0';
+      pg.textContent = tStr('Page ', 'Halaman ') + state.page + ' ' + tStr('of', 'daripada') + ' ' + pages;
       prev.disabled = state.page <= 1; next.disabled = state.page >= pages;
 
       try {
-        sessionStorage.setItem(storageKey, JSON.stringify({ q: state.q, col: state.col, dir: state.dir, page: state.page, per: state.per }));
+        sessionStorage.setItem(storageKey, JSON.stringify({ q: state.q, col: state.col, dir: state.dir, filters: state.filters, page: state.page, per: state.per }));
       } catch (e) {}
     }
-    search.addEventListener('input', function () { state.q = search.value; state.page = 1; draw(); });
-    per.addEventListener('change', function () { state.per = +per.value; state.page = 1; draw(); });
-    prev.addEventListener('click', function () { state.page--; draw(); });
-    next.addEventListener('click', function () { state.page++; draw(); });
-    draw();
+    search.addEventListener('input', function () { state.q = search.value; state.page = 1; draw(false); });
+    per.addEventListener('change', function () { state.per = +per.value; state.page = 1; draw(false); });
+    prev.addEventListener('click', function () { state.page--; draw(false); });
+    next.addEventListener('click', function () { state.page++; draw(false); });
+    draw(false);
   }
 
-  /* ---------- toasts (UI/UX 4.3): flash messages become toasts; errors stay inline ---------- */
-  function toasts() {
-    var flashes = $$('main .status:not(.error)');
-    if (!flashes.length) { return; }
-    var box = el('div', 'toasts'); box.setAttribute('aria-live', 'polite'); document.body.appendChild(box);
-    flashes.forEach(function (f) {
-      var t = el('div', 'toast'); t.appendChild(f); f.className = ''; box.appendChild(t);
-      var x = el('button', 'btn ghost sm', '&times;'); x.type = 'button'; x.setAttribute('aria-label', 'Dismiss'); x.style.marginLeft = 'auto'; t.appendChild(x);
-      var gone = function () { t.remove(); }; x.addEventListener('click', gone); setTimeout(gone, 9000);
-    });
+  /* ---------- toasts (D-75): flash messages, warnings & errors pop out as hover-paused auto-dismissing toasts ---------- */
+  function attachAutoDismiss(node, ms, onGone) {
+    var timer = null;
+    function start(delay) {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        node.style.transition = 'opacity .25s ease';
+        node.style.opacity = '0';
+        setTimeout(function () {
+          if (onGone) onGone(); else node.remove();
+        }, 260);
+      }, delay);
+    }
+    node.addEventListener('mouseenter', function () { clearTimeout(timer); });
+    node.addEventListener('mouseleave', function () { start(3000); });
+    start(ms);
+    return function () { clearTimeout(timer); if (onGone) onGone(); else node.remove(); };
   }
 
-  function showToast(title, body, kind) {
+  function ensureToastBox() {
     var box = $('.toasts');
     if (!box) {
       box = el('div', 'toasts');
       box.setAttribute('aria-live', 'polite');
       document.body.appendChild(box);
     }
-    var t = el('div', 'toast' + (kind ? ' ' + kind : ''));
-    t.innerHTML = '<div><b>' + esc(title) + '</b>' + (body ? '<div class="muted small">' + esc(body) + '</div>' : '') + '</div>';
+    return box;
+  }
+
+  function toasts() {
+    var flashes = $$('main .status:not(.error):not(.warn)').filter(function (f) { return !f.dataset.toasted; });
+    var alerts = $$('main .status.error, main .status.warn').filter(function (f) { return !f.dataset.toasted; });
+    if (!flashes.length && !alerts.length) { return; }
+    var box = ensureToastBox();
+
+    flashes.forEach(function (f) {
+      f.dataset.toasted = '1';
+      var t = el('div', 'toast');
+      t.appendChild(f);
+      f.className = '';
+      var x = el('button', 'btn ghost sm', '&times;');
+      x.type = 'button';
+      x.setAttribute('aria-label', tStr('Dismiss', 'Tutup'));
+      x.style.marginLeft = 'auto';
+      t.appendChild(x);
+      box.appendChild(t);
+      var dismiss = attachAutoDismiss(t, 8000);
+      x.addEventListener('click', dismiss);
+    });
+
+    alerts.forEach(function (a) {
+      a.dataset.toasted = '1';
+      var isErr = a.classList.contains('error');
+      var items = $$('li', a).map(function (li) { return li.textContent.trim(); }).filter(Boolean);
+      var title = isErr
+        ? tStr('Please check the form', 'Sila semak borang')
+        : tStr('Warning', 'Amaran');
+      var bodyHtml = '';
+      if (items.length) {
+        var shown = items.slice(0, 4);
+        bodyHtml = '<ul class="toast-list">' + shown.map(function (m) { return '<li>' + esc(m) + '</li>'; }).join('') +
+          (items.length > 4 ? '<li class="muted">+' + (items.length - 4) + ' ' + esc(tStr('more', 'lagi')) + '</li>' : '') + '</ul>';
+      } else {
+        bodyHtml = '<div class="small">' + esc(a.textContent.trim()) + '</div>';
+      }
+
+      // 1) Pop out a floating toast so the user sees it immediately regardless of scroll position
+      var t = el('div', 'toast ' + (isErr ? 'err' : 'warn'));
+      t.setAttribute('role', 'alert');
+      t.innerHTML = '<div style="min-width:0;flex:1"><b>' + esc(title) + '</b>' + bodyHtml + '</div>';
+      var x = el('button', 'btn ghost sm', '&times;');
+      x.type = 'button';
+      x.setAttribute('aria-label', tStr('Dismiss', 'Tutup'));
+      x.style.marginLeft = 'auto';
+      t.appendChild(x);
+      box.appendChild(t);
+      var dismissToast = attachAutoDismiss(t, 9000);
+      x.addEventListener('click', dismissToast);
+
+      // 2) Add a dismiss button + hover-paused auto-dismiss (12s) on the top inline banner so it does not linger forever
+      a.style.position = 'relative';
+      a.style.paddingRight = '38px';
+      var ix = el('button', 'status-dismiss', '&times;');
+      ix.type = 'button';
+      ix.setAttribute('aria-label', tStr('Dismiss', 'Tutup'));
+      a.appendChild(ix);
+      var dismissInline = attachAutoDismiss(a, 12000);
+      ix.addEventListener('click', dismissInline);
+    });
+  }
+
+  function showToast(title, body, kind) {
+    var box = ensureToastBox();
+    var cls = kind === 'error' ? 'err' : (kind || '');
+    var t = el('div', 'toast' + (cls ? ' ' + cls : ''));
+    if (cls === 'err' || cls === 'warn') t.setAttribute('role', 'alert');
+    t.innerHTML = '<div style="min-width:0;flex:1"><b>' + esc(title) + '</b>' + (body ? '<div class="muted small">' + esc(body) + '</div>' : '') + '</div>';
     var x = el('button', 'btn ghost sm', '&times;');
-    x.type = 'button'; x.setAttribute('aria-label', 'Dismiss'); x.style.marginLeft = 'auto';
+    x.type = 'button'; x.setAttribute('aria-label', tStr('Dismiss', 'Tutup')); x.style.marginLeft = 'auto';
     t.appendChild(x);
     box.appendChild(t);
-    var gone = function () { t.remove(); };
-    x.addEventListener('click', gone);
-    setTimeout(gone, 6000);
+    var dismiss = attachAutoDismiss(t, cls === 'err' ? 9000 : 6000);
+    x.addEventListener('click', dismiss);
   }
   window.mcmsToast = showToast;
 
@@ -813,6 +1647,12 @@
           // Completed check tabs display the quiet green checkmark only (count stays in DOM & sr-only)
           badge.hidden = (indState === 'complete');
         }
+        $$('[data-section-summary="' + key + '"]', root).forEach(function (sb) {
+          var sfx = sb.getAttribute('data-summary-suffix') || '';
+          sb.textContent = done + ' / ' + total + (sfx ? ' ' + sfx : '');
+          sb.classList.remove('ok', 'warn', 'err');
+          sb.classList.add(hasErr ? 'err' : (done === total ? 'ok' : 'warn'));
+        });
         if (srEl && total > 0) {
           var srText = hasErr
             ? ', requires attention, ' + done + ' of ' + total
@@ -957,7 +1797,53 @@
     updateScrollControls();
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
+  /* ---------- Rule D-68: In-Place Async Mutations + Global Scroll & Tab Restoration ---------- */
+  var SCROLL_STORE_KEY = 'mcms_scroll_restore';
+
+  function getActiveTabKey() {
+    var activeBtn = $('[data-tabs] [data-tab].on, [data-tabs] [data-tab][aria-selected="true"], [data-checklist-tabs] [role="tab"][aria-selected="true"]');
+    return activeBtn ? (activeBtn.getAttribute('data-tab') || activeBtn.getAttribute('data-tab-key') || '') : '';
+  }
+
+  function restoreActiveTab(tabKey) {
+    if (!tabKey) return;
+    var btn = $('[data-tabs] [data-tab="' + tabKey + '"], [data-checklist-tabs] [data-tab-key="' + tabKey + '"]');
+    if (btn && !btn.classList.contains('on') && btn.getAttribute('aria-selected') !== 'true') {
+      btn.click();
+    }
+  }
+
+  function saveScrollState() {
+    try {
+      sessionStorage.setItem(SCROLL_STORE_KEY, JSON.stringify({
+        path: location.pathname + location.search,
+        scrollY: window.scrollY || window.pageYOffset || 0,
+        activeTab: getActiveTabKey(),
+        ts: Date.now()
+      }));
+    } catch (e) {}
+  }
+
+  function restoreScrollState() {
+    try {
+      var raw = sessionStorage.getItem(SCROLL_STORE_KEY);
+      if (!raw) return;
+      sessionStorage.removeItem(SCROLL_STORE_KEY);
+      var st = JSON.parse(raw);
+      if (!st || (Date.now() - (st.ts || 0)) > 15000) return;
+      if (st.path !== (location.pathname + location.search)) return;
+      if (st.activeTab) {
+        restoreActiveTab(st.activeTab);
+      }
+      if (typeof st.scrollY === 'number' && st.scrollY > 0) {
+        requestAnimationFrame(function () {
+          window.scrollTo({ top: st.scrollY, behavior: 'instant' });
+        });
+      }
+    } catch (e) {}
+  }
+
+  function reinitMain() {
     $$('[data-tabs]').forEach(tabs);
     $$('[data-checklist-tabs]').forEach(initChecklistTabs);
     $$('main table').forEach(enhance);
@@ -965,7 +1851,146 @@
     switches();
     toasts();
     autoFilterForms();
+  }
+
+  function executeInlineScripts(container) {
+    $$('script', container).forEach(function (oldScript) {
+      if (oldScript.src) return;
+      var s = document.createElement('script');
+      s.textContent = oldScript.textContent;
+      oldScript.parentNode.replaceChild(s, oldScript);
+    });
+  }
+
+  function focusAddedInput(mainEl, submitterName, submitterValue) {
+    if (!mainEl) return;
+    var target = null;
+    if (submitterName === 'add_activity_module_id' && submitterValue) {
+      var modEl = mainEl.querySelector('[data-module-id="' + submitterValue + '"]');
+      var searchScope = modEl || mainEl;
+      var actInputs = $$('input[name^="activities["][name$="[name_en]"]', searchScope);
+      if (!actInputs.length && modEl && modEl.nextElementSibling) {
+        actInputs = $$('input[name^="activities["][name$="[name_en]"]', modEl.nextElementSibling);
+      }
+      target = actInputs[actInputs.length - 1] || null;
+    } else if (submitterValue === 'add') {
+      var rowInputs = $$('input[name^="rows["][name$="[name_en]"], input[name^="rows["][name$="[text_en]"]', mainEl);
+      target = rowInputs[rowInputs.length - 1] || null;
+    }
+    if (target) {
+      try {
+        target.focus({ preventScroll: true });
+        if (target.select) target.select();
+      } catch (e) {}
+    }
+  }
+
+  function setupInPlaceMutations() {
+    document.addEventListener('submit', function (e) {
+      var form = e.target;
+      if (!form || form.tagName !== 'FORM') return;
+      var method = (form.getAttribute('method') || 'get').toLowerCase();
+      if (method !== 'post') return;
+      if (form.hasAttribute('data-confirm') && !form.__ok) return;
+
+      // Always save scroll + active tab for any same-page POST fallback
+      saveScrollState();
+
+      // In-place async swap for forms marked with data-inplace or data-autosave
+      if (!form.hasAttribute('data-inplace') && !form.hasAttribute('data-autosave')) return;
+      if (form.hasAttribute('data-no-inplace')) return;
+
+      e.preventDefault();
+      if (form.dataset.mutating === '1') return;
+      form.dataset.mutating = '1';
+
+      // Cancel any pending autosave timer so explicit mutations never race with autosave
+      form.dispatchEvent(new CustomEvent('mcms:cancel-autosave', { bubbles: true }));
+
+      var submitter = e.submitter || null;
+      var submitterName = submitter ? (submitter.getAttribute('name') || '') : '';
+      var submitterValue = submitter ? (submitter.getAttribute('value') || '') : '';
+      var prevScrollY = window.scrollY || window.pageYOffset || 0;
+      var prevTab = getActiveTabKey();
+
+      var fd = new FormData(form);
+      if (submitterName) {
+        fd.append(submitterName, submitterValue);
+      }
+
+      if (submitter) {
+        submitter.disabled = true;
+        submitter.style.opacity = '0.65';
+      }
+
+      var actionUrl = form.getAttribute('action') || location.href;
+      fetch(actionUrl, {
+        method: 'POST',
+        body: fd,
+        credentials: 'same-origin',
+        redirect: 'follow',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'text/html'
+        }
+      })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var finalUrl = res.url ? new URL(res.url, location.origin) : null;
+        if (finalUrl && (finalUrl.pathname !== location.pathname || finalUrl.search !== location.search)) {
+          window.location.href = res.url;
+          return null;
+        }
+        return res.text();
+      })
+      .then(function (html) {
+        if (html === null) return;
+        var doc = (new DOMParser()).parseFromString(html, 'text/html');
+        var newMain = $('main', doc);
+        var curMain = $('main');
+        if (!newMain || !curMain) {
+          window.location.reload();
+          return;
+        }
+
+        // Remove stale toasts before swapping so new flash toast renders cleanly
+        $$('.toasts').forEach(function (t) { t.remove(); });
+        try { sessionStorage.removeItem(SCROLL_STORE_KEY); } catch (err) {}
+
+        curMain.innerHTML = newMain.innerHTML;
+        executeInlineScripts(curMain);
+        reinitMain();
+
+        if (prevTab) {
+          restoreActiveTab(prevTab);
+        }
+        requestAnimationFrame(function () {
+          window.scrollTo({ top: prevScrollY, behavior: 'instant' });
+          focusAddedInput(curMain, submitterName, submitterValue);
+        });
+      })
+      .catch(function () {
+        form.dataset.mutating = '';
+        if (submitter) {
+          submitter.disabled = false;
+          submitter.style.opacity = '';
+        }
+        // Fallback to standard submit if fetch fails
+        form.setAttribute('data-no-inplace', '1');
+        if (form.requestSubmit && submitter) {
+          form.requestSubmit(submitter);
+        } else {
+          form.submit();
+        }
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    reinitMain();
     setupSidebar();
     setupTheme();
+    setupInPlaceMutations();
+    restoreScrollState();
   });
 })();

@@ -45,30 +45,19 @@
       <div class="hd" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
         <div>
           <h2>{{ __('Cohort indicators') }}</h2>
-          <div class="sub" style="font-size:13px;color:var(--muted)">{{ __('Select a course/subject or explore cohort indicators, outcome attainment, and improvement actions.') }}</div>
+          <div class="sub" style="font-size:13px;color:var(--muted)">{{ __('Explore cohort indicators, outcome attainment, and improvement actions.') }}</div>
         </div>
-        @if($offerings->isNotEmpty())
-          <div style="display:inline-flex;align-items:center;gap:8px">
-            <label for="course-filter" style="margin:0;font-weight:600;font-size:13px;white-space:nowrap">{{ __('Filter by course/subject:') }}</label>
-            <select id="course-filter" onchange="filterCohortCourse(this.value)" style="min-width:240px;margin:0;height:34px;font-size:13px;padding:0 8px">
-              <option value="all" @selected(empty($selectedCourse))>{{ __('All courses / subjects (:count)', ['count' => count($offerings)]) }}</option>
-              @foreach($courses as $c)
-                <option value="{{ $c['id'] }}" @selected(($selectedCourse ?? null) == $c['id'])>{{ $c['name'] }} ({{ $c['count'] }} {{ __('cohort(s)') }})</option>
-              @endforeach
-            </select>
-          </div>
-        @endif
       </div>
       <div class="bd" style="padding:0">
-        <table id="cohort-indicators-table">
+        <table id="cohort-indicators-table" data-search-placeholder="{{ __('Search course, cohort, or lecturer...') }}">
           <thead>
             <tr>
-              <th>{{ __('Course / Subject') }}</th>
+              <th data-filter-type="dropdown" data-filter-unit="{{ app()->getLocale() === 'ms' ? 'kohort|kohort' : 'cohort|cohorts' }}">{{ __('Course / Subject') }}</th>
               <th>{{ __('Cohort') }}</th>
-              <th style="text-align:center">{{ __('Participants') }}</th>
-              <th>{{ __('Indicator target status') }}</th>
-              <th>{{ __('Key metrics') }}</th>
-              <th>{{ __('CQI review') }}</th>
+              <th style="text-align:center" data-sort-type="num">{{ __('Participants') }}</th>
+              <th data-filter-type="select">{{ __('Indicator target status') }}</th>
+              <th data-nofilter>{{ __('Key metrics') }}</th>
+              <th data-sort-type="status" data-filter-type="select">{{ __('CQI review') }}</th>
               <th style="text-align:right">{{ __('Action') }}</th>
             </tr>
           </thead>
@@ -108,9 +97,14 @@
                 <div><span class="muted s">{{ __('Pass rate:') }}</span> <b>{{ $passVal !== null ? $passVal.'%' : 'n/a' }}</b></div>
                 <div><span class="muted s">{{ __('Completion rate:') }}</span> <b>{{ $compVal !== null ? $compVal.'%' : 'n/a' }}</b></div>
               </td>
-              <td>
+              @php
+                $cqiStatusLabel = $o->record
+                  ? __(['draft' => 'Draft', 'submitted' => 'Submitted to the deputy dean', 'confirmed' => 'Confirmed'][$o->record->status] ?? ucfirst($o->record->status))
+                  : __('Not started');
+              @endphp
+              <td data-filter-value="{{ $cqiStatusLabel }}" data-sort-value="{{ $cqiStatusLabel }}">
                 @if($o->record)
-                  <x-pill :s="__(['draft' => 'Draft', 'submitted' => 'Submitted to the deputy dean', 'confirmed' => 'Confirmed'][$o->record->status] ?? ucfirst($o->record->status))" />
+                  <x-pill :s="$cqiStatusLabel" />
                   <span class="muted s" style="display:block;font-size:11px;margin-top:2px">{{ $o->record->reference }}</span>
                 @else
                   <span class="muted s">{{ __('Not started') }}</span>
@@ -144,11 +138,6 @@
               </td>
             </tr>
           @endforelse
-          <tr id="cohort-filter-empty" style="display:none">
-            <td colspan="7" class="muted" style="text-align:center;padding:24px">
-              {{ __('No cohorts found for the selected course / subject.') }}
-            </td>
-          </tr>
           </tbody>
         </table>
       </div>
@@ -320,26 +309,6 @@
 </div>
 
 <script>
-function filterCohortCourse(val) {
-  var rows = document.querySelectorAll('.cohort-row');
-  var visibleCount = 0;
-  
-  rows.forEach(function(row) {
-    var mcId = row.getAttribute('data-mc');
-    if (val === 'all' || mcId === val) {
-      row.style.display = '';
-      visibleCount++;
-    } else {
-      row.style.display = 'none';
-    }
-  });
-
-  var emptyRow = document.getElementById('cohort-filter-empty');
-  if (emptyRow) {
-    emptyRow.style.display = (visibleCount === 0) ? '' : 'none';
-  }
-}
-
 document.addEventListener('DOMContentLoaded', function() {
   // Tab Switching Logic
   var tabButtons = document.querySelectorAll('.tab-btn');
@@ -378,17 +347,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.tab-pane').forEach(function(pane) {
       pane.style.display = 'block';
     });
-  }
-
-  // Course Filter initialization
-  var params = new URLSearchParams(window.location.search);
-  var selected = params.get('course') || params.get('mc');
-  if (selected) {
-    var select = document.getElementById('course-filter');
-    if (select) {
-      select.value = selected;
-      filterCohortCourse(selected);
-    }
   }
 });
 </script>

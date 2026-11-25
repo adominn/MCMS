@@ -134,16 +134,16 @@ it('renders proposal print (Appendix A) with 10 sections', function () {
         ->assertSee('2. Rationale and Development Justification')
         ->assertSee('3. Category Determination')
         ->assertSee('4. Additional Information for UMC')
-        ->assertSee('3. Learning Outcomes')
-        ->assertSee('5. Modules and Student Learning Time (SLT)')
-        ->assertSee('6. Assessment Weightings and Completion Standards')
-        ->assertSee('6. Alignment of Outcomes to Assessment')
-        ->assertSee('7. Credential Design and Recognition')
-        ->assertSee('8. Delivery Mode & Schedule')
-        ->assertSee('8. Delivery Readiness Checklist')
-        ->assertSee('9. Co-developers')
-        ->assertSee('9. Review and Approval Sign-Offs')
-        ->assertSee('10. Declarations and Document Control')
+        ->assertSee('5. Learning Outcomes')
+        ->assertSee('6. Modules and Student Learning Time (SLT)')
+        ->assertSee('7. Assessment Weightings and Completion Standards')
+        ->assertSee('8. Alignment of Outcomes to Assessment')
+        ->assertSee('9. Credential Design and Recognition')
+        ->assertSee('10. Delivery Mode & Schedule')
+        ->assertSee('11. Delivery Readiness Checklist')
+        ->assertSee('12. Co-developers')
+        ->assertSee('13. Review and Approval Sign-Offs')
+        ->assertSee('14. Declarations and Document Control')
         ->assertSee('Intellectual Property Declaration:')
         ->assertSee('IMPORTANT NOTICE')
         ->assertSee('Print or save as PDF');
@@ -161,8 +161,14 @@ it('renders suspension notice under standard print layout', function () {
         ->assertSee('Who is affected')
         ->assertSee('Transition plan')
         ->assertSee('Credentials and credit you have already earned stay valid')
-        ->assertSee('Kredensial dan kredit yang telah anda peroleh kekal sah')
+        ->assertDontSee('Kredensial dan kredit yang telah anda peroleh kekal sah')
         ->assertSee('Print or save as PDF');
+
+    // Per-document BM toggle renders 100% in Bahasa Melayu without changing session locale
+    $bmResponse = $this->actingAs($dean)->get("/suspensions/{$mc->id}/print?doc_lang=ms");
+    $bmResponse->assertOk()
+        ->assertSee('Kredensial dan kredit yang telah anda perolehi kekal sah')
+        ->assertDontSee('Credentials and credit you have already earned stay valid');
 });
 
 it('renders UCreds import validation report in printable dual-mode', function () {

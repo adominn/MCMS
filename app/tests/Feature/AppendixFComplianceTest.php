@@ -185,6 +185,7 @@ it('persists F6 supporting documents checklist, evaluates F7 criterion-specific 
         'credits' => [$dep->id => 3],
         'document_checklist' => ['acr', 'credential', 'learning_outcomes', 'slt', 'other'],
         'other_document' => 'Official UTeM Lab Portfolio',
+        'other_files' => [\Illuminate\Http\UploadedFile::fake()->create('lab-portfolio.pdf', 100, 'application/pdf')],
         'documents' => 'All documents verified in MCMS.',
     ])->assertSessionHasNoErrors()->assertRedirect();
 

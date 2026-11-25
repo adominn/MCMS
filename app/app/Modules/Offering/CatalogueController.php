@@ -33,7 +33,7 @@ final class CatalogueController
     public function catalogue(Request $request)
     {
         $this->status->refresh();
-        $f = $request->only(['q', 'category', 'ptj', 'field', 'mode', 'language', 'starts', 'fee_max']) + ['free' => $request->boolean('free')];
+        $f = $request->only(['q', 'category', 'ptj', 'field', 'mode', 'language', 'starts', 'fee_max', 'sort']) + ['free' => $request->boolean('free')];
         $q = $this->listed()
             ->when(filled($f['q'] ?? null), fn ($b) => $b->where(fn ($w) => $w->where('v.name_en', db_like(), '%'.$f['q'].'%')->orWhere('v.name_ms', db_like(), '%'.$f['q'].'%')->orWhere('v.discipline', db_like(), '%'.$f['q'].'%')->orWhere('u.name', db_like(), '%'.$f['q'].'%')->orWhere('o.facilitators', db_like(), '%'.$f['q'].'%')))
             ->when(in_array($f['category'] ?? null, ['umc', 'samc', 'mce'], true), fn ($b) => $b->where('m.category', $f['category']))
@@ -45,8 +45,17 @@ final class CatalogueController
             ->when($f['free'], fn ($b) => $b->where('o.fee', 0))
             ->when(is_numeric($f['fee_max'] ?? null), fn ($b) => $b->where('o.fee', '<=', $f['fee_max']));
 
+        match ($f['sort'] ?? 'start_asc') {
+            'start_desc' => $q->orderByDesc('o.start_date')->orderBy('o.id'),
+            'name_asc' => $q->orderBy('v.name_en')->orderBy('o.id'),
+            'name_desc' => $q->orderByDesc('v.name_en')->orderBy('o.id'),
+            'fee_asc' => $q->orderBy('o.fee')->orderBy('o.id'),
+            'fee_desc' => $q->orderByDesc('o.fee')->orderBy('o.id'),
+            default => $q->orderBy('o.start_date')->orderBy('o.id'),
+        };
+
         return view('public.catalogue', $this->base() + [
-            'rows' => $q->orderBy('o.start_date')->paginate(5, [
+            'rows' => $q->paginate(5, [
                 'o.id', 'o.cohort_name', 'o.start_date', 'o.end_date', 'o.fee', 
                 'o.delivery_mode', 'o.status', 'o.reg_opens_on', 'o.facilitators', 
                 'v.name_en', 'v.name_ms', 'v.discipline', 'v.delivery_language', 'v.badge_image_path',

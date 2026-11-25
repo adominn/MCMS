@@ -144,17 +144,22 @@ class SearchController
             'theme' => ['nullable', 'in:auto,light,dark'],
             'phone' => ['nullable', 'string', 'max:30'],
             'name_on_certificate' => ['nullable', 'string', 'max:120'],
+            'participant_group' => ['nullable', 'string', 'max:60'],
         ]);
 
         $u = $request->user();
         $theme = $data['theme'] ?? 'auto';
-        DB::table('users')->where('id', $u->id)->update([
+        $update = [
             'locale' => $data['locale'],
             'theme_preference' => $theme,
             'phone' => $data['phone'] ?? null,
             'name_on_certificate' => $data['name_on_certificate'] ?? null,
             'updated_at' => now(),
-        ]);
+        ];
+        if (array_key_exists('participant_group', $data)) {
+            $update['participant_group'] = filled($data['participant_group']) ? trim((string) $data['participant_group']) : null;
+        }
+        DB::table('users')->where('id', $u->id)->update($update);
 
         session([
             'ui_lang' => $data['locale'],

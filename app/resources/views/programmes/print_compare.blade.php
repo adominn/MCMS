@@ -1,36 +1,18 @@
-<!doctype html>
-<html lang="{{ app()->getLocale() }}">
-<head>
-  <meta charset="utf-8">
-  <title>{{ $progA->code }} vs {{ $progB->code }} &ndash; {{ __('Programme Comparison') }}</title>
-  <style>
-    body{font-family:"Plus Jakarta Sans",Arial,sans-serif;color:#090a0f;background:#fff;margin:24px;font-size:12px;line-height:1.4}
-    h1{font-size:18px;margin:0 0 4px}
-    h2{font-size:13px;margin:16px 0 6px;border-bottom:1px solid #090a0f;padding-bottom:3px}
-    .meta{color:#475569;margin-bottom:14px}
-    table{width:100%;border-collapse:collapse;margin-bottom:12px}
-    th,td{border:1px solid #090a0f;padding:5px 7px;text-align:left;vertical-align:top}
-    th{background:#f8fafc;font-size:11px;text-transform:uppercase}
-    .num{text-align:right;font-variant-numeric:tabular-nums}
-    .mono{font-family:"IBM Plex Mono",Consolas,monospace;font-size:11px}
-    .note{border:1px solid #090a0f;padding:8px 10px;margin-top:16px;font-size:11px}
-    .no-print{margin-bottom:14px}
-    @media print{.no-print{display:none}}
-  </style>
-</head>
-<body>
-  <div class="no-print">
-    <button onclick="window.print()" style="padding:6px 14px;background:#0052ff;color:#fff;border:none;border-radius:4px;cursor:pointer">{{ __('Print / Save as PDF') }}</button>
-  </div>
-
-  <h1>{{ __('Programme Comparison:') }} {{ $progA->code }} &rarr; {{ $progB->code }}</h1>
-  <div class="meta">
+@extends('layouts.print')
+@section('title', $progA->code . ' vs ' . $progB->code . ' - ' . __('Programme Comparison'))
+@section('doc_title', __('Programme Comparison'))
+@section('doc_bm', 'Perbandingan Program')
+@section('doc_ref', $progA->code . ' vs ' . $progB->code)
+@section('doc_file', 'programme-compare-' . strtolower($progA->code) . '-' . strtolower($progB->code) . '.pdf')
+@section('content')
+  <h1 style="font-size:14pt;margin:0 0 4px">{{ __('Programme Comparison:') }} {{ $progA->code }} &rarr; {{ $progB->code }}</h1>
+  <div class="muted small" style="margin-bottom:14px">
     {{ __('From:') }} {{ $progA->code }} ({{ $progA->name }}, {{ $progA->total_credits }} cr) &middot;
     {{ __('To:') }} {{ $progB->code }} ({{ $progB->name }}, {{ $progB->total_credits }} cr) &middot;
-    {{ __('Generated:') }} {{ now()->format('Y-m-d') }}
+    {{ __('Generated:') }} {{ now()->format('d/m/Y') }}
   </div>
 
-  <table>
+  <table class="print-audit-table">
     <thead>
       <tr>
         <th>{{ __('Shared Credits') }}</th>
@@ -49,13 +31,13 @@
     </tbody>
   </table>
 
-  <h2>{{ __('Shared Courses') }} ({{ $comparison['shared']->count() }})</h2>
-  <table>
+  <h2 style="font-size:10.5pt;margin:14px 0 6px;border-bottom:1px solid #090a0f;padding-bottom:3px">{{ __('Shared Courses') }} ({{ $comparison['shared']->count() }})</h2>
+  <table class="print-audit-table">
     <thead>
       <tr>
-        <th style="width:95px">{{ __('Code') }}</th>
+        <th style="width:16%">{{ __('Code') }}</th>
         <th>{{ __('Course') }}</th>
-        <th class="num" style="width:60px">{{ __('Credits') }}</th>
+        <th class="num" style="width:12%">{{ __('Credits') }}</th>
       </tr>
     </thead>
     <tbody>
@@ -69,8 +51,8 @@
     </tbody>
   </table>
 
-  <h2>{{ __('Course Equivalences') }} ({{ $comparison['equivalences']->count() }})</h2>
-  <table>
+  <h2 style="font-size:10.5pt;margin:14px 0 6px;border-bottom:1px solid #090a0f;padding-bottom:3px">{{ __('Course Equivalences') }} ({{ $comparison['equivalences']->count() }})</h2>
+  <table class="print-audit-table">
     <thead>
       <tr>
         <th>{{ $progA->code }}</th>
@@ -95,8 +77,7 @@
     </tbody>
   </table>
 
-  <div class="note">
+  <div class="print-note-box">
     {{ __('This comparison is for academic planning only. Formal credit transfer and programme admission require evaluation and approval by UTeM. At least :min% of graduating credits must be earned directly at UTeM.', ['min' => mcms_num($minHomePercent)]) }}
   </div>
-</body>
-</html>
+@endsection

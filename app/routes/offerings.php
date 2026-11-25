@@ -28,6 +28,8 @@ Route::middleware('auth')->group(function () {
 });
 Route::get('/lang/{lang}', [CatalogueController::class, 'lang'])->name('lang');
 
+Route::middleware(['auth', 'role:lecturer,deputy_dean,ptj_authority,codl_admin,academic_authority'])->get('/api/lecturers/search', [OfferingController::class, 'searchLecturers'])->name('lecturers.search');
+
 Route::middleware('auth')->prefix('offerings')->group(function () {
     Route::middleware('role:lecturer,deputy_dean,ptj_authority')->group(function () {
         Route::get('/', [OfferingController::class, 'index'])->name('offerings');

@@ -113,7 +113,18 @@
     <p class="muted">{{ __('An MCE is non-credit. It has no credit value or MQF level.') }}</p>
   @else
     <h2 style="font-size:16px;font-weight:600;margin:20px 0 6px">{{ __('Proposed credit and MQF level') }}</h2>
-    <p class="muted small" style="margin-top:0;margin-bottom:14px">{{ __('These are proposals only. They are not shown in the catalogue or on any credential until approval (:basis) confirms them.', ['basis' => $v->category === 'umc' ? 'UMC' : __('or a Quality Verification decision for a SAMC')]) }}</p>
+    <p class="muted small" style="margin-top:0;margin-bottom:10px">{{ __('These are proposals only. They are not shown in the catalogue or on any credential until approval (:basis) confirms them.', ['basis' => $v->category === 'umc' ? 'UMC' : __('or a Quality Verification decision for a SAMC')]) }}</p>
+    @php($modSlt = (int) ($modulesSlt ?? 0))
+    @if($modSlt > 0)
+      <div class="small muted" style="margin-bottom:12px">
+        {{ __('Module total from Modules tab:') }} <strong style="color:var(--ink)">{{ $modSlt }} h SLT</strong> ({{ mcms_num($modSlt / 40) }} {{ __('credits at 40h/credit') }})
+      </div>
+    @else
+      <div class="note warn" role="status" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <span>{{ __('No module learning time (SLT) has been recorded yet. Add modules first to determine credit equivalence.') }}</span>
+        <a href="{{ route('proposals.show', ['id' => $v->id, 'tab' => 'modules']) }}" class="btn ter sm">{{ __('Go to Modules') }}</a>
+      </div>
+    @endif
     <div class="form-grid cols-2" style="max-width:560px">
       <div class="field">
         <label for="proposed_credit">{{ __('Proposed credit') }}</label>

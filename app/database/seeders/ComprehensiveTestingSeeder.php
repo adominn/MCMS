@@ -1678,7 +1678,7 @@ class ComprehensiveTestingSeeder extends Seeder
             ['area' => 'transfers', 'assignee_role' => 'codl_admin', 'completed_at' => NULL, 'created_at' => '2026-10-30 10:00:00', 'id' => 10, 'kind' => 'transfer_decide', 'link' => '/transfers/2', 'ptj_id' => 1, 'ref_id' => 2, 'subject_ref' => 'TR-2026-0002', 'title' => 'Evaluate Credit Transfer Application: Bee Tan (TR-2026-0002)', 'user_id' => 12],
             ['area' => 'pathway', 'assignee_role' => 'deputy_dean', 'completed_at' => NULL, 'created_at' => '2026-10-28 10:00:00', 'id' => 11, 'kind' => 'plan_decide', 'link' => '/plans/2', 'ptj_id' => 1, 'ref_id' => 2, 'subject_ref' => 'PLAN-2026-0002', 'title' => 'Assess Stackable Study Plan: Bee Tan (PLAN-2026-0002)', 'user_id' => 10],
             ['area' => 'acr', 'assignee_role' => 'student', 'completed_at' => NULL, 'created_at' => '2026-08-28 10:00:00', 'id' => 12, 'kind' => 'consent_give', 'link' => '/my-credit/5', 'ptj_id' => 1, 'ref_id' => 5, 'subject_ref' => 'ACR-2026-0005', 'title' => 'Give ABC Deposit Consent for Data Structures (ACR-2026-0005)', 'user_id' => 3],
-            ['area' => 'records', 'assignee_role' => 'deputy_dean', 'completed_at' => NULL, 'created_at' => '2026-11-03 09:00:00', 'id' => 13, 'kind' => 'discrepancy_fix', 'link' => '/records/discrepancies', 'ptj_id' => 1, 'ref_id' => 4, 'subject_ref' => 'DISC-0004', 'title' => 'Resolve Credit Deposit Discrepancy on ACR-2026-0003', 'user_id' => 10],
+            ['area' => 'records', 'assignee_role' => 'records_custodian', 'completed_at' => NULL, 'created_at' => '2026-11-03 09:00:00', 'id' => 13, 'kind' => 'discrepancy_fix', 'link' => '/records/discrepancies', 'ptj_id' => 1, 'ref_id' => 4, 'subject_ref' => 'DISC-0004', 'title' => 'Resolve Credit Deposit Discrepancy on ACR-2026-0003', 'user_id' => NULL],
             ['area' => 'review', 'assignee_role' => 'industry_expert', 'completed_at' => '2026-11-03 15:00:00', 'created_at' => '2026-10-31 09:00:00', 'id' => 14, 'kind' => 'review_submit', 'link' => '/reviews/4', 'ptj_id' => 1, 'ref_id' => 4, 'subject_ref' => 'MC-FTMK-004', 'title' => 'Submit Industry Expert Review: Cyber Security Operations Fundamentals', 'user_id' => 16],
             ['area' => 'results', 'assignee_role' => 'deputy_dean', 'completed_at' => '2026-08-25 10:00:00', 'created_at' => '2026-08-22 10:00:00', 'id' => 15, 'kind' => 'verify_results', 'link' => '/results/12', 'ptj_id' => 1, 'ref_id' => 12, 'subject_ref' => 'OFF-012', 'title' => 'Verify Results: Data Structures 2026/1-DS', 'user_id' => 10],
         ]);
@@ -2051,6 +2051,42 @@ class ComprehensiveTestingSeeder extends Seeder
                 $idx = max(0, ((int) $lo->sort_order) - 1);
                 $cloIndex = min(count($clos), $idx + 1);
                 DB::table('learning_outcomes')->where('id', $lo->id)->update(['parent_clo_id' => $cloIndex]);
+            }
+        }
+
+        // Backfill slt_hours & learning_type on legacy seeded ACRs where omitted
+        foreach (DB::table('acrs as a')->join('mc_versions as v', 'v.id', '=', 'a.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->get(['a.id', 'a.slt_hours', 'a.mc_version_id', 'v.planned_slt', 'm.category']) as $la) {
+            $slt = $la->slt_hours ?: ((int) DB::table('mc_modules')->where('mc_version_id', $la->mc_version_id)->sum('slt_hours') ?: (int) ($la->planned_slt ?? 0));
+            $ltype = $la->category === 'umc' ? 'formal' : 'non_formal';
+            DB::table('acrs')->where('id', $la->id)->update(['slt_hours' => $slt ?: null, 'learning_type' => $ltype]);
+        }
+
+        // Backfill Appendix F11 Three-Party Verification rows for all seeded confirmed/deposited ACRs from real recorded actors
+        $seededAcrs = DB::table('acrs as a')
+            ->leftJoin('achievement_records as ar', 'ar.id', '=', 'a.achievement_record_id')
+            ->leftJoin('mc_versions as v', 'v.id', '=', 'a.mc_version_id')
+            ->leftJoin('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
+            ->leftJoin('abc_deposits as d', 'd.acr_id', '=', 'a.id')
+            ->whereIn('a.status', ['verified', 'consent_given', 'consent_declined', 'deposited', 'correction'])
+            ->get([
+                'a.id', 'a.confirmed_by', 'a.confirmed_at',
+                'ar.coordinator_signed_by', 'ar.coordinator_signed_at', 'ar.coordinator_remarks',
+                'ar.confirmed_by as ar_confirmed_by', 'ar.confirmed_at as ar_confirmed_at',
+                'm.owner_id', 'd.recorded_by', 'd.created_at as dep_at',
+            ]);
+        $fallbackDepositor = DB::table('users')->where('email', 'nurul.izzah@utem.example.test')->value('id');
+        foreach ($seededAcrs as $sa) {
+            $coordId = $sa->coordinator_signed_by ?: $sa->owner_id;
+            if ($coordId) {
+                \App\Modules\CreditBank\Acr::recordVerification((int) $sa->id, 'coordinator', (int) $coordId, $sa->coordinator_signed_at ?: $sa->ar_confirmed_at ?: $sa->confirmed_at, $sa->coordinator_remarks ?: 'Coursework and assessments verified by Course Coordinator.');
+            }
+            $acadId = $sa->ar_confirmed_by ?: $sa->confirmed_by;
+            if ($acadId) {
+                \App\Modules\CreditBank\Acr::recordVerification((int) $sa->id, 'academic', (int) $acadId, $sa->ar_confirmed_at ?: $sa->confirmed_at, 'Completion confirmed by faculty academic authority.');
+            }
+            $recId = $sa->recorded_by ?: $sa->confirmed_by ?: $fallbackDepositor;
+            if ($recId) {
+                \App\Modules\CreditBank\Acr::recordVerification((int) $sa->id, 'records_abc', (int) $recId, $sa->dep_at ?: $sa->confirmed_at, 'ACR verified and confirmed by Registry / ABC officer.');
             }
         }
 

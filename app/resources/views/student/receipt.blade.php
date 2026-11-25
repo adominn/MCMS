@@ -24,7 +24,7 @@
 @if($p)
   <div class="panel" style="margin-bottom:20px">
     <div class="bd">
-      <table style="margin:0">
+      <table data-plain style="margin:0">
         <tbody>
           <tr><th style="width:180px">{{ __('Receipt number') }}</th><td><b>{{ $rno }}</b></td></tr>
           <tr><th>{{ __('Date of payment') }}</th><td>{{ \Carbon\Carbon::parse($p->created_at)->format('d/m/Y H:i') }}</td></tr>
@@ -41,7 +41,7 @@
   <div class="panel" style="margin-bottom:20px">
     <div class="hd"><h2>{{ __('Fee breakdown') }}</h2></div>
     <div class="bd" style="padding:0">
-      <table style="margin:0">
+      <table data-plain style="margin:0">
         <thead>
           <tr>
             <th>{{ __('Item') }}</th>
@@ -74,7 +74,7 @@
 
   <div class="panel" style="margin-bottom:20px">
     <div class="bd">
-      <table style="margin:0">
+      <table data-plain style="margin:0">
         <tbody>
           <tr><th style="width:180px">{{ __('Payment method') }}</th><td>Dummy card ending {{ $p->card_last4 }}</td></tr>
           <tr><th>{{ __('Payment reference') }}</th><td><code>{{ $p->provider_ref }}</code></td></tr>
@@ -103,7 +103,7 @@
 
   <div class="panel" style="margin-bottom:20px">
     <div class="bd">
-      <table style="margin:0">
+      <table data-plain style="margin:0">
         <tbody>
           <tr><th style="width:180px">{{ __('Registration') }}</th><td><code>{{ $e->reference }}</code></td></tr>
           <tr><th>{{ __('Payer') }}</th><td>{{ $u->name }}</td></tr>

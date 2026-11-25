@@ -113,7 +113,7 @@
       <h2>{{ __('Add or change :entity', ['entity' => $nav[$entity]['label'] ?? 'record']) }}</h2>
     </div>
     <div class="bd">
-      <form method="post" action="{{ route('reference.store', $entity) }}" class="col" style="gap:12px">
+      <form method="post" action="{{ route('reference.store', $entity) }}" class="col" style="gap:12px" data-inplace>
         @csrf
         @foreach($e['cols'] as $c => $label)
           <div>
@@ -134,7 +134,7 @@
       <h2>{{ __('Import from CSV') }}</h2>
     </div>
     <div class="bd">
-      <form method="post" action="{{ route('reference.import', $entity) }}" enctype="multipart/form-data" class="col" style="gap:12px">
+      <form method="post" action="{{ route('reference.import', $entity) }}" enctype="multipart/form-data" class="col" style="gap:12px" data-inplace>
         @csrf
         <p class="small muted" style="margin:0">
           {{ __('Required header column names in first row') }}:<br>

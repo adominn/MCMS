@@ -50,7 +50,7 @@
     @if($standing->conditions)<p>{{ __('Conditions: :cond', ['cond' => $standing->conditions]) }}</p>@endif
     <p class="muted" style="margin-bottom:{{ $dd ? '14px' : '0' }}">{{ __('Quality Verification does not by itself mean a transfer, admission or stackable status.') }}</p>
     @if($dd)
-      <form method="post" action="{{ route('quality.end', $m->id) }}" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+      <form method="post" action="{{ route('quality.end', $m->id) }}" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end" data-inplace>
         @csrf
         <div class="field" style="min-width:180px">
           <label for="to">{{ __('If the QVC/MQA suspended or withdrew it') }}</label>
@@ -83,7 +83,7 @@
         @endforeach
       </ul>
       @if($isOwner)
-        <form method="post" action="{{ route('quality.start', $m->id) }}">@csrf<button type="submit" class="btn sm">{{ __('Start a Quality Verification cycle') }}</button></form>
+        <form method="post" action="{{ route('quality.start', $m->id) }}" data-inplace>@csrf<button type="submit" class="btn sm">{{ __('Start a Quality Verification cycle') }}</button></form>
       @else
         <p class="muted" style="margin:0">{{ __('The lecturer who owns this micro-credential starts a cycle.') }}</p>
       @endif
@@ -320,7 +320,7 @@
     <div class="sr-only" aria-live="polite" data-tab-live></div>
 
     {{-- Single Form Spanning Evidence Tabs 1–6 (zero data loss across tab switches) --}}
-    <form method="post" action="{{ route('quality.evidence', $m->id) }}" id="evidence">
+    <form method="post" action="{{ route('quality.evidence', $m->id) }}" id="evidence" data-inplace>
       @csrf
       <input type="hidden" name="active_tab" data-active-tab-input value="{{ $defaultQvTab }}">
 
@@ -467,7 +467,7 @@
       @endif
 
       {{-- Material Change Review --}}
-      <form method="post" action="{{ route('quality.review', $m->id) }}" id="review" style="margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)">
+      <form method="post" action="{{ route('quality.review', $m->id) }}" id="review" style="margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)" data-inplace>
         @csrf
         <h3 style="margin:0 0 4px">{{ __('Material change review') }}</h3>
         <p class="muted small" style="margin:0 0 12px">{{ __('For each component, say whether it changed since the last verification and what the change needs.') }}</p>
@@ -536,7 +536,7 @@
 
         @if($canEditEvidence)
           @if(! $rec->readiness_confirmed_at)
-            <form method="post" action="{{ route('quality.readiness', $m->id) }}">
+            <form method="post" action="{{ route('quality.readiness', $m->id) }}" data-inplace>
               @csrf
               <div class="form-grid cols-3">
                 <div class="field">
@@ -561,7 +561,7 @@
           @else
             <details class="fold" style="margin-top:12px">
               <summary><span class="muted small">{{ __('Revise readiness decision (will require deputy dean re-confirmation)') }}</span></summary>
-              <form method="post" action="{{ route('quality.readiness', $m->id) }}" style="margin-top:12px">
+              <form method="post" action="{{ route('quality.readiness', $m->id) }}" style="margin-top:12px" data-inplace>
                 @csrf
                 <div class="form-grid cols-3">
                   <div class="field">
@@ -590,7 +590,7 @@
         @endif
 
         @if($dd && $rec->readiness_decision && ! $rec->readiness_confirmed_at)
-          <form method="post" action="{{ route('quality.confirm', $m->id) }}" style="margin-top:12px">
+          <form method="post" action="{{ route('quality.confirm', $m->id) }}" style="margin-top:12px" data-inplace>
             @csrf
             <button type="submit" class="btn sm primary">{{ __('Confirm readiness decision') }}</button>
           </form>
@@ -603,7 +603,7 @@
           <h3 style="margin:0 0 12px">{{ __('Submission to the QVC/MQA') }}</h3>
           @if($rec->status === 'ready' && $dd)
             <p><a href="{{ route('quality.package', $m->id) }}">{{ __('Open the submission package') }}</a></p>
-            <form method="post" action="{{ route('quality.submit', $m->id) }}">
+            <form method="post" action="{{ route('quality.submit', $m->id) }}" data-inplace>
               @csrf
               <div class="form-grid cols-2">
                 <div class="field">
@@ -620,7 +620,7 @@
           @elseif($rec->status === 'submitted')
             <p>{{ __('Submitted on :date, reference :ref.', ['date' => \Carbon\Carbon::parse($rec->submitted_on)->format('d/m/Y'), 'ref' => $rec->submitted_ref]) }} <a href="{{ route('quality.package', $m->id) }}">{{ __('Package') }}</a></p>
             @if($dd)
-              <form method="post" action="{{ route('quality.result', $m->id) }}" id="result">
+              <form method="post" action="{{ route('quality.result', $m->id) }}" id="result" data-inplace>
                 @csrf
                 <h4>{{ __('Record the result') }}</h4>
                 <div class="form-grid cols-2">

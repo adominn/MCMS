@@ -25,7 +25,7 @@
     <span class="r small muted">{{ count($versions) }} {{ __('versions recorded') }}</span>
   </div>
   <div class="table-wrap">
-    <table>
+    <table data-plain>
       <thead>
         <tr>
           <th>{{ __('Effective date') }}</th>

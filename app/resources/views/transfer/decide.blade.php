@@ -94,7 +94,7 @@
     <span class="s" style="color:var(--color-primary, #0052ff);font-weight:600">{{ __('View subjects') }}</span>
   </summary>
   <div class="table-wrap">
-    <table data-no-search data-no-paginate style="margin:0">
+    <table data-plain data-no-search data-no-paginate style="margin:0">
       <thead>
         <tr>
           <th>{{ __('Target Course') }}</th>
@@ -159,7 +159,7 @@
       </div>
       <div class="bd" style="padding:16px 20px">
         @if($validity)
-          <table data-no-search data-no-paginate style="margin:0">
+          <table data-plain data-no-search data-no-paginate style="margin:0">
             <thead>
               <tr>
                 <th>{{ __('Validity Criterion') }}</th>
@@ -183,9 +183,9 @@
           </table>
         @elseif($a->status === 'submitted')
           @if($canDecide)
-            <form method="post" action="{{ route('transfers.validity', $a->id) }}">
+            <form method="post" action="{{ route('transfers.validity', $a->id) }}" data-inplace>
               @csrf
-              <table data-no-search data-no-paginate style="margin:0 0 14px">
+              <table data-plain data-no-search data-no-paginate style="margin:0 0 14px">
                 <thead>
                   <tr>
                     <th style="width:36%">{{ __('Validity Criterion') }}</th>
@@ -295,7 +295,7 @@
               @csrf
               <h3 style="margin:0 0 8px;font-size:14px">{{ __('Learning Outcomes Comparison') }}</h3>
               <div class="table-wrap" style="margin-bottom:16px">
-                <table data-no-search data-no-paginate style="margin:0;min-width:640px">
+                <table data-plain data-no-search data-no-paginate style="margin:0;min-width:640px">
                   <thead>
                     <tr>
                       <th style="min-width:170px">{{ __('Outcome of the course') }}</th>
@@ -342,7 +342,7 @@
 
               <h3 style="margin:0 0 8px;font-size:14px">{{ __('Course Equivalence Criteria') }}</h3>
               <div class="table-wrap" style="margin-bottom:16px">
-                <table data-no-search data-no-paginate style="margin:0;min-width:540px">
+                <table data-plain data-no-search data-no-paginate style="margin:0;min-width:540px">
                   <thead>
                     <tr>
                       <th style="min-width:210px">{{ __('Criterion') }}</th>
@@ -398,7 +398,7 @@
           @else
             <h3 style="margin:0 0 8px;font-size:14px">{{ __('Learning Outcomes Comparison') }}</h3>
             <div class="table-wrap" style="margin-bottom:16px">
-              <table data-no-search data-no-paginate style="margin:0;min-width:620px">
+              <table data-plain data-no-search data-no-paginate style="margin:0;min-width:620px">
                 <thead>
                   <tr>
                     <th style="min-width:180px">{{ __('Outcome of the course') }}</th>
@@ -442,7 +442,7 @@
 
             <h3 style="margin:0 0 8px;font-size:14px">{{ __('Course Equivalence Criteria Findings') }}</h3>
             <div class="table-wrap">
-              <table data-no-search data-no-paginate style="margin:0;min-width:540px">
+              <table data-plain data-no-search data-no-paginate style="margin:0;min-width:540px">
                 <thead>
                   <tr>
                     <th style="min-width:200px">{{ __('Criterion') }}</th>
@@ -510,12 +510,12 @@
 
     @if($a->status === 'under_eval')
       @if($canDecide)
-        <form method="post" action="{{ route('transfers.decide', $a->id) }}" class="card panel" id="decide" style="margin-bottom:20px">
+        <form method="post" action="{{ route('transfers.decide', $a->id) }}" class="card panel" id="decide" style="margin-bottom:20px" data-inplace>
           <div class="hd"><h2 style="margin:0;font-size:15px">{{ __('Record Credit Transfer Decision') }}</h2></div>
           <div class="bd" style="padding:16px 20px">
             @csrf
             <div class="table-wrap" style="margin-bottom:16px">
-              <table data-no-search data-no-paginate style="margin:0;min-width:460px">
+              <table data-plain data-no-search data-no-paginate style="margin:0;min-width:460px">
                 <thead>
                   <tr>
                     <th>{{ __('Course') }}</th>
@@ -579,7 +579,7 @@
           <h2 style="margin:0;font-size:14px">{{ __('Request More Evidence from Applicant') }}</h2>
           <span class="s muted">{{ __('Expand') }}</span>
         </summary>
-        <form method="post" action="{{ route('transfers.more', $a->id) }}" class="bd" style="padding:16px 20px">
+        <form method="post" action="{{ route('transfers.more', $a->id) }}" class="bd" style="padding:16px 20px" data-inplace>
           @csrf
           <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
             <div style="flex:1;min-width:260px">
@@ -622,7 +622,7 @@
   {{-- TAB 4: Admission & Redemption --}}
   <div data-pane="admission" @if($activeTab !== 'admission') hidden @endif>
     @if($canAdmit)
-      <form method="post" action="{{ route('transfers.admit', $a->id) }}" class="card panel" id="admission" style="margin-bottom:20px">
+      <form method="post" action="{{ route('transfers.admit', $a->id) }}" class="card panel" id="admission" style="margin-bottom:20px" data-inplace>
         <div class="hd"><h2 style="margin:0;font-size:15px">{{ __('Programme Admission (Separate Fact)') }}</h2></div>
         <div class="bd" style="padding:16px 20px">
           @csrf
@@ -675,7 +675,7 @@
             {{ __('Record graduation or withdrawal once to update all :count provisionally redeemed courses for :ref together.', ['count' => $heldLines->count(), 'ref' => $a->reference]) }}
           </p>
           @if($canRedeemHere)
-            <form method="post" action="{{ route('transfers.redeem.bulk') }}">
+            <form method="post" action="{{ route('transfers.redeem.bulk') }}" data-inplace>
               @csrf
               <input type="hidden" name="return_to" value="show">
               <input type="hidden" name="application_id" value="{{ $a->id }}">

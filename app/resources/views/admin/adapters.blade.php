@@ -29,7 +29,7 @@
     <span class="r small muted">{{ count($adapters) }} {{ __('adapters active') }}</span>
   </div>
   <div class="table-wrap">
-    <table>
+    <table data-plain>
       <thead>
         <tr>
           <th>{{ __('Adapter') }}</th>

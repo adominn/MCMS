@@ -215,7 +215,7 @@
           </td>
           <td class="num">
             @if(auth()->user()->hasAnyRole($approver) && ! auth()->user()->hasRole('codl_admin') && $r['count'] > 0 && ! $r['held'])
-              <form method="post" action="{{ route('retention.dispose', $r['category']) }}" style="display:inline">
+              <form method="post" action="{{ route('retention.dispose', $r['category']) }}" style="display:inline" data-inplace>
                 @csrf
                 <button type="submit" class="btn sm danger" aria-label="Approve disposal of {{ $r['label'] }}">
                   {{ __('Approve disposal') }}
@@ -248,7 +248,7 @@
       <span class="tag warn">{{ __('Freezes disposal') }}</span>
     </div>
     <div class="bd">
-      <form method="post" action="{{ route('retention.hold') }}" class="col" style="gap:12px">
+      <form method="post" action="{{ route('retention.hold') }}" class="col" style="gap:12px" data-inplace>
         @csrf
         <p class="small muted" style="margin:0">
           {{ __('A hold stops disposal of records while they are needed, for example during an audit or investigation.') }}
@@ -295,7 +295,7 @@
               <td class="small">{{ $h->reason }}</td>
               <td class="num">
                 @if(! auth()->user()->hasRole('codl_admin') || auth()->user()->hasAnyRole('deputy_dean', 'ptj_authority', 'academic_authority', 'records_custodian'))
-                <form method="post" action="{{ route('retention.lift', $h->id) }}" style="display:inline">
+                <form method="post" action="{{ route('retention.lift', $h->id) }}" style="display:inline" data-inplace>
                   @csrf
                   <button type="submit" class="btn sm ghost">{{ __('Lift hold') }}</button>
                 </form>

@@ -28,15 +28,15 @@
   </div>
 @else
 <div class="panel">
-  <table>
+  <table id="approvals-table" data-default-sort="4:desc">
     <thead>
       <tr>
         <th>{{ __('Micro-credential') }}</th>
         <th>{{ __('Proposer') }}</th>
         <th>{{ __('Category') }}</th>
-        <th>{{ __('Status') }}</th>
-        <th>{{ __('Submitted') }}</th>
-        <th style="text-align:right">{{ __('Action') }}</th>
+        <th data-sort-type="status">{{ __('Status') }}</th>
+        <th data-sort-type="date">{{ __('Submitted') }}</th>
+        <th style="text-align:right" data-nosort>{{ __('Action') }}</th>
       </tr>
     </thead>
     <tbody>
@@ -57,7 +57,7 @@
         <td>
           <x-pill :s="__($labels[$r->status] ?? ucfirst(str_replace('_', ' ', $r->status)))" />
         </td>
-        <td>
+        <td data-sort-value="{{ $r->submitted_at ?? '' }}">
           {{ $r->submitted_at ? \Carbon\Carbon::parse($r->submitted_at)->format('d/m/Y') : '-' }}
         </td>
         <td style="text-align:right">

@@ -339,15 +339,20 @@ it('renders Appendix E specifications: certificate details, sheet with E10 sign-
         ->assertSee('Hasil Pembelajaran')
         ->assertSee('Timbalan Dekan (Akademik)');
 
-    // 2. Verify Printable Sheet includes plain-language 3-role sign-offs & Important Notice
+    // 2. Verify Printable Sheet includes plain-language 3-role sign-offs & Important Notice (pure EN by default, pure BM via ?doc_lang=ms)
     $resSheet = $this->actingAs($this->amir)->get("/my-credentials/{$c->id}/sheet")->assertOk();
     $resSheet->assertSee('Credential Specifications Sign-Off')
-        ->assertSee('Penyelaras Kursus / MC')
-        ->assertSee('Wakil PTj / Timbalan Dekan')
-        ->assertSee('Urus Setia Credential')
+        ->assertSee('Course / MC Coordinator')
+        ->assertSee('Faculty Representative / Deputy Dean')
+        ->assertSee('Credential Secretariat')
         ->assertSee('Important Notice:')
         ->assertDontSee('Appendix E10')
         ->assertDontSee('Lampiran E');
+
+    $resSheetBm = $this->actingAs($this->amir)->get("/my-credentials/{$c->id}/sheet?doc_lang=ms")->assertOk();
+    $resSheetBm->assertSee('Penyelaras Kursus / MC')
+        ->assertSee('Wakil PTj / Timbalan Dekan')
+        ->assertSee('Urus Setia Kredensial');
 
     // 3. Verify E8 Checklist Persistence on credentials table
     $credRow = DB::table('credentials')->where('id', $c->id)->first();

@@ -34,29 +34,124 @@ final class OfferingController
         return view('offerings.index', ['rows' => $rows, 'labels' => config('offerings.status'), 'dean' => $request->user()->hasAnyRole('deputy_dean')]);
     }
 
+    /** Rule D-69: scalable server-side lecturer search (capped at 12 results) with PTj and MQF eligibility filters. */
+    public function searchLecturers(Request $request)
+    {
+        $q = trim((string) $request->query('q', ''));
+        $ptjId = $request->query('ptj_id');
+        $allPtj = $request->boolean('all_ptj');
+        $minMqf = is_numeric($request->query('min_mqf')) ? (int) $request->query('min_mqf') : null;
+
+        $query = DB::table('users as u')
+            ->join('role_assignments as ra', 'ra.user_id', '=', 'u.id')
+            ->leftJoin('ptjs as p', 'p.id', '=', 'ra.ptj_id')
+            ->where('ra.role', 'lecturer')
+            ->where('u.status', 'active');
+
+        if (! $allPtj && is_numeric($ptjId) && (int) $ptjId > 0) {
+            $query->where('ra.ptj_id', (int) $ptjId);
+        }
+
+        if ($minMqf !== null && $minMqf > 0) {
+            $query->where(fn ($w) => $w->whereNull('u.max_mqf_level')->orWhere('u.max_mqf_level', '>=', $minMqf));
+        }
+
+        if ($q !== '') {
+            $like = db_like();
+            $query->where(fn ($w) => $w
+                ->where('u.name', $like, "%$q%")
+                ->orWhere('u.email', $like, "%$q%")
+                ->orWhere('u.institution_id', $like, "%$q%"));
+        }
+
+        $rows = $query
+            ->select('u.id', 'u.name', 'u.email', 'u.institution_id', 'u.max_mqf_level', 'p.code as ptj_code')
+            ->distinct()
+            ->orderBy('u.name')
+            ->limit(12)
+            ->get();
+
+        return response()->json(['data' => $rows]);
+    }
+
     public function create(Request $request)
     {
-        return view('offerings.new', ['versions' => $this->approvedVersions($request)->get(['v.id', 'v.name_en', 'v.version_no', 'v.delivery_mode']), 'modes' => config('proposals.delivery_modes'), 'ucreds' => DB::table('ucreds_courses')->orderBy('course_id')->get(['course_id', 'title', 'subject_code'])]);
+        $userPtjId = DB::table('role_assignments')->where('user_id', $request->user()->id)->whereNotNull('ptj_id')->value('ptj_id');
+        $userPtjCode = $userPtjId ? DB::table('ptjs')->where('id', $userPtjId)->value('code') : null;
+
+        $versions = $this->approvedVersions($request)->get([
+            'v.id', 'v.name_en', 'v.version_no', 'v.delivery_mode', 'v.delivery_mode_other',
+            'v.delivery_language', 'v.offering_period', 'v.discipline', 'v.target_group',
+            'v.proposed_mqf_level', 'm.category', 'm.ptj_id',
+        ]);
+        $sltByVersion = $versions->isNotEmpty()
+            ? DB::table('mc_modules')->whereIn('mc_version_id', $versions->pluck('id'))->selectRaw('mc_version_id, SUM(slt_hours) as slt')->groupBy('mc_version_id')->pluck('slt', 'mc_version_id')
+            : collect();
+        $versions->each(function ($ver) use ($sltByVersion) {
+            $ver->slt_hours = (int) ($sltByVersion[$ver->id] ?? 0);
+        });
+
+        return view('offerings.new', [
+            'versions' => $versions,
+            'modes' => config('proposals.delivery_modes'),
+            'ucreds' => DB::table('ucreds_courses')->orderBy('course_id')->get(['course_id', 'title', 'subject_code']),
+            'defaultPtjId' => $userPtjId,
+            'defaultPtjCode' => $userPtjCode,
+        ]);
     }
 
     // FR-83, FR-84: only an approved version, inside the caller's scope.
     public function store(Request $request)
     {
-        $d = $this->validated($request) + $request->validate(['mc_version_id' => 'required|integer']);
+        $d = $this->validated($request) + $request->validate([
+            'mc_version_id' => 'required|integer',
+            'assigned_facilitators' => 'nullable|array',
+            'assigned_facilitators.*' => 'integer|exists:users,id',
+        ]);
         $v = $this->approvedVersions($request)->where('v.id', $d['mc_version_id'])->first() ?? abort(403, 'Only an approved version, inside your scope, can be offered.');
         if (DB::table('mc_modules')->where('mc_version_id', $v->id)->exists()) {
             $check = $this->checker->check($v->id);
             abort_if(! empty($check['blocking']), 422, 'Cannot offer this version: the proposal has unresolved blocking curriculum errors.');
         }
 
-        $id = DB::transaction(function () use ($d, $v, $request) {
-            $id = DB::table('offerings')->insertGetId(array_diff_key($d, ['mc_version_id' => 1]) + ['mc_version_id' => $v->id, 'created_by' => $request->user()->id, 'staged_completion' => $request->boolean('staged_completion'), 'created_at' => now(), 'updated_at' => now()]);
+        $assignedIds = array_values(array_unique(array_map('intval', $d['assigned_facilitators'] ?? [])));
+        $selfAssigned = in_array($request->user()->id, $assignedIds, true);
+        $facText = trim((string) ($d['facilitators'] ?? ''));
+        if ($selfAssigned && ! str_contains($facText, $request->user()->name)) {
+            $facText = $facText === '' ? $request->user()->name : $facText.', '.$request->user()->name;
+        }
+        $d['facilitators'] = $facText !== '' ? $facText : null;
+
+        $id = DB::transaction(function () use ($d, $v, $request, $assignedIds) {
+            $id = DB::table('offerings')->insertGetId(array_diff_key($d, ['mc_version_id' => 1, 'assigned_facilitators' => 1]) + ['mc_version_id' => $v->id, 'created_by' => $request->user()->id, 'staged_completion' => $request->boolean('staged_completion'), 'created_at' => now(), 'updated_at' => now()]);
+            foreach ($assignedIds as $uid) {
+                $isSelf = $uid === $request->user()->id;
+                DB::table('offering_facilitators')->insertOrIgnore([
+                    'offering_id' => $id,
+                    'user_id' => $uid,
+                    'status' => $isSelf ? 'accepted' : 'invited',
+                    'invited_by' => $request->user()->id,
+                    'responded_at' => $isSelf ? now() : null,
+                    'created_at' => now(),
+                ]);
+                if (! $isSelf && ($invitee = User::find($uid))) {
+                    DB::table('notifications')->insert([
+                        'user_id' => $invitee->id,
+                        'channel' => 'in_system',
+                        'template_key' => 'facilitator.invited',
+                        'subject' => 'Facilitator invitation: '.$v->name_en.' '.$d['cohort_name'],
+                        'body' => $request->user()->name.' invited you to facilitate '.$v->name_en.' ('.$d['cohort_name'].'). Accept or decline under Invitations & reviews.',
+                        'link' => '/reviews?tab=facilitator',
+                        'created_at' => now(),
+                    ]);
+                }
+            }
             $prev = DB::table('offerings as o')->join('mc_versions as pv', 'pv.id', '=', 'o.mc_version_id')->where('pv.micro_credential_id', $v->micro_credential_id)->where('o.id', '!=', $id)->orderByDesc('o.id')->value('o.id');
             foreach (array_keys(config('offerings.readiness')) as $item) { // the checklist is repeated for every cohort, pre-filled from the last (FR-88)
                 $p = $prev ? DB::table('readiness_items')->where('offering_id', $prev)->where('item', $item)->first() : null;
                 DB::table('readiness_items')->insert(['offering_id' => $id, 'item' => $item, 'status' => $p->status ?? 'not_yet', 'note' => $p->note ?? null, 'accepted' => $p->accepted ?? false]);
             }
-            $this->audit->record('offering.created', ['type' => 'Offering', 'id' => $id], after: ['version' => $v->id, 'cohort' => $d['cohort_name'], 'prefilled' => (bool) $prev]);
+            $this->audit->record('offering.created', ['type' => 'Offering', 'id' => $id], after: ['version' => $v->id, 'cohort' => $d['cohort_name'], 'prefilled' => (bool) $prev, 'invited_facilitators' => $assignedIds]);
 
             return $id;
         });
@@ -414,7 +509,12 @@ final class OfferingController
             ->leftJoin('ptjs as p', 'p.id', '=', 'm.ptj_id')
             ->leftJoin('users as u', 'u.id', '=', 'm.owner_id')
             ->where(function ($q) use ($user, $ptjs) {
-                $q->where('m.owner_id', $user->id);
+                $q->where('m.owner_id', $user->id)
+                    ->orWhereExists(fn ($sub) => $sub->select(DB::raw(1))
+                        ->from('offering_facilitators as ofac')
+                        ->whereColumn('ofac.offering_id', 'o.id')
+                        ->where('ofac.user_id', $user->id)
+                        ->where('ofac.status', 'accepted'));
                 if ($user->hasAnyRole('deputy_dean')) {
                     $q->orWhereRaw($ptjs === null ? 'true' : 'm.ptj_id in ('.implode(',', array_map('intval', $ptjs) ?: [0]).')');
                 }

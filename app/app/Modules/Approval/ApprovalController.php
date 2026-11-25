@@ -40,13 +40,27 @@ final class ApprovalController
         $v = $this->version($request, $id, act: false);
         $assign = DB::table('review_assignments as a')->join('users as u', 'u.id', '=', 'a.reviewer_id')->leftJoin('reviews as r', 'r.review_assignment_id', '=', 'a.id')
             ->where('a.mc_version_id', $id)->orderBy('a.id')->get(['a.*', 'u.name as reviewer', 'r.ratings', 'r.recommendation', 'r.summary']);
-        $comments = DB::table('review_comments as c')->join('users as u', 'u.id', '=', 'c.author_id')->where('c.mc_version_id', $id)->orderBy('c.id')->get(['c.*', 'u.name as author']);
-        $assigned = $assign->where('status', '!=', 'declined')->pluck('reviewer_id');
+        $comments = DB::table('review_comments as c')
+            ->join('users as u', 'u.id', '=', 'c.author_id')
+            ->leftJoin('review_assignments as ra', 'ra.id', '=', 'c.review_assignment_id')
+            ->where('c.mc_version_id', $id)
+            ->orderByDesc('c.id')
+            ->get(['c.*', 'u.name as author', 'ra.status as assignment_status', 'ra.kind as assignment_kind']);
+        $assigned = $assign->whereNotIn('status', ['declined', 'superseded'])->pluck('reviewer_id');
 
-        return view('approval.show', ProposalSummary::load($id) + [
+        $summary = ProposalSummary::load($id);
+        $requiredMqf = $v->proposed_mqf_level ? (int) $v->proposed_mqf_level : null;
+        if ($requiredMqf === null && ! empty($summary['course']?->programme_id)) {
+            $progMqf = DB::table('programmes')->where('id', $summary['course']->programme_id)->value('mqf_level');
+            $requiredMqf = $progMqf ? (int) $progMqf : null;
+        }
+        $proposalPtjCode = DB::table('ptjs')->where('id', $v->ptj_id)->value('code') ?? '';
+
+        return view('approval.show', $summary + [
             'labels' => self::STATUS, 'assign' => $assign, 'comments' => $comments, 'checks' => $this->checker->check($id),
             'decisions' => DB::table('approval_decisions as d')->join('users as u', 'u.id', '=', 'd.decided_by')->where('d.mc_version_id', $id)->orderBy('d.id')->get(['d.*', 'u.name as by']),
             'lecturers' => $this->candidates('lecturer', $v->owner_id, $assigned), 'experts' => $this->candidates('industry_expert', $v->owner_id, $assigned),
+            'requiredMqf' => $requiredMqf, 'proposalPtjId' => (int) $v->ptj_id, 'proposalPtjCode' => $proposalPtjCode,
             'blocking' => $comments->where('blocking', true)->where('status', '!=', 'resolved')->count(),
             'submittedReviews' => $assign->where('kind', 'reviewer')->where('status', 'submitted')->count(),
             'items' => config('proposals.review_items'),
@@ -61,19 +75,23 @@ final class ApprovalController
         $request->merge(['reviewers' => array_map('intval', (array) $request->input('reviewers'))]);
         $d = $request->validate(['reviewers' => 'required|array|min:1', 'reviewers.*' => 'integer|exists:users,id', 'due_on' => 'required|date|after_or_equal:today', 'scope' => 'required|string|min:5|max:500']);
 
-        DB::transaction(function () use ($d, $v, $id, $request) {
+        $requiredMqf = $v->proposed_mqf_level ? (int) $v->proposed_mqf_level : null;
+        if ($requiredMqf === null && ! empty($v->parent_course_id)) {
+            $progMqf = DB::table('parent_courses as c')->leftJoin('programmes as p', 'p.id', '=', 'c.programme_id')->where('c.id', $v->parent_course_id)->value('p.mqf_level');
+            $requiredMqf = $progMqf ? (int) $progMqf : null;
+        }
+
+        DB::transaction(function () use ($d, $v, $id, $request, $requiredMqf) {
             foreach (array_unique($d['reviewers']) as $uid) {
                 $u = User::findOrFail($uid);
                 $kind = $u->hasAnyRole('industry_expert') && ! $u->hasAnyRole('lecturer') ? 'expert' : 'reviewer';
                 abort_if($uid === $v->owner_id, 422, 'A lecturer cannot review their own proposal.');
                 abort_unless($u->status === 'active' && $u->hasAnyRole('lecturer', 'industry_expert'), 422, 'This person cannot be a reviewer.');
+                if ($kind === 'reviewer' && $requiredMqf !== null && $u->max_mqf_level !== null && (int) $u->max_mqf_level < $requiredMqf) {
+                    abort(422, "{$u->name} is eligible up to MQF {$u->max_mqf_level}; this proposal requires MQF {$requiredMqf}+.");
+                }
                 if (DB::table('review_assignments')->where(['mc_version_id' => $id, 'reviewer_id' => $uid])->whereNotIn('status', ['declined', 'superseded'])->exists()) {
                     continue;
-                }
-                $oldAids = DB::table('review_assignments')->where(['mc_version_id' => $id, 'reviewer_id' => $uid])->whereIn('status', ['declined', 'superseded'])->pluck('id');
-                if ($oldAids->isNotEmpty()) {
-                    DB::table('reviews')->whereIn('review_assignment_id', $oldAids)->delete();
-                    DB::table('review_assignments')->whereIn('id', $oldAids)->delete();
                 }
                 $aid = DB::table('review_assignments')->insertGetId(['mc_version_id' => $id, 'reviewer_id' => $uid, 'kind' => $kind, 'assigned_by' => $request->user()->id, 'due_on' => $d['due_on'], 'scope' => $d['scope'], 'created_at' => now(), 'updated_at' => now()]);
                 $this->audit->record('review.assigned', ['type' => 'McVersion', 'id' => $id], after: ['reviewer' => $u->name, 'kind' => $kind, 'due_on' => $d['due_on']], reason: $d['scope']); // EV-09
@@ -103,6 +121,48 @@ final class ApprovalController
         $this->audit->record('comment.resolved', ['type' => 'McVersion', 'id' => $id], context: ['comment' => $comment], reason: $d['reason']);
 
         return redirect()->route('approvals.show', $id)->with('status', 'Comment resolved.');
+    }
+
+    // Batch-resolve multiple answered comments at once with a shared resolution reason (FR-63).
+    public function resolveAll(Request $request, int $id)
+    {
+        $this->version($request, $id);
+        $d = $request->validate([
+            'reason' => 'required|string|min:5|max:500',
+            'comment_ids' => 'nullable|array',
+            'comment_ids.*' => 'integer',
+        ]);
+
+        $ids = array_map('intval', (array) ($d['comment_ids'] ?? []));
+        $resolved = 0;
+
+        DB::transaction(function () use ($id, $ids, $d, $request, &$resolved) {
+            $q = DB::table('review_comments')
+                ->where('mc_version_id', $id)
+                ->where('status', 'answered');
+            if ($ids !== []) {
+                $q->whereIn('id', $ids);
+            }
+            $targets = $q->pluck('id');
+            foreach ($targets as $cid) {
+                DB::table('review_comments')->where('id', $cid)->update([
+                    'status' => 'resolved',
+                    'resolve_reason' => $d['reason'],
+                    'resolved_by' => $request->user()->id,
+                    'resolved_at' => now(),
+                ]);
+                $this->audit->record('comment.resolved', ['type' => 'McVersion', 'id' => $id], context: ['comment' => $cid], reason: $d['reason']);
+                $resolved++;
+            }
+        });
+
+        if ($resolved === 0) {
+            return redirect()->route('approvals.show', $id)->with('status', __('No answered comments to resolve.'));
+        }
+
+        $msg = $resolved === 1 ? __('1 comment resolved.') : __(':count comments resolved.', ['count' => $resolved]);
+
+        return redirect()->route('approvals.show', $id)->with('status', $msg);
     }
 
     // FR-64, FR-66: endorsement verifies the category and records the second stage.
@@ -185,6 +245,9 @@ final class ApprovalController
             Tasks::close('assign_reviewers', $id);
             Tasks::close('decide', $id);
             Tasks::close('proposal_decide', $id);
+            if ($return) {
+                Tasks::open('lecturer', 'amend', $id, 'Amend and resubmit proposal: '.$v->name_en, "/proposals/$id", userId: $v->owner_id);
+            }
             if ($v->supersedes_id && ! $return) {
                 $this->offerings->releaseForChange($v->micro_credential_id, 'The change was not supported.');
             }
@@ -318,7 +381,24 @@ final class ApprovalController
 
     private function candidates(string $role, int $ownerId, $already)
     {
-        return User::where('status', 'active')->where('id', '!=', $ownerId)->whereNotIn('id', $already)
+        $users = User::where('status', 'active')->where('id', '!=', $ownerId)->whereNotIn('id', $already)
             ->whereHas('roleAssignments', fn ($q) => $q->where('role', $role))->orderBy('name')->get()->filter(fn ($u) => $u->hasAnyRole($role));
+
+        if ($users->isEmpty()) {
+            return $users;
+        }
+
+        $ptjMap = DB::table('role_assignments as ra')
+            ->leftJoin('ptjs as p', 'p.id', '=', 'ra.ptj_id')
+            ->where('ra.role', $role)
+            ->whereIn('ra.user_id', $users->pluck('id'))
+            ->get(['ra.user_id', 'ra.ptj_id', 'p.code as ptj_code'])
+            ->keyBy('user_id');
+
+        return $users->each(function ($u) use ($ptjMap) {
+            $pm = $ptjMap->get($u->id);
+            $u->ptj_id = $pm?->ptj_id ? (int) $pm->ptj_id : null;
+            $u->ptj_code = $pm?->ptj_code ?? null;
+        });
     }
 }

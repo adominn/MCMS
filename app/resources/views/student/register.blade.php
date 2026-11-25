@@ -21,7 +21,7 @@
 </div>
 
 <div class="track" style="margin-bottom:24px">
-  @php($trackSteps = [1 => 'Eligibility and details', 2 => 'Acknowledgement', 3 => 'Payment', 4 => 'Confirmation'])
+  @php $trackSteps = [1 => 'Eligibility and details', 2 => 'Acknowledgement', 3 => 'Payment', 4 => 'Confirmation']; @endphp
   @foreach($trackSteps as $n => $label)
     @if($n < $step && !($e && $e->status === 'pending_payment' && $n < 3))
       <a href="{{ route('register', ['offering' => $o->id, 'step' => $n]) }}" class="stp done" style="text-decoration:none;cursor:pointer">
@@ -56,21 +56,23 @@
               </div>
             </div>
           @else
-            <div class="note ok" style="margin-bottom:20px">
-              {{ __('The checks pass: the registration window is open, there is a place, and your group is eligible.') }}
+            <div class="note ok" style="margin-bottom:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <span class="tag ok" style="flex-shrink:0">{{ __('Checks pass') }}</span>
+              <span>{{ __('The registration window is open, there is a place, and your group is eligible.') }}</span>
             </div>
           @endif
 
-          {{-- Automated Pre-Registration Checks Table --}}
+          {{-- Show automated check breakdown only when a check fails; otherwise keep silent behind the green Eligible confirmation --}}
+          @if(!empty($reasons))
           <div style="margin-bottom:24px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
               <h3 style="font-size:14px;font-weight:600;margin:0;letter-spacing:0.2px">{{ __('Automated Pre-Registration Checks') }}</h3>
-              <span class="tag {{ empty($reasons) ? 'ok' : 'err' }}" style="white-space:nowrap !important;display:inline-flex !important">
-                {{ empty($reasons) ? __('Checks pass') : __('Checks failed') }}
+              <span class="tag err" style="white-space:nowrap !important;display:inline-flex !important">
+                {{ __('Checks failed') }}
               </span>
             </div>
             <div class="table-wrap" style="border:1px solid var(--hairline);border-radius:2px;overflow:hidden">
-              <table style="width:100%;border-collapse:collapse;margin:0">
+              <table data-plain style="width:100%;border-collapse:collapse;margin:0">
                 <thead>
                   <tr style="background:var(--table-header-bg);border-bottom:1px solid var(--hairline)">
                     <th style="width:110px;padding:8px 16px;font-size:12px;text-align:left">{{ __('Status') }}</th>
@@ -96,9 +98,10 @@
               </table>
             </div>
           </div>
+          @endif
 
           @if($o->prerequisites)
-            @php($activeLang = session('lang', app()->getLocale() ?: 'en'))
+            @php $activeLang = session('lang', app()->getLocale() ?: 'en'); @endphp
             <div style="background:var(--surface);border:1px solid var(--hairline);border-left:4px solid var(--accent);border-radius:2px;padding:14px 18px;margin-bottom:24px">
               <div style="display:flex;align-items:flex-start;gap:12px">
                 <div>
@@ -118,11 +121,12 @@
           @endif
 
           @if(empty($reasons))
+          @php $savedPhone = trim((string) (auth()->user()->phone ?? '')); @endphp
           {{-- Authenticated Learner Profile Card --}}
           <div style="margin-bottom:24px">
             <h3 style="font-size:14px;font-weight:600;margin:0 0 10px;letter-spacing:0.2px">{{ __('Participant Profile (From UTeM Identity Records)') }}</h3>
             <div style="background:var(--surface);border:1px solid var(--hairline);border-radius:2px;padding:16px">
-              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:16px">
                 <div>
                   <div class="small muted">{{ __('Full Name') }}</div>
                   <div style="font-weight:600;font-size:14px;margin-top:2px">{{ auth()->user()->name }}</div>
@@ -135,28 +139,41 @@
                   <div class="small muted">{{ __('Registered Email') }}</div>
                   <div style="font-weight:600;font-size:14px;margin-top:2px">{{ auth()->user()->email }}</div>
                 </div>
+                @if($savedPhone !== '')
+                  <div>
+                    <div class="small muted">{{ __('Phone Number') }}</div>
+                    <div style="font-weight:600;font-size:14px;margin-top:2px">
+                      {{ $savedPhone }}
+                      <a href="{{ route('profile') }}" class="small" style="margin-left:6px;font-weight:500">{{ __('Edit') }}</a>
+                    </div>
+                  </div>
+                @endif
               </div>
             </div>
           </div>
 
           <form method="post" action="{{ route('register.eligibility', $o->id) }}">
             @csrf
-            <div class="field" style="margin-bottom:20px;max-width:440px">
-              <label for="phone" style="font-weight:600;margin-bottom:6px;display:block">
-                {{ __('Confirm your phone number') }} <span style="color:var(--err)">*</span>
-              </label>
-              <input type="text" id="phone" name="phone" value="{{ old('phone', auth()->user()->phone) }}" required placeholder="+60123456789" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:2px">
-              <div class="help" style="font-size:12px;color:var(--muted);margin-top:4px">
-                {{ __('Required for cohort communications, LMS account provisioning, and credential issuance.') }}
+            @if($savedPhone !== '' && !$errors->has('phone'))
+              <input type="hidden" name="phone" value="{{ $savedPhone }}">
+            @else
+              <div class="field" style="margin-bottom:20px;max-width:440px">
+                <label for="phone" style="font-weight:600;margin-bottom:6px;display:block">
+                  {{ __('Phone number') }} <span style="color:var(--err)">*</span>
+                </label>
+                <input type="text" id="phone" name="phone" value="{{ old('phone', $savedPhone) }}" required placeholder="+60123456789" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:2px">
+                <div class="help" style="font-size:12px;color:var(--muted);margin-top:4px">
+                  {{ __('Saved to your profile for cohort communications — you will not be asked again.') }}
+                </div>
+                @error('phone')<div class="help err" role="alert" style="color:var(--err);font-size:12px;margin-top:4px">{{ $message }}</div>@enderror
               </div>
-              @error('phone')<div class="help err" role="alert" style="color:var(--err);font-size:12px;margin-top:4px">{{ $message }}</div>@enderror
-            </div>
+            @endif
 
             @if($o->prerequisites)
               <div class="field" style="margin-bottom:20px;max-width:540px">
                 <label style="display:inline-flex;align-items:flex-start;gap:10px;cursor:pointer;font-weight:600;font-size:13px">
                   <input type="checkbox" id="prerequisites_ok" name="prerequisites_ok" value="1" {{ old('prerequisites_ok') ? 'checked' : '' }}>
-                  <span>{{ __('I confirm that I meet the prerequisite knowledge or experience for this micro-credential (:prereq).', ['prereq' => $o->prerequisites]) }} <span style="color:var(--err)">*</span></span>
+                  <span>{{ __('I confirm I meet the recommended prerequisites.') }} <span style="color:var(--err)">*</span></span>
                 </label>
                 @error('prerequisites_ok')<div class="help err" role="alert" style="color:var(--err);font-size:12px;margin-top:4px">{{ $message }}</div>@enderror
               </div>
@@ -187,6 +204,7 @@
               <div class="bd" style="padding:16px">
                 <p style="white-space:pre-line;margin:0 0 16px;line-height:1.6">{{ $ack }}</p>
 
+                @if(($o->category ?? '') !== 'mce')
                 <div style="background:var(--surface);border:1px solid var(--hairline);border-left:3px solid var(--accent);padding:12px 16px;margin:16px 0;font-size:13px">
                   <div style="font-weight:600;margin-bottom:6px;color:var(--accent)">{{ __('Key Recognition Principles:') }}</div>
                   <ul style="margin:0;padding-left:18px;line-height:1.5">
@@ -195,6 +213,7 @@
                     <li><b>{{ __('Credit Transfer') }}</b>: {{ __('Credit transfer is an academic evaluation decided solely by the receiving degree programme, never an automatic guarantee.') }}</li>
                   </ul>
                 </div>
+                @endif
 
                 <label style="display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;font-size:13px;margin-top:8px">
                   <input type="checkbox" id="ack_statement" name="ack_statement" value="1">
@@ -204,7 +223,7 @@
             </div>
 
             @if($pdpa)
-            @php($activeLang = session('lang', app()->getLocale() ?: 'en'))
+            @php $activeLang = session('lang', app()->getLocale() ?: 'en'); @endphp
             <div class="panel" style="margin-bottom:20px;border:1px solid var(--border)">
               <div class="hd" style="background:var(--surface);padding:12px 16px">
                 <h3 style="font-size:15px;margin:0">{{ __('Personal data notice (PDPA)') }}</h3>
@@ -333,7 +352,21 @@
               </div>
             </div>
 
-            <p style="margin-bottom:20px">{{ __('Open the learning platform course:platform when the cohort starts on :start. We also sent you a confirmation.', ['platform' => $platform ? ': '.$platform : '', 'start' => \Carbon\Carbon::parse($o->start_date)->format('d/m/Y')]) }}</p>
+            @php
+              $platformRef = trim((string) ($platform ?? ''));
+              $platformIsUrl = $platformRef !== '' && filter_var($platformRef, FILTER_VALIDATE_URL) && preg_match('/^https?:\/\//i', $platformRef);
+            @endphp
+
+            <p style="margin-bottom:20px">
+              @if($platformIsUrl)
+                {!! __('Open the learning platform course (:link) when the cohort starts on :start. We also sent you a confirmation.', [
+                  'link' => '<a href="'.e($platformRef).'" target="_blank" rel="noopener noreferrer">'.e($platformRef).'</a>',
+                  'start' => \Carbon\Carbon::parse($o->start_date)->format('d/m/Y'),
+                ]) !!}
+              @else
+                {{ __('Open the learning platform course:platform when the cohort starts on :start. We also sent you a confirmation.', ['platform' => $platformRef !== '' ? ': '.$platformRef : '', 'start' => \Carbon\Carbon::parse($o->start_date)->format('d/m/Y')]) }}
+              @endif
+            </p>
 
             <div class="panel" style="margin-bottom:20px">
               <div class="hd"><h2>{{ __('How to start') }}</h2></div>
@@ -349,7 +382,18 @@
                   </div>
                   <div class="check">
                     <span class="dot ok"></span>
-                    <div class="grow">{{ __('Open the course named in your confirmation') }}<span class="s" style="display:block;color:var(--muted);font-size:12px">{{ $o->name_en }} {{ $o->cohort_name }}. {{ __('Modules open in order.') }}</span></div>
+                    <div class="grow">
+                      {{ __('Open the course named in your confirmation') }}
+                      <span class="s" style="display:block;color:var(--muted);font-size:12px">
+                        {{ $o->name_en }} {{ $o->cohort_name }}.
+                        @if($platformIsUrl)
+                          {{ __('Course link:') }} <a href="{{ $platformRef }}" target="_blank" rel="noopener noreferrer">{{ $platformRef }}</a>.
+                        @elseif($platformRef !== '')
+                          {{ __('Course reference:') }} <code>{{ $platformRef }}</code>.
+                        @endif
+                        {{ __('Modules open in order.') }}
+                      </span>
+                    </div>
                   </div>
                   <div class="check">
                     <span class="dot ok"></span>

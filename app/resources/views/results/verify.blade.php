@@ -72,7 +72,7 @@
       </div>
     </div>
     <div class="bd" style="padding:0">
-      <table id="summary" style="width:100%;border-collapse:collapse;font-size:13px">
+      <table data-plain id="summary" style="width:100%;border-collapse:collapse;font-size:13px">
         <thead>
           <tr style="background:var(--table-header-bg, #f1f5f9);border-bottom:2px solid var(--rule, #e2e8f0)">
             <th style="padding:10px 14px;text-align:left;font-weight:600">{{ __('Assessment Component') }}</th>
@@ -366,6 +366,16 @@
             </label>
             <input type="text" id="evidence" name="evidence" required minlength="5" placeholder="{{ __('e.g. UCreds proctoring log and photo ID check') }}" style="width:100%;height:38px;padding:0 12px;font-size:13px">
             <div class="muted s" style="font-size:11.5px;margin-top:4px">{{ __('Required for MQA compliance and Academic Bank of Credit (ABC) audit traceability.') }}</div>
+          </div>
+
+          <div style="margin-bottom:18px;padding:12px 14px;background:var(--color-canvas-subtle, #f8fafc);border:1px solid var(--color-card-border, #090a0f);border-radius:4px;max-width:640px">
+            <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin:0">
+              <input type="checkbox" name="confirm_completion" value="1" checked style="margin-top:3px">
+              <span>
+                <strong style="font-size:13px">{{ __('Also confirm completion & issue certificates / ACRs for eligible participants') }}</strong>
+                <span class="s muted" style="display:block;font-size:12px">{{ __('Applies only to selected participants who passed all requirements with Course Coordinator sign-off and no integrity hold. Failed or held participants remain uncompleted.') }}</span>
+              </span>
+            </label>
           </div>
 
           <div class="row" style="gap:12px;align-items:center">

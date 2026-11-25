@@ -434,7 +434,7 @@
 </div>
 
 @if($editable)
-<form method="post" action="{{ route('pathways.item', $w->id) }}" class="card panel" id="add-item" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
+<form method="post" action="{{ route('pathways.item', $w->id) }}" class="card panel" id="add-item" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)" data-inplace>
   <div class="hd">
     <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Map a credential to a course') }}</h2>
     <div class="muted small" style="margin-top:2px">{{ __('Pair an eligible micro-credential to a parent degree course') }}</div>
@@ -550,7 +550,7 @@
     : auth()->user()->hasAnyRole($stackableRole);
 @endphp
 @if($canApprovePathway && in_array($w->status, ['draft', 'review', 'in_review']))
-<form method="post" action="{{ route('pathways.approve', $w->id) }}" class="card panel" id="approve" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
+<form method="post" action="{{ route('pathways.approve', $w->id) }}" class="card panel" id="approve" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)" data-inplace>
   <div class="hd">
     <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Record the Senate approval') }}</h2>
     <div class="muted small" style="margin-top:2px">{{ __('Institutional signoff and meeting reference') }}</div>
@@ -574,7 +574,7 @@
 @endif
 
 @if($canApprovePathway && $w->status === 'approved')
-<form method="post" action="{{ route('pathways.publish', $w->id) }}" class="card panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)">
+<form method="post" action="{{ route('pathways.publish', $w->id) }}" class="card panel" style="margin-bottom:24px;border:1px solid var(--hairline);background:var(--card-bg, #ffffff)" data-inplace>
   <div class="hd">
     <h2 style="margin:0;font-size:16px;font-weight:600">{{ __('Publish to participants') }}</h2>
     <div class="muted small" style="margin-top:2px">{{ __('Make roadmap publicly accessible on the MCMS catalogue') }}</div>

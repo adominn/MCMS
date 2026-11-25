@@ -61,7 +61,9 @@
   $proposalSteps = [
     [
       'label' => __('1. Lecturer Submission'),
-      'meta' => !empty($v->submitted_at) ? \Carbon\Carbon::parse($v->submitted_at)->format('d M Y') : (!empty($v->created_at) ? \Carbon\Carbon::parse($v->created_at)->format('d M Y') : '—'),
+      'meta' => in_array($v->status, ['submitted', 'in_review', 'endorsed', 'codl_verified', 'approved'])
+        ? (!empty($v->submitted_at) ? \Carbon\Carbon::parse($v->submitted_at)->format('d M Y') : __('Submitted'))
+        : ($v->status === 'returned' ? __('Returned for changes') : __('In Progress (Draft)')),
       'status' => in_array($v->status, ['submitted', 'in_review', 'endorsed', 'codl_verified', 'approved']) ? 'completed' : 'active',
       'num' => '01',
     ],
@@ -90,10 +92,17 @@
   <x-stepper :steps="$proposalSteps" />
 </div>
 
+@php
+  $tabKeys = array_keys($tabs);
+  $currentTabIdx = array_search($tab, $tabKeys, true);
+  $prevTabKey = ($currentTabIdx !== false && $currentTabIdx > 0) ? $tabKeys[$currentTabIdx - 1] : null;
+  $nextTabKey = ($currentTabIdx !== false && $currentTabIdx < count($tabKeys) - 1) ? $tabKeys[$currentTabIdx + 1] : null;
+@endphp
+
 <nav class="tabs" aria-label="Proposal sections" style="margin-bottom:20px">
   @foreach($tabs as $k => $label)
     <a href="{{ route('proposals.show', ['id' => $v->id, 'tab' => $k]) }}" @if($tab === $k) aria-current="page" class="on" @endif>
-      {{ __($label) }}
+      <span style="opacity:.6;margin-right:3px;font-variant-numeric:tabular-nums">{{ $loop->iteration }}.</span>{{ __($label) }}
       @if($k === 'comments' && !empty($commentsCount))
         <span class="c">{{ $commentsCount }}</span>
       @endif
@@ -110,6 +119,26 @@
     @endif
 
     @include('curriculum.tabs.'.$tab)
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid var(--hairline);flex-wrap:wrap">
+      <div>
+        @if($prevTabKey)
+          <a href="{{ route('proposals.show', ['id' => $v->id, 'tab' => $prevTabKey]) }}" class="btn ter sm">
+            &larr; {{ __('Previous') }}: {{ __($tabs[$prevTabKey]) }}
+          </a>
+        @endif
+      </div>
+      <span class="small muted" style="font-variant-numeric:tabular-nums">
+        {{ __('Step :current of :total', ['current' => ($currentTabIdx !== false ? $currentTabIdx + 1 : 1), 'total' => count($tabKeys)]) }}
+      </span>
+      <div>
+        @if($nextTabKey)
+          <a href="{{ route('proposals.show', ['id' => $v->id, 'tab' => $nextTabKey]) }}" class="btn sm">
+            {{ __('Next') }}: {{ __($tabs[$nextTabKey]) }} &rarr;
+          </a>
+        @endif
+      </div>
+    </div>
   </div>
 
   <aside class="panel checks" role="complementary" aria-label="Checks" style="position:sticky;top:20px">
@@ -182,6 +211,7 @@
     var timer = null;
     var isDirty = false;
     var isSaving = false;
+    var activeSavePromise = null;
     var note = document.getElementById('autosave');
     var stamp = document.getElementById('stamp');
     var proposalBaseUrl = '{{ route("proposals.show", ["id" => $v->id]) }}';
@@ -196,26 +226,46 @@
     var txtWarning = '{{ __("Warning") }}';
     var txtWarnings = '{{ __("warning(s)") }}';
 
+    function buildAutosaveFormData() {
+      var fd = new FormData();
+      Array.prototype.forEach.call(form.elements, function (el) {
+        if (!el.name || el.disabled || el.type === 'file' || el.type === 'submit' || el.type === 'button') return;
+        if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) return;
+        fd.append(el.name, el.value);
+      });
+      fd.set('action', 'save');
+      return fd;
+    }
+
     function saveNow(callback) {
-      if (isSaving) {
-        if (callback) callback();
-        return;
+      if (isSaving && activeSavePromise) {
+        if (callback) {
+          activeSavePromise.finally(function () {
+            if (isDirty) {
+              saveNow(callback);
+            } else {
+              callback();
+            }
+          });
+        }
+        return activeSavePromise;
       }
       isSaving = true;
+      isDirty = false;
       clearTimeout(timer);
       if (note) note.textContent = txtSaving;
       if (stamp) stamp.textContent = txtSaving;
 
-      var fd = new FormData(form);
-      fd.set('action', 'save');
-
+      var fd = buildAutosaveFormData();
       var actionUrl = form.getAttribute('action');
       var tokenInput = form.querySelector('input[name="_token"]');
       var csrfToken = tokenInput ? tokenInput.value : '{{ csrf_token() }}';
 
-      fetch(actionUrl, {
+      activeSavePromise = fetch(actionUrl, {
         method: 'POST',
         body: fd,
+        credentials: 'same-origin',
+        keepalive: true,
         headers: {
           'X-Autosave': '1',
           'X-CSRF-TOKEN': csrfToken,
@@ -223,12 +273,12 @@
         }
       })
       .then(function (r) {
-        if (!r.ok) throw new Error('Save error');
+        if (!r.ok) throw new Error('Save error ' + r.status);
         return r.json();
       })
       .then(function (j) {
-        isDirty = false;
         isSaving = false;
+        activeSavePromise = null;
         if (note) note.textContent = txtSavedAuto + ' ' + j.saved_at + '.';
         if (stamp) stamp.textContent = '{{ __("Autosaved") }}';
 
@@ -236,12 +286,17 @@
           updateSidebarChecks(j.checks);
         }
         if (callback) callback(null, j);
+        return j;
       })
       .catch(function (err) {
         isSaving = false;
+        isDirty = true;
+        activeSavePromise = null;
         if (note) note.textContent = txtNotSaved;
         if (callback) callback(err);
       });
+
+      return activeSavePromise;
     }
 
     function scheduleSave() {
@@ -253,36 +308,49 @@
       }, 700);
     }
 
-    // Trigger on text typing AND dropdown/checkbox toggles
-    form.addEventListener('input', scheduleSave);
-    form.addEventListener('change', scheduleSave);
-
-    // Form manual submit clears dirty flag
-    form.addEventListener('submit', function () {
-      isDirty = false;
-      clearTimeout(timer);
+    // Trigger on text typing AND dropdown/checkbox toggles (skip file inputs — uploaded via explicit Save)
+    form.addEventListener('input', function (e) {
+      if (e.target && e.target.type === 'file') return;
+      scheduleSave();
+    });
+    form.addEventListener('change', function (e) {
+      if (e.target && e.target.type === 'file') return;
+      scheduleSave();
     });
 
-    // Save changes before user clicks ANY link (top tabs or sidebar)
-    document.addEventListener('click', function (e) {
+    // Explicit submit or in-place mutation cancels pending autosave so requests never race
+    function cancelPendingAutosave() {
+      isDirty = false;
+      clearTimeout(timer);
+    }
+    form.addEventListener('submit', cancelPendingAutosave);
+    form.addEventListener('mcms:cancel-autosave', cancelPendingAutosave);
+
+    // Save changes before user clicks ANY link (top tabs or sidebar); deduplicate listener across in-place swaps
+    if (window.__mcmsAutosaveLinkHandler) {
+      document.removeEventListener('click', window.__mcmsAutosaveLinkHandler);
+    }
+    window.__mcmsAutosaveLinkHandler = function (e) {
       var a = e.target.closest('a');
       if (!a || !a.href || a.target === '_blank') return;
       var href = a.getAttribute('href');
       if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
 
-      if (isDirty) {
+      if (isDirty || isSaving) {
         e.preventDefault();
         var targetUrl = a.href;
+        var navigated = false;
+        var go = function () {
+          if (navigated) return;
+          navigated = true;
+          window.location.href = targetUrl;
+        };
         if (note) note.textContent = txtSaving;
-        saveNow(function () {
-          window.location.href = targetUrl;
-        });
-        // Safety timeout: navigate anyway if network is stuck
-        setTimeout(function () {
-          window.location.href = targetUrl;
-        }, 1200);
+        saveNow(go);
+        setTimeout(go, 2500);
       }
-    });
+    };
+    document.addEventListener('click', window.__mcmsAutosaveLinkHandler);
 
     // Save on beforeunload / tab close
     window.addEventListener('beforeunload', function () {

@@ -127,6 +127,35 @@
         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
       </button>
     </div>
+
+    {{-- Shared Inline Sort Control (D-73) --}}
+    <div class="tbar-sort" id="results-sort-wrap">
+      <button type="button" class="tbar-sort-btn" id="results-sort-btn" aria-haspopup="true" aria-expanded="false">
+        <span class="tbar-sort-lbl">{{ __('Sort: Default') }}</span>
+        <span class="tbar-sort-caret" aria-hidden="true">&#9662;</span>
+      </button>
+      <div class="tbar-sort-menu" id="results-sort-menu" hidden role="dialog" aria-label="{{ __('Sort options') }}">
+        <div class="tbar-sort-sec">{{ __('Sort by') }}</div>
+        <div class="tbar-sort-list">
+          <label class="tbar-sort-opt"><input type="radio" name="results_sort_field" value="name" data-type="text" data-label="{{ __('Participant') }}"><span>{{ __('Participant') }}</span></label>
+          <label class="tbar-sort-opt"><input type="radio" name="results_sort_field" value="progress" data-type="num" data-label="{{ __('Progress') }}"><span>{{ __('Progress') }}</span></label>
+          <label class="tbar-sort-opt"><input type="radio" name="results_sort_field" value="final" data-type="num" data-label="{{ __('Final') }}"><span>{{ __('Final') }}</span></label>
+          <label class="tbar-sort-opt"><input type="radio" name="results_sort_field" value="result" data-type="status" data-label="{{ __('Result') }}"><span>{{ __('Result') }}</span></label>
+          @foreach($comps as $c)
+            <label class="tbar-sort-opt"><input type="radio" name="results_sort_field" value="comp:{{ $c->id }}" data-type="num" data-label="{{ $c->name_en }}"><span>{{ $c->name_en }}</span></label>
+          @endforeach
+        </div>
+        <div class="tbar-sort-sec" style="margin-top:10px">{{ __('Direction') }}</div>
+        <div class="tbar-sort-dir" id="results-sort-dir" role="group" aria-label="{{ __('Sort direction') }}">
+          <button type="button" class="tbar-dir-btn on" data-dir="asc">{{ __('A to Z') }}</button>
+          <button type="button" class="tbar-dir-btn" data-dir="desc">{{ __('Z to A') }}</button>
+        </div>
+        <div class="tbar-sort-foot" id="results-sort-foot" hidden>
+          <button type="button" class="tbar-sort-reset" id="results-sort-reset">{{ __('Reset to default') }}</button>
+        </div>
+      </div>
+      <span class="sr" aria-live="polite" id="results-sort-live"></span>
+    </div>
   </div>
 
   <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
@@ -151,16 +180,10 @@
   <thead>
     <tr class="group-row">
       <th rowspan="2" style="position:sticky;left:0;z-index:3;background:var(--surface, #262626);min-width:200px;border-right:1px solid var(--hairline, #393939)">
-        <button type="button" class="results-sort-btn" data-sort="name">
-          <span>{{ __('Participant') }}</span>
-          <span class="sort-icon" aria-hidden="true"><svg class="si" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg></span>
-        </button>
+        {{ __('Participant') }}
       </th>
       <th rowspan="2" style="text-align:center;min-width:75px;border-right:1px solid var(--hairline, #393939)">
-        <button type="button" class="results-sort-btn" data-sort="progress" style="justify-content:center">
-          <span>{{ __('Progress') }}</span>
-          <span class="sort-icon" aria-hidden="true"><svg class="si" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg></span>
-        </button>
+        {{ __('Progress') }}
       </th>
       @foreach($groupedComps as $groupKey => $groupItems)
         @php
@@ -183,16 +206,10 @@
         </th>
       @endforeach
       <th rowspan="2" class="num" style="text-align:right;min-width:75px;border-left:1px solid var(--hairline, #393939)">
-        <button type="button" class="results-sort-btn" data-sort="final" style="justify-content:flex-end">
-          <span>{{ __('Final') }}</span>
-          <span class="sort-icon" aria-hidden="true"><svg class="si" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg></span>
-        </button>
+        {{ __('Final') }}
       </th>
       <th rowspan="2" style="text-align:center;min-width:110px">
-        <button type="button" class="results-sort-btn" data-sort="result" style="justify-content:center">
-          <span>{{ __('Result') }}</span>
-          <span class="sort-icon" aria-hidden="true"><svg class="si" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg></span>
-        </button>
+        {{ __('Result') }}
       </th>
       @if($flag ?? false)
         <th rowspan="2" style="min-width:140px;border-left:1px solid var(--hairline, #393939)">{{ __('Integrity') }}</th>
@@ -202,16 +219,11 @@
       @foreach($groupedComps as $groupKey => $groupItems)
         @foreach($groupItems as $c)
           <th class="gradebook-col-mod" style="min-width:160px;vertical-align:top;padding:6px 10px">
-            <button type="button" class="results-sort-btn" data-sort="comp" data-cid="{{ $c->id }}" style="all:unset;cursor:pointer;display:block;width:100%;box-sizing:border-box">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
-                <span style="color:var(--ink, #f1f5f9);font-size:13px;line-height:1.3;font-weight:600">{{ $c->name_en }}</span>
-                <span class="sort-icon" aria-hidden="true" style="margin-top:2px;flex-shrink:0"><svg class="si" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg></span>
-              </div>
-              <div class="muted s" style="margin-top:4px;display:flex;align-items:center;gap:6px">
-                <span class="tag" style="font-size:10px;padding:0 4px">{{ mcms_num($c->weight_percent) }}%</span>
-                <span>{{ __('Pass') }}: {{ mcms_num($c->pass_mark) }}/{{ mcms_num($c->max_mark) }}</span>
-              </div>
-            </button>
+            <div style="color:var(--ink, #f1f5f9);font-size:13px;line-height:1.3;font-weight:600">{{ $c->name_en }}</div>
+            <div class="muted s" style="margin-top:4px;display:flex;align-items:center;gap:6px">
+              <span class="tag" style="font-size:10px;padding:0 4px">{{ mcms_num($c->weight_percent) }}%</span>
+              <span>{{ __('Pass') }}: {{ mcms_num($c->pass_mark) }}/{{ mcms_num($c->max_mark) }}</span>
+            </div>
           </th>
         @endforeach
       @endforeach
@@ -487,30 +499,106 @@ document.addEventListener('DOMContentLoaded', function () {
     if (emptyRow) tbody.appendChild(emptyRow);
   }
 
-  function updateSortIcons() {
-    sortBtns.forEach(btn => {
-      const col = btn.dataset.sort;
-      const cid = btn.dataset.cid;
-      const icon = btn.querySelector('.sort-icon');
-      const th = btn.closest('th');
+  const sortWrap = document.getElementById('results-sort-wrap');
+  const sortBtn = document.getElementById('results-sort-btn');
+  const sortMenu = document.getElementById('results-sort-menu');
+  const sortDirBox = document.getElementById('results-sort-dir');
+  const sortFoot = document.getElementById('results-sort-foot');
+  const sortReset = document.getElementById('results-sort-reset');
+  const sortLive = document.getElementById('results-sort-live');
+  const origRows = Array.from(tbody.querySelectorAll('tr.gradebook-row'));
+  const isMs = (document.documentElement.lang || '').startsWith('ms');
 
-      const isActive = currentSort && currentSort.col === col && (col !== 'comp' || currentSort.cid === cid);
+  function getDirLabels(type) {
+    if (type === 'num') return { asc: isMs ? 'Terendah dahulu' : 'Lowest first', desc: isMs ? 'Tertinggi dahulu' : 'Highest first', def: 'desc' };
+    if (type === 'status') return { asc: isMs ? 'Urutan aliran kerja' : 'Workflow order', desc: isMs ? 'Urutan terbalik' : 'Reverse order', def: 'asc' };
+    return { asc: isMs ? 'A ke Z' : 'A to Z', desc: isMs ? 'Z ke A' : 'Z to A', def: 'asc' };
+  }
 
-      if (th) {
-        th.classList.toggle('sorted', !!isActive);
-      }
+  function updateSortUi(announce) {
+    if (!sortBtn || !sortMenu) return;
+    const lblSpan = sortBtn.querySelector('.tbar-sort-lbl');
+    if (!currentSort) {
+      if (lblSpan) lblSpan.textContent = isMs ? 'Susun: Lalai' : 'Sort: Default';
+      sortBtn.classList.remove('active');
+      if (sortFoot) sortFoot.hidden = true;
+      sortMenu.querySelectorAll('input[type=radio]').forEach(r => { r.checked = false; r.closest('.tbar-sort-opt')?.classList.remove('on'); });
+      if (announce && sortLive) sortLive.textContent = isMs ? 'Susun: Lalai' : 'Sort: Default';
+      return;
+    }
+    const val = currentSort.col === 'comp' ? ('comp:' + currentSort.cid) : currentSort.col;
+    const radio = sortMenu.querySelector(`input[value="${val}"]`);
+    const type = radio ? (radio.dataset.type || 'text') : 'text';
+    const fieldLabel = radio ? (radio.dataset.label || val) : val;
+    const dl = getDirLabels(type);
+    const dirTxt = currentSort.dir === 'asc' ? dl.asc : dl.desc;
+    const summary = (isMs ? 'Susun: ' : 'Sort: ') + fieldLabel + ', ' + dirTxt.toLowerCase();
+    if (lblSpan) lblSpan.textContent = summary;
+    sortBtn.classList.add('active');
+    if (sortFoot) sortFoot.hidden = false;
+    sortMenu.querySelectorAll('input[type=radio]').forEach(r => {
+      const on = r.value === val;
+      r.checked = on;
+      r.closest('.tbar-sort-opt')?.classList.toggle('on', on);
+    });
+    if (sortDirBox) {
+      const btns = sortDirBox.querySelectorAll('.tbar-dir-btn');
+      if (btns[0]) { btns[0].dataset.dir = 'asc'; btns[0].textContent = dl.asc; btns[0].classList.toggle('on', currentSort.dir === 'asc'); }
+      if (btns[1]) { btns[1].dataset.dir = 'desc'; btns[1].textContent = dl.desc; btns[1].classList.toggle('on', currentSort.dir === 'desc'); }
+    }
+    if (announce && sortLive) sortLive.textContent = summary;
+  }
 
-      if (icon) {
-        if (!isActive) {
-          icon.innerHTML = `<svg class="si" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.4"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg>`;
-        } else if (currentSort.dir === 'asc') {
-          icon.innerHTML = `<svg class="si" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--primary, #0052ff)" stroke-width="2.2"><path d="M4 10l4-4 4 4"/></svg>`;
+  if (sortBtn && sortMenu) {
+    sortBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const open = sortMenu.hidden;
+      sortMenu.hidden = !open;
+      sortBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    sortMenu.addEventListener('click', function (e) { e.stopPropagation(); });
+    sortMenu.addEventListener('change', function (e) {
+      if (e.target && e.target.type === 'radio') {
+        const v = e.target.value;
+        const dl = getDirLabels(e.target.dataset.type || 'text');
+        if (v.startsWith('comp:')) {
+          currentSort = { col: 'comp', cid: v.slice(5), dir: dl.def };
         } else {
-          icon.innerHTML = `<svg class="si" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--primary, #0052ff)" stroke-width="2.2"><path d="M4 6l4 4 4 4"/></svg>`;
+          currentSort = { col: v, cid: null, dir: dl.def };
         }
+        applySort();
+        updateSortUi(true);
       }
     });
+    if (sortDirBox) {
+      sortDirBox.addEventListener('click', function (e) {
+        const b = e.target.closest('.tbar-dir-btn');
+        if (!b) return;
+        if (!currentSort) currentSort = { col: 'name', cid: null, dir: b.dataset.dir };
+        else currentSort.dir = b.dataset.dir;
+        applySort();
+        updateSortUi(true);
+      });
+    }
+    if (sortReset) {
+      sortReset.addEventListener('click', function () {
+        currentSort = null;
+        origRows.forEach(r => tbody.appendChild(r));
+        updateSortUi(true);
+        sortMenu.hidden = true;
+        sortBtn.setAttribute('aria-expanded', 'false');
+        sortBtn.focus();
+      });
+    }
+    sortMenu.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { sortMenu.hidden = true; sortBtn.setAttribute('aria-expanded', 'false'); sortBtn.focus(); }
+    });
+    document.addEventListener('click', function (e) {
+      if (sortWrap && !sortWrap.contains(e.target)) { sortMenu.hidden = true; sortBtn.setAttribute('aria-expanded', 'false'); }
+    });
   }
+
+  function updateSortIcons() { updateSortUi(false); }
 
   if (searchInput) {
     searchInput.addEventListener('input', function () {

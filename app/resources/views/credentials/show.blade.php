@@ -187,7 +187,7 @@
           <i class="bi bi-info-circle" style="margin-right:4px"></i>
           {{ __('This micro-credential consists of the modules below. Digital badges are awarded for each module upon achieving assessment mastery, contributing to this full certificate.') }}
         </div>
-        <table>
+        <table data-plain>
           <thead>
             <tr>
               <th>{{ __('Module') }}</th>

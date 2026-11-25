@@ -11,7 +11,7 @@
   <div class="title">
     <div>
       <h1>{{ $t('catalogue') }}</h1>
-      <div class="sub" id="catalogue-count">{{ $rows->total() }} {{ $rows->total() === 1 ? 'offering' : 'offerings' }} {{ $lang === 'ms' ? 'dibuka atau akan datang' : 'open for registration' }}</div>
+      <div class="sub" id="catalogue-count">{{ $rows->total() }} {{ $rows->total() === 1 ? 'offering' : 'offerings' }} {{ $lang === 'ms' ? 'dibuka atau akan datang' : 'open or upcoming' }}</div>
     </div>
   </div>
 
@@ -22,6 +22,18 @@
       <div>
         <label for="q" style="font-weight:500;display:block;margin-bottom:4px">{{ $t('search') }}</label>
         <input type="search" id="q" name="q" value="{{ $f['q'] ?? '' }}" placeholder="{{ $lang === 'ms' ? 'Nama, kod atau fakulti' : 'Name, code or faculty' }}" style="width:100%">
+      </div>
+
+      <div>
+        <label for="sort" style="font-weight:500;display:block;margin-bottom:4px">{{ $lang === 'ms' ? 'Susun mengikut' : 'Sort by' }}</label>
+        <select id="sort" name="sort" style="width:100%">
+          <option value="start_asc" @selected(($f['sort'] ?? 'start_asc') === 'start_asc')>{{ $lang === 'ms' ? 'Tarikh mula: terawal dahulu' : 'Start date: soonest first' }}</option>
+          <option value="start_desc" @selected(($f['sort'] ?? '') === 'start_desc')>{{ $lang === 'ms' ? 'Tarikh mula: terbaharu dahulu' : 'Start date: latest first' }}</option>
+          <option value="name_asc" @selected(($f['sort'] ?? '') === 'name_asc')>{{ $lang === 'ms' ? 'Tajuk: A ke Z' : 'Title: A to Z' }}</option>
+          <option value="name_desc" @selected(($f['sort'] ?? '') === 'name_desc')>{{ $lang === 'ms' ? 'Tajuk: Z ke A' : 'Title: Z to A' }}</option>
+          <option value="fee_asc" @selected(($f['sort'] ?? '') === 'fee_asc')>{{ $lang === 'ms' ? 'Yuran: terendah dahulu' : 'Fee: lowest first' }}</option>
+          <option value="fee_desc" @selected(($f['sort'] ?? '') === 'fee_desc')>{{ $lang === 'ms' ? 'Yuran: tertinggi dahulu' : 'Fee: highest first' }}</option>
+        </select>
       </div>
 
       <div>
@@ -110,8 +122,12 @@
               <div style="margin-top:4px">
                 @if(isset($mine[$r->id]))
                   <span class="tag ok">Registered</span>
+                @elseif($r->status === 'open')
+                  <span class="tag ok">{{ $t('open') }}</span>
+                @elseif(\Carbon\Carbon::parse($r->reg_opens_on)->lte(today()))
+                  <span class="tag">{{ $t('closed') }}</span>
                 @else
-                  <span class="tag ok">{{ $r->status === 'open' ? $t('open') : (\Carbon\Carbon::parse($r->reg_opens_on)->lte(today()) ? $t('closed') : $t('opens').' '.\Carbon\Carbon::parse($r->reg_opens_on)->format('d/m/Y')) }}</span>
+                  <span class="tag info">{{ $t('opens').' '.\Carbon\Carbon::parse($r->reg_opens_on)->format('d/m/Y') }}</span>
                 @endif
               </div>
             </div>

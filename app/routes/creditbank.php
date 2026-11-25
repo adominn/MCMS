@@ -12,11 +12,18 @@ Route::middleware(['auth', 'role:student'])->group(function () {
     Route::post('/my-credit/{id}/consent', [CreditBankController::class, 'consent'])->whereNumber('id')->name('credit.consent');
 });
 
-Route::middleware(['auth', 'role:abc_depositor,records_depositor'])->prefix('deposits')->group(function () {
+// Read-only ACR & ABC browser for university oversight roles + full workspace for ABC/Records Depositors
+// (Deputy Dean / PTj Authority remains strictly separated per Guide Appendix H2/H3)
+Route::middleware(['auth', 'role:abc_depositor,records_depositor,codl_admin,academic_authority,qa_officer,records_custodian'])->prefix('deposits')->group(function () {
     Route::get('/', [CreditBankController::class, 'queue'])->name('deposits');
+    Route::get('/{id}', [CreditBankController::class, 'show'])->whereNumber('id')->name('deposits.show');
+});
+
+Route::middleware(['auth', 'role:abc_depositor,records_depositor'])->prefix('deposits')->group(function () {
     Route::post('/export', [CreditBankController::class, 'export'])->name('deposits.export');
     Route::get('/batches/{id}/csv', [CreditBankController::class, 'batchCsv'])->whereNumber('id')->name('deposits.batch.csv');
-    Route::get('/{id}', [CreditBankController::class, 'show'])->whereNumber('id')->name('deposits.show');
+    Route::post('/confirm-bulk', [CreditBankController::class, 'confirmBulk'])->name('deposits.confirm.bulk');
+    Route::post('/record-bulk', [CreditBankController::class, 'recordBulk'])->name('deposits.record.bulk');
     Route::post('/{id}/confirm', [CreditBankController::class, 'confirm'])->whereNumber('id')->name('deposits.confirm');
     Route::post('/{id}/record', [CreditBankController::class, 'record'])->whereNumber('id')->name('deposits.record');
     Route::post('/{id}/correct', [CreditBankController::class, 'correct'])->whereNumber('id')->name('deposits.correct');

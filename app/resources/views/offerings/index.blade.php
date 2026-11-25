@@ -50,8 +50,9 @@
         <td>
           {{ \Carbon\Carbon::parse($r->reg_opens_on)->format('d/m/Y') }}
         </td>
-        <td>
-          <x-pill :s="__($labels[$r->status] ?? ucfirst($r->status))" />
+        @php $statusLbl = __($labels[$r->status] ?? ucfirst($r->status)); @endphp
+        <td data-filter-value="{{ $statusLbl }}" data-sort-value="{{ $statusLbl }}">
+          <x-pill :s="$statusLbl" />
           @if($r->status === 'not_ready' && $r->readiness_state !== 'pending')
             <span class="muted s" style="display:block;font-size:12px">({{ __('confirmed: :state', ['state' => str_replace('_', ' ', $r->readiness_state)]) }})</span>
           @endif

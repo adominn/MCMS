@@ -30,7 +30,7 @@
 <!-- Clone / Create New Academic Session -->
 <div class="panel" style="margin-bottom:20px">
   <div class="hd"><h2 style="margin:0;font-size:15px">{{ __('Create or Clone Curriculum Version for a New Academic Session') }}</h2></div>
-  <form method="post" action="{{ route('programmes.versions.clone', $programme->code) }}" class="bd" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;padding:16px 20px">
+  <form method="post" action="{{ route('programmes.versions.clone', $programme->code) }}" class="bd" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;padding:16px 20px" data-inplace>
     @csrf
     <div>
       <label for="academic_session" class="s" style="display:block;font-weight:600;margin-bottom:4px">{{ __('New Academic Session') }}</label>
@@ -65,7 +65,7 @@
           </select>
         </form>
         @if($plan['version']->status === 'draft' && $canPublish)
-          <form method="post" action="{{ route('programmes.versions.publish', $plan['version']->id) }}" style="display:inline">
+          <form method="post" action="{{ route('programmes.versions.publish', $plan['version']->id) }}" style="display:inline" data-inplace>
             @csrf
             <button type="submit" class="btn primary sm">{{ __('Publish as Active Version') }}</button>
           </form>
@@ -86,7 +86,7 @@
 
       @if($plan['version']->status === 'draft')
         <div class="cols" style="gap:20px;margin-bottom:20px">
-          <form method="post" action="{{ route('programmes.placements.store', $plan['version']->id) }}" class="panel" style="flex:1.3">
+          <form method="post" action="{{ route('programmes.placements.store', $plan['version']->id) }}" class="panel" style="flex:1.3" data-inplace>
             @csrf
             <div class="hd"><h3 style="margin:0;font-size:14px">{{ __('Add Course to Semester') }}</h3></div>
             <div class="bd" style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -133,7 +133,7 @@
             </div>
           </form>
 
-          <form method="post" action="{{ route('programmes.prerequisites.store', $plan['version']->id) }}" class="panel" style="flex:1">
+          <form method="post" action="{{ route('programmes.prerequisites.store', $plan['version']->id) }}" class="panel" style="flex:1" data-inplace>
             @csrf
             <div class="hd"><h3 style="margin:0;font-size:14px">{{ __('Add Prerequisite') }}</h3></div>
             <div class="bd" style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
@@ -188,7 +188,7 @@
                     <td class="num">{{ mcms_num($c->credits) }}</td>
                     @if($plan['version']->status === 'draft')
                       <td class="num">
-                        <form method="post" action="{{ route('programmes.placements.destroy', $c->placement_id) }}" style="display:inline">
+                        <form method="post" action="{{ route('programmes.placements.destroy', $c->placement_id) }}" style="display:inline" data-inplace>
                           @csrf
                           @method('delete')
                           <button type="submit" class="btn sm ter" style="color:var(--color-error, #da1e28)">{{ __('Remove') }}</button>

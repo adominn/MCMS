@@ -1,10 +1,11 @@
 @extends((request()->boolean('print') || request()->has('print')) ? 'layouts.print' : 'layouts.app')
-@section('title', 'Import validation report')
-@section('doc_title', 'UCreds Import Validation Report')
+@section('title', __('Import validation report'))
+@section('doc_title', __('UCreds Import Validation Report'))
+@section('doc_bm', 'Laporan Pengesahan Import UCreds')
 @section('doc_ref', 'IMP-' . strtoupper(substr(hash('sha256', $f->original_name), 0, 6)))
 @section('doc_file', 'validation-' . $f->original_name . '.pdf')
 @section('doc_actions')
-  <a class="btn ter sm" href="{{ route('ucreds.errors', $f->id) }}">Download .csv</a>
+  <a class="btn ter sm" href="{{ route('ucreds.errors', $f->id) }}">{{ __('Download .csv') }}</a>
 @endsection
 @section('content')
 
@@ -106,7 +107,7 @@
         <a href="{{ route('ucreds.errors', $f->id) }}" class="btn sm ter">{{ __('Download the rejected rows (CSV)') }}</a>
       </div>
       <div class="table-wrap">
-        <table>
+        <table data-plain>
           <thead>
             <tr>
               <th style="width:80px">{{ __('Line') }}</th>

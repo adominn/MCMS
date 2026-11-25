@@ -41,7 +41,7 @@
     <h2 style="margin:0">{{ __('Completed Modules & Earned Badges') }}</h2>
   </div>
   <p class="small muted" style="margin:0 0 12px">{{ __('Modules completed under this micro-credential and digital badges earned by the learner.') }}</p>
-  <table>
+  <table data-plain>
     <thead>
       <tr>
         <th>{{ __('Module') }}</th>
@@ -107,7 +107,7 @@
 @endif
 
 <h2 style="margin-top:24px">{{ __('History') }}</h2>
-<table>
+<table data-plain>
   <thead><tr><th>{{ __('Revision') }}</th><th>{{ __('Event') }}</th><th>{{ __('When') }}</th><th>{{ __('By') }}</th><th>{{ __('Reason') }}</th><th>{{ __('Name on it') }}</th></tr></thead>
   <tbody>@foreach($revisions as $r)@php($rc = json_decode($r->content, true))<tr><td>{{ $r->revision }}</td><td>{{ __(ucfirst($r->event)) }}</td><td>{{ \Carbon\Carbon::parse($r->created_at)->format('d/m/Y H:i') }}</td><td>{{ $r->by ?? __('System') }}</td><td>{{ $r->reason }}</td><td>{{ $rc['holder'] }}</td></tr>@endforeach</tbody>
 </table>

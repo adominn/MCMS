@@ -65,7 +65,7 @@
 
 {{-- 1. SAMC Information and Application Status --}}
 <div class="sec-hd">1. {{ __('SAMC Information and Application Status') }}</div>
-<table class="qv-grid">
+<table data-plain class="qv-grid">
   <tr>
     <td class="lbl">{{ __('SAMC Title') }}</td>
     <td colspan="3"><strong>{{ app()->getLocale() === 'ms' ? ($v->name_ms ?? $v->name_en) : $v->name_en }}</strong> ({{ __('Version') }} {{ $v->version_no }})</td>
@@ -107,7 +107,7 @@
 
 {{-- 2. Basic SAMC Eligibility for QV --}}
 <div class="sec-hd">2. {{ __('Basic SAMC Eligibility for QV') }}</div>
-<table class="qv-table">
+<table data-plain class="qv-table">
   <thead>
     <tr>
       <th style="width:6%">{{ __('No.') }}</th>
@@ -149,7 +149,7 @@
     @endforelse
   </ul>
 </div>
-<table class="qv-table">
+<table data-plain class="qv-table">
   <thead>
     <tr>
       <th style="width:6%">{{ __('No.') }}</th>
@@ -183,7 +183,7 @@
 
 {{-- 4. Assessment and Attainment Evidence --}}
 <div class="sec-hd">4. {{ __('Assessment and Attainment Evidence') }}</div>
-<table class="qv-table">
+<table data-plain class="qv-table">
   <thead>
     <tr>
       <th style="width:6%">{{ __('No.') }}</th>
@@ -215,7 +215,7 @@
 
 {{-- 5. Delivery and Participant Support Evidence --}}
 <div class="sec-hd">5. {{ __('Delivery and Participant Support Evidence') }}</div>
-<table class="qv-table">
+<table data-plain class="qv-table">
   <thead>
     <tr>
       <th style="width:6%">{{ __('No.') }}</th>
@@ -247,7 +247,7 @@
 
 {{-- 6. Quality Assurance and CQI Evidence --}}
 <div class="sec-hd">6. {{ __('Quality Assurance and CQI Evidence') }}</div>
-<table class="qv-table">
+<table data-plain class="qv-table">
   <thead>
     <tr>
       <th style="width:6%">{{ __('No.') }}</th>
@@ -279,7 +279,7 @@
 
 {{-- 7. Digital Credential Evidence --}}
 <div class="sec-hd">7. {{ __('Digital Credential Evidence') }}</div>
-<table class="qv-table">
+<table data-plain class="qv-table">
   <thead>
     <tr>
       <th style="width:6%">{{ __('No.') }}</th>
@@ -313,7 +313,7 @@
 
 {{-- 8. Material Change Review --}}
 <div class="sec-hd">8. {{ __('Material Change Review (9 Components)') }}</div>
-<table class="qv-table">
+<table data-plain class="qv-table">
   <thead>
     <tr>
       <th style="width:30%">{{ __('Component') }}</th>
@@ -345,7 +345,7 @@
 
 {{-- 9. Internal Readiness Review Decision --}}
 <div class="sec-hd">9. {{ __('Internal Readiness Review Decision') }}</div>
-<table class="qv-grid">
+<table data-plain class="qv-grid">
   <tr>
     <td class="lbl">{{ __('Overall Decision') }}</td>
     <td colspan="3">
@@ -379,7 +379,7 @@
 
 {{-- 10. Confirmation (3 Roles) --}}
 <div class="sec-hd">10. {{ __('Confirmation (3 Roles)') }}</div>
-<table class="qv-table">
+<table data-plain class="qv-table">
   <thead>
     <tr>
       <th style="width:25%">{{ __('Role') }}</th>

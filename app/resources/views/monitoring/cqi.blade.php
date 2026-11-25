@@ -73,7 +73,23 @@
   </div>
 </div>
 
-{{-- ===================== C2. COHORT PERFORMANCE & C4. STAKEHOLDER FEEDBACK ===================== --}}
+{{-- ===================== SECTION TABS ===================== --}}
+@php($cqiDefaultTab = ($isDean && $r->status === 'submitted') ? 'cqi-decision' : 'cqi-perf')
+@php($checkedDomainCount = count($domains ?? []))
+@php($totalDomainCount = count(config('monitoring.domains') ?? []))
+@php($issueCount = count($issues ?? []))
+
+<div data-tabs data-default-tab="{{ $cqiDefaultTab }}">
+  <nav class="tabs" aria-label="{{ __('Quality review sections') }}" style="margin-bottom:20px">
+    <button data-tab="cqi-perf">{{ __('Performance & LO') }}</button>
+    <button data-tab="cqi-feedback">{{ __('Stakeholder feedback') }}</button>
+    <button data-tab="cqi-domains">{{ __('Quality domains') }} ({{ $checkedDomainCount }}/{{ $totalDomainCount }})</button>
+    <button data-tab="cqi-actions">{{ __('Issues & actions') }}@if($issueCount > 0) ({{ $issueCount }})@endif</button>
+    <button data-tab="cqi-decision">{{ __('Decision & sign-off') }}</button>
+  </nav>
+
+{{-- ===================== TAB 1: C2. COHORT PERFORMANCE & C3. LO ATTAINMENT ===================== --}}
+<div data-pane="cqi-perf">
 <div style="margin-bottom:24px">
   <div style="margin-bottom:12px">
     <h2 style="margin:0 0 4px">2. {{ __('Cohort performance indicators') }}</h2>
@@ -88,7 +104,7 @@
         <h3>{{ __('Cohort performance indicators (6 indicators)') }}</h3>
       </div>
       <div class="bd" style="padding:0">
-        <table>
+        <table data-plain>
           <thead>
             <tr>
               <th>{{ __('Indicator') }}</th>
@@ -154,7 +170,7 @@
       {{-- Edit C2 Access Issues Form --}}
       @if($isOwner && $r->status !== 'confirmed')
         <div class="bd" style="border-top:1px solid var(--border);background:var(--s1, #f1f5f9);padding:10px 14px">
-          <form method="post" action="{{ route('cqi.access_issues', $r->id) }}" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+          <form method="post" action="{{ route('cqi.access_issues', $r->id) }}" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center" data-inplace>
             @csrf
             <span style="font-size:12px;font-weight:600">{{ __('Update Indicator #6 (Access issues):') }}</span>
             <select name="c2_access_issues_status" style="height:28px;font-size:12px">
@@ -223,7 +239,7 @@
       <h3>3. {{ __('Learning outcome attainment') }}</h3>
     </div>
     <div class="bd" style="padding:0">
-      <table>
+      <table data-plain>
         <thead>
           <tr>
             <th style="width:10%">{{ __('Code') }}</th>
@@ -260,7 +276,7 @@
     {{-- C3 Rumusan --}}
     <div class="bd" style="border-top:1px solid var(--border);padding:14px 16px">
       @if($isOwner && $r->status !== 'confirmed')
-        <form method="post" action="{{ route('cqi.c3_summary', $r->id) }}">
+        <form method="post" action="{{ route('cqi.c3_summary', $r->id) }}" data-inplace>
           @csrf
           <label for="c3_summary" style="font-weight:600;font-size:12px;text-transform:uppercase;color:var(--ink)">
             {{ __('Learning Outcomes Attainment Summary:') }}
@@ -277,16 +293,20 @@
       @endif
     </div>
   </div>
+</div>
+</div>
 
+{{-- ===================== TAB 2: C4. STAKEHOLDER FEEDBACK ===================== --}}
+<div data-pane="cqi-feedback">
   {{-- C4. Maklum Balas Peserta dan Pihak Berkepentingan (4 Sources) --}}
-  <div class="panel" style="margin-top:20px">
+  <div class="panel" style="margin-bottom:24px">
     <div class="hd">
       <h3>4. {{ __('Stakeholder feedback (4 sources: Learners, Instructors, Industry, System data)') }}</h3>
       <div class="sub" style="font-size:13px;color:var(--muted)">{{ __('Analyze qualitative and quantitative input from all 4 stakeholder groups.') }}</div>
     </div>
     @php($c4Feedback = json_decode($r->c4_feedback ?? '[]', true) ?: [])
     <div class="bd" style="padding:0">
-      <table>
+      <table data-plain>
         <thead>
           <tr>
             <th style="width:20%">{{ __('Stakeholder Source') }}</th>
@@ -321,7 +341,7 @@
     @if($isOwner && $r->status !== 'confirmed')
       <div class="bd" style="border-top:1px solid var(--border);padding:14px 16px;background:var(--s1, #f1f5f9)">
         <h4 style="margin:0 0 10px">{{ __('Update Stakeholder Feedback') }}</h4>
-        <form method="post" action="{{ route('cqi.feedback', $r->id) }}">
+        <form method="post" action="{{ route('cqi.feedback', $r->id) }}" data-inplace>
           @csrf
           <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:14px">
             @foreach(config('monitoring.feedback_sources') as $srcKey => $srcDef)
@@ -345,15 +365,16 @@
 
 </div>
 
-{{-- ===================== C5. IMPLEMENTATION QUALITY DOMAINS ===================== --}}
-<form method="post" action="{{ route('cqi.domains', $r->id) }}" class="panel" id="domains" style="margin-bottom:24px">
+{{-- ===================== TAB 3: C5. IMPLEMENTATION QUALITY DOMAINS ===================== --}}
+<div data-pane="cqi-domains">
+<form method="post" action="{{ route('cqi.domains', $r->id) }}" class="panel" id="domains" style="margin-bottom:24px" data-inplace>
   @csrf
   <div class="hd">
     <h2>5. {{ __('Implementation quality domains (8 domains)') }}</h2>
     <div class="sub" style="font-size:13px;color:var(--muted)">{{ __('Evaluate curriculum alignment, SLT adequacy, materials, assessment validity, integrity, platform, records, and QV/credit status.') }}</div>
   </div>
   <div class="bd" style="padding:0">
-    <table>
+    <table data-plain>
       <thead>
         <tr>
           <th style="width:5%">#</th>
@@ -409,8 +430,10 @@
     </div>
   @endif
 </form>
+</div>
 
-{{-- ===================== C6 & C7. ISSUES, ROOT CAUSE & CQI ACTION PLAN ===================== --}}
+{{-- ===================== TAB 4: C6 & C7. ISSUES, ROOT CAUSE & CQI ACTION PLAN ===================== --}}
+<div data-pane="cqi-actions">
 <div style="margin-bottom:24px">
   <div style="margin-bottom:12px">
     <h2 style="margin:0 0 4px">6. {{ __('Issues, root cause and CQI action plan') }}</h2>
@@ -436,7 +459,7 @@
         </div>
       </div>
       <div class="bd" style="padding:0;border-top:1px solid var(--border)">
-        <table>
+        <table data-plain>
           <thead>
             <tr>
               <th style="width:40%">{{ __('Action') }}</th>
@@ -479,7 +502,7 @@
               <td style="text-align:right">
                 <div style="display:inline-flex;gap:6px;align-items:center;justify-content:flex-end">
                   @if($isOwner && in_array($a->status, ['not_started', 'in_progress']))
-                    <form method="post" action="{{ route('cqi.status', $a->id) }}" style="display:inline;margin:0">
+                    <form method="post" action="{{ route('cqi.status', $a->id) }}" style="display:inline;margin:0" data-inplace>
                       @csrf
                       <button type="submit" class="btn sm ter" aria-label="{{ $a->status === 'not_started' ? 'Start' : 'Mark done' }}: {{ $a->description }}">
                         {{ $a->status === 'not_started' ? __('Start') : __('Mark done') }}
@@ -488,7 +511,7 @@
                   @endif
 
                   @if($isOwner && $a->status === 'done' && ! $a->evaluated_at)
-                    <form method="post" action="{{ route('cqi.evaluate', $a->id) }}" style="display:inline-flex;gap:4px;align-items:center">
+                    <form method="post" action="{{ route('cqi.evaluate', $a->id) }}" style="display:inline-flex;gap:4px;align-items:center" data-inplace>
                       @csrf
                       <select name="effectiveness" aria-label="Effectiveness of {{ $a->description }}" style="height:32px;font-size:12px">
                         @foreach(config('monitoring.effectiveness') as $v => $t)
@@ -502,7 +525,7 @@
                   @endif
 
                   @if($isDean && $a->status === 'done')
-                    <form method="post" action="{{ route('cqi.close', $a->id) }}" style="display:inline;margin:0">
+                    <form method="post" action="{{ route('cqi.close', $a->id) }}" style="display:inline;margin:0" data-inplace>
                       @csrf
                       <button type="submit" class="btn sm" aria-label="Close: {{ $a->description }}">{{ __('Close action') }}</button>
                     </form>
@@ -525,7 +548,7 @@
 
   {{-- FORM: RECORD AN ISSUE AND ACTION (WITH TITLE & SELECTABLE OWNER) --}}
   @if($isOwner && $r->status !== 'confirmed')
-    <form method="post" action="{{ route('cqi.issue', $r->id) }}" class="panel card" id="new-issue" style="margin-top:20px">
+    <form method="post" action="{{ route('cqi.issue', $r->id) }}" class="panel card" id="new-issue" style="margin-top:20px" data-inplace>
       @csrf
       <div class="hd">
         <h2>{{ __('Record an issue and an action') }}</h2>
@@ -607,8 +630,10 @@
     </form>
   @endif
 </div>
+</div>
 
-{{-- ===================== C9. OFFERING REVIEW DECISION ===================== --}}
+{{-- ===================== TAB 5: C9. OFFERING REVIEW DECISION & C10. SIGN-OFF ===================== --}}
+<div data-pane="cqi-decision">
 <div class="panel" style="margin-bottom:24px">
   <div class="hd">
     <h2>7. {{ __('Offering review decision') }}</h2>
@@ -618,7 +643,7 @@
   @php($affectedComps = json_decode($r->c9_affected_components ?? '[]', true) ?: [])
   <div class="bd">
     @if($isDean && $r->status !== 'confirmed')
-      <form method="post" action="{{ route('cqi.c9_decision', $r->id) }}">
+      <form method="post" action="{{ route('cqi.c9_decision', $r->id) }}" data-inplace>
         @csrf
         <div style="margin-bottom:14px">
           <label style="font-weight:600;display:block;margin-bottom:6px">{{ __('Review Decision:') }}</label>
@@ -699,7 +724,7 @@
   </div>
   @php($c10Signoffs = json_decode($r->c10_signoffs ?? '[]', true) ?: [])
   <div class="bd" style="padding:0">
-    <table>
+    <table data-plain>
       <thead>
         <tr>
           <th style="width:25%">{{ __('Role') }}</th>
@@ -782,7 +807,7 @@
       <div class="sub" style="font-size:13px;color:var(--muted)">{{ __('Once submitted, the record is locked for review by the Deputy Dean (Academic).') }}</div>
     </div>
     <div class="bd">
-      <form method="post" action="{{ route('cqi.submit', $r->id) }}">
+      <form method="post" action="{{ route('cqi.submit', $r->id) }}" data-inplace>
         @csrf
         <button type="submit" class="btn">{{ __('Submit to the deputy dean') }}</button>
       </form>
@@ -791,7 +816,7 @@
 @endif
 
 @if($isDean && $r->status === 'submitted')
-  <form method="post" action="{{ route('cqi.confirm', $r->id) }}" class="panel card" id="confirm" style="margin-bottom:24px;border-left:4px solid #24a148">
+  <form method="post" action="{{ route('cqi.confirm', $r->id) }}" class="panel card" id="confirm" style="margin-bottom:24px;border-left:4px solid #24a148" data-inplace>
     @csrf
     <div class="hd">
       <h2>{{ __('Confirm the quality review record') }}</h2>
@@ -825,6 +850,8 @@
       {{ __('CQI must be evidence-based and not limited to participant satisfaction scores. Analysis must take into account learning outcome achievement, assessment performance, participation/completion data, implementation issues, and stakeholder feedback. Material changes resulting from CQI must undergo relevant review, approval, or re-Quality Verification before implementation.') }}
     </p>
   </div>
+</div>
+</div>
 </div>
 
 {{-- ===================== STUDENT FEEDBACK COMMENTS MODAL ===================== --}}

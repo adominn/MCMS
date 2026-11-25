@@ -110,7 +110,7 @@
           <td class="small">{{ $a->reason }}</td>
           <td class="num">
             @if($isActive)
-              <form method="post" action="{{ route('users.revoke', [$person, $a]) }}" data-confirm="Revoke this role?|The person loses the access this role gives. The change is recorded in the audit trail." data-danger style="display:inline-flex;gap:6px;align-items:center;justify-content:flex-end">
+              <form method="post" action="{{ route('users.revoke', [$person, $a]) }}" data-confirm="Revoke this role?|The person loses the access this role gives. The change is recorded in the audit trail." data-danger style="display:inline-flex;gap:6px;align-items:center;justify-content:flex-end" data-inplace>
                 @csrf
                 <input type="text" name="reason" placeholder="{{ __('Reason') }}" required minlength="5" aria-label="Reason to revoke" style="max-width:140px;height:28px;font-size:12px">
                 <button type="submit" class="btn sm danger ghost">{{ __('Revoke') }}</button>
@@ -136,7 +136,7 @@
       <h2>{{ __('Assign a role') }}</h2>
     </div>
     <div class="bd">
-      <form method="post" action="{{ route('users.assign', $person) }}" class="col" style="gap:12px">
+      <form method="post" action="{{ route('users.assign', $person) }}" class="col" style="gap:12px" data-inplace>
         @csrf
         <div class="row" style="gap:16px">
           <div style="flex:1">
@@ -196,7 +196,7 @@
       <h2>{{ __('Account governance') }}</h2>
     </div>
     <div class="bd">
-      <form method="post" action="{{ route('users.status', [$person, $person->status === 'active' ? 'inactive' : 'active']) }}" class="col" style="gap:12px">
+      <form method="post" action="{{ route('users.status', [$person, $person->status === 'active' ? 'inactive' : 'active']) }}" class="col" style="gap:12px" data-inplace>
         @csrf
         <p class="small muted" style="margin:0">
           {{ __('Deactivating stops sign-in and active roles. Historical records, verified results, and credentials are preserved.') }}

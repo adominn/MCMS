@@ -175,6 +175,50 @@
 </div>
 @endforeach
 
+{{-- Participant & Achievement Records (B5 Registry Mapping) --}}
+@php
+  $creditEligible = ($o->category === 'umc') || ($o->category === 'samc' && !empty($qv));
+  $b5Rows = [
+    [__('Participant identity'), __('Required'), __('UTeM Identity & Learner Profile'), __('CODL / UTeM Identity'), __('Active')],
+    [__('Registration and cohort details'), __('Required'), __('MCMS Enrolment Registry'), __('Course Coordinator / PTj'), __('Active')],
+    [__('Access and participation status'), __('As required'), __('MCMS Enrolment & LMS Platform'), __('Course Coordinator'), !empty($o->platform_ref) ? __('Linked (:ref)', ['ref' => $o->platform_ref]) : __('Active')],
+    [__('Activity / module completion'), $o->category === 'umc' ? __('Required (UMC)') : __('As required'), __('MCMS Module Progress Tracker'), __('Course Coordinator'), __('Active')],
+    [__('Assessment marks / results'), __('Required'), __('MCMS Assessment Results Ledger'), __('Course Coordinator'), __('Active')],
+    [__('Pass / completion decision'), __('Required'), __('MCMS Verified Completion Engine'), __('Deputy Dean (Academic)'), __('Active')],
+    [__('Digital Badge per module'), __('If applicable'), __('MCMS Credential Registry & QR Portal'), __('Faculty / CODL'), __('Issued on verified module pass')],
+    [__('Certificate / Digital Credential'), __('If applicable'), __('MCMS Credential Registry & QR Portal'), __('Faculty / CODL'), __('Issued on full MC completion')],
+    [__('Academic Credit Record (ACR)'), $o->category === 'mce' ? __('Not applicable') : __('Eligible MC'), __('MCMS Credit Bank (ACR Registry)'), __('Records & ABC Officer'), $o->category === 'mce' ? __('Not applicable (MCE)') : ($creditEligible ? __('Active') : __('Upon SAMC QV'))],
+    [__('ABC deposit status'), $o->category === 'mce' ? __('Not applicable') : __('If applicable'), __('MCMS ABC Deposit Ledger (with learner consent)'), __('Records & ABC Officer'), $o->category === 'mce' ? __('Not applicable (MCE)') : ($creditEligible ? __('Active (opt-in)') : __('Upon SAMC QV'))],
+  ];
+@endphp
+<div class="panel" style="margin-bottom:16px">
+  <div class="hd"><h2 style="font-size:11pt">{{ __('Participant & Achievement Record Governance') }}</h2></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:24%">{{ __('Record Element') }}</th>
+          <th style="width:14%">{{ __('Requirement') }}</th>
+          <th style="width:28%">{{ __('System Location / Mechanism') }}</th>
+          <th style="width:18%">{{ __('Record Owner') }}</th>
+          <th style="width:16%">{{ __('Cohort Status') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach($b5Rows as $br)
+          <tr>
+            <td><b>{{ $br[0] }}</b></td>
+            <td style="font-size:8.5pt">{{ $br[1] }}</td>
+            <td style="font-size:8.5pt">{{ $br[2] }}</td>
+            <td style="font-size:8.5pt">{{ $br[3] }}</td>
+            <td style="font-size:8.5pt">{{ $br[4] }}</td>
+          </tr>
+        @endforeach
+      </tbody>
+    </table>
+  </div>
+</div>
+
 {{-- Pre-Offering Readiness Sign-Off --}}
 <div class="panel" style="margin-bottom:16px">
   <div class="hd"><h2 style="font-size:11pt">{{ __('Pre-Offering Readiness Sign-Off') }}</h2></div>
@@ -243,27 +287,43 @@
         <tr>
           <td>
             <b>3. {{ __('Support / System Platform') }}</b>
-            <div class="small muted">{{ __('Centre for Open & Digital Learning (CODL)') }}</div>
+            <div class="small muted">{{ __('Centre for Open & Digital Learning (CODL)') }} ({{ __('if applicable') }})</div>
           </td>
           <td>
             @if($supConf)
               <b>{{ $supConf->name }}</b>
               <div class="small muted">{{ $supConf->position ?: __('Centre for Open & Digital Learning (CODL)') }}</div>
+            @elseif($o->delivery_mode === 'face_to_face')
+              <span class="muted">{{ __('Not required (Face-to-face delivery)') }}</span>
             @else
-              <span class="muted">{{ __('uLearn / UCreds Platform Integration') }}</span>
+              <span class="muted">{{ __('Automated platform check') }}</span>
             @endif
           </td>
           <td>
             @if($supConf)
-              <span class="tag {{ $supConf->outcome === 'ready' ? 'ok' : 'n' }}">
+              <span class="tag {{ $supConf->outcome === 'ready' ? 'ok' : ($supConf->outcome === 'ready_conditions' ? 'warn' : 'n') }}">
                 {{ __(config('offerings.outcomes.' . $supConf->outcome) ?: ucfirst($supConf->outcome)) }}
               </span>
+            @elseif($o->delivery_mode === 'face_to_face')
+              <span class="tag n">{{ __('Not applicable') }}</span>
+            @elseif(!empty($o->platform_ref))
+              <span class="tag info">{{ __('System verified') }}</span>
             @else
-              <span class="tag ok">{{ __('Ready') }}</span>
+              <span class="tag warn">{{ __('Not recorded') }}</span>
             @endif
           </td>
-          <td>{{ $supConf ? \Carbon\Carbon::parse($supConf->created_at)->format('d/m/Y') : ($ptjConf ? \Carbon\Carbon::parse($ptjConf->created_at)->format('d/m/Y') : ($isConfirmed ? \Carbon\Carbon::parse($o->created_at)->format('d/m/Y') : '—')) }}</td>
-          <td>{{ $supConf?->conditions ?: __('uLearn/UCreds platform ready.') }}</td>
+          <td>{{ $supConf ? \Carbon\Carbon::parse($supConf->created_at)->format('d/m/Y') : '—' }}</td>
+          <td>
+            @if($supConf)
+              {{ $supConf->conditions ?: '—' }}
+            @elseif($o->delivery_mode === 'face_to_face')
+              {{ __('Face-to-face cohort; LMS sign-off optional.') }}
+            @elseif(!empty($o->platform_ref))
+              {{ __('Platform reference verified: :ref', ['ref' => $o->platform_ref]) }}
+            @else
+              {{ __('Optional platform support confirmation not recorded.') }}
+            @endif
+          </td>
         </tr>
       </tbody>
     </table>

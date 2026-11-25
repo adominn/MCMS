@@ -1,4 +1,5 @@
 # Antigravity & IDE
+.agents/
 .claude/
 .gemini/
 .idea/

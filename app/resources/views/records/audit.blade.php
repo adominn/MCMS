@@ -1,6 +1,7 @@
 @extends($print ? 'layouts.print' : 'layouts.app')
 @section('title', __('Audit trail'))
 @section('doc_title', __('Audit trail export'))
+@section('doc_bm', 'Eksport Jejak Audit')
 @section('doc_ref', 'AUD-'.now()->format('Ymd'))
 @section('doc_file', 'audit-'.now()->format('Y-m').'.pdf')
 @section('doc_actions')

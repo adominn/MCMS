@@ -9,7 +9,8 @@
   $autoChecks = $autoChecks ?? ['checks' => [], 'blocking' => [], 'warnings' => [], 'assisted_hints' => [], 'summary' => ['total' => 0, 'passed' => 0, 'warnings' => 0, 'failed' => 0]];
   $lecturerSent = !empty($confirmations) && $confirmations->where('role', 'lecturer')->isNotEmpty();
   $rState = $o->readiness_state ?? null;
-  $isConfirmed = in_array($o->status, ['open', 'running', 'ended'], true) || ($rState && in_array($rState, ['ready', 'ready_conditions'], true));
+  $isConfirmed = in_array($o->status, ['ready', 'open', 'running', 'ended'], true) || ($rState && in_array($rState, ['ready', 'ready_conditions', 'ready_with_conditions', 'confirmed'], true));
+  $canEditChecklist = $isOwnerLecturer && $editable && !$isConfirmed;
   $acSummary = $autoChecks['summary'] ?? ['total' => 0, 'passed' => 0, 'warnings' => 0, 'failed' => 0];
   $hasBlockingAuto = ($acSummary['failed'] ?? 0) > 0;
   $assistedHints = $autoChecks['assisted_hints'] ?? [];
@@ -254,6 +255,163 @@
   </div>
 @endif
 
+@php
+  $step1Done = true;
+  $step2Done = $isConfirmed;
+  $step2Active = !$step2Done && $o->status !== 'cancelled';
+  $step3Done = in_array($o->status, ['running', 'ended'], true);
+  $step3Active = $o->status === 'open' || ($o->status === 'ready');
+  $step4Done = $o->status === 'ended';
+  $step4Active = $o->status === 'running';
+
+  $outerDefaultTab = ($hasServerErr || is_string($flashedTab) || !$isConfirmed) ? 'cohort-readiness' : 'cohort-details';
+  $deliveryModesMap = config('proposals.delivery_modes', []);
+  $oModeLabel = __($deliveryModesMap[$o->delivery_mode ?? ''] ?? ucfirst((string) ($o->delivery_mode ?? '-')));
+@endphp
+
+{{-- 4-Step Cohort Lifecycle Stepper (matching Proposal stepper) --}}
+<div class="panel" style="margin-bottom:18px">
+  <div class="bd" style="padding:16px 20px">
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;text-align:center;position:relative">
+      @foreach([
+        [
+          'n' => '01',
+          'title' => __('1. Cohort Created'),
+          'done' => $step1Done,
+          'active' => false,
+          'sub' => !empty($o->created_at) ? \Carbon\Carbon::parse($o->created_at)->format('d M Y') : __('Done'),
+        ],
+        [
+          'n' => '02',
+          'title' => __('2. Readiness & Confirmation'),
+          'done' => $step2Done,
+          'active' => $step2Active,
+          'sub' => $step2Done ? __('Confirmed') : ($lecturerSent ? __('Pending confirmation') : __('In Progress')),
+        ],
+        [
+          'n' => '03',
+          'title' => __('3. Registration Open'),
+          'done' => $step3Done,
+          'active' => $step3Active,
+          'sub' => $step3Done ? __('Closed') : ($o->status === 'open' ? __('Open now') : \Carbon\Carbon::parse($o->reg_opens_on)->format('d M Y')),
+        ],
+        [
+          'n' => '04',
+          'title' => __('4. Delivery & Completion'),
+          'done' => $step4Done,
+          'active' => $step4Active,
+          'sub' => $step4Done ? __('Ended') : ($step4Active ? __('Running') : \Carbon\Carbon::parse($o->start_date)->format('d M Y')),
+        ],
+      ] as $st)
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          @if($st['done'])
+            <span style="width:28px;height:28px;border-radius:50%;background:#090a0f;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">&#10003;</span>
+          @elseif($st['active'])
+            <span style="width:28px;height:28px;border-radius:50%;background:var(--color-primary, #0052ff);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--mono)">{{ $st['n'] }}</span>
+          @else
+            <span style="width:28px;height:28px;border-radius:50%;background:#f1f5f9;border:1px solid var(--hairline);color:var(--muted);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--mono)">{{ $st['n'] }}</span>
+          @endif
+          <div style="font-size:12.5px;font-weight:{{ ($st['done'] || $st['active']) ? '700' : '600' }};color:{{ $st['active'] ? 'var(--color-primary, #0052ff)' : ($st['done'] ? 'var(--ink)' : 'var(--muted)') }}">{{ $st['title'] }}</div>
+          <div class="small" style="font-size:11.5px;color:{{ $st['done'] ? '#0e6027' : ($st['active'] ? 'var(--color-primary, #0052ff)' : 'var(--muted)') }}">{{ $st['sub'] }}</div>
+        </div>
+      @endforeach
+    </div>
+  </div>
+</div>
+
+{{-- Outer 2-Tab Workspace: Cohort details + Readiness checklist --}}
+<div data-tabs data-default-tab="{{ $outerDefaultTab }}">
+  <div class="tabs" role="tablist" style="margin-bottom:18px">
+    <button type="button" class="tab" role="tab" data-tab="cohort-details" aria-selected="{{ $outerDefaultTab === 'cohort-details' ? 'true' : 'false' }}">
+      {{ __('Cohort details') }}
+    </button>
+    <button type="button" class="tab" role="tab" data-tab="cohort-readiness" aria-selected="{{ $outerDefaultTab === 'cohort-readiness' ? 'true' : 'false' }}">
+      {{ __('Readiness checklist') }}
+      <span class="tag {{ $isConfirmed ? 'ok' : 'warn' }}" style="margin-left:6px;font-family:var(--mono);font-size:11px">{{ $isConfirmed ? __('Confirmed') : ($overallDone . '/' . $overallTotal) }}</span>
+    </button>
+  </div>
+
+  {{-- OUTER TAB 1: COHORT DETAILS (everything entered on Create an offering) --}}
+  <div data-pane="cohort-details" @if($outerDefaultTab !== 'cohort-details') hidden @endif>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;margin-bottom:20px">
+      <div class="panel">
+        <div class="hd" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+          <h2 style="margin:0">{{ __('Cohort parameters') }}</h2>
+          @if(!empty($o->mc_version_id))
+            <a href="{{ route('proposals.show', $o->mc_version_id) }}" target="_blank" rel="noopener" class="btn ter sm">{{ __('View approved proposal') }} &nearr;</a>
+          @endif
+        </div>
+        <div class="bd">
+          <dl class="dl" style="margin:0">
+            <dt>{{ __('Micro-credential') }}</dt>
+            <dd><b>{{ $o->name_en }}</b> ({{ __('version :num', ['num' => $o->version_no ?? 1]) }})</dd>
+
+            <dt>{{ __('Cohort name') }}</dt>
+            <dd>{{ $o->cohort_name }}</dd>
+
+            <dt>{{ __('Delivery period') }}</dt>
+            <dd>{{ \Carbon\Carbon::parse($o->start_date)->format('d/m/Y') }}@if(!empty($o->end_date)) &ndash; {{ \Carbon\Carbon::parse($o->end_date)->format('d/m/Y') }}@endif</dd>
+
+            <dt>{{ __('Registration window') }}</dt>
+            <dd>{{ \Carbon\Carbon::parse($o->reg_opens_on)->format('d/m/Y') }}@if(!empty($o->reg_closes_on)) &ndash; {{ \Carbon\Carbon::parse($o->reg_closes_on)->format('d/m/Y') }}@endif</dd>
+
+            <dt>{{ __('Delivery mode') }}</dt>
+            <dd>{{ $oModeLabel }}</dd>
+
+            <dt>{{ __('Places / Capacity') }}</dt>
+            <dd>{{ $o->capacity ?? '–' }}</dd>
+
+            <dt>{{ __('Fee') }}</dt>
+            <dd>{{ (float) ($o->fee ?? 0) <= 0 ? __('Free (RM 0.00)') : ('RM ' . number_format((float) $o->fee, 2)) }}</dd>
+
+            <dt>{{ __('Facilitators') }}</dt>
+            <dd>{{ ($o->facilitators ?? null) ?: ($o->lecturer_name ?? '–') }}</dd>
+
+            <dt>{{ __('Platform reference') }}</dt>
+            <dd>{{ ($o->platform_ref ?? null) ?: '–' }}</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="hd"><h2 style="margin:0">{{ __('Public information') }}</h2></div>
+        <div class="bd">
+          <dl class="dl" style="margin:0">
+            <dt>{{ __('Description') }}</dt>
+            <dd>{{ ($o->description ?? null) ?: '–' }}</dd>
+
+            <dt>{{ __('Prerequisites') }}</dt>
+            <dd>{{ ($o->prerequisites ?? null) ?: '–' }}</dd>
+
+            <dt>{{ __('Access period') }}</dt>
+            <dd>{{ ($o->access_period ?? null) ?: '–' }}</dd>
+
+            <dt>{{ __('Learning support') }}</dt>
+            <dd>{{ ($o->learning_support ?? null) ?: '–' }}</dd>
+
+            <dt>{{ __('Completion conditions') }}</dt>
+            <dd>{{ ($o->completion_conditions ?? null) ?: '–' }}</dd>
+
+            @if(($o->category ?? '') === 'umc' || !empty($o->staged_completion) || !empty($o->completion_window_months))
+              <dt>{{ __('Staged completion') }}</dt>
+              <dd>{{ !empty($o->staged_completion) ? __('Allowed (modular UMC)') : __('Not enabled') }}@if(!empty($o->completion_window_months)) &middot; {{ $o->completion_window_months }} {{ __('months') }}@endif</dd>
+            @endif
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    @if(!$isConfirmed && $o->status !== 'cancelled')
+      <div class="row" style="justify-content:flex-end;margin-bottom:16px">
+        <button type="button" class="btn" onclick="var b=document.querySelector('[data-tab=&quot;cohort-readiness&quot;]');if(b)b.click();window.scrollTo({top:0,behavior:'smooth'});">
+          {{ __('Go to Readiness checklist') }} &rarr;
+        </button>
+      </div>
+    @endif
+  </div>
+
+  {{-- OUTER TAB 2: READINESS CHECKLIST --}}
+  <div data-pane="cohort-readiness" @if($outerDefaultTab !== 'cohort-readiness') hidden @endif>
 <form id="readiness-form" method="post" action="{{ ($dean || $isSupport) ? route('offerings.confirm', $o->id) : route('offerings.readiness', $o->id) }}">
   @csrf
   <input type="hidden" name="active_tab" data-active-tab-input value="{{ $defaultTab }}">
@@ -311,7 +469,8 @@
       </div>
       <div class="checklist-summary-actions">
         <span class="checklist-dirty-cue" data-dirty-badge hidden>{{ __('Unsaved changes') }}</span>
-        @if($isOwnerLecturer && $editable)
+        @if($canEditChecklist)
+          <button type="button" id="btn-autofill-offering-assisted" class="btn ter sm">{{ __('Auto-fill assisted items') }}</button>
           <button type="submit" name="action" value="save" class="btn ter sm">{{ __('Save draft') }}</button>
         @endif
       </div>
@@ -491,8 +650,8 @@
             @if($dean && $editable && $st['yes_count'] > 0)
               <button type="button" class="btn ter sm" data-accept-tab="{{ $secKey }}">{{ __('Accept all verified in this tab') }}</button>
             @endif
-            <span class="tag {{ $st['state'] === 'err' ? 'err' : ($st['state'] === 'ok' ? 'ok' : 'warn') }}">
-              {{ __(':done / :total Confirmed', ['done' => $st['done'], 'total' => $st['total']]) }}
+            <span class="tag {{ $st['state'] === 'err' ? 'err' : ($st['state'] === 'ok' ? 'ok' : 'warn') }}" data-section-summary="{{ $secKey }}" data-summary-suffix="{{ $dean ? __('Accepted') : __('Confirmed') }}">
+              {{ $st['done'] }} / {{ $st['total'] }} {{ $dean ? __('Accepted') : __('Confirmed') }}
             </span>
           </div>
         </div>
@@ -518,13 +677,13 @@
                   'not_yet' => ($isMs ? 'Belum Sedia' : 'Pending'),
                   'na' => ($isMs ? 'Tidak Berkenaan' : 'Not applicable'),
                 ][$it->status] ?? ucfirst($it->status);
-                $rowMode = ($isOwnerLecturer && $editable) ? 'status' : (($dean && $editable) ? 'accept' : 'readonly');
+                $rowMode = $canEditChecklist ? 'status' : (($dean && $editable && !$isConfirmed) ? 'accept' : 'readonly');
                 $rowDone = $dean
                   ? ($it->status === 'na' || ($it->status === 'yes' && !empty($it->accepted)))
                   : ($it->status !== 'not_yet');
                 $rowHasErr = in_array($k, $errItems, true);
               @endphp
-              <tr data-checklist-row data-row-key="{{ $k }}" data-row-mode="{{ $rowMode }}" data-row-done="{{ $rowDone ? '1' : '0' }}" class="{{ $rowHasErr ? 'row-err' : '' }}">
+              <tr data-checklist-row data-row-key="{{ $k }}" data-row-mode="{{ $rowMode }}" data-row-done="{{ $rowDone ? '1' : '0' }}" @if($itemType === 'assisted') data-assisted="1" data-assisted-level="{{ $hintInfo['level'] ?? 'ok' }}" data-assisted-hint="{{ $hintInfo['hint'] ?? '' }}" @endif class="{{ $rowHasErr ? 'row-err' : '' }}">
                 <td>
                   <div style="font-weight:500;color:var(--ink);font-size:13px">{{ $title }}</div>
                   <div style="margin-top:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
@@ -542,7 +701,7 @@
                   @endif
                 </td>
                 <td>
-                  @if($isOwnerLecturer && $editable)
+                  @if($canEditChecklist)
                     <select name="item[{{ $k }}][status]" aria-label="Status of {{ $title }}">
                       @foreach(['yes' => ($isMs ? 'Ya (Disahkan)' : 'Yes (Confirmed)'), 'not_yet' => ($isMs ? 'Belum Sedia' : 'Not yet'), 'na' => ($isMs ? 'Tidak Berkenaan' : 'Not applicable')] as $sv => $sl)
                         <option value="{{ $sv }}" @selected($it->status === $sv)>{{ $sl }}</option>
@@ -555,14 +714,14 @@
                   @endif
                 </td>
                 <td>
-                  @if($isOwnerLecturer && $editable)
+                  @if($canEditChecklist)
                     <input type="text" name="item[{{ $k }}][note]" value="{{ $it->note }}" aria-label="Evidence note for {{ $title }}" placeholder="{{ __('Reference to evidence') }}">
                   @else
                     <span style="font-size:13px">{{ $it->note ?: '—' }}</span>
                   @endif
                 </td>
                 <td>
-                  @if($dean && $editable)
+                  @if($dean && $editable && !$isConfirmed)
                     @if($it->status === 'yes')
                       <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
                         <input type="checkbox" name="accept[{{ $k }}]" value="1" @checked($it->accepted) aria-label="Accept evidence for {{ $title }}">
@@ -592,7 +751,7 @@
           </div>
           <span class="checklist-nav-pos">{{ __('Section :cur of :total', ['cur' => $curPos, 'total' => $totalTabs]) }}</span>
           <div class="checklist-nav-group">
-            @if($isOwnerLecturer && $editable)
+            @if($canEditChecklist)
               <button type="submit" name="action" value="save" class="btn ter sm">{{ __('Save draft') }}</button>
             @endif
             @if($nextTab)
@@ -644,7 +803,7 @@
             <tr>
               <td><b>{{ $secTitle }}</b></td>
               <td>
-                <span class="tag {{ $st['state'] === 'err' ? 'err' : ($st['state'] === 'ok' ? 'ok' : 'warn') }}">
+                <span class="tag {{ $st['state'] === 'err' ? 'err' : ($st['state'] === 'ok' ? 'ok' : 'warn') }}" data-section-summary="{{ $secKey }}" data-summary-suffix="{{ $dean ? __('Accepted') : __('Confirmed') }}">
                   {{ $st['done'] }} / {{ $st['total'] }} {{ $dean ? __('Accepted') : __('Confirmed') }}
                 </span>
               </td>
@@ -658,22 +817,62 @@
       @if($dean && $editable)
         <div style="border-top:1px solid var(--border);padding-top:18px;margin-bottom:24px">
           @if(!$lecturerSent)
-            <p class="muted" style="margin:0">{{ __('You can confirm once the lecturer has sent the checklist.') }}</p>
+            <div class="note info" style="margin:0">{{ __('You can confirm once the lecturer has sent the checklist.') }}</div>
+          @elseif($isConfirmed)
+            @php $lastDeanConf = $confirmations->where('role', 'ptj')->last(); @endphp
+            <div style="padding:14px 16px;background:#edfcf0;border:1px solid #0e6027;border-left:4px solid #0e6027;border-radius:4px;margin-bottom:14px">
+              <div style="font-weight:700;color:#0e6027;font-size:13.5px">{{ __('Readiness decision recorded') }}</div>
+              <div class="small" style="color:#14532d;margin-top:2px">
+                @if($lastDeanConf)
+                  {{ __('Confirmed as :outcome by :by on :date.', [
+                    'outcome' => __(config('offerings.outcomes')[$lastDeanConf->outcome] ?? $lastDeanConf->outcome),
+                    'by' => $lastDeanConf->name,
+                    'date' => \Carbon\Carbon::parse($lastDeanConf->created_at)->format('d/m/Y H:i'),
+                  ]) }}
+                @else
+                  {{ __('This cohort is confirmed ready and will open automatically on its registration date.') }}
+                @endif
+              </div>
+            </div>
+            <details style="border:1px solid var(--hairline);border-radius:4px;padding:10px 14px;background:var(--surface, #f8fafc)">
+              <summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--ink)">{{ __('Update readiness decision') }}</summary>
+              <div style="margin-top:14px">
+                <div style="display:grid;grid-template-columns:minmax(200px,280px) minmax(0,1fr);gap:14px;align-items:end;margin-bottom:14px">
+                  <div class="field" style="margin:0">
+                    <label for="outcome">{{ __('Outcome') }}</label>
+                    <select id="outcome" name="outcome">
+                      @foreach(config('offerings.outcomes') as $k => $l)
+                        <option value="{{ $k }}" @selected(old('outcome', $lastDeanConf->outcome ?? 'ready') === $k)>{{ __($l) }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                  <div class="field" style="margin:0">
+                    <label for="conditions">{{ __('Conditions (for "Ready with conditions")') }}</label>
+                    <input type="text" id="conditions" name="conditions" value="{{ old('conditions', $lastDeanConf->conditions ?? '') }}" placeholder="{{ __('Specify any conditions if applicable') }}">
+                  </div>
+                </div>
+                <button type="submit" class="btn ter sm">{{ __('Record decision') }}</button>
+              </div>
+            </details>
           @else
-            <h3 style="margin-top:0">{{ __('Confirm readiness') }}</h3>
-            <div class="field" style="margin-bottom:16px;max-width:320px">
-              <label for="outcome">{{ __('Outcome') }}</label>
-              <select id="outcome" name="outcome">
-                @foreach(config('offerings.outcomes') as $k => $l)
-                  <option value="{{ $k }}" @selected(old('outcome') === $k)>{{ __($l) }}</option>
-                @endforeach
-              </select>
+            <div style="padding:16px;border:1px solid var(--hairline);border-radius:6px;background:var(--surface, #f8fafc)">
+              <h3 style="margin:0 0 14px;font-size:14.5px">{{ __('Confirm readiness') }}</h3>
+              <div style="display:grid;grid-template-columns:minmax(200px,280px) minmax(0,1fr);gap:14px;align-items:end;margin-bottom:16px">
+                <div class="field" style="margin:0">
+                  <label for="outcome">{{ __('Outcome') }}</label>
+                  <select id="outcome" name="outcome">
+                    @foreach(config('offerings.outcomes') as $k => $l)
+                      <option value="{{ $k }}" @selected(old('outcome') === $k)>{{ __($l) }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                <div class="field" style="margin:0">
+                  <label for="conditions">{{ __('Conditions (for "Ready with conditions")') }}</label>
+                  <input type="text" id="conditions" name="conditions" value="{{ old('conditions') }}" placeholder="{{ __('Required only for Ready with conditions') }}">
+                </div>
+              </div>
+              <button type="submit" class="btn">{{ __('Record decision') }}</button>
             </div>
-            <div class="field" style="margin-bottom:20px;max-width:540px">
-              <label for="conditions">{{ __('Conditions (for "Ready with conditions")') }}</label>
-              <input type="text" id="conditions" name="conditions" value="{{ old('conditions') }}">
-            </div>
-            <button type="submit" class="btn">{{ __('Record decision') }}</button>
           @endif
         </div>
       @elseif($isSupport && $editable)
@@ -699,23 +898,96 @@
         </div>
       @elseif($isOwnerLecturer && $editable)
         <div style="border-top:1px solid var(--border);padding-top:18px;margin-bottom:24px">
-          <div style="margin-bottom:18px">
-            <button type="submit" name="action" value="save" class="btn ter sm">{{ __('Save') }}</button>
-          </div>
-          <h3 style="margin-top:0">{{ __('Send to DD and/or CODL') }}</h3>
-          <div class="field" style="margin-bottom:16px;max-width:320px">
-            <label for="outcome">{{ __('Your view') }}</label>
-            <select id="outcome" name="outcome">
-              @foreach(config('offerings.outcomes') as $k => $l)
-                <option value="{{ $k }}" @selected(old('outcome') === $k)>{{ __($l) }}</option>
-              @endforeach
-            </select>
-          </div>
-          <div class="field" style="margin-bottom:20px;max-width:540px">
-            <label for="conditions">{{ __('Conditions (for "Ready with conditions")') }}</label>
-            <input type="text" id="conditions" name="conditions" value="{{ old('conditions') }}">
-          </div>
-          <button type="submit" name="action" value="send" class="btn">{{ __('Send the checklist') }}</button>
+          @if($isConfirmed)
+            @php $lastDeanConf = $confirmations->where('role', 'ptj')->last(); @endphp
+            <div style="padding:14px 16px;background:#edfcf0;border:1px solid #0e6027;border-left:4px solid #0e6027;border-radius:4px;margin-bottom:14px">
+              <div style="font-weight:700;color:#0e6027;font-size:13.5px">{{ __('Readiness confirmed') }}</div>
+              <div class="small" style="color:#14532d;margin-top:2px">
+                @if($lastDeanConf)
+                  {{ __('Confirmed as :outcome by :by on :date. No further submission is needed.', [
+                    'outcome' => __(config('offerings.outcomes')[$lastDeanConf->outcome] ?? $lastDeanConf->outcome),
+                    'by' => $lastDeanConf->name,
+                    'date' => \Carbon\Carbon::parse($lastDeanConf->created_at)->format('d/m/Y H:i'),
+                  ]) }}
+                @else
+                  {{ __('Readiness has been confirmed. No further submission is needed.') }}
+                @endif
+              </div>
+            </div>
+            <details style="border:1px solid var(--hairline);border-radius:4px;padding:10px 14px;background:var(--surface, #f8fafc)">
+              <summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--ink)">{{ __('Need to amend and resend the checklist?') }}</summary>
+              <div class="small muted" style="margin:8px 0 12px">{{ __('Updating any checklist item withdraws prior acceptance and requires the Deputy Dean to re-confirm.') }}</div>
+              <div style="display:grid;grid-template-columns:minmax(200px,280px) minmax(0,1fr);gap:14px;align-items:end;margin-bottom:14px">
+                <div class="field" style="margin:0">
+                  <label for="outcome">{{ __('Your view') }}</label>
+                  <select id="outcome" name="outcome">
+                    @foreach(config('offerings.outcomes') as $k => $l)
+                      <option value="{{ $k }}" @selected(old('outcome', 'ready') === $k)>{{ __($l) }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                <div class="field" style="margin:0">
+                  <label for="conditions">{{ __('Conditions (for "Ready with conditions")') }}</label>
+                  <input type="text" id="conditions" name="conditions" value="{{ old('conditions') }}" placeholder="{{ __('Optional unless Ready with conditions') }}">
+                </div>
+              </div>
+              <div class="row" style="gap:10px">
+                <button type="submit" name="action" value="save" class="btn ter sm">{{ __('Save draft') }}</button>
+                <button type="submit" name="action" value="send" class="btn ter sm">{{ __('Resend updated checklist') }}</button>
+              </div>
+            </details>
+          @elseif($lecturerSent)
+            @php $lastSent = $confirmations->where('role', 'lecturer')->last(); @endphp
+            <div class="note info" style="margin-bottom:14px">
+              <b>{{ __('Checklist sent:') }}</b>
+              {{ __('Submitted on :date. Waiting for the Deputy Dean and/or CODL to review your evidence and confirm readiness.', ['date' => \Carbon\Carbon::parse($lastSent->created_at)->format('d/m/Y H:i')]) }}
+            </div>
+            <details style="border:1px solid var(--hairline);border-radius:4px;padding:10px 14px;background:var(--surface, #f8fafc)">
+              <summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--ink)">{{ __('Update and resend checklist') }}</summary>
+              <div style="margin-top:14px">
+                <div style="display:grid;grid-template-columns:minmax(200px,280px) minmax(0,1fr);gap:14px;align-items:end;margin-bottom:14px">
+                  <div class="field" style="margin:0">
+                    <label for="outcome">{{ __('Your view') }}</label>
+                    <select id="outcome" name="outcome">
+                      @foreach(config('offerings.outcomes') as $k => $l)
+                        <option value="{{ $k }}" @selected(old('outcome', $lastSent->outcome ?? 'ready') === $k)>{{ __($l) }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                  <div class="field" style="margin:0">
+                    <label for="conditions">{{ __('Conditions (for "Ready with conditions")') }}</label>
+                    <input type="text" id="conditions" name="conditions" value="{{ old('conditions', $lastSent->conditions ?? '') }}">
+                  </div>
+                </div>
+                <div class="row" style="gap:10px">
+                  <button type="submit" name="action" value="save" class="btn ter sm">{{ __('Save draft') }}</button>
+                  <button type="submit" name="action" value="send" class="btn ter sm">{{ __('Resend updated checklist') }}</button>
+                </div>
+              </div>
+            </details>
+          @else
+            <div style="padding:16px;border:1px solid var(--hairline);border-radius:6px;background:var(--surface, #f8fafc)">
+              <h3 style="margin:0 0 14px;font-size:14.5px">{{ __('Send to DD and/or CODL') }}</h3>
+              <div style="display:grid;grid-template-columns:minmax(200px,280px) minmax(0,1fr);gap:14px;align-items:end;margin-bottom:16px">
+                <div class="field" style="margin:0">
+                  <label for="outcome">{{ __('Your view') }}</label>
+                  <select id="outcome" name="outcome">
+                    @foreach(config('offerings.outcomes') as $k => $l)
+                      <option value="{{ $k }}" @selected(old('outcome') === $k)>{{ __($l) }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                <div class="field" style="margin:0">
+                  <label for="conditions">{{ __('Conditions (for "Ready with conditions")') }}</label>
+                  <input type="text" id="conditions" name="conditions" value="{{ old('conditions') }}" placeholder="{{ __('Required only for Ready with conditions') }}">
+                </div>
+              </div>
+              <div class="row" style="gap:10px">
+                <button type="submit" name="action" value="send" class="btn">{{ __('Send the checklist') }}</button>
+                <button type="submit" name="action" value="save" class="btn ter">{{ __('Save draft') }}</button>
+              </div>
+            </div>
+          @endif
         </div>
       @endif
 
@@ -737,8 +1009,11 @@
               <td><b>{{ $c->name }}</b>@if(!empty($c->position)) <div class="small muted">{{ $c->position }}</div>@endif</td>
               <td>{{ $c->role === 'ptj' ? __('Faculty Authority (Deputy Dean)') : ($c->role === 'support' ? __('Platform Support (CODL)') : __('Course Coordinator')) }}</td>
               <td>
-                <x-pill :s="__(config('offerings.outcomes')[$c->outcome] ?? $c->outcome)" />
-                @if($c->conditions) &mdash; <span class="s muted">{{ $c->conditions }}</span>@endif
+                @php $outLbl = __(config('offerings.outcomes')[$c->outcome] ?? $c->outcome); @endphp
+                <x-pill :s="$outLbl" />
+                @if(!empty($c->conditions) && trim((string) $c->conditions) !== trim((string) $outLbl))
+                  <div class="s muted" style="margin-top:3px">{{ $c->conditions }}</div>
+                @endif
               </td>
               <td>{{ \Carbon\Carbon::parse($c->created_at)->format('d/m/Y H:i') }}</td>
             </tr>
@@ -753,16 +1028,21 @@
         </table>
       </div>
 
-      {{-- Deputy Dean Cohort Cancellation (bound to separate outer form to keep HTML valid) --}}
+      {{-- Deputy Dean Cohort Cancellation (tucked inside a clean collapsible Danger Zone) --}}
       @if($dean && !in_array($o->status, ['cancelled', 'ended', 'running']))
-        <div style="border-top:1px solid var(--border);padding-top:18px;margin-top:18px">
-          <h3 style="margin:0 0 12px;color:var(--err-ink, #a2191f)">{{ __('Cancel this cohort') }}</h3>
-          <div class="field" style="margin-bottom:14px;max-width:540px">
-            <label for="creason">{{ __('Reason') }}</label>
-            <input type="text" id="creason" name="reason" form="cancel-cohort-form" required minlength="5">
+        <details style="margin-top:18px;border:1px solid #f4b8bb;border-left:4px solid var(--err, #da1e28);border-radius:6px;padding:12px 16px;background:#fff8f8">
+          <summary style="cursor:pointer;font-weight:700;font-size:13.5px;color:var(--err-ink, #a2191f)">{{ __('Cancel this cohort') }}</summary>
+          <div style="margin-top:12px">
+            <div class="small muted" style="margin-bottom:10px">{{ __('Cancelling removes this cohort from the public catalogue and notifies any registered participants.') }}</div>
+            <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+              <div class="field" style="flex:1;min-width:240px;margin:0">
+                <label for="creason">{{ __('Reason for cancellation') }}</label>
+                <input type="text" id="creason" name="reason" form="cancel-cohort-form" required minlength="5" placeholder="{{ __('Provide a brief governance reason (min 5 characters)') }}">
+              </div>
+              <button type="submit" form="cancel-cohort-form" class="btn danger sm">{{ __('Cancel cohort') }}</button>
+            </div>
           </div>
-          <button type="submit" form="cancel-cohort-form" class="btn danger sm">{{ __('Cancel cohort') }}</button>
-        </div>
+        </details>
       @endif
 
       <div class="checklist-nav">
@@ -787,4 +1067,45 @@
     <b>{{ __('Important Notice:') }}</b> {{ __('This operational readiness check ensures delivery quality and learner protection before an offering opens. It does not replace prior academic approval of the micro-credential.') }}
   </div>
 </div>
+  </div>
+</div>
+
+@if($isOwnerLecturer && $editable)
+  <script>
+  (function () {
+    var btn = document.getElementById('btn-autofill-offering-assisted');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var filled = 0;
+      document.querySelectorAll('tr[data-checklist-row][data-assisted="1"]').forEach(function (tr) {
+        if (tr.getAttribute('data-assisted-level') === 'warn') return;
+        var sel = tr.querySelector('select[name$="[status]"]');
+        var inp = tr.querySelector('input[name$="[note]"]');
+        var hint = (tr.getAttribute('data-assisted-hint') || '').trim();
+        var changed = false;
+        if (sel && sel.value === 'not_yet') {
+          sel.value = 'yes';
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
+          changed = true;
+        }
+        if (inp && !inp.value.trim() && hint) {
+          inp.value = hint;
+          inp.dispatchEvent(new Event('input', { bubbles: true }));
+          changed = true;
+        }
+        if (changed) filled++;
+      });
+      if (window.mcmsToast) {
+        window.mcmsToast(
+          filled > 0 ? @json(__('Assisted items auto-filled')) : @json(__('No pending assisted items')),
+          filled > 0
+            ? (filled + ' ' + @json(__('verified assisted item(s) updated. Review them and click Save draft.')))
+            : @json(__('All verified assisted items are already filled.')),
+          filled > 0 ? 'info' : 'warn'
+        );
+      }
+    });
+  })();
+  </script>
+@endif
 @endsection

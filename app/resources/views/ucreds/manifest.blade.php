@@ -1,10 +1,11 @@
 @extends('layouts.print')
-@section('title', 'UCreds enrolment export')
-@section('doc_title', 'UCreds Enrolment Export')
+@section('title', __('UCreds enrollment export'))
+@section('doc_title', __('UCreds Enrollment Export'))
+@section('doc_bm', 'Eksport Pendaftaran UCreds')
 @section('doc_ref', 'EXP-' . $ref)
 @section('doc_file', 'enrol-' . $ref . '.csv')
 @section('doc_actions')
-  <a class="btn ter sm" href="{{ route('ucreds.export', $o->id) }}">Download .csv</a>
+  <a class="btn ter sm" href="{{ route('ucreds.export', $o->id) }}">{{ __('Download .csv') }}</a>
 @endsection
 @section('content')
 
@@ -45,7 +46,7 @@
 <div class="panel" style="margin-bottom:16px">
   <div class="hd"><h2 style="font-size:11pt">{{ __("Columns in export file") }}</h2></div>
   <div class="table-wrap">
-    <table>
+    <table data-plain>
       <thead>
         <tr>
           <th>{{ __("Column") }}</th>

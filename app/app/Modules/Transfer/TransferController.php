@@ -168,15 +168,34 @@ final class TransferController
             'document_checklist' => 'nullable|array',
             'document_checklist.*' => "in:$validDocs",
             'other_document' => 'nullable|string|max:500',
+            'other_files' => 'nullable|array|max:5',
+            'other_files.*' => 'file|mimes:pdf,png,jpg,jpeg,doc,docx|max:10240',
             'documents' => 'nullable|string|max:2000',
             'deposits' => 'required|array|min:1',
             'deposits.*' => 'integer',
             'course' => 'required|array',
             'credits' => 'required|array',
-        ], ['deposits.required' => 'Choose the credit you want to use.']);
+        ], [
+            'deposits.required' => 'Choose the credit you want to use.',
+            'other_files.*.mimes' => 'Supporting documents must be PDF, PNG, JPG, DOC, or DOCX.',
+            'other_files.*.max' => 'Each supporting document must not exceed 10 MB.',
+        ]);
         $checkedDocs = array_values(array_unique($d['document_checklist'] ?? []));
         $otherDoc = trim((string) ($d['other_document'] ?? '')) ?: null;
         $notesDoc = trim((string) ($d['documents'] ?? '')) ?: null;
+
+        if (in_array('other', $checkedDocs, true)) {
+            $errors = [];
+            if (! $request->hasFile('other_files')) {
+                $errors['other_files'] = 'Please upload at least one supporting document (PDF, image, or Word file) when "Other supporting documents" is ticked.';
+            }
+            if ($otherDoc === null) {
+                $errors['other_document'] = 'Please specify what the other supporting document is.';
+            }
+            if ($errors !== []) {
+                throw ValidationException::withMessages($errors);
+            }
+        }
         $checklistPayload = ($checkedDocs !== [] || $otherDoc !== null || $notesDoc !== null)
             ? json_encode(['items' => $checkedDocs, 'other' => $otherDoc, 'notes' => $notesDoc])
             : null;
@@ -252,7 +271,7 @@ final class TransferController
             }
             $lines[] = [$dep, $course, $cr, $expired];
         }
-        $app = DB::transaction(function () use ($d, $lines, $request, $checklistPayload, $documentsText, $prog) {
+        $app = DB::transaction(function () use ($d, $lines, $request, $checkedDocs, $otherDoc, $notesDoc, $checklistPayload, $documentsText, $prog) {
             $id = DB::table('transfer_applications')->insertGetId([
                 'reference' => 'TMP'.bin2hex(random_bytes(8)),
                 'user_id' => $request->user()->id,
@@ -266,7 +285,43 @@ final class TransferController
                 'updated_at' => now(),
             ]);
             $ref = 'TR-'.now()->year.'-'.str_pad((string) $id, 6, '0', STR_PAD_LEFT);
-            DB::table('transfer_applications')->where('id', $id)->update(['reference' => $ref]);
+            $updates = ['reference' => $ref];
+
+            if (in_array('other', $checkedDocs, true) && $request->hasFile('other_files')) {
+                $storedNames = [];
+                $targetDir = storage_path('app/transfers/'.$id);
+                if (! is_dir($targetDir)) {
+                    mkdir($targetDir, 0755, true);
+                }
+                foreach ($request->file('other_files') as $file) {
+                    if (! $file || ! $file->isValid()) {
+                        continue;
+                    }
+                    $orig = basename((string) $file->getClientOriginalName());
+                    $safe = preg_replace('/[^A-Za-z0-9._ -]/', '_', $orig) ?: ('document_'.time().'.'.$file->getClientOriginalExtension());
+                    $candidate = $safe;
+                    $n = 1;
+                    while (file_exists($targetDir.DIRECTORY_SEPARATOR.$candidate)) {
+                        $ext = pathinfo($safe, PATHINFO_EXTENSION);
+                        $base = pathinfo($safe, PATHINFO_FILENAME);
+                        $candidate = $base.'_'.$n.($ext ? '.'.$ext : '');
+                        $n++;
+                    }
+                    $file->move($targetDir, $candidate);
+                    $storedNames[] = $candidate;
+                }
+                if ($storedNames !== []) {
+                    $updates['document_checklist'] = json_encode([
+                        'items' => $checkedDocs,
+                        'other' => $otherDoc,
+                        'notes' => $notesDoc,
+                        'uploaded_files' => $storedNames,
+                    ]);
+                    $updates['documents'] = trim(($documentsText ? $documentsText.'; ' : '').'Uploaded: '.implode(', ', $storedNames));
+                }
+            }
+
+            DB::table('transfer_applications')->where('id', $id)->update($updates);
             foreach ($lines as [$dep, $course, $cr, $expired]) {
                 DB::table('transfer_lines')->insert(['transfer_application_id' => $id, 'acr_id' => $dep->acr_id, 'abc_deposit_id' => $dep->id, 'mc_version_id' => $dep->mc_version_id, 'parent_course_id' => $course->id, 'credits_requested' => $cr,
                     'reevaluate' => $expired, 'target_version' => $prog->curriculum_version, 'source_version_no' => $dep->version_no, 'created_at' => now(), 'updated_at' => now()]);

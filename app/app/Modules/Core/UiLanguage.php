@@ -18,7 +18,16 @@ class UiLanguage
             session(['ui_lang' => $sessionLang, 'lang' => $sessionLang]);
         }
 
-        app()->setLocale($sessionLang === 'ms' ? 'ms' : 'en');
+        $docLang = $request->query('doc_lang');
+        if (! in_array($docLang, ['en', 'ms'], true) && $request->routeIs('credentials.certificate') && in_array($request->query('lang'), ['en', 'ms'], true)) {
+            $docLang = $request->query('lang');
+        }
+
+        if (in_array($docLang, ['en', 'ms'], true)) {
+            app()->setLocale($docLang);
+        } else {
+            app()->setLocale($sessionLang === 'ms' ? 'ms' : 'en');
+        }
 
         return $next($request);
     }

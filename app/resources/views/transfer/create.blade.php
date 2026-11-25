@@ -20,7 +20,7 @@
 
 <div class="cols">
   <div>
-    <form method="post" action="{{ route('transfer.store') }}">
+    <form method="post" action="{{ route('transfer.store') }}" enctype="multipart/form-data">
       @csrf
 
       <div class="panel" style="margin-bottom:20px">
@@ -131,9 +131,26 @@
             @endforeach
           </div>
 
-          <div style="margin-top:14px">
-            <label for="other_document">{{ __('If "Other supporting documents" is ticked, specify') }}</label>
-            <input id="other_document" name="other_document" type="text" value="{{ old('other_document') }}" placeholder="{{ __('e.g. Portfolio link, syllabus PDF reference, or professional endorsement') }}">
+          <div id="other-docs-wrap" style="display:none;margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:4px">
+            <div style="margin-bottom:12px">
+              <label for="other_document">{{ __('Specify other supporting document(s)') }} *</label>
+              <input id="other_document" name="other_document" type="text" value="{{ old('other_document') }}" placeholder="{{ __('e.g. Portfolio, syllabus PDF, or professional endorsement') }}">
+              @error('other_document')
+                <div class="small" style="color:var(--danger, #da1e28);margin-top:4px">{{ $message }}</div>
+              @enderror
+            </div>
+
+            <div>
+              <label for="other_files">{{ __('Upload supporting document(s)') }} *</label>
+              <input id="other_files" name="other_files[]" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.doc,.docx">
+              <div class="small muted" style="margin-top:4px">{{ __('Accepted: PDF, PNG, JPG, DOC, DOCX (up to 5 files, max 10 MB each). Required when "Other supporting documents" is ticked.') }}</div>
+              @error('other_files')
+                <div class="small" style="color:var(--danger, #da1e28);margin-top:4px">{{ $message }}</div>
+              @enderror
+              @error('other_files.*')
+                <div class="small" style="color:var(--danger, #da1e28);margin-top:4px">{{ $message }}</div>
+              @enderror
+            </div>
           </div>
 
           <div style="margin-top:12px">
@@ -323,6 +340,23 @@
       checkProgrammeEligibility();
     });
     checkProgrammeEligibility();
+  }
+
+  var otherCheckbox = document.querySelector('#f6-checklist input[type="checkbox"][value="other"]');
+  var otherWrap = document.getElementById('other-docs-wrap');
+  var otherInput = document.getElementById('other_document');
+  var otherFiles = document.getElementById('other_files');
+
+  function syncOtherDocs() {
+    var checked = !!(otherCheckbox && otherCheckbox.checked);
+    if (otherWrap) { otherWrap.style.display = checked ? 'block' : 'none'; }
+    if (otherInput) { otherInput.required = checked; }
+    if (otherFiles) { otherFiles.required = checked; }
+  }
+
+  if (otherCheckbox) {
+    otherCheckbox.addEventListener('change', syncOtherDocs);
+    syncOtherDocs();
   }
 })();
 </script>

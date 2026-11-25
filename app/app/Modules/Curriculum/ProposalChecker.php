@@ -12,6 +12,36 @@ final class ProposalChecker
 {
     public function __construct(private Settings $settings) {}
 
+    /** Normalize mc_versions.evidence_files JSON (supports grouped by_type + legacy flat array). @return array{by_type: array<string, list<string>>, other_label: ?string, legacy: list<string>} */
+    public static function parseEvidenceFiles(?string $raw): array
+    {
+        $decoded = json_decode((string) ($raw ?? ''), true);
+        if (! is_array($decoded)) {
+            return ['by_type' => [], 'other_label' => null, 'legacy' => []];
+        }
+        if (array_is_list($decoded)) {
+            $files = array_values(array_filter(array_map('strval', $decoded)));
+
+            return ['by_type' => [], 'other_label' => null, 'legacy' => $files];
+        }
+
+        $validKeys = array_keys(config('proposals.evidence_types', []));
+        $byType = [];
+        foreach ($validKeys as $k) {
+            if (! empty($decoded[$k]) && is_array($decoded[$k])) {
+                $byType[$k] = array_values(array_filter(array_map('strval', $decoded[$k])));
+            }
+        }
+        $legacy = (! empty($decoded['legacy']) && is_array($decoded['legacy']))
+            ? array_values(array_filter(array_map('strval', $decoded['legacy'])))
+            : [];
+        $otherLabel = isset($decoded['other_label']) && trim((string) $decoded['other_label']) !== ''
+            ? trim((string) $decoded['other_label'])
+            : null;
+
+        return ['by_type' => $byType, 'other_label' => $otherLabel, 'legacy' => $legacy];
+    }
+
     /** @return array{blocking: list<array{fr:string,tab:string,msg:string}>, warnings: list<array{fr:string,tab:string,msg:string}>, slt:int} */
     public function check(int $versionId): array
     {
@@ -35,6 +65,22 @@ final class ProposalChecker
         if (! $v->need) {
             $block('FR-36', 'justification', __('Describe the need or problem this micro-credential addresses.'));
         }
+        $evTypes = json_decode((string) ($v->evidence_types ?? '[]'), true) ?: [];
+        if (! empty($evTypes)) {
+            $evData = self::parseEvidenceFiles($v->evidence_files ?? null);
+            foreach ($evTypes as $evKey) {
+                if ($evKey === 'other' && empty($evData['other_label'])) {
+                    $block('FR-36', 'justification', __('Specify the "Other" evidence of need.'));
+                }
+                if (empty($evData['by_type'][$evKey])) {
+                    $label = __(config("proposals.evidence_types.$evKey", (string) $evKey));
+                    $block('FR-36', 'justification', __('Upload at least one supporting document for ":type" under Evidence of need.', ['type' => $label]));
+                }
+            }
+        }
+        if ($los->isEmpty()) {
+            $block('FR-37', 'outcomes', __('Add at least one learning outcome.'));
+        }
         if ($modules->isEmpty()) {
             $block('FR-52', 'modules', __('Add at least one module.'));
         }
@@ -43,9 +89,6 @@ final class ProposalChecker
             if ($actSum > 0 && $actSum > $m->slt_hours) {
                 $block('FR-36', 'modules', __('Module :seq activities SLT (:act hours) exceeds module planned SLT (:total hours).', ['seq' => $m->seq, 'act' => $actSum, 'total' => $m->slt_hours]));
             }
-        }
-        if ($los->isEmpty()) {
-            $block('FR-37', 'outcomes', __('Add at least one learning outcome.'));
         }
         if ($comps->isEmpty()) {
             $block('FR-39', 'assessment', __('Add at least one assessment component.'));

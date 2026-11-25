@@ -18,7 +18,7 @@
     'SAMC' => __('Quality-Verified Standalone Micro-Credential (SAMC)'),
     default => $catCode ?: __('Not yet recorded'),
   };
-  $sltHours = $a->slt_hours ?? ($p['slt_hours'] ?? null);
+  $sltHours = $a->slt_hours ?: ($p['slt_hours'] ?? ($a->planned_slt ?? null));
   $qvRef = $a->qv_reference ?? ($p['verification']['qv_reference'] ?? null);
   $qvUntil = $a->qv_valid_until ?? ($p['verification']['qv_valid_until'] ?? null);
   $parentCourse = $p['verification']['parent_course'] ?? null;
@@ -140,46 +140,123 @@
     <div>
       {{-- Action Panel 1: Participant Consent (Stage 05) --}}
       @if($mine && in_array($a->status, ['verified', 'consent_declined'], true))
-        <form method="post" action="{{ route('credit.consent', $a->id) }}" class="panel" id="consent" style="border-top:3px solid var(--primary)">
-          @csrf
-          <div class="hd">
-            <h2>{{ __('Learner Consent for ABC Deposit') }}</h2>
-            <span class="r"><span class="tag warn">{{ __('Action required') }}</span></span>
-          </div>
-          <div class="bd">
-            <div class="note" style="margin-bottom:14px">
+        @php
+          $latestConsent = $consents->first();
+          $isPostponedActive = $a->status === 'consent_declined'
+            && $latestConsent
+            && $latestConsent->decision === 'postponed'
+            && $latestConsent->decided_at
+            && \Carbon\Carbon::parse($latestConsent->decided_at)->gt(now()->subDays(14));
+          $postponedUntil = $isPostponedActive
+            ? \Carbon\Carbon::parse($latestConsent->decided_at)->addDays(14)->format('d/m/Y')
+            : null;
+          $isDeclinedChoice = $a->status === 'consent_declined'
+            && $latestConsent
+            && $latestConsent->decision === 'declined';
+          $collapseConsent = $isPostponedActive || $isDeclinedChoice;
+        @endphp
+
+        @if($collapseConsent)
+          <details class="panel" id="consent" style="margin-bottom:16px">
+            <summary class="hd" style="cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px">
               <div>
-                <p style="margin:0">{{ $consentText }}</p>
+                <h2 style="margin:0">{{ __('Learner Consent for ABC Deposit') }}</h2>
+                <div class="small muted" style="margin-top:2px">
+                  @if($isPostponedActive)
+                    {{ __('Postponed — hidden from your tasks until :date. Click to expand and change your choice anytime.', ['date' => $postponedUntil]) }}
+                  @else
+                    {{ __('Declined — ACR is kept permanently in MCMS and not deposited to ABC. Click to expand if you wish to consent later.') }}
+                  @endif
+                </div>
               </div>
+              <span class="r" style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+                @if($isPostponedActive)
+                  <span class="tag">{{ __('Postponed until :date', ['date' => $postponedUntil]) }}</span>
+                @else
+                  <span class="tag">{{ __('Declined') }}</span>
+                @endif
+                <span class="btn ter sm" style="pointer-events:none">{{ __('Change choice') }}</span>
+              </span>
+            </summary>
+            <form method="post" action="{{ route('credit.consent', $a->id) }}" class="bd" style="border-top:1px solid var(--line)">
+              @csrf
+              <div class="note" style="margin-bottom:14px">
+                <div>
+                  <p style="margin:0">{{ $consentText }}</p>
+                </div>
+              </div>
+              <p class="small muted" style="margin-bottom:14px">{{ __('Depositing into the Academic Bank of Credit (ABC) stores your credit for up to 10 years. It is storage only and not a credit transfer.') }}</p>
+              <fieldset style="border:0;padding:0;margin:0 0 16px">
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink)">
+                    <input type="radio" name="decision" value="given" required>
+                    <span><b>{{ __('I consent to the deposit') }}</b> &middot; <span class="muted small">{{ __('The ACR enters the Registry / ABC Depositor queue') }}</span></span>
+                  </label>
+                  <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink)">
+                    <input type="radio" name="decision" value="postponed" @checked($isPostponedActive)>
+                    <span><b>{{ __('Postpone') }}</b> &middot; <span class="muted small">{{ __('Hide from your tasks for 14 days; decide anytime') }}</span></span>
+                  </label>
+                  <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink)">
+                    <input type="radio" name="decision" value="declined" @checked($isDeclinedChoice)>
+                    <span><b>{{ __('Decline') }}</b> &middot; <span class="muted small">{{ __('The ACR is kept permanently in MCMS and not deposited') }}</span></span>
+                  </label>
+                </div>
+              </fieldset>
+              <button type="submit" class="btn">{{ __('Save my choice') }}</button>
+            </form>
+          </details>
+        @else
+          <form method="post" action="{{ route('credit.consent', $a->id) }}" class="panel" id="consent" style="border-top:3px solid var(--primary)">
+            @csrf
+            <div class="hd">
+              <h2>{{ __('Learner Consent for ABC Deposit') }}</h2>
+              <span class="r"><span class="tag warn">{{ __('Action required') }}</span></span>
             </div>
-            <p class="small muted" style="margin-bottom:14px">{{ __('Depositing into the Academic Bank of Credit (ABC) stores your credit for up to 10 years. It is storage only and not a credit transfer.') }}</p>
-            <fieldset style="border:0;padding:0;margin:0 0 16px">
-              <div style="display:flex;flex-direction:column;gap:10px">
-                <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink)">
-                  <input type="radio" name="decision" value="given" required>
-                  <span><b>{{ __('I consent to the deposit') }}</b> &middot; <span class="muted small">{{ __('The ACR enters the Registry / ABC Depositor queue') }}</span></span>
-                </label>
-                <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink)">
-                  <input type="radio" name="decision" value="postponed">
-                  <span><b>{{ __('Postpone') }}</b> &middot; <span class="muted small">{{ __('Nothing changes; decide at any time') }}</span></span>
-                </label>
-                <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink)">
-                  <input type="radio" name="decision" value="declined">
-                  <span><b>{{ __('Decline') }}</b> &middot; <span class="muted small">{{ __('The ACR is kept permanently in MCMS and not deposited') }}</span></span>
-                </label>
+            <div class="bd">
+              <div class="note" style="margin-bottom:14px">
+                <div>
+                  <p style="margin:0">{{ $consentText }}</p>
+                </div>
               </div>
-            </fieldset>
-            <button type="submit" class="btn">{{ __('Save my choice') }}</button>
-          </div>
-        </form>
+              <p class="small muted" style="margin-bottom:14px">{{ __('Depositing into the Academic Bank of Credit (ABC) stores your credit for up to 10 years. It is storage only and not a credit transfer.') }}</p>
+              <fieldset style="border:0;padding:0;margin:0 0 16px">
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink)">
+                    <input type="radio" name="decision" value="given" required>
+                    <span><b>{{ __('I consent to the deposit') }}</b> &middot; <span class="muted small">{{ __('The ACR enters the Registry / ABC Depositor queue') }}</span></span>
+                  </label>
+                  <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink)">
+                    <input type="radio" name="decision" value="postponed">
+                    <span><b>{{ __('Postpone') }}</b> &middot; <span class="muted small">{{ __('Hide from your tasks for 14 days; decide anytime') }}</span></span>
+                  </label>
+                  <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink)">
+                    <input type="radio" name="decision" value="declined">
+                    <span><b>{{ __('Decline') }}</b> &middot; <span class="muted small">{{ __('The ACR is kept permanently in MCMS and not deposited') }}</span></span>
+                  </label>
+                </div>
+              </fieldset>
+              <button type="submit" class="btn">{{ __('Save my choice') }}</button>
+            </div>
+          </form>
+        @endif
       @elseif($mine && $isDeposited)
         <div class="note ok" style="margin-bottom:16px">
           <div><b>{{ __('Consent recorded and credit deposited.') }}</b> {{ __('This Academic Credit Record is deposited in the Academic Bank of Credit. Consent can no longer be changed here. Contact CODL / Registry for corrections.') }}</div>
         </div>
       @endif
 
+      @php
+        $canWriteAcr = ! $mine && auth()->user()->hasAnyRole('abc_depositor', 'records_depositor');
+      @endphp
+
+      @if(! $mine && ! $canWriteAcr)
+        <div class="note info" style="margin-bottom:16px">
+          <div><strong>{{ __('Read-Only ACR Oversight:') }}</strong> {{ __('You are viewing this Academic Credit Record in read-only mode. Confirmation, ABC deposit recording, and corrections are managed by the Authorized Records & ABC Depositor Officer.') }}</div>
+        </div>
+      @endif
+
       {{-- Action Panel 2: P6/P7 ACR Confirmation (Stage 04) --}}
-      @if(! $mine && $a->status === 'prepared')
+      @if($canWriteAcr && $a->status === 'prepared')
         <form method="post" action="{{ route('deposits.confirm', $a->id) }}" class="panel" style="border-top:3px solid var(--primary)">
           @csrf
           <div class="hd">
@@ -198,7 +275,7 @@
       @endif
 
       {{-- Action Panel 3: P7 ABC Deposit Recording (Stage 06) --}}
-      @if(! $mine && in_array($a->status, ['consent_given', 'correction'], true))
+      @if($canWriteAcr && in_array($a->status, ['consent_given', 'correction'], true))
         <form method="post" action="{{ route('deposits.record', $a->id) }}" class="panel" id="deposit" style="border-top:3px solid var(--primary);margin-bottom:20px">
           @csrf
           <div class="hd">
@@ -255,7 +332,7 @@
               <span class="r"><span class="tag info">{{ $catCode }}</span></span>
             </div>
             <div class="table-wrap">
-              <table>
+              <table data-plain>
                 <tbody>
                   <tr><th scope="row" style="width:240px">{{ __('Participant Name') }}</th><td><b>{{ $p['participant']['name'] ?? $a->user_name }}</b></td></tr>
                   <tr><th scope="row">{{ __('Matric / Participant ID') }}</th><td><code>{{ $p['participant']['matric'] ?? $a->institution_id }}</code></td></tr>
@@ -287,7 +364,7 @@
               <span class="r" id="acr-status"><span class="tag {{ $isDeposited ? 'ok' : 'info' }}">{{ __($acrStatus[$a->status] ?? ucfirst($a->status)) }}</span></span>
             </div>
             <div class="table-wrap">
-              <table>
+              <table data-plain>
                 <tbody>
                   <tr><th scope="row" style="width:240px">{{ __('ACR Reference') }}</th><td><code>{{ $a->reference }}</code></td></tr>
                   <tr><th scope="row">{{ __('ACR Created Date') }}</th><td>{{ $a->created_at ? \Carbon\Carbon::parse($a->created_at)->format('d/m/Y H:i') : __('Not yet recorded') }}</td></tr>
@@ -328,7 +405,7 @@
               <span class="r"><span class="tag ok">{{ $checks->count() }} {{ __('checks') }}</span></span>
             </div>
             <div class="table-wrap">
-              <table id="checks">
+              <table data-plain id="checks" data-no-search data-no-paginate>
                 <thead>
                   <tr>
                     <th style="width:44px">{{ __('No.') }}</th>
@@ -371,7 +448,7 @@
               <span class="r"><span class="tag {{ $isDeposited ? 'ok' : 'info' }}">{{ $a->deposit_status ? ($depositStatusLabels[$a->deposit_status] ?? __(ucfirst($a->deposit_status))) : __('Not yet deposited') }}</span></span>
             </div>
             <div class="table-wrap">
-              <table>
+              <table data-plain>
                 <tbody>
                   <tr>
                     <th scope="row" style="width:240px">{{ __('Learner Consent Obtained') }}</th>
@@ -404,7 +481,7 @@
               <span class="r"><span class="tag {{ $a->credit_status === 'redeemed' ? 'ok' : ($a->credit_status === 'provisional' ? 'warn' : 'info') }}">{{ $a->credit_status ? __($creditStatus[$a->credit_status] ?? ucfirst($a->credit_status)) : __('Pending deposit') }}</span></span>
             </div>
             <div class="table-wrap">
-              <table id="redemption-table">
+              <table data-plain id="redemption-table" data-no-search data-no-paginate>
                 <thead>
                   <tr>
                     <th>{{ __('Stage') }}</th>
@@ -447,7 +524,7 @@
             <div class="panel">
               <div class="hd"><h2>{{ __('Consent History') }}</h2><span class="r">{{ $consents->count() }} {{ __('record(s)') }}</span></div>
               <div class="table-wrap">
-                <table id="consents">
+                <table data-plain id="consents" data-no-search data-no-paginate>
                   <thead><tr><th>{{ __('Date') }}</th><th>{{ __('Decision') }}</th><th>{{ __('Channel') }}</th><th>{{ __('Wording version') }}</th></tr></thead>
                   <tbody>
                     @foreach($consents as $c)
@@ -468,7 +545,7 @@
             <div class="panel">
               <div class="hd"><h2>{{ __('Credit Ledger History') }}</h2><span class="r">{{ $ledger->count() }} {{ __('entries') }}</span></div>
               <div class="table-wrap">
-                <table id="credit-history">
+                <table data-plain id="credit-history" data-no-search data-no-paginate>
                   <thead><tr><th>{{ __('Date') }}</th><th>{{ __('Event') }}</th><th>{{ __('From') }}</th><th>{{ __('To') }}</th></tr></thead>
                   <tbody>
                     @foreach($ledger as $l)
@@ -494,7 +571,7 @@
               <span class="r"><span class="tag info">{{ $verifications->count() }} / 3 {{ __('recorded') }}</span></span>
             </div>
             <div class="table-wrap">
-              <table id="f11-verifications">
+              <table data-plain id="f11-verifications" data-no-search data-no-paginate>
                 <thead>
                   <tr>
                     <th style="width:24%">{{ __('Role') }}</th>
@@ -558,7 +635,7 @@
               <span class="r"><span class="tag info">{{ $corrections->count() }} {{ __('entry/entries') }}</span></span>
             </div>
             <div class="table-wrap">
-              <table id="f10-corrections">
+              <table data-plain id="f10-corrections" data-no-search data-no-paginate>
                 <thead>
                   <tr>
                     <th style="width:100px">{{ __('Date') }}</th>
@@ -593,7 +670,7 @@
               </table>
             </div>
 
-            @if(! $mine)
+            @if($canWriteAcr)
               <div class="bd" style="border-top:1px solid var(--hairline)">
                 <h3 style="margin-top:0">{{ __('Log a Controlled Correction') }}</h3>
                 <p class="small muted">{{ __('Corrections never overwrite the original ACR or ABC deposit. The original snapshot is preserved and the participant is notified automatically.') }}</p>
@@ -730,7 +807,7 @@
     <div class="print-sec-title">
       <span>{{ __('General Information') }}</span>
     </div>
-    <table class="print-kv-table">
+    <table data-plain class="print-kv-table">
       <tbody>
         <tr>
           <th style="width:23%">{{ __('Participant Name') }}</th>
@@ -802,7 +879,7 @@
     <div class="print-sec-title">
       <span>{{ __('Eligibility Verification Before ACR') }}</span>
     </div>
-    <table class="print-audit-table">
+    <table data-plain class="print-audit-table">
       <thead>
         <tr>
           <th style="width:5%">{{ __('No.') }}</th>
@@ -836,7 +913,7 @@
     <div class="print-sec-title">
       <span>{{ __('Academic Credit Record Summary') }}</span>
     </div>
-    <table class="print-kv-table">
+    <table data-plain class="print-kv-table">
       <tbody>
         <tr>
           <th style="width:23%">{{ __('ACR Reference') }}</th>
@@ -870,7 +947,7 @@
     <div class="print-sec-title">
       <span>{{ __('Learner Consent & ABC Deposit Record') }}</span>
     </div>
-    <table class="print-kv-table">
+    <table data-plain class="print-kv-table">
       <tbody>
         <tr>
           <th style="width:23%">{{ __('Learner Consent') }}</th>
@@ -928,7 +1005,7 @@
     <div class="print-sec-title">
       <span>{{ __('Single Redemption Principle Record') }}</span>
     </div>
-    <table class="print-audit-table">
+    <table data-plain class="print-audit-table">
       <thead>
         <tr>
           <th style="width:26%">{{ __('Redemption Stage') }}</th>
@@ -979,7 +1056,7 @@
     <div class="print-sec-title">
       <span>{{ __('Record Correction & Update Log') }}</span>
     </div>
-    <table class="print-audit-table">
+    <table data-plain class="print-audit-table">
       <thead>
         <tr>
           <th style="width:12%">{{ __('Date') }}</th>
@@ -1012,7 +1089,7 @@
     <div class="print-sec-title">
       <span>{{ __('Three-Party Verification & Sign-Off') }}</span>
     </div>
-    <table class="print-audit-table">
+    <table data-plain class="print-audit-table">
       <thead>
         <tr>
           <th style="width:24%">{{ __('Role') }}</th>

@@ -1,70 +1,29 @@
-<!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ __('Quality Review & CQI Report') }} — {{ $r->reference }}</title>
+@extends('layouts.print')
+@section('title', __('Quality Review & CQI Report') . ' - ' . $r->reference)
+@section('doc_title', __('Quality Assurance, Monitoring & CQI Report'))
+@section('doc_bm', 'Laporan Jaminan Kualiti, Pemantauan & CQI')
+@section('doc_ref', $r->reference)
+@section('doc_file', 'cqi-report-' . strtolower($r->reference) . '.pdf')
+@section('content')
   <style>
-    @page { size: A4 portrait; margin: 14mm 14mm 16mm 14mm; }
-    * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 11px; line-height: 1.45; color: #090a0f; background: #fff; margin: 0; padding: 20px; }
-    .print-bar { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 8px 14px; margin-bottom: 20px; font-size: 12px; }
-    .btn { display: inline-block; padding: 5px 12px; background: #0052ff; color: #fff; text-decoration: none; font-weight: 500; font-size: 11px; cursor: pointer; border: 1px solid #0052ff; }
-    .btn-outline { background: #fff; color: #090a0f; border-color: #8d8d8d; margin-left: 6px; }
-    @media print { .print-bar { display: none !important; } body { padding: 0; } }
-
-    .header-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; border-bottom: 2px solid #090a0f; padding-bottom: 8px; }
-    .header-table td { vertical-align: top; }
-    .inst-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #090a0f; letter-spacing: 0.5px; }
-    .doc-badge { text-align: right; font-size: 10px; font-weight: 700; color: #475569; }
-    .doc-badge span { display: inline-block; border: 1px solid #090a0f; padding: 2px 6px; font-size: 11px; font-weight: 700; color: #090a0f; background: #f1f5f9; }
-    h1 { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 4px 0 2px; letter-spacing: 0.5px; }
-    .subtitle { font-size: 10px; color: #475569; margin-bottom: 12px; }
-
-    .sec-title { font-size: 11px; font-weight: 700; text-transform: uppercase; background: #e2e8f0; padding: 4px 8px; margin: 14px 0 6px; border-left: 3px solid #0052ff; }
-    table.data-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 10.5px; }
+    .sec-title { font-size: 9.5pt; font-weight: 700; text-transform: uppercase; background: #eef0f6; padding: 5px 8px; margin: 14px 0 6px; border-left: 3px solid #0b1a3d; break-after: avoid; page-break-after: avoid; }
+    table.data-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 8.5pt; }
     table.data-table th, table.data-table td { border: 1px solid #8d8d8d; padding: 4px 6px; vertical-align: top; }
     table.data-table th { background: #f1f5f9; font-weight: 600; text-align: left; }
-    table.grid-form { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 10.5px; }
-    table.grid-form td { padding: 3px 6px; border: 1px solid #d1d1d1; vertical-align: top; }
-    table.grid-form td.label { font-weight: 600; background: #f1f5f9; width: 22%; }
-    .tag { display: inline-block; padding: 1px 5px; font-size: 9.5px; font-weight: 600; border-radius: 2px; }
-    .tag.ok { background: #edfcf0; color: #0e6027; }
-    .tag.warn { background: #fef0c7; color: #8f4700; }
-    .tag.err { background: #ffebee; color: #b71c1c; }
-    .tag.info { background: #edf4ff; color: #0043ce; }
-
-    .nota-box { border: 1.5px solid #0052ff; background: #edf4ff; padding: 8px 12px; margin-top: 14px; font-size: 10px; line-height: 1.45; }
-    .nota-box b { color: #0043ce; text-transform: uppercase; letter-spacing: 0.5px; }
-    .check-box { display: inline-block; width: 11px; height: 11px; border: 1px solid #090a0f; vertical-align: middle; margin-right: 4px; text-align: center; line-height: 10px; font-size: 9px; }
-    .check-box.checked { background: #090a0f; color: #fff; font-weight: bold; }
-    .page-break { page-break-before: always; }
+    table.grid-form { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 8.5pt; }
+    table.grid-form td { padding: 4px 6px; border: 1px solid #c6cbd6; vertical-align: top; }
+    table.grid-form td.label { font-weight: 600; background: #f2f4f8; width: 22%; }
+    .nota-box { border: 1px solid #0b1a3d; border-left: 3px solid #0b1a3d; background: #f4f5f8; padding: 8px 12px; margin-top: 14px; font-size: 8.5pt; line-height: 1.45; }
+    .nota-box b { color: #0b1a3d; text-transform: uppercase; letter-spacing: 0.4px; }
+    .check-box { display: inline-block; width: 11px; height: 11px; border: 1px solid #090a0f; vertical-align: middle; margin-right: 4px; text-align: center; line-height: 10px; font-size: 8pt; }
+    .check-box.checked { background: #0b1a3d; color: #fff; font-weight: bold; }
+    .page-break { page-break-before: always; break-before: page; }
   </style>
-</head>
-<body>
 
-  <div class="print-bar">
-    <div><strong>{{ __('Cohort Quality Assurance, Monitoring & CQI Report') }}</strong> &middot; {{ $r->reference }}</div>
-    <div>
-      <a href="javascript:window.print()" class="btn">{{ __('Print / Save PDF') }}</a>
-      <a href="{{ route('cqi.show', $r->id) }}" class="btn btn-outline">&larr; {{ __('Back to CQI View') }}</a>
-    </div>
+  <div style="margin-bottom:10px">
+    <h1 style="font-size:13pt;margin:0 0 2px;text-transform:uppercase">{{ __('Quality Assurance, Monitoring and Continuous Quality Improvement (CQI) Report') }}</h1>
+    <div class="muted small">{{ __('Cohort performance evaluation, learning outcome attainment, and continuous improvement record') }}</div>
   </div>
-
-  <table class="header-table">
-    <tr>
-      <td>
-        <div class="inst-title">Universiti Teknikal Malaysia Melaka (UTeM)</div>
-        <h1>{{ __('Quality Assurance, Monitoring and Continuous Quality Improvement (CQI) Report') }}</h1>
-        <div class="subtitle">{{ __('Cohort performance evaluation, learning outcome attainment, and continuous improvement record') }}</div>
-      </td>
-      <td class="doc-badge">
-        <span>{{ __('CQI REPORT') }}</span>
-        <div style="margin-top:4px;font-size:9.5px;color:#475569">{{ __('Ref:') }} {{ $r->reference }}</div>
-        <div style="font-size:9.5px;color:#475569">{{ __('Date:') }} {{ \Carbon\Carbon::parse($r->created_at)->format('d/m/Y') }}</div>
-      </td>
-    </tr>
-  </table>
 
   {{-- Offering Information and Monitoring Period --}}
   <div class="sec-title">1. {{ __('Offering Information and Monitoring Period') }}</div>
@@ -114,11 +73,11 @@
   <table class="data-table">
     <thead>
       <tr>
-        <th style="width:30%">Indikator</th>
-        <th style="width:20%">Nilai / Dapatan</th>
-        <th style="width:20%">Sasaran / Rujukan</th>
-        <th style="width:15%">Status</th>
-        <th style="width:15%">Catatan</th>
+        <th style="width:30%">{{ __('Indicator') }}</th>
+        <th style="width:20%">{{ __('Value / Finding') }}</th>
+        <th style="width:20%">{{ __('Target / Benchmark') }}</th>
+        <th style="width:15%">{{ __('Status') }}</th>
+        <th style="width:15%">{{ __('Remarks') }}</th>
       </tr>
     </thead>
     <tbody>
@@ -145,28 +104,28 @@
             @if($rx['value'] === null)
               <span class="tag info">{{ __('Not recorded') }}</span>
             @elseif($rx['below'])
-              <span class="tag err">{{ $rx['key'] === 'access_issues' ? 'Ada' : 'Tidak Capai' }}</span>
+              <span class="tag err">{{ $rx['key'] === 'access_issues' ? __('Reported') : __('Below target') }}</span>
             @else
-              <span class="tag ok">{{ $rx['key'] === 'access_issues' ? 'Tiada' : 'Capai' }}</span>
+              <span class="tag ok">{{ $rx['key'] === 'access_issues' ? __('None') : __('Met') }}</span>
             @endif
           </td>
           <td>{{ $rx['notes'] ?? '–' }}</td>
         </tr>
       @endforeach
       <tr>
-        <td><strong>Purata / median pencapaian</strong></td>
-        <td>Purata: {{ $ind['average'] !== null ? $ind['average'].'%' : 'n/a' }} &middot; Median: {{ $ind['median'] !== null ? $ind['median'].'%' : 'n/a' }}</td>
+        <td><strong>{{ __('Average / median attainment') }}</strong></td>
+        <td>{{ __('Average:') }} {{ $ind['average'] !== null ? $ind['average'].'%' : __('n/a') }} &middot; {{ __('Median:') }} {{ $ind['median'] !== null ? $ind['median'].'%' : __('n/a') }}</td>
         <td>&ge; 50%</td>
         <td>
           @if($ind['average'] === null)
             <span class="tag info">{{ __('Not recorded') }}</span>
           @elseif($ind['average'] >= 50)
-            <span class="tag ok">Capai</span>
+            <span class="tag ok">{{ __('Met') }}</span>
           @else
-            <span class="tag err">Tidak Capai</span>
+            <span class="tag err">{{ __('Below target') }}</span>
           @endif
         </td>
-        <td>Markah pentaksiran disahkan</td>
+        <td>{{ __('Verified assessment marks') }}</td>
       </tr>
     </tbody>
   </table>
@@ -524,6 +483,4 @@
     <b>{{ __('Important Notice:') }}</b><br>
     {{ __('CQI must be evidence-based and not limited to participant satisfaction scores. Analysis must take into account learning outcome achievement, assessment performance, participation/completion data, implementation issues, and stakeholder feedback. Material changes resulting from CQI must undergo relevant review, approval, or re-Quality Verification before implementation.') }}
   </div>
-
-</body>
-</html>
+@endsection

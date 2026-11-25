@@ -25,16 +25,27 @@
     </section>
 
     <section class="panel" id="in-progress" aria-labelledby="h-progress">
-      <div class="hd"><h2 id="h-progress">{{ __('In progress') }}</h2></div>
+      <div class="hd">
+        <h2 id="h-progress">{{ __('In progress') }}</h2>
+        <span class="r"><span class="tag info">{{ $inProgress->count() }} {{ $inProgress->count() === 1 ? __('course') : __('courses') }}</span></span>
+      </div>
       @forelse($inProgress as $e)
-        <div class="item"><div class="grow">
-          <a href="{{ route('enrolments.show', $e->id) }}" style="font-weight:600">{{ $e->name_en }}</a> <span class="muted">{{ __('Cohort') }} {{ $e->cohort_name }}@if(!empty($e->lecturer_name)) &middot; {{ $e->lecturer_name }}@endif</span> <span class="s" style="display:inline;float:right">{{ __('Ends') }} {{ \Carbon\Carbon::parse($e->end_date)->format('d/m/Y') }}</span>
-          <div class="bar" role="progressbar" aria-valuenow="{{ $e->percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="Progress in {{ $e->name_en }}"><i style="width:{{ $e->percent }}%"></i></div>
-          <span class="s">{{ $e->achieved }} of {{ $e->modules }} {{ __('modules achieved') }} &middot; {{ $e->percent }}% {{ __('done') }}</span>
-          <div style="margin-top:4px">
-            <a href="{{ route('enrolments.show', $e->id) }}" class="s" style="font-weight:500">{{ __('View course & modules') }} &rarr;</a>
+        <div class="item" style="padding:18px 20px;{{ !$loop->last ? 'border-bottom:1.5px solid #94a3b8;' : '' }}">
+          <div class="grow">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap">
+              <div>
+                <a href="{{ route('enrolments.show', $e->id) }}" style="font-weight:700;font-size:14.5px">{{ $e->name_en }}</a>
+                <span class="s muted" style="margin-left:8px">{{ __('Cohort') }} {{ $e->cohort_name }}@if(!empty($e->lecturer_name)) &middot; {{ $e->lecturer_name }}@endif</span>
+              </div>
+              <span class="s muted" style="white-space:nowrap">{{ __('Ends') }} {{ \Carbon\Carbon::parse($e->end_date)->format('d/m/Y') }}</span>
+            </div>
+            <div class="bar" role="progressbar" aria-valuenow="{{ $e->percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="Progress in {{ $e->name_en }}" style="margin:10px 0 8px"><i style="width:{{ $e->percent }}%"></i></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+              <span class="s muted">{{ $e->achieved }} {{ __('of') }} {{ $e->modules }} {{ __('modules achieved') }} &middot; {{ $e->percent }}% {{ __('done') }}</span>
+              <a href="{{ route('enrolments.show', $e->id) }}" class="s" style="font-weight:600">{{ __('View course & modules') }} &rarr;</a>
+            </div>
           </div>
-        </div></div>
+        </div>
       @empty
         <div class="bd muted" style="padding:20px">{{ __('You are not taking a micro-credential now.') }}</div>
       @endforelse
@@ -63,7 +74,7 @@
 
     <section class="panel" id="achieved" aria-labelledby="h-achieved">
       <div class="hd"><h2 id="h-achieved">{{ __('Achieved') }}</h2><span class="r"><a class="btn ghost sm" href="{{ route('credentials.wallet') }}">{{ __('All credentials') }} &rarr;</a></span></div>
-      <table>
+      <table data-plain>
         <thead><tr><th>{{ __('Micro-credential') }}</th><th>{{ __('Issued') }}</th><th>{{ __('Verify code') }}</th><th>{{ __('Status') }}</th></tr></thead>
         <tbody>
         @forelse($achieved as $c)

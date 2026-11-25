@@ -188,7 +188,8 @@ final class CompletionController
     {
         $o = DB::table('offerings as o')->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->leftJoin('ptjs as p', 'p.id', '=', 'm.ptj_id')->where('o.id', $id)
             ->first(['o.*', 'v.name_en', 'm.category', 'm.ptj_id', 'm.owner_id', 'p.code as ptj_code', 'p.name as ptj_name']) ?? abort(404);
-        abort_unless($o->owner_id === $request->user()->id, 403, 'Only the assigned Course Coordinator / Lecturer for this micro-credential can sign off completion.');
+        $isFacilitator = DB::table('offering_facilitators')->where('offering_id', $o->id)->where('user_id', $request->user()->id)->where('status', 'accepted')->exists();
+        abort_unless($o->owner_id === $request->user()->id || $isFacilitator, 403, 'Only the assigned Course Coordinator / Facilitator for this cohort can sign off completion.');
 
         return $o;
     }
@@ -199,7 +200,8 @@ final class CompletionController
             ->first(['o.*', 'v.name_en', 'm.ptj_id', 'm.owner_id', 'u.name as lecturer_name']) ?? abort(404);
         $ids = $request->user()->scopedPtjIds('deputy_dean');
         abort_unless($ids === null || in_array($o->ptj_id, $ids, true), 403, 'This cohort belongs to another PTj.');
-        abort_if($o->owner_id === $request->user()->id, 403, 'You cannot confirm the completion of your own micro-credential.');
+        $isFacilitator = DB::table('offering_facilitators')->where('offering_id', $o->id)->where('user_id', $request->user()->id)->where('status', 'accepted')->exists();
+        abort_if($o->owner_id === $request->user()->id || $isFacilitator, 403, 'You cannot confirm the completion of a cohort you coordinate or facilitate.');
 
         return $o;
     }

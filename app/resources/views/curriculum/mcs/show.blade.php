@@ -42,7 +42,7 @@
     @if($current && !$open)<button data-tab="reoffer">{{ __('Re-offer') }}</button>@endif
   </nav>
   <div data-pane="versions" class="panel">
-    <table id="versions">
+    <table data-plain id="versions">
       <thead><tr><th>{{ __('Version') }}</th><th>{{ __('Status') }}</th><th>{{ __('Effective') }}</th><th>{{ __('Change') }}</th><th>{{ __('Decision') }}</th><th>{{ __('Current participants') }}</th></tr></thead>
       <tbody>
       @foreach($versions as $v)
@@ -66,7 +66,7 @@
     </table>
   </div>
   <div data-pane="cohorts" class="panel">
-    <table id="cohorts">
+    <table data-plain id="cohorts">
       <thead><tr><th>{{ __('Cohort') }}</th><th>{{ __('Dates') }}</th><th>{{ __('Status') }}</th></tr></thead>
       <tbody>
       @forelse($cohorts as $c)
@@ -78,7 +78,7 @@
     </table>
   </div>
   <div data-pane="changes" class="panel">
-    <table>
+    <table data-plain>
       <thead><tr><th>{{ __('Date') }}</th><th>{{ __('Class') }}</th><th>{{ __('Reason') }}</th><th>{{ __('Status') }}</th></tr></thead>
       <tbody>
       @forelse($changes as $c)

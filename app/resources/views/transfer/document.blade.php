@@ -266,7 +266,7 @@
       @if($sheet['type'] === 'acr')
         <div class="print-sec" style="margin-bottom:14px">
           <div class="print-sec-title"><span>{{ __('Academic Credit Records (ACR) & ABC Deposits') }}</span></div>
-          <table>
+          <table data-plain>
             <thead>
               <tr>
                 <th>{{ __('ACR Ref') }}</th>
@@ -402,7 +402,7 @@
                 <span>{{ $l->source_name }}</span>
                 <span style="font-family:var(--mono);font-size:8pt;color:#475569">{{ $l->course_code }} {{ $l->course_name }}</span>
               </div>
-              <table style="margin:0">
+              <table data-plain style="margin:0">
                 <thead>
                   <tr>
                     <th style="width:55px">{{ __('Unit') }}</th>
@@ -439,7 +439,7 @@
                 <span>{{ $l->source_name }}</span>
                 <span style="font-size:8pt;color:#475569">{{ $l->course_code }} &middot; {{ $fmtNum($l->credits_requested) }} cr &middot; {{ $totSlt > 0 ? $totSlt.' hrs' : ($fmtNum($l->credits_requested * 40).' hrs') }}</span>
               </div>
-              <table style="margin:0">
+              <table data-plain style="margin:0">
                 <thead>
                   <tr>
                     <th style="width:45px">#</th>
@@ -479,7 +479,7 @@
                 <span>{{ $l->source_name }}</span>
                 <span style="font-size:8pt;color:#475569">{{ $l->course_code }} &middot; {{ __('Total:') }} {{ $totWeight > 0 ? $fmtNum($totWeight).'%' : '100%' }}</span>
               </div>
-              <table style="margin:0">
+              <table data-plain style="margin:0">
                 <thead>
                   <tr>
                     <th>{{ __('Assessment Component') }}</th>
@@ -507,7 +507,7 @@
       @elseif($sheet['type'] === 'qv')
         <div class="print-sec" style="margin-bottom:12px">
           <div class="print-sec-title"><span>{{ __('Quality Verification (QV) & Accreditation Records') }}</span></div>
-          <table>
+          <table data-plain>
             <thead>
               <tr>
                 <th>{{ __('Micro-Credential') }}</th>

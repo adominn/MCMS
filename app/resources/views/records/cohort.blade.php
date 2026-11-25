@@ -25,7 +25,7 @@
 
 <div class="panel">
   <div class="table-wrap">
-    <table id="cohort-records">
+    <table data-plain id="cohort-records">
       <thead>
         <tr>
           <th style="width:40px">#</th>

@@ -7,27 +7,30 @@
 @section('content')
 
 @php
+  $isMs = app()->getLocale() === 'ms';
   $kind = $s ? $s->kind : 'suspension';
-  $kindLabel = ucfirst($kind);
-  $eff = $s ? \Carbon\Carbon::parse($s->effective_from)->format('d M Y') : now()->format('d M Y');
-  $title = $v ? $v->name_en : 'Micro-Credential';
-  $ptjName = $m->ptj_name ?? 'Faculty';
+  $kindLabel = $isMs
+    ? ($kind === 'termination' ? 'Penamatan' : 'Penggantungan')
+    : ucfirst($kind);
+  $eff = $s ? \Carbon\Carbon::parse($s->effective_from)->format('d/m/Y') : now()->format('d/m/Y');
+  $title = $v ? (($isMs && !empty($v->name_ms)) ? $v->name_ms : $v->name_en) : 'Micro-Credential';
+  $ptjName = $m->ptj_name ?? __('Faculty');
   $totParticipants = $cohorts->sum('participants');
   $plan = ($s && $s->transition_plan)
     ? $s->transition_plan
-    : 'Participants already registered in an open or running cohort finish it as planned. No new registrations are accepted. Participants who prefer to leave may withdraw, and CODL contacts them about fees. The lecturer stays responsible for teaching and marking until the last cohort ends.';
+    : __('Participants already registered in an open or running cohort finish it as planned. No new registrations are accepted. Participants who prefer to leave may withdraw, and CODL contacts them about fees. The lecturer stays responsible for teaching and marking until the last cohort ends.');
 @endphp
 
 @if(!$s)
   <div class="note warn" style="margin-bottom:16px;font-size:10pt">
-    <b>{{ __("Draft for review.") }}</b> No suspension or termination has been recorded for this micro-credential. This is the notice that participants would receive.
+    <b>{{ __('Draft for review.') }}</b> {{ __('No suspension or termination has been recorded for this micro-credential. This is the notice that participants would receive.') }}
   </div>
 @endif
 
 <div style="margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:10px">
-  <h1 style="font-size:18pt;margin:0 0 4px">{{ $title }}: {{ $kindLabel }} notice</h1>
+  <h1 style="font-size:18pt;margin:0 0 4px">{{ $title }}: {{ $isMs ? 'Notis ' . strtolower($kindLabel) : $kindLabel . ' notice' }}</h1>
   <div class="small muted">
-    Reference: NOT-{{ $m->id }}-{{ now()->year }} &middot; Effective: {{ $eff }} &middot; {{ $ptjName }}
+    {{ __('Reference:') }} NOT-{{ $m->id }}-{{ now()->year }} &middot; {{ __('Effective:') }} {{ $eff }} &middot; {{ $ptjName }}
   </div>
 </div>
 
@@ -51,7 +54,7 @@
 <div class="panel" style="margin-bottom:16px">
   <div class="hd"><h2 style="font-size:11pt">{{ __("Who is affected") }}</h2></div>
   <div class="table-wrap">
-    <table>
+    <table data-plain>
       <thead>
         <tr>
           <th>{{ __("Cohort") }}</th>
@@ -74,7 +77,7 @@
       </tbody>
       <tfoot>
         <tr style="font-weight:600;border-top:2px solid var(--border)">
-          <td colspan="3">Total participants</td>
+          <td colspan="3">{{ __('Total participants') }}</td>
           <td class="num">{{ $totParticipants }}</td>
         </tr>
       </tfoot>
@@ -92,8 +95,7 @@
 
 {{-- Participant safeguards --}}
 <div class="note ok" style="margin-bottom:20px;font-size:10pt">
-  <div><b>{{ __("Credentials and credit you have already earned stay valid.") }}</b> Certificates, Digital Credentials, Academic Credit Records and any ABC deposit are not changed by this decision.</div>
-  <div style="margin-top:4px;font-size:9.5pt;color:var(--muted)"><b>Kredensial dan kredit yang telah anda peroleh kekal sah.</b> Sijil, Kredensial Digital, Rekod Kredit Akademik (ACR) dan sebarang deposit ABC tidak berubah oleh keputusan ini.</div>
+  <div><b>{{ __('Credentials and credit you have already earned stay valid.') }}</b> {{ __('Certificates, Digital Credentials, Academic Credit Records and any ABC deposit are not changed by this decision.') }}</div>
 </div>
 
 <div class="small muted" style="margin-bottom:24px">

@@ -78,14 +78,14 @@ final class CreditBankController
             $given = $d['decision'] === 'given';
             DB::table('acrs')->where('id', $a->id)->update(['status' => $given ? 'consent_given' : 'consent_declined', 'updated_at' => now()]);
             $this->audit->record($given ? 'consent.given' : 'consent.declined', ['type' => 'Acr', 'id' => $a->id], after: ['decision' => $d['decision'], 'versions' => $c['versions']]); // EV-45, EV-46
+            Tasks::close('acr_consent', $a->id);
             if ($given) {
-                Tasks::close('acr_consent', $a->id);
                 [$name, $ptj] = $this->nameAndPtj($a);
                 Tasks::open('records_depositor', 'abc_deposit', $a->id, "Record the ABC deposit: $name ({$request->user()->name})", "/deposits/{$a->id}", $ptj, area: 'deposits');
             }
         });
 
-        return redirect()->route('credit.acr', $id)->with('status', match ($d['decision']) { 'given' => 'Consent recorded. The record is now in the deposit queue. A deposit is storage only and is not a credit transfer.', 'postponed' => 'Postponed. Your record is kept and you can give consent later.', default => 'Declined. Your record is kept and you can give consent later.' });
+        return redirect()->route('credit.acr', $id)->with('status', match ($d['decision']) { 'given' => 'Consent recorded. The record is now in the deposit queue. A deposit is storage only and is not a credit transfer.', 'postponed' => 'Postponed for 14 days. Hidden from your tasks for now — you can expand the consent section anytime if you decide earlier.', default => 'Declined. Your ACR is kept permanently in MCMS and will not be deposited unless you choose to consent later.' });
     }
 
     // ---- deputy dean
@@ -129,6 +129,105 @@ final class CreditBankController
         });
 
         return back()->with('status', 'Academic Credit Record confirmed. The participant is asked for consent.');
+    }
+
+    /** Bulk confirm prepared ACRs (P6/P7) for large cohorts. */
+    public function confirmBulk(Request $request)
+    {
+        $d = $request->validate([
+            'acrs' => 'required|array|min:1',
+            'acrs.*' => 'integer',
+            'notes' => 'nullable|string|max:1000',
+        ], ['acrs.required' => 'Select at least one ACR to confirm.']);
+
+        $notes = trim((string) ($d['notes'] ?? '')) ?: null;
+        $rows = $this->scoped($request)->whereIn('a.id', $d['acrs'])->where('a.status', 'prepared')->get();
+        $confirmed = 0;
+        $skipped = 0;
+
+        DB::transaction(function () use ($rows, $notes, $request, &$confirmed, &$skipped) {
+            foreach ($rows as $a) {
+                $slots = DB::table('acr_verifications')->where('acr_id', $a->id)->where('status', 'confirmed')->pluck('role_slot')->all();
+                if (! in_array('coordinator', $slots, true) || ! in_array('academic', $slots, true)) {
+                    $skipped++;
+                    continue;
+                }
+                DB::table('acrs')->where('id', $a->id)->update(['status' => 'verified', 'notes' => $notes, 'confirmed_by' => $request->user()->id, 'confirmed_at' => now(), 'updated_at' => now()]);
+                Acr::recordVerification($a->id, 'records_abc', $request->user()->id, now(), $notes ?: 'ACR verified and confirmed by Registry / ABC officer.');
+                Tasks::close('acr_confirm', $a->id);
+                $this->audit->record('acr.confirmed', ['type' => 'Acr', 'id' => $a->id], before: ['status' => 'prepared'], after: ['status' => 'verified', 'notes' => $notes]);
+                $u = User::find($a->user_id);
+                [$name] = $this->nameAndPtj($a);
+                Tasks::open('student', 'acr_consent', $a->id, "Give or decline consent to deposit your Academic Credit Record: $name", "/my-credit/{$a->id}", userId: $u->id, area: 'deposits');
+                $this->notifier->send($u, 'acr.confirmed', ['name' => $u->name, 'title' => $name], dedupe: "acr-confirmed-{$a->id}");
+                $confirmed++;
+            }
+        });
+
+        $msg = "Confirmed {$confirmed} ACR(s).".($skipped > 0 ? " Skipped {$skipped} missing Coordinator or Faculty verification." : ' Participants have been asked for consent.');
+
+        return redirect()->route('deposits', ['tab' => 'to-confirm'])->with('status', $msg);
+    }
+
+    /** Bulk record ABC deposit outcomes for consented ACRs (P7). */
+    public function recordBulk(Request $request)
+    {
+        $d = $request->validate([
+            'acrs' => 'required|array|min:1',
+            'acrs.*' => 'integer',
+            'abc_prefix' => 'required|string|max:45',
+            'deposit_date' => 'required|date|before_or_equal:today',
+            'deposit_status' => 'required|in:successful,in_process,correction',
+        ], ['acrs.required' => 'Select at least one consented ACR to record deposit.']);
+
+        $rows = $this->scoped($request)->whereIn('a.id', $d['acrs'])->whereIn('a.status', ['consent_given', 'correction'])->orderBy('a.id')->get();
+        $recorded = 0;
+        $skipped = 0;
+        $prefix = rtrim(trim($d['abc_prefix']), '-');
+
+        foreach ($rows as $idx => $a) {
+            if ($a->qv_record_id) {
+                $qvStatus = DB::table('qv_records')->where('id', $a->qv_record_id)->value('status');
+                if (in_array($qvStatus, ['suspended', 'withdrawn'], true)) {
+                    $skipped++;
+                    continue;
+                }
+            }
+            $acrMc = DB::table('mc_versions as v')->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')->where('v.id', $a->mc_version_id)->first(['m.category', 'v.id as version_id', 'v.credit_model']);
+            if ($acrMc?->category === 'umc') {
+                $enrolId = DB::table('achievement_records')->where('id', $a->achievement_record_id)->value('enrolment_id');
+                $totalModules = DB::table('mc_modules')->where('mc_version_id', $a->mc_version_id)->count();
+                $achievedModules = $enrolId ? DB::table('module_achievements')->where('enrolment_id', $enrolId)->count() : 0;
+                $isSep = ($acrMc->credit_model ?? '') === 'separate_assessment';
+                $modulesOk = $isSep ? ($enrolId && \App\Modules\Achievement\Completion::check((int) $enrolId)['met']) : ($totalModules === 0 || $achievedModules >= $totalModules);
+                if (! $modulesOk) {
+                    $skipped++;
+                    continue;
+                }
+            }
+
+            $abcRef = $rows->count() === 1 ? $prefix : $prefix.'-'.str_pad((string) ($idx + 1), 2, '0', STR_PAD_LEFT);
+            $payload = [
+                'abc_reference' => $abcRef,
+                'deposit_date' => $d['deposit_date'],
+                'credits' => (float) $a->credits,
+                'deposit_status' => $d['deposit_status'],
+            ];
+            $this->ledger->deposit($a->id, $payload, $request->user()->id);
+            Acr::recordVerification($a->id, 'abc_deposit', $request->user()->id, now(), 'ABC deposit recorded ('.$abcRef.', status: '.$d['deposit_status'].').');
+            if ($d['deposit_status'] === 'successful') {
+                Tasks::close('abc_deposit', $a->id);
+                $u = User::find($a->user_id);
+                $dep = DB::table('abc_deposits')->where('acr_id', $a->id)->first();
+                [$name] = $this->nameAndPtj($a);
+                $this->notifier->send($u, 'abc.deposited', ['name' => $u->name, 'title' => $name, 'date' => \Carbon\Carbon::parse($dep->credit_expiry)->format('d/m/Y')], dedupe: "abc-deposited-{$a->id}");
+            }
+            $recorded++;
+        }
+
+        $msg = "Recorded ABC deposit for {$recorded} ACR(s).".($skipped > 0 ? " Skipped {$skipped} due to incomplete UMC modules or suspended QV." : '');
+
+        return redirect()->route('deposits', ['tab' => 'queue'])->with('status', $msg);
     }
 
     /** DOC-10: only consented, confirmed records, one PTj at a time. The format is open (OI-11), so this is a plain CSV. */
@@ -385,6 +484,7 @@ final class CreditBankController
                 'u.institution_id',
                 'v.name_en',
                 'v.name_ms',
+                'v.planned_slt',
                 'm.ptj_id',
                 'm.category',
                 'cu.name as confirmed_by_name',
@@ -408,7 +508,11 @@ final class CreditBankController
 
     private function scoped(Request $request)
     {
-        $ids = $request->user()->scopedPtjIds('records_depositor');
+        $u = $request->user();
+        if ($u->hasAnyRole('abc_depositor', 'records_depositor', 'codl_admin', 'academic_authority', 'qa_officer', 'records_custodian')) {
+            return $this->acrs();
+        }
+        $ids = $u->scopedPtjIds('deputy_dean');
 
         return $this->acrs()->when($ids !== null, fn ($q) => $q->whereIn('m.ptj_id', $ids));
     }

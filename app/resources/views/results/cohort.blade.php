@@ -97,19 +97,33 @@
   </div>
 </div>
 
-<form method="post" action="{{ route('results.save', $o->id) }}" class="card" style="margin-bottom:24px">@csrf
-  @include('results._table', ['flag' => false, 'changeable' => $locked === null ? false : true])
-  @if($editable)
-    <p style="margin-top:16px;display:flex;gap:8px">
-      <button type="submit" name="action" value="save" class="btn sm">{{ __('Save marks') }}</button>
-      <button type="submit" name="action" value="submit" class="btn ter sm" @if($missingCount > 0) title="{{ __('All marks must be filled before submitting') }}" @endif>{{ __('Submit for verification') }}</button>
+@if($editable)
+  <form method="post" action="{{ route('results.save', $o->id) }}" class="card" style="margin-bottom:24px">@csrf
+    @include('results._table', ['flag' => false, 'changeable' => false])
+    <div style="margin-top:16px;padding:12px 14px;background:var(--color-canvas-subtle, #f8fafc);border:1px solid var(--color-card-border, #090a0f);border-radius:4px">
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:8px">
+        <input type="checkbox" name="include_coordinator_signoff" value="1" checked style="margin-top:3px">
+        <span>
+          <strong style="font-size:13px">{{ __('Include Coordinator Sign-off for all passing participants on submit') }}</strong>
+          <span class="s muted" style="display:block;font-size:12px">{{ __('Automatically signs off completion for participants who passed all components with no integrity hold. Failed, incomplete, or held cases are excluded.') }}</span>
+        </span>
+      </label>
+      <input type="text" name="coordinator_remarks" placeholder="{{ __('Optional coordinator sign-off remarks (e.g. All coursework and assessments verified)') }}" style="width:100%;max-width:560px;font-size:12.5px">
+    </div>
+    <p style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+      <button type="submit" name="action" value="save" class="btn ter sm">{{ __('Save marks') }}</button>
+      <button type="submit" name="action" value="submit" class="btn primary sm" @if($missingCount > 0) title="{{ __('All marks must be filled before submitting') }}" @endif>{{ __('Submit for verification') }}</button>
     </p>
-  @else
-    <p style="margin-top:16px">
+  </form>
+@else
+  <div class="card" style="margin-bottom:24px">
+    @include('results._table', ['flag' => false, 'changeable' => true])
+    <form method="post" action="{{ route('results.save', $o->id) }}" style="margin-top:16px">
+      @csrf
       <button type="submit" name="action" value="withdraw" class="btn ter sm">{{ __('Withdraw the submission') }}</button>
-    </p>
-  @endif
-</form>
+    </form>
+  </div>
+@endif
 
 @if($editable)
   <script>
