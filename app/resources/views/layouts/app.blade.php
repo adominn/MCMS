@@ -63,7 +63,6 @@
     ],
     'records_custodian' => [
       'credentials.admin' => $areaCount('credentials'),
-      'results' => $areaCount('results'),
     ],
     'abc_depositor' => [
       'deposits' => $areaCount('deposits'),
@@ -160,7 +159,6 @@
     'records_custodian' => [
       ['Registry & Credentials', 'Task queue', 'tasks', ['tasks*'], 'home'],
       ['Registry & Credentials', 'Credentials', 'credentials.admin', ['credentials.admin*'], 'award'],
-      ['Registry & Credentials', 'Results & completion', 'results', ['results*', 'completion*'], 'check'],
       ['Registry & Credentials', 'ACR & ABC records', 'deposits', ['deposits*'], 'bank'],
       ['Registry & Credentials', 'Discrepancies & corrections', 'discrepancies', ['discrepancies*'], 'check'],
       ['Insight & Audit', 'Cohort records', 'trace', ['trace*', 'cohort.records*', 'records.show*'], 'search'],

@@ -236,7 +236,7 @@
       @if($codl)
         <button data-tab="ucreds">{{ __('UCreds Exchange') }} ({{ count($ucredsOfferings) + count($ucredsImports) }})</button>
       @endif
-      @if($dean || ($depositor ?? false))
+      @if($canScopedAudit ?? auth()->user()->hasAnyRole('deputy_dean', 'ptj_authority', 'academic_authority', 'qa_officer', 'records_custodian', 'abc_depositor', 'records_depositor'))
         <button data-tab="audit">{{ __('Audit & Compliance') }}</button>
       @endif
     </nav>
@@ -498,7 +498,7 @@
     @endif
 
     <!-- Staff Pane 5: Audit & Compliance -->
-    @if($dean || ($depositor ?? false))
+    @if($canScopedAudit ?? auth()->user()->hasAnyRole('deputy_dean', 'ptj_authority', 'academic_authority', 'qa_officer', 'records_custodian', 'abc_depositor', 'records_depositor'))
       <div data-pane="audit">
         <div class="panel">
           <div class="hd">

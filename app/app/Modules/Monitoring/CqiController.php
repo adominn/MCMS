@@ -28,12 +28,10 @@ final class CqiController
         $ind = $this->indicators->for($o->id);
         abort_if($ind['participants'] === 0, 422, 'The cohort has no participants to review.');
 
-        $c4Init = [
-            'learners' => ['aspect' => 'Kandungan, aktiviti, pentaksiran, platform, sokongan', 'findings' => '', 'issues_strengths' => '', 'initial_action' => ''],
-            'instructors' => ['aspect' => 'Reka bentuk dan pelaksanaan', 'findings' => '', 'issues_strengths' => '', 'initial_action' => ''],
-            'industry' => ['aspect' => 'Relevansi dan kompetensi', 'findings' => '', 'issues_strengths' => '', 'initial_action' => ''],
-            'system_data' => ['aspect' => 'Akses, penyertaan, penyempurnaan', 'findings' => '', 'issues_strengths' => '', 'initial_action' => ''],
-        ];
+        $c4Init = [];
+        foreach (config('monitoring.feedback_sources') as $k => $def) {
+            $c4Init[$k] = ['aspect' => $def['aspect'], 'findings' => '', 'issues_strengths' => '', 'initial_action' => ''];
+        }
 
         $id = DB::table('cqi_records')->insertGetId([
             'reference' => 'TMP'.bin2hex(random_bytes(6)),
@@ -424,20 +422,20 @@ final class CqiController
             'remarks' => $request->input('remarks') ?: 'Semakan dan kelulusan peringkat fakulti',
         ];
 
-        // If category is not SAMC, default QA party signoff to TB
-        $oCategory = DB::table('offerings as o')
+        // If category is not SAMC, default QA party signoff to N/A (tb); for SAMC, leave pending for QA/CODL sign-off
+        $oCategory = strtolower((string) DB::table('offerings as o')
             ->join('mc_versions as v', 'v.id', '=', 'o.mc_version_id')
             ->join('micro_credentials as m', 'm.id', '=', 'v.micro_credential_id')
             ->where('o.id', $r->offering_id)
-            ->value('m.category');
+            ->value('m.category'));
 
-        if (! isset($signoffs['qa_authority'])) {
+        if (! isset($signoffs['qa_authority']) && $oCategory !== 'samc') {
             $signoffs['qa_authority'] = [
-                'name' => 'Jawatankuasa Jaminan Kualiti',
-                'position' => 'Pegawai Jaminan Kualiti',
-                'status' => $oCategory === 'SAMC' ? 'disahkan' : 'tb',
+                'name' => '—',
+                'position' => 'Quality Assurance Officer',
+                'status' => 'tb',
                 'signed_at' => now()->toIso8601String(),
-                'remarks' => $oCategory === 'SAMC' ? 'Pematuhan audit kualiti SAMC' : 'Tidak berkaitan bagi penawaran standard',
+                'remarks' => 'Not applicable for standard cohort',
             ];
         }
 

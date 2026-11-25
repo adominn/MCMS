@@ -351,11 +351,24 @@ it('renders Appendix C CQI printout and enforces C1-C10 sections, 8 domains, C9 
         'remarks' => 'Audited for quality compliance',
     ])->assertSessionHasNoErrors();
 
+    // Verify on-screen CQI view has clean labels & QA sign-off form
+    $this->actingAs($this->farid)->get("/cqi/$id")
+        ->assertOk()
+        ->assertDontSee('P1.')
+        ->assertDontSee('P2.')
+        ->assertDontSee('P4.')
+        ->assertDontSee('(Pemilik Tindakan)')
+        ->assertSee('Record QA / Authority sign-off:');
+
     // Verify Print View (both ?print=1 and /print)
     $res1 = $this->actingAs($this->aina)->get("/cqi/$id?print=1");
     $res1->assertOk()
         ->assertDontSee('Lampiran C')
         ->assertDontSee('LAMPIRAN C')
+        ->assertDontSee('Evidens / Rujukan')
+        ->assertDontSee('Tindakan CQI')
+        ->assertDontSee('Tidak Berkaitan (TB)')
+        ->assertSee('class="check-box checked"', false)
         ->assertSee('Quality Assurance, Monitoring and Continuous Quality Improvement (CQI) Report')
         ->assertSee('1. Offering Information and Monitoring Period')
         ->assertSee('2. Cohort Performance Summary')
@@ -365,6 +378,7 @@ it('renders Appendix C CQI printout and enforces C1-C10 sections, 8 domains, C9 
         ->assertSee('6. Issues, Root Cause Analysis, and Priority Level')
         ->assertSee('7. CQI Action Plan')
         ->assertSee('8. CQI Effectiveness Evaluation')
+        ->assertSee('No effectiveness evaluation recorded yet.')
         ->assertSee('9. Offering Review Decision')
         ->assertSee('10. Confirmation and CQI Sign-Off (3 Roles)')
         ->assertSee('Important Notice:')

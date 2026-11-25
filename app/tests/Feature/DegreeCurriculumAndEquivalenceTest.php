@@ -48,7 +48,7 @@ it('renders programme catalogue, degree plan, course detail, comparison, and pri
 
     $this->actingAs($student)->get('/programmes/BITS?print=1')
         ->assertOk()
-        ->assertSee('Print / Save as PDF');
+        ->assertSee('Print or save as PDF');
 
     $this->actingAs($student)->get('/courses/'.urlencode('BITS 1125'))
         ->assertOk()

@@ -183,7 +183,8 @@ final class RecordsController
         $batches = $u->hasAnyRole('abc_depositor', 'records_depositor') ? DB::table('abc_batches')
             ->when($ptjs !== null, fn ($b) => $b->whereIn('ptj_id', $ptjs))
             ->orderByDesc('id')->limit(10)->get() : collect();
-        $suspensions = $u->hasAnyRole('deputy_dean', 'ptj_authority', 'codl_admin', 'academic_authority', 'qa_officer') ? DB::table('suspensions as s')
+        $suspensionRole = (string) app(\App\Modules\Core\Settings::class)->get('approval.route.suspension', 'deputy_dean');
+        $suspensions = $u->hasAnyRole($suspensionRole) ? DB::table('suspensions as s')
             ->join('micro_credentials as m', 'm.id', '=', 's.micro_credential_id')
             ->join('mc_versions as v', fn ($j) => $j->on('v.micro_credential_id', '=', 'm.id')->whereRaw('v.version_no = (select max(version_no) from mc_versions where micro_credential_id = m.id)'))
             ->when($ptjs !== null, fn ($b) => $b->whereIn('m.ptj_id', $ptjs))

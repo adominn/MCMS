@@ -34,17 +34,18 @@ final class Indicators
         $accessIssuesStatus = $cqi ? $cqi->c2_access_issues_status : ($accessIssuesCount > 0 ? 'ada' : 'tiada');
         $accessIssuesNotes = $cqi ? $cqi->c2_access_issues_notes : null;
 
+        $hasAccessIssues = $accessIssuesStatus === 'ada' || $accessIssuesCount > 0;
         $rows = [
             ['key' => 'participation', 'label' => 'Active participation rate', 'value' => $pct($active), 'target' => (int) $this->settings->get('quality.target_participation_percent')],
             ['key' => 'completion', 'label' => 'Completion rate', 'value' => $pct($completed->count()), 'target' => (int) $this->settings->get('quality.target_completion_percent')],
             ['key' => 'pass', 'label' => 'Pass rate', 'value' => $pct($people->filter(fn ($e) => $passed($e->id, $comps))->count()), 'target' => (int) $this->settings->get('quality.target_pass_percent')],
             ['key' => 'issuance', 'label' => 'Credential issuance rate', 'value' => $completed->count() > 0 ? round($issued / $completed->count() * 100, 1) : null, 'target' => (int) $this->settings->get('quality.target_issuance_percent')],
-            ['key' => 'access_issues', 'label' => 'Significant access/technical issues', 'value' => $accessIssuesStatus === 'ada' || $accessIssuesCount > 0 ? 'Ada' : 'Tiada', 'target' => 'Tiada', 'notes' => $accessIssuesNotes],
+            ['key' => 'access_issues', 'label' => 'Significant access/technical issues', 'value' => $hasAccessIssues ? __('Yes') : __('None'), 'target' => __('None'), 'notes' => $accessIssuesNotes],
         ];
         foreach ($rows as &$r) {
             $r['not_recorded'] = $r['value'] === null;
             if ($r['key'] === 'access_issues') {
-                $r['below'] = $r['value'] === 'Ada';
+                $r['below'] = $hasAccessIssues;
             } else {
                 $r['below'] = $r['value'] !== null && is_numeric($r['value']) && (float) $r['value'] < (float) $r['target'];
             }

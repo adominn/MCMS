@@ -147,9 +147,9 @@ final class OfferingController
                 }
             }
             $prev = DB::table('offerings as o')->join('mc_versions as pv', 'pv.id', '=', 'o.mc_version_id')->where('pv.micro_credential_id', $v->micro_credential_id)->where('o.id', '!=', $id)->orderByDesc('o.id')->value('o.id');
-            foreach (array_keys(config('offerings.readiness')) as $item) { // the checklist is repeated for every cohort, pre-filled from the last (FR-88)
+            foreach (array_keys(config('offerings.readiness')) as $item) { // the checklist is repeated for every cohort, pre-filled from the last (FR-88); Deputy Dean must re-accept evidence for each new cohort
                 $p = $prev ? DB::table('readiness_items')->where('offering_id', $prev)->where('item', $item)->first() : null;
-                DB::table('readiness_items')->insert(['offering_id' => $id, 'item' => $item, 'status' => $p->status ?? 'not_yet', 'note' => $p->note ?? null, 'accepted' => $p->accepted ?? false]);
+                DB::table('readiness_items')->insert(['offering_id' => $id, 'item' => $item, 'status' => $p->status ?? 'not_yet', 'note' => $p->note ?? null, 'accepted' => false]);
             }
             $this->audit->record('offering.created', ['type' => 'Offering', 'id' => $id], after: ['version' => $v->id, 'cohort' => $d['cohort_name'], 'prefilled' => (bool) $prev, 'invited_facilitators' => $assignedIds]);
 
@@ -210,6 +210,7 @@ final class OfferingController
             'qv' => $qv,
             'items' => $readinessItems,
             'autoChecks' => $autoChecks,
+            'recordGovernance' => $this->recordGovernance($o, $qv),
             'labels' => config('offerings.status'),
             'items_cfg' => $readinessCfg,
             'sections' => config('offerings.readiness_sections') ?? [],
@@ -411,6 +412,30 @@ final class OfferingController
     }
 
     // ---- helpers
+
+    /**
+     * Build the 10-row participant and achievement record governance mapping
+     * shared by the on-screen Cohort details tab and the printable readiness report.
+     *
+     * @return list<array{element:string,requirement:string,location:string,owner:string,status:string}>
+     */
+    private function recordGovernance(object $o, ?object $qv): array
+    {
+        $creditEligible = ($o->category === 'umc') || ($o->category === 'samc' && ! empty($qv));
+
+        return [
+            ['element' => __('Participant identity'), 'requirement' => __('Required'), 'location' => __('UTeM Identity & Learner Profile'), 'owner' => __('CODL / UTeM Identity'), 'status' => __('Active')],
+            ['element' => __('Registration and cohort details'), 'requirement' => __('Required'), 'location' => __('MCMS Enrolment Registry'), 'owner' => __('Course Coordinator / PTj'), 'status' => __('Active')],
+            ['element' => __('Access and participation status'), 'requirement' => __('As required'), 'location' => __('MCMS Enrolment & LMS Platform'), 'owner' => __('Course Coordinator'), 'status' => ! empty($o->platform_ref) ? __('Linked (:ref)', ['ref' => $o->platform_ref]) : __('Active')],
+            ['element' => __('Activity / module completion'), 'requirement' => $o->category === 'umc' ? __('Required (UMC)') : __('As required'), 'location' => __('MCMS Module Progress Tracker'), 'owner' => __('Course Coordinator'), 'status' => __('Active')],
+            ['element' => __('Assessment marks / results'), 'requirement' => __('Required'), 'location' => __('MCMS Assessment Results Ledger'), 'owner' => __('Course Coordinator'), 'status' => __('Active')],
+            ['element' => __('Pass / completion decision'), 'requirement' => __('Required'), 'location' => __('MCMS Verified Completion Engine'), 'owner' => __('Deputy Dean (Academic)'), 'status' => __('Active')],
+            ['element' => __('Digital Badge per module'), 'requirement' => __('If applicable'), 'location' => __('MCMS Credential Registry & QR Portal'), 'owner' => __('Faculty / CODL'), 'status' => __('Issued on verified module pass')],
+            ['element' => __('Certificate / Digital Credential'), 'requirement' => __('If applicable'), 'location' => __('MCMS Credential Registry & QR Portal'), 'owner' => __('Faculty / CODL'), 'status' => __('Issued on full MC completion')],
+            ['element' => __('Academic Credit Record (ACR)'), 'requirement' => $o->category === 'mce' ? __('Not applicable') : __('Eligible MC'), 'location' => __('MCMS Credit Bank (ACR Registry)'), 'owner' => __('Records & ABC Officer'), 'status' => $o->category === 'mce' ? __('Not applicable (MCE)') : ($creditEligible ? __('Active') : __('Upon SAMC QV'))],
+            ['element' => __('ABC deposit status'), 'requirement' => $o->category === 'mce' ? __('Not applicable') : __('If applicable'), 'location' => __('MCMS ABC Deposit Ledger (with learner consent)'), 'owner' => __('Records & ABC Officer'), 'status' => $o->category === 'mce' ? __('Not applicable (MCE)') : ($creditEligible ? __('Active (opt-in)') : __('Upon SAMC QV'))],
+        ];
+    }
 
     private function requireAnswered(Request $request, int $id, string $outcome, bool $accepted = false): void
     {

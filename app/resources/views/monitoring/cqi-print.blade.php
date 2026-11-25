@@ -34,10 +34,11 @@
     </tr>
     <tr>
       <td class="label">{{ __('Category') }}</td>
+      @php($catLower = strtolower((string) ($offering->category ?? '')))
       <td style="width:28%">
-        <span class="check-box {{ ($offering->category ?? '') === 'UMC' ? 'checked' : '' }}">{{ ($offering->category ?? '') === 'UMC' ? '✓' : '' }}</span> UMC &nbsp;
-        <span class="check-box {{ ($offering->category ?? '') === 'SAMC' ? 'checked' : '' }}">{{ ($offering->category ?? '') === 'SAMC' ? '✓' : '' }}</span> SAMC &nbsp;
-        <span class="check-box {{ ($offering->category ?? '') === 'MCE' ? 'checked' : '' }}">{{ ($offering->category ?? '') === 'MCE' ? '✓' : '' }}</span> MCE
+        <span class="check-box {{ $catLower === 'umc' ? 'checked' : '' }}">{{ $catLower === 'umc' ? '✓' : '' }}</span> UMC &nbsp;
+        <span class="check-box {{ $catLower === 'samc' ? 'checked' : '' }}">{{ $catLower === 'samc' ? '✓' : '' }}</span> SAMC &nbsp;
+        <span class="check-box {{ $catLower === 'mce' ? 'checked' : '' }}">{{ $catLower === 'mce' ? '✓' : '' }}</span> MCE
       </td>
       <td class="label">{{ __('PTj / Faculty') }}</td>
       <td>{{ $offering->ptj_name ?? $offering->ptj_code ?? '–' }}</td>
@@ -194,11 +195,11 @@
               {{ __('Avg rating:') }} {{ round(collect($ind['feedback']['areas'])->filter()->avg(), 1) }} / 5.0 ({{ $ind['feedback']['count'] }} {{ __('responses') }})
               @if(!empty($rowVal['findings'])) &middot; {{ $rowVal['findings'] }} @endif
             @else
-              {{ $rowVal['findings'] ?? __('Feedback collected and recorded for the cohort.') }}
+              {{ !empty($rowVal['findings']) ? $rowVal['findings'] : '–' }}
             @endif
           </td>
-          <td>{{ $rowVal['issues_strengths'] ?? __('Positive engagement and learner reception.') }}</td>
-          <td>{{ $rowVal['initial_action'] ?? __('Continue routine monitoring.') }}</td>
+          <td>{{ !empty($rowVal['issues_strengths']) ? $rowVal['issues_strengths'] : '–' }}</td>
+          <td>{{ !empty($rowVal['initial_action']) ? $rowVal['initial_action'] : '–' }}</td>
         </tr>
       @endforeach
     </tbody>
@@ -209,10 +210,10 @@
   <table class="data-table">
     <thead>
       <tr>
-        <th style="width:5%">Bil.</th>
-        <th style="width:40%">Domain</th>
-        <th style="width:20%">Status</th>
-        <th style="width:35%">Evidens / Rujukan</th>
+        <th style="width:5%">{{ __('No.') }}</th>
+        <th style="width:40%">{{ __('Domain') }}</th>
+        <th style="width:20%">{{ __('Status') }}</th>
+        <th style="width:35%">{{ __('Evidence / Reference') }}</th>
       </tr>
     </thead>
     <tbody>
@@ -225,14 +226,14 @@
           <td>
             @if($dc)
               @if($dc->status === 'tb')
-                <span class="tag info">Tidak Berkaitan (TB)</span>
+                <span class="tag info">{{ __('Not applicable') }}</span>
               @elseif($dc->status === 'memuaskan' || $dc->met)
-                <span class="tag ok">Memuaskan</span>
+                <span class="tag ok">{{ __('Satisfactory') }}</span>
               @else
-                <span class="tag err">Perlu Tindakan</span>
+                <span class="tag err">{{ __('Needs action') }}</span>
               @endif
             @else
-              <span class="tag info">Belum Disemak</span>
+              <span class="tag info">{{ __('Not checked') }}</span>
             @endif
           </td>
           <td>{{ $dc->finding ?? '–' }}</td>
@@ -318,38 +319,43 @@
 
   {{-- CQI Effectiveness Evaluation --}}
   <div class="sec-title">8. {{ __('CQI Effectiveness Evaluation') }}</div>
+  @php
+    $evaluatedActions = [];
+    foreach ($issues as $iss) {
+      foreach ($actions[$iss->id] ?? [] as $act) {
+        if ($act->effectiveness || $act->status === 'closed' || $act->status === 'carried') {
+          $evaluatedActions[] = $act;
+        }
+      }
+    }
+  @endphp
   <table class="data-table">
     <thead>
       <tr>
-        <th style="width:5%">Bil.</th>
-        <th style="width:25%">Tindakan CQI</th>
-        <th style="width:20%">Bukti Selepas Pelaksanaan</th>
-        <th style="width:20%">Perbandingan Sebelum / Selepas</th>
-        <th style="width:15%">Keputusan</th>
-        <th style="width:15%">Tindakan Seterusnya</th>
+        <th style="width:5%">{{ __('No.') }}</th>
+        <th style="width:25%">{{ __('CQI Action') }}</th>
+        <th style="width:20%">{{ __('Post-Implementation Evidence') }}</th>
+        <th style="width:20%">{{ __('Before / After Comparison') }}</th>
+        <th style="width:15%">{{ __('Decision') }}</th>
+        <th style="width:15%">{{ __('Next Action') }}</th>
       </tr>
     </thead>
     <tbody>
-      @php($evalCounter = 1)
-      @forelse($issues as $i)
-        @foreach($actions[$i->id] ?? [] as $a)
-          @if($a->effectiveness || $a->status === 'closed' || $a->status === 'carried')
-            <tr>
-              <td>{{ $evalCounter++ }}</td>
-              <td><strong>{{ $a->description }}</strong></td>
-              <td>{{ $a->after_evidence ?? '–' }}</td>
-              <td>Sebelum: {{ $a->before_evidence ?? '–' }}<br>Selepas: {{ $a->after_evidence ?? '–' }}</td>
-              <td>
-                <span class="tag {{ $a->effectiveness === 'effective' ? 'ok' : ($a->effectiveness === 'partly' ? 'warn' : 'err') }}">
-                  {{ __(config('monitoring.effectiveness')[$a->effectiveness] ?? $a->effectiveness ?? 'Dinilai') }}
-                </span>
-              </td>
-              <td>{{ $a->effectiveness === 'not_effective' ? 'Dibawa ke kitaran CQI seterusnya' : 'Tindakan selesai' }}</td>
-            </tr>
-          @endif
-        @endforeach
+      @forelse($evaluatedActions as $eIdx => $a)
+        <tr>
+          <td>{{ $eIdx + 1 }}</td>
+          <td><strong>{{ $a->description }}</strong></td>
+          <td>{{ $a->after_evidence ?? '–' }}</td>
+          <td>{{ __('Before:') }} {{ $a->before_evidence ?? '–' }}<br>{{ __('After:') }} {{ $a->after_evidence ?? '–' }}</td>
+          <td>
+            <span class="tag {{ $a->effectiveness === 'effective' ? 'ok' : ($a->effectiveness === 'partly' ? 'warn' : 'err') }}">
+              {{ __(config('monitoring.effectiveness')[$a->effectiveness] ?? $a->effectiveness ?? 'Evaluated') }}
+            </span>
+          </td>
+          <td>{{ $a->effectiveness === 'not_effective' ? __('Carried to next CQI cycle') : __('Action completed') }}</td>
+        </tr>
       @empty
-        <tr><td colspan="6" style="text-align:center;color:#475569">Tiada penilaian keberkesanan tindakan direkodkan lagi.</td></tr>
+        <tr><td colspan="6" style="text-align:center;color:#475569">{{ __('No effectiveness evaluation recorded yet.') }}</td></tr>
       @endforelse
     </tbody>
   </table>
@@ -457,23 +463,24 @@
 
       {{-- Role 3: Quality Assurance / Authority --}}
       @php($s3 = $c10Signoffs['qa_authority'] ?? null)
+      @php($isSamcPrint = strtolower((string) ($offering->category ?? '')) === 'samc')
       <tr>
         <td><strong>{{ __('Quality Assurance / University Authority') }}</strong><div style="font-size:9.5px;color:#475569">{{ __('QA Committee / CODL') }}</div></td>
         <td>
-          <strong>{{ $s3['name'] ?? ($r->status === 'confirmed' ? __('Quality Assurance Committee') : '–') }}</strong><br>
-          <span style="font-size:9.5px;color:#475569">{{ $s3['position'] ?? __('Quality Assurance Officer') }}</span>
+          <strong>{{ $s3['name'] ?? '–' }}</strong><br>
+          <span style="font-size:9.5px;color:#475569">{{ __($s3['position'] ?? 'Quality Assurance Officer') }}</span>
         </td>
         <td>
           @if(!empty($s3['status']) && $s3['status'] === 'tb')
             <span class="tag info">{{ __('N/A') }}</span>
-          @elseif($r->status === 'confirmed' || !empty($s3['signed_at']))
+          @elseif(!empty($s3['signed_at']))
             <span class="tag ok">{{ __('Confirmed') }}</span>
           @else
-            <span class="tag info">{{ $offering->category === 'SAMC' ? __('Pending QA') : __('N/A') }}</span>
+            <span class="tag info">{{ $isSamcPrint ? __('Pending QA') : __('N/A') }}</span>
           @endif
         </td>
-        <td>{{ !empty($s3['signed_at']) ? \Carbon\Carbon::parse($s3['signed_at'])->format('d/m/Y') : ($r->confirmed_at ? \Carbon\Carbon::parse($r->confirmed_at)->format('d/m/Y') : '–') }}</td>
-        <td>{{ $s3['remarks'] ?? ($offering->category === 'SAMC' ? __('Audit and QV compliance') : __('Not applicable for standard cohort')) }}</td>
+        <td>{{ !empty($s3['signed_at']) ? \Carbon\Carbon::parse($s3['signed_at'])->format('d/m/Y') : '–' }}</td>
+        <td>{{ !empty($s3['remarks']) ? __($s3['remarks']) : ($isSamcPrint ? __('Awaiting quality assurance sign-off') : __('Not applicable for standard cohort')) }}</td>
       </tr>
     </tbody>
   </table>

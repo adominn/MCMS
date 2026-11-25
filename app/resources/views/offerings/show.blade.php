@@ -338,13 +338,23 @@
         <div class="hd" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
           <h2 style="margin:0">{{ __('Cohort parameters') }}</h2>
           @if(!empty($o->mc_version_id))
-            <a href="{{ route('proposals.show', $o->mc_version_id) }}" target="_blank" rel="noopener" class="btn ter sm">{{ __('View approved proposal') }} &nearr;</a>
+            @if(auth()->user()->hasAnyRole('lecturer'))
+              <a href="{{ route('proposals.show', $o->mc_version_id) }}" target="_blank" rel="noopener" class="btn ter sm">{{ __('View approved proposal') }} &nearr;</a>
+            @elseif(auth()->user()->hasAnyRole('deputy_dean', 'ptj_authority', 'codl_admin', 'academic_authority', 'qa_officer'))
+              <a href="{{ route('approvals.show', $o->mc_version_id) }}" target="_blank" rel="noopener" class="btn ter sm">{{ __('View approved proposal') }} &nearr;</a>
+            @endif
           @endif
         </div>
         <div class="bd">
           <dl class="dl" style="margin:0">
             <dt>{{ __('Micro-credential') }}</dt>
             <dd><b>{{ $o->name_en }}</b> ({{ __('version :num', ['num' => $o->version_no ?? 1]) }})</dd>
+
+            <dt>{{ __('Category') }}</dt>
+            <dd><b>{{ strtoupper((string) ($o->category ?? 'umc')) }}</b> ({{ __(['umc' => 'Unbundled Micro-Credential', 'samc' => 'Stand-Alone Micro-Credential', 'mce' => 'Executive Micro-Credential'][$o->category ?? 'umc'] ?? strtoupper((string) ($o->category ?? ''))) }})</dd>
+
+            <dt>{{ __('Faculty / Centre') }}</dt>
+            <dd>{{ ($o->ptj_name ?? null) ?: ($o->ptj_code ?? '–') }}</dd>
 
             <dt>{{ __('Cohort name') }}</dt>
             <dd>{{ $o->cohort_name }}</dd>
@@ -357,6 +367,19 @@
 
             <dt>{{ __('Delivery mode') }}</dt>
             <dd>{{ $oModeLabel }}</dd>
+
+            <dt>{{ __('Quality Verification Status') }}</dt>
+            <dd>
+              @if(($o->category ?? '') === 'samc')
+                @if(!empty($qv))
+                  <span class="tag ok">{{ __('Valid until :date (Quality-Verified)', ['date' => \Carbon\Carbon::parse($qv->valid_until)->format('d/m/Y')]) }}</span>
+                @else
+                  <span class="tag warn">{{ __('In progress / Pending verification (Non-credit)') }}</span>
+                @endif
+              @else
+                <span class="tag info">{{ __('Not applicable (:cat)', ['cat' => strtoupper((string) ($o->category ?? 'UMC'))]) }}</span>
+              @endif
+            </dd>
 
             <dt>{{ __('Places / Capacity') }}</dt>
             <dd>{{ $o->capacity ?? '–' }}</dd>
@@ -400,6 +423,39 @@
         </div>
       </div>
     </div>
+
+    @if(!empty($recordGovernance))
+      <div class="panel" style="margin-bottom:20px">
+        <div class="hd" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+          <h2 style="margin:0">{{ __('Participant & Achievement Record Governance') }}</h2>
+          <span class="tag info">{{ __('Read-only') }}</span>
+        </div>
+        <div class="table-wrap">
+          <table class="checklist-table" data-plain>
+            <thead>
+              <tr>
+                <th style="width:24%">{{ __('Record Element') }}</th>
+                <th style="width:14%">{{ __('Requirement') }}</th>
+                <th style="width:28%">{{ __('System Location / Mechanism') }}</th>
+                <th style="width:18%">{{ __('Record Owner') }}</th>
+                <th style="width:16%">{{ __('Cohort Status') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach($recordGovernance as $rg)
+                <tr>
+                  <td><b>{{ $rg['element'] }}</b></td>
+                  <td>{{ $rg['requirement'] }}</td>
+                  <td>{{ $rg['location'] }}</td>
+                  <td>{{ $rg['owner'] }}</td>
+                  <td>{{ $rg['status'] }}</td>
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+    @endif
 
     @if(!$isConfirmed && $o->status !== 'cancelled')
       <div class="row" style="justify-content:flex-end;margin-bottom:16px">
@@ -1064,7 +1120,7 @@
 
 <div class="note info" style="margin-top:20px;margin-bottom:24px">
   <div>
-    <b>{{ __('Important Notice:') }}</b> {{ __('This operational readiness check ensures delivery quality and learner protection before an offering opens. It does not replace prior academic approval of the micro-credential.') }}
+    <b>{{ __('Important Notice:') }}</b> {{ __('This operational readiness check confirms delivery readiness and learner protection before an offering opens and does not replace prior academic approval. If pre-cohort checks identify significant changes to learning outcomes, SLT/credit, major assessment, core content, delivery mode, Quality Verification status, or credentials, those changes must be referred through formal review and approval before proceeding.') }}
   </div>
 </div>
   </div>

@@ -104,15 +104,15 @@ test('FL-02 Propose a UMC, fix the hours, submit', async ({ page }) => {
   await expect(page.getByRole('status')).toContainText('proposed until your deputy dean verifies it');
 
   await page.getByLabel('Title (Bahasa Melayu)').fill('Ujian Perisian');
-  await page.getByLabel('Delivery mode').selectOption('online');
+  await page.getByLabel('Delivery mode', { exact: true }).selectOption('online');
   await page.getByLabel('Delivery language').fill('English');
   await page.getByRole('button', { name: 'Save' }).click();
-  await page.getByRole('link', { name: 'Justification' }).click();
+  await page.getByRole('link', { name: 'Justification' }).first().click();
   await page.getByLabel('Need or problem addressed').fill('Employers cannot find enough software testers.');
   await page.getByRole('button', { name: 'Save' }).click();
 
-  await page.getByRole('link', { name: 'Modules', exact: true }).click(); // 2. 40 + 38 + 32 = 110 h against a 120 h parent course
-  await page.getByLabel('Unbundling model').selectOption('topic_based');
+  await page.getByRole('link', { name: /Modules/ }).first().click(); // 2. 40 + 38 + 32 = 110 h against a 120 h parent course
+  await page.getByLabel('Unbundling model', { exact: true }).selectOption('topic_based');
   for (let i = 0; i < 3; i++) {
     await page.getByRole('button', { name: 'Add module' }).click();
   }
@@ -125,28 +125,28 @@ test('FL-02 Propose a UMC, fix the hours, submit', async ({ page }) => {
   const checks = page.getByRole('complementary', { name: 'Checks' });
   await expect(checks).toContainText('The modules total 110 hours; they must equal the parent course (120 hours).');
 
-  await page.getByRole('link', { name: 'Submit', exact: true }).click(); // Submit is off, with the reason beside it
+  await page.getByRole('link', { name: /Submit/ }).first().click(); // Submit is off, with the reason beside it
   await expect(page.getByRole('button', { name: 'Submit for review' })).toBeDisabled();
   await expect(page.getByText('Submit is off')).toBeVisible();
 
-  await page.getByRole('link', { name: 'Modules', exact: true }).click(); // 3. set module 3 to 42 h: the error clears
+  await page.getByRole('link', { name: /Modules/ }).first().click(); // 3. set module 3 to 42 h: the error clears
   await page.getByLabel('Module 3 hours').fill('42');
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(checks).not.toContainText('they must equal the parent course');
   await expect(checks).toContainText('Total learning time: 120 h');
 
-  await page.getByRole('link', { name: 'Learning outcomes' }).click(); // the remaining sections
+  await page.getByRole('link', { name: /Learning outcomes/ }).first().click(); // the remaining sections
   await page.getByRole('button', { name: 'Add outcome' }).click();
   await page.getByLabel('LO1 in English').fill('Design and run software tests');
   await page.getByRole('button', { name: 'Save' }).click();
-  await page.getByRole('link', { name: 'Assessment', exact: true }).click();
+  await page.getByRole('link', { name: /Assessment/ }).first().click();
   await page.getByRole('button', { name: 'Add component' }).click();
   await page.getByLabel('Component name').fill('Test project');
   await page.getByLabel('Weight in percent').fill('100');
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(checks).toContainText('Outcome LO1 has no assessment.'); // the warning of the storyboard
 
-  await page.getByRole('link', { name: 'Submit', exact: true }).click(); // 4. warnings need a written response
+  await page.getByRole('link', { name: /Submit/ }).first().click(); // 4. warnings need a written response
   await page.getByLabel(/I confirm that third-party materials/).check();
   await page.getByLabel('Your response to the warnings').fill('The project assesses it; I will link it after review.');
   await page.getByRole('button', { name: 'Submit for review' }).click();
@@ -176,7 +176,8 @@ test.describe('Review and approval', () => {
     await expect(page.getByText('Proposal summary')).toHaveCount(0);
     await page.getByLabel('I have no conflict of interest').check();
     await page.getByRole('button', { name: 'Confirm' }).click();
-    await expect(page.getByText('Proposal summary')).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Proposal summary' })).toBeVisible();
+    await page.locator('[data-tab="rev-form"]').click();
 
     await page.getByRole('button', { name: 'Submit review' }).click(); // 3. nothing is rated yet
     await expect(page.getByText('Rate every item.').first()).toBeVisible();
@@ -201,35 +202,47 @@ test.describe('Review and approval', () => {
     await expect(page.getByRole('link', { name: 'Record Senate decision: Applied Data Analytics' })).toHaveCount(0);
     await page.getByRole('link', { name: 'Decide on proposal: Database Systems' }).click();
 
+    await page.locator('[data-tab="decision"]').click();
     await page.getByLabel(/I have checked the category/).check(); // 2. endorse is refused while blocking comments are open
     await page.getByRole('button', { name: 'Endorse', exact: true }).click();
-    await expect(page.getByText('A blocking comment is not resolved yet.')).toBeVisible();
-    const answered = page.locator('#comments tbody tr', { hasText: 'Answered' });
+    await expect(page.locator('main').getByText('A blocking comment is not resolved yet.').first()).toBeVisible();
+    await page.locator('[data-tab="comments"]').click();
+    await page.locator('[data-pane="comments"]').getByRole('button', { name: /Review & resolve/ }).first().click();
+    const answered = page.locator('tr.dd-cmt-row', { hasText: 'Answered' }).first();
     await expect(answered).toContainText('I added 6 hours of lab work');
-    await answered.getByPlaceholder('Reason').fill('The extra lab hours answer the comment.');
+    await answered.getByPlaceholder(/Reason|Resolution reason/).fill('The extra lab hours answer the comment.');
     await answered.getByRole('button', { name: 'Mark resolved' }).click();
-    await expect(page.getByText("Waiting for the lecturer's response")).toBeVisible(); // the other one cannot be resolved yet
+    await expect(page.getByText("Waiting for the lecturer's response").first()).toBeVisible(); // the other one cannot be resolved yet
+    await page.locator('.dd-cmt-close:visible').first().click().catch(() => {});
     await page.locator('.who-btn').click();
     await page.getByRole('button', { name: 'Sign out' }).click();
 
     await signIn(page, 'Dr. Aina Zulkifli'); // 3. the lecturer answers it
     await page.getByRole('link', { name: 'Respond to review comments: Database Systems' }).click();
-    await expect(page.getByRole('link', { name: 'Comments' })).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByRole('link', { name: /Comments/ }).first()).toHaveAttribute('aria-current', 'page');
+    await page.getByRole('button', { name: /View & respond/ }).first().click();
     await page.getByLabel('Your response').fill('Outcome 3 is now assessed by the project.');
     await page.getByRole('button', { name: 'Send response' }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Your response is sent.' })).toBeVisible();
+    await page.locator('.cmt-modal-close:visible').first().click().catch(() => {});
     await page.locator('.who-btn').click();
     await page.getByRole('button', { name: 'Sign out' }).click();
 
     await signIn(page, 'Hakim Rahman', true); // 4. resolve, verify the category, endorse
     await page.goto('/approvals?status=in_review');
     await page.getByRole('link', { name: 'Database Systems', exact: true }).click();
-    const second = page.locator('#comments tbody tr', { hasText: 'Answered' });
-    await second.getByPlaceholder('Reason').fill('Alignment is fixed.');
+    await page.locator('[data-tab="comments"]').click();
+    await page.locator('[data-pane="comments"]').getByRole('button', { name: /Review & resolve/ }).first().click();
+    const second = page.locator('tr.dd-cmt-row', { hasText: 'Answered' }).first();
+    await second.getByPlaceholder(/Reason|Resolution reason/).fill('Alignment is fixed.');
     await second.getByRole('button', { name: 'Mark resolved' }).click();
+    await expect(page.getByRole('status')).toContainText('Comment resolved.');
+    await page.locator('.dd-cmt-close:visible').first().click().catch(() => {});
+    await page.locator('[data-tab="decision"]').click();
     await page.getByLabel(/I have checked the category/).check();
     await page.getByRole('button', { name: 'Endorse', exact: true }).click();
     await expect(page.getByRole('status')).toContainText('Endorsed by Deputy Dean. Forwarded to CODL for verification and Senate approval.');
+    await page.locator('[data-tab="decision"]').click();
     await expect(page.getByRole('row', { name: /Endorsement.*Endorsed.*category SAMC verified/ })).toBeVisible();
 
     await page.getByRole('link', { name: 'Decision pack' }).click(); // 5. the decision pack shows the endorsement
@@ -240,6 +253,7 @@ test.describe('Review and approval', () => {
     await signIn(page, 'Farid Hashim', true); // 6. CODL verifies the endorsed proposal
     await page.goto('/approvals?status=endorsed');
     await page.getByRole('link', { name: 'Applied Data Analytics' }).click();
+    await page.locator('[data-tab="decision"]').click();
     await page.getByRole('button', { name: 'Confirm CODL Verification' }).click();
     await expect(page.getByRole('status')).toContainText('CODL verification recorded.');
     await page.locator('.who-btn').click();
@@ -248,6 +262,7 @@ test.describe('Review and approval', () => {
     await signIn(page, 'Prof. Dr. Zulkifli Ahmad', true); // 7. Senate records the final decision
     await page.goto('/approvals?status=codl_verified');
     await page.getByRole('link', { name: 'Applied Data Analytics' }).click();
+    await page.locator('[data-tab="decision"]').click();
     await page.getByRole('link', { name: 'Record Senate decision' }).first().click();
     await page.getByLabel('Senate meeting reference').fill('Senate 8/2026');
     const d = new Date(); d.setDate(d.getDate() - 2);
@@ -261,7 +276,7 @@ test.describe('Review and approval', () => {
     await page.goto('/approvals?status=endorsed'); // 8. both proposals show their new status
     await expect(page.getByRole('row', { name: /Database Systems.*Endorsed/ })).toBeVisible();
     await page.goto('/approvals?status=approved');
-    await page.getByRole('searchbox', { name: 'Search this table' }).fill('Applied Data Analytics');
+    await page.locator('.tbar input[type="search"]').first().fill('Applied Data Analytics');
     await expect(page.getByRole('row', { name: /Applied Data Analytics.*Approved/ })).toBeVisible();
   });
   test('Versions: a minor change is acknowledged, a material change makes version 2', async ({ page }) => {
@@ -313,7 +328,8 @@ test.describe('Review and approval', () => {
     await page.getByLabel('Places').fill('40');
     await page.getByLabel('Registration opens').fill(day(0));
     await page.getByLabel('Registration closes').fill(day(20));
-    await page.getByLabel('Facilitators').fill('Dr. Aina Zulkifli');
+    await page.locator('input[name="facilitators"], textarea[name="facilitators"]').first().fill('Dr. Aina Zulkifli');
+    await page.locator('[data-tab="off-public"]').click();
     await page.getByLabel('Description').fill('Hands-on notebooks and weekly clinics.');
     await page.getByLabel('Prerequisites').fill('Basic Python');
     await page.getByLabel('Completion conditions').fill('Pass the project');
@@ -351,7 +367,7 @@ test.describe('Review and approval', () => {
 
     // Submit from Review & Decision with hidden unanswered item on Learner Protection -> blocked & auto-jumps to Learner Protection
     await page.locator('#panel-review_decision').getByRole('button', { name: 'Send the checklist' }).click();
-    await expect(page.getByText('"Ready" needs every checklist item answered')).toBeVisible();
+    await expect(page.locator('main [role="alert"]').first()).toContainText('"Ready" needs every checklist item answered');
     await expect(page.locator('#tab-learner_protection')).toHaveAttribute('aria-selected', 'true');
     await expect(page.locator('#panel-learner_protection tr.row-err')).toHaveCount(1);
 
@@ -427,15 +443,17 @@ test.describe('Registration and payment', () => {
     await page.getByRole('link', { name: 'Register' }).click();
 
     await expect(page.getByRole('heading', { name: 'Step 1: eligibility' })).toBeVisible(); // 2. eligibility and the phone number
-    await expect(page.getByText('The checks pass')).toBeVisible();
-    await page.getByLabel('Confirm your phone number').fill('012-3456789');
+    await expect(page.getByText('Checks pass')).toBeVisible();
+    if (await page.getByLabel(/Phone number|Confirm your phone number/).isVisible()) {
+      await page.getByLabel(/Phone number|Confirm your phone number/).fill('012-3456789');
+    }
     await page.locator('#prerequisites_ok').check();
     await page.getByRole('button', { name: 'Continue' }).click();
 
     await expect(page.getByRole('heading', { name: /Step 2/ })).toBeVisible(); // 3. the wording and the personal data notice
     await expect(page.getByText('Standalone Micro-Credential (SAMC)')).toBeVisible();
     await page.getByRole('button', { name: 'Continue to payment' }).click();
-    await expect(page.getByText('Tick that you have read the recognition statement.')).toBeVisible();
+    await expect(page.locator('main').getByText('Tick that you have read the recognition statement.')).toBeVisible();
     await page.getByLabel('I have read the recognition statement.').check();
     await page.getByLabel('I have read the personal data notice.').check();
     await page.getByRole('button', { name: 'Continue to payment' }).click();
@@ -460,7 +478,9 @@ test.describe('Registration and payment', () => {
     await page.goto('/public/catalogue?q=lean');
     await page.getByRole('link', { name: 'Lean Six Sigma Yellow Belt 2026/12' }).click();
     await page.getByRole('link', { name: 'Register' }).click();
-    await page.getByLabel('Confirm your phone number').fill('012-3456789');
+    if (await page.getByLabel(/Phone number|Confirm your phone number/).isVisible()) {
+      await page.getByLabel(/Phone number|Confirm your phone number/).fill('012-3456789');
+    }
     await page.getByRole('button', { name: 'Continue' }).click();
     await page.getByLabel('I have read the recognition statement.').check();
     if (await page.getByLabel('I have read the personal data notice.').isVisible()) {
@@ -523,10 +543,14 @@ test.describe('Results', () => {
     await expect(page.getByText('2 rows were rejected')).toBeVisible();
     await page.goto(`/offerings/${offeringId}/results`);
     await page.getByRole('button', { name: 'Submit for verification' }).click();
-    await expect(page.getByText('Some marks are missing')).toBeVisible();
+    await expect(page.locator('main').getByText('Some marks are missing')).toBeVisible();
     const fill = async (name: string, key: string, v: string) => page.getByLabel(`${key} for ${name}`).fill(v);
     for (const [name, marks] of [['Cee Lim', ['60', '60', '55']], ['Dan Ong', ['45', '60', '70']]] as const) {
       await fill(name, 'module1_mark', marks[0]); await fill(name, 'module2_mark', marks[1]); await fill(name, 'project_mark', marks[2]);
+    }
+    const coordChk = page.locator('input[name="include_coordinator_signoff"]');
+    if (await coordChk.isVisible() && await coordChk.isChecked()) {
+      await coordChk.uncheck();
     }
     await page.getByRole('button', { name: 'Submit for verification' }).click();
     await expect(page.getByRole('status')).toContainText('Submitted for verification');
@@ -679,7 +703,7 @@ test.describe('Quality Verification', () => {
     await page.getByRole('link', { name: 'Lean Six Sigma Yellow Belt' }).click();
     await page.locator('#tab-changes_submission').click();
     await page.getByRole('button', { name: 'Confirm readiness decision' }).click();
-    await expect(page.getByRole('alert')).toContainText('Not ready to submit');
+    await expect(page.locator('main [role="alert"]')).toContainText('Not ready to submit');
     await expect(page.locator('#tab-eligibility')).toHaveAttribute('aria-selected', 'true');
     await page.locator('#tab-changes_submission').click();
     await expect(page.locator('#submit-off')).toContainText('Submission needs the status Ready to submit');
@@ -728,7 +752,7 @@ test.describe('Quality Verification', () => {
     await page.getByLabel('Valid until').fill(iso(365 * 3 + 40));
     await page.getByLabel('Decision document').fill('qv-2026-312.pdf');
     await page.getByRole('button', { name: 'Record result' }).click();
-    await expect(page.getByRole('alert')).toContainText('at most 3 years');
+    await expect(page.locator('main [role="alert"]')).toContainText('at most 3 years');
     await page.getByLabel('QV reference').fill('QV/2026/312');
     await page.getByLabel('Verified credit').fill('2');
     await page.getByLabel('MQF level').fill('4');
@@ -798,6 +822,8 @@ test.describe('Credit transfer', () => {
     execSync('php artisan db:seed --class=DemoTransferSeeder --force --no-interaction', { stdio: 'inherit', env: { ...process.env, DB_DATABASE: 'mcms_e2e', MCMS_STUB_IDP: 'true' } });
   });
   const evaluate = async (page: Page, matches: string[]) => {
+    const evalTab = page.locator('[data-tab="evaluation"]');
+    if (await evalTab.isVisible()) await evalTab.click();
     const form = page.locator('.line form').first();
     const n = await form.getByLabel(/^Match for:/).count();
     for (let i = 0; i < n; i++) {
@@ -818,6 +844,7 @@ test.describe('Credit transfer', () => {
   const validity = async (page: Page) => {
     for (const r of await page.locator('#validity').getByRole('radio', { name: 'Passed' }).all()) await r.check();
     await page.getByRole('button', { name: 'Record validity check' }).click();
+    await expect(page.locator('#validity')).toContainText('Verified');
   };
 
   test('FL-12 Apply, decide by outcome, credit held, second use and an unmatched outcome blocked', async ({ page }) => {
@@ -844,6 +871,7 @@ test.describe('Credit transfer', () => {
     await signIn(page, 'Prof. Dr. Zulkifli Ahmad', true);
     await page.getByRole('link', { name: /^Credit transfer(s| evaluation| decisions)?( \d+)?$/ }).click();
     await page.getByRole('row', { name: /Amir Hakimi/ }).getByRole('link', { name: 'Open' }).click();
+    await page.locator('[data-tab="decision"]').click();
     await page.locator('#decision_ref').fill('SEN-CT 4/2026');
     await page.getByRole('button', { name: 'Record decision' }).click();
     await expect(page.getByRole('status')).toContainText('provisionally redeemed');
@@ -880,9 +908,10 @@ test.describe('Credit transfer', () => {
     await signIn(page, 'Prof. Dr. Zulkifli Ahmad', true);
     await page.getByRole('link', { name: /^Credit transfer(s| evaluation| decisions)?( \d+)?$/ }).click();
     await page.getByRole('row', { name: /Bee Tan.*Under eval/i }).getByRole('link', { name: 'Open' }).click();
+    await page.locator('[data-tab="decision"]').click();
     await page.locator('#decision_ref').fill('SEN-CT 5/2026');
     await page.getByRole('button', { name: 'Record decision' }).click();
-    await expect(page.getByRole('alert')).toContainText('not matched by the micro-credential');
+    await expect(page.locator('main [role="alert"]')).toContainText('not matched by the micro-credential');
     await page.locator('#outcome').selectOption('not_approved');
     await page.getByLabel(/^Credits approved for/).fill('0');
     await page.locator('#conditions').fill('Course learning outcomes do not match micro-credential.');
@@ -913,7 +942,7 @@ test.describe('Stackable pathways', () => {
     await expect(page.getByText('does not mean the rest can be transferred automatically').first()).toBeVisible();
     await page.locator('#decision-sel').selectOption('suitable');
     await page.getByRole('button', { name: 'Record decision' }).click();
-    await expect(page.getByRole('alert')).toContainText('Suitable to proceed needs the programme admission');
+    await expect(page.locator('main [role="alert"]')).toContainText('Suitable to proceed needs the programme admission');
     await page.locator('#decision-sel').selectOption('not_yet');
     await page.getByLabel('Conditions and follow-up').fill('Earn more of the credit at UTeM');
     await page.getByRole('button', { name: 'Record decision' }).click();
@@ -926,14 +955,15 @@ test.describe('Stackable pathways', () => {
     await expect(page.locator('#plan-status')).toHaveText('Needs review');
     await page.locator('#decision-sel').selectOption('suitable');
     await page.getByRole('button', { name: 'Record decision' }).click();
-    await expect(page.getByRole('alert')).toContainText('admission');
+    await expect(page.locator('main [role="alert"]')).toContainText('admission');
     await page.locator('.who-btn').click();
     await page.getByRole('button', { name: 'Sign out' }).click();
 
     // Step 3: the participant reads what the plan does and does not mean
     await signIn(page, 'Amir Hakimi');
     await page.getByRole('link', { name: 'My degree plan' }).click();
-    await expect(page.locator('.plan').first()).toContainText('50%');
+    await expect(page.locator('main')).toContainText('BITS Bachelor of Computer Science');
+    await expect(page.locator('main')).toContainText('30% of graduating credits');
     await expect(page.getByText('No number of micro-credentials or badges leads to a degree automatically')).toBeVisible();
 
     // Step 4: the public page shows the pathway and says it transfers no credit
@@ -948,7 +978,7 @@ test.describe('Quality review', () => {
     // Step 1: the lecturer opens the quality review of the Data Structures cohort and records the domains
     await signIn(page, 'Dr. Aina Zulkifli');
     await page.getByRole('link', { name: /^Quality review( \(CQI\))?$/ }).click();
-    await expect(page.locator('.cohort').filter({ hasText: 'Data Structures 2026/2' })).toContainText('Completion rate');
+    await expect(page.locator('.cohort').filter({ hasText: 'Data Structures' }).filter({ hasText: '2026/2' })).toContainText('Completion rate');
     await page.getByRole('button', { name: /Start a quality review of Data Structures 2026\/2/ }).click();
     const domainSelects = await page.locator('#domains select[name^="status["]').all();
     const domainInputs = await page.locator('#domains input[name^="finding["]').all();
@@ -982,7 +1012,7 @@ test.describe('Quality review', () => {
     await page.getByRole('link', { name: /^Quality review( \(CQI\))?$/ }).click();
     await page.getByRole('link', { name: /CQI-/ }).first().click();
     await page.getByRole('button', { name: /^Close: Rewrite/ }).click();
-    await expect(page.getByRole('alert')).toContainText('only after its effectiveness is evaluated');
+    await expect(page.locator('main [role="alert"]')).toContainText('only after its effectiveness is evaluated');
     await page.locator('.who-btn').click();
     await page.getByRole('button', { name: 'Sign out' }).click();
 

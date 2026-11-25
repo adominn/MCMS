@@ -253,7 +253,7 @@
         @forelse($ind['outcomes'] as $lo)
           <tr>
             <td><b>{{ $lo['code'] }}</b></td>
-            <td>{{ $lo['text_ms'] ?? $lo['text'] ?? '-' }}</td>
+            <td>{{ app()->getLocale() === 'ms' ? ($lo['text_ms'] ?: ($lo['text'] ?? '-')) : ($lo['text'] ?: ($lo['text_ms'] ?? '-')) }}</td>
             <td>{{ $lo['assessment_method'] ?? __('Course assessments') }}</td>
             <td><b>{{ $lo['share'] === null ? 'n/a' : $lo['share'].'%' }}</b></td>
             <td>
@@ -587,7 +587,7 @@
             </select>
           </div>
           <div>
-            <label for="responsible_id" style="font-weight:600">{{ __('Action Owner (Pemilik Tindakan)') }}</label>
+            <label for="responsible_id" style="font-weight:600">{{ __('Action Owner') }}</label>
             <select id="responsible_id" name="responsible_id" style="width:100%">
               @foreach($ptjUsers as $u)
                 <option value="{{ $u->id }}" @selected($u->id === $me)>{{ $u->name }} ({{ $u->position ?? __('Staff') }})</option>
@@ -735,10 +735,10 @@
         </tr>
       </thead>
       <tbody>
-        {{-- P1 Coordinator --}}
+        {{-- Coordinator --}}
         @php($s1 = $c10Signoffs['coordinator'] ?? null)
         <tr>
-          <td><b>P1. {{ __('MC Coordinator') }}</b></td>
+          <td><b>{{ __('MC Coordinator') }}</b></td>
           <td>
             <b>{{ $s1['name'] ?? $offering->owner_name ?? '–' }}</b><br>
             <span class="muted s">{{ $s1['position'] ?? __('Course Coordinator') }}</span>
@@ -754,11 +754,11 @@
           <td>{{ $s1['remarks'] ?? __('Prepared from cohort evidence') }}</td>
         </tr>
 
-        {{-- P2 Faculty Rep --}}
+        {{-- Faculty Rep --}}
         @php($s2 = $c10Signoffs['ptj_rep'] ?? null)
         @php($confirmer = $r->confirmed_by ? \App\Models\User::find($r->confirmed_by) : null)
         <tr>
-          <td><b>P2. {{ __('PTj / Faculty Representative') }}</b></td>
+          <td><b>{{ __('PTj / Faculty Representative') }}</b></td>
           <td>
             <b>{{ $s2['name'] ?? ($confirmer ? $confirmer->name : '–') }}</b><br>
             <span class="muted s">{{ $s2['position'] ?? ($confirmer ? ($confirmer->position ?? __('Deputy Dean')) : __('Deputy Dean (Academic)')) }}</span>
@@ -774,29 +774,46 @@
           <td>{{ $s2['remarks'] ?? __('Faculty academic review') }}</td>
         </tr>
 
-        {{-- P4 QA Authority --}}
+        {{-- QA Authority --}}
         @php($s3 = $c10Signoffs['qa_authority'] ?? null)
+        @php($isSamcCat = strtolower((string) ($offering->category ?? '')) === 'samc')
         <tr>
-          <td><b>P4. {{ __('QA / University Authority') }}</b></td>
+          <td><b>{{ __('QA / University Authority') }}</b></td>
           <td>
-            <b>{{ $s3['name'] ?? ($r->status === 'confirmed' ? __('Quality Assurance Committee') : '–') }}</b><br>
-            <span class="muted s">{{ $s3['position'] ?? __('Quality Assurance Officer') }}</span>
+            <b>{{ $s3['name'] ?? '–' }}</b><br>
+            <span class="muted s">{{ __($s3['position'] ?? 'Quality Assurance Officer') }}</span>
           </td>
           <td>
             @if(!empty($s3['status']) && $s3['status'] === 'tb')
               <span class="tag info">{{ __('Not applicable') }}</span>
-            @elseif($r->status === 'confirmed' || !empty($s3['signed_at']))
+            @elseif(!empty($s3['signed_at']))
               <span class="tag ok">{{ __('Confirmed') }}</span>
             @else
-              <span class="tag info">{{ $offering->category === 'SAMC' ? __('Awaiting QA') : __('Not applicable') }}</span>
+              <span class="tag info">{{ $isSamcCat ? __('Awaiting QA') : __('Not applicable') }}</span>
             @endif
           </td>
-          <td>{{ !empty($s3['signed_at']) ? \Carbon\Carbon::parse($s3['signed_at'])->format('d/m/Y') : ($r->confirmed_at ? \Carbon\Carbon::parse($r->confirmed_at)->format('d/m/Y') : '–') }}</td>
-          <td>{{ $s3['remarks'] ?? ($offering->category === 'SAMC' ? __('SAMC quality verification compliance') : __('Not applicable for standard cohort')) }}</td>
+          <td>{{ !empty($s3['signed_at']) ? \Carbon\Carbon::parse($s3['signed_at'])->format('d/m/Y') : '–' }}</td>
+          <td>{{ !empty($s3['remarks']) ? __($s3['remarks']) : ($isSamcCat ? __('Awaiting quality assurance sign-off') : __('Not applicable for standard cohort')) }}</td>
         </tr>
       </tbody>
     </table>
   </div>
+
+  @if($isQa && $r->status !== 'draft')
+    <div class="bd" style="border-top:1px solid var(--border);background:var(--s1, #f1f5f9)">
+      <form method="post" action="{{ route('cqi.signoff', $r->id) }}" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center" data-inplace>
+        @csrf
+        <input type="hidden" name="role" value="qa_authority">
+        <span style="font-size:12px;font-weight:600">{{ __('Record QA / Authority sign-off:') }}</span>
+        <select name="status" aria-label="{{ __('QA sign-off status') }}" style="height:30px;font-size:12px">
+          <option value="disahkan" @selected(($s3['status'] ?? ($isSamcCat ? 'disahkan' : 'tb')) === 'disahkan')>{{ __('Confirmed') }}</option>
+          <option value="tb" @selected(($s3['status'] ?? ($isSamcCat ? 'disahkan' : 'tb')) === 'tb')>{{ __('Not applicable') }}</option>
+        </select>
+        <input type="text" name="remarks" value="{{ $s3['remarks'] ?? '' }}" placeholder="{{ __('QA sign-off remarks...') }}" style="height:30px;flex:1;min-width:180px;font-size:12px">
+        <button type="submit" class="btn sm">{{ __('Record sign-off') }}</button>
+      </form>
+    </div>
+  @endif
 </div>
 
 {{-- ===================== SUBMISSION & DEAN CONFIRMATION ===================== --}}

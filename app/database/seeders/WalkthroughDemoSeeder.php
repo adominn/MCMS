@@ -169,12 +169,23 @@ class WalkthroughDemoSeeder extends Seeder
                     'signatory' => 'Hakim Rahman',
                     'signatory_position' => 'Deputy Dean (Academic)',
                 ];
+                $key = \App\Modules\Credentials\KeyStore::active();
+                $kid = $key->kid;
+                $jwt = \App\Modules\Credentials\Jwt::sign([
+                    'iss' => 'https://mcms.utem.edu.my',
+                    'sub' => $certNo,
+                    'iat' => now()->subDays(11 - $idx)->timestamp,
+                    'vc' => $content,
+                ], $key);
+
                 DB::table('credentials')->insert([
                     'enrolment_id' => $enrId,
                     'number' => $certNo,
                     'public_code' => $verifyCode,
                     'status' => 'valid',
                     'content' => json_encode($content),
+                    'jwt' => $jwt,
+                    'kid' => $kid,
                     'issued_at' => now()->subDays(11 - $idx),
                     'created_at' => now()->subDays(11 - $idx),
                     'updated_at' => now()->subDays(11 - $idx),

@@ -556,6 +556,12 @@
       @endif
     </div>
 
+    {{-- Governance & Approval Track Note --}}
+    <div style="font-size:7.5pt;color:#475569;margin-top:8px;padding-top:6px;border-top:1px dashed #cbd5e1;display:flex;justify-content:space-between;gap:12px">
+      <span>{{ __('Evaluation:') }} <strong>{{ __('CODL Equivalence Evaluation') }}</strong></span>
+      <span>{{ __('Decision Authority:') }} <strong>{{ __('UTeM Senate Approval') }}</strong></span>
+    </div>
+
     {{-- Official Document Footer (Identical on every page) --}}
     <div class="doc-foot">
       <span>{{ $a->reference }}</span>

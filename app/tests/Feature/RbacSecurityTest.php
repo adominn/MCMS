@@ -142,14 +142,15 @@ it('verifies CODL admin role route access and zero academic authority (Decision 
     $this->actingAs($admin)->get('/records/reports')->assertOk();
     $this->actingAs($admin)->get('/approvals')->assertOk();
     $this->actingAs($admin)->get('/transfers')->assertOk();
-    $this->actingAs($admin)->get('/pathways')->assertOk();
+    $this->actingAs($admin)->get('/deposits')->assertOk(); // read-only oversight
 
-    // Faculty teaching/assessment/deposit operations remain Forbidden (403)
+    // Faculty teaching/assessment/deposit write operations remain Forbidden (403)
+    $this->actingAs($admin)->get('/pathways')->assertForbidden();
     $this->actingAs($admin)->get('/proposals')->assertForbidden();
     $this->actingAs($admin)->get('/micro-credentials')->assertForbidden();
     $this->actingAs($admin)->get('/results')->assertForbidden();
     $this->actingAs($admin)->get('/credentials')->assertForbidden();
-    $this->actingAs($admin)->get('/deposits')->assertForbidden();
+    $this->actingAs($admin)->post('/deposits/export', ['acrs' => [1]])->assertForbidden();
     $this->actingAs($admin)->get('/suspensions')->assertForbidden();
     $this->actingAs($admin)->get('/enrolments')->assertForbidden();
     $this->actingAs($admin)->get('/my-credit')->assertForbidden();
@@ -185,10 +186,11 @@ it('verifies academic authority (P3 / Senate) role route access and restrictions
     $this->actingAs($academic)->get('/quality')->assertOk();
     $this->actingAs($academic)->get('/monitoring')->assertOk();
 
-    // Forbidden administrative and proposal creation pages (403)
+    // Forbidden administrative, deposit-write, and proposal creation pages (403)
     $this->actingAs($academic)->get('/admin/users')->assertForbidden();
     $this->actingAs($academic)->get('/admin/settings')->assertForbidden();
-    $this->actingAs($academic)->get('/deposits')->assertForbidden();
+    $this->actingAs($academic)->get('/deposits')->assertOk(); // read-only oversight
+    $this->actingAs($academic)->post('/deposits/export', ['acrs' => [1]])->assertForbidden();
     $this->actingAs($academic)->get('/proposals/new')->assertForbidden();
     $this->actingAs($academic)->get('/my-results')->assertForbidden();
 });
@@ -201,8 +203,9 @@ it('verifies quality assurance authority (P4 / PBK) role route access and restri
     $this->actingAs($qa)->get('/quality')->assertOk();
     $this->actingAs($qa)->get('/approvals')->assertOk(); // QA audit review of approvals
 
-    // Forbidden deposit and proposal authoring pages (403)
-    $this->actingAs($qa)->get('/deposits')->assertForbidden();
+    // Forbidden deposit-write and proposal authoring pages (403)
+    $this->actingAs($qa)->get('/deposits')->assertOk(); // read-only oversight
+    $this->actingAs($qa)->post('/deposits/export', ['acrs' => [1]])->assertForbidden();
     $this->actingAs($qa)->get('/admin/users')->assertForbidden();
     $this->actingAs($qa)->get('/admin/settings')->assertForbidden();
     $this->actingAs($qa)->get('/proposals/new')->assertForbidden();
@@ -215,10 +218,11 @@ it('verifies records custodian (P6 / Registry) role route access and separation 
     $this->actingAs($registry)->get('/credentials')->assertOk();
     $this->actingAs($registry)->get('/records/reports')->assertOk();
 
-    // Forbidden academic verification, ABC deposit, and admin pages per Note H separation of duties (403)
+    // Forbidden academic verification, ABC deposit-write, and admin pages per Note H separation of duties (403)
     $this->actingAs($registry)->get('/results')->assertForbidden();
     $this->actingAs($registry)->get('/transfers')->assertForbidden();
-    $this->actingAs($registry)->get('/deposits')->assertForbidden();
+    $this->actingAs($registry)->get('/deposits')->assertOk(); // read-only oversight
+    $this->actingAs($registry)->post('/deposits/export', ['acrs' => [1]])->assertForbidden();
     $this->actingAs($registry)->get('/admin/users')->assertForbidden();
     $this->actingAs($registry)->get('/proposals/new')->assertForbidden();
 });

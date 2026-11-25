@@ -44,6 +44,7 @@ it('renders offering readiness in Bahasa Melayu when BM locale is active', funct
         ->toContain('Bahan Pembelajaran &amp; Platform')
         ->toContain('Pentaksiran &amp; Integriti Akademik')
         ->toContain('Perlindungan Peserta &amp; Kontingensi')
+        ->toContain('Tadbir Urus Rekod Peserta &amp; Pencapaian')
         ->toContain('Kesediaan Operasi Disahkan');
 
     expect($content)->not->toContain('Course Information &amp; Support')

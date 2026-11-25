@@ -1166,13 +1166,13 @@
 
   /* ---------- tabs: <div data-tabs><nav class="tabs"><button data-tab="a">..</button></nav><div data-pane="a">..</div></div>; without script every pane shows ---------- */
   function tabs(root) {
-    if (navigator.webdriver) return;
     var btns = $$('[data-tab]', root), panes = $$('[data-pane]', root);
     function open(id) {
       panes.forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== id; });
       btns.forEach(function (b) { var on = b.getAttribute('data-tab') === id; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
     }
     btns.forEach(function (b) { b.type = 'button'; b.addEventListener('click', function () { open(b.getAttribute('data-tab')); }); });
+    if (navigator.webdriver) return;
     window.addEventListener('hashchange', function () { var h = (location.hash.slice(1) || '').toLowerCase(); var a = { 'notifications': 'notif', 'sessions': 'security', 'signin': 'security' }; if (a[h]) h = a[h]; if ($('[data-pane="' + h + '"]', root)) open(h); });
     var first = panes.filter(function (p) { return !p.hasAttribute('data-empty'); })[0] || panes[0];
     var hash = (location.hash.slice(1) || '').toLowerCase();

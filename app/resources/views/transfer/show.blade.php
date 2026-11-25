@@ -169,7 +169,7 @@
       </div>
 
       @if($docChecklist || $a->documents || $lines->isNotEmpty())
-        <x-transfer-evidence :a="$a" :lines="$lines" routeName="transfer.document" idPrefix="student" />
+        <x-transfer-evidence :a="$a" :lines="$lines" routeName="{{ auth()->user()->hasAnyRole('student') ? 'transfer.document' : 'transfers.document' }}" idPrefix="student" />
       @endif
     </div>
 

@@ -82,7 +82,7 @@
   <div class="bd">
     <ul style="margin:0;padding-left:18px">
       @foreach($remaining as $r)
-        <li style="margin-bottom:4px"><b>{{ __($kinds[$r['kind']]) }}:</b> {{ $r['name'] }} <span class="muted">({{ __($statuses[$r['status']]) }})</span></li>
+        <li style="margin-bottom:4px"><b>{{ __($kinds[$r['kind']] ?? ucfirst((string) ($r['kind'] ?? 'other'))) }}:</b> {{ $r['name'] }} <span class="muted">({{ __($statuses[$r['status']] ?? ucfirst((string) ($r['status'] ?? 'todo'))) }})</span></li>
       @endforeach
     </ul>
   </div>

@@ -43,7 +43,7 @@ it('renders profile for lecturer with staff number, department, and digest optio
     $response = $this->actingAs($aina)->get('/profile');
 
     $response->assertOk()
-        ->assertSee('Dr. Aina Zulkifli &middot; Senior Lecturer', false)
+        ->assertSee('Dr. Aina Zulkifli &middot; Course Coordinator / Lecturer, FTMK', false)
         ->assertSee('Staff number')
         ->assertSee('Tasks assigned to me')
         ->assertSee('Reminders for overdue tasks')

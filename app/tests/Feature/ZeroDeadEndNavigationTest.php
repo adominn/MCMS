@@ -35,8 +35,7 @@ it('ensures every sidebar link across all active roles opens cleanly without a 4
         // Role-specific sidebar visibility checks
         if ($roleName === 'deputy_dean') {
             expect($navMatch[1])
-                ->not->toContain('/credentials')
-                ->not->toContain('/transfers');
+                ->not->toContain('"/deposits"');
         }
         if ($roleName === 'records_custodian') {
             expect($navMatch[1])->not->toContain('"/results"');

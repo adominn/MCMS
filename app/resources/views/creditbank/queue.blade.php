@@ -113,8 +113,10 @@
 {{-- TAB 2: Deposit queue (CSV Export + Bulk Record ABC Deposit) --}}
 <div data-pane="queue" @if(!$queue->count()) data-empty @endif>
 <div class="note" style="margin-bottom:14px">{{ __('Consented and confirmed records only. Only confirmed Academic Credit Records with explicit learner consent appear in the deposit queue.') }}</div>
+@if($canWrite)
 <form method="post" action="{{ route('deposits.export') }}" id="queue-action-form">
 @csrf
+@endif
 <div class="panel">
   <div class="hd">
     <h2>{{ __('Queue for Academic Bank of Credit deposit') }}</h2>
@@ -185,7 +187,9 @@
     </div>
   @endif
 </div>
+@if($canWrite)
 </form>
+@endif
 @if($canWrite && $queue->count())
 <script>
 (function () {

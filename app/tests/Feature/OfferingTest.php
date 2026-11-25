@@ -197,16 +197,25 @@ it('withdraws acceptance when the lecturer changes an item, tells the lecturer t
     expect((bool) DB::table('readiness_items')->where('offering_id', $o)->where('item', 'info_eligibility')->value('accepted'))->toBeFalse();
 });
 
-it('pre-fills the checklist of a new cohort from the last one (FR-88)', function () {
+it('pre-fills the checklist of a new cohort from the last one while resetting evidence acceptance (FR-88)', function () {
     [$o, $v1] = openCohort();
     $second = newCohort($v1, ['cohort_name' => '2027/2', 'start_date' => today()->addDays(120)->toDateString(), 'end_date' => today()->addDays(180)->toDateString(), 'reg_opens_on' => today()->addDays(60)->toDateString(), 'reg_closes_on' => today()->addDays(100)->toDateString()]);
     $item = DB::table('readiness_items')->where('offering_id', $second)->where('item', 'protect_changes')->first();
-    expect($item->status)->toBe('yes')->and($item->note)->toBe('Evidence for protect_changes')->and((bool) $item->accepted)->toBeTrue()
+    expect($item->status)->toBe('yes')->and($item->note)->toBe('Evidence for protect_changes')->and((bool) $item->accepted)->toBeFalse()
         ->and(DB::table('offerings')->find($second)->status)->toBe('not_ready'); // still needs its own confirmation
 });
 
 it('renders plain-language offering readiness printout with automated checks, 4 sections, and important notice', function () {
     [$o, $v1] = openCohort();
+    $this->actingAs($this->hakim)->get("/offerings/$o")
+        ->assertOk()
+        ->assertSee('Faculty / Centre')
+        ->assertSee('Quality Verification Status')
+        ->assertSee('Participant & Achievement Record Governance')
+        ->assertSee('UTeM Identity & Learner Profile')
+        ->assertSee('MCMS Verified Completion Engine')
+        ->assertSee('significant changes to learning outcomes');
+
     $res = $this->actingAs($this->hakim)->get("/offerings/$o/readiness?print=1");
     $res->assertOk()
         ->assertDontSee('Appendix B')
@@ -217,7 +226,8 @@ it('renders plain-language offering readiness printout with automated checks, 4 
         ->assertSee('Learning Materials & Platform')
         ->assertSee('Assessment & Academic Integrity')
         ->assertSee('Learner Protection & Contingency')
-        ->assertSee('Important Notice');
+        ->assertSee('Important Notice')
+        ->assertSee('significant changes to learning outcomes');
 
     // Support party (P5) confirmation recording
     $this->actingAs($this->farid)->post("/offerings/$o/confirm", ['outcome' => 'ready', 'conditions' => 'Platform verified'])->assertSessionHasNoErrors();

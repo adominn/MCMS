@@ -19,6 +19,7 @@ return [
     ],
     'remaining_status' => [
         'done' => 'Completed',
+        'planned' => 'Planned',
         'todo' => 'Remaining',
         'na' => 'Not applicable',
     ],

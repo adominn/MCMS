@@ -175,21 +175,9 @@
 </div>
 @endforeach
 
-{{-- Participant & Achievement Records (B5 Registry Mapping) --}}
+{{-- Participant & Achievement Records Governance --}}
 @php
-  $creditEligible = ($o->category === 'umc') || ($o->category === 'samc' && !empty($qv));
-  $b5Rows = [
-    [__('Participant identity'), __('Required'), __('UTeM Identity & Learner Profile'), __('CODL / UTeM Identity'), __('Active')],
-    [__('Registration and cohort details'), __('Required'), __('MCMS Enrolment Registry'), __('Course Coordinator / PTj'), __('Active')],
-    [__('Access and participation status'), __('As required'), __('MCMS Enrolment & LMS Platform'), __('Course Coordinator'), !empty($o->platform_ref) ? __('Linked (:ref)', ['ref' => $o->platform_ref]) : __('Active')],
-    [__('Activity / module completion'), $o->category === 'umc' ? __('Required (UMC)') : __('As required'), __('MCMS Module Progress Tracker'), __('Course Coordinator'), __('Active')],
-    [__('Assessment marks / results'), __('Required'), __('MCMS Assessment Results Ledger'), __('Course Coordinator'), __('Active')],
-    [__('Pass / completion decision'), __('Required'), __('MCMS Verified Completion Engine'), __('Deputy Dean (Academic)'), __('Active')],
-    [__('Digital Badge per module'), __('If applicable'), __('MCMS Credential Registry & QR Portal'), __('Faculty / CODL'), __('Issued on verified module pass')],
-    [__('Certificate / Digital Credential'), __('If applicable'), __('MCMS Credential Registry & QR Portal'), __('Faculty / CODL'), __('Issued on full MC completion')],
-    [__('Academic Credit Record (ACR)'), $o->category === 'mce' ? __('Not applicable') : __('Eligible MC'), __('MCMS Credit Bank (ACR Registry)'), __('Records & ABC Officer'), $o->category === 'mce' ? __('Not applicable (MCE)') : ($creditEligible ? __('Active') : __('Upon SAMC QV'))],
-    [__('ABC deposit status'), $o->category === 'mce' ? __('Not applicable') : __('If applicable'), __('MCMS ABC Deposit Ledger (with learner consent)'), __('Records & ABC Officer'), $o->category === 'mce' ? __('Not applicable (MCE)') : ($creditEligible ? __('Active (opt-in)') : __('Upon SAMC QV'))],
-  ];
+  $govRows = $recordGovernance ?? [];
 @endphp
 <div class="panel" style="margin-bottom:16px">
   <div class="hd"><h2 style="font-size:11pt">{{ __('Participant & Achievement Record Governance') }}</h2></div>
@@ -205,13 +193,13 @@
         </tr>
       </thead>
       <tbody>
-        @foreach($b5Rows as $br)
+        @foreach($govRows as $br)
           <tr>
-            <td><b>{{ $br[0] }}</b></td>
-            <td style="font-size:8.5pt">{{ $br[1] }}</td>
-            <td style="font-size:8.5pt">{{ $br[2] }}</td>
-            <td style="font-size:8.5pt">{{ $br[3] }}</td>
-            <td style="font-size:8.5pt">{{ $br[4] }}</td>
+            <td><b>{{ $br['element'] }}</b></td>
+            <td style="font-size:8.5pt">{{ $br['requirement'] }}</td>
+            <td style="font-size:8.5pt">{{ $br['location'] }}</td>
+            <td style="font-size:8.5pt">{{ $br['owner'] }}</td>
+            <td style="font-size:8.5pt">{{ $br['status'] }}</td>
           </tr>
         @endforeach
       </tbody>
@@ -336,7 +324,7 @@
     {{ __('Important Notice') }}
   </div>
   <div style="font-size:9pt;line-height:1.5">
-    {{ __('This operational readiness check ensures delivery quality and learner protection before an offering opens. It does not replace prior academic approval of the micro-credential.') }}
+    {{ __('This operational readiness check confirms delivery readiness and learner protection before an offering opens and does not replace prior academic approval. If pre-cohort checks identify significant changes to learning outcomes, SLT/credit, major assessment, core content, delivery mode, Quality Verification status, or credentials, those changes must be referred through formal review and approval before proceeding.') }}
   </div>
 </div>
 
